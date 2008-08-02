@@ -1,0 +1,57 @@
+<!-- build configuration -->
+<project name="build-support" xmlns:artifact="urn:maven-artifact-ant">
+
+  <!-- figure out the absolute path to this build file -->
+  <dirname property="buildetc.dir" file="${ant.file.build-support}"/>
+
+  <!-- specify where we'll find our various dependencies -->
+  <property name="projects.dir"  value="."/>
+  <property name="libs.dir"      value="${deploy.dir}/lib"/>
+  <property name="buildlibs.dir" value="${buildetc.dir}/../lib/java"/>
+
+  <!-- call buildproject on each item in ${projects} -->
+  <target name="distprojects">
+    <for list="${projects}" param="project">
+      <sequential>
+        <echo>Building in @{project}...</echo>
+        <dirname property="abs.flexsdk.dir" file="${flexsdk.dir}/somefile.txt"/>
+        <ant dir="${projects.dir}/@{project}" target="dist" inheritAll="false">
+          <property name="libs.dir" value="../../${libs.dir}"/>
+        </ant>
+        <!-- copy the library jars to ${deploy.dir}/lib -->
+        <copy todir="${deploy.dir}/lib">
+          <fileset dir="${projects.dir}/@{project}/dist">
+            <include name="*.jar"/>
+          </fileset>
+        </copy>
+      </sequential>
+    </for>
+  </target>
+
+  <!-- call clean on each item in ${projects} -->
+  <target name="cleanprojects">
+    <antcall target="projectscall">
+      <param name="projects.list" value="${projects}"/>
+      <param name="project.target" value="clean"/>
+    </antcall>
+  </target>
+
+  <!-- call distclean on each item in ${projects} -->
+  <target name="distcleanprojects">
+    <antcall target="projectscall">
+      <param name="projects.list" value="${projects}"/>
+      <param name="project.target" value="distclean"/>
+    </antcall>
+  </target>
+
+
+  <!-- call ${project.target} on each item in ${projects.list}. Passes @project. -->
+  <target name="projectscall">
+    <for list="${projects.list}" param="project">
+      <sequential>
+        <echo level="info">Calling ${project.target} in ${projects.dir}/@{project}...</echo>
+        <ant dir="${projects.dir}/@{project}" target="${project.target}" inheritAll="false"/>
+      </sequential>
+    </for>
+  </target>
+</project>
