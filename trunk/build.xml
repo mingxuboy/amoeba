@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="GB2312"?>
+<project default="dist" name="Amoeba" basedir=".">
+  	<property name="amoeba.version"     value="0.21"/>
+  	<property name="app.name"     value="amoeba"/>
+  	<property name="deploy.dir"   value="dist"/>
+  	<property name="savedoc.dir"  value="docs"/>
+  	<property name="javadoc.home" value="${deploy.dir}/document"/>
+  	<property name="classes.dir"  value="${deploy.dir}/classes"/>
+  	<property name="libs.dir"     value="lib"/>
+  	<property name="release.dir" value="release"/>
+  	
+  <property name="projects.dir"   value="."/>
+  <property name="projects"       value="amoeba,amoeba-mysql"/>
+  	
+  <import file="build/etc/build-support.xml"/>
+
+  <filelist dir="." id="dist.libs">
+    <file name="build/lib/classworlds-1.0.jar"/>
+    <file name="build/lib/commons-collections-3.1.jar"/>
+    <file name="build/lib/commons-lang-2.1.jar"/>
+    <file name="build/lib/commons-logging-1.1.jar"/>
+    <file name="build/lib/commons-pool-1.4.jar"/>
+    <file name="build/lib/junit-4.3.jar"/>
+    <file name="build/lib/log4j-1.2.12.jar"/>
+  </filelist>
+  
+  <path id="classpath">
+	<pathelement location="${classes.dir}"/>
+	<fileset dir="${libs.dir}" includes="**/*.jar"/>
+  </path>
+  	
+
+  
+  <!-- prepares the build directories -->
+  <target name="prepare">
+    <mkdir dir="${deploy.dir}"/>
+    <mkdir dir="${deploy.dir}/tmp"/>
+    <mkdir dir="${deploy.dir}/lib"/>
+    <mkdir dir="${deploy.dir}/document"/>
+
+    <!-- Copy all the libs we depend on. -->
+    <copyfilelist dest="${deploy.dir}/lib">
+      <filelist refid="dist.libs"/>
+    </copyfilelist>
+  </target>
+  
+  <target name="compile" depends="prepare">
+    <javac srcdir="src/java" destdir="${classes.dir}" includeAntRuntime="false"
+           debug="on" optimize="{$build.optimize}" deprecation="on"
+           source="1.5" target="1.5">
+      <classpath refid="classpath"/>
+    <!--
+      <compilerarg value="-Xlint:unchecked"/>
+      -->
+    </javac>
+   </target>
+    
+	<target name="server" description="Amoeba for Mysql" depends="compile">
+        <java classname="com.meidusa.amoeba.mysql.server.MysqlProxyServer" fork="true" maxmemory="128m">
+        <sysproperty key="amoeba.home" value="${basedir}"/>
+         <classpath>
+			<fileset dir="lib">
+				<include name="**/*.jar"/>
+				<include name="classes"/>
+				<exclude name="amoeba-*.jar"/>
+			</fileset>
+         	<pathelement path="target/classes"/>
+         </classpath>
+       </java>
+	</target>
+	
+    <target name="prepare">
+	    <mkdir dir="${deploy.dir}"/>
+	    <mkdir dir="${deploy.dir}/lib"/>
+	    <mkdir dir="${classes.dir}"/>
+	    <mkdir dir="${javadoc.home}"/>
+	    <copy todir="${classes.dir}">
+	    	<fileset dir="src/java" >
+	    		<exclude name="*/.svn/*"/>
+	    		<exclude name="**/*.java"/>
+	    	</fileset>	
+	    </copy>
+    </target>
+</project>
