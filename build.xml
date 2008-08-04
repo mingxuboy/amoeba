@@ -49,9 +49,10 @@
   <!-- prepares the build directories -->
   <target name="prepare">
     <mkdir dir="${deploy.dir}"/>
-    <mkdir dir="${deploy.dir}/tmp"/>
+    <mkdir dir="${deploy.dir}/classes"/>
     <mkdir dir="${deploy.dir}/bin"/>
     <mkdir dir="${deploy.dir}/lib"/>
+    <mkdir dir="${deploy.dir}/lib/classes"/>
     <mkdir dir="${deploy.dir}/doc"/>
 
     <!-- Copy all the libs we depend on. -->

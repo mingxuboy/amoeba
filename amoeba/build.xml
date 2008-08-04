@@ -41,11 +41,7 @@
         <mkdir dir="${deploy.dir}"/>
 		
         <jar destfile="${deploy.dir}/${app.name}-${amoeba.version}.jar" index="true">
-            <fileset dir="${classes.dir}" casesensitive="yes">
-                <exclude name="*/.svn/*"/>
-                <exclude name="**/mysql/**"/>
-            	<exclude name="*.class"/>
-            </fileset>
+            <fileset dir="${classes.dir}" casesensitive="yes"/>
         </jar>
     </target>
 </project>
