@@ -1,15 +1,12 @@
 <?xml version="1.0" encoding="GB2312"?>
-<project default="dist" name="amoeba" basedir=".">
+<project default="dist" name="amoeba-mysql" basedir=".">
   	<property name="amoeba.version"     value="0.21"/>
-  	<property name="app.name"     value="amoeba"/>
+  	<property name="app.name"     value="amoeba-mysql"/>
   	<property name="deploy.dir"   value="dist"/>
   	<property name="savedoc.dir"  value="docs"/>
   	<property name="javadoc.home" value="${deploy.dir}/document"/>
   	<property name="classes.dir"  value="${deploy.dir}/classes"/>
-  	
-  	<!--
-  	<proerty name="libs.dir"     value="build/ect/lib"/>p
-  	-->
+  	<property name="libs.dir"     value="../build/ect/lib"/>
   	<property name="release.dir" value="release"/>
   	<path id="classpath">
   		<pathelement location="${classes.dir}"/>
@@ -39,7 +36,7 @@
 
   	<target name="dist" depends="compile">
         <mkdir dir="${deploy.dir}"/>
-		
+
         <jar destfile="${deploy.dir}/${app.name}-${amoeba.version}.jar" index="true">
             <fileset dir="${classes.dir}" casesensitive="yes">
                 <exclude name="*/.svn/*"/>

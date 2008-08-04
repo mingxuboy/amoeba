@@ -1,27 +1,42 @@
 <?xml version="1.0" encoding="GB2312"?>
-<project default="dist" name="Amoeba" basedir=".">
+<project default="dist" name="AmoebaBuilder" basedir="." xmlns:artifact="urn:maven-artifact-ant">
   	<property name="amoeba.version"     value="0.21"/>
   	<property name="app.name"     value="amoeba"/>
   	<property name="deploy.dir"   value="dist"/>
   	<property name="savedoc.dir"  value="docs"/>
   	<property name="javadoc.home" value="${deploy.dir}/document"/>
   	<property name="classes.dir"  value="${deploy.dir}/classes"/>
-  	<property name="libs.dir"     value="lib"/>
+  	<property name="libs.dir"     value="build/etc/lib"/>
   	<property name="release.dir" value="release"/>
   	
   <property name="projects.dir"   value="."/>
-  <property name="projects"       value="amoeba,amoeba-mysql"/>
+  <property name="projects" 	 value="amoeba,amoeba-mysql"/>
   	
   <import file="build/etc/build-support.xml"/>
 
   <filelist dir="." id="dist.libs">
-    <file name="build/lib/classworlds-1.0.jar"/>
-    <file name="build/lib/commons-collections-3.1.jar"/>
-    <file name="build/lib/commons-lang-2.1.jar"/>
-    <file name="build/lib/commons-logging-1.1.jar"/>
-    <file name="build/lib/commons-pool-1.4.jar"/>
-    <file name="build/lib/junit-4.3.jar"/>
-    <file name="build/lib/log4j-1.2.12.jar"/>
+    <file name="build/etc/lib/classworlds-1.0.jar"/>
+    <file name="build/etc/lib/commons-collections-3.1.jar"/>
+    <file name="build/etc/lib/commons-lang-2.1.jar"/>
+    <file name="build/etc/lib/commons-logging-1.1.jar"/>
+    <file name="build/etc/lib/commons-pool-1.4.jar"/>
+    <file name="build/etc/lib/junit-4.3.jar"/>
+    <file name="build/etc/lib/log4j-1.2.12.jar"/>
+  </filelist>
+  
+  <filelist dir="." id="bin.files">
+    <file name="build/bin/amoeba"/>
+    <file name="build/bin/amoeba.bat"/>
+    <file name="build/bin/amoeba-mysql.classworlds"/>
+  </filelist>
+  
+  <filelist dir="." id="etc.files">
+    <file name="build/LICENSE.txt"/>
+    <file name="build/README.html"/>
+  </filelist>
+  
+  <filelist dir="." id="doc.files">
+    <file name="build/doc/amoeba.pdf"/>
   </filelist>
   
   <path id="classpath">
@@ -35,12 +50,22 @@
   <target name="prepare">
     <mkdir dir="${deploy.dir}"/>
     <mkdir dir="${deploy.dir}/tmp"/>
+    <mkdir dir="${deploy.dir}/bin"/>
     <mkdir dir="${deploy.dir}/lib"/>
-    <mkdir dir="${deploy.dir}/document"/>
+    <mkdir dir="${deploy.dir}/doc"/>
 
     <!-- Copy all the libs we depend on. -->
     <copyfilelist dest="${deploy.dir}/lib">
       <filelist refid="dist.libs"/>
+    </copyfilelist>
+    <copyfilelist dest="${deploy.dir}/bin">
+      <filelist refid="bin.files"/>
+    </copyfilelist>
+    <copyfilelist dest="${deploy.dir}">
+      <filelist refid="etc.files"/>
+    </copyfilelist>
+        <copyfilelist dest="${deploy.dir}/doc">
+      <filelist refid="doc.files"/>
     </copyfilelist>
   </target>
   
@@ -69,6 +94,7 @@
        </java>
 	</target>
 	
+	<!--
     <target name="prepare">
 	    <mkdir dir="${deploy.dir}"/>
 	    <mkdir dir="${deploy.dir}/lib"/>
@@ -81,4 +107,41 @@
 	    	</fileset>	
 	    </copy>
     </target>
+    -->
+   <target name="dist" depends="prepare,distprojects">
+   		
+	    <tar longfile="gnu" destfile="amoeba-mysql-${amoeba.version}.tar.gz" compression="gzip">
+		    <tarfileset dir="${deploy.dir}" mode="755">
+		        <include name="bin/**"/>
+		    	<exclude name="*/.svn/*"/>
+		    </tarfileset>
+	    	
+		    <tarfileset dir="${deploy.dir}">
+		        <include name="lib/**"/>
+		    	<include name="doc/**"/>
+		    	<include name="conf/**"/>
+		    	<include name="src/**"/>
+		    	<exclude name="*/.svn/*"/>
+		    	<exclude name="bin/*"/>
+		    	<include name="*.*"/>
+		    </tarfileset>
+	    </tar>
+		
+		<zip destfile="amoeba-mysql-${amoeba.version}.zip">
+		    <zipfileset dir="${deploy.dir}">
+		        <include name="bin/**"/>
+		    	<exclude name="*/.svn/*"/>
+		    </zipfileset>
+	    	
+		    <zipfileset dir="${deploy.dir}">
+		        <include name="lib/**"/>
+		    	<include name="doc/**"/>
+		    	<include name="conf/**"/>
+		    	<include name="src/**"/>
+		    	<exclude name="*/.svn/*"/>
+		    	<exclude name="bin/*"/>
+		    	<include name="*.*"/>
+		    </zipfileset>
+	    </zip>
+   </target>
 </project>

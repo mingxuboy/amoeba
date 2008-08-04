@@ -18,6 +18,7 @@ import java.sql.SQLException;
 
 import com.meidusa.amoeba.mysql.io.Constants;
 import com.meidusa.amoeba.mysql.io.MySqlPacketConstant;
+import com.meidusa.amoeba.mysql.util.MysqlStringUtil;
 import com.meidusa.amoeba.mysql.util.SingleByteCharsetConverter;
 import com.meidusa.amoeba.util.StringUtil;
 
@@ -652,7 +653,7 @@ public class PacketBuffer {
 		if (converter != null) {
 			b = converter.toBytes(s);
 		} else {
-			b = StringUtil.getBytes(s,converter, encoding, serverEncoding,
+			b = MysqlStringUtil.getBytes(s,converter, encoding, serverEncoding,
 					parserKnowsUnicode);
 		}
 
@@ -722,7 +723,7 @@ public class PacketBuffer {
 			String serverEncoding, boolean parserKnowsUnicode) throws UnsupportedEncodingException{
 		byte[] b = null;
 		SingleByteCharsetConverter converter = SingleByteCharsetConverter.getInstance(encoding);
-		b = StringUtil.getBytes(s, converter,encoding, serverEncoding,
+		b = MysqlStringUtil.getBytes(s, converter,encoding, serverEncoding,
 				parserKnowsUnicode);
 		
 		int len = b.length;
