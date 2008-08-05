@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="GB2312"?>
 <project default="dist" name="amoeba-mysql" basedir=".">
-  	<property name="version"     value="0.21"/>
-  	<property name="app.name"     value="amoeba-mysql"/>
+  	<property name="version"     value="0.1"/>
+  	<property name="app.name"     value="amoeba-oracle"/>
   	<property name="deploy.dir"   value="dist"/>
   	<property name="savedoc.dir"  value="docs"/>
   	<property name="javadoc.home" value="${deploy.dir}/document"/>
