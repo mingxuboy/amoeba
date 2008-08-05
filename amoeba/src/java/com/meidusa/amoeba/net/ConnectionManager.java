@@ -24,6 +24,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
@@ -60,7 +62,7 @@ public class ConnectionManager extends LoopingThread implements Reporter {
 	
 	/** Our current runtime stats. */
 	protected ConMgrStats _stats, _lastStats;
-	//private final Lock lock = new ReentrantLock(false);
+	private final Lock selectorLock = new ReentrantLock(false);
 	private int currentReadingThreadSize = 0;
 	
 	/** 连接已经失效或者网络断开的队列 */
@@ -95,11 +97,14 @@ public class ConnectionManager extends LoopingThread implements Reporter {
         }
         
         if(level == Level.DEBUG){
-	        Set<SelectionKey> keys = _selector.keys();
-	        Set<SelectionKey> dumpKeys = new HashSet<SelectionKey>();
-	        synchronized (keys) {
+        	Set<SelectionKey> dumpKeys = new HashSet<SelectionKey>();
+        	selectorLock.lock();
+        	try{
+        		Set<SelectionKey> keys = _selector.keys();
 		        dumpKeys.addAll(keys);
-	        }
+        	}finally{
+        		selectorLock.unlock();
+        	}
 	        for(SelectionKey key: dumpKeys){
 	        	if(key.attachment() instanceof Connection){
 	        		Connection conn = (Connection)key.attachment();
@@ -177,7 +182,12 @@ public class ConnectionManager extends LoopingThread implements Reporter {
 		try {
 			// check for incoming network events
 			int ecount = _selector.select(SELECT_LOOP_TIME);
-			ready = _selector.selectedKeys();
+			selectorLock.lock();
+			try{
+				ready = _selector.selectedKeys();
+			}finally{
+				selectorLock.unlock();
+			}
 			if (ecount == 0) {
 				if (ready.size() == 0) {
 					return;
@@ -338,12 +348,12 @@ public class ConnectionManager extends LoopingThread implements Reporter {
 	}
 
 	/**
-	 * 异步注册一个连接
+	 * 异步注册一个NetEventHandler
 	 * @param connection
 	 * @param key
 	 */
-	public void postRegisterConnection(Connection connection,int key){
-		_registerQueue.append(new Tuple<NetEventHandler,Integer>(connection,key));
+	public void postRegisterNetEventHandler(NetEventHandler handler,int key){
+		_registerQueue.append(new Tuple<NetEventHandler,Integer>(handler,key));
 		/**
 		 * 唤醒ConnectionManager正在等待select的线程，让其能够更快速的处理registerQueue队列中的对象
 		 */

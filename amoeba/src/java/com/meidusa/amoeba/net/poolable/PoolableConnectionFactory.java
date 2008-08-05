@@ -61,7 +61,7 @@ public abstract class PoolableConnectionFactory implements PoolableObjectFactory
 	 */
 	public Object makeObject() throws Exception {
 		Connection connection = (Connection) createConnection(socketChannelFactory.createSokectChannel(),System.currentTimeMillis());
-		connectionManager.postRegisterConnection(connection, SelectionKey.OP_READ);
+		connectionManager.postRegisterNetEventHandler(connection, SelectionKey.OP_READ);
 		if(connection instanceof AuthingableConnection){
 			AuthingableConnection authconn = (AuthingableConnection)connection;
 			authconn.isAuthenticatedWithBlocked(15000);
