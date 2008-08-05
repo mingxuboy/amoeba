@@ -29,7 +29,7 @@ import com.meidusa.amoeba.net.ServerableConnectionManager;
  *
  */
 public class MysqlClientConnectionManager extends ServerableConnectionManager{
-	private final static String SERVER_VERSION = "5.1.22-mysql-community-proxy";
+	private final static String SERVER_VERSION = "5.1.22-mysql-community-amoeba-proxy";
 	private final static char[] c = { '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', 'q',
             'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p', 'a', 's', 'd',
             'f', 'g', 'h', 'j', 'k', 'l', 'z', 'x', 'c', 'v', 'b', 'n', 'm' };
