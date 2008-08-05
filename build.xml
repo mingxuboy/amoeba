@@ -58,7 +58,9 @@
 	<fileset dir="${libs.dir}" includes="**/*.jar"/>
   </path>
   	
-
+  <target name="distclean">
+	<delete dir="${deploy.dir}"/>
+  </target>
   
   <!-- prepares the build directories -->
   <target name="prepare">
@@ -112,7 +114,7 @@
        </java>
 	</target>
 
-   <target name="dist" depends="prepare,distprojects">
+   <target name="dist" depends="distclean,prepare,distcleanprojects,distprojects">
    		
 	    <tar longfile="gnu" destfile="amoeba-mysql-${version}.tar.gz" compression="gzip">
 		    <tarfileset dir="${deploy.dir}" mode="755">
