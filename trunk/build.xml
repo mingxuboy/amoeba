@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="GB2312"?>
 <project default="dist" name="AmoebaBuilder" basedir="." xmlns:artifact="urn:maven-artifact-ant">
-  	<property name="amoeba.version"     value="0.21"/>
+  	<property name="version"     value="0.22"/>
   	<property name="app.name"     value="amoeba"/>
   	<property name="deploy.dir"   value="dist"/>
   	<property name="savedoc.dir"  value="docs"/>
@@ -114,7 +114,7 @@
 
    <target name="dist" depends="prepare,distprojects">
    		
-	    <tar longfile="gnu" destfile="amoeba-mysql-${amoeba.version}.tar.gz" compression="gzip">
+	    <tar longfile="gnu" destfile="amoeba-mysql-${version}.tar.gz" compression="gzip">
 		    <tarfileset dir="${deploy.dir}" mode="755">
 		        <include name="bin/**"/>
 		    	<exclude name="*/.svn/*"/>
@@ -131,7 +131,7 @@
 		    </tarfileset>
 	    </tar>
 		
-		<zip destfile="amoeba-mysql-${amoeba.version}.zip">
+		<zip destfile="amoeba-mysql-${version}.zip">
 		    <zipfileset dir="${deploy.dir}">
 		        <include name="bin/**"/>
 		    	<exclude name="*/.svn/*"/>
