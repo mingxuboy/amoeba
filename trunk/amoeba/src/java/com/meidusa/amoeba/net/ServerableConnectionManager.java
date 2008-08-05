@@ -116,7 +116,7 @@ public class ServerableConnectionManager extends AuthingableConnectionManager{
 		};
 		SelectionKey sk = listener.register(_selector, SelectionKey.OP_ACCEPT,serverNetEvent);
 		serverNetEvent.setSelectionKey(sk);
-		this._registerQueue.append(new Tuple<NetEventHandler,Integer>(serverNetEvent,SelectionKey.OP_ACCEPT));
+		postRegisterNetEventHandler(serverNetEvent,SelectionKey.OP_ACCEPT);
 	}
 
 	protected void acceptConnection(ServerSocketChannel listener) {
@@ -140,7 +140,7 @@ public class ServerableConnectionManager extends AuthingableConnectionManager{
 				return;
 			}
 			Connection connection = connFactory.createConnection(channel, System.currentTimeMillis());
-			this.postRegisterConnection(connection,SelectionKey.OP_READ);
+			this.postRegisterNetEventHandler(connection,SelectionKey.OP_READ);
 		}catch(Exception e){
 			if (channel != null) {
 				try {
