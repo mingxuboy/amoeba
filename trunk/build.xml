@@ -39,6 +39,20 @@
     <file name="build/doc/amoeba.pdf"/>
   </filelist>
   
+  <filelist dir="." id="conf.files">
+	<file name="build/conf/access_list.conf"/>
+  	<file name="build/conf/access_list.conf"/>
+	<file name="build/conf/amoeba.dtd"/>
+	<file name="build/conf/amoeba.xml"/>
+	<file name="build/conf/function.dtd"/>
+	<file name="build/conf/functionMap.xml"/>
+	<file name="build/conf/log4j.dtd"/>
+	<file name="build/conf/log4j.xml"/>
+	<file name="build/conf/rule.dtd"/>
+	<file name="build/conf/rule.xml"/>
+	<file name="build/conf/ruleFunctionMap.xml"/>	
+  </filelist>
+	
   <path id="classpath">
 	<pathelement location="${classes.dir}"/>
 	<fileset dir="${libs.dir}" includes="**/*.jar"/>
@@ -67,6 +81,9 @@
     </copyfilelist>
         <copyfilelist dest="${deploy.dir}/doc">
       <filelist refid="doc.files"/>
+    </copyfilelist>
+    <copyfilelist dest="${deploy.dir}/conf">
+      <filelist refid="conf.files"/>
     </copyfilelist>
   </target>
   

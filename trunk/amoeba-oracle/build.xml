@@ -32,6 +32,12 @@
   <target name="prepare">
 	<mkdir dir="${deploy.dir}"/>
 	<mkdir dir="${deploy.dir}/classes"/>
+	<copy todir="${classes.dir}">
+    	<fileset dir="src/java" >
+    		<exclude name="*/.svn/*"/>
+    		<exclude name="**/*.java"/>
+    	</fileset>	
+	</copy>
   </target>
 
   	<target name="dist" depends="compile">
