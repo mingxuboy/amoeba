@@ -27,7 +27,7 @@ public abstract class OracleConnection extends DatabaseConnection {
 
 	@Override
 	protected PacketOutputStream createPakcetOutputStream() {
-		return new OraclePacketOutputStream();
+		return new OraclePacketOutputStream(true);
 	}
 
 	/**
