@@ -35,7 +35,7 @@ import java.nio.ByteBuffer;
  * @author struct
  *
  */
-public class AbstractPacket implements Packet, SQLnetDef {
+public class AbstractPacket implements Packet {
 	
 	protected byte[] header;
 	protected byte buffer[];

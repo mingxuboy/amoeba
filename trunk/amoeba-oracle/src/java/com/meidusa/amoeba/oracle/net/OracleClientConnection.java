@@ -5,7 +5,6 @@ import java.nio.channels.SocketChannel;
 import org.apache.commons.pool.ObjectPool;
 
 import com.meidusa.amoeba.net.Connection;
-import com.meidusa.amoeba.net.Sessionable;
 import com.meidusa.amoeba.oracle.context.OracleProxyRuntimeContext;
 import com.meidusa.amoeba.oracle.handler.OracleMessageHandler;
 
@@ -28,12 +27,4 @@ public class OracleClientConnection extends OracleConnection {
 		this.getMessageHandler().handleMessage(conn, message);
 	}
 	
-	protected void close(Exception exception){
-		if(this.getMessageHandler() instanceof Sessionable){
-			Sessionable session = (Sessionable)this.getMessageHandler();
-			session.endSession();
-			this.setMessageHandler(null);
-		}
-		super.close(exception);
-	}
 }
