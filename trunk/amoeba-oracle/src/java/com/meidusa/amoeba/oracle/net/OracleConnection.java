@@ -22,7 +22,7 @@ public abstract class OracleConnection extends DatabaseConnection {
 
 	@Override
 	protected PacketInputStream createPacketInputStream() {
-		return new OraclePacketInputStream();
+		return new OraclePacketInputStream(true);
 	}
 
 	@Override

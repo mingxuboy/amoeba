@@ -9,7 +9,11 @@ import com.meidusa.amoeba.net.io.PacketInputStream;
  */
 public class OraclePacketInputStream extends PacketInputStream implements OraclePacketConstant {
 	
+	private boolean readPackedWithHead;
 	
+	public OraclePacketInputStream(boolean readPackedWithHead){
+		this.readPackedWithHead = readPackedWithHead;
+	}
 	@Override
 	protected int decodeLength() {
 		// if we don't have enough bytes to determine our frame size, stop
@@ -40,5 +44,20 @@ public class OraclePacketInputStream extends PacketInputStream implements Oracle
 	public int getHeaderSize() {
 		return HEADER_SIZE;
 	}
+	
+	protected boolean checkForCompletePacket ()
+    {
+        if (_length == -1 || _have < _length) {
+            return false;
+        }
+        //将buffer 包含整个数据包，包括包头内容
+        if(readPackedWithHead){
+        	_buffer.position(0);
+        }else{
+        	_buffer.position(this.getHeaderSize());
+        }
+        _buffer.limit(_length);
+        return true;
+    }
 
 }
