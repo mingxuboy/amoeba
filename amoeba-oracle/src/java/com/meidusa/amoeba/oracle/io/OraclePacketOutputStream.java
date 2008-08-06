@@ -23,6 +23,16 @@ public class OraclePacketOutputStream extends PacketOutputStream implements Orac
     {
         // flip the buffer which will limit it to it's current position
         _buffer.flip();
+        if(!packetwrittenWithHead){
+	        /**
+	         *  包头信息：长度－－是不包含包头长度
+	         */
+	        /*int count = _buffer.limit()-HEADER_PAD.length;
+	        _buffer.put((byte)(count & 0xff));
+	        _buffer.put((byte) (count >>> 8));
+	        _buffer.put((byte) (count >>> 16));*/
+        	//TODO 写一些包头相关的信息，目前使用状态不需要这段代码
+        }
         _buffer.rewind();
         return _buffer;
     }
