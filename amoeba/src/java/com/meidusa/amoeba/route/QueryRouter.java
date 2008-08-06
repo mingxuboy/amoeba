@@ -22,4 +22,5 @@ import com.meidusa.amoeba.net.DatabaseConnection;
  */
 public interface QueryRouter {
 	public ObjectPool[] doRoute(DatabaseConnection connection,String sql,boolean ispreparedStatment,Object[] parameters);
+	public String getDefaultPool();
 }

@@ -13,7 +13,8 @@ public class OracleClientConnection extends OracleConnection {
 
 	public OracleClientConnection(SocketChannel channel, long createStamp) {
 		super(channel, createStamp);
-		ObjectPool pool = OracleProxyRuntimeContext.getInstance().getPoolMap().get("default");
+		String defaultPoolName = OracleProxyRuntimeContext.getInstance().getQueryRouter().getDefaultPool();
+		ObjectPool pool = OracleProxyRuntimeContext.getInstance().getPoolMap().get(defaultPoolName);
 		try {
 			Connection dst = (Connection)pool.borrowObject();
 			this.setMessageHandler(new OracleMessageHandler(this,dst));
