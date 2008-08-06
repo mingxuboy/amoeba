@@ -4,6 +4,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 
 import com.meidusa.amoeba.net.DatabaseConnection;
+import com.meidusa.amoeba.net.Sessionable;
 import com.meidusa.amoeba.net.io.PacketInputStream;
 import com.meidusa.amoeba.net.io.PacketOutputStream;
 import com.meidusa.amoeba.oracle.io.OraclePacketInputStream;
@@ -11,6 +12,8 @@ import com.meidusa.amoeba.oracle.io.OraclePacketOutputStream;
 
 public abstract class OracleConnection extends DatabaseConnection {
 
+	private int sdu;
+	private int tdu;
 	public OracleConnection(SocketChannel channel, long createStamp) {
 		super(channel, createStamp);
 		/**
@@ -41,4 +44,29 @@ public abstract class OracleConnection extends DatabaseConnection {
         _outQueue.append(out);
         _cmgr.invokeConnectionWriteMessage(this);
     }
+
+	public int getSdu() {
+		return sdu;
+	}
+
+	public void setSdu(int sdu) {
+		this.sdu = sdu;
+	}
+
+	public int getTdu() {
+		return tdu;
+	}
+
+	public void setTdu(int tdu) {
+		this.tdu = tdu;
+	}
+	
+	protected void close(Exception exception){
+		if(this.getMessageHandler() instanceof Sessionable){
+			Sessionable session = (Sessionable)this.getMessageHandler();
+			session.endSession();
+			this.setMessageHandler(null);
+		}
+		super.close(exception);
+	}
 }

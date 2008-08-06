@@ -3,6 +3,8 @@ package com.meidusa.amoeba.oracle.handler;
 import com.meidusa.amoeba.net.Connection;
 import com.meidusa.amoeba.net.MessageHandler;
 import com.meidusa.amoeba.net.Sessionable;
+import com.meidusa.amoeba.oracle.packet.ConnectPacket;
+import com.meidusa.amoeba.oracle.packet.Packet;
 
 /**
  * 非常简单的数据包转发程序
@@ -21,6 +23,15 @@ public class OracleMessageHandler implements MessageHandler,Sessionable {
 	public void handleMessage(Connection conn, byte[] message) {
 		if(conn == clientConn){
 			serverConn.postMessage(message);
+			
+			/**
+			 * 从客户端发送过来的验证信息包
+			 */
+			if(message[4] == (byte)Packet.NS_PACKT_TYPE_CONNECT){
+				ConnectPacket packet = new ConnectPacket();
+				packet.init(message);
+			}
+			
 		}else{
 			clientConn.postMessage(message);
 		}
