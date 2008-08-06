@@ -28,10 +28,11 @@ public class OracleClientConnection extends OracleConnection {
 	}
 	
 	protected void close(Exception exception){
-		super.close(exception);
 		if(this.getMessageHandler() instanceof Sessionable){
 			Sessionable session = (Sessionable)this.getMessageHandler();
 			session.endSession();
+			this.setMessageHandler(null);
 		}
+		super.close(exception);
 	}
 }
