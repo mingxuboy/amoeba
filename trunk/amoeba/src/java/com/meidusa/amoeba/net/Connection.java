@@ -43,9 +43,9 @@ public abstract class Connection implements NetEventHandler {
 	protected SocketChannel _channel;
 	protected long _lastEvent;
 	protected MessageHandler _handler;
-	private final Lock closeLock = new ReentrantLock(false);
-	private final Lock postCloseLock = new ReentrantLock(false);
-	private boolean closePosted = false;
+	protected final Lock closeLock = new ReentrantLock(false);
+	protected final Lock postCloseLock = new ReentrantLock(false);
+	protected boolean closePosted = false;
 	private PacketInputStream _fin;
 
 	private PacketOutputStream _fout;
@@ -167,7 +167,7 @@ public abstract class Connection implements NetEventHandler {
 	 * 可以提供给外界调用，这儿只是递交关闭该连接得请求。具体关闭将由Connection Manager处理。
 	 */
 	public void postClose(Exception exception){
-		if(closePosted){ 
+		if(closePosted){
 			return;
 		}
 		postCloseLock.lock();

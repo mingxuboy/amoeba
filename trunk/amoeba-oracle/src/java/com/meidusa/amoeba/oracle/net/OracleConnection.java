@@ -61,12 +61,14 @@ public abstract class OracleConnection extends DatabaseConnection {
 		this.tdu = tdu;
 	}
 	
-	protected void close(Exception exception){
+	public void postClose(Exception exception){
+		super.postClose(exception);
 		if(this.getMessageHandler() instanceof Sessionable){
 			Sessionable session = (Sessionable)this.getMessageHandler();
-			session.endSession();
-			this.setMessageHandler(null);
+			if(!session.isEnded()){
+				session.endSession();
+				this.setMessageHandler(null);
+			}
 		}
-		super.close(exception);
 	}
 }
