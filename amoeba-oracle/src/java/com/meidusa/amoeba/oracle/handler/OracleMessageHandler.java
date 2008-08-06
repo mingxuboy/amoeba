@@ -37,10 +37,11 @@ public class OracleMessageHandler implements MessageHandler,Sessionable {
 			
 			/**
 			 * 从服务端发送过来的接收连接的数据包
-			 */
-			if(message[4] == (byte)Packet.NS_PACKT_TYPE_ACCEPT){
-				packet = new AcceptPacket();
+			 */			
+			switch(message[4]){
+			    case Packet.NS_PACKT_TYPE_RESEND:
 			}
+			
 			clientConn.postMessage(message);
 		}
 		

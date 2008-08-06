@@ -82,36 +82,34 @@ public class OracleProxyServer {
 		repoterLog.info(report);
 	}
 
-	/**
-	 * @param args
-	 * @throws IOException
-	 */
 	public static void main(String[] args) throws IOException {
-		String log4jConf = System.getProperty("log4j.conf","${amoeba.home}/conf/log4j.xml");
-		log4jConf = ConfigUtil.filter(log4jConf);
-		File logconf = new File(log4jConf);
-		if(logconf.exists() && logconf.isFile()){
-			DOMConfigurator.configureAndWatch(logconf.getAbsolutePath(), System.getProperties());
-		}
+	    //load log4j config
+		String log4jConf = System.getProperty("log4j.conf", "${amoeba.home}/conf/log4j.xml");
+        log4jConf = ConfigUtil.filter(log4jConf);
+        File logconf = new File(log4jConf);
+        if (logconf.exists() && logconf.isFile()) {
+            DOMConfigurator.configureAndWatch(logconf.getAbsolutePath(), System.getProperties());
+        }
 		
+        //load amoeba config
 		Logger logger = Logger.getLogger(OracleProxyServer.class);
-		ProxyRuntimeContext context = new OracleProxyRuntimeContext();
-		String config = System.getProperty("amoeba.conf","${amoeba.home}/conf/amoeba.xml");
-		config = ConfigUtil.filter(config);
-		File configFile = new File(config);
-		
-		if(config == null || !configFile.exists()){
-			logger.error("could not find config file:"+configFile.getAbsolutePath());
-			System.exit(-1);
-		}else{
-			ProxyRuntimeContext.getInstance().init(configFile.getAbsolutePath());
-		}
+        ProxyRuntimeContext context = new OracleProxyRuntimeContext();
+        String config = System.getProperty("amoeba.conf", "${amoeba.home}/conf/amoeba.xml");
+        config = ConfigUtil.filter(config);
+        File configFile = new File(config);
+        if (config == null || !configFile.exists()) {
+            logger.error("could not find config file:" + configFile.getAbsolutePath());
+            System.exit(-1);
+        } else {
+            ProxyRuntimeContext.getInstance().init(configFile.getAbsolutePath());
+        }
 		
 		registerReporter(context);
 		for(ConnectionManager connMgr :context.getConnectionManagerList().values()){
 			registerReporter(connMgr);
 		}
 		
+		//config proxy server
 		OracleClientConnectionManager oracleProxyServerconMger = new OracleClientConnectionManager("Oracle proxy Server"
 				,context.getConfig().getIpAddress(),context.getConfig().getPort());
 		registerReporter(oracleProxyServerconMger);
@@ -119,6 +117,7 @@ public class OracleProxyServer {
 		factory.setPassword(context.getConfig().getPassword());
 		factory.setUser(context.getConfig().getUser());
 		oracleProxyServerconMger.setConnectionFactory(factory);
+		
 		/*MysqlAuthenticator authen = new MysqlAuthenticator();
 		
 		String accessConf = System.getProperty("access.conf","${amoeba.home}/conf/access_list.conf");
@@ -126,9 +125,10 @@ public class OracleProxyServer {
 		authen.addAuthenticateFilter(new IPAccessController(accessConf));
 		
 		oracleProxyServerconMger.setAuthenticator(authen);*/
-		oracleProxyServerconMger.setExecutor(context.getReadExecutor());
 		
+		oracleProxyServerconMger.setExecutor(context.getReadExecutor());		
 		oracleProxyServerconMger.start();
+		
 		new Thread(){
 			{
 				this.setDaemon(true);
