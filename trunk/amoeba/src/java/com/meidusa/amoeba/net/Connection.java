@@ -283,7 +283,7 @@ public abstract class Connection implements NetEventHandler {
 		if (isClosed()) {
 			return true;
 		}
-		logger.info("Disconnecting non-communicative client [conn=" + this
+		logger.info("Disconnecting non-communicative connection [conn=" + this
 				+ ", idle=" + idleMillis + "ms].");
 		return true;
 	}
