@@ -29,8 +29,6 @@ public class OraclePacketInputStream extends PacketInputStream implements Oracle
 		/**
 		 * length = 数据部分＋包头=整个数据包长度
 		 */
-		/*int length = (_buffer.get() & 0xff)
-					+ ((_buffer.get() & 0xff) << 8);	*/
 		
 		int length = _buffer.get() & 0xff;
         length <<= 8;
