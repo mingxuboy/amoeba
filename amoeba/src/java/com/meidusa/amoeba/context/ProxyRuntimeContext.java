@@ -209,14 +209,17 @@ public abstract class ProxyRuntimeContext implements Reporter{
 				throw new ConfigurationException("queryRouter instance error",e);
 			}
 		}
-		
 		initAllInitialisableBeans();
 		initialisableList.clear();
 		for(ConnectionManager conMgr :getConnectionManagerList().values()){
 			conMgr.setExecutor(this.getReadExecutor());
 			conMgr.start();
 		}
-		
+		initPools();
+	}
+	
+	
+	protected void initPools(){
 		for(Map.Entry<String, ObjectPool> entry: poolMap.entrySet()){
 			ObjectPool pool = entry.getValue();
 			if(pool instanceof MultipleLoadBalanceObjectPool){
@@ -231,8 +234,6 @@ public abstract class ProxyRuntimeContext implements Reporter{
 			}
 		}
 	}
-	
-	
 	private void initAllInitialisableBeans(){
 		for(Initialisable bean : initialisableList){
 			try {

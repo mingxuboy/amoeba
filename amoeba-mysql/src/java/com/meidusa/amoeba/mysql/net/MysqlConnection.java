@@ -46,7 +46,7 @@ public abstract class MysqlConnection extends DatabaseConnection {
 	}
 	
 	/**
-	 * 为了提升性能，由于mysql数据包写到目的地的时候已经包含了包头，则不需要经过FramingOutputStream处理
+	 * 为了提升性能，由于mysql数据包写到目的地的时候已经包含了包头，则不需要经过PacketOutputStream处理
 	 */
 	public void postMessage(byte[] msg)
     {

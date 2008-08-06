@@ -292,7 +292,7 @@ public abstract class Connection implements NetEventHandler {
 	
 	protected abstract PacketOutputStream createPakcetOutputStream();
 	
-	public PacketOutputStream getPacketOutputStream(){
+	protected PacketOutputStream getPacketOutputStream(){
 		if (_fout == null) {
 			_fout = createPakcetOutputStream();
 		}
@@ -300,7 +300,7 @@ public abstract class Connection implements NetEventHandler {
 		
 	}
 	
-	public PacketInputStream getPacketInputStream(){
+	protected PacketInputStream getPacketInputStream(){
 		if (_fin == null) {
 			_fin = createPacketInputStream();
 		}
