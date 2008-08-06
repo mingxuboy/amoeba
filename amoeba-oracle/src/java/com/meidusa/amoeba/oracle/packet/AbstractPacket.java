@@ -37,7 +37,6 @@ import java.nio.ByteBuffer;
  */
 public class AbstractPacket implements Packet {
 	
-	protected byte[] header;
 	protected byte buffer[];
 	protected int length;
 	protected byte type;
@@ -48,12 +47,11 @@ public class AbstractPacket implements Packet {
     protected int headerCheckSum;
 	public void init(byte[] buffer) {
 		this.buffer =  buffer;
-		header = new byte[8];
-		length = header[0] & 0xff;
+		length = buffer[0] & 0xff;
         length <<= 8;
-        length |= header[1] & 0xff;
-        type = header[4];
-        flags = header[5];
+        length |= buffer[1] & 0xff;
+        type = buffer[4];
+        flags = buffer[5];
 	}
 
 	public ByteBuffer toByteBuffer() {
