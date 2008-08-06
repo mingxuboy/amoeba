@@ -9,7 +9,8 @@ import com.meidusa.amoeba.net.poolable.PoolableObject;
 
 public class OracleServerConnection extends OracleConnection implements PoolableObject{
 
-	private ObjectPool pool;
+	private boolean active;
+	private ObjectPool objectPool;
 	public OracleServerConnection(SocketChannel channel, long createStamp) {
 		super(channel, createStamp);
 	}
@@ -19,23 +20,42 @@ public class OracleServerConnection extends OracleConnection implements Poolable
 	}
 
 	public ObjectPool getObjectPool() {
-		return pool;
+		return objectPool;
+	}
+	public boolean isActive() {
+		return active;
 	}
 
-	public boolean isActive() {
-		return false;
+	public synchronized void setObjectPool(ObjectPool pool) {
+		this.objectPool = pool;
+	}
+	
+	public void setActive(boolean active) {
+		this.active = active;
 	}
 
 	public boolean isRemovedFromPool() {
-		return false;
+		return objectPool == null;
 	}
+	
+	protected void close(Exception exception){
+		super.close(exception);
+		final ObjectPool tmpPool = objectPool;
+		objectPool = null;
+		try {
+			if(tmpPool != null){
+				
+				/**
+				 * 处于active 状态的 poolableObject，可以用ObjectPool.invalidateObject 方式从pool中销毁
+				 * 否则只能等待被borrow 或者 idle time out
+				 */
+				if(isActive()){
+					tmpPool.invalidateObject(this);
+				}
+			}
+		} catch (Exception e) {
 
-	public void setActive(boolean isactive) {
-		
-	}
-
-	public void setObjectPool(ObjectPool pool) {
-		this.pool = pool;
+		}
 	}
 
 }
