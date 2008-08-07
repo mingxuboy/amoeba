@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="GB2312"?>
 <project default="dist" name="AmoebaBuilder" basedir="." xmlns:artifact="urn:maven-artifact-ant">
-  	<property name="version"     value="0.22"/>
+  	<property name="version"     value="0.23"/>
   	<property name="app.name"     value="amoeba"/>
   	<property name="deploy.dir"   value="dist"/>
   	<property name="savedoc.dir"  value="docs"/>
