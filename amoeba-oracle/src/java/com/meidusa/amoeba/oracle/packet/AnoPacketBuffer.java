@@ -24,15 +24,15 @@ public class AnoPacketBuffer {
     }
 
     protected short readUB1() {
-        return (short) buffer[this.position++];
+        return (short) (buffer[this.position++] & 0xff);
     }
 
     protected int readUB2() {
         byte[] abyte0 = new byte[2];
         abyte0[0] = buffer[this.position++];
         abyte0[1] = buffer[this.position++];
-        int k = (int) byteArray2Long(abyte0);
-        return k & 0xffff;
+        int k = (int) (byteArray2Long(abyte0) & 0xffff);
+        return k;
     }
 
     protected long readUB4() {
@@ -60,8 +60,7 @@ public class AnoPacketBuffer {
 
     protected int receiveUB2() {
         readDataLength(3);
-        int k = readUB2();
-        return k & 0xffff;
+        return readUB2();
     }
 
     protected short receiveUB1() {
@@ -80,7 +79,7 @@ public class AnoPacketBuffer {
         int i1 = readUB2();
         long l1 = readUB4();
         int[] ai = new int[(int) l1];
-        if (l != 0xffffffffdeadbeefL || i1 != 3) {
+        if (l != AnoServices.NA_MAGIC || i1 != 3) {
             throw new RuntimeException("Error in array header received");
         }
 
@@ -116,11 +115,11 @@ public class AnoPacketBuffer {
 
     protected void sendUB2Array(int[] ai) {
         sendPktHeader(10 + ai.length * 2, 1);
-        writeUB4(0xffffffffdeadbeefL);
+        writeUB4(AnoServices.NA_MAGIC);
         writeUB2(3);
         writeUB4(ai.length);
         for (int k = 0; k < ai.length; k++) {
-            writeUB2(ai[k] & 0xffff);
+            writeUB2(ai[k]);
         }
     }
 
