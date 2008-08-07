@@ -2,16 +2,11 @@ package com.meidusa.amoeba.oracle.packet;
 
 import org.apache.log4j.Logger;
 
-/**
- * 服务器端返回的要求客户端重发的数据包
- * 
- * @author hexianmao
- * @version 2008-8-6 下午05:32:52
- */
-public class ResendPacket extends AbstractPacket {
+public class AnoServiceDataPacket extends DataPacket {
 
-    private static Logger logger = Logger.getLogger(ResendPacket.class);
+    private static Logger logger = Logger.getLogger(AnoServiceDataPacket.class);
 
+    @Override
     public void init(byte[] buffer) {
         super.init(buffer);
 
@@ -22,7 +17,8 @@ public class ResendPacket extends AbstractPacket {
 
     public String toString() {
         StringBuffer sb = new StringBuffer();
-        sb.append("ResendPacket info ==============================\n");
+        sb.append("AnoServiceDataPacket info ==============================\n");
         return sb.toString();
     }
+
 }

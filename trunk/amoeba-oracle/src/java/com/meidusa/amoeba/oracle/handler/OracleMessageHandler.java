@@ -5,6 +5,7 @@ import com.meidusa.amoeba.net.MessageHandler;
 import com.meidusa.amoeba.net.Sessionable;
 import com.meidusa.amoeba.oracle.packet.AcceptPacket;
 import com.meidusa.amoeba.oracle.packet.ConnectPacket;
+import com.meidusa.amoeba.oracle.packet.DataPacket;
 import com.meidusa.amoeba.oracle.packet.Packet;
 import com.meidusa.amoeba.oracle.packet.ResendPacket;
 
@@ -78,6 +79,7 @@ public class OracleMessageHandler implements MessageHandler, Sessionable {
             case Packet.NS_PACKT_TYPE_REDIRECT:
                 break;
             case Packet.NS_PACKT_TYPE_DATA:
+                packet = new DataPacket();
                 break;
             case Packet.NS_PACKT_TYPE_NULL:
                 break;

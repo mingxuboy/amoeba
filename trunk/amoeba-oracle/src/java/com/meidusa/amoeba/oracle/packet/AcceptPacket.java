@@ -1,14 +1,18 @@
 package com.meidusa.amoeba.oracle.packet;
 
+import org.apache.log4j.Logger;
+
 public class AcceptPacket extends AbstractPacket {
 
-    protected int version;
-    protected int options;
-    protected int sduSize;
-    protected int tduSize;
-    protected int myHWByteOrder;
-    protected int flag0;
-    protected int flag1;
+    private static Logger logger = Logger.getLogger(AcceptPacket.class);
+
+    protected int         version;
+    protected int         options;
+    protected int         sduSize;
+    protected int         tduSize;
+    protected int         myHWByteOrder;
+    protected int         flag0;
+    protected int         flag1;
 
     public void init(byte[] buffer) {
         super.init(buffer);
@@ -35,5 +39,22 @@ public class AcceptPacket extends AbstractPacket {
         dataOff |= buffer[21] & 0xff;
         flag0 = buffer[22];
         flag1 = buffer[23];
+
+        if (logger.isDebugEnabled()) {
+            logger.debug(this.toString());
+        }
+    }
+
+    public String toString() {
+        StringBuffer sb = new StringBuffer();
+        sb.append("AcceptPacket info ==============================\n");
+        sb.append("version:").append(version).append("\n");
+        sb.append("options:").append(options).append("\n");
+        sb.append("sduSize:").append(sduSize).append("\n");
+        sb.append("tduSize:").append(tduSize).append("\n");
+        sb.append("myHWByteOrder:").append(myHWByteOrder).append("\n");
+        sb.append("flag0:").append(flag0).append("\n");
+        sb.append("flag1:").append(flag1).append("\n");
+        return sb.toString();
     }
 }
