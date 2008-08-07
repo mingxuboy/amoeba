@@ -96,7 +96,7 @@ public class ConnectionManager extends LoopingThread implements Reporter {
 			}
         }
         
-        if(level == Level.DEBUG){
+        /*if(level == Level.DEBUG){
         	Set<SelectionKey> dumpKeys = new HashSet<SelectionKey>();
         	selectorLock.lock();
         	try{
@@ -119,7 +119,7 @@ public class ConnectionManager extends LoopingThread implements Reporter {
 	        		reporter.appendReport(report, now, sinceLast, reset,level);
 	        	}
 	        }
-        }
+        }*/
 	}
 
 	public ConnectionManager() throws IOException {
@@ -182,12 +182,12 @@ public class ConnectionManager extends LoopingThread implements Reporter {
 		try {
 			// check for incoming network events
 			int ecount = _selector.select(SELECT_LOOP_TIME);
-			selectorLock.lock();
-			try{
+			//selectorLock.lock();
+			//try{
 				ready = _selector.selectedKeys();
-			}finally{
-				selectorLock.unlock();
-			}
+			//}finally{
+			//	selectorLock.unlock();
+			//}
 			if (ecount == 0) {
 				if (ready.size() == 0) {
 					return;
@@ -271,7 +271,7 @@ public class ConnectionManager extends LoopingThread implements Reporter {
 				});
 			}else{
 				latch.countDown();
-				logger.error(selkey);
+				logger.error(selkey+", isAcceptable="+selkey.isAcceptable()+",isConnectable="+selkey.isConnectable()+",isReadable="+selkey.isReadable()+",isWritable="+selkey.isWritable());
 			}
 		}
 		
@@ -471,14 +471,20 @@ public class ConnectionManager extends LoopingThread implements Reporter {
 	public void invokeConnectionWriteMessage(Connection connection) {
 		if(connection.isClosed()) return;
 		try {
-            SelectionKey key = connection.getSelectionKey();
-            if(key!= null && (key.interestOps() & SelectionKey.OP_WRITE) == 0){
-            	/**
-            	 * 发送数据，如果返回false，则表示socket send buffer 已经满了。则Selector 需要监听 Writeable event
-				 */
-				boolean finished = connection.doWrite();
-				if(!finished){
-					key.interestOps(key.interestOps() | SelectionKey.OP_WRITE);
+			SelectionKey key = connection.getSelectionKey();
+			if(!key.isValid()){
+				connection.handleFailure(new java.nio.channels.CancelledKeyException());
+				return;
+			}
+			synchronized(key){
+	            if(key!= null && (key.interestOps() & SelectionKey.OP_WRITE) == 0){
+	            	/**
+	            	 * 发送数据，如果返回false，则表示socket send buffer 已经满了。则Selector 需要监听 Writeable event
+					 */
+					boolean finished = connection.doWrite();
+					if(!finished){
+						key.interestOps(key.interestOps() | SelectionKey.OP_WRITE);
+					}
 				}
 			}
 		} catch (IOException ioe) {
