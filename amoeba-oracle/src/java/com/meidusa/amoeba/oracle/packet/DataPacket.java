@@ -1,9 +1,13 @@
 package com.meidusa.amoeba.oracle.packet;
 
+import org.apache.log4j.Logger;
+
 public class DataPacket extends AbstractPacket {
 
-    protected int pktOffset;
-    protected int dataFlags;
+    private static Logger logger = Logger.getLogger(DataPacket.class);
+
+    protected int         pktOffset;
+    protected int         dataFlags;
 
     public void init(byte[] buffer) {
         super.init(buffer);
@@ -17,5 +21,15 @@ public class DataPacket extends AbstractPacket {
         }
         if (type == 6 && 0 == dataLen)
             type = 7;
+
+        if (logger.isDebugEnabled()) {
+            logger.debug(this.toString());
+        }
+    }
+
+    public String toString() {
+        StringBuffer sb = new StringBuffer();
+        sb.append("DataPacket info ==============================\n");
+        return sb.toString();
     }
 }
