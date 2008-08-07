@@ -11,19 +11,19 @@
 		<property name="ipAddress">127.0.0.1</property>
 		
 		<!-- proxy server net IO Read thread size -->
-		<property name="readThreadPoolSize">100</property>
+		<property name="readThreadPoolSize">20</property>
 		
 		<!-- proxy server client process thread size -->
-		<property name="clientSideThreadPoolSize">80</property>
+		<property name="clientSideThreadPoolSize">30</property>
 		
 		<!-- mysql server data packet process thread size -->
-		<property name="serverSideThreadPoolSize">100</property>
+		<property name="serverSideThreadPoolSize">30</property>
 		
 		<!-- socket Send and receive BufferSize(unit:K)  -->
 		<property name="netBufferSize">100</property>
 		
 		<!-- Enable/disable TCP_NODELAY (disable/enable Nagle's algorithm). -->
-		<property name="tcpNoDelay">false</property>
+		<property name="tcpNoDelay">true</property>
 		
 		<!-- 对外验证的用户名 -->
 		<property name="user">root</property>
