@@ -2,9 +2,7 @@ package com.meidusa.amoeba.oracle.packet;
 
 import java.nio.ByteBuffer;
 
-
 /**
- * 
  * <pre>
  * 
  * |-------------------------------------------
@@ -31,34 +29,33 @@ import java.nio.ByteBuffer;
  * 
  * </pre>
  * 
- * 
  * @author struct
- *
  */
 public class AbstractPacket implements Packet {
-	
-	protected byte buffer[];
-	protected int length;
-	protected byte type;
-	protected byte flags;
-	protected int dataLen;
-    protected int dataOff;
-    protected int packetCheckSum;
-    protected int headerCheckSum;
-	public void init(byte[] buffer) {
-		this.buffer =  buffer;
-		length = buffer[0] & 0xff;
+
+    protected byte buffer[];
+    protected int  length;
+    protected byte type;
+    protected byte flags;
+    protected int  dataLen;
+    protected int  dataOff;
+    protected int  packetCheckSum;
+    protected int  headerCheckSum;
+
+    public void init(byte[] buffer) {
+        this.buffer = buffer;
+        length = buffer[0] & 0xff;
         length <<= 8;
         length |= buffer[1] & 0xff;
         type = buffer[4];
         flags = buffer[5];
-	}
+    }
 
-	public ByteBuffer toByteBuffer() {
-		if(buffer == null){
-			
-		}
-		return null;
-	}
+    public ByteBuffer toByteBuffer() {
+        if (buffer == null) {
+
+        }
+        return null;
+    }
 
 }

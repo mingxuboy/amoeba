@@ -1,17 +1,18 @@
 package com.meidusa.amoeba.oracle.packet;
 
 public class AcceptPacket extends AbstractPacket {
-	protected int version;
+
+    protected int version;
     protected int options;
     protected int sduSize;
     protected int tduSize;
     protected int myHWByteOrder;
     protected int flag0;
     protected int flag1;
-    
-	public void init(byte[] buffer) {
-		super.init(buffer);
-		version = buffer[8] & 0xff;
+
+    public void init(byte[] buffer) {
+        super.init(buffer);
+        version = buffer[8] & 0xff;
         version <<= 8;
         version |= buffer[9] & 0xff;
         options = buffer[10] & 0xff;
@@ -34,5 +35,5 @@ public class AcceptPacket extends AbstractPacket {
         dataOff |= buffer[21] & 0xff;
         flag0 = buffer[22];
         flag1 = buffer[23];
-	}
+    }
 }
