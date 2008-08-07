@@ -11,6 +11,8 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import com.meidusa.amoeba.util.StringUtil;
+
 public class PerformaceTest {
 
 	/**
@@ -28,6 +30,15 @@ public class PerformaceTest {
 				count = Integer.parseInt(args[2]);
 			}
 		}
+		final String ip = System.getProperty("ip");
+		String sql = System.getProperty("sql");
+		if(sql.startsWith("\"")){
+			sql = sql.substring(1, sql.length() -1);
+		}
+		sql = StringUtil.replace(sql, "\\", "");
+		final String sqlext = sql;
+		System.out.println("query:"+sqlext +" to ip="+ip);
+
 		final int runcount = count;
 		Properties props = new Properties(); 
 
@@ -52,10 +63,10 @@ public class PerformaceTest {
 					PreparedStatement statment = null;
 					ResultSet result = null;
 					try{
-						conn = DriverManager.getConnection("jdbc:mysql://10.0.38.105:3306/test","root",null);
+						conn = DriverManager.getConnection("jdbc:mysql://"+ip+":3306/test","root",null);
 						for(int i=0;i<runcount;i++){
 							try{
-							statment = conn.prepareStatement("SELECT * FROM promotion.choice_option");
+							statment = conn.prepareStatement(sqlext);
 							result = statment.executeQuery();
 							}catch(Exception e){
 								e.printStackTrace();

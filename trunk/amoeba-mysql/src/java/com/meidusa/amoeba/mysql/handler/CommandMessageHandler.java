@@ -712,8 +712,9 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 	protected abstract ConnectionStatuts newConnectionStatuts(Connection conn);
 
 	public synchronized void startSession() throws Exception {
-		logger.info(this+" session start");
-		
+		if(logger.isInfoEnabled()){
+			logger.info(this+" session start");
+		}
 		for(ObjectPool pool:pools){
 			MysqlServerConnection conn;
 			conn = (MysqlServerConnection)pool.borrowObject();
@@ -758,7 +759,9 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 					logger.warn("session was killed!!",new Exception());
 					source.postClose(null);
 				}else{
-					logger.info(this+" session ended.");
+					if(logger.isInfoEnabled()){
+						logger.info(this+" session ended.");
+					}
 				}
 			}
 		}finally{
