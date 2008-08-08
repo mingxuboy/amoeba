@@ -13,11 +13,17 @@ public class OracleMessageHandler implements MessageHandler, Sessionable {
 
     private Connection clientConn;
     private Connection serverConn;
+    private MessageHandler clientHandler;
+    private MessageHandler serverHandler;
     private boolean    isEnded = false;
 
     public OracleMessageHandler(Connection clientConn, Connection serverConn){
         this.clientConn = clientConn;
+        clientHandler = clientConn.getMessageHandler();
         this.serverConn = serverConn;
+        serverHandler = serverConn.getMessageHandler();
+        clientConn.setMessageHandler(this);
+        serverConn.setMessageHandler(this);
     }
 
     public void handleMessage(Connection conn, byte[] message) {
@@ -35,6 +41,8 @@ public class OracleMessageHandler implements MessageHandler, Sessionable {
     public synchronized void endSession() {
         if (!isEnded()) {
             isEnded = true;
+            clientConn.setMessageHandler(clientHandler);
+            serverConn.setMessageHandler(serverHandler);
             clientConn.postClose(null);
             serverConn.postClose(null);
         }
