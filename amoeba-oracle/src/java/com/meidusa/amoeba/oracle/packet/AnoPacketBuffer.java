@@ -80,8 +80,8 @@ public class AnoPacketBuffer {
         byte abyte0[] = new byte[4];
         abyte0[0] = buffer[position++];
         abyte0[1] = buffer[position++];
-        abyte0[0] = buffer[position++];
-        abyte0[1] = buffer[position++];
+        abyte0[2] = buffer[position++];
+        abyte0[3] = buffer[position++];
         int2ByteArray((int) (-1L & l), abyte0);
     }
 
