@@ -125,8 +125,15 @@ public class MysqlServerConnection extends MysqlConnection implements MySqlPacke
 	public boolean checkIdle(long now) {
 		if(isAuthenticated()){
 			if(_handler instanceof Sessionable){
-				Sessionable session = (Sessionable)_handler;
-				return session.checkIdle(now);
+				/**
+				 * 该处在高并发的情况下可能会发生ClassCastException 异常,为了提升性能,这儿将忽略这种异常.
+				 */
+				try{
+					Sessionable session = (Sessionable)_handler;
+					return session.checkIdle(now);
+				}catch(ClassCastException castException){
+					return false;
+				}
 			}
 			return false;
 		}else{
