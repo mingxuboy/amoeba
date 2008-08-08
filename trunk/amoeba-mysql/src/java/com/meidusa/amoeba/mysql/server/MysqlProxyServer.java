@@ -135,6 +135,8 @@ public class MysqlProxyServer {
 		factory.setPassword(context.getConfig().getPassword());
 		factory.setUser(context.getConfig().getUser());
 		mysqlProxyServerconMger.setConnectionFactory(factory);
+		factory.setConnectionManager(mysqlProxyServerconMger);
+		
 		MysqlAuthenticator authen = new MysqlAuthenticator();
 		
 		String accessConf = System.getProperty("access.conf","${amoeba.home}/conf/access_list.conf");

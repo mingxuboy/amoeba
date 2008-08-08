@@ -21,8 +21,6 @@ import java.nio.channels.SocketChannel;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
-import com.meidusa.amoeba.util.Tuple;
-
 /**
  * 指定一个端口,创建一个serverSocket. 将该ServerSocket所创建的Connection加入管理
  * @author <a href=mailto:piratebase@sina.com>Struct chen</a>
@@ -139,8 +137,8 @@ public class ServerableConnectionManager extends AuthingableConnectionManager{
 				channel.socket().close();
 				return;
 			}
-			Connection connection = connFactory.createConnection(channel, System.currentTimeMillis());
-			this.postRegisterNetEventHandler(connection,SelectionKey.OP_READ);
+			connFactory.createConnection(channel, System.currentTimeMillis());
+			//this.postRegisterNetEventHandler(connection,SelectionKey.OP_READ);
 		}catch(Exception e){
 			if (channel != null) {
 				try {

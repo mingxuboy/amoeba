@@ -5,7 +5,6 @@ import java.nio.channels.SocketChannel;
 import org.apache.commons.pool.ObjectPool;
 
 import com.meidusa.amoeba.net.Connection;
-import com.meidusa.amoeba.net.MessageHandler;
 import com.meidusa.amoeba.oracle.context.OracleProxyRuntimeContext;
 import com.meidusa.amoeba.oracle.handler.OracleMessageHandler;
 import com.meidusa.amoeba.oracle.packet.AcceptPacket;
@@ -22,9 +21,7 @@ public class OracleClientConnection extends OracleConnection {
         ObjectPool pool = OracleProxyRuntimeContext.getInstance().getPoolMap().get(defaultPoolName);
         try {
             Connection dst = (Connection) pool.borrowObject();
-            MessageHandler handler = new OracleMessageHandler(this, dst);
-            this.setMessageHandler(handler);
-            dst.setMessageHandler(handler);
+            new OracleMessageHandler(this, dst);
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -11,6 +11,7 @@
  */
 package com.meidusa.amoeba.net;
 
+import java.io.IOException;
 import java.nio.channels.SocketChannel;
 
 /**
@@ -25,6 +26,7 @@ public interface ConnectionFactory {
 	 * @param channel
 	 * @param createStamp
 	 * @return
+	 * @throws IOException 
 	 */
-	public Connection createConnection(SocketChannel channel,long createStamp);
+	public Connection createConnection(SocketChannel channel,long createStamp) throws IOException;
 }

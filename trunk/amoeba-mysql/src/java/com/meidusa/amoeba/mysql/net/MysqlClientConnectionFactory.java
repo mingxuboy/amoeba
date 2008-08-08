@@ -14,40 +14,18 @@ package com.meidusa.amoeba.mysql.net;
 import java.nio.channels.SocketChannel;
 
 import com.meidusa.amoeba.net.Connection;
-import com.meidusa.amoeba.net.ConnectionFactory;
+import com.meidusa.amoeba.net.FrontendConnectionFactory;
 
 /**
  * 
  * @author <a href=mailto:piratebase@sina.com>Struct chen</a>
  *
  */
-public class MysqlClientConnectionFactory implements ConnectionFactory {
-	private String user;
-	private String password;
-	
-	public String getUser() {
-		return user;
-	}
+public class MysqlClientConnectionFactory extends FrontendConnectionFactory {
 
-	public void setUser(String user) {
-		this.user = user;
-	}
-
-	public String getPassword() {
-		return password;
-	}
-
-	public void setPassword(String password) {
-		this.password = password;
-	}
-
-	public MysqlClientConnectionFactory(){
-	}
-	
-	public Connection createConnection(SocketChannel channel, long createStamp){
-		MysqlClientConnection conn = new MysqlClientConnection(channel, createStamp);
-		conn.setUser(user);
-		conn.setPassword(password);
-		return conn;
+	@Override
+	protected Connection newConnectionInstance(SocketChannel channel,
+			long createStamp) {
+		return new MysqlClientConnection(channel, createStamp);
 	}
 }

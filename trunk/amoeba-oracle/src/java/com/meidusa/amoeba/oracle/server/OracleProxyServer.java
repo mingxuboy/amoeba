@@ -10,10 +10,10 @@ import com.meidusa.amoeba.config.ConfigUtil;
 import com.meidusa.amoeba.context.ProxyRuntimeContext;
 import com.meidusa.amoeba.log4j.DOMConfigurator;
 import com.meidusa.amoeba.net.ConnectionManager;
+import com.meidusa.amoeba.net.FrontendConnectionFactory;
 import com.meidusa.amoeba.oracle.context.OracleProxyRuntimeContext;
 import com.meidusa.amoeba.oracle.net.OracleClientConnectionFactory;
 import com.meidusa.amoeba.oracle.net.OracleClientConnectionManager;
-import com.meidusa.amoeba.oracle.net.OracleConnectionFactory;
 import com.meidusa.amoeba.util.Reporter;
 import com.meidusa.amoeba.util.StringUtil;
 
@@ -113,11 +113,11 @@ public class OracleProxyServer {
 		OracleClientConnectionManager oracleProxyServerconMger = new OracleClientConnectionManager("Oracle proxy Server"
 				,context.getConfig().getIpAddress(),context.getConfig().getPort());
 		registerReporter(oracleProxyServerconMger);
-		OracleConnectionFactory factory = new OracleClientConnectionFactory();
+		FrontendConnectionFactory factory = new OracleClientConnectionFactory();
 		factory.setPassword(context.getConfig().getPassword());
 		factory.setUser(context.getConfig().getUser());
 		oracleProxyServerconMger.setConnectionFactory(factory);
-		
+		factory.setConnectionManager(oracleProxyServerconMger);
 		/*MysqlAuthenticator authen = new MysqlAuthenticator();
 		
 		String accessConf = System.getProperty("access.conf","${amoeba.home}/conf/access_list.conf");

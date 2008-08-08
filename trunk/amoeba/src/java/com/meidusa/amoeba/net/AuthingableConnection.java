@@ -47,7 +47,7 @@ public abstract class AuthingableConnection extends Connection implements Messag
 	}
 	
 	public boolean isAuthenticatedWithBlocked(long timeout){
-		if(authenticated) return true;
+		if(authenticatedSeted) return authenticated;
 		synchronized(this){
 			try {
 				this.wait(timeout);
