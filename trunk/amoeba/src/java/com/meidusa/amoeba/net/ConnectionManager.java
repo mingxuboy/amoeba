@@ -19,13 +19,10 @@ import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 import java.nio.channels.spi.SelectorProvider;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
@@ -62,7 +59,6 @@ public class ConnectionManager extends LoopingThread implements Reporter {
 	
 	/** Our current runtime stats. */
 	protected ConMgrStats _stats, _lastStats;
-	private final Lock selectorLock = new ReentrantLock(false);
 	private int currentReadingThreadSize = 0;
 	
 	/** 连接已经失效或者网络断开的队列 */
