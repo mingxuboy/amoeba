@@ -2,9 +2,9 @@ package com.meidusa.amoeba.oracle.packet;
 
 import org.apache.log4j.Logger;
 
-public class AnoServiceDataPacket extends DataPacket {
+public class AnoDataPacket extends DataPacket {
 
-    private static Logger logger = Logger.getLogger(AnoServiceDataPacket.class);
+    private static Logger logger = Logger.getLogger(AnoDataPacket.class);
 
     @Override
     public void init(byte[] buffer) {
@@ -17,7 +17,7 @@ public class AnoServiceDataPacket extends DataPacket {
 
     public String toString() {
         StringBuffer sb = new StringBuffer();
-        sb.append("AnoServiceDataPacket info ==============================\n");
+        sb.append("AnoDataPacket info ==============================\n");
         return sb.toString();
     }
 
