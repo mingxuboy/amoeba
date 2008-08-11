@@ -26,8 +26,10 @@ public abstract class PoolableConnectionFactory extends BackendConnectionFactory
 	}
 
 	public void destroyObject(Object arg0) throws Exception {
-		Connection connection = (Connection)arg0;
-		connection.postClose(null);
+		if(arg0 instanceof Connection){
+			Connection connection = (Connection)arg0;
+			connection.postClose(null);
+		}
 	}
 	
 	/**
