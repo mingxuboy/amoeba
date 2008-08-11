@@ -2,6 +2,10 @@ package com.meidusa.amoeba.oracle.packet;
 
 import org.apache.log4j.Logger;
 
+/**
+ * @author hexianmao
+ * @version 2008-8-11 обнГ04:17:38
+ */
 public class AcceptPacket extends AbstractPacket {
 
     private static Logger logger = Logger.getLogger(AcceptPacket.class);

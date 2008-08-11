@@ -1,5 +1,9 @@
 package com.meidusa.amoeba.oracle.packet;
 
+/**
+ * @author hexianmao
+ * @version 2008-8-11 обнГ04:17:26
+ */
 public interface AnoServices {
 
     public static final int      AUTHENTICATION             = 1;

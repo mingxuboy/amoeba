@@ -1,5 +1,7 @@
 package com.meidusa.amoeba.oracle.packet;
 
+import java.nio.ByteBuffer;
+
 import org.apache.log4j.Logger;
 
 /**
@@ -10,7 +12,8 @@ import org.apache.log4j.Logger;
  */
 public class ResendPacket extends AbstractPacket {
 
-    private static Logger logger = Logger.getLogger(ResendPacket.class);
+    private static Logger       logger = Logger.getLogger(ResendPacket.class);
+    private final static byte[] b      = { 0x00, 0x08, 0x00, 0x00, 0x0b, 0x00, 0x00, 0x00 };
 
     public void init(byte[] buffer) {
         super.init(buffer);
@@ -18,6 +21,10 @@ public class ResendPacket extends AbstractPacket {
         if (logger.isDebugEnabled()) {
             logger.debug(this.toString());
         }
+    }
+
+    public ByteBuffer toByteBuffer() {
+        return ByteBuffer.wrap(b);
     }
 
     public String toString() {
