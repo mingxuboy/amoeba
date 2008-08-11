@@ -2,6 +2,10 @@ package com.meidusa.amoeba.oracle.packet;
 
 import org.apache.log4j.Logger;
 
+/**
+ * @author hexianmao
+ * @version 2008-8-11 обнГ04:18:34
+ */
 public class DataPacket extends AbstractPacket {
 
     private static Logger logger = Logger.getLogger(DataPacket.class);
