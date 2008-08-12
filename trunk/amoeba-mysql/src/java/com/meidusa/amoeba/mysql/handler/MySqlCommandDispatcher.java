@@ -24,7 +24,7 @@ import com.meidusa.amoeba.mysql.packet.ErrorPacket;
 import com.meidusa.amoeba.mysql.packet.ExecutePacket;
 import com.meidusa.amoeba.mysql.packet.LongDataPacket;
 import com.meidusa.amoeba.mysql.packet.OkPacket;
-import com.meidusa.amoeba.mysql.packet.PacketBuffer;
+import com.meidusa.amoeba.mysql.packet.MysqlPacketBuffer;
 import com.meidusa.amoeba.mysql.packet.QueryCommandPacket;
 import com.meidusa.amoeba.net.Connection;
 import com.meidusa.amoeba.net.MessageHandler;
@@ -55,13 +55,13 @@ public class MySqlCommandDispatcher implements MessageHandler {
 		QueryCommandPacket command = new QueryCommandPacket();
 		command.init(message);
 		try {
-			if(PacketBuffer.isPacketType(message, QueryCommandPacket.COM_QUIT) || PacketBuffer.isPacketType(message, QueryCommandPacket.COM_STMT_CLOSE)){
+			if(MysqlPacketBuffer.isPacketType(message, QueryCommandPacket.COM_QUIT) || MysqlPacketBuffer.isPacketType(message, QueryCommandPacket.COM_STMT_CLOSE)){
 				if(logger.isDebugEnabled()){
 					logger.debug(command);
 				}
-			}else if(PacketBuffer.isPacketType(message, QueryCommandPacket.COM_PING)){
+			}else if(MysqlPacketBuffer.isPacketType(message, QueryCommandPacket.COM_PING)){
 				conn.postMessage(STATIC_OK_BUFFER);
-			}else if(PacketBuffer.isPacketType(message, QueryCommandPacket.COM_QUERY)){
+			}else if(MysqlPacketBuffer.isPacketType(message, QueryCommandPacket.COM_QUERY)){
 				
 				QueryRouter router = ProxyRuntimeContext.getInstance().getQueryRouter();
 				ObjectPool[] pools = router.doRoute(conn,command.arg,false,null);
@@ -80,7 +80,7 @@ public class MySqlCommandDispatcher implements MessageHandler {
 						throw e;
 					}
 				}
-			}else if(PacketBuffer.isPacketType(message, QueryCommandPacket.COM_STMT_PREPARE)){
+			}else if(MysqlPacketBuffer.isPacketType(message, QueryCommandPacket.COM_STMT_PREPARE)){
 				
 				QueryRouter router = ProxyRuntimeContext.getInstance().getQueryRouter();
 				ObjectPool[] pools = router.doRoute(conn,command.arg,true,null);
@@ -107,9 +107,9 @@ public class MySqlCommandDispatcher implements MessageHandler {
 					}
 				}
 				
-			}else if(PacketBuffer.isPacketType(message, QueryCommandPacket.COM_STMT_SEND_LONG_DATA)){
+			}else if(MysqlPacketBuffer.isPacketType(message, QueryCommandPacket.COM_STMT_SEND_LONG_DATA)){
 				conn.addLongData(message);
-			}else if(PacketBuffer.isPacketType(message, QueryCommandPacket.COM_STMT_EXECUTE)){
+			}else if(MysqlPacketBuffer.isPacketType(message, QueryCommandPacket.COM_STMT_EXECUTE)){
 				long statmentId = ExecutePacket.readStatmentID(message);
 				PreparedStatmentInfo preparedInf = conn.getPreparedStatmentInfo(statmentId);
 				
@@ -147,7 +147,7 @@ public class MySqlCommandDispatcher implements MessageHandler {
 						}
 					}
 				}
-			}else if(PacketBuffer.isPacketType(message, QueryCommandPacket.COM_INIT_DB)){
+			}else if(MysqlPacketBuffer.isPacketType(message, QueryCommandPacket.COM_INIT_DB)){
 				conn.setSchema(command.arg);
 				conn.postMessage(STATIC_OK_BUFFER);
 				

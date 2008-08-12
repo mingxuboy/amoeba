@@ -21,7 +21,7 @@ import java.io.UnsupportedEncodingException;
 public class ResultSetHeaderPacket extends AbstractPacket {
 	public long columns;
 	public long extra;
-	public void init(PacketBuffer buffer){
+	public void init(MysqlPacketBuffer buffer){
 		super.init(buffer);
 		columns = buffer.readFieldLength();
 		if(buffer.getBufLength()> buffer.getPosition()){
@@ -29,7 +29,7 @@ public class ResultSetHeaderPacket extends AbstractPacket {
 		}
 	}
 	
-	public void write2Buffer(PacketBuffer buffer) throws UnsupportedEncodingException{
+	public void write2Buffer(MysqlPacketBuffer buffer) throws UnsupportedEncodingException{
 		super.write2Buffer(buffer);
 		buffer.writeFieldLength(columns);
 		if(extra >0){

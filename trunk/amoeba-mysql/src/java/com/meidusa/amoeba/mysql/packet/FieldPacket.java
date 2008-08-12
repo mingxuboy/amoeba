@@ -32,7 +32,7 @@ public class FieldPacket extends AbstractPacket {
 	public byte decimals;
 	public String definition;
 	
-	public void init(PacketBuffer buffer) {
+	public void init(MysqlPacketBuffer buffer) {
 		super.init(buffer);
 		catalog = buffer.readLengthCodedString(CODE_PAGE_1252);
 		db = buffer.readLengthCodedString(CODE_PAGE_1252);
@@ -48,7 +48,7 @@ public class FieldPacket extends AbstractPacket {
 		decimals = buffer.readByte();
 		definition = buffer.readLengthCodedString(CODE_PAGE_1252);
 	}
-	protected void write2Buffer(PacketBuffer buffer) throws UnsupportedEncodingException {
+	protected void write2Buffer(MysqlPacketBuffer buffer) throws UnsupportedEncodingException {
 		super.write2Buffer(buffer);
 		buffer.writeLengthCodedString(catalog,CODE_PAGE_1252);
 		

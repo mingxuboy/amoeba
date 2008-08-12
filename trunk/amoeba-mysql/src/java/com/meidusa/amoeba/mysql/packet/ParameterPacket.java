@@ -41,7 +41,7 @@ public class ParameterPacket extends AbstractPacket {
 	public int flags;
 	public byte decimals;
 	public long length;
-	public void init(PacketBuffer buffer) {
+	public void init(MysqlPacketBuffer buffer) {
 		super.init(buffer);
 		type = buffer.readByte();
 		flags = buffer.readInt();
@@ -49,7 +49,7 @@ public class ParameterPacket extends AbstractPacket {
 		length = buffer.readLong();
 	}
 	
-	protected void write2Buffer(PacketBuffer buffer) throws UnsupportedEncodingException {
+	protected void write2Buffer(MysqlPacketBuffer buffer) throws UnsupportedEncodingException {
 		super.write2Buffer(buffer);
 		buffer.writeInt(type);
 		buffer.writeInt(flags);

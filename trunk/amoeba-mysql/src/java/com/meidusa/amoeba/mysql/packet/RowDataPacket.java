@@ -24,7 +24,7 @@ import java.util.List;
 public class RowDataPacket extends AbstractPacket {
 	public List<String> columns;
 	
-	public void init(PacketBuffer buffer){
+	public void init(MysqlPacketBuffer buffer){
 		super.init(buffer);
 		if(columns == null){
 			columns = new ArrayList<String>();
@@ -35,7 +35,7 @@ public class RowDataPacket extends AbstractPacket {
 		}
 		
 	}
-	protected void write2Buffer(PacketBuffer buffer) throws UnsupportedEncodingException {
+	protected void write2Buffer(MysqlPacketBuffer buffer) throws UnsupportedEncodingException {
 		super.write2Buffer(buffer);
 		if(columns == null)return;
 		Iterator<String> it = columns.iterator();

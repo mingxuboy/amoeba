@@ -103,12 +103,12 @@ public abstract class CommandPacket extends AbstractPacket {
 	public static final byte COM_EOF = (byte)0xfe;      //  
 	public byte command;
 	
-	public void init(PacketBuffer buffer) {
+	public void init(MysqlPacketBuffer buffer) {
 		super.init(buffer);
 		command = buffer.readByte();
 	}
 
-	public void write2Buffer(PacketBuffer buffer) throws UnsupportedEncodingException {
+	public void write2Buffer(MysqlPacketBuffer buffer) throws UnsupportedEncodingException {
 		super.write2Buffer(buffer);
 		buffer.writeByte(command);
 		

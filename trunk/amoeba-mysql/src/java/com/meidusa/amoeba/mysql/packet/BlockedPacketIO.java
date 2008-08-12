@@ -51,7 +51,7 @@ public class BlockedPacketIO {
      * @throws IOException 
      * @throws CommunicationsException DOCUMENT ME!
      */
-    public static final PacketBuffer readFullyPacketBuffer(InputStream mysqlInput) throws IOException {
+    public static final MysqlPacketBuffer readFullyPacketBuffer(InputStream mysqlInput) throws IOException {
     	
     		byte[] packetHeaderBuf = new byte[4];
             int lengthRead = readFully(mysqlInput,packetHeaderBuf, 0, 4);
@@ -80,7 +80,7 @@ public class BlockedPacketIO {
             }
 
             buffer[bufferLength] = 0;
-            PacketBuffer packet = new PacketBuffer(buffer);
+            MysqlPacketBuffer packet = new MysqlPacketBuffer(buffer);
             packet.setBufLength(bufferLength + 1);
             
             return packet;

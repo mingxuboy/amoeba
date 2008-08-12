@@ -22,7 +22,7 @@ public class EOFPacket extends AbstractResultPacket {
 	public int serverStatus;
 	public int warningCount;
 	
-	public void init(PacketBuffer buffer){
+	public void init(MysqlPacketBuffer buffer){
 		super.init(buffer);
 		warningCount = buffer.readInt();
 		serverStatus = buffer.readInt();
@@ -34,7 +34,7 @@ public class EOFPacket extends AbstractResultPacket {
 		return packLength;
 	}
 
-	public void write2Buffer(PacketBuffer buffer) throws UnsupportedEncodingException{
+	public void write2Buffer(MysqlPacketBuffer buffer) throws UnsupportedEncodingException{
 		super.write2Buffer(buffer);
 		buffer.writeInt(warningCount);
 		buffer.writeInt(serverStatus);
