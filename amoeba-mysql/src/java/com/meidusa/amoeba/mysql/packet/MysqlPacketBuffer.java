@@ -20,6 +20,7 @@ import com.meidusa.amoeba.mysql.io.Constants;
 import com.meidusa.amoeba.mysql.io.MySqlPacketConstant;
 import com.meidusa.amoeba.mysql.util.MysqlStringUtil;
 import com.meidusa.amoeba.mysql.util.SingleByteCharsetConverter;
+import com.meidusa.amoeba.packet.PackeBuffer;
 import com.meidusa.amoeba.util.StringUtil;
 
 /**
@@ -27,7 +28,7 @@ import com.meidusa.amoeba.util.StringUtil;
  * 该类负责 发送、接收 socket 输入流，并且可以根据包头信息，构造出ByteBuffer
  * @author <a href=mailto:piratebase@sina.com>Struct chen</a>
  */
-public class PacketBuffer {
+public class MysqlPacketBuffer implements PackeBuffer{
 	static final int MAX_BYTES_TO_DUMP = 512;
 
 	static final int NO_LENGTH_LIMIT = -1;
@@ -47,7 +48,7 @@ public class PacketBuffer {
 	 * buf 中含包头信息
 	 * @param buf
 	 */
-	public PacketBuffer(byte[] buf) {
+	public MysqlPacketBuffer(byte[] buf) {
 		
 		this.byteBuffer = new byte[buf.length+1];
 		System.arraycopy(buf, 0, byteBuffer, 0, buf.length);
@@ -77,7 +78,7 @@ public class PacketBuffer {
 		}
 	}
 	
-	public PacketBuffer(int size) {
+	public MysqlPacketBuffer(int size) {
 		this.byteBuffer = new byte[size];
 		setBufLength(this.byteBuffer.length);
 		this.position = MySqlPacketConstant.HEADER_SIZE;

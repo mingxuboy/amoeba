@@ -27,19 +27,19 @@ public interface Packet extends MySqlPacketConstant,com.meidusa.amoeba.packet.Pa
 	 * @param buffer buffer是从mysql socketChannel的流读取头4个字节计算数据包长度
 	 * 				并且读取相应的长度所形成的buffer
 	 */
-	public void init(PacketBuffer buffer);
+	public void init(MysqlPacketBuffer buffer);
 	
 	/**
 	 * 直接转化成buffer对象
 	 * @return Buffer 对象
 	 * @throws UnsupportedEncodingException  当String to bytes发生编码不支持的时候
 	 */
-	public PacketBuffer toBuffer()throws UnsupportedEncodingException;
+	public MysqlPacketBuffer toBuffer()throws UnsupportedEncodingException;
 	
 	/**
 	 * 将该packet写入到buffer中 
 	 * @param buffer 用于输入输出的缓冲
 	 * @throws UnsupportedEncodingException 当String to bytes发生编码不支持的时候
 	 */
-	public PacketBuffer toBuffer(PacketBuffer buffer)throws UnsupportedEncodingException;
+	public MysqlPacketBuffer toBuffer(MysqlPacketBuffer buffer)throws UnsupportedEncodingException;
 }

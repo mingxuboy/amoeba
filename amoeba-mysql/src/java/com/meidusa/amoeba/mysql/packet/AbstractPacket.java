@@ -40,7 +40,7 @@ public abstract class AbstractPacket implements Packet {
 	 * 				并且读取相应的长度所形成的buffer
 	 */
 	public void init(byte[] buffer){
-		init(new PacketBuffer(buffer));
+		init(new MysqlPacketBuffer(buffer));
 	}
 	
 	
@@ -56,7 +56,7 @@ public abstract class AbstractPacket implements Packet {
 		}
 	}
 	
-	public void init(PacketBuffer buffer) {
+	public void init(MysqlPacketBuffer buffer) {
 		buffer.setPosition(0);
 		packetLength = (buffer.readByte() & 0xff)	
 		+ ((buffer.readByte() & 0xff) << 8)	
@@ -68,7 +68,7 @@ public abstract class AbstractPacket implements Packet {
 	 * 写完之后一定需要调用这个方法，buffer的指针位置指向末尾的下一个位置（包总长度位置）。
 	 * @param buffer
 	 */
-	protected void afterPacketWritten(PacketBuffer buffer){
+	protected void afterPacketWritten(MysqlPacketBuffer buffer){
 		int position = buffer.getPosition();
 		packetLength = position-HEADER_SIZE;
 		buffer.setPosition(0);
@@ -84,23 +84,23 @@ public abstract class AbstractPacket implements Packet {
 	 * @param buffer 用于输入输出的缓冲
 	 * @throws UnsupportedEncodingException 当String to bytes发生编码不支持的时候
 	 */
-	protected void write2Buffer(PacketBuffer buffer) throws UnsupportedEncodingException {
+	protected void write2Buffer(MysqlPacketBuffer buffer) throws UnsupportedEncodingException {
 		
 	}
 
 	/**
-	 * 该方法调用了{@link #write2Buffer(PacketBuffer)} 写入到指定的buffer，并且调用了{@link #afterPacketWritten(PacketBuffer)}
+	 * 该方法调用了{@link #write2Buffer(MysqlPacketBuffer)} 写入到指定的buffer，并且调用了{@link #afterPacketWritten(MysqlPacketBuffer)}
 	 */
-	public PacketBuffer toBuffer(PacketBuffer buffer) throws UnsupportedEncodingException {
+	public MysqlPacketBuffer toBuffer(MysqlPacketBuffer buffer) throws UnsupportedEncodingException {
 		write2Buffer(buffer);
 		afterPacketWritten(buffer);
 		return buffer;
 	}
 	
-	public PacketBuffer toBuffer() throws UnsupportedEncodingException{
+	public MysqlPacketBuffer toBuffer() throws UnsupportedEncodingException{
 		int bufferSize = calculatePacketSize();
 		bufferSize = (bufferSize<5?5:bufferSize);
-		PacketBuffer buffer = new PacketBuffer(bufferSize);
+		MysqlPacketBuffer buffer = new MysqlPacketBuffer(bufferSize);
 		return toBuffer(buffer);
 	}
 	

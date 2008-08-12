@@ -92,7 +92,7 @@ public class HandshakePacket extends AbstractPacket{
 	/** 13¸ö×Ö½Ú */
 	public String restOfScrambleBuff;
 
-	public void init(PacketBuffer buffer) {
+	public void init(MysqlPacketBuffer buffer) {
 		super.init(buffer);
 		this.protocolVersion = buffer.readByte();
 		this.serverVersion = buffer.readString();
@@ -111,14 +111,14 @@ public class HandshakePacket extends AbstractPacket{
         restOfScrambleBuff = buffer.readString();
 	}
 
-	public PacketBuffer toBuffer() throws UnsupportedEncodingException {
+	public MysqlPacketBuffer toBuffer() throws UnsupportedEncodingException {
 		int serverVersionLength = (serverVersion != null) ? serverVersion.length() : 0;
 		int packLength = 1 + (serverVersionLength + 8+13)*2+8+2+1+2;
-		PacketBuffer buffer = new PacketBuffer(packLength);
+		MysqlPacketBuffer buffer = new MysqlPacketBuffer(packLength);
 		return toBuffer(buffer);
 	}
 	
-	public void write2Buffer(PacketBuffer buffer) throws UnsupportedEncodingException {
+	public void write2Buffer(MysqlPacketBuffer buffer) throws UnsupportedEncodingException {
 		super.write2Buffer(buffer);
 		buffer.writeByte(protocolVersion);
 		buffer.writeString(serverVersion,CODE_PAGE_1252);

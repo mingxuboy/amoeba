@@ -85,7 +85,7 @@ public class ErrorPacket extends AbstractResultPacket{
 	public ErrorPacket(){
 		resultPacketType = PACKET_TYPE_ERROR;
 	}
-	public void init(PacketBuffer buffer) {
+	public void init(MysqlPacketBuffer buffer) {
 		super.init(buffer);
 		errno = buffer.readInt();
 		serverErrorMessage = buffer.readString(CODE_PAGE_1252);
@@ -99,7 +99,7 @@ public class ErrorPacket extends AbstractResultPacket{
         }
 	}
 
-	public void write2Buffer(PacketBuffer buffer) throws UnsupportedEncodingException {
+	public void write2Buffer(MysqlPacketBuffer buffer) throws UnsupportedEncodingException {
 		super.write2Buffer(buffer);
 		buffer.writeInt(errno);
 		buffer.writeString('#'+sqlstate+serverErrorMessage);

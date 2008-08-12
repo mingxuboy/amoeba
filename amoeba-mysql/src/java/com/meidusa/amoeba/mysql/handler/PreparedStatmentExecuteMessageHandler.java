@@ -16,7 +16,7 @@ import org.apache.commons.pool.ObjectPool;
 import com.meidusa.amoeba.mysql.net.CommandInfo;
 import com.meidusa.amoeba.mysql.net.MysqlClientConnection;
 import com.meidusa.amoeba.mysql.packet.CommandPacket;
-import com.meidusa.amoeba.mysql.packet.PacketBuffer;
+import com.meidusa.amoeba.mysql.packet.MysqlPacketBuffer;
 import com.meidusa.amoeba.mysql.packet.QueryCommandPacket;
 import com.meidusa.amoeba.net.Connection;
 
@@ -35,7 +35,7 @@ public class PreparedStatmentExecuteMessageHandler extends PreparedStatmentMessa
 		@Override
 		public boolean isCompleted(byte[] buffer) {
 			if(this.commandType == QueryCommandPacket.COM_STMT_EXECUTE){
-				if(PacketBuffer.isEofPacket(buffer)){
+				if(MysqlPacketBuffer.isEofPacket(buffer)){
 					if((this.statusCode & PreparedStatmentSessionStatus.EOF_FIELDS)==0){
 						this.statusCode |= PreparedStatmentSessionStatus.EOF_FIELDS;
 						return false;
@@ -44,11 +44,11 @@ public class PreparedStatmentExecuteMessageHandler extends PreparedStatmentMessa
 						this.statusCode |= PreparedStatmentSessionStatus.COMPLETED;
 						return true;
 					}
-				}else if(PacketBuffer.isErrorPacket(buffer)){
+				}else if(MysqlPacketBuffer.isErrorPacket(buffer)){
 					this.statusCode |= PreparedStatmentSessionStatus.ERROR;
 					this.statusCode |= PreparedStatmentSessionStatus.COMPLETED;
 					return true;
-				}else if(packetIndex == 0 && PacketBuffer.isOkPacket(buffer)){
+				}else if(packetIndex == 0 && MysqlPacketBuffer.isOkPacket(buffer)){
 					this.statusCode |= PreparedStatmentSessionStatus.OK;
 					this.statusCode |= PreparedStatmentSessionStatus.COMPLETED;
 					return true;

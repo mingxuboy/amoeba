@@ -34,7 +34,7 @@ import com.meidusa.amoeba.mysql.net.MysqlServerConnection;
 import com.meidusa.amoeba.mysql.packet.EOFPacket;
 import com.meidusa.amoeba.mysql.packet.ErrorPacket;
 import com.meidusa.amoeba.mysql.packet.OkPacket;
-import com.meidusa.amoeba.mysql.packet.PacketBuffer;
+import com.meidusa.amoeba.mysql.packet.MysqlPacketBuffer;
 import com.meidusa.amoeba.mysql.packet.QueryCommandPacket;
 import com.meidusa.amoeba.net.Connection;
 import com.meidusa.amoeba.net.MessageHandler;
@@ -104,11 +104,11 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 		public boolean isCompleted(byte[] buffer) {
 			if(this.commandType == QueryCommandPacket.COM_INIT_DB){
 				boolean isCompleted = false; 
-				if(PacketBuffer.isErrorPacket(buffer)){
+				if(MysqlPacketBuffer.isErrorPacket(buffer)){
 					statusCode |= SessionStatus.ERROR;
 					statusCode |= SessionStatus.COMPLETED;
 					isCompleted = true;
-				}else if(PacketBuffer.isOkPacket(buffer)){
+				}else if(MysqlPacketBuffer.isOkPacket(buffer)){
 					statusCode |= SessionStatus.OK;
 					statusCode |= SessionStatus.COMPLETED;
 					isCompleted = true;
@@ -189,11 +189,11 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 					if(currentCommand.getCompletedCount().incrementAndGet() == connStatusMap.size()){
 						if(logger.isDebugEnabled()){
 							Packet packet = null;
-							if(PacketBuffer.isErrorPacket(buffer)){
+							if(MysqlPacketBuffer.isErrorPacket(buffer)){
 								packet = new ErrorPacket();
-							}else if(PacketBuffer.isEofPacket(buffer)){
+							}else if(MysqlPacketBuffer.isEofPacket(buffer)){
 								packet = new EOFPacket();
-							}else if(PacketBuffer.isOkPacket(buffer)){
+							}else if(MysqlPacketBuffer.isOkPacket(buffer)){
 								packet = new OkPacket();
 							}
 							packet.init(buffer);
@@ -403,7 +403,7 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 		}else{
 			
 			if(logger.isDebugEnabled()){
-				if(PacketBuffer.isErrorPacket(message)){
+				if(MysqlPacketBuffer.isErrorPacket(message)){
 					logger.error("connection="+fromConn.hashCode()+",error packet:\n"+StringUtil.dumpAsHex(message, message.length));
 				}
 			}
@@ -647,7 +647,7 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 				return buffers;
 			}
 			if(isSelectQuery){
-				isSelectQuery =isSelectQuery && PacketBuffer.isEofPacket(buffer);
+				isSelectQuery =isSelectQuery && MysqlPacketBuffer.isEofPacket(buffer);
 			}
 		}
 		
@@ -657,7 +657,7 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 			
 			//∑¢ÀÕfield–≈œ¢
 			for(byte[] buffer : buffers){
-				if(PacketBuffer.isEofPacket(buffer)){
+				if(MysqlPacketBuffer.isEofPacket(buffer)){
 					returnList.add(buffer);
 					paketId = buffer[3];
 					break;
@@ -672,13 +672,13 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 				boolean rowStart = false;;
 				for(byte[] buffer : connStatus.buffers){
 					if(!rowStart){
-						if(PacketBuffer.isEofPacket(buffer)){
+						if(MysqlPacketBuffer.isEofPacket(buffer)){
 							rowStart = true;
 						}else{
 							continue;
 						}
 					}else{
-						if(!PacketBuffer.isEofPacket(buffer)){
+						if(!MysqlPacketBuffer.isEofPacket(buffer)){
 							buffer[3] = paketId;
 							paketId += 1;
 							returnList.add(buffer);

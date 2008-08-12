@@ -16,7 +16,7 @@ import org.apache.commons.pool.ObjectPool;
 import org.apache.log4j.Logger;
 
 import com.meidusa.amoeba.mysql.net.MysqlClientConnection;
-import com.meidusa.amoeba.mysql.packet.PacketBuffer;
+import com.meidusa.amoeba.mysql.packet.MysqlPacketBuffer;
 import com.meidusa.amoeba.mysql.packet.QueryCommandPacket;
 import com.meidusa.amoeba.net.Connection;
 
@@ -44,15 +44,15 @@ public class QueryCommandMessageHandler extends CommandMessageHandler{
 		public boolean isCompleted(byte[] buffer) {
 			if(this.commandType == QueryCommandPacket.COM_QUERY){
 				boolean isCompleted = false; 
-				if(PacketBuffer.isErrorPacket(buffer)){
+				if(MysqlPacketBuffer.isErrorPacket(buffer)){
 					statusCode |= SessionStatus.ERROR;
 					statusCode |= SessionStatus.COMPLETED;
 					isCompleted = true;
-				}else if(packetIndex == 0 &&  PacketBuffer.isOkPacket(buffer)){
+				}else if(packetIndex == 0 &&  MysqlPacketBuffer.isOkPacket(buffer)){
 					statusCode |= SessionStatus.OK;
 					statusCode |= SessionStatus.COMPLETED;
 					isCompleted = true;
-				}else if(PacketBuffer.isEofPacket(buffer)){
+				}else if(MysqlPacketBuffer.isEofPacket(buffer)){
 					if((statusCode & SessionStatus.EOF_FIELDS) >0){
 							statusCode |= SessionStatus.EOF_ROWS;
 							statusCode |= SessionStatus.COMPLETED;

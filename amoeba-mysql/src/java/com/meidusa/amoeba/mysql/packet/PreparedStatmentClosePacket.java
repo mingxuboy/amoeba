@@ -20,12 +20,12 @@ import java.io.UnsupportedEncodingException;
  */
 public class PreparedStatmentClosePacket extends CommandPacket {
 	public long statmentId;
-	public void init(PacketBuffer buffer) {
+	public void init(MysqlPacketBuffer buffer) {
 		super.init(buffer);
 		statmentId = buffer.readLong();
 	}
 
-	public void write2Buffer(PacketBuffer buffer) throws UnsupportedEncodingException {
+	public void write2Buffer(MysqlPacketBuffer buffer) throws UnsupportedEncodingException {
 		super.write2Buffer(buffer);
 		buffer.writeLong(statmentId);
 	}

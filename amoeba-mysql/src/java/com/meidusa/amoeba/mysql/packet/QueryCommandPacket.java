@@ -75,14 +75,14 @@ import com.meidusa.amoeba.mysql.context.MysqlProxyRuntimeContext;
 public class QueryCommandPacket extends CommandPacket {
 	public String arg;
 	
-	public void init(PacketBuffer buffer) {
+	public void init(MysqlPacketBuffer buffer) {
 		super.init(buffer);
 		MysqlProxyRuntimeContext context = ((MysqlProxyRuntimeContext)MysqlProxyRuntimeContext.getInstance());
 		String charset = context.getServerCharset();
 		arg	= (charset == null?buffer.readString():buffer.readString(charset));
 	}
 
-	public void write2Buffer(PacketBuffer buffer) throws UnsupportedEncodingException {
+	public void write2Buffer(MysqlPacketBuffer buffer) throws UnsupportedEncodingException {
 		super.write2Buffer(buffer);
 		buffer.writeString(arg);
 	}

@@ -25,7 +25,7 @@ public class LongDataPacket extends AbstractPacket {
 	public int type;
 	public byte[] data;
 	
-	public void init(PacketBuffer buffer) {
+	public void init(MysqlPacketBuffer buffer) {
 		super.init(buffer);
 		code = buffer.readByte();
 		statementId = buffer.readLong();
@@ -34,7 +34,7 @@ public class LongDataPacket extends AbstractPacket {
 		data = buffer.getBytes(buffer.getPosition(), buffer.getBufLength() - buffer.getPosition());
 	}
 	
-	protected void write2Buffer(PacketBuffer buffer) throws UnsupportedEncodingException {
+	protected void write2Buffer(MysqlPacketBuffer buffer) throws UnsupportedEncodingException {
 		super.write2Buffer(buffer);
 		buffer.writeByte(code);
 		buffer.writeLong(statementId);

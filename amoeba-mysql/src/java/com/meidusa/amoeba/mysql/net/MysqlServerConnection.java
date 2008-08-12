@@ -26,7 +26,7 @@ import com.meidusa.amoeba.mysql.io.MySqlPacketConstant;
 import com.meidusa.amoeba.mysql.packet.AuthenticationPacket;
 import com.meidusa.amoeba.mysql.packet.ErrorPacket;
 import com.meidusa.amoeba.mysql.packet.HandshakePacket;
-import com.meidusa.amoeba.mysql.packet.PacketBuffer;
+import com.meidusa.amoeba.mysql.packet.MysqlPacketBuffer;
 import com.meidusa.amoeba.mysql.util.CharsetMapping;
 import com.meidusa.amoeba.mysql.util.Security;
 import com.meidusa.amoeba.net.Connection;
@@ -69,8 +69,8 @@ public class MysqlServerConnection extends MysqlConnection implements MySqlPacke
 			 * 第二次数据为 OkPacket packet or ErrorPacket 
 			 * 
 			 */
-			PacketBuffer buffer = new PacketBuffer(message);
-			if(PacketBuffer.isErrorPacket(message)){
+			MysqlPacketBuffer buffer = new MysqlPacketBuffer(message);
+			if(MysqlPacketBuffer.isErrorPacket(message)){
 				setAuthenticated(false);
 				ErrorPacket error = new ErrorPacket();
 				error.init(message);
@@ -109,7 +109,7 @@ public class MysqlServerConnection extends MysqlConnection implements MySqlPacke
 				status = Status.AUTHING;
 				this.postMessage(authing.toByteBuffer().array());
 			}else if(status == Status.AUTHING){
-				if(PacketBuffer.isOkPacket(message)){
+				if(MysqlPacketBuffer.isOkPacket(message)){
 					setAuthenticated(true);
 					return;
 				}

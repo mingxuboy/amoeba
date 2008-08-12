@@ -82,7 +82,7 @@ public class AuthenticationPacket extends AbstractPacket{
 	
 	public String database;
 
-	public void init(PacketBuffer buffer) {
+	public void init(MysqlPacketBuffer buffer) {
 		super.init(buffer);
 		clientParam 	= buffer.readLong();
 		maxThreeBytes 	= buffer.readLong();
@@ -130,7 +130,7 @@ public class AuthenticationPacket extends AbstractPacket{
 		}*/
 	}
 
-	public void write2Buffer(PacketBuffer buffer) throws UnsupportedEncodingException{
+	public void write2Buffer(MysqlPacketBuffer buffer) throws UnsupportedEncodingException{
 		super.write2Buffer(buffer);
 		buffer.writeLong(clientParam);
 		buffer.writeLong(maxThreeBytes);

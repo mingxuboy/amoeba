@@ -94,7 +94,7 @@ public class ExecutePacket extends CommandPacket {
 				| ((long) (b[position++] & 0xff) << 24);
 	}
 	
-	public void init(PacketBuffer buffer){
+	public void init(MysqlPacketBuffer buffer){
 		super.init(buffer);
 		statementId = buffer.readLong();
 		flags = buffer.readByte();
@@ -130,7 +130,7 @@ public class ExecutePacket extends CommandPacket {
 		}
 	}
 	
-	private void readBindValue(PacketBuffer packet, BindValue bindValue) {
+	private void readBindValue(MysqlPacketBuffer packet, BindValue bindValue) {
 
 		//
 		// Handle primitives first
@@ -222,7 +222,7 @@ public class ExecutePacket extends CommandPacket {
 	 * @throws SQLException
 	 *             DOCUMENT ME!
 	 */
-	private void storeBinding(PacketBuffer packet, BindValue bindValue){
+	private void storeBinding(MysqlPacketBuffer packet, BindValue bindValue){
 			Object value = bindValue.value;
 
 			//
@@ -275,7 +275,7 @@ public class ExecutePacket extends CommandPacket {
 	}
 			
 	
-	private void storeDateTime(PacketBuffer intoBuf, Date dt) {
+	private void storeDateTime(MysqlPacketBuffer intoBuf, Date dt) {
 		Calendar sessionCalendar = (Calendar)ThreadLocalMap.get(StaticString.CALENDAR);
 		java.util.Date oldTime = sessionCalendar.getTime();
 		try {
@@ -327,7 +327,7 @@ public class ExecutePacket extends CommandPacket {
 		}
 	}
 
-	private void storeTime(PacketBuffer intoBuf, Time tm){
+	private void storeTime(MysqlPacketBuffer intoBuf, Time tm){
 		
 		intoBuf.ensureCapacity(9);
 		intoBuf.writeByte((byte) 8); // length
@@ -346,7 +346,7 @@ public class ExecutePacket extends CommandPacket {
 		}
 	}
 	
-	protected Time readTime(PacketBuffer intoBuf){
+	protected Time readTime(MysqlPacketBuffer intoBuf){
 		intoBuf.readByte();
 		intoBuf.readByte();
 		intoBuf.readLong();
@@ -358,7 +358,7 @@ public class ExecutePacket extends CommandPacket {
 		return new Time(cal.getTimeInMillis());
 	}
 	
-	protected Date readDate(PacketBuffer intoBuf){
+	protected Date readDate(MysqlPacketBuffer intoBuf){
 		byte length = intoBuf.readByte(); // length
 		int year = intoBuf.readInt();
 		byte month = intoBuf.readByte();
@@ -381,7 +381,7 @@ public class ExecutePacket extends CommandPacket {
 	}
 	
 	
-	public void write2Buffer(PacketBuffer buffer) throws UnsupportedEncodingException {
+	public void write2Buffer(MysqlPacketBuffer buffer) throws UnsupportedEncodingException {
 		super.write2Buffer(buffer);
 		buffer.writeLong(statementId);
 		buffer.writeByte(flags);

@@ -16,7 +16,7 @@ import org.apache.log4j.Logger;
 import com.meidusa.amoeba.mysql.filter.FilterInvocation.Result;
 import com.meidusa.amoeba.mysql.handler.MySqlCommandDispatcher;
 import com.meidusa.amoeba.mysql.packet.OkPacket;
-import com.meidusa.amoeba.mysql.packet.PacketBuffer;
+import com.meidusa.amoeba.mysql.packet.MysqlPacketBuffer;
 import com.meidusa.amoeba.mysql.packet.QueryCommandPacket;
 
 /**
@@ -29,11 +29,11 @@ public class PacketIOFilter extends  AbstractIOFilter {
 
 	@Override
 	protected Result packetFilter(byte[] message) {
-		if(PacketBuffer.isPacketType(message, QueryCommandPacket.COM_QUIT)){
+		if(MysqlPacketBuffer.isPacketType(message, QueryCommandPacket.COM_QUIT)){
 			return Result.QUIT;
-		}else if(PacketBuffer.isPacketType(message, QueryCommandPacket.COM_STMT_CLOSE)){
+		}else if(MysqlPacketBuffer.isPacketType(message, QueryCommandPacket.COM_STMT_CLOSE)){
 			return Result.RETURN;
-		}else if(PacketBuffer.isPacketType(message, QueryCommandPacket.COM_PING)){
+		}else if(MysqlPacketBuffer.isPacketType(message, QueryCommandPacket.COM_PING)){
 			OkPacket ok = new OkPacket();
 			ok.affectedRows = 0;
 			ok.insertId = 0;

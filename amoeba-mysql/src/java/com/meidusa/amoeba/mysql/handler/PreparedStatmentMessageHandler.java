@@ -26,7 +26,7 @@ import com.meidusa.amoeba.mysql.net.MysqlClientConnection;
 import com.meidusa.amoeba.mysql.net.MysqlServerConnection;
 import com.meidusa.amoeba.mysql.packet.CommandPacket;
 import com.meidusa.amoeba.mysql.packet.OKforPreparedStatementPacket;
-import com.meidusa.amoeba.mysql.packet.PacketBuffer;
+import com.meidusa.amoeba.mysql.packet.MysqlPacketBuffer;
 import com.meidusa.amoeba.mysql.packet.PreparedStatmentClosePacket;
 import com.meidusa.amoeba.mysql.packet.QueryCommandPacket;
 import com.meidusa.amoeba.net.Connection;
@@ -54,7 +54,7 @@ public class PreparedStatmentMessageHandler extends QueryCommandMessageHandler{
 		@Override
 		public boolean isCompleted(byte[] buffer) {
 			if(this.commandType == QueryCommandPacket.COM_STMT_PREPARE){
-				if(PacketBuffer.isEofPacket(buffer)){
+				if(MysqlPacketBuffer.isEofPacket(buffer)){
 					if(preparedStatmentInfo.getOkPrepared().parameters>0 && preparedStatmentInfo.getOkPrepared().columns >0){
 						if((this.statusCode & PreparedStatmentSessionStatus.PREPAED_PARAMETER_EOF) >0){
 							this.statusCode |=  PreparedStatmentSessionStatus.PREPAED_FIELD_EOF;
@@ -70,11 +70,11 @@ public class PreparedStatmentMessageHandler extends QueryCommandMessageHandler{
 						return true;
 					}
 					
-				}else if(PacketBuffer.isErrorPacket(buffer)){
+				}else if(MysqlPacketBuffer.isErrorPacket(buffer)){
 					this.statusCode |=  PreparedStatmentSessionStatus.ERROR;
 					this.statusCode |=  PreparedStatmentSessionStatus.COMPLETED;
 					return true;
-				}else if(packetIndex == 0 && PacketBuffer.isOkPacket(buffer)){
+				}else if(packetIndex == 0 && MysqlPacketBuffer.isOkPacket(buffer)){
 					if(!preparedStatmentInfo.isReady()){
 						OKforPreparedStatementPacket ok = new OKforPreparedStatementPacket();
 						ok.init(buffer);
@@ -91,7 +91,7 @@ public class PreparedStatmentMessageHandler extends QueryCommandMessageHandler{
 				}
 				return false;
 			}else if(this.commandType == QueryCommandPacket.COM_STMT_CLOSE){
-				if(PacketBuffer.isErrorPacket(buffer)){
+				if(MysqlPacketBuffer.isErrorPacket(buffer)){
 					this.statusCode |=  PreparedStatmentSessionStatus.ERROR;
 					this.statusCode |=  PreparedStatmentSessionStatus.COMPLETED;
 					return true;
@@ -145,7 +145,7 @@ public class PreparedStatmentMessageHandler extends QueryCommandMessageHandler{
 	protected void dispatchMessageTo(Connection toConn,byte[] message){
 		if(toConn == source){
 			if(commandType == QueryCommandPacket.COM_STMT_PREPARE){
-				if(PacketBuffer.isOkPacket(message)){
+				if(MysqlPacketBuffer.isOkPacket(message)){
 					//替换statmentId 为 proxy statment id 发送到mysql客户端
 					OKforPreparedStatementPacket ok = new OKforPreparedStatementPacket();
 					ok.init(message);
