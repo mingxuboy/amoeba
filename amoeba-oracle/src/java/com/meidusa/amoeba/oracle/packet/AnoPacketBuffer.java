@@ -23,13 +23,13 @@ public class AnoPacketBuffer implements PackeBuffer{
         buffer = new byte[buf.length + 1];
         System.arraycopy(buf, 0, buffer, 0, buf.length);
         length = buf.length;
-        position = OraclePacketConstant.HEADER_SIZE;
+        position = OraclePacketConstant.DATA_OFFSET;
     }
 
     public AnoPacketBuffer(int size) {
 		this.buffer = new byte[size];
 		setPacketLength(this.buffer.length);
-		this.position = OraclePacketConstant.HEADER_SIZE;
+		this.position = OraclePacketConstant.DATA_OFFSET;
 	}
 
     /**
