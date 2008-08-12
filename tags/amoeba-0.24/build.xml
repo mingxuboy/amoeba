@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="GB2312"?>
+<project default="dist" name="AmoebaBuilder" basedir="." xmlns:artifact="urn:maven-artifact-ant">
+  	<property name="version"     value="0.24"/>
+  	<property name="app.name"     value="amoeba"/>
+  	<property name="deploy.dir"   value="dist"/>
+  	<property name="savedoc.dir"  value="docs"/>
+  	<property name="javadoc.home" value="${deploy.dir}/document"/>
+  	<property name="classes.dir"  value="${deploy.dir}/classes"/>
+  	<property name="libs.dir"     value="build/etc/lib"/>
+  	<property name="release.dir" value="release"/>
+  	
+  <property name="projects.dir"   value="."/>
+  <property name="projects" 	 value="amoeba,amoeba-mysql"/>
+  	
+  <import file="build/etc/build-support.xml"/>
+
+  <filelist dir="." id="dist.libs">
+    <file name="build/etc/lib/classworlds-1.0.jar"/>
+    <file name="build/etc/lib/commons-collections-3.1.jar"/>
+    <file name="build/etc/lib/commons-lang-2.1.jar"/>
+    <file name="build/etc/lib/commons-logging-1.1.jar"/>
+    <file name="build/etc/lib/commons-pool-1.4.jar"/>
+    <file name="build/etc/lib/junit-4.3.jar"/>
+    <file name="build/etc/lib/log4j-1.2.12.jar"/>
+  </filelist>
+  
+  <filelist dir="." id="bin.files">
+    <file name="build/bin/amoeba"/>
+    <file name="build/bin/amoeba.bat"/>
+    <file name="build/bin/amoeba-mysql.classworlds"/>
+  </filelist>
+  
+  <filelist dir="." id="etc.files">
+    <file name="build/LICENSE.txt"/>
+    <file name="build/README.html"/>
+  </filelist>
+  
+  <filelist dir="." id="doc.files">
+    <file name="build/doc/amoeba.pdf"/>
+  </filelist>
+  
+  <filelist dir="." id="conf.files">
+	<file name="build/conf/access_list.conf"/>
+  	<file name="build/conf/access_list.conf"/>
+	<file name="build/conf/amoeba.dtd"/>
+	<file name="build/conf/amoeba.xml"/>
+	<file name="build/conf/function.dtd"/>
+	<file name="build/conf/functionMap.xml"/>
+	<file name="build/conf/log4j.dtd"/>
+	<file name="build/conf/log4j.xml"/>
+	<file name="build/conf/rule.dtd"/>
+	<file name="build/conf/rule.xml"/>
+	<file name="build/conf/ruleFunctionMap.xml"/>	
+  </filelist>
+	
+  <path id="classpath">
+	<pathelement location="${classes.dir}"/>
+	<fileset dir="${libs.dir}" includes="**/*.jar"/>
+  </path>
+  	
+  <target name="distclean">
+	<delete dir="${deploy.dir}"/>
+  </target>
+  
+  <!-- prepares the build directories -->
+  <target name="prepare">
+    <mkdir dir="${deploy.dir}"/>
+    <mkdir dir="${deploy.dir}/classes"/>
+    <mkdir dir="${deploy.dir}/bin"/>
+    <mkdir dir="${deploy.dir}/lib"/>
+    <mkdir dir="${deploy.dir}/lib/classes"/>
+    <mkdir dir="${deploy.dir}/doc"/>
+
+    <!-- Copy all the libs we depend on. -->
+    <copyfilelist dest="${deploy.dir}/lib">
+      <filelist refid="dist.libs"/>
+    </copyfilelist>
+    <copyfilelist dest="${deploy.dir}/bin">
+      <filelist refid="bin.files"/>
+    </copyfilelist>
+    <copyfilelist dest="${deploy.dir}">
+      <filelist refid="etc.files"/>
+    </copyfilelist>
+        <copyfilelist dest="${deploy.dir}/doc">
+      <filelist refid="doc.files"/>
+    </copyfilelist>
+    <copyfilelist dest="${deploy.dir}/conf">
+      <filelist refid="conf.files"/>
+    </copyfilelist>
+  </target>
+  
+  <target name="compile" depends="prepare">
+    <javac srcdir="src/java" destdir="${classes.dir}" includeAntRuntime="false"
+           debug="on" optimize="{$build.optimize}" deprecation="on"
+           source="1.5" target="1.5">
+      <classpath refid="classpath"/>
+    <!--
+      <compilerarg value="-Xlint:unchecked"/>
+      -->
+    </javac>
+   </target>
+    
+	<target name="server" description="Amoeba for Mysql" depends="compile">
+        <java classname="com.meidusa.amoeba.mysql.server.MysqlProxyServer" fork="true" maxmemory="128m">
+        <sysproperty key="amoeba.home" value="${basedir}"/>
+         <classpath>
+			<fileset dir="lib">
+				<include name="**/*.jar"/>
+				<include name="classes"/>
+				<exclude name="amoeba-*.jar"/>
+			</fileset>
+         	<pathelement path="target/classes"/>
+         </classpath>
+       </java>
+	</target>
+
+   <target name="dist" depends="distclean,prepare,distcleanprojects,distprojects">
+   		
+	    <tar longfile="gnu" destfile="amoeba-mysql-${version}.tar.gz" compression="gzip">
+		    <tarfileset dir="${deploy.dir}" mode="755">
+		        <include name="bin/**"/>
+		    	<exclude name="*/.svn/*"/>
+		    </tarfileset>
+	    	
+		    <tarfileset dir="${deploy.dir}">
+		        <include name="lib/**"/>
+		    	<include name="doc/**"/>
+		    	<include name="conf/**"/>
+		    	<include name="src/**"/>
+		    	<exclude name="*/.svn/*"/>
+		    	<exclude name="bin/*"/>
+		    	<include name="*.*"/>
+		    </tarfileset>
+	    </tar>
+		
+		<zip destfile="amoeba-mysql-${version}.zip">
+		    <zipfileset dir="${deploy.dir}">
+		        <include name="bin/**"/>
+		    	<exclude name="*/.svn/*"/>
+		    </zipfileset>
+	    	
+		    <zipfileset dir="${deploy.dir}">
+		        <include name="lib/**"/>
+		    	<include name="doc/**"/>
+		    	<include name="conf/**"/>
+		    	<include name="src/**"/>
+		    	<exclude name="*/.svn/*"/>
+		    	<exclude name="bin/*"/>
+		    	<include name="*.*"/>
+		    </zipfileset>
+	    </zip>
+   </target>
+</project>
