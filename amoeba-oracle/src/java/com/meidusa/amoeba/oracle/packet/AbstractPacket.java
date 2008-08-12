@@ -109,7 +109,7 @@ public class AbstractPacket implements Packet,OraclePacketConstant {
 	
 	public AnoPacketBuffer toBuffer() throws UnsupportedEncodingException{
 		int bufferSize = calculatePacketSize();
-		bufferSize = (bufferSize<DATA_OFFSET?DATA_OFFSET:bufferSize);
+		bufferSize = (bufferSize<(DATA_OFFSET+1)?(DATA_OFFSET+1):bufferSize);
 		AnoPacketBuffer buffer = new AnoPacketBuffer(bufferSize);
 		return toBuffer(buffer);
 	}
