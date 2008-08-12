@@ -16,27 +16,22 @@ public class AnoClientDataPacket extends DataPacket implements AnoServices {
     short                 h;
     AnoService[]          anoService;
 
-    @Override
-    public void init(byte[] buffer) {
-        super.init(buffer);
-
-        AnoPacketBuffer ano = new AnoPacketBuffer(buffer);
-        ano.setPosition(pktOffset);
-
-        if (ano.readUB4() != NA_MAGIC) {
+    protected void init(AnoPacketBuffer buffer){
+    	super.init(buffer);
+    	if (buffer.readUB4() != NA_MAGIC) {
             throw new RuntimeException("Wrong Magic number in na packet");
         }
-        m = ano.readUB2();
-        version = ano.readUB4();
-        anoServiceSize = ano.readUB2();
-        h = ano.readUB1();
+        m = buffer.readUB2();
+        version = buffer.readUB4();
+        anoServiceSize = buffer.readUB2();
+        h = buffer.readUB1();
 
         anoService = new AnoService[anoServiceSize];
         try {
             String pkgPrefix = "com.meidusa.amoeba.oracle.packet.";
             for (int i = 0; i < SERV_INORDER_CLASSNAME.length; i++) {
                 anoService[i] = (AnoService) Class.forName(pkgPrefix + SERV_INORDER_CLASSNAME[i]).newInstance();
-                anoService[i].setAno(ano);
+                anoService[i].setAno(buffer);
                 anoService[i].readClient();
             }
         } catch (Exception e) {
@@ -47,7 +42,7 @@ public class AnoClientDataPacket extends DataPacket implements AnoServices {
             logger.debug(this.toString());
         }
     }
-
+    
     public AnoService[] getAnoService() {
         return anoService;
     }

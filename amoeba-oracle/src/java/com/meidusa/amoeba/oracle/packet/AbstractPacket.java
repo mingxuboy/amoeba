@@ -38,7 +38,7 @@ import com.meidusa.amoeba.oracle.io.OraclePacketConstant;
  */
 public class AbstractPacket implements Packet,OraclePacketConstant {
 
-    protected byte buffer[];
+    //protected byte buffer[];
     protected int  length;
     protected byte type;
     protected byte flags;
@@ -48,12 +48,16 @@ public class AbstractPacket implements Packet,OraclePacketConstant {
     protected int  headerCheckSum;
 
     public void init(byte[] buffer) {
-        this.buffer = buffer;
-        length = buffer[0] & 0xff;
-        length <<= 8;
-        length |= buffer[1] & 0xff;
-        type = buffer[4];
-        flags = buffer[5];
+        //this.buffer = buffer;
+        init(new AnoPacketBuffer(buffer));
+    }
+    
+    protected void init(AnoPacketBuffer buffer){
+    	length = buffer.readUB2();
+    	packetCheckSum = buffer.readUB2();
+    	type = (byte)(buffer.readUB1()& 0xff);
+    	flags = (byte)(buffer.readUB1()& 0xff);
+    	headerCheckSum = buffer.readUB2();
     }
 
     /**
@@ -85,12 +89,15 @@ public class AbstractPacket implements Packet,OraclePacketConstant {
 	}
 	
 	/**
-	 * 将该packet写入到buffer中，该buffer中包含4个字节的包头，写完以后将计算buffer包头值
 	 * @param buffer 用于输入输出的缓冲
 	 * @throws UnsupportedEncodingException 当String to bytes发生编码不支持的时候
 	 */
 	protected void write2Buffer(AnoPacketBuffer buffer) throws UnsupportedEncodingException {
-		
+		buffer.writeUB2(length);
+		buffer.writeUB2(packetCheckSum);
+		buffer.writeUB1(type);
+		buffer.writeUB1(flags);
+		buffer.writeUB2(headerCheckSum);
 	}
 
 	/**
