@@ -26,15 +26,15 @@ public class ConnectPacket extends AbstractPacket {
         dataLen = buffer[24] & 0xff;
         dataLen <<= 8;
         dataLen |= buffer[25] & 0xff;
-        if (buffer[32] == 1 && buffer[33] == 1) {
-            anoEnabled = true;
-        } else {
+        if (buffer[32] == 4 && buffer[33] == 4) {
             anoEnabled = false;
+        } else {
+            anoEnabled = true;
         }
-
+        int dataOffSet = buffer[27];
         if (dataLen > 0) {
             data = new byte[dataLen];
-            System.arraycopy(buffer, 34, data, 0, data.length);
+            System.arraycopy(buffer, dataOffSet, data, 0, data.length);
         }
 
         if (logger.isDebugEnabled()) {

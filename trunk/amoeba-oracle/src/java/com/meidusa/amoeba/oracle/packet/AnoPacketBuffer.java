@@ -1,6 +1,9 @@
 package com.meidusa.amoeba.oracle.packet;
 
+import java.nio.ByteBuffer;
+
 import com.meidusa.amoeba.oracle.io.OraclePacketConstant;
+import com.meidusa.amoeba.packet.PackeBuffer;
 
 /**
  * Ano数据包,buffer的读写和解析。
@@ -8,7 +11,7 @@ import com.meidusa.amoeba.oracle.io.OraclePacketConstant;
  * @author hexianmao
  * @version 2008-8-7 下午05:17:56
  */
-public class AnoPacketBuffer {
+public class AnoPacketBuffer implements PackeBuffer{
 
     private int    length   = 0;
 
@@ -23,11 +26,28 @@ public class AnoPacketBuffer {
         position = OraclePacketConstant.HEADER_SIZE;
     }
 
-    public int getLength() {
+    public AnoPacketBuffer(int size) {
+		this.buffer = new byte[size];
+		setPacketLength(this.buffer.length);
+		this.position = OraclePacketConstant.HEADER_SIZE;
+	}
+
+    /**
+     * 将从0当到前位置的所有字节写入到 ByteBuffer中,并且将 ByteBuffer position设置到0
+	 * @return
+	 */
+	public ByteBuffer toByteBuffer(){
+		ByteBuffer buffer = ByteBuffer.allocate(this.getPacketLength());
+		buffer.put(this.buffer,0,this.getPacketLength());
+		buffer.rewind();
+		return buffer;
+	}
+    
+    public int getPacketLength() {
         return length;
     }
 
-    public void setLength(int length) {
+    public void setPacketLength(int length) {
         this.length = length;
     }
 
@@ -299,9 +319,9 @@ public class AnoPacketBuffer {
      * 增加buffer长度
      */
     private void ensureCapacity(int len) {
-        if ((position + len) > getLength()) {
+        if ((position + len) > getPacketLength()) {
             if ((position + len) < buffer.length) {
-                setLength(buffer.length);
+                setPacketLength(buffer.length);
             } else {
                 int newLength = (int) (buffer.length * 1.25);
 
@@ -312,9 +332,13 @@ public class AnoPacketBuffer {
                 byte[] newBytes = new byte[newLength];
                 System.arraycopy(buffer, 0, newBytes, 0, buffer.length);
                 buffer = newBytes;
-                setLength(buffer.length);
+                setPacketLength(buffer.length);
             }
         }
     }
+
+	public void writeByte(byte b) {
+		buffer[position++] = b;
+	}
 
 }

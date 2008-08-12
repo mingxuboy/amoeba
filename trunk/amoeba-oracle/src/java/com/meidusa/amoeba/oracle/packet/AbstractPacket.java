@@ -1,6 +1,11 @@
 package com.meidusa.amoeba.oracle.packet;
 
+import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
+
+import org.apache.commons.lang.builder.ToStringBuilder;
+
+import com.meidusa.amoeba.oracle.io.OraclePacketConstant;
 
 /**
  * <pre>
@@ -31,7 +36,7 @@ import java.nio.ByteBuffer;
  * 
  * @author struct
  */
-public class AbstractPacket implements Packet {
+public class AbstractPacket implements Packet,OraclePacketConstant {
 
     protected byte buffer[];
     protected int  length;
@@ -51,11 +56,78 @@ public class AbstractPacket implements Packet {
         flags = buffer[5];
     }
 
-    public ByteBuffer toByteBuffer() {
-        if (buffer == null) {
+    /**
+	 * 将数据包转化成ByteBuffer
+	 * @return
+	 */
+	public ByteBuffer toByteBuffer(){
+		try {
+			return toBuffer().toByteBuffer();
+		} catch (UnsupportedEncodingException e) {
+			return null;
+		}
+	}
 
-        }
-        return null;
-    }
+    /**
+	 * 写完之后一定需要调用这个方法，buffer的指针位置指向末尾的下一个位置（包总长度位置）。
+	 * @param buffer
+	 */
+	protected void afterPacketWritten(AnoPacketBuffer buffer){
+		int position = buffer.getPosition();
+		int packetLength = position;
+		buffer.setPosition(0);
+		buffer.writeByte((byte)(packetLength/ 256));
+		buffer.writeByte((byte)(packetLength % 256));
+		buffer.setPosition(4);
+		buffer.writeByte(type);
+		buffer.writeByte(flags);
+		buffer.setPosition(position);
+	}
+	
+	/**
+	 * 将该packet写入到buffer中，该buffer中包含4个字节的包头，写完以后将计算buffer包头值
+	 * @param buffer 用于输入输出的缓冲
+	 * @throws UnsupportedEncodingException 当String to bytes发生编码不支持的时候
+	 */
+	protected void write2Buffer(AnoPacketBuffer buffer) throws UnsupportedEncodingException {
+		
+	}
 
+	/**
+	 * 该方法调用了{@link #write2Buffer(PacketBuffer)} 写入到指定的buffer，并且调用了{@link #afterPacketWritten(PacketBuffer)}
+	 */
+	public AnoPacketBuffer toBuffer(AnoPacketBuffer buffer) throws UnsupportedEncodingException {
+		write2Buffer(buffer);
+		afterPacketWritten(buffer);
+		return buffer;
+	}
+	
+	public AnoPacketBuffer toBuffer() throws UnsupportedEncodingException{
+		int bufferSize = calculatePacketSize();
+		bufferSize = (bufferSize<5?5:bufferSize);
+		AnoPacketBuffer buffer = new AnoPacketBuffer(bufferSize);
+		return toBuffer(buffer);
+	}
+	
+	/**
+	 * 估算packet的大小，估算的太大浪费内存，估算的太小会影响性能
+	 * @return
+	 */
+	protected int calculatePacketSize(){
+		return HEADER_SIZE + 1;
+	}
+	
+	public String toString(){
+		return ToStringBuilder.reflectionToString(this);
+	}
+	
+	
+	public  Object clone(){
+		try {
+			return (AbstractPacket)super.clone();
+		} catch (CloneNotSupportedException e) {
+			//逻辑上面不会发生不支持情况
+			return null;
+		}
+	}
 }
