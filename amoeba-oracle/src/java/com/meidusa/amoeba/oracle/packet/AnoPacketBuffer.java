@@ -11,7 +11,7 @@ import com.meidusa.amoeba.packet.PackeBuffer;
  * @author hexianmao
  * @version 2008-8-7 下午05:17:56
  */
-public class AnoPacketBuffer implements PackeBuffer ,OraclePacketConstant{
+public class AnoPacketBuffer implements PackeBuffer, OraclePacketConstant {
 
     private int    length   = 0;
 
@@ -22,27 +22,28 @@ public class AnoPacketBuffer implements PackeBuffer ,OraclePacketConstant{
     public AnoPacketBuffer(byte[] buf){
         buffer = new byte[buf.length + 1];
         System.arraycopy(buf, 0, buffer, 0, buf.length);
-        length = buf.length;
+        setPacketLength(buffer.length);
         position = 0;
     }
 
-    public AnoPacketBuffer(int size) {
-		this.buffer = new byte[size];
-		setPacketLength(this.buffer.length);
-		this.position = 0;
-	}
+    public AnoPacketBuffer(int size){
+        this.buffer = new byte[size];
+        setPacketLength(this.buffer.length);
+        this.position = 0;
+    }
 
     /**
      * 将从0当到前位置的所有字节写入到 ByteBuffer中,并且将 ByteBuffer position设置到0
-	 * @return
-	 */
-	public ByteBuffer toByteBuffer(){
-		ByteBuffer buffer = ByteBuffer.allocate(this.getPacketLength());
-		buffer.put(this.buffer,0,this.getPacketLength());
-		buffer.rewind();
-		return buffer;
-	}
-    
+     * 
+     * @return
+     */
+    public ByteBuffer toByteBuffer() {
+        ByteBuffer buffer = ByteBuffer.allocate(this.getPacketLength());
+        buffer.put(this.buffer, 0, this.getPacketLength());
+        buffer.rewind();
+        return buffer;
+    }
+
     public int getPacketLength() {
         return length;
     }
@@ -245,29 +246,24 @@ public class AnoPacketBuffer implements PackeBuffer ,OraclePacketConstant{
     }
 
     private void check(int k, int l) {
-        if (l < 0 || l > 7)
-            throw new RuntimeException("Invalid NA packet type received");
+        if (l < 0 || l > 7) throw new RuntimeException("Invalid NA packet type received");
         switch (l) {
             case 0:
             case 1:
                 break;
             case 2:
-                if (k > 1)
-                    throw new RuntimeException("Invalid length for an NA type");
+                if (k > 1) throw new RuntimeException("Invalid length for an NA type");
                 break;
             case 3:
             case 6:
-                if (k > 2)
-                    throw new RuntimeException("Invalid length for an NA type");
+                if (k > 2) throw new RuntimeException("Invalid length for an NA type");
                 break;
             case 4:
             case 5:
-                if (k > 4)
-                    throw new RuntimeException("Invalid length for an NA type");
+                if (k > 4) throw new RuntimeException("Invalid length for an NA type");
                 break;
             case 7:
-                if (k < 10)
-                    throw new RuntimeException("Invalid length for an NA type");
+                if (k < 10) throw new RuntimeException("Invalid length for an NA type");
                 break;
             default:
                 throw new RuntimeException("Invalid NA packet type received");
@@ -337,8 +333,8 @@ public class AnoPacketBuffer implements PackeBuffer ,OraclePacketConstant{
         }
     }
 
-	public void writeByte(byte b) {
-		buffer[position++] = b;
-	}
+    public void writeByte(byte b) {
+        buffer[position++] = b;
+    }
 
 }

@@ -14,6 +14,7 @@ public class AnoServerDataPacket extends DataPacket implements AnoServices {
     long                  version;
     int                   anoServiceSize;
     short                 h;
+
     AnoService[]          anoService;
 
     public void setAnoService(AnoService[] service) {
@@ -23,9 +24,9 @@ public class AnoServerDataPacket extends DataPacket implements AnoServices {
         }
     }
 
-    protected void init(AnoPacketBuffer buffer){
-    	super.init(buffer);
-    	if (buffer.readUB4() != DEADBEEF) {
+    protected void init(AnoPacketBuffer buffer) {
+        super.init(buffer);
+        if (buffer.readUB4() != DEADBEEF) {
             throw new RuntimeException("Wrong Magic number in na packet");
         }
         m = buffer.readUB2();
@@ -33,11 +34,11 @@ public class AnoServerDataPacket extends DataPacket implements AnoServices {
         anoServiceSize = buffer.readUB2();
         h = buffer.readUB1();
 
-        // c
+        // // c
         // AnoService service = new AnoService();
         // for (int i = 0; i < anoServiceSize; i++) {
-        // //service.readServer();
-        // //anoService[service.service].b(service);
+        // service.readServer();
+        // anoService[service.service].b(service);
         // }
         //
         // // f
@@ -48,7 +49,7 @@ public class AnoServerDataPacket extends DataPacket implements AnoServices {
         if (logger.isDebugEnabled()) {
             logger.debug(this.toString());
         }
-    	
+
     }
 
     public String toString() {
