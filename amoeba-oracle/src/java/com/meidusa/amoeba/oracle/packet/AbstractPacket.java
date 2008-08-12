@@ -114,7 +114,7 @@ public class AbstractPacket implements Packet,OraclePacketConstant {
 	 * @return
 	 */
 	protected int calculatePacketSize(){
-		return HEADER_SIZE + 1;
+		return DATA_OFFSET + 1;
 	}
 	
 	public String toString(){
