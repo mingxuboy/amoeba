@@ -23,21 +23,15 @@ public class AnoServerDataPacket extends DataPacket implements AnoServices {
         }
     }
 
-    @Override
-    public void init(byte[] buffer) {
-        super.init(buffer);
-
-        AnoPacketBuffer ano = new AnoPacketBuffer(buffer);
-        ano.setPosition(pktOffset);
-
-        // g
-        if (ano.readUB4() != DEADBEEF) {
+    protected void init(AnoPacketBuffer buffer){
+    	super.init(buffer);
+    	if (buffer.readUB4() != DEADBEEF) {
             throw new RuntimeException("Wrong Magic number in na packet");
         }
-        m = ano.readUB2();
-        version = ano.readUB4();
-        anoServiceSize = ano.readUB2();
-        h = ano.readUB1();
+        m = buffer.readUB2();
+        version = buffer.readUB4();
+        anoServiceSize = buffer.readUB2();
+        h = buffer.readUB1();
 
         // c
         // AnoService service = new AnoService();
@@ -54,6 +48,7 @@ public class AnoServerDataPacket extends DataPacket implements AnoServices {
         if (logger.isDebugEnabled()) {
             logger.debug(this.toString());
         }
+    	
     }
 
     public String toString() {
