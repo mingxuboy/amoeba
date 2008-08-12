@@ -78,11 +78,11 @@ public class AbstractPacket implements Packet,OraclePacketConstant {
 		int position = buffer.getPosition();
 		int packetLength = position;
 		buffer.setPosition(0);
-		buffer.writeByte((byte)(packetLength/ 256));
-		buffer.writeByte((byte)(packetLength % 256));
-		buffer.setPosition(4);
+		buffer.writeUB2(packetLength);
+		buffer.writeUB2(packetCheckSum);
 		buffer.writeByte(type);
 		buffer.writeByte(flags);
+		buffer.writeUB2(headerCheckSum);
 		buffer.setPosition(position);
 	}
 	
