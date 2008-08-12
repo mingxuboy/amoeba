@@ -3,6 +3,12 @@ package com.meidusa.amoeba.oracle.packet;
 import com.meidusa.amoeba.oracle.io.OraclePacketConstant;
 import com.meidusa.amoeba.packet.AbstractPacketBuffer;
 
+/**
+ * Oracle,T4C格式的数据包buffer解析
+ * 
+ * @author hexianmao
+ * @version 2008-8-13 上午01:02:40
+ */
 public class T4CPacketBuffer extends AbstractPacketBuffer implements OraclePacketConstant {
 
     public T4CPacketBuffer(byte[] buf){

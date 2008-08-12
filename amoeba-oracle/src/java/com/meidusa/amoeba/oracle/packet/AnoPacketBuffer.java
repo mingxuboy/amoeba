@@ -4,7 +4,7 @@ import com.meidusa.amoeba.oracle.io.OraclePacketConstant;
 import com.meidusa.amoeba.packet.AbstractPacketBuffer;
 
 /**
- * Ano数据包,buffer的读写和解析。
+ * Oracle,Ano格式的数据包buffer解析
  * 
  * @author hexianmao
  * @version 2008-8-7 下午05:17:56
