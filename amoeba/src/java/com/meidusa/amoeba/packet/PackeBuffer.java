@@ -17,6 +17,11 @@ public interface PackeBuffer {
 	
 	/**
 	 * 
+	 * @param bte
+	 */
+	public void writeByte(byte bte);
+	/**
+	 * 
 	 * @return
 	 */
 	public int getPacketLength();

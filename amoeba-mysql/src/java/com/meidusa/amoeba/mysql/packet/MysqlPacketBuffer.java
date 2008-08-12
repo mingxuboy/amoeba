@@ -545,7 +545,7 @@ public class MysqlPacketBuffer implements PackeBuffer{
 		return this.wasMultiPacket;
 	}
 
-	final void writeByte(byte b){
+	public void writeByte(byte b){
 		ensureCapacity(1);
 		this.byteBuffer[this.position++] = b;
 	}
