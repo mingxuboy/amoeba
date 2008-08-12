@@ -993,10 +993,36 @@ public class GenericObjectPool extends BaseObjectPool implements ObjectPool {
 
             // create new object when needed
             boolean newlyCreated = false;
+            boolean numIncreased = false;
             if(null == pair) {
-                Object obj = _factory.makeObject();
-                pair = new ObjectTimestampPair(obj);
-                newlyCreated = true;
+	            if(_maxActive < 0 || this.getNumActive() < _maxActive || _whenExhaustedAction != WHEN_EXHAUSTED_BLOCK) {
+	            	lock.lock();
+	                try {
+	                	if(_numActive < _maxActive){
+		                    _numActive++;
+		                    numIncreased = true;
+	                	}else{
+	                		continue;
+	                	}
+	                }finally{
+	                	lock.unlock();
+	                }
+	                try{
+		                Object obj = _factory.makeObject();
+		                pair = new ObjectTimestampPair(obj);
+		                newlyCreated = true;
+	                }catch(Exception e){
+	                	try {
+		                    _numActive--;
+		                    numIncreased = false;
+		                }finally{
+		                	lock.unlock();
+		                }
+		                throw e;
+	                }
+            	}else{
+            		continue;
+            	}
             }
 
             // activate & validate the object
@@ -1005,16 +1031,25 @@ public class GenericObjectPool extends BaseObjectPool implements ObjectPool {
                     throw new Exception("ValidateObject failed");
                 }
                 _factory.activateObject(pair.value);
-                
-                lock.lock();
-                try {
-                    _numActive++;
-                    return pair.value;
-                }finally{
-                	lock.unlock();
+                if(!numIncreased){
+	                lock.lock();
+	                try {
+	                    _numActive++;
+	                    numIncreased = true;
+	                }finally{
+	                	lock.unlock();
+	                }
                 }
-            }
-            catch (Throwable e) {
+                return pair.value;
+            } catch (Throwable e) {
+            	if(numIncreased){
+	                lock.lock();
+	                try {
+	                    _numActive--;
+	                }finally{
+	                	lock.unlock();
+	                }
+                }
                 // object cannot be activated or is invalid
                 try {
                     _factory.destroyObject(pair.value);
