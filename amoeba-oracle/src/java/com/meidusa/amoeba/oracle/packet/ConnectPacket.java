@@ -8,8 +8,9 @@ import org.apache.log4j.Logger;
  */
 public class ConnectPacket extends AbstractPacket {
 
-    private static Logger logger = Logger.getLogger(ConnectPacket.class);
+    private static Logger logger    = Logger.getLogger(ConnectPacket.class);
 
+    protected byte[]      arrayFlag = new byte[6];
     protected int         sdu;
     protected int         tdu;
     protected boolean     anoEnabled;
@@ -40,6 +41,13 @@ public class ConnectPacket extends AbstractPacket {
         if (logger.isDebugEnabled()) {
             logger.debug(this.toString());
         }
+    }
+
+    public void init(AnoPacketBuffer buffer) {
+        super.init(buffer);
+
+        sdu = buffer.readUB2();
+        // TODO
     }
 
     public String toString() {
