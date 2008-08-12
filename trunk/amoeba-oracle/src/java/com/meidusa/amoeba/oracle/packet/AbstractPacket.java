@@ -38,7 +38,6 @@ import com.meidusa.amoeba.oracle.io.OraclePacketConstant;
  */
 public class AbstractPacket implements Packet,OraclePacketConstant {
 
-    //protected byte buffer[];
     protected int  length;
     protected byte type;
     protected byte flags;
@@ -48,7 +47,6 @@ public class AbstractPacket implements Packet,OraclePacketConstant {
     protected int  headerCheckSum;
 
     public void init(byte[] buffer) {
-        //this.buffer = buffer;
         init(new AnoPacketBuffer(buffer));
     }
     
