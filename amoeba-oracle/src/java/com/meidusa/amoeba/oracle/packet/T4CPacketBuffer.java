@@ -3,9 +3,9 @@ package com.meidusa.amoeba.oracle.packet;
 import java.nio.ByteBuffer;
 
 import com.meidusa.amoeba.oracle.io.OraclePacketConstant;
-import com.meidusa.amoeba.packet.PackeBuffer;
+import com.meidusa.amoeba.packet.PacketBuffer;
 
-public class T4CPacketBuffer implements PackeBuffer, OraclePacketConstant {
+public class T4CPacketBuffer implements PacketBuffer, OraclePacketConstant {
 
     private int    length   = 0;
 

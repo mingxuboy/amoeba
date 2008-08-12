@@ -240,7 +240,7 @@ public class ConnectionManager extends LoopingThread implements Reporter {
 				}finally{
 					latch.countDown();
 				}
-			}if(selkey.isReadable() || selkey.isAcceptable()){
+			}else if(selkey.isReadable() || selkey.isAcceptable()){
 				final NetEventHandler tmpHandler = handler;
 				currentReadingThreadSize ++;
 				executor.execute(new NameableRunner(){
@@ -267,7 +267,7 @@ public class ConnectionManager extends LoopingThread implements Reporter {
 				});
 			}else{
 				latch.countDown();
-				logger.error(selkey+", isAcceptable="+selkey.isAcceptable()+",isConnectable="+selkey.isConnectable()+",isReadable="+selkey.isReadable()+",isWritable="+selkey.isWritable());
+				logger.error(selkey.attachment()+", isAcceptable="+selkey.isAcceptable()+",isConnectable="+selkey.isConnectable()+",isReadable="+selkey.isReadable()+",isWritable="+selkey.isWritable());
 			}
 		}
 		
