@@ -234,23 +234,18 @@ public class ExecutePacket extends CommandPacket {
 				packet.writeByte(bindValue.byteBinding);
 				return;
 			case MysqlDefs.FIELD_TYPE_SHORT:
-				packet.ensureCapacity(2);
 				packet.writeInt(bindValue.shortBinding);
 				return;
 			case MysqlDefs.FIELD_TYPE_LONG:
-				packet.ensureCapacity(4);
 				packet.writeLong(bindValue.intBinding);
 				return;
 			case MysqlDefs.FIELD_TYPE_LONGLONG:
-				packet.ensureCapacity(8);
 				packet.writeLongLong(bindValue.longBinding);
 				return;
 			case MysqlDefs.FIELD_TYPE_FLOAT:
-				packet.ensureCapacity(4);
 				packet.writeFloat(bindValue.floatBinding);
 				return;
 			case MysqlDefs.FIELD_TYPE_DOUBLE:
-				packet.ensureCapacity(8);
 				packet.writeDouble(bindValue.doubleBinding);
 				return;
 			case MysqlDefs.FIELD_TYPE_TIME:
@@ -288,8 +283,6 @@ public class ExecutePacket extends CommandPacket {
 			}
 
 			byte length = (byte) 7;
-
-			intoBuf.ensureCapacity(length);
 
 			if (dt instanceof java.sql.Timestamp) {
 				length = (byte) 11;
@@ -329,7 +322,6 @@ public class ExecutePacket extends CommandPacket {
 
 	private void storeTime(MysqlPacketBuffer intoBuf, Time tm){
 		
-		intoBuf.ensureCapacity(9);
 		intoBuf.writeByte((byte) 8); // length
 		intoBuf.writeByte((byte) 0); // neg flag
 		intoBuf.writeLong(0); // tm->day, not used

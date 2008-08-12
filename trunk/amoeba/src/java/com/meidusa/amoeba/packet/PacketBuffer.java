@@ -7,7 +7,7 @@ import java.nio.ByteBuffer;
  * @author struct
  *
  */
-public interface PackeBuffer {
+public interface PacketBuffer {
 	
 	/**
 	 * 

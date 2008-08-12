@@ -20,7 +20,7 @@ import com.meidusa.amoeba.mysql.io.Constants;
 import com.meidusa.amoeba.mysql.io.MySqlPacketConstant;
 import com.meidusa.amoeba.mysql.util.MysqlStringUtil;
 import com.meidusa.amoeba.mysql.util.SingleByteCharsetConverter;
-import com.meidusa.amoeba.packet.PackeBuffer;
+import com.meidusa.amoeba.packet.AbstractPacketBuffer;
 import com.meidusa.amoeba.util.StringUtil;
 
 /**
@@ -28,21 +28,14 @@ import com.meidusa.amoeba.util.StringUtil;
  * 该类负责 发送、接收 socket 输入流，并且可以根据包头信息，构造出ByteBuffer
  * @author <a href=mailto:piratebase@sina.com>Struct chen</a>
  */
-public class MysqlPacketBuffer implements PackeBuffer{
+public class MysqlPacketBuffer extends AbstractPacketBuffer{
 	static final int MAX_BYTES_TO_DUMP = 512;
 
 	static final int NO_LENGTH_LIMIT = -1;
 
 	static final long NULL_LENGTH = -1;
 
-	private int bufLength = 0;
-	
-	private byte[] byteBuffer;
-
-	private int position = 0;
-
 	protected boolean wasMultiPacket = false;
-	
 	
 	/**
 	 * buf 中含包头信息
@@ -50,19 +43,17 @@ public class MysqlPacketBuffer implements PackeBuffer{
 	 */
 	public MysqlPacketBuffer(byte[] buf) {
 		
-		this.byteBuffer = new byte[buf.length+1];
-		System.arraycopy(buf, 0, byteBuffer, 0, buf.length);
-		setBufLength(buf.length);
+		super(buf);
 		this.position = MySqlPacketConstant.HEADER_SIZE;
 	}
 	
 	public int getPacketLength(){
-		if(byteBuffer == null || byteBuffer.length <4){
+		if(buffer == null || buffer.length <4){
 			return 0;
 		}else{
-			int packetLength = (byteBuffer[0] & 0xff) +
-            ((byteBuffer[1] & 0xff) << 8) +
-            ((byteBuffer[2] & 0xff) << 16);
+			int packetLength = (buffer[0] & 0xff) +
+            ((buffer[1] & 0xff) << 8) +
+            ((buffer[2] & 0xff) << 16);
 			return packetLength;
 		}
 	}
@@ -79,8 +70,7 @@ public class MysqlPacketBuffer implements PackeBuffer{
 	}
 	
 	public MysqlPacketBuffer(int size) {
-		this.byteBuffer = new byte[size];
-		setBufLength(this.byteBuffer.length);
+		super(size);
 		this.position = MySqlPacketConstant.HEADER_SIZE;
 	}
 
@@ -151,37 +141,37 @@ public class MysqlPacketBuffer implements PackeBuffer{
 		System.out.println("    " + asciiBuf.toString()); //$NON-NLS-1$
 	}
 
-	final void ensureCapacity(int additionalData){
+	protected void ensureCapacity(int additionalData){
 		if ((this.position + additionalData) > getBufLength()) {
-			if ((this.position + additionalData) < this.byteBuffer.length) {
+			if ((this.position + additionalData) < this.buffer.length) {
 				// byteBuffer.length is != getBufLength() all of the time
 				// due to re-using of packets (we don't shrink them)
 				//
 				// If we can, don't re-alloc, just set buffer length
 				// to size of current buffer
-				setBufLength(this.byteBuffer.length);
+				setBufLength(this.buffer.length);
 			} else {
 				//
 				// Otherwise, re-size, and pad so we can avoid
 				// allocing again in the near future
 				//
-				int newLength = (int) (this.byteBuffer.length * 1.25);
+				int newLength = (int) (this.buffer.length * 1.25);
 
-				if (newLength < (this.byteBuffer.length + additionalData)) {
-					newLength = this.byteBuffer.length
+				if (newLength < (this.buffer.length + additionalData)) {
+					newLength = this.buffer.length
 							+ (int) (additionalData * 1.25);
 				}
 
-				if (newLength < this.byteBuffer.length) {
-					newLength = this.byteBuffer.length + additionalData;
+				if (newLength < this.buffer.length) {
+					newLength = this.buffer.length + additionalData;
 				}
 
 				byte[] newBytes = new byte[newLength];
 
-				System.arraycopy(this.byteBuffer, 0, newBytes, 0,
-						this.byteBuffer.length);
-				this.byteBuffer = newBytes;
-				setBufLength(this.byteBuffer.length);
+				System.arraycopy(this.buffer, 0, newBytes, 0,
+						this.buffer.length);
+				this.buffer = newBytes;
+				setBufLength(this.buffer.length);
 			}
 		}
 	}
@@ -210,11 +200,11 @@ public class MysqlPacketBuffer implements PackeBuffer{
 	}
 	
 	protected final byte[] getBufferSource() {
-		return this.byteBuffer;
+		return this.buffer;
 	}
 
 	int getBufLength() {
-		return this.bufLength;
+		return this.length;
 	}
 
 	/**
@@ -223,12 +213,12 @@ public class MysqlPacketBuffer implements PackeBuffer{
 	 * @return byte array being read from
 	 */
 	public byte[] getByteBuffer() {
-		return this.byteBuffer;
+		return this.buffer;
 	}
 
 	public final byte[] getBytes(int len) {
 		byte[] b = new byte[len];
-		System.arraycopy(this.byteBuffer, this.position, b, 0, len);
+		System.arraycopy(this.buffer, this.position, b, 0, len);
 		this.position += len; // update cursor
 
 		return b;
@@ -236,30 +226,22 @@ public class MysqlPacketBuffer implements PackeBuffer{
 
 	public byte[] getBytes(int offset, int len) {
 		byte[] dest = new byte[len];
-		System.arraycopy(this.byteBuffer, offset, dest, 0, len);
+		System.arraycopy(this.buffer, offset, dest, 0, len);
 
 		return dest;
 	}
 
 	int getCapacity() {
-		return this.byteBuffer.length;
+		return this.buffer.length;
 	}
 
-	/**
-	 * Returns the current position to write to/ read from
-	 * 
-	 * @return the current position to write to/ read from
-	 */
-	public int getPosition() {
-		return this.position;
-	}
 
 	final boolean isLastDataPacket() {
-		return ((getBufLength() < 9) && ((this.byteBuffer[4] & 0xff) == 254));
+		return ((getBufLength() < 9) && ((this.buffer[4] & 0xff) == 254));
 	}
 
 	final long newReadLength() {
-		int sw = this.byteBuffer[this.position++] & 0xff;
+		int sw = this.buffer[this.position++] & 0xff;
 
 		switch (sw) {
 		case 251:
@@ -280,15 +262,15 @@ public class MysqlPacketBuffer implements PackeBuffer{
 	}
 
 	final byte readByte() {
-		return this.byteBuffer[this.position++];
+		return this.buffer[this.position++];
 	}
 
 	public final byte readByte(int readAt) {
-		return this.byteBuffer[readAt];
+		return this.buffer[readAt];
 	}
 
 	final long readFieldLength() {
-		int sw = this.byteBuffer[this.position++] & 0xff;
+		int sw = this.buffer[this.position++] & 0xff;
 
 		switch (sw) {
 		case 251:
@@ -309,13 +291,13 @@ public class MysqlPacketBuffer implements PackeBuffer{
 	}
 
 	final int readInt() {
-		byte[] b = this.byteBuffer; // a little bit optimization
+		byte[] b = this.buffer; // a little bit optimization
 
 		return (b[this.position++] & 0xff) | ((b[this.position++] & 0xff) << 8);
 	}
 
 	final int readIntAsLong() {
-		byte[] b = this.byteBuffer;
+		byte[] b = this.buffer;
 
 		return (b[this.position++] & 0xff) | ((b[this.position++] & 0xff) << 8)
 				| ((b[this.position++] & 0xff) << 16)
@@ -339,7 +321,7 @@ public class MysqlPacketBuffer implements PackeBuffer{
 	}
 
 	final long readLength() {
-		int sw = this.byteBuffer[this.position++] & 0xff;
+		int sw = this.buffer[this.position++] & 0xff;
 
 		switch (sw) {
 		case 251:
@@ -360,7 +342,7 @@ public class MysqlPacketBuffer implements PackeBuffer{
 	}
 
 	final long readLong() {
-		byte[] b = this.byteBuffer;
+		byte[] b = this.buffer;
 
 		return ((long) b[this.position++] & 0xff)
 				| (((long) b[this.position++] & 0xff) << 8)
@@ -369,14 +351,14 @@ public class MysqlPacketBuffer implements PackeBuffer{
 	}
 
 	final int readLongInt() {
-		byte[] b = this.byteBuffer;
+		byte[] b = this.buffer;
 
 		return (b[this.position++] & 0xff) | ((b[this.position++] & 0xff) << 8)
 				| ((b[this.position++] & 0xff) << 16);
 	}
 
 	final long readLongLong() {
-		byte[] b = this.byteBuffer;
+		byte[] b = this.buffer;
 
 		return (b[this.position++] & 0xff)
 				| ((long) (b[this.position++] & 0xff) << 8)
@@ -389,11 +371,11 @@ public class MysqlPacketBuffer implements PackeBuffer{
 	}
 
 	final int readnBytes() {
-		int sw = this.byteBuffer[this.position++] & 0xff;
+		int sw = this.buffer[this.position++] & 0xff;
 
 		switch (sw) {
 		case 1:
-			return this.byteBuffer[this.position++] & 0xff;
+			return this.buffer[this.position++] & 0xff;
 
 		case 2:
 			return this.readInt();
@@ -420,12 +402,12 @@ public class MysqlPacketBuffer implements PackeBuffer{
 		int len = 0;
 		int maxLen = getBufLength();
 
-		while ((i < maxLen) && (this.byteBuffer[i] != 0)) {
+		while ((i < maxLen) && (this.buffer[i] != 0)) {
 			len++;
 			i++;
 		}
 
-		String s = new String(this.byteBuffer, this.position, len);
+		String s = new String(this.buffer, this.position, len);
 		this.position += (len + 1); // update cursor
 
 		return s;
@@ -436,13 +418,13 @@ public class MysqlPacketBuffer implements PackeBuffer{
 		if(length ==0) return null;
 		try {
 			if(encoding != null){
-				return new String(this.byteBuffer, this.position, (int)length, encoding);
+				return new String(this.buffer, this.position, (int)length, encoding);
 			}else{
-				return new String(this.byteBuffer, this.position, length);
+				return new String(this.buffer, this.position, length);
 			}
 		}catch(UnsupportedEncodingException e){
 			//TODO logger exception
-			return new String(this.byteBuffer, this.position, length);
+			return new String(this.buffer, this.position, length);
 		} finally {
 			this.position += length; // update cursor
 		}
@@ -479,43 +461,33 @@ public class MysqlPacketBuffer implements PackeBuffer{
 		int len = 0;
 		int maxLen = getBufLength();
 
-		while ((i < maxLen) && (this.byteBuffer[i] != 0)) {
+		while ((i < maxLen) && (this.buffer[i] != 0)) {
 			len++;
 			i++;
 		}
 
 		try {
-			return new String(this.byteBuffer, this.position, len, encoding);
+			return new String(this.buffer, this.position, len, encoding);
 		}catch(UnsupportedEncodingException e){
 			//TODO logger exception
-			return new String(this.byteBuffer, this.position, len);
+			return new String(this.buffer, this.position, len);
 		} finally {
 			this.position += (len + 1); // update cursor
 		}
 	}
 
 	void setBufLength(int bufLengthToSet) {
-		this.bufLength = bufLengthToSet;
+		this.length = bufLengthToSet;
 	}
 
 	/**
 	 * Sets the array of bytes to use as a buffer to read from.
 	 * 
-	 * @param byteBuffer
+	 * @param buffer
 	 *            the array of bytes to use as a buffer
 	 */
 	public void setByteBuffer(byte[] byteBufferToSet) {
-		this.byteBuffer = byteBufferToSet;
-	}
-
-	/**
-	 * Set the current position to write to/ read from
-	 * 
-	 * @param position
-	 *            the position (0-based index)
-	 */
-	public void setPosition(int positionToSet) {
-		this.position = positionToSet;
+		this.buffer = byteBufferToSet;
 	}
 
 	/**
@@ -545,16 +517,11 @@ public class MysqlPacketBuffer implements PackeBuffer{
 		return this.wasMultiPacket;
 	}
 
-	public void writeByte(byte b){
-		ensureCapacity(1);
-		this.byteBuffer[this.position++] = b;
-	}
-
 	// Write a byte array
 	final void writeBytesNoNull(byte[] bytes){
 		int len = bytes.length;
 		ensureCapacity(len);
-		System.arraycopy(bytes, 0, this.byteBuffer, this.position, len);
+		System.arraycopy(bytes, 0, this.buffer, this.position, len);
 		this.position += len;
 	}
 
@@ -562,7 +529,7 @@ public class MysqlPacketBuffer implements PackeBuffer{
 	final void writeBytesNoNull(byte[] bytes, int offset, int length)
 			throws SQLException {
 		ensureCapacity(length);
-		System.arraycopy(bytes, offset, this.byteBuffer, this.position, length);
+		System.arraycopy(bytes, offset, this.buffer, this.position, length);
 		this.position += length;
 	}
 
@@ -598,7 +565,7 @@ public class MysqlPacketBuffer implements PackeBuffer{
 		ensureCapacity(4);
 
 		int i = Float.floatToIntBits(f);
-		byte[] b = this.byteBuffer;
+		byte[] b = this.buffer;
 		b[this.position++] = (byte) (i & 0xff);
 		b[this.position++] = (byte) (i >>> 8);
 		b[this.position++] = (byte) (i >>> 16);
@@ -606,7 +573,7 @@ public class MysqlPacketBuffer implements PackeBuffer{
 	}
 	
 	final float readFloat(){
-		byte[] b = this.byteBuffer;
+		byte[] b = this.buffer;
 
 		int result =((int) b[this.position++] & 0xff)
 				| (((int) b[this.position++] & 0xff) << 8)
@@ -619,7 +586,7 @@ public class MysqlPacketBuffer implements PackeBuffer{
 	final void writeInt(int i){
 		ensureCapacity(2);
 
-		byte[] b = this.byteBuffer;
+		byte[] b = this.buffer;
 		b[this.position++] = (byte) (i & 0xff);
 		b[this.position++] = (byte) (i >>> 8);
 	}
@@ -630,7 +597,7 @@ public class MysqlPacketBuffer implements PackeBuffer{
 		int len = b.length;
 		ensureCapacity(len + 9);
 		writeFieldLength(len);
-		System.arraycopy(b, 0, this.byteBuffer, this.position, len);
+		System.arraycopy(b, 0, this.buffer, this.position, len);
 		this.position += len;
 	}
 
@@ -661,14 +628,14 @@ public class MysqlPacketBuffer implements PackeBuffer{
 		int len = b.length;
 		ensureCapacity(len + 9);
 		writeFieldLength(len);
-		System.arraycopy(b, 0, this.byteBuffer, this.position, len);
+		System.arraycopy(b, 0, this.buffer, this.position, len);
 		this.position += len;
 	}
 
 	final void writeLong(long i){
 		ensureCapacity(4);
 
-		byte[] b = this.byteBuffer;
+		byte[] b = this.buffer;
 		b[this.position++] = (byte) (i & 0xff);
 		b[this.position++] = (byte) (i >>> 8);
 		b[this.position++] = (byte) (i >>> 16);
@@ -677,7 +644,7 @@ public class MysqlPacketBuffer implements PackeBuffer{
 
 	final void writeLongInt(int i){
 		ensureCapacity(3);
-		byte[] b = this.byteBuffer;
+		byte[] b = this.buffer;
 		b[this.position++] = (byte) (i & 0xff);
 		b[this.position++] = (byte) (i >>> 8);
 		b[this.position++] = (byte) (i >>> 16);
@@ -685,7 +652,7 @@ public class MysqlPacketBuffer implements PackeBuffer{
 
 	final void writeLongLong(long i){
 		ensureCapacity(8);
-		byte[] b = this.byteBuffer;
+		byte[] b = this.buffer;
 		b[this.position++] = (byte) (i & 0xff);
 		b[this.position++] = (byte) (i >>> 8);
 		b[this.position++] = (byte) (i >>> 16);
@@ -700,21 +667,21 @@ public class MysqlPacketBuffer implements PackeBuffer{
 	final void writeString(String s){
 		ensureCapacity((s.length() * 2) + 1);
 		writeStringNoNull(s);
-		this.byteBuffer[this.position++] = 0;
+		this.buffer[this.position++] = 0;
 	}
 	
 	//	 Write null-terminated string in the given encoding
 	final void writeString(String s, String encoding) throws UnsupportedEncodingException{
 		ensureCapacity((s.length() * 2) + 1);
 		writeStringNoNull(s, encoding, encoding, false);
-		this.byteBuffer[this.position++] = 0;
+		this.buffer[this.position++] = 0;
 	}
 
 	// Write string, with no termination
 	final void writeStringNoNull(String s){
 		int len = s.length();
 		ensureCapacity(len * 2);
-		System.arraycopy(s.getBytes(), 0, this.byteBuffer, this.position, len);
+		System.arraycopy(s.getBytes(), 0, this.buffer, this.position, len);
 		this.position += len;
 	}
 
@@ -729,7 +696,7 @@ public class MysqlPacketBuffer implements PackeBuffer{
 		
 		int len = b.length;
 		ensureCapacity(len);
-		System.arraycopy(b, 0, this.byteBuffer, this.position, len);
+		System.arraycopy(b, 0, this.buffer, this.position, len);
 		this.position += len;
 	}
 	
@@ -739,7 +706,7 @@ public class MysqlPacketBuffer implements PackeBuffer{
 	 */
 	public ByteBuffer toByteBuffer(){
 		ByteBuffer buffer = ByteBuffer.allocate(this.getPacketLength()+4);
-		buffer.put(this.byteBuffer,0,this.getPacketLength()+4);
+		buffer.put(this.buffer,0,this.getPacketLength()+4);
 		buffer.rewind();
 		return buffer;
 	}
