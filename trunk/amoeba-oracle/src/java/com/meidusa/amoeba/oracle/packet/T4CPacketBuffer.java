@@ -1,57 +1,159 @@
 package com.meidusa.amoeba.oracle.packet;
 
-import java.nio.ByteBuffer;
-
 import com.meidusa.amoeba.oracle.io.OraclePacketConstant;
-import com.meidusa.amoeba.packet.PacketBuffer;
+import com.meidusa.amoeba.packet.AbstractPacketBuffer;
 
-public class T4CPacketBuffer implements PacketBuffer, OraclePacketConstant {
-
-    private int    length   = 0;
-
-    private int    position = 0;
-
-    private byte[] buffer   = null;
+public class T4CPacketBuffer extends AbstractPacketBuffer implements OraclePacketConstant {
 
     public T4CPacketBuffer(byte[] buf){
-        buffer = new byte[buf.length + 1];
-        System.arraycopy(buf, 0, buffer, 0, buf.length);
-        setPacketLength(buffer.length);
-        position = 0;
+        super(buf);
     }
 
     public T4CPacketBuffer(int size){
-        buffer = new byte[size];
-        setPacketLength(buffer.length);
-        position = 0;
+        super(size);
     }
 
-    public int getPacketLength() {
-        return length;
+    /**
+     * 发送带符号的byte
+     */
+    void marshalSB1(byte b) {
+        writeByte(b);
     }
 
-    public void setPacketLength(int length) {
-        this.length = length;
+    byte unmarshalSB1() {
+        return 0;
     }
 
-    public int getPosition() {
-        return position;
+    /**
+     * 发送无符号的byte
+     */
+    void marshalUB1(short s) {
+        writeByte((byte) (s & 0xff));
     }
 
-    public void setPosition(int position) {
-        this.position = position;
+    short unmarshalUB1() {
+        return 0;
     }
 
-    public ByteBuffer toByteBuffer() {
-        ByteBuffer buffer = ByteBuffer.allocate(this.getPacketLength());
-        buffer.put(this.buffer, 0, this.getPacketLength());
-        buffer.rewind();
-        return buffer;
+    void marshalSB2(short s) {
     }
 
-    public void writeByte(byte bte) {
-        // TODO Auto-generated method stub
+    short unmarshalSB2() {
+        return 0;
+    }
 
+    void marshalUB2(int i) {
+    }
+
+    int unmarshalUB2() {
+        return 0;
+    }
+
+    void marshalSB4(int i) {
+    }
+
+    int unmarshalSB4() {
+        return 0;
+    }
+
+    void marshalUB4(long l) {
+    }
+
+    long unmarshalUB4() {
+        return 0;
+    }
+
+    void marshalSB8(long l) {
+    }
+
+    long unmarshalSB8() {
+        return 0;
+    }
+
+    void marshalSWORD(int i) {
+    }
+
+    int unmarshalSWORD() {
+        return 0;
+    }
+
+    void marshalUWORD(long l) {
+    }
+
+    long unmarshalUWORD() {
+        return 0;
+    }
+
+    void marshalB1Array(byte[] ab) {
+    }
+
+    void marshalB1Array(byte[] ab, int i, int j) {
+    }
+
+    void marshalUB4Array(long[] al) {
+    }
+
+    void marshalO2U(boolean flag) {
+    }
+
+    void marshalNULLPTR() {
+    }
+
+    void marshalPTR() {
+    }
+
+    void marshalCHR(byte[] ab) {
+    }
+
+    byte[] unmarshalCHR(int i) {
+        return null;
+    }
+
+    void marshalCHR(byte[] ab, int i, int j) {
+    }
+
+    void unmarshalCLR(byte[] ab, int i, int[] ai) {
+    }
+
+    void marshalCLR(byte[] ab, int i, int j) {
+    }
+
+    byte[] unmarshalCLR(int i, int[] ai) {
+        return null;
+    }
+
+    void marshalCLR(byte[] ab, int i) {
+    }
+
+    void unmarshalCLR(byte[] ab, int i, int[] ai, int j) {
+    }
+
+    void marshalKEYVAL(byte[][] ab, int[] ai, byte[][] ab1, int[] ai1, byte[] ab2, int i) {
+    }
+
+    int unmarshalKEYVAL(byte[][] ab0, byte[][] ab1, int i) {
+        return 0;
+    }
+
+    void marshalKEYVAL(byte[][] ab, byte[][] ab1, byte[] ab2, int i) {
+    }
+
+    void marshalDALC(byte[] ab) {
+    }
+
+    long unmarshalDALC(byte[] ab, int i, int[] ai) {
+        return 0;
+    }
+
+    byte[] unmarshalDALC() {
+        return null;
+    }
+
+    byte[] unmarshalDALC(int[] ai) {
+        return null;
+    }
+
+    void addPtr(byte b) {
     }
 
 }

@@ -3,39 +3,35 @@ package com.meidusa.amoeba.packet;
 import java.nio.ByteBuffer;
 
 /**
- * 
  * @author struct
- *
  */
 public class AbstractPacketBuffer implements PacketBuffer {
 
-	protected int length = 0;
+    protected int    length   = 0;
 
-	protected int position = 0;
+    protected int    position = 0;
 
-	protected byte[] buffer = null;
+    protected byte[] buffer   = null;
 
-	public AbstractPacketBuffer(byte[] buf) {
-		buffer = new byte[buf.length + 1];
-		System.arraycopy(buf, 0, buffer, 0, buf.length);
-		setPacketLength(buf.length);
-		position = 0;
-	}
+    public AbstractPacketBuffer(byte[] buf){
+        buffer = new byte[buf.length + 1];
+        System.arraycopy(buf, 0, buffer, 0, buf.length);
+        setPacketLength(buffer.length);
+        position = 0;
+    }
 
-	public AbstractPacketBuffer(int size) {
-		this.buffer = new byte[size];
-		setPacketLength(this.buffer.length);
-		this.position = 0;
-	}
+    public AbstractPacketBuffer(int size){
+        buffer = new byte[size];
+        setPacketLength(buffer.length);
+        position = 0;
+    }
 
     /**
-     * 将从0当到前位置的所有字节写入到 ByteBuffer中,并且将 ByteBuffer position设置到0
-     * 
-     * @return
+     * 将从0到当前位置的所有字节写入到ByteBuffer中,并且将ByteBuffer.position设置到0.
      */
     public ByteBuffer toByteBuffer() {
-        ByteBuffer buffer = ByteBuffer.allocate(this.getPacketLength());
-        buffer.put(this.buffer, 0, this.getPacketLength());
+        ByteBuffer buffer = ByteBuffer.allocate(getPacketLength());
+        buffer.put(this.buffer, 0, getPacketLength());
         buffer.rewind();
         return buffer;
     }
@@ -56,18 +52,23 @@ public class AbstractPacketBuffer implements PacketBuffer {
         this.position = position;
     }
 
+    public void writeByte(byte b) {
+        ensureCapacity(1);
+        buffer[position++] = b;
+    }
+
     /**
      * 增加buffer长度
      */
-    protected void ensureCapacity(int len) {
-        if ((position + len) > getPacketLength()) {
-            if ((position + len) < buffer.length) {
+    protected void ensureCapacity(int i) {
+        if ((position + i) > getPacketLength()) {
+            if ((position + i) < buffer.length) {
                 setPacketLength(buffer.length);
             } else {
                 int newLength = (int) (buffer.length * 1.25);
 
-                if (newLength < (buffer.length + len)) {
-                    newLength = buffer.length + (int) (len * 1.25);
+                if (newLength < (buffer.length + i)) {
+                    newLength = buffer.length + (int) (i * 1.25);
                 }
 
                 byte[] newBytes = new byte[newLength];
@@ -77,11 +78,5 @@ public class AbstractPacketBuffer implements PacketBuffer {
             }
         }
     }
-
-    public void writeByte(byte b) {
-    	ensureCapacity(1);
-        buffer[position++] = b;
-    }
-	
 
 }
