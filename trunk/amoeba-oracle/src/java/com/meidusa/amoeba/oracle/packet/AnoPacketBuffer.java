@@ -11,7 +11,7 @@ import com.meidusa.amoeba.packet.PackeBuffer;
  * @author hexianmao
  * @version 2008-8-7 обнГ05:17:56
  */
-public class AnoPacketBuffer implements PackeBuffer{
+public class AnoPacketBuffer implements PackeBuffer ,OraclePacketConstant{
 
     private int    length   = 0;
 
@@ -197,7 +197,7 @@ public class AnoPacketBuffer implements PackeBuffer{
     }
 
     public void writeVersion() {
-        writeUB4(0x8105000L);
+        writeUB4(VERSION);
     }
 
     public void sendVersion() {
