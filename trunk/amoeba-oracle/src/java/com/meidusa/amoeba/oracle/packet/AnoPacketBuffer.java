@@ -44,17 +44,17 @@ public class AnoPacketBuffer extends AbstractPacketBuffer implements OraclePacke
 
     public long readUB4() {
         long l = 0L;
-        l |= (byte) ((buffer[position++] & 0xff) << 24);
-        l |= (byte) ((buffer[position++] & 0xff) << 16);
-        l |= (byte) ((buffer[position++] & 0xff) << 8);
-        l |= (byte) (buffer[position++] & 0xff);
-        l &= 0xfffffffffL;
+        l |= ((buffer[position++] & 0xff) << 24);
+        l |= ((buffer[position++] & 0xff) << 16);
+        l |= ((buffer[position++] & 0xff) << 8);
+        l |= (buffer[position++] & 0xff);
+        l &= -1L;
         return l;
     }
 
     public void writeUB4(long l) {
         ensureCapacity(4);
-        long m = l & 0xfffffffffL;
+        long m = l & -1L;
         buffer[position++] = (byte) ((m >>> 24) & 0xff);
         buffer[position++] = (byte) ((m >>> 16) & 0xff);
         buffer[position++] = (byte) ((m >>> 8) & 0xff);
