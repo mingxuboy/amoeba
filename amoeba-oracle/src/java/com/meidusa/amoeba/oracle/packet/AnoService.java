@@ -2,72 +2,115 @@ package com.meidusa.amoeba.oracle.packet;
 
 import com.meidusa.amoeba.oracle.util.C04;
 import com.meidusa.amoeba.oracle.util.C06;
+import com.meidusa.amoeba.oracle.util.NetException;
 
 /**
  * @author hexianmao
  * @version 2008-8-11 ÏÂÎç04:17:11
  */
-public class AnoService implements AnoServices {
+public abstract class AnoService implements AnoServices {
 
-    protected AnoPacketBuffer ano;
     protected int             service;
     protected int             serviceSubPackets;
     protected long            version;
     protected byte[]          selectedDrivers;
     protected int             level;
-
-    protected int             receivedService;
-    protected int             numSubPackets;
-    protected long            oracleError;
+    protected String[] listOfDrivers;
 
     public AnoService(){
         selectedDrivers = new byte[0];
         level = 0;
     }
 
-    public void setAno(AnoPacketBuffer ano) {
-        this.ano = ano;
+    public void doRead(AnoPacketBuffer ano){
+    	doReadService(ano);
+        doReadVersion(ano);
     }
-
-    public void readClient() {
-        e();
-        n();
+    
+    public void doWrite(AnoPacketBuffer ano){
+    	ano.writeUB2(service);
+    	ano.writeUB2(serviceSubPackets);
+    	ano.writeUB4(0);
+    	ano.writeUB4(version);
+    	ano.sendRaw(selectedDrivers);
     }
-
-    void e() {
+    
+    void doReadService(AnoPacketBuffer ano) {
         service = ano.readUB2();
         serviceSubPackets = ano.readUB2();
         ano.readUB4();
     }
 
-    void n() {
+    void doReadVersion(AnoPacketBuffer ano) {
         version = ano.receiveVersion();
         selectedDrivers = ano.receiveRaw();
     }
 
-    public void readServer() {
-        receivedService = ano.readUB2();
-        numSubPackets = ano.readUB2();
-        oracleError = ano.readUB4();
-        if (oracleError != 0L) {
-            throw new RuntimeException("oracleError:" + oracleError);
-        }
-    }
-
-    void b(AnoService service) {
-        receivedService = service.receivedService;
-        numSubPackets = service.numSubPackets;
-        oracleError = service.oracleError;
-        d();
+    void init(AnoPacketBuffer ano) {
+    	doReadService(ano);
+    	doReadServiceStatus(ano);
         b();
     }
 
-    void d() {
+    void doReadServiceStatus(AnoPacketBuffer ano) {
     }
 
     void b() {
     }
 
+    void selectDrivers(String as[], String as1[], int i1) throws NetException {
+        label0: switch (i1) {
+            case 0: // '\0'
+                selectedDrivers = new byte[as.length + 1];
+                selectedDrivers[0] = 0;
+                int j1 = 0;
+                do {
+                    if (j1 >= as.length)
+                        break label0;
+                    if (!as[j1].equals(""))
+                        selectedDrivers[j1 + 1] = k(as1, as[j1]);
+                    j1++;
+                } while (true);
+
+            case 1: // '\001'
+                selectedDrivers = new byte[1];
+                selectedDrivers[0] = 0;
+                break;
+
+            case 2: // '\002'
+                int k1 = 0;
+                selectedDrivers = new byte[as.length + 1];
+                for (k1 = 0; k1 < as.length; k1++)
+                    if (!as[k1].equals(""))
+                        selectedDrivers[k1] = k(as1, as[k1]);
+
+                selectedDrivers[k1] = 0;
+                break;
+
+            case 3: // '\003'
+                selectedDrivers = new byte[as.length];
+                int l1 = 0;
+                do {
+                    if (l1 >= as.length)
+                        break label0;
+                    if (!as[l1].equals(""))
+                        selectedDrivers[l1] = k(as1, as[l1]);
+                    l1++;
+                } while (true);
+
+            default:
+                throw new NetException(304);
+        }
+    }
+    
+    byte k(String as[], String s) throws NetException {
+        for (byte byte0 = 0; byte0 < as.length; byte0++)
+            if (s.equals(as[byte0]))
+                return byte0;
+
+        throw new NetException(309);
+    }
+    
     void c() {
     }
 }
@@ -83,14 +126,14 @@ class SupervisorService extends AnoService {
     private int      q = 2;
 
     @Override
-    void n() {
+    void doReadVersion(AnoPacketBuffer ano) {
         version = ano.receiveVersion();
         l = ano.receiveRaw();
         h = ano.receiveUB2Array();
     }
 
     @Override
-    void d() {
+    void doReadServiceStatus(AnoPacketBuffer ano) {
         version = ano.receiveVersion();
         status = ano.receiveStatus();
         if (status != 31) {
@@ -127,13 +170,23 @@ class SupervisorService extends AnoService {
 
 class AuthenticationService extends AnoService {
 
+	
     protected int      const1;
     protected int      status;
     protected String[] selectedDriversDesc;
     protected boolean  l;
+	
 
+    public AuthenticationService(){
+    	service = 1;
+        serviceSubPackets = 3;
+        level = 3;
+        selectDrivers(listOfDrivers, AnoServices.AUTH_CLASSNAME, level);
+        serviceSubPackets += selectedDrivers.length * 2;
+    }
+    
     @Override
-    void n() {
+    void doReadVersion(AnoPacketBuffer ano) {
         version = ano.receiveVersion();
         const1 = ano.receiveUB2();
         status = ano.receiveStatus();
@@ -146,7 +199,8 @@ class AuthenticationService extends AnoService {
     }
 
     @Override
-    void d() {
+    void doReadServiceStatus(AnoPacketBuffer ano) {
+    	int numSubPackets = ano.readUB2();
         if (numSubPackets != 2) {
             throw new RuntimeException("Wrong Number of service subpackets");
         }
@@ -177,7 +231,8 @@ class EncryptionService extends AnoService {
     protected int     a;
 
     @Override
-    void d() {
+    void doReadServiceStatus(AnoPacketBuffer ano) {
+    	int numSubPackets = ano.readUB2();
         if (numSubPackets != serviceSubPackets) {
             throw new RuntimeException("Wrong Number of service subpackets");
         } else {
@@ -224,9 +279,10 @@ class DataIntegrityService extends AnoService {
     }
 
     @Override
-    void d() {
+    void doReadServiceStatus(AnoPacketBuffer ano) {
         version = ano.receiveVersion();
         h = ano.receiveUB1();
+        int numSubPackets = ano.readUB2();
         if (numSubPackets != serviceSubPackets && numSubPackets == 8) {
             short word0 = (short) ano.receiveUB2();
             short word1 = (short) ano.receiveUB2();
@@ -279,17 +335,17 @@ class DataIntegrityService extends AnoService {
             int l = 13 + 8 + 4 + clientPK.length;
             sendANOHeader(l, 1, (short) 0);
             serviceSubPackets = 1;
-            e();
-            ano.sendRaw(clientPK);
+            /*doReadService();
+            ano.sendRaw(clientPK);*/
         }
     }
 
     private void sendANOHeader(int i, int j, short word) {
-        ano.writeUB4(NA_MAGIC);
+        /*ano.writeUB4(NA_MAGIC);
         ano.writeUB2(i);
         ano.writeVersion();
         ano.writeUB2(j);
-        ano.writeUB1(word);
+        ano.writeUB1(word);*/
     }
 
 }

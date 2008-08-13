@@ -3,6 +3,9 @@ package com.meidusa.amoeba.oracle.net;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 
+import org.apache.commons.lang.ArrayUtils;
+
+import com.meidusa.amoeba.net.Connection;
 import com.meidusa.amoeba.net.DatabaseConnection;
 import com.meidusa.amoeba.net.Sessionable;
 import com.meidusa.amoeba.net.io.PacketInputStream;
@@ -23,6 +26,10 @@ public abstract class OracleConnection extends DatabaseConnection {
 		this.setAuthenticated(true);
 	}
 
+	public void handleMessage(Connection conn, byte[] message) {
+    	System.out.println(ArrayUtils.toString(message));
+    }
+	
 	@Override
 	protected PacketInputStream createPacketInputStream() {
 		return new OraclePacketInputStream(true);
