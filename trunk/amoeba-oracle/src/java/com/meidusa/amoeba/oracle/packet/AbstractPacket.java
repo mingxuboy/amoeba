@@ -84,6 +84,7 @@ public class AbstractPacket implements Packet, OraclePacketConstant {
         buffer.writeUB1(flags);
         buffer.writeUB2(headerCheckSum);
         buffer.setPosition(position);
+        buffer.setPacketLength(packetLength);
     }
 
     /**

@@ -4,7 +4,6 @@ import java.nio.channels.SocketChannel;
 
 import org.apache.commons.pool.ObjectPool;
 
-import com.meidusa.amoeba.net.Connection;
 import com.meidusa.amoeba.net.poolable.PoolableObject;
 
 public class OracleServerConnection extends OracleConnection implements PoolableObject {
@@ -16,10 +15,7 @@ public class OracleServerConnection extends OracleConnection implements Poolable
         super(channel, createStamp);
     }
 
-    public void handleMessage(Connection conn, byte[] message) {
-        this.getMessageHandler().handleMessage(conn, message);
-    }
-
+    
     public ObjectPool getObjectPool() {
         return objectPool;
     }

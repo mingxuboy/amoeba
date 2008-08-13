@@ -7,9 +7,14 @@ import java.io.UnsupportedEncodingException;
  * @version 2008-8-11 обнГ04:18:34
  */
 public class DataPacket extends AbstractPacket {
-
-    //protected int pktOffset;
+	
+	//protected int pktOffset;
     protected int dataFlags;
+
+	public DataPacket(){
+		this.type = 6;
+	}
+    
 
     /*public void init(byte[] buffer) {
         super.init(buffer);

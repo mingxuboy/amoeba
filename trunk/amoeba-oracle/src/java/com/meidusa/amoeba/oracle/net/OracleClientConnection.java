@@ -23,7 +23,7 @@ public class OracleClientConnection extends OracleConnection {
         switchHandler();
     }
 
-    public void handleMessage(Connection conn, byte[] message) {
+   /* public void handleMessage(Connection conn, byte[] message) {
         msgCount++;
 
         Packet packet = null;
@@ -38,7 +38,7 @@ public class OracleClientConnection extends OracleConnection {
 
         postMessage(packet.toByteBuffer().array());
         switchHandler();
-    }
+    }*/
 
     private void switchHandler() {
         try {

@@ -1,21 +1,26 @@
 package com.meidusa.amoeba.oracle.handler;
 
+import java.io.UnsupportedEncodingException;
+
 import com.meidusa.amoeba.net.Connection;
 import com.meidusa.amoeba.net.MessageHandler;
 import com.meidusa.amoeba.net.Sessionable;
 import com.meidusa.amoeba.oracle.packet.AcceptPacket;
 import com.meidusa.amoeba.oracle.packet.AnoClientDataPacket;
+import com.meidusa.amoeba.oracle.packet.AnoPacketBuffer;
 import com.meidusa.amoeba.oracle.packet.AnoServerDataPacket;
+import com.meidusa.amoeba.oracle.packet.AnoServices;
 import com.meidusa.amoeba.oracle.packet.ConnectPacket;
 import com.meidusa.amoeba.oracle.packet.Packet;
 import com.meidusa.amoeba.oracle.packet.ResendPacket;
+import com.meidusa.amoeba.oracle.packet.SQLnetDef;
 
 /**
  * 非常简单的数据包转发程序
  * 
  * @author struct
  */
-public class OracleMessageHandler implements MessageHandler, Sessionable {
+public class OracleMessageHandler implements MessageHandler, Sessionable,SQLnetDef {
 
     private Connection     clientConn;
     private Connection     serverConn;
@@ -38,11 +43,35 @@ public class OracleMessageHandler implements MessageHandler, Sessionable {
     public void handleMessage(Connection conn, byte[] message) {
         if (conn == clientConn) {
             clientMsgCount++;
-            parseClientPacket(clientMsgCount, message);
+            //parseClientPacket(clientMsgCount, message);
+            if(message[4] == Packet.NS_PACKT_TYPE_CONNECT){
+            	message[32] = (byte)(NSINADISABLEFORCONNECTION & 0xff);
+            	message[33] = (byte)(NSINADISABLEFORCONNECTION & 0xff);
+            }
+            
+            if(clientMsgCount ==3){
+	            if (message[4] == Packet.NS_PACKT_TYPE_DATA) {
+	            	AnoPacketBuffer buffer = new AnoPacketBuffer(message);
+	            	buffer.setPosition(10);
+	            	long magic = buffer.readUB4();
+	            	if(magic == AnoServices.NA_MAGIC){
+	            		AnoClientDataPacket dataPacket = new AnoClientDataPacket();
+	            		dataPacket.anoServiceSize = 0;
+	            		try {
+							this.clientConn.postMessage(dataPacket.toBuffer().toByteBuffer().array());
+							return;
+						} catch (UnsupportedEncodingException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+						
+	            	}
+	            }
+            }
             serverConn.postMessage(message);// proxy-->server
         } else {
             serverMsgCount++;
-            parseServerPacket(serverMsgCount, message);
+            //parseServerPacket(serverMsgCount, message);
             clientConn.postMessage(message);// proxy-->client
         }
     }
@@ -101,12 +130,7 @@ public class OracleMessageHandler implements MessageHandler, Sessionable {
                     throw new RuntimeException("Error data packet.");
                 }
             case 3:
-                if (msg[4] == Packet.NS_PACKT_TYPE_DATA) {
-                    packet = new AnoClientDataPacket();
-                    break;
-                } else {
-                    throw new RuntimeException("Error data packet.");
-                }
+                break;
         }
         if (packet != null) {
             packet.init(msg);

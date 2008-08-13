@@ -27,7 +27,7 @@ public class ConnectPacket extends AbstractPacket {
         dataLen = buffer[24] & 0xff;
         dataLen <<= 8;
         dataLen |= buffer[25] & 0xff;
-        if (buffer[32] == 4 && buffer[33] == 4) {
+        if (buffer[32] == NSINADISABLEFORCONNECTION && buffer[33] == NSINADISABLEFORCONNECTION) {
             anoEnabled = false;
         } else {
             anoEnabled = true;
