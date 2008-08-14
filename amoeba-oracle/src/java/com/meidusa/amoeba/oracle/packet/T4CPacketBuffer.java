@@ -1,7 +1,5 @@
 package com.meidusa.amoeba.oracle.packet;
 
-import java.io.IOException;
-
 import com.meidusa.amoeba.oracle.io.OraclePacketConstant;
 import com.meidusa.amoeba.packet.AbstractPacketBuffer;
 
@@ -13,33 +11,52 @@ import com.meidusa.amoeba.packet.AbstractPacketBuffer;
  */
 public class T4CPacketBuffer extends AbstractPacketBuffer implements OraclePacketConstant {
 
-    final byte[] tmpBuffer1 = new byte[1];
-    final byte[] tmpBuffer2 = new byte[2];
-    final byte[] tmpBuffer3 = new byte[3];
-    final byte[] tmpBuffer4 = new byte[4];
-    final byte[] tmpBuffer5 = new byte[5];
-    final byte[] tmpBuffer6 = new byte[6];
-    final byte[] tmpBuffer7 = new byte[7];
-    final byte[] tmpBuffer8 = new byte[8];
+    final byte[] tmpBuffer1   = new byte[1];
+    final byte[] tmpBuffer2   = new byte[2];
+    final byte[] tmpBuffer3   = new byte[3];
+    final byte[] tmpBuffer4   = new byte[4];
+    final byte[] tmpBuffer5   = new byte[5];
+    final byte[] tmpBuffer6   = new byte[6];
+    final byte[] tmpBuffer7   = new byte[7];
+    final byte[] tmpBuffer8   = new byte[8];
 
-    T4CTypeRep   types;
+    final byte[] ignored      = new byte[255];
+    final int[]  retLen       = new int[1];
+
+    // T4CTypeRep types = new T4CTypeRep();
+    byte[]       rep          = new byte[5];
+    boolean      isConvNeeded = false;
+
+    // DBConversion conv = null;
+    int          c2sNlsRatio  = 1;
 
     public T4CPacketBuffer(byte[] buf){
         super(buf);
-        initType();
+        // types.setRep((byte) 1, (byte) 2);
     }
 
     public T4CPacketBuffer(int size){
         super(size);
-        initType();
+        // types.setRep((byte) 1, (byte) 2);
+    }
+
+    public void setRep(byte[] rep) {
+        this.rep = rep;
+    }
+
+    public void setConvNeeded(boolean isConvNeeded) {
+        this.isConvNeeded = isConvNeeded;
+    }
+
+    public void setC2sNlsRatio(int nlsRatio) {
+        c2sNlsRatio = nlsRatio;
     }
 
     /**
      * 发送有符号byte
      */
     void marshalSB1(byte b) {
-        ensureCapacity(1);
-        buffer[position++] = b;
+        writeByte(b);
     }
 
     /**
@@ -52,9 +69,7 @@ public class T4CPacketBuffer extends AbstractPacketBuffer implements OraclePacke
     void marshalSB2(short s) {
         byte b = int2Buffer(s, tmpBuffer2, (byte) 1);
         if (b != 0) {
-            ensureCapacity(b);
-            System.arraycopy(tmpBuffer2, 0, buffer, position, b);
-            position += b;
+            write(tmpBuffer2, 0, b);
         }
     }
 
@@ -65,9 +80,7 @@ public class T4CPacketBuffer extends AbstractPacketBuffer implements OraclePacke
     void marshalSB4(int i) {
         byte b = int2Buffer(i, tmpBuffer4, (byte) 2);
         if (b != 0) {
-            ensureCapacity(b);
-            System.arraycopy(tmpBuffer4, 0, buffer, position, b);
-            position += b;
+            write(tmpBuffer4, 0, b);
         }
     }
 
@@ -78,9 +91,7 @@ public class T4CPacketBuffer extends AbstractPacketBuffer implements OraclePacke
     void marshalSB8(long l) {
         byte b = long2Buffer(l, tmpBuffer8, (byte) 3);
         if (b != 0) {
-            ensureCapacity(b);
-            System.arraycopy(tmpBuffer8, 0, buffer, position, b);
-            position += b;
+            write(tmpBuffer8, 0, b);
         }
     }
 
@@ -93,42 +104,120 @@ public class T4CPacketBuffer extends AbstractPacketBuffer implements OraclePacke
     }
 
     void marshalB1Array(byte[] ab) {
+        if (ab.length > 0) {
+            write(ab, 0, ab.length);
+        }
     }
 
     void marshalB1Array(byte[] ab, int i, int j) {
+        if (ab.length > 0) {
+            write(ab, i, j);
+        }
     }
 
     void marshalUB4Array(long[] al) {
+        for (int i = 0; i < al.length; i++) {
+            marshalSB4((int) (al[i] & -1L));
+        }
     }
 
     void marshalO2U(boolean flag) {
+        if (flag) {
+            addPtr((byte) 1);
+        } else {
+            addPtr((byte) 0);
+        }
     }
 
     void marshalNULLPTR() {
+        addPtr((byte) 0);
     }
 
     void marshalPTR() {
+        addPtr((byte) 1);
     }
 
     void marshalCHR(byte[] ab) {
+        marshalCHR(ab, 0, ab.length);
     }
 
-    void marshalCHR(byte[] ab, int i, int j) {
+    void marshalCHR(byte[] ab, int offset, int len) {
+        if (len > 0) {
+            if (isConvNeeded) {
+                marshalCLR(ab, offset, len);
+            } else {
+                write(ab, offset, len);
+            }
+        }
     }
 
     void marshalCLR(byte[] ab, int i, int j) {
+        if (j > 64) {
+            int i1 = 0;
+            writeByte((byte) -2);
+            do {
+                int k = j - i1;
+                int l = k <= 64 ? k : 64;
+                writeByte((byte) (l & 0xff));
+                write(ab, i + i1, l);
+                i1 += l;
+            } while (i1 < j);
+            writeByte((byte) 0);
+        } else {
+            writeByte((byte) (j & 0xff));
+            if (ab.length != 0) {
+                write(ab, i, j);
+            }
+        }
     }
 
     void marshalCLR(byte[] ab, int i) {
+        marshalCLR(ab, 0, i);
     }
 
-    void marshalKEYVAL(byte[][] ab, int[] ai, byte[][] ab1, int[] ai1, byte[] ab2, int i) {
+    void marshalKEYVAL(byte[][] ab0, int[] ai, byte[][] ab1, int[] ai1, byte[] ab2, int i) {
+        for (int j = 0; j < i; j++) {
+            if (ab0[j] != null && ai[j] > 0) {
+                marshalUB4(ai[j]);
+                marshalCLR(ab0[j], 0, ai[j]);
+            } else {
+                marshalUB4(0L);
+            }
+            if (ab1[j] != null && ai1[j] > 0) {
+                marshalUB4(ai1[j]);
+                marshalCLR(ab1[j], 0, ai1[j]);
+            } else {
+                marshalUB4(0L);
+            }
+            if (ab2[j] != 0) {
+                marshalUB4(1L);
+            } else {
+                marshalUB4(0L);
+            }
+        }
     }
 
-    void marshalKEYVAL(byte[][] ab, byte[][] ab1, byte[] ab2, int i) {
+    void marshalKEYVAL(byte[][] ab0, byte[][] ab1, byte[] ab2, int i) {
+        int ai[] = new int[i];
+        int ai1[] = new int[i];
+        for (int j = 0; j < i; j++) {
+            if (ab0[j] != null) {
+                ai[j] = ab0[j].length;
+            }
+            if (ab1[j] != null) {
+                ai1[j] = ab1[j].length;
+            }
+        }
+        marshalKEYVAL(ab0, ai, ab1, ai1, ab2, i);
     }
 
     void marshalDALC(byte[] ab) {
+        if (ab == null || ab.length < 1) {
+            writeByte((byte) 0);
+        } else {
+            marshalSB4(-1 & ab.length);
+            marshalCLR(ab, ab.length);
+        }
     }
 
     /**
@@ -142,7 +231,7 @@ public class T4CPacketBuffer extends AbstractPacketBuffer implements OraclePacke
      * 读取无符号byte
      */
     short unmarshalUB1() {
-        return (short) (buffer[position++] & 0xff);
+        return (short) (unmarshalSB1() & 0xff);
     }
 
     short unmarshalSB2() {
@@ -150,68 +239,266 @@ public class T4CPacketBuffer extends AbstractPacketBuffer implements OraclePacke
     }
 
     int unmarshalUB2() {
-        int i = (int) buffer2Value((byte) 1);
-        return i & 0xffff;
+        return buffer2Int((byte) 1);
     }
 
     int unmarshalSB4() {
-        return 0;
+        return (int) unmarshalUB4();
     }
 
     long unmarshalUB4() {
-        return 0;
+        return buffer2Long((byte) 2);
     }
 
     long unmarshalSB8() {
-        return 0;
+        return buffer2Long((byte) 2);
     }
 
     int unmarshalSWORD() {
-        return 0;
+        return (int) unmarshalUB4();
     }
 
     long unmarshalUWORD() {
-        return 0;
+        return unmarshalUB4();
+    }
+
+    byte[] unmarshalNBytes(int i) {
+        byte abyte0[] = new byte[i];
+        if (read(abyte0, 0, abyte0.length) < 0) {
+            throw new RuntimeException("无法从套接字读取更多的数据");
+        }
+        return abyte0;
+    }
+
+    int unmarshalNBytes(byte abyte0[], int i, int j) {
+        int k;
+        for (k = 0; k < j; k += getNBytes(abyte0, i + k, j - k))
+            ;
+        return k;
+    }
+
+    byte[] getNBytes(int i) {
+        byte abyte0[] = new byte[i];
+        if (read(abyte0, 0, abyte0.length) < 0) {
+            throw new RuntimeException("无法从套接字读取更多的数据");
+        }
+        return abyte0;
+    }
+
+    int getNBytes(byte abyte0[], int i, int j) {
+        int k = 0;
+        if ((k = read(abyte0, i, j)) < 0) {
+            throw new RuntimeException("无法从套接字读取更多的数据");
+        }
+        return k;
     }
 
     byte[] unmarshalCHR(int i) {
-        return null;
-    }
-
-    void unmarshalCLR(byte[] ab, int i, int[] ai) {
+        byte abyte0[] = null;
+        if (isConvNeeded) {
+            abyte0 = unmarshalCLR(i, retLen);
+            if (abyte0.length != retLen[0]) {
+                byte abyte1[] = new byte[retLen[0]];
+                System.arraycopy(abyte0, 0, abyte1, 0, retLen[0]);
+                abyte0 = abyte1;
+            }
+        } else {
+            abyte0 = getNBytes(i);
+        }
+        return abyte0;
     }
 
     byte[] unmarshalCLR(int i, int[] ai) {
-        return null;
+        byte abyte0[] = new byte[i * c2sNlsRatio];
+        unmarshalCLR(abyte0, 0, ai, i);
+        return abyte0;
     }
 
-    void unmarshalCLR(byte[] ab, int i, int[] ai, int j) {
+    void unmarshalCLR(byte[] ab, int i, int[] ai) {
+        unmarshalCLR(ab, i, ai, 0x7fffffff);
     }
 
-    int unmarshalKEYVAL(byte[][] ab0, byte[][] ab1, int i) {
-        return 0;
+    void unmarshalCLR(byte abyte0[], int i, int ai[], int j) {
+        short word0 = 0;
+        int k = i;
+        boolean flag = false;
+        int l = 0;
+        word0 = unmarshalUB1();
+        if (word0 < 0) {
+            throw new RuntimeException("违反协议");
+        }
+        if (word0 == 0) {
+            ai[0] = 0;
+            return;
+        }
+        if (escapeSequenceNull(word0)) {
+            ai[0] = 0;
+            return;
+        }
+        if (word0 != 254) {
+            int i1 = Math.min(j - l, word0);
+            k = unmarshalBuffer(abyte0, k, i1);
+            l += i1;
+            int k1 = word0 - i1;
+            if (k1 > 0) unmarshalBuffer(ignored, 0, k1);
+        } else {
+            byte byte1 = -1;
+            do {
+                if (byte1 != -1) {
+                    word0 = unmarshalUB1();
+                    if (word0 <= 0) {
+                        break;
+                    }
+                }
+                if (word0 == 254) {
+                    switch (byte1) {
+                        case -1:
+                            byte1 = 1;
+                            continue;
+                        case 1:
+                            byte1 = 0;
+                            break;
+                        case 0:
+                            if (flag) {
+                                byte1 = 0;
+                                break;
+                            }
+                            byte1 = 0;
+                            continue;
+                        default:
+                            break;
+                    }
+                }
+                if (k == -1) {
+                    unmarshalBuffer(ignored, 0, word0);
+                } else {
+                    int j1 = Math.min(j - l, word0);
+                    k = unmarshalBuffer(abyte0, k, j1);
+                    l += j1;
+                    int l1 = word0 - j1;
+                    if (l1 > 0) {
+                        unmarshalBuffer(ignored, 0, l1);
+                    }
+                }
+                byte1 = 0;
+                if (word0 > 252) {
+                    flag = true;
+                }
+            } while (true);
+        }
+        if (ai != null) {
+            if (k != -1) {
+                ai[0] = l;
+            } else {
+                ai[0] = abyte0.length - i;
+            }
+        }
     }
 
-    long unmarshalDALC(byte[] ab, int i, int[] ai) {
-        return 0;
+    int unmarshalKEYVAL(byte[][] abyte0, byte[][] abyte1, int i) {
+        byte[] abyte2 = new byte[1000];
+        int[] ai = new int[1];
+        int j = 0;
+        for (int l = 0; l < i; l++) {
+            int k = unmarshalSB4();
+            if (k > 0) {
+                unmarshalCLR(abyte2, 0, ai);
+                abyte0[l] = new byte[ai[0]];
+                System.arraycopy(abyte2, 0, abyte0[l], 0, ai[0]);
+            }
+            k = unmarshalSB4();
+            if (k > 0) {
+                unmarshalCLR(abyte2, 0, ai);
+                abyte1[l] = new byte[ai[0]];
+                System.arraycopy(abyte2, 0, abyte1[l], 0, ai[0]);
+            }
+            j = unmarshalSB4();
+        }
+
+        abyte2 = null;
+        return j;
+    }
+
+    int unmarshalBuffer(byte abyte0[], int i, int j) {
+        if (j <= 0) return i;
+        if (abyte0.length < i + j) {
+            unmarshalNBytes(abyte0, i, abyte0.length - i);
+            unmarshalNBytes(ignored, 0, (i + j) - abyte0.length);
+            i = -1;
+        } else {
+            unmarshalNBytes(abyte0, i, j);
+            i += j;
+        }
+        return i;
     }
 
     byte[] unmarshalDALC() {
-        return null;
+        long l = unmarshalUB4();
+        byte abyte0[] = new byte[(int) (-1L & l)];
+        if (abyte0.length > 0) {
+            abyte0 = unmarshalCLR(abyte0.length, retLen);
+            if (abyte0 == null) {
+                throw new RuntimeException("违反协议");
+            }
+        } else {
+            abyte0 = new byte[0];
+        }
+        return abyte0;
     }
 
     byte[] unmarshalDALC(int[] ai) {
-        return null;
+        long l = unmarshalUB4();
+        byte abyte0[] = new byte[(int) (-1L & l)];
+        if (abyte0.length > 0) {
+            abyte0 = unmarshalCLR(abyte0.length, ai);
+            if (abyte0 == null) {
+                throw new RuntimeException("违反协议");
+            }
+        } else {
+            abyte0 = new byte[0];
+        }
+        return abyte0;
+    }
+
+    long unmarshalDALC(byte[] ab, int i, int[] ai) {
+        long l = unmarshalUB4();
+        if (l > 0L) {
+            unmarshalCLR(ab, i, ai);
+        }
+        return l;
     }
 
     // ////////////////////////////////////////////////////////
-    void addPtr(byte b) {
+    private boolean escapeSequenceNull(int i) {
+        boolean flag = false;
+        switch (i) {
+            case 0:
+                flag = true;
+                break;
+            case 253:
+                throw new RuntimeException("违反协议");
+            case 255:
+                flag = true;
+                break;
+        }
+        return flag;
     }
 
-    private long buffer2Value(byte b) {
+    private void addPtr(byte b) {
+        if ((rep[4] & 1) > 0) {
+            writeByte(b);
+        } else {
+            byte byte1 = int2Buffer(b, tmpBuffer4, (byte) 4);
+            if (byte1 != 0) {
+                write(tmpBuffer4, 0, byte1);
+            }
+        }
+    }
+
+    private long buffer2Long(byte b) {
         int i = 0;
         boolean flag = false;
-        if ((types.rep[b] & 1) > 0) {
+        if ((rep[b] & 1) > 0) {
             i = buffer[position++] & 0xff;
             if ((i & 0x80) > 0) {
                 i &= 0x7f;
@@ -230,13 +517,12 @@ public class T4CPacketBuffer extends AbstractPacketBuffer implements OraclePacke
             i = 8;
         }
         byte[] ab = getTmpBuffer(i);
-        System.arraycopy(buffer, position, ab, 0, i);
-        position += i;
+        read(ab, 0, i);
 
         long l1 = 0L;
         for (int j = 0; j < ab.length; j++) {
             long l = 0L;
-            if ((types.rep[b] & 2) > 0) {
+            if ((rep[b] & 2) > 0) {
                 l = (long) (ab[ab.length - 1 - j] & 0xff) & 255L;
             } else {
                 l = (long) (ab[j] & 0xff) & 255L;
@@ -250,10 +536,50 @@ public class T4CPacketBuffer extends AbstractPacketBuffer implements OraclePacke
         return l1;
     }
 
-    long buffer2Value(byte b, byte[] buffer) throws IOException {
+    private int buffer2Int(byte b) {
         int i = 0;
         boolean flag = false;
-        if ((types.rep[b] & 1) > 0) {
+        if ((rep[b] & 1) > 0) {
+            i = buffer[position++] & 0xff;
+            if ((i & 0x80) > 0) {
+                i &= 0x7f;
+                flag = true;
+            }
+            if (i < 0) throw new RuntimeException("无法从套接字读取更多的数据");
+            if (i == 0) return 0;
+            if ((b == 1 && i > 2) || (b == 2 && i > 4)) {
+                throw new RuntimeException("类型长度大于最大值");
+            }
+        } else if (b == 1) {
+            i = 2;
+        } else if (b == 2) {
+            i = 4;
+        }
+
+        byte[] ab = getTmpBuffer(i);
+        read(ab, 0, i);
+
+        int i1 = 0;
+        for (int j = 0; j < ab.length; j++) {
+            int i2 = 0;
+            if ((rep[b] & 2) > 0) {
+                i2 = ab[ab.length - 1 - j] & 0xff;
+            } else {
+                i2 = ab[j] & 0xff;
+            }
+            i1 |= i2 << (8 * (ab.length - 1 - j));
+        }
+        if (b != 2) {
+            i1 &= 0xffff;
+        }
+        if (flag) i1 = -i1;
+        return i1;
+    }
+
+    long buffer2Value(byte b, byte[] buffer) {
+        int i = 0;
+        boolean flag = false;
+        if ((rep[b] & 1) > 0) {
             i = buffer[0] & 0xff;
             if ((i & 0x80) > 0) {
                 i &= 0x7f;
@@ -275,7 +601,7 @@ public class T4CPacketBuffer extends AbstractPacketBuffer implements OraclePacke
         long l = 0L;
         for (int j = 0; j < ab.length; j++) {
             short s = 0;
-            if ((types.rep[b] & 2) > 0) {
+            if ((rep[b] & 2) > 0) {
                 s = (short) (ab[ab.length - 1 - j] & 0xff);
             } else {
                 s = (short) (ab[j] & 0xff);
@@ -285,6 +611,54 @@ public class T4CPacketBuffer extends AbstractPacketBuffer implements OraclePacke
         l &= -1L;
         if (flag) l = -l;
         return l;
+    }
+
+    private byte int2Buffer(int i, byte[] ab, byte b) {
+        boolean flag = true;
+        byte b1 = 0;
+        for (int j = ab.length - 1; j >= 0; j--) {
+            ab[b1] = (byte) ((i >>> (8 * j)) & 0xff);
+            if ((rep[b] & 1) > 0) {
+                if (!flag || ab[b1] != 0) {
+                    flag = false;
+                    b1++;
+                }
+            } else {
+                b1++;
+            }
+        }
+
+        if ((rep[b] & 1) > 0) {
+            writeByte(b1);
+        }
+        if ((rep[b] & 2) > 0) {
+            reverseArray(ab, b1);
+        }
+        return b1;
+    }
+
+    private byte long2Buffer(long l, byte[] ab, byte b) {
+        boolean flag = true;
+        byte b1 = 0;
+        for (int i = ab.length - 1; i >= 0; i--) {
+            ab[b1] = (byte) ((l >>> (8 * i)) & 255L);
+            if ((rep[b] & 1) > 0) {
+                if (!flag || ab[b1] != 0) {
+                    flag = false;
+                    b1++;
+                }
+            } else {
+                b1++;
+            }
+        }
+
+        if ((rep[b] & 1) > 0) {
+            writeByte(b1);
+        }
+        if ((rep[b] & 2) > 0) {
+            reverseArray(ab, b1);
+        }
+        return b1;
     }
 
     private byte[] getTmpBuffer(int i) {
@@ -310,52 +684,17 @@ public class T4CPacketBuffer extends AbstractPacketBuffer implements OraclePacke
         }
     }
 
-    private byte int2Buffer(int i, byte[] ab, byte b) {
-        boolean flag = true;
-        byte b1 = 0;
-        for (int j = ab.length - 1; j >= 0; j--) {
-            ab[b1] = (byte) ((i >>> (8 * j)) & 0xff);
-            if ((types.rep[b] & 1) > 0) {
-                if (!flag || ab[b1] != 0) {
-                    flag = false;
-                    b1++;
-                }
-            } else {
-                b1++;
-            }
-        }
-
-        if ((types.rep[b] & 1) > 0) {
-            writeByte(b1);
-        }
-        if ((types.rep[b] & 2) > 0) {
-            reverseArray(ab, b1);
-        }
-        return b1;
+    private int read(byte[] ab, int offset, int len) {
+        System.arraycopy(buffer, position, ab, offset, len);
+        position += len;
+        return len;
     }
 
-    byte long2Buffer(long l, byte[] ab, byte b) {
-        boolean flag = true;
-        byte b1 = 0;
-        for (int i = ab.length - 1; i >= 0; i--) {
-            ab[b1] = (byte) ((l >>> (8 * i)) & 255L);
-            if ((types.rep[b] & 1) > 0) {
-                if (!flag || ab[b1] != 0) {
-                    flag = false;
-                    b1++;
-                }
-            } else {
-                b1++;
-            }
-        }
-
-        if ((types.rep[b] & 1) > 0) {
-            writeByte(b1);
-        }
-        if ((types.rep[b] & 2) > 0) {
-            reverseArray(ab, b1);
-        }
-        return b1;
+    private int write(byte[] ab, int offset, int len) {
+        ensureCapacity(len);
+        System.arraycopy(ab, offset, buffer, position, len);
+        position += len;
+        return len;
     }
 
     private void reverseArray(byte[] ab, byte b) {
@@ -364,11 +703,6 @@ public class T4CPacketBuffer extends AbstractPacketBuffer implements OraclePacke
             ab[i] = ab[b - 1 - i];
             ab[b - 1 - i] = b1;
         }
-    }
-
-    private void initType() {
-        types = new T4CTypeRep();
-        types.setRep((byte) 1, (byte) 2);
     }
 
 }
