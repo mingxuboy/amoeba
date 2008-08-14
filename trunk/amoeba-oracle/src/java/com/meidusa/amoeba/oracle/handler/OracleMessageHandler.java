@@ -59,6 +59,7 @@ public class OracleMessageHandler implements MessageHandler, Sessionable, SQLnet
                             AnoClientDataPacket packet = new AnoClientDataPacket();
                             packet.anoServiceSize = 0;
                             try {
+                                serverMsgCount++;
                                 clientConn.postMessage(packet.toBuffer().toByteBuffer().array());
                             } catch (UnsupportedEncodingException e) {
                                 e.printStackTrace();
@@ -76,6 +77,11 @@ public class OracleMessageHandler implements MessageHandler, Sessionable, SQLnet
                 serverMsgCount++;
             }
 
+            switch (message[4]) {
+                case NS_PACKT_TYPE_RESEND:
+
+            }
+
             // parseServerPacket(serverMsgCount, message);
             clientConn.postMessage(message);// proxy-->client
         }
@@ -84,7 +90,6 @@ public class OracleMessageHandler implements MessageHandler, Sessionable, SQLnet
     /**
      * 解析服务器端返回的数据包
      */
-    @SuppressWarnings("unused")
     private void parseServerPacket(int count, byte[] msg) {
         Packet packet = null;
         switch (count) {
