@@ -170,7 +170,7 @@ public class AnoPacketBuffer extends AbstractPacketBuffer implements OraclePacke
     }
 
     // //////////////////////////////////////////////////////
-
+    // Ë½ÓÐº¯Êý
     private void writeArray(byte[] ab) {
         ensureCapacity(ab.length);
         System.arraycopy(ab, 0, buffer, position, ab.length);
