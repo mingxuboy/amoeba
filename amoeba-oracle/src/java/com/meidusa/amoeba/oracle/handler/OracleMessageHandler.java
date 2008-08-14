@@ -43,24 +43,27 @@ public class OracleMessageHandler implements MessageHandler, Sessionable, SQLnet
         if (conn == clientConn) {
             clientMsgCount++;
 
-            if (message[4] == NS_PACKT_TYPE_CONNECT) {
-                message[32] = (byte) NSINADISABLEFORCONNECTION;
-                message[33] = (byte) NSINADISABLEFORCONNECTION;
-            }
-
-            if (message[4] == NS_PACKT_TYPE_DATA && clientMsgCount == 3) {
-                AnoPacketBuffer buffer = new AnoPacketBuffer(message);
-                buffer.setPosition(10);
-                if (buffer.readUB4() == AnoServices.NA_MAGIC) {
-                    AnoClientDataPacket packet = new AnoClientDataPacket();
-                    packet.anoServiceSize = 0;
-                    try {
-                        clientConn.postMessage(packet.toBuffer().toByteBuffer().array());
-                    } catch (UnsupportedEncodingException e) {
-                        e.printStackTrace();
+            switch (message[4]) {
+                case NS_PACKT_TYPE_CONNECT:
+                    message[32] = (byte) NSINADISABLEFORCONNECTION;
+                    message[33] = (byte) NSINADISABLEFORCONNECTION;
+                    break;
+                case NS_PACKT_TYPE_DATA:
+                    if (clientMsgCount == 3) {
+                        AnoPacketBuffer buffer = new AnoPacketBuffer(message);
+                        buffer.setPosition(10);
+                        if (buffer.readUB4() == AnoServices.NA_MAGIC) {
+                            AnoClientDataPacket packet = new AnoClientDataPacket();
+                            packet.anoServiceSize = 0;
+                            try {
+                                clientConn.postMessage(packet.toBuffer().toByteBuffer().array());
+                            } catch (UnsupportedEncodingException e) {
+                                e.printStackTrace();
+                            }
+                            return;
+                        }
                     }
-                    return;
-                }
+                    break;
             }
 
             // parseClientPacket(clientMsgCount, message);
