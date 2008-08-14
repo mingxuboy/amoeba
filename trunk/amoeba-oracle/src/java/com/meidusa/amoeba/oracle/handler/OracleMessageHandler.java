@@ -10,7 +10,6 @@ import com.meidusa.amoeba.oracle.packet.AnoClientDataPacket;
 import com.meidusa.amoeba.oracle.packet.AnoPacketBuffer;
 import com.meidusa.amoeba.oracle.packet.AnoServerDataPacket;
 import com.meidusa.amoeba.oracle.packet.AnoServices;
-import com.meidusa.amoeba.oracle.packet.ConnectPacket;
 import com.meidusa.amoeba.oracle.packet.Packet;
 import com.meidusa.amoeba.oracle.packet.ResendPacket;
 import com.meidusa.amoeba.oracle.packet.SQLnetDef;
@@ -20,7 +19,7 @@ import com.meidusa.amoeba.oracle.packet.SQLnetDef;
  * 
  * @author struct
  */
-public class OracleMessageHandler implements MessageHandler, Sessionable,SQLnetDef {
+public class OracleMessageHandler implements MessageHandler, Sessionable, SQLnetDef {
 
     private Connection     clientConn;
     private Connection     serverConn;
@@ -43,35 +42,32 @@ public class OracleMessageHandler implements MessageHandler, Sessionable,SQLnetD
     public void handleMessage(Connection conn, byte[] message) {
         if (conn == clientConn) {
             clientMsgCount++;
-            //parseClientPacket(clientMsgCount, message);
-            if(message[4] == Packet.NS_PACKT_TYPE_CONNECT){
-            	message[32] = (byte)(NSINADISABLEFORCONNECTION & 0xff);
-            	message[33] = (byte)(NSINADISABLEFORCONNECTION & 0xff);
+
+            if (message[4] == NS_PACKT_TYPE_CONNECT) {
+                message[32] = (byte) NSINADISABLEFORCONNECTION;
+                message[33] = (byte) NSINADISABLEFORCONNECTION;
             }
-            
-            if(clientMsgCount ==3){
-	            if (message[4] == Packet.NS_PACKT_TYPE_DATA) {
-	            	AnoPacketBuffer buffer = new AnoPacketBuffer(message);
-	            	buffer.setPosition(10);
-	            	long magic = buffer.readUB4();
-	            	if(magic == AnoServices.NA_MAGIC){
-	            		AnoClientDataPacket dataPacket = new AnoClientDataPacket();
-	            		dataPacket.anoServiceSize = 0;
-	            		try {
-							this.clientConn.postMessage(dataPacket.toBuffer().toByteBuffer().array());
-							return;
-						} catch (UnsupportedEncodingException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-						
-	            	}
-	            }
+
+            if (message[4] == NS_PACKT_TYPE_DATA && clientMsgCount == 3) {
+                AnoPacketBuffer buffer = new AnoPacketBuffer(message);
+                buffer.setPosition(10);
+                if (buffer.readUB4() == AnoServices.NA_MAGIC) {
+                    AnoClientDataPacket packet = new AnoClientDataPacket();
+                    packet.anoServiceSize = 0;
+                    try {
+                        clientConn.postMessage(packet.toBuffer().toByteBuffer().array());
+                    } catch (UnsupportedEncodingException e) {
+                        e.printStackTrace();
+                    }
+                    return;
+                }
             }
+
+            // parseClientPacket(clientMsgCount, message);
             serverConn.postMessage(message);// proxy-->server
         } else {
             serverMsgCount++;
-            //parseServerPacket(serverMsgCount, message);
+            // parseServerPacket(serverMsgCount, message);
             clientConn.postMessage(message);// proxy-->client
         }
     }
@@ -79,25 +75,26 @@ public class OracleMessageHandler implements MessageHandler, Sessionable,SQLnetD
     /**
      * 解析服务器端返回的数据包
      */
+    @SuppressWarnings("unused")
     private void parseServerPacket(int count, byte[] msg) {
         Packet packet = null;
         switch (count) {
             case 1:
-                if (msg[4] == Packet.NS_PACKT_TYPE_RESEND) {
+                if (msg[4] == NS_PACKT_TYPE_RESEND) {
                     packet = new ResendPacket();
                     break;
                 } else {
                     throw new RuntimeException("Error data packet.");
                 }
             case 2:
-                if (msg[4] == Packet.NS_PACKT_TYPE_ACCEPT) {
+                if (msg[4] == NS_PACKT_TYPE_ACCEPT) {
                     packet = new AcceptPacket();
                     break;
                 } else {
                     throw new RuntimeException("Error data packet.");
                 }
             case 3:
-                if (msg[4] == Packet.NS_PACKT_TYPE_DATA) {
+                if (msg[4] == NS_PACKT_TYPE_DATA) {
                     packet = new AnoServerDataPacket();
                     break;
                 } else {
@@ -112,29 +109,8 @@ public class OracleMessageHandler implements MessageHandler, Sessionable,SQLnetD
     /**
      *解析客户端发送的数据包
      */
+    @SuppressWarnings("unused")
     private void parseClientPacket(int count, byte[] msg) {
-        Packet packet = null;
-        switch (count) {
-            case 1:
-                if (msg[4] == Packet.NS_PACKT_TYPE_CONNECT) {
-                    packet = new ConnectPacket();
-                    break;
-                } else {
-                    throw new RuntimeException("Error data packet.");
-                }
-            case 2:
-                if (msg[4] == Packet.NS_PACKT_TYPE_CONNECT) {
-                    packet = new ConnectPacket();
-                    break;
-                } else {
-                    throw new RuntimeException("Error data packet.");
-                }
-            case 3:
-                break;
-        }
-        if (packet != null) {
-            packet.init(msg);
-        }
     }
 
     public boolean checkIdle(long now) {

@@ -12,7 +12,7 @@ public class DataPacket extends AbstractPacket {
     protected int dataFlags;
 
 	public DataPacket(){
-		this.type = 6;
+		this.type = NS_PACKT_TYPE_DATA;
 	}
     
 
