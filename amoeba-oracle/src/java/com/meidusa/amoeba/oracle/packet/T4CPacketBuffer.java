@@ -43,25 +43,10 @@ public class T4CPacketBuffer extends AbstractPacketBuffer implements OraclePacke
     }
 
     /**
-     * 读取有符号byte
-     */
-    byte unmarshalSB1() {
-        return buffer[position++];
-    }
-
-    /**
      * 发送无符号byte
      */
     void marshalUB1(short s) {
-        ensureCapacity(1);
-        buffer[position++] = (byte) (s & 0xff);
-    }
-
-    /**
-     * 读取无符号byte
-     */
-    short unmarshalUB1() {
-        return (short) (buffer[position++] & 0xff);
+        marshalSB1((byte) (s & 0xff));
     }
 
     void marshalSB2(short s) {
@@ -73,50 +58,38 @@ public class T4CPacketBuffer extends AbstractPacketBuffer implements OraclePacke
         }
     }
 
-    short unmarshalSB2() {
-        return (short) buffer2Value((byte) 1);
-    }
-
     void marshalUB2(int i) {
-    }
-
-    int unmarshalUB2() {
-        return 0;
+        marshalSB2((short) (i & 0xffff));
     }
 
     void marshalSB4(int i) {
-    }
-
-    int unmarshalSB4() {
-        return 0;
+        byte b = int2Buffer(i, tmpBuffer4, (byte) 2);
+        if (b != 0) {
+            ensureCapacity(b);
+            System.arraycopy(tmpBuffer4, 0, buffer, position, b);
+            position += b;
+        }
     }
 
     void marshalUB4(long l) {
-    }
-
-    long unmarshalUB4() {
-        return 0;
+        marshalSB4((int) (l & -1L));
     }
 
     void marshalSB8(long l) {
-    }
-
-    long unmarshalSB8() {
-        return 0;
+        byte b = long2Buffer(l, tmpBuffer8, (byte) 3);
+        if (b != 0) {
+            ensureCapacity(b);
+            System.arraycopy(tmpBuffer8, 0, buffer, position, b);
+            position += b;
+        }
     }
 
     void marshalSWORD(int i) {
-    }
-
-    int unmarshalSWORD() {
-        return 0;
+        marshalSB4(i);
     }
 
     void marshalUWORD(long l) {
-    }
-
-    long unmarshalUWORD() {
-        return 0;
+        marshalSB4((int) (l & -1L));
     }
 
     void marshalB1Array(byte[] ab) {
@@ -140,40 +113,83 @@ public class T4CPacketBuffer extends AbstractPacketBuffer implements OraclePacke
     void marshalCHR(byte[] ab) {
     }
 
-    byte[] unmarshalCHR(int i) {
-        return null;
-    }
-
     void marshalCHR(byte[] ab, int i, int j) {
-    }
-
-    void unmarshalCLR(byte[] ab, int i, int[] ai) {
     }
 
     void marshalCLR(byte[] ab, int i, int j) {
     }
 
-    byte[] unmarshalCLR(int i, int[] ai) {
-        return null;
-    }
-
     void marshalCLR(byte[] ab, int i) {
     }
 
-    void unmarshalCLR(byte[] ab, int i, int[] ai, int j) {
-    }
-
     void marshalKEYVAL(byte[][] ab, int[] ai, byte[][] ab1, int[] ai1, byte[] ab2, int i) {
-    }
-
-    int unmarshalKEYVAL(byte[][] ab0, byte[][] ab1, int i) {
-        return 0;
     }
 
     void marshalKEYVAL(byte[][] ab, byte[][] ab1, byte[] ab2, int i) {
     }
 
     void marshalDALC(byte[] ab) {
+    }
+
+    /**
+     * 读取有符号byte
+     */
+    byte unmarshalSB1() {
+        return buffer[position++];
+    }
+
+    /**
+     * 读取无符号byte
+     */
+    short unmarshalUB1() {
+        return (short) (buffer[position++] & 0xff);
+    }
+
+    short unmarshalSB2() {
+        return (short) unmarshalUB2();
+    }
+
+    int unmarshalUB2() {
+        int i = (int) buffer2Value((byte) 1);
+        return i & 0xffff;
+    }
+
+    int unmarshalSB4() {
+        return 0;
+    }
+
+    long unmarshalUB4() {
+        return 0;
+    }
+
+    long unmarshalSB8() {
+        return 0;
+    }
+
+    int unmarshalSWORD() {
+        return 0;
+    }
+
+    long unmarshalUWORD() {
+        return 0;
+    }
+
+    byte[] unmarshalCHR(int i) {
+        return null;
+    }
+
+    void unmarshalCLR(byte[] ab, int i, int[] ai) {
+    }
+
+    byte[] unmarshalCLR(int i, int[] ai) {
+        return null;
+    }
+
+    void unmarshalCLR(byte[] ab, int i, int[] ai, int j) {
+    }
+
+    int unmarshalKEYVAL(byte[][] ab0, byte[][] ab1, int i) {
+        return 0;
     }
 
     long unmarshalDALC(byte[] ab, int i, int[] ai) {
@@ -188,10 +204,10 @@ public class T4CPacketBuffer extends AbstractPacketBuffer implements OraclePacke
         return null;
     }
 
+    // ////////////////////////////////////////////////////////
     void addPtr(byte b) {
     }
 
-    // ////////////////////////////////////////////////////////
     private long buffer2Value(byte b) {
         int i = 0;
         boolean flag = false;

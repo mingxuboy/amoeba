@@ -27,6 +27,7 @@ public class OracleMessageHandler implements MessageHandler, Sessionable, SQLnet
     private MessageHandler serverHandler;
     private boolean        isEnded        = false;
 
+    private static int     msgCountLimit  = 8;
     private int            serverMsgCount = 0;
     private int            clientMsgCount = 0;
 
@@ -41,7 +42,9 @@ public class OracleMessageHandler implements MessageHandler, Sessionable, SQLnet
 
     public void handleMessage(Connection conn, byte[] message) {
         if (conn == clientConn) {
-            clientMsgCount++;
+            if (clientMsgCount <= msgCountLimit) {
+                clientMsgCount++;
+            }
 
             switch (message[4]) {
                 case NS_PACKT_TYPE_CONNECT:
@@ -69,7 +72,10 @@ public class OracleMessageHandler implements MessageHandler, Sessionable, SQLnet
             // parseClientPacket(clientMsgCount, message);
             serverConn.postMessage(message);// proxy-->server
         } else {
-            serverMsgCount++;
+            if (serverMsgCount <= msgCountLimit) {
+                serverMsgCount++;
+            }
+
             // parseServerPacket(serverMsgCount, message);
             clientConn.postMessage(message);// proxy-->client
         }
