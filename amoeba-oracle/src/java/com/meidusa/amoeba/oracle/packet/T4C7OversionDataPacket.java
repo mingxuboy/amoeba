@@ -10,7 +10,7 @@ import com.meidusa.amoeba.packet.AbstractPacketBuffer;
  * @author hexianmao
  * @version 2008-8-14 обнГ07:32:33
  */
-public class T4C7OversionDataPacket extends T4CTTIMsgDataPacket implements T4CTTIMsg {
+public class T4C7OversionDataPacket extends T4CTTIMsgDataPacket {
 
     @Override
     protected void init(AbstractPacketBuffer buffer) {
