@@ -10,7 +10,7 @@ import com.meidusa.amoeba.packet.AbstractPacketBuffer;
  * @author hexianmao
  * @version 2008-8-14 обнГ07:29:53
  */
-public class T4C8TTIproDataPacket extends T4CTTIMsgDataPacket {
+public class T4C8TTIproServerDataPacket extends T4CTTIMsgDataPacket {
 
     byte         proSvrVer;
     short        oVersion         = -1;
