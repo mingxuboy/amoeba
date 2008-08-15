@@ -49,12 +49,20 @@ public class AbstractPacketBuffer implements PacketBuffer {
     }
 
     public void setPosition(int position) {
+    	int length = this.position - position;
+    	ensureCapacity(length);
         this.position = position;
     }
 
     public void writeByte(byte b) {
         ensureCapacity(1);
         buffer[position++] = b;
+    }
+    
+    public void writeBytes(byte[] byts) {
+        ensureCapacity(byts.length);
+        System.arraycopy(byts, 0, buffer, position, byts.length);
+        position += byts.length;
     }
 
     /**
