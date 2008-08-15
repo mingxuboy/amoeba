@@ -116,7 +116,9 @@ public abstract class AbstractPacket implements Packet, OraclePacketConstant {
         return buffer;
     }
     
-    protected abstract Class<? extends AbstractPacketBuffer> getBufferClass();
+    protected Class<? extends AbstractPacketBuffer> getBufferClass(){
+    	return OracleAbstractPacketBuffer.class;
+    }
 
 	private AbstractPacketBuffer toBuffer() throws UnsupportedEncodingException {
         int bufferSize = calculatePacketSize();
@@ -129,7 +131,6 @@ public abstract class AbstractPacket implements Packet, OraclePacketConstant {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-        //AbstractPacketBuffer buffer = new AnoPacketBuffer(bufferSize);
         return toBuffer(buffer);
     }
 
