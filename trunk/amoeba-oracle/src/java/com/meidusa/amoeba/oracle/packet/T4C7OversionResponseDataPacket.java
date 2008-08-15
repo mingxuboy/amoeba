@@ -10,20 +10,15 @@ import com.meidusa.amoeba.packet.AbstractPacketBuffer;
  * @author hexianmao
  * @version 2008-8-14 ÏÂÎç07:32:33
  */
-public class T4C7OversionDataPacket extends T4CTTIfunPacket {
+public class T4C7OversionResponseDataPacket extends DataPacket {
 
-	public byte                        rdbmsVersion[]                              = { 78, 111, 116, 32, 100, 101, 116, 101, 114, 109, 105, 110, 101, 100, 32, 121, 101, 116 };
-	public boolean                     rdbmsVersionO2U = true;
-	public int                         bufLen = 256;
-	public boolean                     retVerLenO2U = true;
-	public int                         retVerLen = 0;
-	public boolean                     retVerNumO2U = true;
-	public long                        retVerNum = 0L;
+	public String rdbmsVersion= "Oracle9i Enterprise Edition Release 9.2.0.6.0 - Production \n With the Partitioning option \n JServer Release 9.2.0.6.0 - Production";
+	public long                        retVerNum = 153093632L;
     
     @Override
     protected void init(AbstractPacketBuffer buffer) {
         super.init(buffer);
-        /*T4CPacketBuffer meg = (T4CPacketBuffer)buffer;
+        T4CPacketBuffer meg = (T4CPacketBuffer)buffer;
         boolean flag = false;
         T4CTTIoer oer = new T4CTTIoer(meg);
         while (true) {
@@ -38,8 +33,13 @@ public class T4C7OversionDataPacket extends T4CTTIfunPacket {
                     if (flag){
                         //DatabaseError.throwSqlException(401);
                     }
-                    retVerLen = meg.unmarshalUB2();
-                    rdbmsVersion = meg.unmarshalCHR(retVerLen);
+                    int retVerLen = meg.unmarshalUB2();
+                    byte[] vers = meg.unmarshalCHR(retVerLen);
+                    try {
+						rdbmsVersion = new String(vers,"UTF8");
+					} catch (UnsupportedEncodingException e) {
+						rdbmsVersion = new String(vers);
+					}
                     if (rdbmsVersion == null){
                         //DatabaseError.throwSqlException(438);
                     }
@@ -58,18 +58,29 @@ public class T4C7OversionDataPacket extends T4CTTIfunPacket {
                 }
             }
             break;
-        }*/
+        }
     }
 
     @Override
     protected void write2Buffer(AbstractPacketBuffer buffer) throws UnsupportedEncodingException {
         super.write2Buffer(buffer);
         T4CPacketBuffer meg = (T4CPacketBuffer)buffer;
-        meg.marshalO2U(rdbmsVersionO2U);
-        meg.marshalSWORD(bufLen);
-        meg.marshalO2U(retVerLenO2U);
-        meg.marshalO2U(retVerNumO2U);
+        meg.marshalUB1((byte)8);
+        meg.marshalUB2(rdbmsVersion.length());
+        meg.marshalCHR(rdbmsVersion.getBytes());
+        meg.marshalUB4(retVerNum);
+        meg.marshalUB1((byte)9);
         
+    }
+    
+    short getVersionNumber() {
+        int i = 0;
+        i = (int) ((long) i + (retVerNum >>> 24 & 255L) * 1000L);
+        i = (int) ((long) i + (retVerNum >>> 20 & 15L) * 100L);
+        i = (int) ((long) i + (retVerNum >>> 12 & 15L) * 10L);
+        i = (int) ((long) i + (retVerNum >>> 8 & 15L));
+        return (short) i;
+    	//return 9260;
     }
 
 }

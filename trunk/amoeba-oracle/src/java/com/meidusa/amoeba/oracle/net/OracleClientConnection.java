@@ -7,6 +7,8 @@ import org.apache.commons.pool.ObjectPool;
 import com.meidusa.amoeba.net.Connection;
 import com.meidusa.amoeba.oracle.context.OracleProxyRuntimeContext;
 import com.meidusa.amoeba.oracle.handler.OracleMessageHandler;
+import com.meidusa.amoeba.oracle.packet.AcceptPacket;
+import com.meidusa.amoeba.oracle.packet.AnoServerDataPacket;
 import com.meidusa.amoeba.oracle.packet.ConnectPacket;
 import com.meidusa.amoeba.oracle.packet.Packet;
 import com.meidusa.amoeba.oracle.packet.ResendPacket;
@@ -35,10 +37,16 @@ public class OracleClientConnection extends OracleConnection {
             	ConnectPacket connPacket = new ConnectPacket();
             	connPacket.init(message);
             	clientConn.setAnoEnabled(connPacket.anoEnabled);
-                packet = new ResendPacket();
+                packet = new AcceptPacket();
             } else {
                 throw new RuntimeException("Error data packet.");
             }
+        }if(msgCount ==2){
+        	if(clientConn.isAnoEnabled()){
+        		packet = new AnoServerDataPacket(); 
+        	}else{
+        		
+        	}
         }
         // ...
 
