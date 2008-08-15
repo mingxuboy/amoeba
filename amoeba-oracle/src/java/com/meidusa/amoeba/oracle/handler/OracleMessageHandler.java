@@ -57,7 +57,7 @@ public class OracleMessageHandler implements MessageHandler, Sessionable, SQLnet
                             AnoClientDataPacket packet = new AnoClientDataPacket();
                             packet.anoServiceSize = 0;
                             serverMsgCount++;
-                            clientConn.postMessage(packet.toByteBuffer());
+                            clientConn.postMessage(packet.toByteBuffer().array());
                             return;
                         }
                     }
@@ -71,10 +71,9 @@ public class OracleMessageHandler implements MessageHandler, Sessionable, SQLnet
                 serverMsgCount++;
             }
 
-            switch (message[4]) {
-                case NS_PACKT_TYPE_RESEND:
-
-            }
+            // switch (message[4]) {
+            // case NS_PACKT_TYPE_RESEND:
+            // }
 
             // parseServerPacket(serverMsgCount, message);
             clientConn.postMessage(message);// proxy-->client
