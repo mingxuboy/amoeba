@@ -82,6 +82,7 @@ public class AnoClientDataPacket extends DataPacket implements AnoServices {
         return sb.toString();
     }
     
+    @Override
     protected Class<? extends AbstractPacketBuffer> getBufferClass() {
 		return AnoPacketBuffer.class;
 	}
