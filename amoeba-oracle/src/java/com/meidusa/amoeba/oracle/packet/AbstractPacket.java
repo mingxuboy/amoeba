@@ -62,8 +62,6 @@ public class AbstractPacket implements Packet, OraclePacketConstant {
 
     /**
      * 将数据包转化成ByteBuffer
-     * 
-     * @return
      */
     public ByteBuffer toByteBuffer() {
         try {
@@ -120,6 +118,18 @@ public class AbstractPacket implements Packet, OraclePacketConstant {
         return DATA_OFFSET + 1;
     }
 
+    protected String extractData() {
+        String data;
+        if (dataLen <= 0) data = new String();
+        else if (length > dataOffset) {
+            data = new String(buffer, dataOffset, dataLen);
+        } else {
+            byte abyte0[] = new byte[dataLen];
+            data = new String(abyte0);
+        }
+        return data;
+    }
+
     public String toString() {
         return ToStringBuilder.reflectionToString(this);
     }
@@ -131,18 +141,6 @@ public class AbstractPacket implements Packet, OraclePacketConstant {
             // 逻辑上面不会发生不支持情况
             return null;
         }
-    }
-
-    protected String extractData() {
-        String data;
-        if (dataLen <= 0) data = new String();
-        else if (length > dataOffset) {
-            data = new String(buffer, dataOffset, dataLen);
-        } else {
-            byte abyte0[] = new byte[dataLen];
-            data = new String(abyte0);
-        }
-        return data;
     }
 
 }

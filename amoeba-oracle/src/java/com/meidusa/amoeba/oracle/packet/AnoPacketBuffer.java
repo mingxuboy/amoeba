@@ -101,7 +101,7 @@ public class AnoPacketBuffer extends AbstractPacketBuffer implements OraclePacke
 
     public void sendRaw(byte[] ab) {
         sendPktHeader(ab.length, 1);
-        writeArray(ab);
+        writeBytes(ab);
     }
 
     public int[] receiveUB2Array() {
@@ -140,7 +140,7 @@ public class AnoPacketBuffer extends AbstractPacketBuffer implements OraclePacke
     public void sendString(String s) {
         byte[] ab = s.getBytes();
         sendPktHeader(ab.length, 0);
-        writeArray(ab);
+        writeBytes(ab);
     }
 
     // //////////////////////////////////////////////////////
@@ -171,12 +171,6 @@ public class AnoPacketBuffer extends AbstractPacketBuffer implements OraclePacke
 
     // //////////////////////////////////////////////////////
     // Ë½ÓÐº¯Êý
-    private void writeArray(byte[] ab) {
-        ensureCapacity(ab.length);
-        System.arraycopy(ab, 0, buffer, position, ab.length);
-        position += ab.length;
-    }
-
     private void sendPktHeader(int k, int l) {
         check(k, l);
         writeUB2(k);
