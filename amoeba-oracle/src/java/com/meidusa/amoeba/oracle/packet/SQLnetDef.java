@@ -42,7 +42,7 @@ public interface SQLnetDef {
     public static final int     NSPMXCDATA                            = 230;
     public static final int     NSINAWANTED                           = 1;
     public static final int     NSINAINTCHG                           = 2;
-    public static final int     NSINADISABLEFORCONNECTION             = 4;
+    public static final byte     NSINADISABLEFORCONNECTION             = 4;
     public static final int     NSINANOSERVICES                       = 8;
     public static final int     NSINAREQUIRED                         = 16;
     public static final int     NSINAAUTHWANTED                       = 32;
