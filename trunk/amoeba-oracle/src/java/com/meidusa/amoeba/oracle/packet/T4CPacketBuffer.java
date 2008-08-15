@@ -467,6 +467,28 @@ public class T4CPacketBuffer extends OracleAbstractPacketBuffer implements Oracl
         return l;
     }
 
+    byte[] unmarshalTEXT(int i) {
+        int j = 0;
+        byte[] abyte0 = new byte[i];
+        do {
+            if (j >= i) {
+                break;
+            }
+            if (readBytes(abyte0, j, 1) < 0) {
+                throw new RuntimeException("无法从套接字读取更多的数据");
+            }
+        } while (abyte0[j++] != 0);
+
+        byte[] abyte1;
+        if (abyte0.length == --j) {
+            abyte1 = abyte0;
+        } else {
+            abyte1 = new byte[j];
+            System.arraycopy(abyte0, 0, abyte1, 0, j);
+        }
+        return abyte1;
+    }
+
     // ////////////////////////////////////////////////////////
     private boolean escapeSequenceNull(int i) {
         boolean flag = false;
