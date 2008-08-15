@@ -2,11 +2,13 @@ package com.meidusa.amoeba.oracle.packet;
 
 import java.io.UnsupportedEncodingException;
 
+import com.meidusa.amoeba.packet.AbstractPacketBuffer;
+
 /**
  * @author hexianmao
  * @version 2008-8-11 ÏÂÎç04:18:34
  */
-public class DataPacket extends AbstractPacket {
+public abstract class DataPacket extends AbstractPacket {
 
     protected int dataFlags;
 
@@ -29,14 +31,23 @@ public class DataPacket extends AbstractPacket {
 //        }
 //    }
 
-    protected void init(AnoPacketBuffer buffer) {
-        super.init(buffer);
+    
+    @Override
+    protected void init(AbstractPacketBuffer absbuffer) {
+        super.init(absbuffer);
+        OracleAbstractPacketBuffer buffer = (OracleAbstractPacketBuffer)absbuffer;
         dataFlags = buffer.readUB2();
     }
 
-    protected void write2Buffer(AnoPacketBuffer buffer) throws UnsupportedEncodingException {
-        super.write2Buffer(buffer);
+    @Override
+    protected void write2Buffer(AbstractPacketBuffer absbuffer) throws UnsupportedEncodingException {
+        super.write2Buffer(absbuffer);
+        OracleAbstractPacketBuffer buffer = (OracleAbstractPacketBuffer)absbuffer;
         buffer.writeUB2(dataFlags);
     }
 
+    @Override
+	protected Class<? extends AbstractPacketBuffer> getBufferClass() {
+		return OracleAbstractPacketBuffer.class;
+	}
 }

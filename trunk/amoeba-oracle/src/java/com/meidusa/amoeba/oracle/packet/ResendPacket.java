@@ -4,6 +4,8 @@ import java.nio.ByteBuffer;
 
 import org.apache.log4j.Logger;
 
+import com.meidusa.amoeba.packet.AbstractPacketBuffer;
+
 /**
  * 服务器端返回的要求客户端重发的数据包
  * 
@@ -32,4 +34,9 @@ public class ResendPacket extends AbstractPacket {
         sb.append("ResendPacket info ==============================\n");
         return sb.toString();
     }
+    
+    @Override
+	protected Class<? extends AbstractPacketBuffer> getBufferClass() {
+		return AbstractPacketBuffer.class;
+	}
 }

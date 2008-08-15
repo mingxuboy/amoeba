@@ -4,6 +4,8 @@ import java.io.UnsupportedEncodingException;
 
 import org.apache.log4j.Logger;
 
+import com.meidusa.amoeba.packet.AbstractPacketBuffer;
+
 /**
  * @author hexianmao
  * @version 2008-8-11 下午04:18:18
@@ -47,7 +49,8 @@ public class ConnectPacket extends AbstractPacket {
         }
     }
 
-    protected void write2Buffer(AnoPacketBuffer buffer) throws UnsupportedEncodingException {
+    protected void write2Buffer(AbstractPacketBuffer absbuffer) throws UnsupportedEncodingException {
+    	OracleAbstractPacketBuffer buffer = (OracleAbstractPacketBuffer)absbuffer;
     	this.type = SQLnetDef.NS_PACKT_TYPE_CONNECT;
     	dataOffset = 34;
     	super.write2Buffer(buffer);
@@ -65,7 +68,7 @@ public class ConnectPacket extends AbstractPacket {
     		buffer.setPosition(27);
     		buffer.writeUB2(dataOffset);//写入data 在buffer中偏移位置
     		buffer.setPosition(dataOffset);
-    		buffer.writeBytes(dataBytes);
+    		buffer.writeBytes(dataBytes);//写入data 数据
     	}else{
     		buffer.writeUB2((byte)0);
     	}
@@ -86,4 +89,7 @@ public class ConnectPacket extends AbstractPacket {
         return sb.toString();
     }
     
+    protected Class<? extends AbstractPacketBuffer> getBufferClass() {
+		return AnoPacketBuffer.class;
+	}
 }

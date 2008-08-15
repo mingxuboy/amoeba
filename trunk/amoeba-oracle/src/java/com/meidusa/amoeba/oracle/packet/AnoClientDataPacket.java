@@ -4,6 +4,8 @@ import java.io.UnsupportedEncodingException;
 
 import org.apache.log4j.Logger;
 
+import com.meidusa.amoeba.packet.AbstractPacketBuffer;
+
 /**
  * @author hexianmao
  * @version 2008-8-11 ÏÂÎç04:17:45
@@ -18,7 +20,9 @@ public class AnoClientDataPacket extends DataPacket implements AnoServices {
     public short          h;
     public AnoService[]   anoService;
 
-    protected void init(AnoPacketBuffer buffer) {
+    @Override
+    protected void init(AbstractPacketBuffer absbuffer) {
+    	AnoPacketBuffer buffer = (AnoPacketBuffer)absbuffer;
         super.init(buffer);
         if (buffer.readUB4() != NA_MAGIC) {
             throw new RuntimeException("Wrong Magic number in na packet");
@@ -28,7 +32,7 @@ public class AnoClientDataPacket extends DataPacket implements AnoServices {
         anoServiceSize = buffer.readUB2();
         h = buffer.readUB1();
 
-        anoService = new AnoService[anoServiceSize];
+        /*anoService = new AnoService[anoServiceSize];
         try {
             String pkgPrefix = "com.meidusa.amoeba.oracle.packet.";
             for (int i = 0; i < SERV_INORDER_CLASSNAME.length; i++) {
@@ -37,7 +41,7 @@ public class AnoClientDataPacket extends DataPacket implements AnoServices {
             }
         } catch (Exception e) {
             throw new RuntimeException();
-        }
+        }*/
 
         if (logger.isDebugEnabled()) {
             logger.debug(this.toString());
@@ -48,7 +52,9 @@ public class AnoClientDataPacket extends DataPacket implements AnoServices {
         return anoService;
     }
 
-    protected void write2Buffer(AnoPacketBuffer buffer) throws UnsupportedEncodingException {
+    @Override
+    protected void write2Buffer(AbstractPacketBuffer absbuffer) throws UnsupportedEncodingException {
+    	AnoPacketBuffer buffer = (AnoPacketBuffer)absbuffer;
         super.write2Buffer(buffer);
         buffer.writeUB4(NA_MAGIC);
         buffer.writeUB2(m);
@@ -75,5 +81,9 @@ public class AnoClientDataPacket extends DataPacket implements AnoServices {
         sb.append("AnoClientDataPacket info ==============================\n");
         return sb.toString();
     }
+    
+    protected Class<? extends AbstractPacketBuffer> getBufferClass() {
+		return AnoPacketBuffer.class;
+	}
 
 }

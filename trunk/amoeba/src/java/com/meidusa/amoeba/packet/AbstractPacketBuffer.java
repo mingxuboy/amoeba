@@ -54,6 +54,15 @@ public class AbstractPacketBuffer implements PacketBuffer {
         this.position = position;
     }
 
+    public byte readByte() {
+        return buffer[position++];
+    }
+    
+    public byte readByte(int position) {
+    	this.position = position;
+        return buffer[this.position++];
+    }
+    
     public void writeByte(byte b) {
         ensureCapacity(1);
         buffer[position++] = b;
