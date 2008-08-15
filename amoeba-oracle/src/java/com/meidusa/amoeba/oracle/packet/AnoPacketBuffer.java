@@ -1,7 +1,6 @@
 package com.meidusa.amoeba.oracle.packet;
 
 import com.meidusa.amoeba.oracle.io.OraclePacketConstant;
-import com.meidusa.amoeba.packet.AbstractPacketBuffer;
 
 /**
  * Oracle,Ano格式的数据包buffer解析
