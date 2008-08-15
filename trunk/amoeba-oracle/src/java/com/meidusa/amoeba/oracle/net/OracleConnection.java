@@ -17,6 +17,8 @@ public abstract class OracleConnection extends DatabaseConnection {
 
 	private int sdu;
 	private int tdu;
+	private boolean anoEnabled = false;
+	
 	public OracleConnection(SocketChannel channel, long createStamp) {
 		super(channel, createStamp);
 		/**
@@ -77,5 +79,13 @@ public abstract class OracleConnection extends DatabaseConnection {
 				this.setMessageHandler(null);
 			}
 		}
+	}
+
+	public boolean isAnoEnabled() {
+		return anoEnabled;
+	}
+
+	public void setAnoEnabled(boolean anoEnabled) {
+		this.anoEnabled = anoEnabled;
 	}
 }

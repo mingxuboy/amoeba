@@ -1,5 +1,7 @@
 package com.meidusa.amoeba.oracle.packet;
 
+import java.io.UnsupportedEncodingException;
+
 import org.apache.log4j.Logger;
 
 /**
@@ -10,13 +12,13 @@ public class AcceptPacket extends AbstractPacket {
 
     private static Logger logger = Logger.getLogger(AcceptPacket.class);
 
-    protected int         version;
-    protected int         options;
-    protected int         sduSize;
-    protected int         tduSize;
-    protected int         myHWByteOrder;
-    protected int         flag0;
-    protected int         flag1;
+    protected int         version = 308;
+    protected int         options = 0 ;
+    protected int         sduSize = NSPDFSDULN;
+    protected int         tduSize = NSPMXSDULN;
+    protected int         myHWByteOrder = 256;
+    protected byte         flag0 = 69;
+    protected byte         flag1 = 0;
 
     public void init(byte[] buffer) {
         super.init(buffer);
@@ -38,15 +40,28 @@ public class AcceptPacket extends AbstractPacket {
         dataLen = buffer[18] & 0xff;
         dataLen <<= 8;
         dataLen |= buffer[19] & 0xff;
-        dataOff = buffer[20] & 0xff;
-        dataOff <<= 8;
-        dataOff |= buffer[21] & 0xff;
+        dataOffset = buffer[20] & 0xff;
+        dataOffset <<= 8;
+        dataOffset |= buffer[21] & 0xff;
         flag0 = buffer[22];
         flag1 = buffer[23];
 
         if (logger.isDebugEnabled()) {
             logger.debug(this.toString());
         }
+    }
+    
+    protected void write2Buffer(AnoPacketBuffer buffer) throws UnsupportedEncodingException {
+    	super.write2Buffer(buffer);
+    	buffer.writeUB2(version);
+    	buffer.writeUB2(options);
+    	buffer.writeUB2(sduSize);
+    	buffer.writeUB2(tduSize);
+    	buffer.writeUB2(myHWByteOrder);
+    	buffer.writeUB2(0);
+    	buffer.writeUB2(dataOffset);
+    	buffer.writeUB1(flag0);
+    	buffer.writeUB1(flag1);
     }
 
     public String toString() {
