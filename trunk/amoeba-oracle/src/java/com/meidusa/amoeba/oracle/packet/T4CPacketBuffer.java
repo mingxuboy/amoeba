@@ -21,9 +21,8 @@ public class T4CPacketBuffer extends OracleAbstractPacketBuffer implements Oracl
 
     final byte[] ignored      = new byte[255];
     final int[]  retLen       = new int[1];
+    final byte[] rep          = { 0, 1, 1, 1, 1 };
 
-    // T4CTypeRep types = new T4CTypeRep();
-    byte[]       rep          = { 0, 1, 1, 1, 1 };
     boolean      isConvNeeded = false;
 
     // DBConversion conv = null;
@@ -39,8 +38,18 @@ public class T4CPacketBuffer extends OracleAbstractPacketBuffer implements Oracl
         // types.setRep((byte) 1, (byte) 2);
     }
 
-    public void setRep(byte[] rep) {
-        this.rep = rep;
+    public byte getRep(byte pos) {
+        if (pos < 0 || pos > 4) {
+            throw new RuntimeException("无效的类型表示");
+        }
+        return rep[pos];
+    }
+
+    public void setRep(byte pos, byte val) {
+        if (pos < 0 || pos > 4 || val > 3) {
+            throw new RuntimeException("无效的类型表示");
+        }
+        rep[pos] = val;
     }
 
     public void setConvNeeded(boolean isConvNeeded) {
