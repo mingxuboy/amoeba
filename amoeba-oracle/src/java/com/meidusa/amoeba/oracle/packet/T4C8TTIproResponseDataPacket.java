@@ -10,19 +10,16 @@ import com.meidusa.amoeba.packet.AbstractPacketBuffer;
  * @author hexianmao
  * @version 2008-8-14 ÏÂÎç07:29:53
  */
-public class T4C8TTIproServerDataPacket extends T4CTTIMsgDataPacket {
+public class T4C8TTIproResponseDataPacket extends T4CTTIMsgDataPacket {
 
-    byte         proSvrVer;
-    short        oVersion         = -1;
-    byte[]       proSvrStr;
-    short        svrCharSet;
-    byte         svrFlags;
-    short        svrCharSetElem;
-    boolean      svrInfoAvailable = false;
-    short        NCHAR_CHARSET    = 0;
-
-    final byte[] proCliVerTTC8    = { 6, 5, 4, 3, 2, 1, 0 };
-    final byte[] proCliStrTTC8    = { 74, 97, 118, 97, 95, 84, 84, 67, 45, 56, 46, 50, 46, 48, 0 };
+    byte    proSvrVer        = 6;
+    short   oVersion         = -1;
+    byte[]  proSvrStr        = "Linuxi386/Linux-2.0.34-8.1.0".getBytes();
+    short   svrCharSet       = 852;
+    byte    svrFlags         = 1;
+    short   svrCharSetElem   = 0;
+    boolean svrInfoAvailable = false;
+    short   NCHAR_CHARSET    = 0;
 
     protected void init(AbstractPacketBuffer absbuffer) {
         super.init(absbuffer);
@@ -83,9 +80,14 @@ public class T4C8TTIproServerDataPacket extends T4CTTIMsgDataPacket {
     protected void write2Buffer(AbstractPacketBuffer absbuffer) throws UnsupportedEncodingException {
         msgCode = TTIPRO;
         super.write2Buffer(absbuffer);
-        T4CPacketBuffer buffer = (T4CPacketBuffer) absbuffer;
-        buffer.writeBytes(proCliVerTTC8);
-        buffer.writeBytes(proCliStrTTC8);
+        T4CPacketBuffer meg = (T4CPacketBuffer) absbuffer;
+        meg.writeByte(proSvrVer);
+        meg.marshalNULLPTR();
+        meg.writeBytes(proSvrStr);
+        meg.marshalNULLPTR();
+        meg.marshalUB2(svrCharSet);
+        meg.marshalUB1(svrFlags);
+        meg.marshalUB1(svrCharSetElem);
     }
 
     @Override

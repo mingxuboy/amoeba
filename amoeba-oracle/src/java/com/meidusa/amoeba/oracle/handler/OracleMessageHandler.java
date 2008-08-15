@@ -14,7 +14,7 @@ import com.meidusa.amoeba.oracle.packet.Packet;
 import com.meidusa.amoeba.oracle.packet.ResendPacket;
 import com.meidusa.amoeba.oracle.packet.SQLnetDef;
 import com.meidusa.amoeba.oracle.packet.T4C8TTIdtyDataPacket;
-import com.meidusa.amoeba.oracle.packet.T4C8TTIproServerDataPacket;
+import com.meidusa.amoeba.oracle.packet.T4C8TTIproResponseDataPacket;
 import com.meidusa.amoeba.oracle.util.ByteUtil;
 
 /**
