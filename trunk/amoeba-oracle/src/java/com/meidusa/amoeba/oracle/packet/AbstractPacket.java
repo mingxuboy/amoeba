@@ -37,8 +37,8 @@ import com.meidusa.amoeba.oracle.io.OraclePacketConstant;
  * @author struct
  */
 public class AbstractPacket implements Packet, OraclePacketConstant {
-	
-	private byte[] buffer;
+
+    private byte[]  buffer;
     protected int   length;
     protected short type;
     protected short flags;
@@ -48,7 +48,7 @@ public class AbstractPacket implements Packet, OraclePacketConstant {
     protected int   headerCheckSum;
 
     public void init(byte[] buffer) {
-    	this.buffer = buffer;
+        this.buffer = buffer;
         init(new AnoPacketBuffer(buffer));
     }
 
@@ -94,11 +94,7 @@ public class AbstractPacket implements Packet, OraclePacketConstant {
      * @throws UnsupportedEncodingException 当String to bytes发生编码不支持的时候
      */
     protected void write2Buffer(AnoPacketBuffer buffer) throws UnsupportedEncodingException {
-        buffer.writeUB2(length);
-        buffer.writeUB2(packetCheckSum);
-        buffer.writeUB1(type);
-        buffer.writeUB1(flags);
-        buffer.writeUB2(headerCheckSum);
+        buffer.setPosition(HEADER_SIZE);
     }
 
     /**
@@ -136,11 +132,10 @@ public class AbstractPacket implements Packet, OraclePacketConstant {
             return null;
         }
     }
-    
-    protected String extractData(){
-    	String data;
-        if (dataLen <= 0)
-            data = new String();
+
+    protected String extractData() {
+        String data;
+        if (dataLen <= 0) data = new String();
         else if (length > dataOffset) {
             data = new String(buffer, dataOffset, dataLen);
         } else {

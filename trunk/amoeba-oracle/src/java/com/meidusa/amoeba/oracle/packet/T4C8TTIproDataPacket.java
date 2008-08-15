@@ -11,9 +11,16 @@ import java.io.UnsupportedEncodingException;
 public class T4C8TTIproDataPacket extends DataPacket implements T4CTTIMsg {
 
     @Override
-    protected void init(AnoPacketBuffer buffer) {
-        // TODO Auto-generated method stub
-        super.init(buffer);
+    public void init(byte[] buffer) {        
+        init(new T4CPacketBuffer(buffer));
+    }
+
+    protected void init(T4CPacketBuffer buffer) {
+        // length = buffer.unmarshalUB2();
+        // packetCheckSum = buffer.readUB2();
+        // type = buffer.readUB1();
+        // flags = buffer.readUB1();
+        // headerCheckSum = buffer.readUB2();
     }
 
     @Override
