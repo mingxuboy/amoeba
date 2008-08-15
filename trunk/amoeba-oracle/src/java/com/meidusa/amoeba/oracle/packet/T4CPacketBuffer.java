@@ -69,7 +69,7 @@ public class T4CPacketBuffer extends AbstractPacketBuffer implements OraclePacke
     void marshalSB2(short s) {
         byte b = int2Buffer(s, tmpBuffer2, (byte) 1);
         if (b != 0) {
-            write(tmpBuffer2, 0, b);
+            writeBytes(tmpBuffer2, 0, b);
         }
     }
 
@@ -80,7 +80,7 @@ public class T4CPacketBuffer extends AbstractPacketBuffer implements OraclePacke
     void marshalSB4(int i) {
         byte b = int2Buffer(i, tmpBuffer4, (byte) 2);
         if (b != 0) {
-            write(tmpBuffer4, 0, b);
+            writeBytes(tmpBuffer4, 0, b);
         }
     }
 
@@ -91,7 +91,7 @@ public class T4CPacketBuffer extends AbstractPacketBuffer implements OraclePacke
     void marshalSB8(long l) {
         byte b = long2Buffer(l, tmpBuffer8, (byte) 3);
         if (b != 0) {
-            write(tmpBuffer8, 0, b);
+            writeBytes(tmpBuffer8, 0, b);
         }
     }
 
@@ -105,13 +105,13 @@ public class T4CPacketBuffer extends AbstractPacketBuffer implements OraclePacke
 
     void marshalB1Array(byte[] ab) {
         if (ab.length > 0) {
-            write(ab, 0, ab.length);
+            writeBytes(ab, 0, ab.length);
         }
     }
 
     void marshalB1Array(byte[] ab, int i, int j) {
         if (ab.length > 0) {
-            write(ab, i, j);
+            writeBytes(ab, i, j);
         }
     }
 
@@ -146,7 +146,7 @@ public class T4CPacketBuffer extends AbstractPacketBuffer implements OraclePacke
             if (isConvNeeded) {
                 marshalCLR(ab, offset, len);
             } else {
-                write(ab, offset, len);
+                writeBytes(ab, offset, len);
             }
         }
     }
@@ -159,14 +159,14 @@ public class T4CPacketBuffer extends AbstractPacketBuffer implements OraclePacke
                 int k = j - i1;
                 int l = k <= 64 ? k : 64;
                 writeByte((byte) (l & 0xff));
-                write(ab, i + i1, l);
+                writeBytes(ab, i + i1, l);
                 i1 += l;
             } while (i1 < j);
             writeByte((byte) 0);
         } else {
             writeByte((byte) (j & 0xff));
             if (ab.length != 0) {
-                write(ab, i, j);
+                writeBytes(ab, i, j);
             }
         }
     }
@@ -264,7 +264,7 @@ public class T4CPacketBuffer extends AbstractPacketBuffer implements OraclePacke
 
     byte[] unmarshalNBytes(int i) {
         byte abyte0[] = new byte[i];
-        if (read(abyte0, 0, abyte0.length) < 0) {
+        if (readBytes(abyte0, 0, abyte0.length) < 0) {
             throw new RuntimeException("无法从套接字读取更多的数据");
         }
         return abyte0;
@@ -279,7 +279,7 @@ public class T4CPacketBuffer extends AbstractPacketBuffer implements OraclePacke
 
     byte[] getNBytes(int i) {
         byte abyte0[] = new byte[i];
-        if (read(abyte0, 0, abyte0.length) < 0) {
+        if (readBytes(abyte0, 0, abyte0.length) < 0) {
             throw new RuntimeException("无法从套接字读取更多的数据");
         }
         return abyte0;
@@ -287,7 +287,7 @@ public class T4CPacketBuffer extends AbstractPacketBuffer implements OraclePacke
 
     int getNBytes(byte abyte0[], int i, int j) {
         int k = 0;
-        if ((k = read(abyte0, i, j)) < 0) {
+        if ((k = readBytes(abyte0, i, j)) < 0) {
             throw new RuntimeException("无法从套接字读取更多的数据");
         }
         return k;
@@ -490,7 +490,7 @@ public class T4CPacketBuffer extends AbstractPacketBuffer implements OraclePacke
         } else {
             byte byte1 = int2Buffer(b, tmpBuffer4, (byte) 4);
             if (byte1 != 0) {
-                write(tmpBuffer4, 0, byte1);
+                writeBytes(tmpBuffer4, 0, byte1);
             }
         }
     }
@@ -517,7 +517,7 @@ public class T4CPacketBuffer extends AbstractPacketBuffer implements OraclePacke
             i = 8;
         }
         byte[] ab = getTmpBuffer(i);
-        read(ab, 0, i);
+        readBytes(ab, 0, i);
 
         long l1 = 0L;
         for (int j = 0; j < ab.length; j++) {
@@ -557,7 +557,7 @@ public class T4CPacketBuffer extends AbstractPacketBuffer implements OraclePacke
         }
 
         byte[] ab = getTmpBuffer(i);
-        read(ab, 0, i);
+        readBytes(ab, 0, i);
 
         int i1 = 0;
         for (int j = 0; j < ab.length; j++) {
@@ -682,19 +682,6 @@ public class T4CPacketBuffer extends AbstractPacketBuffer implements OraclePacke
             default:
                 return new byte[i];
         }
-    }
-
-    private int read(byte[] ab, int offset, int len) {
-        System.arraycopy(buffer, position, ab, offset, len);
-        position += len;
-        return len;
-    }
-
-    private int write(byte[] ab, int offset, int len) {
-        ensureCapacity(len);
-        System.arraycopy(ab, offset, buffer, position, len);
-        position += len;
-        return len;
     }
 
     private void reverseArray(byte[] ab, byte b) {

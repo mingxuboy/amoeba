@@ -49,8 +49,8 @@ public class AbstractPacketBuffer implements PacketBuffer {
     }
 
     public void setPosition(int position) {
-    	int length = this.position - position;
-    	ensureCapacity(length);
+        int length = this.position - position;
+        ensureCapacity(length);
         this.position = position;
     }
 
@@ -58,11 +58,22 @@ public class AbstractPacketBuffer implements PacketBuffer {
         ensureCapacity(1);
         buffer[position++] = b;
     }
-    
-    public void writeBytes(byte[] byts) {
-        ensureCapacity(byts.length);
-        System.arraycopy(byts, 0, buffer, position, byts.length);
-        position += byts.length;
+
+    public int writeBytes(byte[] ab) {
+        return writeBytes(ab, 0, ab.length);
+    }
+
+    public int writeBytes(byte[] ab, int offset, int len) {
+        ensureCapacity(len);
+        System.arraycopy(ab, offset, buffer, position, len);
+        position += len;
+        return len;
+    }
+
+    public int readBytes(byte[] ab, int offset, int len) {
+        System.arraycopy(buffer, position, ab, offset, len);
+        position += len;
+        return len;
     }
 
     /**
