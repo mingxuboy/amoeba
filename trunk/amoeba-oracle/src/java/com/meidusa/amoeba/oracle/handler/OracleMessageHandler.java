@@ -1,7 +1,5 @@
 package com.meidusa.amoeba.oracle.handler;
 
-import java.io.UnsupportedEncodingException;
-
 import com.meidusa.amoeba.net.Connection;
 import com.meidusa.amoeba.net.MessageHandler;
 import com.meidusa.amoeba.net.Sessionable;
@@ -58,12 +56,8 @@ public class OracleMessageHandler implements MessageHandler, Sessionable, SQLnet
                         if (buffer.readUB4() == AnoServices.NA_MAGIC) {
                             AnoClientDataPacket packet = new AnoClientDataPacket();
                             packet.anoServiceSize = 0;
-                            try {
-                                serverMsgCount++;
-                                clientConn.postMessage(packet.toBuffer().toByteBuffer().array());
-                            } catch (UnsupportedEncodingException e) {
-                                e.printStackTrace();
-                            }
+                            serverMsgCount++;
+                            clientConn.postMessage(packet.toByteBuffer());
                             return;
                         }
                     }

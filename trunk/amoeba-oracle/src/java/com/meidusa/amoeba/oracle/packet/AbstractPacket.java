@@ -102,13 +102,13 @@ public class AbstractPacket implements Packet, OraclePacketConstant {
     /**
      * 该方法调用了{@link #write2Buffer(PacketBuffer)} 写入到指定的buffer，并且调用了{@link #afterPacketWritten(PacketBuffer)}
      */
-    public AnoPacketBuffer toBuffer(AnoPacketBuffer buffer) throws UnsupportedEncodingException {
+    protected AnoPacketBuffer toBuffer(AnoPacketBuffer buffer) throws UnsupportedEncodingException {
         write2Buffer(buffer);
         afterPacketWritten(buffer);
         return buffer;
     }
 
-    public AnoPacketBuffer toBuffer() throws UnsupportedEncodingException {
+    protected AnoPacketBuffer toBuffer() throws UnsupportedEncodingException {
         int bufferSize = calculatePacketSize();
         bufferSize = (bufferSize < (DATA_OFFSET + 1) ? (DATA_OFFSET + 1) : bufferSize);
         AnoPacketBuffer buffer = new AnoPacketBuffer(bufferSize);
