@@ -81,9 +81,9 @@ public class T4C8TTIproDataPacket extends T4CTTIMsgDataPacket {
 
     @Override
     protected void write2Buffer(AbstractPacketBuffer absbuffer) throws UnsupportedEncodingException {
+        msgCode = TTIPRO;
         super.write2Buffer(absbuffer);
         T4CPacketBuffer buffer = (T4CPacketBuffer) absbuffer;
-        buffer.writeByte(TTIPRO);
         buffer.writeBytes(proCliVerTTC8);
         buffer.writeBytes(proCliStrTTC8);
     }
