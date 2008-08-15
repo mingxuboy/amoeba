@@ -1,5 +1,7 @@
 package com.meidusa.amoeba.oracle.packet;
 
+import java.io.UnsupportedEncodingException;
+
 import org.apache.log4j.Logger;
 
 import com.meidusa.amoeba.packet.AbstractPacketBuffer;
@@ -56,6 +58,29 @@ public class AnoServerDataPacket extends DataPacket implements AnoServices {
 
     }
 
+    @Override
+    protected void write2Buffer(AbstractPacketBuffer absbuffer) throws UnsupportedEncodingException {
+    	AnoPacketBuffer buffer = (AnoPacketBuffer)absbuffer;
+        super.write2Buffer(buffer);
+        buffer.writeUB4(NA_MAGIC);
+        buffer.writeUB2(m);
+        buffer.writeUB4(version);
+        buffer.writeUB2(anoServiceSize);
+        buffer.writeUB1(h);
+        if (anoService == null && anoServiceSize > 0) {
+            anoService = new AnoService[anoServiceSize];
+            try {
+                String pkgPrefix = "com.meidusa.amoeba.oracle.packet.";
+                for (int i = 0; i < SERV_INORDER_CLASSNAME.length; i++) {
+                    anoService[i] = (AnoService) Class.forName(pkgPrefix + SERV_INORDER_CLASSNAME[i]).newInstance();
+                    anoService[i].doWrite(buffer);
+                }
+            } catch (Exception e) {
+                throw new RuntimeException();
+            }
+        }
+
+    }
     public String toString() {
         StringBuffer sb = new StringBuffer();
         sb.append("AnoServerDataPacket info ==============================\n");
