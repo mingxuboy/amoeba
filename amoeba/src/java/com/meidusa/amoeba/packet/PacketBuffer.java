@@ -15,6 +15,9 @@ public interface PacketBuffer {
 	 */
 	public ByteBuffer toByteBuffer();
 	
+	public byte readByte();
+
+	public byte readByte(int postion);
 	/**
 	 * 
 	 * @param bte

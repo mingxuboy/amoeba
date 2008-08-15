@@ -4,6 +4,8 @@ import java.io.UnsupportedEncodingException;
 
 import org.apache.log4j.Logger;
 
+import com.meidusa.amoeba.packet.AbstractPacketBuffer;
+
 /**
  * @author hexianmao
  * @version 2008-8-11 ÏÂÎç04:17:38
@@ -51,7 +53,9 @@ public class AcceptPacket extends AbstractPacket {
         }
     }
     
-    protected void write2Buffer(AnoPacketBuffer buffer) throws UnsupportedEncodingException {
+    @Override
+    protected void write2Buffer(AbstractPacketBuffer absbuffer) throws UnsupportedEncodingException {
+    	OracleAbstractPacketBuffer buffer =(OracleAbstractPacketBuffer) absbuffer;
     	super.write2Buffer(buffer);
     	buffer.writeUB2(version);
     	buffer.writeUB2(options);
@@ -76,4 +80,10 @@ public class AcceptPacket extends AbstractPacket {
         sb.append("flag1:").append(flag1).append("\n");
         return sb.toString();
     }
+
+	@Override
+	protected Class<? extends AbstractPacketBuffer> getBufferClass() {
+		return AnoPacketBuffer.class;
+	}
+
 }

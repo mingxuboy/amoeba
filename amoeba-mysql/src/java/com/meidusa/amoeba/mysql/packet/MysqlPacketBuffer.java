@@ -261,14 +261,6 @@ public class MysqlPacketBuffer extends AbstractPacketBuffer{
 		}
 	}
 
-	final byte readByte() {
-		return this.buffer[this.position++];
-	}
-
-	public final byte readByte(int readAt) {
-		return this.buffer[readAt];
-	}
-
 	final long readFieldLength() {
 		int sw = this.buffer[this.position++] & 0xff;
 
