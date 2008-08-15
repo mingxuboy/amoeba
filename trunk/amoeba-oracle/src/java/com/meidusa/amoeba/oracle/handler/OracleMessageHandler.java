@@ -1,5 +1,7 @@
 package com.meidusa.amoeba.oracle.handler;
 
+import org.apache.log4j.Logger;
+
 import com.meidusa.amoeba.net.Connection;
 import com.meidusa.amoeba.net.MessageHandler;
 import com.meidusa.amoeba.net.Sessionable;
@@ -11,6 +13,8 @@ import com.meidusa.amoeba.oracle.packet.AnoServices;
 import com.meidusa.amoeba.oracle.packet.Packet;
 import com.meidusa.amoeba.oracle.packet.ResendPacket;
 import com.meidusa.amoeba.oracle.packet.SQLnetDef;
+import com.meidusa.amoeba.oracle.packet.T4C8TTIproDataPacket;
+import com.meidusa.amoeba.oracle.util.ByteUtil;
 
 /**
  * 非常简单的数据包转发程序
@@ -18,6 +22,8 @@ import com.meidusa.amoeba.oracle.packet.SQLnetDef;
  * @author struct
  */
 public class OracleMessageHandler implements MessageHandler, Sessionable, SQLnetDef {
+
+    private static Logger  logger         = Logger.getLogger(OracleMessageHandler.class);
 
     private Connection     clientConn;
     private Connection     serverConn;
@@ -60,6 +66,16 @@ public class OracleMessageHandler implements MessageHandler, Sessionable, SQLnet
                             clientConn.postMessage(packet.toByteBuffer().array());
                             return;
                         }
+                    }
+                    if (clientMsgCount == 4) {
+                        T4C8TTIproDataPacket packet = new T4C8TTIproDataPacket();
+                        byte[] ab = packet.toByteBuffer().array();
+                        if (logger.isDebugEnabled()) {
+                            System.out.println(ByteUtil.toHex(ab, 0, ab.length));
+                        }
+                    }
+                    if(clientMsgCount == 5){
+                        
                     }
                     break;
             }
