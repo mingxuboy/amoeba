@@ -37,16 +37,18 @@ import com.meidusa.amoeba.oracle.io.OraclePacketConstant;
  * @author struct
  */
 public class AbstractPacket implements Packet, OraclePacketConstant {
-
+	
+	private byte[] buffer;
     protected int   length;
     protected short type;
     protected short flags;
     protected int   dataLen;
-    protected int   dataOff;
+    protected int   dataOffset;
     protected int   packetCheckSum;
     protected int   headerCheckSum;
 
     public void init(byte[] buffer) {
+    	this.buffer = buffer;
         init(new AnoPacketBuffer(buffer));
     }
 
@@ -134,4 +136,18 @@ public class AbstractPacket implements Packet, OraclePacketConstant {
             return null;
         }
     }
+    
+    protected String extractData(){
+    	String data;
+        if (dataLen <= 0)
+            data = new String();
+        else if (length > dataOffset) {
+            data = new String(buffer, dataOffset, dataLen);
+        } else {
+            byte abyte0[] = new byte[dataLen];
+            data = new String(abyte0);
+        }
+        return data;
+    }
+
 }

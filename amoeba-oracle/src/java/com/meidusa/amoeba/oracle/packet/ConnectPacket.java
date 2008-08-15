@@ -13,11 +13,10 @@ public class ConnectPacket extends AbstractPacket {
     private static Logger logger    = Logger.getLogger(ConnectPacket.class);
     public static final byte[] CONSTANT_CONNECT_BYTES = new byte[]{1,52,1,44,0,0};
     protected byte[]      arrayFlag = new byte[6];
-    protected int sduSize = NSPDFSDULN;
-    protected int tduSize = NSPMXSDULN;
-    protected boolean     anoEnabled;
-    protected String      data;
-    protected byte dataOffset = 34; 
+    public int sduSize = NSPDFSDULN;
+    public int tduSize = NSPMXSDULN;
+    public boolean     anoEnabled;
+    public String      data;
 
     public void init(byte[] buffer) {
         super.init(buffer);
@@ -36,11 +35,12 @@ public class ConnectPacket extends AbstractPacket {
             anoEnabled = true;
         }
         dataOffset = buffer[27];
-        if (dataLen > 0) {
+        data  = extractData();
+        /*if (dataLen > 0) {
             byte[] dataBytes = new byte[dataLen];
             System.arraycopy(buffer, dataOffset, data, 0, dataLen);
             data = new String(dataBytes);
-        }
+        }*/
 
         if (logger.isDebugEnabled()) {
             logger.debug(this.toString());
@@ -49,6 +49,7 @@ public class ConnectPacket extends AbstractPacket {
 
     protected void write2Buffer(AnoPacketBuffer buffer) throws UnsupportedEncodingException {
     	this.type = SQLnetDef.NS_PACKT_TYPE_CONNECT;
+    	dataOffset = 34;
     	super.write2Buffer(buffer);
     	buffer.writeBytes(CONSTANT_CONNECT_BYTES);
     	buffer.writeUB2(sduSize);//postion = 14;
