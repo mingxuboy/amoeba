@@ -23,7 +23,7 @@ public class T4CPacketBuffer extends OracleAbstractPacketBuffer implements Oracl
     final int[]  retLen       = new int[1];
 
     // T4CTypeRep types = new T4CTypeRep();
-    byte[]       rep          = new byte[5];
+    byte[]       rep          = { 0, 1, 1, 1, 1 };
     boolean      isConvNeeded = false;
 
     // DBConversion conv = null;

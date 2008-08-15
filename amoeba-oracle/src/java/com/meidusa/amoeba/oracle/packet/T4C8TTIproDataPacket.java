@@ -12,7 +12,13 @@ import com.meidusa.amoeba.packet.AbstractPacketBuffer;
  */
 public class T4C8TTIproDataPacket extends DataPacket implements T4CTTIMsg {
 
-    protected void init(AbstractPacketBuffer buffer) {
+    byte  ttcCode;
+    short oVersion;
+
+    protected void init(AbstractPacketBuffer absbuffer) {
+        super.init(absbuffer);
+        T4CPacketBuffer buffer = (T4CPacketBuffer) absbuffer;
+
         // length = buffer.unmarshalUB2();
         // packetCheckSum = buffer.readUB2();
         // type = buffer.readUB1();
@@ -21,14 +27,14 @@ public class T4C8TTIproDataPacket extends DataPacket implements T4CTTIMsg {
     }
 
     @Override
-    protected void write2Buffer(AbstractPacketBuffer buffer) throws UnsupportedEncodingException {
-        // TODO Auto-generated method stub
-        super.write2Buffer(buffer);
+    protected void write2Buffer(AbstractPacketBuffer absbuffer) throws UnsupportedEncodingException {
+        super.write2Buffer(absbuffer);
+        T4CPacketBuffer buffer = (T4CPacketBuffer) absbuffer;
     }
-    
+
     @Override
-	protected Class<? extends AbstractPacketBuffer> getBufferClass() {
-		return T4CPacketBuffer.class;
-	}
+    protected Class<? extends AbstractPacketBuffer> getBufferClass() {
+        return T4CPacketBuffer.class;
+    }
 
 }
