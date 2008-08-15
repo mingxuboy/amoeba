@@ -22,8 +22,8 @@ public class AnoClientDataPacket extends DataPacket implements AnoServices {
 
     @Override
     protected void init(AbstractPacketBuffer absbuffer) {
-    	AnoPacketBuffer buffer = (AnoPacketBuffer)absbuffer;
-        super.init(buffer);
+        super.init(absbuffer);
+    	AnoPacketBuffer buffer = (AnoPacketBuffer)absbuffer;        
         if (buffer.readUB4() != NA_MAGIC) {
             throw new RuntimeException("Wrong Magic number in na packet");
         }
@@ -54,8 +54,8 @@ public class AnoClientDataPacket extends DataPacket implements AnoServices {
 
     @Override
     protected void write2Buffer(AbstractPacketBuffer absbuffer) throws UnsupportedEncodingException {
-    	AnoPacketBuffer buffer = (AnoPacketBuffer)absbuffer;
-        super.write2Buffer(buffer);
+        super.write2Buffer(absbuffer);
+    	AnoPacketBuffer buffer = (AnoPacketBuffer)absbuffer;        
         buffer.writeUB4(NA_MAGIC);
         buffer.writeUB2(m);
         buffer.writeUB4(version);
