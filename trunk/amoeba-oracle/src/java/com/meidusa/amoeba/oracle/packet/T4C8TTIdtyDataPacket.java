@@ -10,7 +10,7 @@ import com.meidusa.amoeba.packet.AbstractPacketBuffer;
  * @author hexianmao
  * @version 2008-8-14 обнГ07:31:03
  */
-public class T4C8TTIdtyDataPacket extends T4CTTIMsgDataPacket implements T4CTTIMsg {
+public class T4C8TTIdtyDataPacket extends T4CTTIMsgDataPacket {
 
 	public short	cliRIN = 1;
 	public short	cliROUT = 1;
