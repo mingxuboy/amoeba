@@ -94,8 +94,7 @@ public class AnoPacketBuffer extends AbstractPacketBuffer implements OraclePacke
     public byte[] receiveRaw() {
         int l = readDataLength(1);
         byte[] b = new byte[l];
-        System.arraycopy(buffer, position, b, 0, b.length);
-        position += b.length;
+        readBytes(b, 0, b.length);
         return b;
     }
 
@@ -132,8 +131,7 @@ public class AnoPacketBuffer extends AbstractPacketBuffer implements OraclePacke
     public String receiveString() {
         int l = readDataLength(0);
         byte[] ab = new byte[l];
-        System.arraycopy(buffer, position, ab, 0, ab.length);
-        position += ab.length;
+        readBytes(ab, 0, ab.length);
         return new String(ab);
     }
 
