@@ -1,7 +1,6 @@
 package com.meidusa.amoeba.oracle.packet;
 
 import java.io.UnsupportedEncodingException;
-import java.nio.ByteBuffer;
 
 import org.apache.log4j.Logger;
 
