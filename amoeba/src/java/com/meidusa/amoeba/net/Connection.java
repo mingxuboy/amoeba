@@ -276,7 +276,13 @@ public abstract class Connection implements NetEventHandler {
 			this._cmgr.connectionFailed(this, e);
 		}
     }
-    
+	
+	public void postMessage(ByteBuffer msg)
+    {
+		_outQueue.append(msg);
+        _cmgr.invokeConnectionWriteMessage(this);
+    }
+	
 	public boolean checkIdle(long now) {
 		long idleMillis = now - _lastEvent;
 		if (idleMillis < PING_INTERVAL + LATENCY_GRACE) {
