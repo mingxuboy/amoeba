@@ -13,7 +13,8 @@ import com.meidusa.amoeba.oracle.packet.AnoServices;
 import com.meidusa.amoeba.oracle.packet.Packet;
 import com.meidusa.amoeba.oracle.packet.ResendPacket;
 import com.meidusa.amoeba.oracle.packet.SQLnetDef;
-import com.meidusa.amoeba.oracle.packet.T4C8TTIproDataPacket;
+import com.meidusa.amoeba.oracle.packet.T4C8TTIdtyDataPacket;
+import com.meidusa.amoeba.oracle.packet.T4C8TTIproServerDataPacket;
 import com.meidusa.amoeba.oracle.util.ByteUtil;
 
 /**
@@ -67,16 +68,20 @@ public class OracleMessageHandler implements MessageHandler, Sessionable, SQLnet
                             return;
                         }
                     }
-                    if (clientMsgCount == 4) {
-                        T4C8TTIproDataPacket packet = new T4C8TTIproDataPacket();
-                        byte[] ab = packet.toByteBuffer().array();
-                        if (logger.isDebugEnabled()) {
-                            System.out.println(ByteUtil.toHex(ab, 0, ab.length));
-                        }
-                    }
-                    if(clientMsgCount == 5){
-                        
-                    }
+//                    if (clientMsgCount == 4) {
+//                        T4C8TTIproServerDataPacket packet = new T4C8TTIproServerDataPacket();
+//                        byte[] ab = packet.toByteBuffer().array();
+//                        if (logger.isDebugEnabled()) {
+//                            System.out.println(ByteUtil.toHex(ab, 0, ab.length));
+//                        }
+//                    }
+//                    if (clientMsgCount == 5) {
+//                        T4C8TTIdtyDataPacket packet = new T4C8TTIdtyDataPacket();
+//                        byte[] ab = packet.toByteBuffer().array();
+//                        if (logger.isDebugEnabled()) {
+//                            System.out.println(ByteUtil.toHex(ab, 0, ab.length));
+//                        }
+//                    }
                     break;
             }
 

@@ -1,6 +1,9 @@
 package com.meidusa.amoeba.oracle.packet;
 
+import java.util.Arrays;
+
 import com.meidusa.amoeba.oracle.io.OraclePacketConstant;
+import com.meidusa.amoeba.oracle.util.ByteUtil;
 
 /**
  * Oracle,T4C格式的数据包buffer解析
@@ -21,7 +24,7 @@ public class T4CPacketBuffer extends OracleAbstractPacketBuffer implements Oracl
 
     final byte[] ignored      = new byte[255];
     final int[]  retLen       = new int[1];
-    final byte[] rep          = { 0, 1, 1, 1, 1 };
+    final byte[] rep          = { 0, 2, 1, 1, 1 };
 
     boolean      isConvNeeded = false;
 
@@ -720,6 +723,13 @@ public class T4CPacketBuffer extends OracleAbstractPacketBuffer implements Oracl
             ab[i] = ab[b - 1 - i];
             ab[b - 1 - i] = b1;
         }
+    }
+
+    public static void main(String[] args) {
+        T4CPacketBuffer meg = new T4CPacketBuffer(5);
+        meg.marshalUB2(1);
+        byte[] ab = meg.toByteBuffer().array();
+        System.out.println(ByteUtil.toHex(ab, 0, ab.length));
     }
 
 }
