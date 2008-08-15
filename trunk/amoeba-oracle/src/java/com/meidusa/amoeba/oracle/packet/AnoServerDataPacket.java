@@ -2,6 +2,8 @@ package com.meidusa.amoeba.oracle.packet;
 
 import org.apache.log4j.Logger;
 
+import com.meidusa.amoeba.packet.AbstractPacketBuffer;
+
 /**
  * @author hexianmao
  * @version 2008-8-11 ÏÂÎç04:17:54
@@ -24,7 +26,9 @@ public class AnoServerDataPacket extends DataPacket implements AnoServices {
         }
     }
 
-    protected void init(AnoPacketBuffer buffer) {
+    @Override
+    protected void init(AbstractPacketBuffer absbuffer) {
+    	OracleAbstractPacketBuffer buffer = (OracleAbstractPacketBuffer)absbuffer;
         super.init(buffer);
         if (buffer.readUB4() != DEADBEEF) {
             throw new RuntimeException("Wrong Magic number in na packet");
@@ -58,5 +62,8 @@ public class AnoServerDataPacket extends DataPacket implements AnoServices {
         return sb.toString();
     }
 
-
+    @Override
+	protected Class<? extends AbstractPacketBuffer> getBufferClass() {
+		return OracleAbstractPacketBuffer.class;
+	}
 }
