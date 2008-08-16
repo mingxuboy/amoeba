@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="GB2312"?>
-<project default="dist" name="AmoebaBuilder" basedir="." xmlns:artifact="urn:maven-artifact-ant">
+<project default="mysql" name="AmoebaBuilder" basedir="." xmlns:artifact="urn:maven-artifact-ant">
   	<property name="version"     value="0.24"/>
   	<property name="app.name"     value="amoeba"/>
   	<property name="deploy.dir"   value="dist"/>
   	<property name="savedoc.dir"  value="docs"/>
   	<property name="javadoc.home" value="${deploy.dir}/document"/>
   	<property name="classes.dir"  value="${deploy.dir}/classes"/>
-  	<property name="libs.dir"     value="build/etc/lib"/>
-  	<property name="release.dir" value="release"/>
+  	
+  	<property file="${basedir}/build.properties" />
   	
   <property name="projects.dir"   value="."/>
   <property name="projects" 	 value="amoeba,amoeba-mysql"/>
@@ -37,6 +37,11 @@
   
   <filelist dir="." id="doc.files">
     <file name="build/doc/amoeba.pdf"/>
+  </filelist>
+  
+  <filelist dir="." id="build-mysql.files">
+    <file name="build/build-mysql/build.properties"/>
+    <file name="build/build-mysql/build.xml"/>
   </filelist>
   
   <filelist dir="." id="conf.files">
@@ -100,22 +105,10 @@
     </javac>
    </target>
     
-	<target name="server" description="Amoeba for Mysql" depends="compile">
-        <java classname="com.meidusa.amoeba.mysql.server.MysqlProxyServer" fork="true" maxmemory="128m">
-        <sysproperty key="amoeba.home" value="${basedir}"/>
-         <classpath>
-			<fileset dir="lib">
-				<include name="**/*.jar"/>
-				<include name="classes"/>
-				<exclude name="amoeba-*.jar"/>
-			</fileset>
-         	<pathelement path="target/classes"/>
-         </classpath>
-       </java>
-	</target>
-
-   <target name="dist" depends="distclean,prepare,distcleanprojects,distprojects">
-   		
+   <target name="mysql" depends="distclean,prepare,distcleanprojects,distprojects">
+   		<copyfilelist dest="${deploy.dir}">
+      		<filelist refid="build-mysql.files"/>
+    	</copyfilelist>
 	    <tar longfile="gnu" destfile="amoeba-mysql-${version}.tar.gz" compression="gzip">
 		    <tarfileset dir="${deploy.dir}" mode="755">
 		        <include name="bin/**"/>
@@ -131,6 +124,15 @@
 		    	<exclude name="bin/*"/>
 		    	<include name="*.*"/>
 		    </tarfileset>
+	        <tarfileset dir="amoeba">
+	        	<exclude name="*/.svn/*"/>
+	        	<include name="src/java/**"/>
+	        </tarfileset>
+			<tarfileset dir="amoeba-mysql">
+	        	<exclude name="*/.svn/*"/>
+	        	<include name="src/java/**"/>
+	        	
+	        </tarfileset>
 	    </tar>
 		
 		<zip destfile="amoeba-mysql-${version}.zip">
@@ -148,6 +150,15 @@
 		    	<exclude name="bin/*"/>
 		    	<include name="*.*"/>
 		    </zipfileset>
+		     <zipfileset dir="amoeba">
+	        	<exclude name="*/.svn/*"/>
+	        	<include name="src/java/**"/>
+	        </zipfileset>
+			<zipfileset dir="amoeba-mysql">
+	        	<exclude name="*/.svn/*"/>
+	        	<include name="src/java/**"/>
+	        </zipfileset>
+		    
 	    </zip>
    </target>
 </project>
