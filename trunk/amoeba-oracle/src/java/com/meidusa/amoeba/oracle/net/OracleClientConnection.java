@@ -35,7 +35,7 @@ public class OracleClientConnection extends OracleConnection {
         if (msgCount == 1) {
             if (message[4] == Packet.NS_PACKT_TYPE_CONNECT) {
             	ConnectPacket connPacket = new ConnectPacket();
-            	connPacket.init(message);
+            	connPacket.init(message,conn);
             	clientConn.setAnoEnabled(connPacket.anoEnabled);
                 packet = new AcceptPacket();
             } else {
@@ -50,7 +50,7 @@ public class OracleClientConnection extends OracleConnection {
         }
         // ...
 
-        postMessage(packet.toByteBuffer().array());
+        postMessage(packet.toByteBuffer(conn).array());
     }
 
     private void switchHandler() {

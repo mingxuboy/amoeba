@@ -39,7 +39,7 @@ public class PacketIOFilter extends  AbstractIOFilter {
 			ok.insertId = 0;
 			ok.packetId = 1;
 			ok.serverStatus = 2;
-			this.setResultBuffer(ok.toByteBuffer().array());
+			this.setResultBuffer(ok.toByteBuffer(null).array());
 			return Result.RETURN;
 		}
 		return null;

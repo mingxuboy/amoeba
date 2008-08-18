@@ -40,16 +40,19 @@ public abstract class AbstractResultPacket extends AbstractPacket {
 	
 	public byte resultPacketType;
 	
+	@Override
 	public void init(MysqlPacketBuffer buffer) {
 		super.init(buffer);
 		resultPacketType = buffer.readByte();
 	}
 
+	@Override
 	protected void write2Buffer(MysqlPacketBuffer buffer) throws UnsupportedEncodingException {
 		super.write2Buffer(buffer);
 		buffer.writeByte(resultPacketType);
 	}
 	
+	@Override
 	protected int calculatePacketSize(){
 		int packLength = super.calculatePacketSize();
         packLength += 1;

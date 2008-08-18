@@ -169,5 +169,5 @@ public class AuthenticationPacket extends AbstractPacket{
         packLength += ((userLength + passwordLength + databaseLength) * 2) + 7 + HEADER_SIZE + AUTH_411_OVERHEAD;
 		return packLength;
 	}
-	
+
 }

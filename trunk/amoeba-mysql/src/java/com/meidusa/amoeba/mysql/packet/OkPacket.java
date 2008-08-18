@@ -84,6 +84,7 @@ public class OkPacket extends AbstractResultPacket {
 	public int warningCount;
 	public String message;
 	
+	@Override
 	public void init(MysqlPacketBuffer buffer) {
 		super.init(buffer);
 		
@@ -97,6 +98,7 @@ public class OkPacket extends AbstractResultPacket {
 		}
 	}
 
+	@Override
 	public void write2Buffer(MysqlPacketBuffer buffer) throws UnsupportedEncodingException {
 		super.write2Buffer(buffer);
 		buffer.writeFieldLength(affectedRows);
@@ -108,6 +110,7 @@ public class OkPacket extends AbstractResultPacket {
 		}
 	}
 	
+	@Override
 	protected int calculatePacketSize(){
 		int packLength = super.calculatePacketSize();
 		packLength += 4+4+2+2+(message == null?0:message.length()) * 2;

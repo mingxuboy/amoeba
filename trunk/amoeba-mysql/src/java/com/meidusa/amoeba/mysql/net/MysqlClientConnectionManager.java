@@ -73,7 +73,7 @@ public class MysqlClientConnectionManager extends ServerableConnectionManager{
 		handshakePacket.restOfScrambleBuff = getRandomString(12);
 		MysqlClientConnection aconn = (MysqlClientConnection) authing;
 		aconn.setSeed(handshakePacket.seed + handshakePacket.restOfScrambleBuff);
-		aconn.postMessage(handshakePacket.toByteBuffer().array());
+		aconn.postMessage(handshakePacket.toByteBuffer(authing).array());
 	}
 	
 	public void connectionAuthenticateSuccess(Connection conn,AuthResponseData data) {
@@ -85,7 +85,7 @@ public class MysqlClientConnectionManager extends ServerableConnectionManager{
 			ok.insertId = 0;
 			ok.serverStatus = 2;
 			ok.warningCount = 0;
-			authenticateOkPacketData = ok.toByteBuffer().array();
+			authenticateOkPacketData = ok.toByteBuffer(conn).array();
 		}
 		conn.setMessageHandler(new MySqlCommandDispatcher());
 		conn.postMessage(authenticateOkPacketData);
@@ -99,7 +99,7 @@ public class MysqlClientConnectionManager extends ServerableConnectionManager{
 		error.serverErrorMessage = data.message;
 		error.sqlstate = "42S02";
 		error.errno = 1000;
-		conn.postMessage(error.toByteBuffer().array());
+		conn.postMessage(error.toByteBuffer(conn).array());
 	}
 	
     public static String getRandomString(int size){

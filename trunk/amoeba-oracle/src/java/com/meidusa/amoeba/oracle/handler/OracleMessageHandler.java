@@ -12,7 +12,9 @@ import com.meidusa.amoeba.oracle.packet.ConnectPacket;
 import com.meidusa.amoeba.oracle.packet.Packet;
 import com.meidusa.amoeba.oracle.packet.SQLnetDef;
 import com.meidusa.amoeba.oracle.packet.T4C7OversionDataPacket;
+import com.meidusa.amoeba.oracle.packet.T4C7OversionResponseDataPacket;
 import com.meidusa.amoeba.oracle.packet.T4C8TTIdtyDataPacket;
+import com.meidusa.amoeba.oracle.packet.T4C8TTIdtyResponseDataPacket;
 import com.meidusa.amoeba.oracle.packet.T4C8TTIproDataPacket;
 import com.meidusa.amoeba.oracle.packet.T4C8TTIproResponseDataPacket;
 import com.meidusa.amoeba.oracle.packet.T4CTTIfunPacket;
@@ -65,7 +67,7 @@ public class OracleMessageHandler implements MessageHandler, Sessionable, SQLnet
                             packet = new AnoDataPacket();
                             ((AnoDataPacket) packet).anoServiceSize = 0;
                             serverMsgCount++;
-                            clientConn.postMessage(packet.toByteBuffer().array());
+                            clientConn.postMessage(packet.toByteBuffer(conn).array());
                             return;
                         }
                     }
@@ -88,8 +90,8 @@ public class OracleMessageHandler implements MessageHandler, Sessionable, SQLnet
             if (packet != null) {
                 System.out.println("========================================================");
                 System.out.println("source:" + ByteUtil.toHex(message, 0, message.length));
-                packet.init(message);
-                byte[] ab = packet.toByteBuffer().array();
+                packet.init(message,conn);
+                byte[] ab = packet.toByteBuffer(conn).array();
                 if (logger.isDebugEnabled()) {
                     System.out.println("#warpped packet:" + packet);
                     System.out.println("#warpped bytes:" + ByteUtil.toHex(ab, 0, ab.length));
@@ -103,20 +105,31 @@ public class OracleMessageHandler implements MessageHandler, Sessionable, SQLnet
 
         } else {
             serverMsgCount++;
-
+            Packet packet = null;
             switch (message[4]) {
                 case NS_PACKT_TYPE_DATA:
                     if (lastPackt instanceof T4C8TTIproDataPacket) {
-                        Packet packet = new T4C8TTIproResponseDataPacket();
-                        System.out.println("@server source bytes:" + ByteUtil.toHex(message, 0, message.length));
-                        packet.init(message);
-                        message = packet.toByteBuffer().array();
-                        if (logger.isDebugEnabled()) {
-                            System.out.println("@server warpped bytes:" + ByteUtil.toHex(message, 0, message.length));
-                            System.out.println();
-                        }
+                    	packet = new T4C8TTIproResponseDataPacket();
+                    }else if(lastPackt instanceof T4C8TTIdtyDataPacket){
+                    	packet = new T4C8TTIdtyResponseDataPacket();
+                    }else if(lastPackt instanceof T4C7OversionDataPacket){
+                    	packet = new T4C7OversionResponseDataPacket();
                     }
                     break;
+            }
+            
+            try{
+	            if(packet != null){
+	            	System.out.println("@server source bytes:" + ByteUtil.toHex(message, 0, message.length));
+	                packet.init(message,conn);
+	                message = packet.toByteBuffer(conn).array();
+	                if (logger.isDebugEnabled()) {
+	                    System.out.println("@server warpped bytes:" + ByteUtil.toHex(message, 0, message.length));
+	                    System.out.println();
+	                }
+	            }
+            }catch(Exception e){
+            	e.printStackTrace();
             }
             lastPackt = null;
             clientConn.postMessage(message);// proxy-->client

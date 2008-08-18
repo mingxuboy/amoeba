@@ -17,6 +17,8 @@ import java.nio.ByteBuffer;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.log4j.Logger;
 
+import com.meidusa.amoeba.net.Connection;
+
 /**
  * 
  * @author <a href=mailto:piratebase@sina.com>Struct chen</a>
@@ -39,18 +41,19 @@ public abstract class AbstractPacket implements Packet {
 	 * @param buffer buffer是从mysql socketChannel的流读取头4个字节计算数据包长度
 	 * 				并且读取相应的长度所形成的buffer
 	 */
-	public void init(byte[] buffer){
-		init(new MysqlPacketBuffer(buffer));
+	public void init(byte[] buffer,Connection conn){
+		MysqlPacketBuffer packetBuffer = new MysqlPacketBuffer(buffer);
+		packetBuffer.init(conn);
+		init(packetBuffer);
 	}
-	
 	
 	/**
 	 * 将数据包转化成ByteBuffer
 	 * @return
 	 */
-	public ByteBuffer toByteBuffer(){
+	public ByteBuffer toByteBuffer(Connection conn){
 		try {
-			return toBuffer().toByteBuffer();
+			return toBuffer(conn).toByteBuffer();
 		} catch (UnsupportedEncodingException e) {
 			return null;
 		}
@@ -97,10 +100,11 @@ public abstract class AbstractPacket implements Packet {
 		return buffer;
 	}
 	
-	public MysqlPacketBuffer toBuffer() throws UnsupportedEncodingException{
+	private MysqlPacketBuffer toBuffer(Connection conn) throws UnsupportedEncodingException{
 		int bufferSize = calculatePacketSize();
 		bufferSize = (bufferSize<5?5:bufferSize);
 		MysqlPacketBuffer buffer = new MysqlPacketBuffer(bufferSize);
+		buffer.init(conn);
 		return toBuffer(buffer);
 	}
 	

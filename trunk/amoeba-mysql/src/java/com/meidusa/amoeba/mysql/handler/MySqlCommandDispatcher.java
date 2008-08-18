@@ -46,14 +46,14 @@ public class MySqlCommandDispatcher implements MessageHandler {
 		ok.insertId = 0;
 		ok.packetId = 1;
 		ok.serverStatus = 2;
-		STATIC_OK_BUFFER = ok.toByteBuffer().array();
+		STATIC_OK_BUFFER = ok.toByteBuffer(null).array();
 	}
 	
 	public void handleMessage(Connection connection,byte[] message) {
 		MysqlClientConnection conn = (MysqlClientConnection)connection;
 		
 		QueryCommandPacket command = new QueryCommandPacket();
-		command.init(message);
+		command.init(message,connection);
 		try {
 			if(MysqlPacketBuffer.isPacketType(message, QueryCommandPacket.COM_QUIT) || MysqlPacketBuffer.isPacketType(message, QueryCommandPacket.COM_STMT_CLOSE)){
 				if(logger.isDebugEnabled()){
@@ -119,18 +119,18 @@ public class MySqlCommandDispatcher implements MessageHandler {
 					error.packetId = 1;
 					error.sqlstate = "42000";
 					error.serverErrorMessage ="Unknown prepared statment id="+statmentId;
-					conn.postMessage(error.toByteBuffer().array());
+					conn.postMessage(error.toByteBuffer(connection).array());
 					logger.warn("Unknown prepared statment id:"+statmentId);
 				}else{
 					Map<Integer,Object> longMap = null;
 					for(byte[] longdate:conn.getLongDataList()){
 						LongDataPacket packet = new LongDataPacket();
-						packet.init(longdate);
+						packet.init(longdate,connection);
 						longMap.put(packet.parameterIndex, packet.data);
 					}
 					
 					ExecutePacket executePacket = new ExecutePacket(preparedInf.getOkPrepared().parameters,longMap);
-					executePacket.init(message);
+					executePacket.init(message,connection);
 
 					QueryRouter router = ProxyRuntimeContext.getInstance().getQueryRouter();
 					ObjectPool[] pools = router.doRoute(conn,preparedInf.getPreparedStatment(),false,executePacket.getParameters());
@@ -157,7 +157,7 @@ public class MySqlCommandDispatcher implements MessageHandler {
 				error.packetId = 1;
 				error.sqlstate = "42000";
 				error.serverErrorMessage ="can not use this command here!!";
-				conn.postMessage(error.toByteBuffer().array());
+				conn.postMessage(error.toByteBuffer(connection).array());
 				logger.debug("unsupport packet:"+command);
 			}
 		} catch (Exception e) {
@@ -167,7 +167,7 @@ public class MySqlCommandDispatcher implements MessageHandler {
 			error.packetId = 1;
 			error.sqlstate = "42000";
 			error.serverErrorMessage =e.getMessage();
-			conn.postMessage(error.toByteBuffer().array());
+			conn.postMessage(error.toByteBuffer(connection).array());
 		}
 		
 	}

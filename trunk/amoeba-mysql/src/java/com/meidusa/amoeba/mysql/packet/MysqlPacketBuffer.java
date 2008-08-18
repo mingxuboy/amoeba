@@ -20,7 +20,7 @@ import com.meidusa.amoeba.mysql.io.Constants;
 import com.meidusa.amoeba.mysql.io.MySqlPacketConstant;
 import com.meidusa.amoeba.mysql.util.MysqlStringUtil;
 import com.meidusa.amoeba.mysql.util.SingleByteCharsetConverter;
-import com.meidusa.amoeba.packet.AbstractPacketBuffer;
+import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
 import com.meidusa.amoeba.util.StringUtil;
 
 /**
