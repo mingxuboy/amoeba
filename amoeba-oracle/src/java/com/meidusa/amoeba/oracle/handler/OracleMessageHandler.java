@@ -8,13 +8,13 @@ import com.meidusa.amoeba.net.Sessionable;
 import com.meidusa.amoeba.oracle.packet.AnoDataPacket;
 import com.meidusa.amoeba.oracle.packet.AnoPacketBuffer;
 import com.meidusa.amoeba.oracle.packet.AnoServices;
-import com.meidusa.amoeba.oracle.packet.T4C7OversionDataPacket;
-import com.meidusa.amoeba.oracle.packet.T4C8TTIdtyDataPacket;
-import com.meidusa.amoeba.oracle.packet.T4C8TTIproResponseDataPacket;
 import com.meidusa.amoeba.oracle.packet.ConnectPacket;
 import com.meidusa.amoeba.oracle.packet.Packet;
 import com.meidusa.amoeba.oracle.packet.SQLnetDef;
+import com.meidusa.amoeba.oracle.packet.T4C7OversionDataPacket;
+import com.meidusa.amoeba.oracle.packet.T4C8TTIdtyDataPacket;
 import com.meidusa.amoeba.oracle.packet.T4C8TTIproDataPacket;
+import com.meidusa.amoeba.oracle.packet.T4C8TTIproResponseDataPacket;
 import com.meidusa.amoeba.oracle.util.ByteUtil;
 
 /**
@@ -87,8 +87,9 @@ public class OracleMessageHandler implements MessageHandler, Sessionable, SQLnet
                 packet.init(message);
                 byte[] ab = packet.toByteBuffer().array();
                 if (logger.isDebugEnabled()) {
-                    System.out.println(packet);
-                    System.out.println(ByteUtil.toHex(ab, 0, ab.length));
+                    System.out.println("@send packet:" + packet);
+                    System.out.println("@send bytes:" + ByteUtil.toHex(ab, 0, ab.length));
+                    System.out.println();
                 }
                 serverConn.postMessage(ab);
             } else {
@@ -101,8 +102,14 @@ public class OracleMessageHandler implements MessageHandler, Sessionable, SQLnet
             switch (message[4]) {
                 case NS_PACKT_TYPE_DATA:
                     if (clientMsgCount == 4) {
-                        T4C8TTIproResponseDataPacket packet = new T4C8TTIproResponseDataPacket();
+                        Packet packet = new T4C8TTIproResponseDataPacket();
+                        System.out.println("##receive bytes:" + ByteUtil.toHex(message, 0, message.length));
+                        packet.init(message);
                         message = packet.toByteBuffer().array();
+                        if (logger.isDebugEnabled()) {
+                            System.out.println("##receive bytes:" + ByteUtil.toHex(message, 0, message.length));
+                            System.out.println();
+                        }
                     }
                     break;
             }

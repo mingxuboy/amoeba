@@ -724,10 +724,14 @@ public class T4CPacketBuffer extends OracleAbstractPacketBuffer implements Oracl
     }
 
     public static void main(String[] args) {
-        T4CPacketBuffer meg = new T4CPacketBuffer(5);
-        meg.marshalUB2(1);
+        T4CPacketBuffer meg = new T4CPacketBuffer(2);
+        meg.marshalUB2(100);
         byte[] ab = meg.toByteBuffer().array();
         System.out.println(ByteUtil.toHex(ab, 0, ab.length));
+
+        byte[] ab0 = { 0x64, 0x00 };
+        meg = new T4CPacketBuffer(ab0);
+        System.out.println(meg.unmarshalUB2());
     }
 
 }

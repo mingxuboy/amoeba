@@ -13,16 +13,18 @@ import com.meidusa.amoeba.packet.AbstractPacketBuffer;
 public class T4C8TTIproDataPacket extends T4CTTIMsgPacket {
 
     byte[] proCliVerTTC8 = { 6, 5, 4, 3, 2, 1 };
-    String proCliStrTTC8 = "Java_TTC-8.2.0";
+    byte[] proCliStrTTC8 = "Java_TTC-8.2.0".getBytes();
+
+    // String proCliStrTTC8 = "Java_TTC-8.2.0";
 
     protected void init(AbstractPacketBuffer absbuffer) {
         super.init(absbuffer);
-        // if (msgCode != TTIPRO) {
-        // throw new RuntimeException("违反协议");
-        // }
-        // T4CPacketBuffer meg = (T4CPacketBuffer) absbuffer;
-        // meg.readBytes(proCliVerTTC8, 0, proCliVerTTC8.length);
-        // meg.readBytes(proCliStrTTC8, 0, proCliStrTTC8.length);
+        if (msgCode != TTIPRO) {
+            throw new RuntimeException("违反协议");
+        }
+        T4CPacketBuffer meg = (T4CPacketBuffer) absbuffer;
+        proCliVerTTC8 = meg.unmarshalTEXT(50);
+        proCliStrTTC8 = meg.unmarshalTEXT(100);
     }
 
     @Override
@@ -31,9 +33,9 @@ public class T4C8TTIproDataPacket extends T4CTTIMsgPacket {
         super.write2Buffer(absbuffer);
         T4CPacketBuffer meg = (T4CPacketBuffer) absbuffer;
         meg.writeBytes(proCliVerTTC8);
-        meg.writeByte((byte) 0);
-        meg.writeBytes(proCliStrTTC8.getBytes());
-        meg.writeByte((byte) 0);
+        meg.marshalNULLPTR();
+        meg.writeBytes(proCliStrTTC8);
+        meg.marshalNULLPTR();
     }
 
 }
