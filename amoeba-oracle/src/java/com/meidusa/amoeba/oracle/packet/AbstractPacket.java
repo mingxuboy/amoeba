@@ -55,7 +55,7 @@ public abstract class AbstractPacket implements Packet, OraclePacketConstant {
         AbstractPacketBuffer packetbuffer = null;
         try {
         	Constructor<? extends AbstractPacketBuffer> constractor = getBufferClass().getConstructor(byte[].class);
-        	packetbuffer = constractor.newInstance(packetbuffer);
+        	packetbuffer = constractor.newInstance(buffer);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

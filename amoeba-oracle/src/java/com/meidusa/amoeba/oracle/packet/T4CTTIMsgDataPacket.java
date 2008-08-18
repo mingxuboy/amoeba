@@ -25,4 +25,5 @@ public abstract class T4CTTIMsgDataPacket extends DataPacket implements T4CTTIMs
     protected Class<? extends AbstractPacketBuffer> getBufferClass() {
         return T4CPacketBuffer.class;
     }
+    
 }

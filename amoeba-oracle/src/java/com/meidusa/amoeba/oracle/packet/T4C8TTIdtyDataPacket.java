@@ -16,6 +16,10 @@ public class T4C8TTIdtyDataPacket extends T4CTTIMsgDataPacket {
 	public short	cliROUT = 1;
 	public byte	cliFlags = 0;
 
+	public T4C8TTIdtyDataPacket(){
+		this.msgCode = TTIDTY;
+	}
+	
 	@Override
     protected void init(AbstractPacketBuffer buffer) {
         super.init(buffer);
