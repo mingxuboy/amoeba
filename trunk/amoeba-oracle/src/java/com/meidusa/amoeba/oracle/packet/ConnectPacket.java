@@ -4,7 +4,8 @@ import java.io.UnsupportedEncodingException;
 
 import org.apache.log4j.Logger;
 
-import com.meidusa.amoeba.packet.AbstractPacketBuffer;
+import com.meidusa.amoeba.net.Connection;
+import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
 
 /**
  * @author hexianmao
@@ -20,8 +21,9 @@ public class ConnectPacket extends AbstractPacket {
     public boolean     anoEnabled;
     public String      data;
 
-    public void init(byte[] buffer) {
-        super.init(buffer);
+    @Override
+    public void init(byte[] buffer,Connection conn) {
+        super.init(buffer,conn);
         sduSize = buffer[14] & 0xff;
         sduSize <<= 8;
         sduSize |= buffer[15] & 0xff;
@@ -49,6 +51,7 @@ public class ConnectPacket extends AbstractPacket {
         }
     }
 
+    @Override
     protected void write2Buffer(AbstractPacketBuffer absbuffer) throws UnsupportedEncodingException {
     	OracleAbstractPacketBuffer buffer = (OracleAbstractPacketBuffer)absbuffer;
     	this.type = SQLnetDef.NS_PACKT_TYPE_CONNECT;

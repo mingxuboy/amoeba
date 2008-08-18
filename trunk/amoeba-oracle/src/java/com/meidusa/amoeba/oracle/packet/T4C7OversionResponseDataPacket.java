@@ -2,7 +2,7 @@ package com.meidusa.amoeba.oracle.packet;
 
 import java.io.UnsupportedEncodingException;
 
-import com.meidusa.amoeba.packet.AbstractPacketBuffer;
+import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
 
 /**
  * 数据库版本信息数据包
@@ -83,4 +83,7 @@ public class T4C7OversionResponseDataPacket extends DataPacket {
     	//return 9260;
     }
 
+    protected Class<? extends AbstractPacketBuffer> getBufferClass() {
+		return T4CPacketBuffer.class;
+	}
 }
