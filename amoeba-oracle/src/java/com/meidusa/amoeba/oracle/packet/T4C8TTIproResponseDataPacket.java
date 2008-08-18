@@ -19,13 +19,14 @@ public class T4C8TTIproResponseDataPacket extends T4CTTIMsgPacket {
     byte           svrFlags         = 1;
     short          svrCharSetElem   = 0;
     boolean        svrInfoAvailable = false;
-
-    byte[]         nchar_charset    = { 0x00, 0x0b, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x07,
-            (byte) 0xd0            };
     short          NCHAR_CHARSET    = 0;
 
     private int    i                = 0;
     private byte[] abyte0           = null;
+    private short  word0            = 0;
+    private byte[] as0              = null;
+    private short  word1            = 0;
+    private byte[] as1              = null;
 
     protected void init(AbstractPacketBuffer absbuffer) {
         super.init(absbuffer);
@@ -72,13 +73,15 @@ public class T4C8TTIproResponseDataPacket extends T4CTTIMsgPacket {
         if (proSvrVer < 6) {
             return;
         }
-        short word0 = buffer.unmarshalUB1();
-        for (int k = 0; k < word0; k++) {
-            buffer.unmarshalUB1();
-        }
         word0 = buffer.unmarshalUB1();
-        for (int l = 0; l < word0; l++) {
-            buffer.unmarshalUB1();
+        as0 = new byte[word0];
+        for (int k = 0; k < word0; k++) {
+            as0[k] = (byte) buffer.unmarshalUB1();
+        }
+        word1 = buffer.unmarshalUB1();
+        as1 = new byte[word1];
+        for (int l = 0; l < word1; l++) {
+            as1[l] = (byte) buffer.unmarshalUB1();
         }
     }
 
@@ -111,8 +114,10 @@ public class T4C8TTIproResponseDataPacket extends T4CTTIMsgPacket {
         if (proSvrVer < 6) {
             return;
         }
-        meg.marshalNULLPTR();
-        meg.marshalNULLPTR();
+        meg.marshalUB1(word0);
+        meg.marshalB1Array(as0);
+        meg.marshalUB1(word1);
+        meg.marshalB1Array(as1);
     }
 
 }
