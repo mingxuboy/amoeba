@@ -14,8 +14,9 @@ import com.meidusa.amoeba.oracle.packet.SQLnetDef;
 import com.meidusa.amoeba.oracle.packet.T4C7OversionDataPacket;
 import com.meidusa.amoeba.oracle.packet.T4C8TTIdtyDataPacket;
 import com.meidusa.amoeba.oracle.packet.T4C8TTIproDataPacket;
-import com.meidusa.amoeba.oracle.packet.T4CTTIfunPacket;
 import com.meidusa.amoeba.oracle.packet.T4C8TTIproResponseDataPacket;
+import com.meidusa.amoeba.oracle.packet.T4CTTIfunPacket;
+import com.meidusa.amoeba.oracle.packet.T4CTTIoAuthKeyDataPacket;
 import com.meidusa.amoeba.oracle.util.ByteUtil;
 
 /**
@@ -32,7 +33,7 @@ public class OracleMessageHandler implements MessageHandler, Sessionable, SQLnet
     private MessageHandler clientHandler;
     private MessageHandler serverHandler;
     private boolean        isEnded        = false;
-    private Packet lastPackt = null;
+    private Packet         lastPackt      = null;
     private int            serverMsgCount = 0;
     private int            clientMsgCount = 0;
 
@@ -68,21 +69,25 @@ public class OracleMessageHandler implements MessageHandler, Sessionable, SQLnet
                             return;
                         }
                     }
-                    if(clientMsgCount<=6){
-	                    if (T4CTTIfunPacket.isMsgType(message,T4CTTIfunPacket.TTIPRO)) {
-	                        packet = new T4C8TTIproDataPacket();
-	                    }else if (T4CTTIfunPacket.isMsgType(message,T4CTTIfunPacket.TTIDTY)) {
-	                        packet = new T4C8TTIdtyDataPacket();
-	                    }else if (T4CTTIfunPacket.isFunType(message,T4CTTIfunPacket.OVERSION)) {
-	                        packet = new T4C7OversionDataPacket();
-	                    }
+                    if (clientMsgCount <= 6) {
+                        if (T4CTTIfunPacket.isMsgType(message, T4CTTIfunPacket.TTIPRO)) {
+                            packet = new T4C8TTIproDataPacket();
+                        } else if (T4CTTIfunPacket.isMsgType(message, T4CTTIfunPacket.TTIDTY)) {
+                            packet = new T4C8TTIdtyDataPacket();
+                        } else if (T4CTTIfunPacket.isFunType(message, T4CTTIfunPacket.OVERSION)) {
+                            packet = new T4C7OversionDataPacket();
+                        }
+                    }
+
+                    if (clientMsgCount == 7 && T4CTTIfunPacket.isFunType(message, T4CTTIfunPacket.OSESSKEY)) {
+                        packet = new T4CTTIoAuthKeyDataPacket();
                     }
                     break;
             }
 
             if (packet != null) {
-            	System.out.println("========================================================");
-            	System.out.println("source:"+ByteUtil.toHex(message, 0, message.length));
+                System.out.println("========================================================");
+                System.out.println("source:" + ByteUtil.toHex(message, 0, message.length));
                 packet.init(message);
                 byte[] ab = packet.toByteBuffer().array();
                 if (logger.isDebugEnabled()) {
