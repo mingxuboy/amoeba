@@ -5,7 +5,7 @@ import org.apache.log4j.Logger;
 import com.meidusa.amoeba.net.Connection;
 import com.meidusa.amoeba.net.MessageHandler;
 import com.meidusa.amoeba.net.Sessionable;
-import com.meidusa.amoeba.oracle.packet.AnoClientDataPacket;
+import com.meidusa.amoeba.oracle.packet.AnoDataPacket;
 import com.meidusa.amoeba.oracle.packet.AnoPacketBuffer;
 import com.meidusa.amoeba.oracle.packet.AnoServices;
 import com.meidusa.amoeba.oracle.packet.T4C7OversionDataPacket;
@@ -60,8 +60,8 @@ public class OracleMessageHandler implements MessageHandler, Sessionable, SQLnet
                         AnoPacketBuffer buffer = new AnoPacketBuffer(message);
                         buffer.setPosition(10);
                         if (buffer.readUB4() == AnoServices.NA_MAGIC) {
-                        	packet  = new AnoClientDataPacket();
-                            ((AnoClientDataPacket)packet).anoServiceSize = 0;
+                        	packet  = new AnoDataPacket();
+                            ((AnoDataPacket)packet).anoServiceSize = 0;
                             serverMsgCount++;
                             clientConn.postMessage(packet.toByteBuffer().array());
                             return;

@@ -9,7 +9,7 @@ import com.meidusa.amoeba.packet.AbstractPacketBuffer;
  * @author struct
  *
  */
-public class T4C8TTIdtyResponseDataPacket extends T4CTTIMsgDataPacket {
+public class T4C8TTIdtyResponseDataPacket extends T4CTTIMsgPacket {
 	
 	public boolean typeValid;
 	public T4C8TTIdtyResponseDataPacket(){

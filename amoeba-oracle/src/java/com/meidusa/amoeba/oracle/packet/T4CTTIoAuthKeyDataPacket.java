@@ -4,26 +4,24 @@ import java.io.UnsupportedEncodingException;
 
 import com.meidusa.amoeba.packet.AbstractPacketBuffer;
 
-public abstract class T4CTTIMsgDataPacket extends DataPacket implements T4CTTIMsg {
-
-    protected byte msgCode;
+public class T4CTTIoAuthKeyDataPacket extends T4CTTIfunPacket {
 
     @Override
     protected void init(AbstractPacketBuffer buffer) {
         super.init(buffer);
-        T4CPacketBuffer packetBuffer = (T4CPacketBuffer) buffer;
-        msgCode = (byte) packetBuffer.unmarshalUB1();
     }
 
     @Override
     protected void write2Buffer(AbstractPacketBuffer buffer) throws UnsupportedEncodingException {
+        this.msgCode = TTIFUN;
+        this.funCode = OSESSKEY;
+        this.seqNumber = 0;
         super.write2Buffer(buffer);
-        buffer.writeByte(msgCode);
-    }
 
-    @Override
-    protected Class<? extends AbstractPacketBuffer> getBufferClass() {
-        return T4CPacketBuffer.class;
     }
     
+    protected void marshalFunHeader(){
+        
+    }
+
 }

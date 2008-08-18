@@ -10,9 +10,9 @@ import com.meidusa.amoeba.packet.AbstractPacketBuffer;
  * @author hexianmao
  * @version 2008-8-11 обнГ04:17:54
  */
-public class AnoServerDataPacket extends DataPacket implements AnoServices {
+public class AnoResponseDataPacket extends DataPacket implements AnoServices {
 
-    private static Logger logger = Logger.getLogger(AnoServerDataPacket.class);
+    private static Logger logger = Logger.getLogger(AnoResponseDataPacket.class);
 
     int                   m;
     long                  version;
