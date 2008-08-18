@@ -12,27 +12,26 @@ import com.meidusa.amoeba.net.io.PacketInputStream;
 import com.meidusa.amoeba.net.io.PacketOutputStream;
 import com.meidusa.amoeba.oracle.io.OraclePacketInputStream;
 import com.meidusa.amoeba.oracle.io.OraclePacketOutputStream;
+import com.meidusa.amoeba.oracle.util.T4CTypeRep;
 
 public abstract class OracleConnection extends DatabaseConnection {
 
 	private int sdu;
 	private int tdu;
 	private boolean anoEnabled = false;
-	public final byte[] rep          = { 0, 2, 1, 1, 1 };
+	private final T4CTypeRep rep = new T4CTypeRep();
 	
-	public void setRep(byte pos, byte val) {
-        if (pos < 0 || pos > 4 || val > 3) {
-            throw new RuntimeException("无效的类型表示");
-        }
-        rep[pos] = val;
-    }
-	
+	public T4CTypeRep getRep() {
+		return rep;
+	}
+
 	public OracleConnection(SocketChannel channel, long createStamp) {
 		super(channel, createStamp);
 		/**
 		 * TODO
 		 * 测试用
 		 */
+		rep.setRep((byte) 1, (byte) 2);
 		this.setAuthenticated(true);
 	}
 
