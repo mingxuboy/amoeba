@@ -30,7 +30,7 @@ goto END
 
 set DEFAULT_OPTS=-Xms64m -Xmx128m
 set DEFAULT_OPTS=%DEFAULT_OPTS% "-Damoeba.home=%AMOEBA_HOME%"
-set DEFAULT_OPTS=%DEFAULT_OPTS% "-Dclassworlds.conf=%AMOEBA_HOME%\bin\amoeba-mysql.classworlds"
+set DEFAULT_OPTS=%DEFAULT_OPTS% "-Dclassworlds.conf=%AMOEBA_HOME%\bin\amoeba.classworlds"
 
 set JAVA_EXE="%JAVA_HOME%\bin\java.exe"
 set CLASSPATH="%AMOEBA_HOME%\lib\classworlds-1.0.jar"

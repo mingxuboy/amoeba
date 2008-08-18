@@ -27,7 +27,6 @@
   <filelist dir="." id="bin.files">
     <file name="build/bin/amoeba"/>
     <file name="build/bin/amoeba.bat"/>
-    <file name="build/bin/amoeba-mysql.classworlds"/>
   </filelist>
   
   <filelist dir="." id="etc.files">
@@ -37,25 +36,6 @@
   
   <filelist dir="." id="doc.files">
     <file name="build/doc/amoeba.pdf"/>
-  </filelist>
-  
-  <filelist dir="." id="build-mysql.files">
-    <file name="build/build-mysql/build.properties"/>
-    <file name="build/build-mysql/build.xml"/>
-  </filelist>
-  
-  <filelist dir="." id="conf.files">
-	<file name="build/conf/access_list.conf"/>
-  	<file name="build/conf/access_list.conf"/>
-	<file name="build/conf/amoeba.dtd"/>
-	<file name="build/conf/amoeba.xml"/>
-	<file name="build/conf/function.dtd"/>
-	<file name="build/conf/functionMap.xml"/>
-	<file name="build/conf/log4j.dtd"/>
-	<file name="build/conf/log4j.xml"/>
-	<file name="build/conf/rule.dtd"/>
-	<file name="build/conf/rule.xml"/>
-	<file name="build/conf/ruleFunctionMap.xml"/>	
   </filelist>
 	
   <path id="classpath">
@@ -86,11 +66,9 @@
     <copyfilelist dest="${deploy.dir}">
       <filelist refid="etc.files"/>
     </copyfilelist>
-        <copyfilelist dest="${deploy.dir}/doc">
+    
+    <copyfilelist dest="${deploy.dir}/doc">
       <filelist refid="doc.files"/>
-    </copyfilelist>
-    <copyfilelist dest="${deploy.dir}/conf">
-      <filelist refid="conf.files"/>
     </copyfilelist>
   </target>
   
@@ -106,9 +84,7 @@
    </target>
     
    <target name="mysql" depends="distclean,prepare,distcleanprojects,distprojects">
-   		<copyfilelist dest="${deploy.dir}">
-      		<filelist refid="build-mysql.files"/>
-    	</copyfilelist>
+
 	    <tar longfile="gnu" destfile="amoeba-mysql-${version}.tar.gz" compression="gzip">
 		    <tarfileset dir="${deploy.dir}" mode="755">
 		        <include name="bin/**"/>
@@ -134,7 +110,6 @@
 	        </tarfileset>
 	        <tarfileset dir="build/build-mysql">
 	        	<exclude name="*/.svn/*"/>
-	        	<include name="lib/*jar"/>
 	        </tarfileset>
 	    </tar>
 		
@@ -164,7 +139,6 @@
 	        
 	        <zipfileset dir="build/build-mysql">
 	        	<exclude name="*/.svn/*"/>
-	        	<include name="lib/*jar"/>
 	        </zipfileset>
 		    
 	    </zip>

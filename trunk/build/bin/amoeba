@@ -57,7 +57,7 @@ fi
 
 DEFAULT_OPTS="-Xmx160m"
 DEFAULT_OPTS="$DEFAULT_OPTS -Damoeba.home=\"$AMOEBA_HOME\""
-DEFAULT_OPTS="$DEFAULT_OPTS -Dclassworlds.conf=\"$AMOEBA_HOME/bin/amoeba-mysql.classworlds\""
+DEFAULT_OPTS="$DEFAULT_OPTS -Dclassworlds.conf=\"$AMOEBA_HOME/bin/amoeba.classworlds\""
 
 CMD="exec \"$JAVA_HOME/bin/java\" $DEFAULT_OPTS $OPTS -classpath \"$CLASSPATH\"  $MAIN_CLASS $@"
 eval $CMD
