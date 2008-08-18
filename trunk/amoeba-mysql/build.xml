@@ -11,6 +11,7 @@
   	<path id="classpath">
   		<pathelement location="${classes.dir}"/>
     	<fileset dir="${libs.dir}" includes="**/*.jar"/>
+    	<fileset dir="${project.libs.dir}" includes="**/*.jar"/>
   	</path>
 	
 

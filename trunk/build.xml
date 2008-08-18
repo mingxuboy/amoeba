@@ -131,7 +131,10 @@
 			<tarfileset dir="amoeba-mysql">
 	        	<exclude name="*/.svn/*"/>
 	        	<include name="src/java/**"/>
-	        	
+	        </tarfileset>
+	        <tarfileset dir="build/build-mysql">
+	        	<exclude name="*/.svn/*"/>
+	        	<include name="lib/*jar"/>
 	        </tarfileset>
 	    </tar>
 		
@@ -157,6 +160,11 @@
 			<zipfileset dir="amoeba-mysql">
 	        	<exclude name="*/.svn/*"/>
 	        	<include name="src/java/**"/>
+	        </zipfileset>
+	        
+	        <zipfileset dir="build/build-mysql">
+	        	<exclude name="*/.svn/*"/>
+	        	<include name="lib/*jar"/>
 	        </zipfileset>
 		    
 	    </zip>
