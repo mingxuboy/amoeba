@@ -87,8 +87,8 @@ public class OracleMessageHandler implements MessageHandler, Sessionable, SQLnet
                 packet.init(message);
                 byte[] ab = packet.toByteBuffer().array();
                 if (logger.isDebugEnabled()) {
-                    System.out.println("@send packet:" + packet);
-                    System.out.println("@send bytes:" + ByteUtil.toHex(ab, 0, ab.length));
+                    System.out.println("#receive packet:" + packet);
+                    System.out.println("#receive bytes:" + ByteUtil.toHex(ab, 0, ab.length));
                     System.out.println();
                 }
                 serverConn.postMessage(ab);
@@ -103,11 +103,11 @@ public class OracleMessageHandler implements MessageHandler, Sessionable, SQLnet
                 case NS_PACKT_TYPE_DATA:
                     if (clientMsgCount == 4) {
                         Packet packet = new T4C8TTIproResponseDataPacket();
-                        System.out.println("##receive bytes:" + ByteUtil.toHex(message, 0, message.length));
+                        System.out.println("@send bytes:" + ByteUtil.toHex(message, 0, message.length));
                         packet.init(message);
                         message = packet.toByteBuffer().array();
                         if (logger.isDebugEnabled()) {
-                            System.out.println("##receive bytes:" + ByteUtil.toHex(message, 0, message.length));
+                            System.out.println("@send bytes:" + ByteUtil.toHex(message, 0, message.length));
                             System.out.println();
                         }
                     }
