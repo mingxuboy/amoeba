@@ -15,10 +15,12 @@ public class T4C8TTIproResponseDataPacket extends T4CTTIMsgDataPacket {
     byte    proSvrVer        = 6;
     short   oVersion         = -1;
     byte[]  proSvrStr        = "Linuxi386/Linux-2.0.34-8.1.0".getBytes();
-    short   svrCharSet       = 852;
+    short   svrCharSet       = 1;
     byte    svrFlags         = 1;
     short   svrCharSetElem   = 0;
     boolean svrInfoAvailable = false;
+
+    byte[]  nchar_charset    = { 0x00, 0x0b, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x07, (byte) 0xd0 };
     short   NCHAR_CHARSET    = 0;
 
     protected void init(AbstractPacketBuffer absbuffer) {
@@ -87,7 +89,10 @@ public class T4C8TTIproResponseDataPacket extends T4CTTIMsgDataPacket {
         meg.marshalNULLPTR();
         meg.marshalUB2(svrCharSet);
         meg.marshalUB1(svrFlags);
-        meg.marshalUB1(svrCharSetElem);
+        meg.marshalUB2(svrCharSetElem);
+        meg.marshalB1Array(nchar_charset);
+        meg.writeByte((byte) 0);
+        meg.writeByte((byte) 0);
     }
 
     @Override
