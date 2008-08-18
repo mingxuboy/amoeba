@@ -32,7 +32,7 @@ public class OracleMessageHandler implements MessageHandler, Sessionable, SQLnet
     private MessageHandler clientHandler;
     private MessageHandler serverHandler;
     private boolean        isEnded        = false;
-
+    private Packet lastPackt = null;
     private int            serverMsgCount = 0;
     private int            clientMsgCount = 0;
 
@@ -68,19 +68,15 @@ public class OracleMessageHandler implements MessageHandler, Sessionable, SQLnet
                             return;
                         }
                     }
-
-                    if (T4CTTIfunPacket.isMsgType(message,T4CTTIfunPacket.TTIPRO)) {
-                        packet = new T4C8TTIproDataPacket();
+                    if(clientMsgCount<=6){
+	                    if (T4CTTIfunPacket.isMsgType(message,T4CTTIfunPacket.TTIPRO)) {
+	                        packet = new T4C8TTIproDataPacket();
+	                    }else if (T4CTTIfunPacket.isMsgType(message,T4CTTIfunPacket.TTIDTY)) {
+	                        packet = new T4C8TTIdtyDataPacket();
+	                    }else if (T4CTTIfunPacket.isFunType(message,T4CTTIfunPacket.OVERSION)) {
+	                        packet = new T4C7OversionDataPacket();
+	                    }
                     }
-
-                    if (T4CTTIfunPacket.isMsgType(message,T4CTTIfunPacket.TTIDTY)) {
-                        packet = new T4C8TTIdtyDataPacket();
-                    }
-
-                    if (T4CTTIfunPacket.isFunType(message,T4CTTIfunPacket.OVERSION)) {
-                        packet = new T4C7OversionDataPacket();
-                    }
-
                     break;
             }
 
@@ -94,6 +90,7 @@ public class OracleMessageHandler implements MessageHandler, Sessionable, SQLnet
                     System.out.println("#warpped bytes:" + ByteUtil.toHex(ab, 0, ab.length));
                     System.out.println();
                 }
+                lastPackt = packet;
                 serverConn.postMessage(ab);
             } else {
                 serverConn.postMessage(message);// proxy-->server
@@ -104,19 +101,19 @@ public class OracleMessageHandler implements MessageHandler, Sessionable, SQLnet
 
             switch (message[4]) {
                 case NS_PACKT_TYPE_DATA:
-                    if (clientMsgCount == 4) {
+                    if (lastPackt instanceof T4C8TTIproDataPacket) {
                         Packet packet = new T4C8TTIproResponseDataPacket();
-                        System.out.println("@send bytes:" + ByteUtil.toHex(message, 0, message.length));
+                        System.out.println("@server source bytes:" + ByteUtil.toHex(message, 0, message.length));
                         packet.init(message);
                         message = packet.toByteBuffer().array();
                         if (logger.isDebugEnabled()) {
-                            System.out.println("@send bytes:" + ByteUtil.toHex(message, 0, message.length));
+                            System.out.println("@server warpped bytes:" + ByteUtil.toHex(message, 0, message.length));
                             System.out.println();
                         }
                     }
                     break;
             }
-
+            lastPackt = null;
             clientConn.postMessage(message);// proxy-->client
         }
     }
