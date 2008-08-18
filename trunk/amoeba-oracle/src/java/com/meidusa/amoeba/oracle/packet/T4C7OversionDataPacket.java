@@ -23,6 +23,13 @@ public class T4C7OversionDataPacket extends T4CTTIfunPacket {
     @Override
     protected void init(AbstractPacketBuffer buffer) {
         super.init(buffer);
+        
+        T4CPacketBuffer meg = (T4CPacketBuffer)buffer;
+        //rdbmsVersionO2U = meg.unmarshalO2U();
+        meg.marshalSWORD(bufLen);
+        meg.marshalO2U(retVerLenO2U);
+        meg.marshalO2U(retVerNumO2U);
+        
         /*T4CPacketBuffer meg = (T4CPacketBuffer)buffer;
         boolean flag = false;
         T4CTTIoer oer = new T4CTTIoer(meg);

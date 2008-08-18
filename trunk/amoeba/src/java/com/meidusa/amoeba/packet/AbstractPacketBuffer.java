@@ -71,6 +71,12 @@ public class AbstractPacketBuffer implements PacketBuffer {
     public int writeBytes(byte[] ab) {
         return writeBytes(ab, 0, ab.length);
     }
+    
+    public int writeBytesWithNull(byte[] ab) {
+        int count = writeBytes(ab, 0, ab.length);
+        writeByte((byte)0);
+        return count;
+    }
 
     public int writeBytes(byte[] ab, int offset, int len) {
         ensureCapacity(len);

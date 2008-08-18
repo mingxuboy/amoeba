@@ -24,6 +24,13 @@ public class T4CTTIfunPacket extends T4CTTIMsgPacket {
         meg.marshalUB1(seqNumber);
     }
     
+    public static boolean isFunType(byte[] buffer,short type){
+    	if(buffer == null || buffer.length<=12){
+    		return false;
+    	}else{
+    		return isMsgType(buffer,TTIFUN) && ((buffer[11] & 0xff) == (type & 0xff));
+    	}
+    }
     
     public static final short          OOPEN         = 2;
     public static final short          OEXEC         = 4;
