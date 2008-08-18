@@ -14,6 +14,7 @@ import com.meidusa.amoeba.oracle.packet.SQLnetDef;
 import com.meidusa.amoeba.oracle.packet.T4C7OversionDataPacket;
 import com.meidusa.amoeba.oracle.packet.T4C8TTIdtyDataPacket;
 import com.meidusa.amoeba.oracle.packet.T4C8TTIproDataPacket;
+import com.meidusa.amoeba.oracle.packet.T4CTTIfunPacket;
 import com.meidusa.amoeba.oracle.packet.T4C8TTIproResponseDataPacket;
 import com.meidusa.amoeba.oracle.util.ByteUtil;
 
@@ -68,15 +69,15 @@ public class OracleMessageHandler implements MessageHandler, Sessionable, SQLnet
                         }
                     }
 
-                    if (clientMsgCount == 4) {
+                    if (T4CTTIfunPacket.isMsgType(message,T4CTTIfunPacket.TTIPRO)) {
                         packet = new T4C8TTIproDataPacket();
                     }
 
-                    if (clientMsgCount == 5) {
+                    if (T4CTTIfunPacket.isMsgType(message,T4CTTIfunPacket.TTIDTY)) {
                         packet = new T4C8TTIdtyDataPacket();
                     }
 
-                    if (clientMsgCount == 6) {
+                    if (T4CTTIfunPacket.isFunType(message,T4CTTIfunPacket.OVERSION)) {
                         packet = new T4C7OversionDataPacket();
                     }
 
@@ -84,11 +85,13 @@ public class OracleMessageHandler implements MessageHandler, Sessionable, SQLnet
             }
 
             if (packet != null) {
+            	System.out.println("========================================================");
+            	System.out.println("source:"+ByteUtil.toHex(message, 0, message.length));
                 packet.init(message);
                 byte[] ab = packet.toByteBuffer().array();
                 if (logger.isDebugEnabled()) {
-                    System.out.println("#receive packet:" + packet);
-                    System.out.println("#receive bytes:" + ByteUtil.toHex(ab, 0, ab.length));
+                    System.out.println("#warpped packet:" + packet);
+                    System.out.println("#warpped bytes:" + ByteUtil.toHex(ab, 0, ab.length));
                     System.out.println();
                 }
                 serverConn.postMessage(ab);

@@ -271,6 +271,16 @@ public class T4CPacketBuffer extends OracleAbstractPacketBuffer implements Oracl
         return unmarshalUB4();
     }
 
+    byte[] unmarshalArrayWithNull(){
+    	int currentPosition = this.getPosition();
+    	while(this.readByte()!=0);
+    	int distPosition = this.getPosition();
+    	int lenght = distPosition-currentPosition-1;
+    	byte[] result = new byte[lenght];
+    	System.arraycopy(buffer, currentPosition, result, 0, lenght);
+    	return result;
+    }
+    
     byte[] unmarshalNBytes(int i) {
         byte abyte0[] = new byte[i];
         if (readBytes(abyte0, 0, abyte0.length) < 0) {

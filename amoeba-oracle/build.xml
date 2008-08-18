@@ -6,11 +6,11 @@
   	<property name="savedoc.dir"  value="docs"/>
   	<property name="javadoc.home" value="${deploy.dir}/document"/>
   	<property name="classes.dir"  value="${deploy.dir}/classes"/>
-  	<property name="libs.dir"     value="../build/ect/lib"/>
-  	<property name="release.dir" value="release"/>
+	<property file="${basedir}/build.properties" />
   	<path id="classpath">
   		<pathelement location="${classes.dir}"/>
     	<fileset dir="${libs.dir}" includes="**/*.jar"/>
+    	<fileset dir="${user.dir}" includes="**/*.jar"/>
   	</path>
 		
 	<target name="compile" depends="prepare">
