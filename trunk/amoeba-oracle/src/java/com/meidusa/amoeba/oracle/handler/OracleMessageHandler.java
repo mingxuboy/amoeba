@@ -5,17 +5,12 @@ import org.apache.log4j.Logger;
 import com.meidusa.amoeba.net.Connection;
 import com.meidusa.amoeba.net.MessageHandler;
 import com.meidusa.amoeba.net.Sessionable;
-import com.meidusa.amoeba.oracle.packet.AcceptPacket;
 import com.meidusa.amoeba.oracle.packet.AnoClientDataPacket;
 import com.meidusa.amoeba.oracle.packet.AnoPacketBuffer;
-import com.meidusa.amoeba.oracle.packet.AnoServerDataPacket;
 import com.meidusa.amoeba.oracle.packet.AnoServices;
-import com.meidusa.amoeba.oracle.packet.Packet;
-import com.meidusa.amoeba.oracle.packet.ResendPacket;
 import com.meidusa.amoeba.oracle.packet.SQLnetDef;
-import com.meidusa.amoeba.oracle.packet.T4C8TTIdtyDataPacket;
+import com.meidusa.amoeba.oracle.packet.T4C8TTIproDataPacket;
 import com.meidusa.amoeba.oracle.packet.T4C8TTIproResponseDataPacket;
-import com.meidusa.amoeba.oracle.util.ByteUtil;
 
 /**
  * 非常简单的数据包转发程序
@@ -32,7 +27,6 @@ public class OracleMessageHandler implements MessageHandler, Sessionable, SQLnet
     private MessageHandler serverHandler;
     private boolean        isEnded        = false;
 
-    private static int     msgCountLimit  = 8;
     private int            serverMsgCount = 0;
     private int            clientMsgCount = 0;
 
@@ -47,9 +41,7 @@ public class OracleMessageHandler implements MessageHandler, Sessionable, SQLnet
 
     public void handleMessage(Connection conn, byte[] message) {
         if (conn == clientConn) {
-            if (clientMsgCount <= msgCountLimit) {
-                clientMsgCount++;
-            }
+            clientMsgCount++;
 
             switch (message[4]) {
                 case NS_PACKT_TYPE_CONNECT:
@@ -68,69 +60,27 @@ public class OracleMessageHandler implements MessageHandler, Sessionable, SQLnet
                             return;
                         }
                     }
-//                    if (clientMsgCount == 4) {
-//                        T4C8TTIproServerDataPacket packet = new T4C8TTIproServerDataPacket();
-//                        byte[] ab = packet.toByteBuffer().array();
-//                        if (logger.isDebugEnabled()) {
-//                            System.out.println(ByteUtil.toHex(ab, 0, ab.length));
-//                        }
-//                    }
-//                    if (clientMsgCount == 5) {
-//                        T4C8TTIdtyDataPacket packet = new T4C8TTIdtyDataPacket();
-//                        byte[] ab = packet.toByteBuffer().array();
-//                        if (logger.isDebugEnabled()) {
-//                            System.out.println(ByteUtil.toHex(ab, 0, ab.length));
-//                        }
-//                    }
+                    if (clientMsgCount == 4) {
+                        T4C8TTIproDataPacket packet = new T4C8TTIproDataPacket();
+                        message = packet.toByteBuffer().array();
+                    }
                     break;
             }
 
-            // parseClientPacket(clientMsgCount, message);
             serverConn.postMessage(message);// proxy-->server
         } else {
-            if (serverMsgCount <= msgCountLimit) {
-                serverMsgCount++;
+            serverMsgCount++;
+
+            switch (message[4]) {
+                case NS_PACKT_TYPE_DATA:
+                    if (clientMsgCount == 4) {
+                        T4C8TTIproResponseDataPacket packet = new T4C8TTIproResponseDataPacket();
+                        message = packet.toByteBuffer().array();
+                    }
+                    break;
             }
 
-            // switch (message[4]) {
-            // case NS_PACKT_TYPE_RESEND:
-            // }
-
-            // parseServerPacket(serverMsgCount, message);
             clientConn.postMessage(message);// proxy-->client
-        }
-    }
-
-    /**
-     * 解析服务器端返回的数据包
-     */
-    private void parseServerPacket(int count, byte[] msg) {
-        Packet packet = null;
-        switch (count) {
-            case 1:
-                if (msg[4] == NS_PACKT_TYPE_RESEND) {
-                    packet = new ResendPacket();
-                    break;
-                } else {
-                    throw new RuntimeException("Error data packet.");
-                }
-            case 2:
-                if (msg[4] == NS_PACKT_TYPE_ACCEPT) {
-                    packet = new AcceptPacket();
-                    break;
-                } else {
-                    throw new RuntimeException("Error data packet.");
-                }
-            case 3:
-                if (msg[4] == NS_PACKT_TYPE_DATA) {
-                    packet = new AnoServerDataPacket();
-                    break;
-                } else {
-                    throw new RuntimeException("Error data packet.");
-                }
-        }
-        if (packet != null) {
-            packet.init(msg);
         }
     }
 
