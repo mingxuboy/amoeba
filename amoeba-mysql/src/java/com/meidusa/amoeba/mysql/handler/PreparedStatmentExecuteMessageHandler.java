@@ -73,7 +73,7 @@ public class PreparedStatmentExecuteMessageHandler extends PreparedStatmentMessa
 		QueryCommandPacket preparedCommandPacket = new QueryCommandPacket();
 		preparedCommandPacket.command = CommandPacket.COM_STMT_PREPARE;
 		preparedCommandPacket.arg = preparedStatmentInfo.getPreparedStatment();
-		byte[] buffer = preparedCommandPacket.toByteBuffer().array();
+		byte[] buffer = preparedCommandPacket.toByteBuffer(source).array();
 		CommandInfo info = new CommandInfo();
 		info.setBuffer(buffer);
 		info.setMain(false);

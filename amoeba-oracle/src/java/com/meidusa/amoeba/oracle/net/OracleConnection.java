@@ -18,6 +18,14 @@ public abstract class OracleConnection extends DatabaseConnection {
 	private int sdu;
 	private int tdu;
 	private boolean anoEnabled = false;
+	public final byte[] rep          = { 0, 2, 1, 1, 1 };
+	
+	public void setRep(byte pos, byte val) {
+        if (pos < 0 || pos > 4 || val > 3) {
+            throw new RuntimeException("无效的类型表示");
+        }
+        rep[pos] = val;
+    }
 	
 	public OracleConnection(SocketChannel channel, long createStamp) {
 		super(channel, createStamp);

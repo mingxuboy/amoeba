@@ -81,7 +81,7 @@ public class QueryCommandMessageHandler extends CommandMessageHandler{
 		if(logger.isDebugEnabled()){
 			if(conn == source){
 				QueryCommandPacket command = new QueryCommandPacket();
-				command.init(message);
+				command.init(message,conn);
 				if(command.arg != null){
 					logger.debug(command.arg);
 				}

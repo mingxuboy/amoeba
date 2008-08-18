@@ -77,7 +77,7 @@ public class PreparedStatmentMessageHandler extends QueryCommandMessageHandler{
 				}else if(packetIndex == 0 && MysqlPacketBuffer.isOkPacket(buffer)){
 					if(!preparedStatmentInfo.isReady()){
 						OKforPreparedStatementPacket ok = new OKforPreparedStatementPacket();
-						ok.init(buffer);
+						ok.init(buffer,null);
 						ok.statementHandlerId = preparedStatmentInfo.getStatmentId();
 						preparedStatmentInfo.setOkPrepared(ok);
 					}
@@ -119,7 +119,7 @@ public class PreparedStatmentMessageHandler extends QueryCommandMessageHandler{
 			for(ConnectionStatuts status : collection){
 				byte[] buffer = status.buffers.get(0);
 				OKforPreparedStatementPacket ok = new OKforPreparedStatementPacket();
-				ok.init(buffer);
+				ok.init(buffer,source);
 				statmentIdMap.put(status.conn, ok.statementHandlerId);
 			}
 		}
@@ -148,10 +148,10 @@ public class PreparedStatmentMessageHandler extends QueryCommandMessageHandler{
 				if(MysqlPacketBuffer.isOkPacket(message)){
 					//替换statmentId 为 proxy statment id 发送到mysql客户端
 					OKforPreparedStatementPacket ok = new OKforPreparedStatementPacket();
-					ok.init(message);
+					ok.init(message,toConn);
 					ok.statementHandlerId = preparedStatmentInfo.getStatmentId();
 					preparedStatmentInfo.setOkPrepared(ok);
-					message = ok.toByteBuffer().array();
+					message = ok.toByteBuffer(toConn).array();
 				}
 				preparedStatmentInfo.putPreparedStatmentBuffer(message);
 			}
@@ -172,7 +172,7 @@ public class PreparedStatmentMessageHandler extends QueryCommandMessageHandler{
 		super.appendAfterMainCommand();
 		PreparedStatmentClosePacket preparedCloseCommandPacket = new PreparedStatmentClosePacket();
 		preparedCloseCommandPacket.command = CommandPacket.COM_STMT_CLOSE;
-		final byte[] buffer = preparedCloseCommandPacket.toByteBuffer().array();
+		final byte[] buffer = preparedCloseCommandPacket.toByteBuffer(source).array();
 		CommandInfo info = new CommandInfo();
 		info.setBuffer(buffer);
 		info.setMain(false);

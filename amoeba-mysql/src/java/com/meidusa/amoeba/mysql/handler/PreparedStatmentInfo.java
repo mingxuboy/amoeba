@@ -86,7 +86,7 @@ public class PreparedStatmentInfo{
 		
 		synchronized (this.okPrepared) {
 			OKforPreparedStatementPacket ok = new OKforPreparedStatementPacket();
-			ok.init(buffer);
+			ok.init(buffer,null);
 			this.okPrepared = ok;
 			preparedStatmentPackets = list;
 		}

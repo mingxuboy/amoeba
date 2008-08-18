@@ -20,7 +20,7 @@ import com.meidusa.amoeba.mysql.io.MySqlPacketConstant;
  * @author <a href=mailto:piratebase@sina.com>Struct chen</a>
  *
  */
-public interface Packet extends MySqlPacketConstant,com.meidusa.amoeba.packet.Packet{
+public interface Packet extends MySqlPacketConstant,com.meidusa.amoeba.net.packet.Packet{
 	
 	/**
 	 * 从buffer(含包头) 中初始化数据包。
@@ -28,13 +28,6 @@ public interface Packet extends MySqlPacketConstant,com.meidusa.amoeba.packet.Pa
 	 * 				并且读取相应的长度所形成的buffer
 	 */
 	public void init(MysqlPacketBuffer buffer);
-	
-	/**
-	 * 直接转化成buffer对象
-	 * @return Buffer 对象
-	 * @throws UnsupportedEncodingException  当String to bytes发生编码不支持的时候
-	 */
-	public MysqlPacketBuffer toBuffer()throws UnsupportedEncodingException;
 	
 	/**
 	 * 将该packet写入到buffer中 

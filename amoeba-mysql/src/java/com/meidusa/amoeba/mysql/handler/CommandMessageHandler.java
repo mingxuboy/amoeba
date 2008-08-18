@@ -25,6 +25,7 @@ import org.apache.commons.pool.ObjectPool;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
+import com.meidusa.amoeba.net.packet.Packet;
 import com.meidusa.amoeba.net.poolable.PoolableObject;
 import com.meidusa.amoeba.mysql.net.CommandInfo;
 import com.meidusa.amoeba.mysql.net.CommandListener;
@@ -39,7 +40,6 @@ import com.meidusa.amoeba.mysql.packet.QueryCommandPacket;
 import com.meidusa.amoeba.net.Connection;
 import com.meidusa.amoeba.net.MessageHandler;
 import com.meidusa.amoeba.net.Sessionable;
-import com.meidusa.amoeba.packet.Packet;
 import com.meidusa.amoeba.util.Reporter;
 import com.meidusa.amoeba.util.StringUtil;
 
@@ -126,7 +126,10 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 		private final Lock lock = new ReentrantLock(false);
 		protected Map<MysqlServerConnection,ConnectionStatuts> connStatusMap = new HashMap<MysqlServerConnection,ConnectionStatuts>();
 		private boolean mainCommandExecuted;
-
+		private MysqlClientConnection source;
+		public CommandQueue(MysqlClientConnection source){
+			this.source = source;
+		}
 		public boolean isMultiple(){
 			return connStatusMap.size()>1;
 		}
@@ -151,7 +154,7 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 					currentCommand = sessionInitQueryQueue.get(0);
 					if(logger.isDebugEnabled()){
 						QueryCommandPacket command = new QueryCommandPacket();
-						command.init(currentCommand.getBuffer());
+						command.init(currentCommand.getBuffer(),source);
 						logger.debug(command);
 					}
 					return true;
@@ -196,7 +199,7 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 							}else if(MysqlPacketBuffer.isOkPacket(buffer)){
 								packet = new OkPacket();
 							}
-							packet.init(buffer);
+							packet.init(buffer,conn);
 							logger.debug("returned Packet:"+packet);
 						}
 						return CommandStatus.AllCompleted;
@@ -261,9 +264,9 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 	public CommandMessageHandler(final MysqlClientConnection source,byte[] query,ObjectPool[] pools,long timeout){
 		handlerMap.put(source, source.getMessageHandler());
 		source.setMessageHandler(this);
-		commandQueue = new CommandQueue();
+		commandQueue = new CommandQueue(source);
 		QueryCommandPacket command = new QueryCommandPacket();
-		command.init(query);
+		command.init(query,source);
 		this.pools = pools;
 		info.setBuffer(query);
 		info.setMain(true);
@@ -302,7 +305,7 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 					selectDBCommand.arg = sourceMysql.getSchema();
 					selectDBCommand.command = QueryCommandPacket.COM_INIT_DB;
 					
-					byte[] buffer = selectDBCommand.toByteBuffer().array();
+					byte[] buffer = selectDBCommand.toByteBuffer(destMysqlConn).array();
 					CommandInfo info = new CommandInfo();
 					info.setBuffer(buffer);
 					info.setMain(false);
@@ -323,7 +326,7 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 				charsetCommand.arg = "set names " + sourceMysql.getCharset();
 				charsetCommand.command = QueryCommandPacket.COM_QUERY;
 				
-				byte[] buffer = charsetCommand.toByteBuffer().array();
+				byte[] buffer = charsetCommand.toByteBuffer(sourceMysql).array();
 				CommandInfo info = new CommandInfo();
 				info.setBuffer(buffer);
 				info.setMain(false);
@@ -343,7 +346,7 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 				charsetCommand.arg = "set autocommit = " + (sourceMysql.isAutoCommit()?1:0);
 				charsetCommand.command = QueryCommandPacket.COM_QUERY;
 				
-				byte[] buffer = charsetCommand.toByteBuffer().array();
+				byte[] buffer = charsetCommand.toByteBuffer(sourceMysql).array();
 				CommandInfo info = new CommandInfo();
 				info.setBuffer(buffer);
 				info.setMain(false);
@@ -696,7 +699,7 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 			for(ConnectionStatuts connStatus : connectionStatutsSet){
 				byte[] buffer = connStatus.buffers.get(connStatus.buffers.size()-1);
 				OkPacket connOK = new OkPacket();
-				connOK.init(buffer);
+				connOK.init(buffer,connStatus.conn);
 				ok.affectedRows +=connOK.affectedRows;
 				ok.insertId =connOK.insertId;
 				ok.packetId = 1;
@@ -704,7 +707,7 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 				ok.warningCount +=connOK.warningCount;
 			}
 			ok.message = strbuffer.toString();
-			returnList.add(ok.toByteBuffer().array());
+			returnList.add(ok.toByteBuffer(source).array());
 		}
 		return returnList;
 	}
@@ -755,7 +758,7 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 					error.errno = 10000;
 					error.packetId = 2;
 					error.serverErrorMessage = "session was killed!!";
-					this.dispatchMessageTo(source, error.toByteBuffer().array());
+					this.dispatchMessageTo(source, error.toByteBuffer(source).array());
 					logger.warn("session was killed!!",new Exception());
 					source.postClose(null);
 				}else{

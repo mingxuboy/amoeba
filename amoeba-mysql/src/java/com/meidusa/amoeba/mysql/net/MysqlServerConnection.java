@@ -73,7 +73,7 @@ public class MysqlServerConnection extends MysqlConnection implements MySqlPacke
 			if(MysqlPacketBuffer.isErrorPacket(message)){
 				setAuthenticated(false);
 				ErrorPacket error = new ErrorPacket();
-				error.init(message);
+				error.init(message,conn);
 				logger.error("handShake with "+this._channel.socket().getRemoteSocketAddress()+" error:"+error.serverErrorMessage);
 				return;
 			}
@@ -107,7 +107,7 @@ public class MysqlServerConnection extends MysqlConnection implements MySqlPacke
 					}
 				}
 				status = Status.AUTHING;
-				this.postMessage(authing.toByteBuffer().array());
+				this.postMessage(authing.toByteBuffer(conn).array());
 			}else if(status == Status.AUTHING){
 				if(MysqlPacketBuffer.isOkPacket(message)){
 					setAuthenticated(true);
