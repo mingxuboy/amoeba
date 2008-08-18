@@ -46,7 +46,7 @@ public class OracleMessageHandler implements MessageHandler, Sessionable, SQLnet
 
     public void handleMessage(Connection conn, byte[] message) {
         if (conn == clientConn) {
-        	Packet packet = null;
+            Packet packet = null;
             clientMsgCount++;
 
             switch (message[4]) {
@@ -60,40 +60,39 @@ public class OracleMessageHandler implements MessageHandler, Sessionable, SQLnet
                         AnoPacketBuffer buffer = new AnoPacketBuffer(message);
                         buffer.setPosition(10);
                         if (buffer.readUB4() == AnoServices.NA_MAGIC) {
-                        	packet  = new AnoDataPacket();
-                            ((AnoDataPacket)packet).anoServiceSize = 0;
+                            packet = new AnoDataPacket();
+                            ((AnoDataPacket) packet).anoServiceSize = 0;
                             serverMsgCount++;
                             clientConn.postMessage(packet.toByteBuffer().array());
                             return;
                         }
                     }
-                    
+
                     if (clientMsgCount == 4) {
-                    	packet = new T4C8TTIproDataPacket();
+                        packet = new T4C8TTIproDataPacket();
                     }
-                    
+
                     if (clientMsgCount == 5) {
                         packet = new T4C8TTIdtyDataPacket();
                     }
-                    
-                    if(clientMsgCount == 6){
-                    	packet = new T4C7OversionDataPacket();
+
+                    if (clientMsgCount == 6) {
+                        packet = new T4C7OversionDataPacket();
                     }
 
                     break;
             }
 
-            if(packet != null){
-            	packet.init(message);
-            	byte[] ab = packet.toByteBuffer().array();
-            	if (logger.isDebugEnabled()) {
-            		System.out.println(packet);
+            if (packet != null) {
+                packet.init(message);
+                byte[] ab = packet.toByteBuffer().array();
+                if (logger.isDebugEnabled()) {
+                    System.out.println(packet);
                     System.out.println(ByteUtil.toHex(ab, 0, ab.length));
                 }
-            	serverConn.postMessage(ab);
-            }else{
-            	//parseClientPacket(clientMsgCount, message);
-            	serverConn.postMessage(message);// proxy-->server
+                serverConn.postMessage(ab);
+            } else {
+                serverConn.postMessage(message);// proxy-->server
             }
 
         } else {
@@ -110,13 +109,6 @@ public class OracleMessageHandler implements MessageHandler, Sessionable, SQLnet
 
             clientConn.postMessage(message);// proxy-->client
         }
-    }
-
-    /**
-     *解析客户端发送的数据包
-     */
-    @SuppressWarnings("unused")
-    private void parseClientPacket(int count, byte[] msg) {
     }
 
     public boolean checkIdle(long now) {
