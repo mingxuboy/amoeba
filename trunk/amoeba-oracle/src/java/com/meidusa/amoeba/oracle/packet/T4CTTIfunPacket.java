@@ -5,7 +5,7 @@ import java.io.UnsupportedEncodingException;
 import com.meidusa.amoeba.packet.AbstractPacketBuffer;
 
 
-public class T4CTTIfunPacket extends T4CTTIMsgDataPacket {
+public class T4CTTIfunPacket extends T4CTTIMsgPacket {
 	public short                       funCode;
 	public byte                        seqNumber;
     

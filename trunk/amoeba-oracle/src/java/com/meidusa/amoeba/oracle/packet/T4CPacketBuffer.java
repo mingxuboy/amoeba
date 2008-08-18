@@ -1,7 +1,5 @@
 package com.meidusa.amoeba.oracle.packet;
 
-import java.util.Arrays;
-
 import com.meidusa.amoeba.oracle.io.OraclePacketConstant;
 import com.meidusa.amoeba.oracle.util.ByteUtil;
 

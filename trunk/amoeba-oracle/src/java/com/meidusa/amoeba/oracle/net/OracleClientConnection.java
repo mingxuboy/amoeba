@@ -8,7 +8,7 @@ import com.meidusa.amoeba.net.Connection;
 import com.meidusa.amoeba.oracle.context.OracleProxyRuntimeContext;
 import com.meidusa.amoeba.oracle.handler.OracleMessageHandler;
 import com.meidusa.amoeba.oracle.packet.AcceptPacket;
-import com.meidusa.amoeba.oracle.packet.AnoServerDataPacket;
+import com.meidusa.amoeba.oracle.packet.AnoResponseDataPacket;
 import com.meidusa.amoeba.oracle.packet.ConnectPacket;
 import com.meidusa.amoeba.oracle.packet.Packet;
 import com.meidusa.amoeba.oracle.packet.ResendPacket;
@@ -43,7 +43,7 @@ public class OracleClientConnection extends OracleConnection {
             }
         }if(msgCount ==2){
         	if(clientConn.isAnoEnabled()){
-        		packet = new AnoServerDataPacket(); 
+        		packet = new AnoResponseDataPacket(); 
         	}else{
         		
         	}

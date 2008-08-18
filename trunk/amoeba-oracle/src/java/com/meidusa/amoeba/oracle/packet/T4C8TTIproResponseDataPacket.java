@@ -10,7 +10,7 @@ import com.meidusa.amoeba.packet.AbstractPacketBuffer;
  * @author hexianmao
  * @version 2008-8-14 ÏÂÎç07:29:53
  */
-public class T4C8TTIproResponseDataPacket extends T4CTTIMsgDataPacket {
+public class T4C8TTIproResponseDataPacket extends T4CTTIMsgPacket {
 
     byte    proSvrVer        = 6;
     short   oVersion         = -1;
@@ -93,11 +93,6 @@ public class T4C8TTIproResponseDataPacket extends T4CTTIMsgDataPacket {
         meg.marshalB1Array(nchar_charset);
         meg.writeByte((byte) 0);
         meg.writeByte((byte) 0);
-    }
-
-    @Override
-    protected Class<? extends AbstractPacketBuffer> getBufferClass() {
-        return T4CPacketBuffer.class;
     }
 
 }
