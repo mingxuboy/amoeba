@@ -62,13 +62,13 @@ public class ConnectPacket extends AbstractPacket {
     	buffer.setPosition(22);
     	buffer.writeUB1((byte)0);
     	buffer.writeUB1((byte)1);
+    	byte[] dataBytes = null;
     	if(data != null){
-    		byte[] dataBytes = data.getBytes();
+    		dataBytes = data.getBytes();
     		buffer.writeUB2(dataBytes.length);
-    		buffer.setPosition(27);
+    		buffer.setPosition(26);
     		buffer.writeUB2(dataOffset);//写入data 在buffer中偏移位置
-    		buffer.setPosition(dataOffset);
-    		buffer.writeBytes(dataBytes);//写入data 数据
+    		
     	}else{
     		buffer.writeUB2((byte)0);
     	}
@@ -77,6 +77,10 @@ public class ConnectPacket extends AbstractPacket {
     	buffer.writeByte(NSINADISABLEFORCONNECTION);
     	buffer.writeByte(NSINADISABLEFORCONNECTION);
     	
+    	if(dataBytes != null){
+    		buffer.setPosition(dataOffset);
+    		buffer.writeBytes(dataBytes);//写入data 数据
+    	}
     	
     }
     public String toString() {

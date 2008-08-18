@@ -8,9 +8,13 @@ import com.meidusa.amoeba.net.Sessionable;
 import com.meidusa.amoeba.oracle.packet.AnoClientDataPacket;
 import com.meidusa.amoeba.oracle.packet.AnoPacketBuffer;
 import com.meidusa.amoeba.oracle.packet.AnoServices;
+import com.meidusa.amoeba.oracle.packet.T4C8TTIdtyDataPacket;
+import com.meidusa.amoeba.oracle.packet.T4C8TTIproResponseDataPacket;
+import com.meidusa.amoeba.oracle.packet.ConnectPacket;
+import com.meidusa.amoeba.oracle.packet.Packet;
 import com.meidusa.amoeba.oracle.packet.SQLnetDef;
 import com.meidusa.amoeba.oracle.packet.T4C8TTIproDataPacket;
-import com.meidusa.amoeba.oracle.packet.T4C8TTIproResponseDataPacket;
+import com.meidusa.amoeba.oracle.util.ByteUtil;
 
 /**
  * 非常简单的数据包转发程序
@@ -41,33 +45,52 @@ public class OracleMessageHandler implements MessageHandler, Sessionable, SQLnet
 
     public void handleMessage(Connection conn, byte[] message) {
         if (conn == clientConn) {
+        	Packet packet = null;
             clientMsgCount++;
 
             switch (message[4]) {
                 case NS_PACKT_TYPE_CONNECT:
                     message[32] = (byte) NSINADISABLEFORCONNECTION;
                     message[33] = (byte) NSINADISABLEFORCONNECTION;
+                    packet = new ConnectPacket();
                     break;
                 case NS_PACKT_TYPE_DATA:
                     if (clientMsgCount == 3) {
                         AnoPacketBuffer buffer = new AnoPacketBuffer(message);
                         buffer.setPosition(10);
                         if (buffer.readUB4() == AnoServices.NA_MAGIC) {
-                            AnoClientDataPacket packet = new AnoClientDataPacket();
-                            packet.anoServiceSize = 0;
+                        	packet  = new AnoClientDataPacket();
+                            ((AnoClientDataPacket)packet).anoServiceSize = 0;
                             serverMsgCount++;
                             clientConn.postMessage(packet.toByteBuffer().array());
                             return;
                         }
                     }
+                    
                     if (clientMsgCount == 4) {
-                        T4C8TTIproDataPacket packet = new T4C8TTIproDataPacket();
-                        message = packet.toByteBuffer().array();
+                    	packet = new T4C8TTIproDataPacket();
                     }
+                    
+                    if (clientMsgCount == 5) {
+                        packet = new T4C8TTIdtyDataPacket();
+                    }
+
                     break;
             }
 
-            serverConn.postMessage(message);// proxy-->server
+            if(packet != null){
+            	packet.init(message);
+            	byte[] ab = packet.toByteBuffer().array();
+            	if (logger.isDebugEnabled()) {
+            		System.out.println(packet);
+                    System.out.println(ByteUtil.toHex(ab, 0, ab.length));
+                }
+            	serverConn.postMessage(ab);
+            }else{
+            	//parseClientPacket(clientMsgCount, message);
+            	serverConn.postMessage(message);// proxy-->server
+            }
+
         } else {
             serverMsgCount++;
 
