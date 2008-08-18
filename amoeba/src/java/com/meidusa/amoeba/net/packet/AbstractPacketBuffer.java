@@ -9,7 +9,6 @@ import com.meidusa.amoeba.net.Connection;
  */
 public class AbstractPacketBuffer implements PacketBuffer {
 	
-	protected Connection conn;
     protected int    length   = 0;
 
     protected int    position = 0;
@@ -118,6 +117,5 @@ public class AbstractPacketBuffer implements PacketBuffer {
 
     
     public void init(Connection conn){
-    	this.conn = conn; 
     }
 }

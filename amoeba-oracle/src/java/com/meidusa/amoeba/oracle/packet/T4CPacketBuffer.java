@@ -22,7 +22,7 @@ public class T4CPacketBuffer extends OracleAbstractPacketBuffer implements Oracl
 
     final byte[] ignored      = new byte[255];
     final int[]  retLen       = new int[1];
-    byte[] rep          = { 0, 2, 1, 1, 1 };
+    //byte[] rep          = { 0, 2, 1, 1, 1 };
 
     boolean      isConvNeeded = false;
 
@@ -31,26 +31,18 @@ public class T4CPacketBuffer extends OracleAbstractPacketBuffer implements Oracl
 
     public T4CPacketBuffer(byte[] buf){
         super(buf);
-        // types.setRep((byte) 1, (byte) 2);
     }
 
     public T4CPacketBuffer(int size){
         super(size);
-        // types.setRep((byte) 1, (byte) 2);
     }
 
     public byte getRep(byte pos) {
-        if (pos < 0 || pos > 4) {
-            throw new RuntimeException("无效的类型表示");
-        }
-        return rep[pos];
+        return typeRep.getRep(pos);
     }
 
     public void setRep(byte pos, byte val) {
-        if (pos < 0 || pos > 4 || val > 3) {
-            throw new RuntimeException("无效的类型表示");
-        }
-        rep[pos] = val;
+        typeRep.setRep(pos, val);
     }
 
     public void setConvNeeded(boolean isConvNeeded) {
@@ -526,7 +518,7 @@ public class T4CPacketBuffer extends OracleAbstractPacketBuffer implements Oracl
     }
 
     private void addPtr(byte b) {
-        if ((rep[4] & 1) > 0) {
+        if ((typeRep.getRep(4) & 1) > 0) {
             writeByte(b);
         } else {
             byte byte1 = int2Buffer(b, tmpBuffer4, (byte) 4);
@@ -536,10 +528,10 @@ public class T4CPacketBuffer extends OracleAbstractPacketBuffer implements Oracl
         }
     }
 
-    private long buffer2Long(byte b) {
+    private long buffer2Long(int b) {
         int i = 0;
         boolean flag = false;
-        if ((rep[b] & 1) > 0) {
+        if ((typeRep.getRep(b) & 1) > 0) {
             i = buffer[position++] & 0xff;
             if ((i & 0x80) > 0) {
                 i &= 0x7f;
@@ -563,7 +555,7 @@ public class T4CPacketBuffer extends OracleAbstractPacketBuffer implements Oracl
         long l1 = 0L;
         for (int j = 0; j < ab.length; j++) {
             long l = 0L;
-            if ((rep[b] & 2) > 0) {
+            if ((typeRep.getRep(b) & 2) > 0) {
                 l = (long) (ab[ab.length - 1 - j] & 0xff) & 255L;
             } else {
                 l = (long) (ab[j] & 0xff) & 255L;
@@ -580,7 +572,7 @@ public class T4CPacketBuffer extends OracleAbstractPacketBuffer implements Oracl
     private int buffer2Int(byte b) {
         int i = 0;
         boolean flag = false;
-        if ((rep[b] & 1) > 0) {
+        if ((typeRep.getRep(b) & 1) > 0) {
             i = buffer[position++] & 0xff;
             if ((i & 0x80) > 0) {
                 i &= 0x7f;
@@ -603,7 +595,7 @@ public class T4CPacketBuffer extends OracleAbstractPacketBuffer implements Oracl
         int i1 = 0;
         for (int j = 0; j < ab.length; j++) {
             int i2 = 0;
-            if ((rep[b] & 2) > 0) {
+            if ((typeRep.getRep(b) & 2) > 0) {
                 i2 = ab[ab.length - 1 - j] & 0xff;
             } else {
                 i2 = ab[j] & 0xff;
@@ -620,7 +612,7 @@ public class T4CPacketBuffer extends OracleAbstractPacketBuffer implements Oracl
     long buffer2Value(byte b, byte[] buffer) {
         int i = 0;
         boolean flag = false;
-        if ((rep[b] & 1) > 0) {
+        if ((typeRep.getRep(b) & 1) > 0) {
             i = buffer[0] & 0xff;
             if ((i & 0x80) > 0) {
                 i &= 0x7f;
@@ -642,7 +634,7 @@ public class T4CPacketBuffer extends OracleAbstractPacketBuffer implements Oracl
         long l = 0L;
         for (int j = 0; j < ab.length; j++) {
             short s = 0;
-            if ((rep[b] & 2) > 0) {
+            if ((typeRep.getRep(b) & 2) > 0) {
                 s = (short) (ab[ab.length - 1 - j] & 0xff);
             } else {
                 s = (short) (ab[j] & 0xff);
@@ -659,7 +651,7 @@ public class T4CPacketBuffer extends OracleAbstractPacketBuffer implements Oracl
         byte b1 = 0;
         for (int j = ab.length - 1; j >= 0; j--) {
             ab[b1] = (byte) ((i >>> (8 * j)) & 0xff);
-            if ((rep[b] & 1) > 0) {
+            if ((typeRep.getRep(b) & 1) > 0) {
                 if (!flag || ab[b1] != 0) {
                     flag = false;
                     b1++;
@@ -669,10 +661,10 @@ public class T4CPacketBuffer extends OracleAbstractPacketBuffer implements Oracl
             }
         }
 
-        if ((rep[b] & 1) > 0) {
+        if ((typeRep.getRep(b) & 1) > 0) {
             writeByte(b1);
         }
-        if ((rep[b] & 2) > 0) {
+        if ((typeRep.getRep(b) & 2) > 0) {
             reverseArray(ab, b1);
         }
         return b1;
@@ -683,7 +675,7 @@ public class T4CPacketBuffer extends OracleAbstractPacketBuffer implements Oracl
         byte b1 = 0;
         for (int i = ab.length - 1; i >= 0; i--) {
             ab[b1] = (byte) ((l >>> (8 * i)) & 255L);
-            if ((rep[b] & 1) > 0) {
+            if ((typeRep.getRep(b) & 1) > 0) {
                 if (!flag || ab[b1] != 0) {
                     flag = false;
                     b1++;
@@ -693,10 +685,10 @@ public class T4CPacketBuffer extends OracleAbstractPacketBuffer implements Oracl
             }
         }
 
-        if ((rep[b] & 1) > 0) {
+        if ((typeRep.getRep(b) & 1) > 0) {
             writeByte(b1);
         }
-        if ((rep[b] & 2) > 0) {
+        if ((typeRep.getRep(b) & 2) > 0) {
             reverseArray(ab, b1);
         }
         return b1;

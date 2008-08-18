@@ -1,9 +1,13 @@
 package com.meidusa.amoeba.oracle.packet;
 
+import com.meidusa.amoeba.net.Connection;
 import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
+import com.meidusa.amoeba.oracle.net.OracleConnection;
+import com.meidusa.amoeba.oracle.util.T4CTypeRep;
 
 public class OracleAbstractPacketBuffer extends AbstractPacketBuffer {
 	public static short versionNumber;//用于存放全局服务器端的版本，amoeba 所代理的多个 oracle server 在版本上面必须要一致
+	protected T4CTypeRep typeRep;
 	
 	public OracleAbstractPacketBuffer(byte[] buf) {
 		super(buf);
@@ -55,4 +59,13 @@ public class OracleAbstractPacketBuffer extends AbstractPacketBuffer {
         buffer[position++] = (byte) (m & 0xff);
     }
 
+    public T4CTypeRep getTypeRep() {
+		return typeRep;
+	}
+
+	public void init(Connection conn){
+    	super.init(conn);
+    	OracleConnection oconn = (OracleConnection)conn ;
+    	this.typeRep = oconn.getRep(); 
+    }
 }
