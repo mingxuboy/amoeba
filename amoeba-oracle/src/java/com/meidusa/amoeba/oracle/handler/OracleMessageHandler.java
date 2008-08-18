@@ -8,6 +8,7 @@ import com.meidusa.amoeba.net.Sessionable;
 import com.meidusa.amoeba.oracle.packet.AnoClientDataPacket;
 import com.meidusa.amoeba.oracle.packet.AnoPacketBuffer;
 import com.meidusa.amoeba.oracle.packet.AnoServices;
+import com.meidusa.amoeba.oracle.packet.T4C7OversionDataPacket;
 import com.meidusa.amoeba.oracle.packet.T4C8TTIdtyDataPacket;
 import com.meidusa.amoeba.oracle.packet.T4C8TTIproResponseDataPacket;
 import com.meidusa.amoeba.oracle.packet.ConnectPacket;
@@ -73,6 +74,10 @@ public class OracleMessageHandler implements MessageHandler, Sessionable, SQLnet
                     
                     if (clientMsgCount == 5) {
                         packet = new T4C8TTIdtyDataPacket();
+                    }
+                    
+                    if(clientMsgCount == 6){
+                    	packet = new T4C7OversionDataPacket();
                     }
 
                     break;
