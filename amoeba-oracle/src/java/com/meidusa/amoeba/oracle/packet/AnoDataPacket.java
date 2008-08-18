@@ -4,7 +4,7 @@ import java.io.UnsupportedEncodingException;
 
 import org.apache.log4j.Logger;
 
-import com.meidusa.amoeba.packet.AbstractPacketBuffer;
+import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
 
 /**
  * @author hexianmao

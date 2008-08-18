@@ -2,7 +2,7 @@ package com.meidusa.amoeba.oracle.packet;
 
 import java.io.UnsupportedEncodingException;
 
-import com.meidusa.amoeba.packet.AbstractPacketBuffer;
+import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
 
 /**
  * 数据库版本信息数据包

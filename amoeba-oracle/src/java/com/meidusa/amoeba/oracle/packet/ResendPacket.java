@@ -4,7 +4,8 @@ import java.nio.ByteBuffer;
 
 import org.apache.log4j.Logger;
 
-import com.meidusa.amoeba.packet.AbstractPacketBuffer;
+import com.meidusa.amoeba.net.Connection;
+import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
 
 /**
  * 服务器端返回的要求客户端重发的数据包
@@ -17,8 +18,9 @@ public class ResendPacket extends AbstractPacket {
     private static Logger       logger = Logger.getLogger(ResendPacket.class);
     private final static byte[] b      = { 0x00, 0x08, 0x00, 0x00, 0x0b, 0x00, 0x00, 0x00 };
 
-    public void init(byte[] buffer) {
-        super.init(buffer);
+    @Override
+    public void init(byte[] buffer,Connection conn) {
+        super.init(buffer,conn);
 
         if (logger.isDebugEnabled()) {
             logger.debug(this.toString());

@@ -22,7 +22,7 @@ public class T4CPacketBuffer extends OracleAbstractPacketBuffer implements Oracl
 
     final byte[] ignored      = new byte[255];
     final int[]  retLen       = new int[1];
-    final byte[] rep          = { 0, 2, 1, 1, 1 };
+    byte[] rep          = { 0, 2, 1, 1, 1 };
 
     boolean      isConvNeeded = false;
 

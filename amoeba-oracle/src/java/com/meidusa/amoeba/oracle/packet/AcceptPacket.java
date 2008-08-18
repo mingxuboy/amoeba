@@ -4,7 +4,8 @@ import java.io.UnsupportedEncodingException;
 
 import org.apache.log4j.Logger;
 
-import com.meidusa.amoeba.packet.AbstractPacketBuffer;
+import com.meidusa.amoeba.net.Connection;
+import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
 
 /**
  * @author hexianmao
@@ -22,8 +23,9 @@ public class AcceptPacket extends AbstractPacket {
     protected byte         flag0 = 69;
     protected byte         flag1 = 0;
 
-    public void init(byte[] buffer) {
-        super.init(buffer);
+    @Override
+    public void init(byte[] buffer,Connection conn) {
+        super.init(buffer,conn);
         version = buffer[8] & 0xff;
         version <<= 8;
         version |= buffer[9] & 0xff;

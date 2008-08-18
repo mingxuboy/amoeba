@@ -2,7 +2,7 @@ package com.meidusa.amoeba.oracle.packet;
 
 import java.io.UnsupportedEncodingException;
 
-import com.meidusa.amoeba.packet.AbstractPacketBuffer;
+import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
 
 public class T4CTTIoAuthKeyDataPacket extends T4CTTIfunPacket {
 

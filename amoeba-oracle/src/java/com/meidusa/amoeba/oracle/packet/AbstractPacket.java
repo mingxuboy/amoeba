@@ -6,9 +6,10 @@ import java.nio.ByteBuffer;
 
 import org.apache.commons.lang.builder.ToStringBuilder;
 
+import com.meidusa.amoeba.net.Connection;
+import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
+import com.meidusa.amoeba.net.packet.PacketBuffer;
 import com.meidusa.amoeba.oracle.io.OraclePacketConstant;
-import com.meidusa.amoeba.packet.AbstractPacketBuffer;
-import com.meidusa.amoeba.packet.PacketBuffer;
 
 /**
  * <pre>
@@ -50,12 +51,13 @@ public abstract class AbstractPacket implements Packet, OraclePacketConstant {
     protected int   packetCheckSum;
     protected int   headerCheckSum;
 
-    public void init(byte[] buffer) {
+    public void init(byte[] buffer,Connection conn) {
         this.buffer = buffer;
         AbstractPacketBuffer packetbuffer = null;
         try {
         	Constructor<? extends AbstractPacketBuffer> constractor = getBufferClass().getConstructor(byte[].class);
         	packetbuffer = constractor.newInstance(buffer);
+        	packetbuffer.init(conn);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -74,9 +76,9 @@ public abstract class AbstractPacket implements Packet, OraclePacketConstant {
     /**
      * 将数据包转化成ByteBuffer
      */
-    public ByteBuffer toByteBuffer() {
+    public ByteBuffer toByteBuffer(Connection conn) {
         try {
-            return toBuffer().toByteBuffer();
+            return toBuffer(conn).toByteBuffer();
         } catch (UnsupportedEncodingException e) {
             return null;
         }
@@ -120,7 +122,7 @@ public abstract class AbstractPacket implements Packet, OraclePacketConstant {
     	return OracleAbstractPacketBuffer.class;
     }
 
-	private AbstractPacketBuffer toBuffer() throws UnsupportedEncodingException {
+	private AbstractPacketBuffer toBuffer(Connection conn) throws UnsupportedEncodingException {
         int bufferSize = calculatePacketSize();
         bufferSize = (bufferSize < (DATA_OFFSET + 1) ? (DATA_OFFSET + 1) : bufferSize);
         
@@ -128,6 +130,7 @@ public abstract class AbstractPacket implements Packet, OraclePacketConstant {
         try {
         	Constructor<? extends AbstractPacketBuffer> constractor = getBufferClass().getConstructor(int.class);
 			buffer = constractor.newInstance(bufferSize);
+			buffer.init(conn);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
