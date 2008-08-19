@@ -20,12 +20,12 @@ import org.apache.log4j.Logger;
 
 import com.meidusa.amoeba.context.ProxyRuntimeContext;
 import com.meidusa.amoeba.mysql.net.MysqlClientConnection;
-import com.meidusa.amoeba.mysql.packet.ErrorPacket;
-import com.meidusa.amoeba.mysql.packet.ExecutePacket;
-import com.meidusa.amoeba.mysql.packet.LongDataPacket;
-import com.meidusa.amoeba.mysql.packet.OkPacket;
-import com.meidusa.amoeba.mysql.packet.MysqlPacketBuffer;
-import com.meidusa.amoeba.mysql.packet.QueryCommandPacket;
+import com.meidusa.amoeba.mysql.net.packet.ErrorPacket;
+import com.meidusa.amoeba.mysql.net.packet.ExecutePacket;
+import com.meidusa.amoeba.mysql.net.packet.LongDataPacket;
+import com.meidusa.amoeba.mysql.net.packet.MysqlPacketBuffer;
+import com.meidusa.amoeba.mysql.net.packet.OkPacket;
+import com.meidusa.amoeba.mysql.net.packet.QueryCommandPacket;
 import com.meidusa.amoeba.net.Connection;
 import com.meidusa.amoeba.net.MessageHandler;
 import com.meidusa.amoeba.net.Sessionable;

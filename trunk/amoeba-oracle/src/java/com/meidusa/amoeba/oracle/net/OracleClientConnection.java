@@ -7,11 +7,11 @@ import org.apache.commons.pool.ObjectPool;
 import com.meidusa.amoeba.net.Connection;
 import com.meidusa.amoeba.oracle.context.OracleProxyRuntimeContext;
 import com.meidusa.amoeba.oracle.handler.OracleMessageHandler;
-import com.meidusa.amoeba.oracle.packet.AcceptPacket;
-import com.meidusa.amoeba.oracle.packet.AnoResponseDataPacket;
-import com.meidusa.amoeba.oracle.packet.ConnectPacket;
-import com.meidusa.amoeba.oracle.packet.Packet;
-import com.meidusa.amoeba.oracle.packet.ResendPacket;
+import com.meidusa.amoeba.oracle.net.packet.AcceptPacket;
+import com.meidusa.amoeba.oracle.net.packet.AnoResponseDataPacket;
+import com.meidusa.amoeba.oracle.net.packet.ConnectPacket;
+import com.meidusa.amoeba.oracle.net.packet.Packet;
+import com.meidusa.amoeba.oracle.net.packet.ResendPacket;
 
 public class OracleClientConnection extends OracleConnection {
 
