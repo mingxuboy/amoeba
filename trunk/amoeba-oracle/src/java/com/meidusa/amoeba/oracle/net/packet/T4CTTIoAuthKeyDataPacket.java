@@ -10,12 +10,25 @@ import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
  */
 public class T4CTTIoAuthKeyDataPacket extends T4CTTIfunPacket {
 
-    int      userLength = 0;
-    long     LOGON_MODE = 0L;
-    int      propLen    = 0;
-    byte[]   user       = null;
-    byte[][] keys       = null;
-    byte[][] values     = null;
+    int    userLength      = 0;
+    long   LOGON_MODE      = 0L;
+    int    propLen         = 0;
+    byte[] user            = null;
+
+    String auth_terminal   = "AUTH_TERMINAL";
+    byte[] terminal        = null;
+
+    String auth_program_nm = "AUTH_PROGRAM_NM";
+    byte[] program_nm      = null;
+
+    String auth_machine    = "AUTH_MACHINE";
+    byte[] machine         = null;
+
+    String auth_pid        = "AUTH_PID";
+    byte[] pid             = null;
+
+    String auth_sid        = "AUTH_SID";
+    byte[] sid             = null;
 
     public T4CTTIoAuthKeyDataPacket(){
         this.funCode = OSESSKEY;
@@ -37,9 +50,20 @@ public class T4CTTIoAuthKeyDataPacket extends T4CTTIfunPacket {
         meg.unmarshalUB1();
         user = meg.unmarshalCHR(userLength);
 
-        keys = new byte[propLen][];
-        values = new byte[propLen][];
+        byte[][] keys = new byte[propLen][];
+        byte[][] values = new byte[propLen][];
         meg.unmarshalKEYVAL(keys, values, propLen);
+
+        if (propLen >= 4) {
+            int i = 0;
+            terminal = values[i++];
+            if (propLen == 5) {
+                program_nm = values[i++];
+            }
+            machine = values[i++];
+            pid = values[i++];
+            sid = values[i++];
+        }
     }
 
     @Override
@@ -54,7 +78,13 @@ public class T4CTTIoAuthKeyDataPacket extends T4CTTIfunPacket {
         meg.marshalPTR();
         meg.marshalPTR();
         meg.marshalCHR(user);
+
+        byte[][] keys = new byte[propLen][];
+        byte[][] values = new byte[propLen][];
         byte[] abyte2 = new byte[propLen];
+
+        // DBConversion.stringToDriverCharBytes(auth_terminal, 1);
+
         meg.marshalKEYVAL(keys, values, abyte2, propLen);
     }
 
