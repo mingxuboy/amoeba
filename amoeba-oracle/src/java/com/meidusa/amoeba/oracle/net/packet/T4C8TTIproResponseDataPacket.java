@@ -14,7 +14,7 @@ public class T4C8TTIproResponseDataPacket extends T4CTTIMsgPacket {
 
     byte           proSvrVer        = 6;
     short          oVersion         = -1;
-    byte[]         proSvrStr        = "Linuxi386/Linux-2.0.34-8.1.0".getBytes();
+    String         proSvrStr        = "Linuxi386/Linux-2.0.34-8.1.0";
     short          svrCharSet       = 0;
     byte           svrFlags         = 1;
     short          svrCharSetElem   = 0;
@@ -27,6 +27,10 @@ public class T4C8TTIproResponseDataPacket extends T4CTTIMsgPacket {
     private byte[] as0              = null;
     private short  word1            = 0;
     private byte[] as1              = null;
+
+    public T4C8TTIproResponseDataPacket(){
+        this.msgCode = TTIPRO;
+    }
 
     protected void init(AbstractPacketBuffer absbuffer) {
         super.init(absbuffer);
@@ -49,7 +53,7 @@ public class T4C8TTIproResponseDataPacket extends T4CTTIMsgPacket {
                 throw new RuntimeException("不支持从服务器接收到的 TTC 协议版本");
         }
         buffer.unmarshalSB1();
-        proSvrStr = buffer.unmarshalTEXT(50);
+        proSvrStr = new String(buffer.unmarshalTEXT(50));
         svrCharSet = (short) buffer.unmarshalUB2();
         svrFlags = (byte) buffer.unmarshalUB1();
         svrCharSetElem = (short) buffer.unmarshalUB2();
@@ -87,12 +91,11 @@ public class T4C8TTIproResponseDataPacket extends T4CTTIMsgPacket {
 
     @Override
     protected void write2Buffer(AbstractPacketBuffer absbuffer) throws UnsupportedEncodingException {
-        msgCode = TTIPRO;
         super.write2Buffer(absbuffer);
         T4CPacketBuffer meg = (T4CPacketBuffer) absbuffer;
         meg.writeByte(proSvrVer);
         meg.marshalNULLPTR();
-        meg.writeBytes(proSvrStr);
+        meg.writeBytes(proSvrStr.getBytes());
         meg.marshalNULLPTR();
         meg.marshalUB2(svrCharSet);
         meg.marshalUB1(svrFlags);
