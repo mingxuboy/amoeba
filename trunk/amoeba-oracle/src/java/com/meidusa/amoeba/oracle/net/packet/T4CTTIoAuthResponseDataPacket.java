@@ -1,6 +1,7 @@
 package com.meidusa.amoeba.oracle.net.packet;
 
 import java.io.UnsupportedEncodingException;
+import java.util.Properties;
 
 import org.apache.log4j.Logger;
 
@@ -12,9 +13,11 @@ import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
  */
 public class T4CTTIoAuthResponseDataPacket extends DataPacket implements T4CTTIoAuth {
 
-    private static Logger logger = Logger.getLogger(T4CTTIoAuthResponseDataPacket.class);
+    private static Logger logger           = Logger.getLogger(T4CTTIoAuthResponseDataPacket.class);
 
-    T4CTTIoer             oer    = null;
+    int                   len              = 0;
+    T4CTTIoer             oer              = null;
+    Properties            connectionValues = new Properties();
 
     @Override
     protected void init(AbstractPacketBuffer absbuffer) {
@@ -22,9 +25,8 @@ public class T4CTTIoAuthResponseDataPacket extends DataPacket implements T4CTTIo
         T4CPacketBuffer meg = (T4CPacketBuffer) absbuffer;
         oer = new T4CTTIoer(meg);
 
-        byte[][] abyte0 = (byte[][]) null;
-        byte[][] abyte1 = (byte[][]) null;
-        int i = 0;
+        byte[][] abyte0 = null;
+        byte[][] abyte1 = null;
         while (true) {
             byte byte0 = meg.unmarshalSB1();
             switch (byte0) {
@@ -38,33 +40,34 @@ public class T4CTTIoAuthResponseDataPacket extends DataPacket implements T4CTTIo
                     }
                     break;
                 case 8:
-                    i = meg.unmarshalUB2();
-                    abyte0 = new byte[i][];
-                    abyte1 = new byte[i][];
-                    meg.unmarshalKEYVAL(abyte0, abyte1, i);
+                    len = meg.unmarshalUB2();
+                    abyte0 = new byte[len][];
+                    abyte1 = new byte[len][];
+                    meg.unmarshalKEYVAL(abyte0, abyte1, len);
                     continue;
                 case 15:
-                    // oer.init();
-                    // oer.unmarshalWarning();
-                    // try {
-                    // oer.processWarning();
-                    // } catch (SQLWarning sqlwarning) {
-                    // conn.setWarnings(DatabaseError.addSqlWarning(conn.getWarnings(), sqlwarning));
-                    // }
-                    // continue;
+                    oer.init();
+                    oer.unmarshalWarning();
+                    if (oer.retCode != 0) {
+                        String s = new String(oer.errorMsg);
+                        logger.warn(s);
+                        // conn.setWarnings(DatabaseError.addSqlWarning(conn.getWarnings(), sqlwarning));
+                        return;
+                    }
+                    continue;
                 default:
                     throw new RuntimeException("Œ•∑¥–≠“È");
             }
             break;
         }
 
-        for (int j = 0; j < i; j++) {
+        for (int j = 0; j < len; j++) {
             String s = new String(abyte0[j]);
             String s1 = "";
             if (abyte1[j] != null) {
                 s1 = new String(abyte1[j]);
             }
-            // connectionValues.setProperty(s, s1);
+            connectionValues.setProperty(s, s1);
         }
 
         return;
@@ -73,6 +76,23 @@ public class T4CTTIoAuthResponseDataPacket extends DataPacket implements T4CTTIo
     @Override
     protected void write2Buffer(AbstractPacketBuffer absbuffer) throws UnsupportedEncodingException {
         super.write2Buffer(absbuffer);
+        T4CPacketBuffer meg = (T4CPacketBuffer) absbuffer;
+        meg.marshalUB1((byte) 8);
+        meg.marshalUB2(len);
+        
+        byte[][] abyte0 = new byte[len][];
+        byte[][] abyte1 = new byte[len][];
+        byte[] abyte2 = new byte[len];
+        
+        //connectionValues
+//        int i = 0;
+//        abyte0[i] = AUTH_SESSKEY.getBytes();
+//        abyte1[i++] = encryptedSK;
+        
+        //meg.marshalKEYVAL(abyte0, abyte1, abyte2, len);
+
+        meg.marshalUB1((byte) 4);
+        oer.marshal(meg);
     }
 
     @Override

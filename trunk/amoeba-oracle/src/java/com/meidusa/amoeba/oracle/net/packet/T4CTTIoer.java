@@ -1,5 +1,6 @@
 package com.meidusa.amoeba.oracle.net.packet;
 
+
 public class T4CTTIoer {
 
     final int               MAXERRBUF = 512;
@@ -81,6 +82,16 @@ public class T4CTTIoer {
             errorLength[0] = errorMsg.length;
         }
         return currCursorID;
+    }
+
+    void unmarshalWarning() {
+        retCode = meg.unmarshalUB2();
+        warnLength = meg.unmarshalUB2();
+        warnFlag = meg.unmarshalUB2();
+        if (retCode != 0 && warnLength > 0) {
+            errorMsg = meg.unmarshalCHR(warnLength);
+            errorLength[0] = warnLength;
+        }
     }
 
     public void marshal(T4CPacketBuffer meg) {
