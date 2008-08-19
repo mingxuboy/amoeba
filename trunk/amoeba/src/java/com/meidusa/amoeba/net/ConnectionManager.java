@@ -59,7 +59,6 @@ public class ConnectionManager extends LoopingThread implements Reporter {
 	
 	/** Our current runtime stats. */
 	protected ConMgrStats _stats, _lastStats;
-	private int currentReadingThreadSize = 0;
 	
 	/** 连接已经失效或者网络断开的队列 */
 	protected Queue<Tuple<Connection,Exception>> _deathq = new Queue<Tuple<Connection,Exception>>();
@@ -242,7 +241,7 @@ public class ConnectionManager extends LoopingThread implements Reporter {
 				}
 			}else if(selkey.isReadable() || selkey.isAcceptable()){
 				final NetEventHandler tmpHandler = handler;
-				currentReadingThreadSize ++;
+
 				executor.execute(new NameableRunner(){
 					public void run(){
 						try{
