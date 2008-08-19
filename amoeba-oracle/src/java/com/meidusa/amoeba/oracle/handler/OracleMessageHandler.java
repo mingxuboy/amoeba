@@ -52,9 +52,8 @@ public class OracleMessageHandler implements MessageHandler, Sessionable, SQLnet
 
     public void handleMessage(Connection conn, byte[] message) {
         if (conn == clientConn) {
-            Packet packet = null;
             clientMsgCount++;
-
+            Packet packet = null;
             switch (message[4]) {
                 case NS_PACKT_TYPE_CONNECT:
                     message[32] = (byte) NSINADISABLEFORCONNECTION;
@@ -73,7 +72,7 @@ public class OracleMessageHandler implements MessageHandler, Sessionable, SQLnet
                             return;
                         }
                     }
-                    if (clientMsgCount <= 7) {
+                    if (clientMsgCount <= 8) {
                         if (T4CTTIfunPacket.isMsgType(message, T4CTTIfunPacket.TTIPRO)) {
                             packet = new T4C8TTIproDataPacket();
                         } else if (T4CTTIfunPacket.isMsgType(message, T4CTTIfunPacket.TTIDTY)) {
@@ -88,22 +87,20 @@ public class OracleMessageHandler implements MessageHandler, Sessionable, SQLnet
             }
 
             if (packet != null) {
+                packet.init(message, conn);
                 if (logger.isDebugEnabled()) {
-                    System.out.println("===================================" + PacketTypeMap.get(message[4]));
+                    System.out.println("========================================================");
+                    System.out.println("packet:" + packet);
                     System.out.println("##source:" + ByteUtil.toHex(message, 0, message.length));
                 }
-                packet.init(message, conn);
-                byte[] ab = packet.toByteBuffer(conn).array();
+                message = packet.toByteBuffer(conn).array();
                 if (logger.isDebugEnabled()) {
-                    System.out.println("#warpped:" + ByteUtil.toHex(ab, 0, ab.length));
+                    System.out.println("#warpped:" + ByteUtil.toHex(message, 0, message.length));
                     System.out.println();
                 }
                 lastPackt = packet;
-                serverConn.postMessage(ab);
-            } else {
-                serverConn.postMessage(message);// proxy-->server
             }
-
+            serverConn.postMessage(message);// proxy-->server
         } else {
             serverMsgCount++;
             Packet packet = null;
@@ -123,10 +120,10 @@ public class OracleMessageHandler implements MessageHandler, Sessionable, SQLnet
 
             try {
                 if (packet != null) {
+                    packet.init(message, conn);
                     if (logger.isDebugEnabled()) {
                         System.out.println("@@server source:" + ByteUtil.toHex(message, 0, message.length));
                     }
-                    packet.init(message, conn);
                     message = packet.toByteBuffer(conn).array();
                     if (logger.isDebugEnabled()) {
                         System.out.println("@server warpped:" + ByteUtil.toHex(message, 0, message.length));

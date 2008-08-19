@@ -2,8 +2,9 @@ package com.meidusa.amoeba.oracle.net.packet;
 
 public class T4CTTIoer {
 
-    private T4CPacketBuffer meg;
     final int               MAXERRBUF = 512;
+
+    private T4CPacketBuffer meg;
     short                   endToEndECIDSequenceNumber;
     long                    curRowNumber;
     int                     retCode;

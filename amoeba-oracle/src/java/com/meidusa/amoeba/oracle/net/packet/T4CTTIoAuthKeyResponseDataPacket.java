@@ -6,6 +6,10 @@ import org.apache.log4j.Logger;
 
 import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
 
+/**
+ * @author hexianmao
+ * @version 2008-8-19 обнГ02:43:47
+ */
 public class T4CTTIoAuthKeyResponseDataPacket extends DataPacket {
 
     private static Logger logger      = Logger.getLogger(T4CTTIoAuthKeyResponseDataPacket.class);
