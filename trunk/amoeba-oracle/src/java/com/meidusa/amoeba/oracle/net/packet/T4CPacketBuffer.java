@@ -1,5 +1,7 @@
 package com.meidusa.amoeba.oracle.net.packet;
 
+import java.util.Vector;
+
 import com.meidusa.amoeba.oracle.io.OraclePacketConstant;
 import com.meidusa.amoeba.oracle.util.ByteUtil;
 
@@ -11,23 +13,19 @@ import com.meidusa.amoeba.oracle.util.ByteUtil;
  */
 public class T4CPacketBuffer extends OracleAbstractPacketBuffer implements OraclePacketConstant {
 
-    final byte[] tmpBuffer1   = new byte[1];
-    final byte[] tmpBuffer2   = new byte[2];
-    final byte[] tmpBuffer3   = new byte[3];
-    final byte[] tmpBuffer4   = new byte[4];
-    final byte[] tmpBuffer5   = new byte[5];
-    final byte[] tmpBuffer6   = new byte[6];
-    final byte[] tmpBuffer7   = new byte[7];
-    final byte[] tmpBuffer8   = new byte[8];
+    final byte[] tmpBuffer1  = new byte[1];
+    final byte[] tmpBuffer2  = new byte[2];
+    final byte[] tmpBuffer3  = new byte[3];
+    final byte[] tmpBuffer4  = new byte[4];
+    final byte[] tmpBuffer5  = new byte[5];
+    final byte[] tmpBuffer6  = new byte[6];
+    final byte[] tmpBuffer7  = new byte[7];
+    final byte[] tmpBuffer8  = new byte[8];
 
-    final byte[] ignored      = new byte[255];
-    final int[]  retLen       = new int[1];
-    //byte[] rep          = { 0, 2, 1, 1, 1 };
+    final byte[] ignored     = new byte[255];
+    final int[]  retLen      = new int[1];
 
-    boolean      isConvNeeded = false;
-
-    // DBConversion conv = null;
-    int          c2sNlsRatio  = 1;
+    int          c2sNlsRatio = 1;
 
     public T4CPacketBuffer(byte[] buf){
         super(buf);
@@ -35,18 +33,6 @@ public class T4CPacketBuffer extends OracleAbstractPacketBuffer implements Oracl
 
     public T4CPacketBuffer(int size){
         super(size);
-    }
-
-    public byte getRep(byte pos) {
-        return typeRep.getRep(pos);
-    }
-
-    public void setRep(byte pos, byte val) {
-        typeRep.setRep(pos, val);
-    }
-
-    public void setConvNeeded(boolean isConvNeeded) {
-        this.isConvNeeded = isConvNeeded;
     }
 
     public void setC2sNlsRatio(int nlsRatio) {
@@ -144,7 +130,7 @@ public class T4CPacketBuffer extends OracleAbstractPacketBuffer implements Oracl
 
     void marshalCHR(byte[] ab, int offset, int len) {
         if (len > 0) {
-            if (isConvNeeded) {
+            if (typeRep.isConvNeeded()) {
                 marshalCLR(ab, offset, len);
             } else {
                 writeBytes(ab, offset, len);
@@ -263,16 +249,17 @@ public class T4CPacketBuffer extends OracleAbstractPacketBuffer implements Oracl
         return unmarshalUB4();
     }
 
-    byte[] unmarshalArrayWithNull(){
-    	int currentPosition = this.getPosition();
-    	while(this.readByte()!=0);
-    	int distPosition = this.getPosition();
-    	int lenght = distPosition-currentPosition-1;
-    	byte[] result = new byte[lenght];
-    	System.arraycopy(buffer, currentPosition, result, 0, lenght);
-    	return result;
+    byte[] unmarshalArrayWithNull() {
+        int currentPosition = this.getPosition();
+        while (this.readByte() != 0)
+            ;
+        int distPosition = this.getPosition();
+        int lenght = distPosition - currentPosition - 1;
+        byte[] result = new byte[lenght];
+        System.arraycopy(buffer, currentPosition, result, 0, lenght);
+        return result;
     }
-    
+
     byte[] unmarshalNBytes(int i) {
         byte abyte0[] = new byte[i];
         if (readBytes(abyte0, 0, abyte0.length) < 0) {
@@ -306,7 +293,7 @@ public class T4CPacketBuffer extends OracleAbstractPacketBuffer implements Oracl
 
     byte[] unmarshalCHR(int i) {
         byte abyte0[] = null;
-        if (isConvNeeded) {
+        if (typeRep.isConvNeeded()) {
             abyte0 = unmarshalCLR(i, retLen);
             if (abyte0.length != retLen[0]) {
                 byte abyte1[] = new byte[retLen[0]];
@@ -499,6 +486,51 @@ public class T4CPacketBuffer extends OracleAbstractPacketBuffer implements Oracl
             System.arraycopy(abyte0, 0, abyte1, 0, j);
         }
         return abyte1;
+    }
+
+    @SuppressWarnings("unchecked")
+    byte[] unmarshalCLRforREFS() {
+        short word1 = 0;
+        byte abyte0[] = null;
+        Vector vector = new Vector(10, 10);
+        short word2 = unmarshalUB1();
+        if (word2 < 0) {
+            throw new RuntimeException("Î¥·´Ð­Òé");
+        }
+        if (word2 == 0) {
+            return null;
+        }
+        if (!escapeSequenceNull(word2)) {
+            if (word2 == 254) {
+                do {
+                    short word0;
+                    if ((word0 = unmarshalUB1()) <= 0) {
+                        break;
+                    }
+                    if (word0 != 254 || !typeRep.isServerConversion()) {
+                        word1 += word0;
+                        byte[] abyte1 = new byte[word0];
+                        unmarshalBuffer(abyte1, 0, word0);
+                        vector.addElement(abyte1);
+                    }
+                } while (true);
+            } else {
+                word1 = word2;
+                byte abyte2[] = new byte[word2];
+                unmarshalBuffer(abyte2, 0, word2);
+                vector.addElement(abyte2);
+            }
+            abyte0 = new byte[word1];
+            int i = 0;
+            for (; vector.size() > 0; vector.removeElementAt(0)) {
+                int j = ((byte[]) vector.elementAt(0)).length;
+                System.arraycopy(vector.elementAt(0), 0, abyte0, i, j);
+                i += j;
+            }
+        } else {
+            abyte0 = null;
+        }
+        return abyte0;
     }
 
     // ////////////////////////////////////////////////////////
