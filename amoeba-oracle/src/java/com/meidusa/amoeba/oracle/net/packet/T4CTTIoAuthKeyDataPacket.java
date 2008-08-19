@@ -1,10 +1,8 @@
 package com.meidusa.amoeba.oracle.net.packet;
 
 import java.io.UnsupportedEncodingException;
-import java.sql.SQLException;
 
 import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
-import com.meidusa.amoeba.oracle.util.DBConversion;
 
 /**
  * @author hexianmao
@@ -15,24 +13,22 @@ public class T4CTTIoAuthKeyDataPacket extends T4CTTIfunPacket {
     int    userLength      = 0;
     long   LOGON_MODE      = 0L;
     int    propLen         = 0;
-    byte[] user            = null;
+    String user            = null;
 
     String auth_terminal   = "AUTH_TERMINAL";
-    byte[] terminal        = null;
+    String terminal        = null;
 
     String auth_program_nm = "AUTH_PROGRAM_NM";
-    byte[] program_nm      = null;
+    String program_nm      = null;
 
     String auth_machine    = "AUTH_MACHINE";
-    byte[] machine         = null;
+    String machine         = null;
 
     String auth_pid        = "AUTH_PID";
-    byte[] pid             = null;
+    String pid             = null;
 
     String auth_sid        = "AUTH_SID";
-    byte[] sid             = null;
-
-    short  clientCharSetId = 1;
+    String sid             = null;
 
     public T4CTTIoAuthKeyDataPacket(){
         this.funCode = OSESSKEY;
@@ -52,7 +48,7 @@ public class T4CTTIoAuthKeyDataPacket extends T4CTTIfunPacket {
         propLen = (int) meg.unmarshalUB4();// key-value length
         meg.unmarshalUB1();
         meg.unmarshalUB1();
-        user = meg.unmarshalCHR(userLength);
+        user = new String(meg.unmarshalCHR(userLength));
 
         byte[][] keys = new byte[propLen][];
         byte[][] values = new byte[propLen][];
@@ -60,13 +56,13 @@ public class T4CTTIoAuthKeyDataPacket extends T4CTTIfunPacket {
 
         if (propLen >= 4) {
             int i = 0;
-            terminal = values[i++];
+            terminal = new String(values[i++]);
             if (propLen == 5) {
-                program_nm = values[i++];
+                program_nm = new String(values[i++]);
             }
-            machine = values[i++];
-            pid = values[i++];
-            sid = values[i++];
+            machine = new String(values[i++]);
+            pid = new String(values[i++]);
+            sid = new String(values[i++]);
         }
     }
 
@@ -75,34 +71,30 @@ public class T4CTTIoAuthKeyDataPacket extends T4CTTIfunPacket {
         super.write2Buffer(buffer);
         T4CPacketBuffer meg = (T4CPacketBuffer) buffer;
         meg.marshalPTR();
-        meg.marshalSB4(user.length);
+        meg.marshalSB4(userLength);
         meg.marshalUB4(LOGON_MODE | 1L);
         meg.marshalPTR();
         meg.marshalUB4(propLen);
         meg.marshalPTR();
         meg.marshalPTR();
-        meg.marshalCHR(user);
+        meg.marshalCHR(user.getBytes());
 
         byte[][] keys = new byte[propLen][];
         byte[][] values = new byte[propLen][];
         byte[] abyte2 = new byte[propLen];
-        try {
-            int j = 0;
-            keys[j] = DBConversion.stringToDriverCharBytes(auth_terminal, clientCharSetId);
-            values[j++] = terminal;
-            if (program_nm != null) {
-                keys[j] = DBConversion.stringToDriverCharBytes(auth_program_nm, clientCharSetId);
-                values[j++] = program_nm;
-            }
-            keys[j] = DBConversion.stringToDriverCharBytes(auth_machine, clientCharSetId);
-            values[j++] = machine;
-            keys[j] = DBConversion.stringToDriverCharBytes(auth_pid, clientCharSetId);
-            values[j++] = pid;
-            keys[j] = DBConversion.stringToDriverCharBytes(auth_sid, clientCharSetId);
-            values[j++] = sid;
-        } catch (SQLException e) {
-            e.printStackTrace();
+        int j = 0;
+        keys[j] = auth_terminal.getBytes();
+        values[j++] = terminal.getBytes();
+        if (program_nm != null) {
+            keys[j] = auth_program_nm.getBytes();
+            values[j++] = program_nm.getBytes();
         }
+        keys[j] = auth_machine.getBytes();
+        values[j++] = machine.getBytes();
+        keys[j] = auth_pid.getBytes();
+        values[j++] = pid.getBytes();
+        keys[j] = auth_sid.getBytes();
+        values[j++] = sid.getBytes();
 
         meg.marshalKEYVAL(keys, values, abyte2, propLen);
     }
