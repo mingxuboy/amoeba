@@ -12,6 +12,7 @@ import com.meidusa.amoeba.net.io.PacketInputStream;
 import com.meidusa.amoeba.net.io.PacketOutputStream;
 import com.meidusa.amoeba.oracle.io.OraclePacketInputStream;
 import com.meidusa.amoeba.oracle.io.OraclePacketOutputStream;
+import com.meidusa.amoeba.oracle.util.DBConversion;
 import com.meidusa.amoeba.oracle.util.T4CTypeRep;
 
 public abstract class OracleConnection extends DatabaseConnection {
@@ -20,7 +21,27 @@ public abstract class OracleConnection extends DatabaseConnection {
 	private int tdu;
 	private boolean anoEnabled = false;
 	private final T4CTypeRep rep = new T4CTypeRep();
+	public String protocolVersionStr = "Java_TTC-8.2.0";
+	public byte[] protocolVersion = new byte[]{6};
+	private DBConversion conversion;
+	private byte[] encryptedSK;
 	
+	public byte[] getEncryptedSK() {
+		return encryptedSK;
+	}
+
+	public void setEncryptedSK(byte[] encryptedSK) {
+		this.encryptedSK = encryptedSK;
+	}
+
+	public DBConversion getConversion() {
+		return conversion;
+	}
+
+	public void setConversion(DBConversion conversion) {
+		this.conversion = conversion;
+	}
+
 	public T4CTypeRep getRep() {
 		return rep;
 	}
