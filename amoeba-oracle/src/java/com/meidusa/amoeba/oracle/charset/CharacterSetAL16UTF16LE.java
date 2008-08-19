@@ -1,14 +1,6 @@
-// Decompiled by Jad v1.5.8g. Copyright 2001 Pavel Kouznetsov.
-// Jad home page: http://www.kpdus.com/jad.html
-// Decompiler options: packimports(3) 
-// Source File Name:   CharacterSetAL16UTF16LE.java
-
 package com.meidusa.amoeba.oracle.charset;
 
 import java.sql.SQLException;
-
-// Referenced classes of package oracle.sql:
-//            CharacterSet, CharacterRepConstants, CharacterWalker, CharacterBuffer
 
 class CharacterSetAL16UTF16LE extends CharacterSet
     implements CharacterRepConstants
