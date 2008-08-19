@@ -15,8 +15,8 @@ public class T4CTTIoAuthKeyResponseDataPacket extends DataPacket {
     private static Logger logger      = Logger.getLogger(T4CTTIoAuthKeyResponseDataPacket.class);
 
     int                   len         = 0;
-    byte[][]              abyte0      = null;
-    byte[][]              abyte1      = null;
+
+    String                sesskey     = "AUTH_SESSKEY";
     byte[]                encryptedSK = null;
 
     T4CTTIoer             oer         = null;
@@ -27,6 +27,8 @@ public class T4CTTIoAuthKeyResponseDataPacket extends DataPacket {
         T4CPacketBuffer meg = (T4CPacketBuffer) absbuffer;
         oer = new T4CTTIoer(meg);
 
+        byte[][] abyte0 = null;
+        byte[][] abyte1 = null;
         while (true) {
             byte byte0 = meg.unmarshalSB1();
             switch (byte0) {
@@ -67,7 +69,15 @@ public class T4CTTIoAuthKeyResponseDataPacket extends DataPacket {
         T4CPacketBuffer meg = (T4CPacketBuffer) absbuffer;
         meg.marshalUB1((byte) 8);
         meg.marshalUB2(len);
-        meg.marshalKEYVAL(abyte0, abyte1, new byte[len], len);
+
+        byte[][] abyte0 = new byte[len][];
+        byte[][] abyte1 = new byte[len][];
+        byte[] abyte2 = new byte[len];
+        int i = 0;
+        abyte0[i] = sesskey.getBytes();
+        abyte1[i++] = encryptedSK;
+        meg.marshalKEYVAL(abyte0, abyte1, abyte2, len);
+
         meg.marshalUB1((byte) 4);
         oer.marshal(meg);
     }

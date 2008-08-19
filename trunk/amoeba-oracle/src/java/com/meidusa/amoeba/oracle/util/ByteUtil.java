@@ -1,6 +1,5 @@
 package com.meidusa.amoeba.oracle.util;
 
-
 public class ByteUtil {
 
     public static String toHex(byte[] b, int offset, int len) {
@@ -37,7 +36,7 @@ public class ByteUtil {
         // byte[] b = { 1, 2, 3, 4, 50, 60, 70 };
         // System.out.println(toHex(b, 3, 4));
 
-        String hex = "43 4e";
+        String hex = "41 55 54 48 5f 53 45 53 53 4b 45 59";
         System.out.println(fromHex(hex, null));
     }
 }
