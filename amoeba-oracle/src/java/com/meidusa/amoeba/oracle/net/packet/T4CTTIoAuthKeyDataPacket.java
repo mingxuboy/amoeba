@@ -1,8 +1,10 @@
 package com.meidusa.amoeba.oracle.net.packet;
 
 import java.io.UnsupportedEncodingException;
+import java.sql.SQLException;
 
 import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
+import com.meidusa.amoeba.oracle.util.DBConversion;
 
 /**
  * @author hexianmao
@@ -29,6 +31,8 @@ public class T4CTTIoAuthKeyDataPacket extends T4CTTIfunPacket {
 
     String auth_sid        = "AUTH_SID";
     byte[] sid             = null;
+
+    short  clientCharSetId = 1;
 
     public T4CTTIoAuthKeyDataPacket(){
         this.funCode = OSESSKEY;
@@ -82,8 +86,23 @@ public class T4CTTIoAuthKeyDataPacket extends T4CTTIfunPacket {
         byte[][] keys = new byte[propLen][];
         byte[][] values = new byte[propLen][];
         byte[] abyte2 = new byte[propLen];
-
-        // DBConversion.stringToDriverCharBytes(auth_terminal, 1);
+        try {
+            int j = 0;
+            keys[j] = DBConversion.stringToDriverCharBytes(auth_terminal, clientCharSetId);
+            values[j++] = terminal;
+            if (program_nm != null) {
+                keys[j] = DBConversion.stringToDriverCharBytes(auth_program_nm, clientCharSetId);
+                values[j++] = program_nm;
+            }
+            keys[j] = DBConversion.stringToDriverCharBytes(auth_machine, clientCharSetId);
+            values[j++] = machine;
+            keys[j] = DBConversion.stringToDriverCharBytes(auth_pid, clientCharSetId);
+            values[j++] = pid;
+            keys[j] = DBConversion.stringToDriverCharBytes(auth_sid, clientCharSetId);
+            values[j++] = sid;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
 
         meg.marshalKEYVAL(keys, values, abyte2, propLen);
     }
