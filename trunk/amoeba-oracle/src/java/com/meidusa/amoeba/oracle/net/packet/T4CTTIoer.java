@@ -23,7 +23,7 @@ public class T4CTTIoer {
     int                     pad1;
     long                    successIters;
     int                     partitionId;
-    int                     tableId;
+    short                   tableId;
     int                     slotNumber;
     long                    rba;
     long                    blockNumber;
@@ -95,6 +95,21 @@ public class T4CTTIoer {
         meg.marshalUB1(sqlType);
         meg.marshalSB1(oerFatal);
         meg.marshalSB2(flags);
-
+        meg.marshalSB2(userCursorOpt);
+        meg.marshalUB1(upiParam);
+        meg.marshalUB1(warningFlag);
+        meg.marshalUB4(rba);
+        meg.marshalUB2(partitionId);
+        meg.marshalUB1(tableId);
+        meg.marshalUB4(blockNumber);
+        meg.marshalUB2(slotNumber);
+        meg.marshalSWORD(osError);
+        meg.marshalUB1(stmtNumber);
+        meg.marshalUB1(callNumber);
+        meg.marshalUB2(pad1);
+        meg.marshalUB4(successIters);
+        if (retCode != 0) {
+            meg.marshalDALC(errorMsg);
+        }
     }
 }
