@@ -1,16 +1,8 @@
-// Decompiled by Jad v1.5.8g. Copyright 2001 Pavel Kouznetsov.
-// Jad home page: http://www.kpdus.com/jad.html
-// Decompiler options: packimports(3)
-// Source File Name: CharacterSet1Byte.java
-
 package com.meidusa.amoeba.oracle.charset;
 
 import java.sql.SQLException;
 
 import oracle.sql.converter.CharacterConverters;
-
-// Referenced classes of package oracle.sql:
-// CharacterSetWithConverter, CharacterWalker, CharacterBuffer
 
 class CharacterSet1Byte extends CharacterSetWithConverter {
 

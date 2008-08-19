@@ -1,15 +1,5 @@
-// Decompiled by Jad v1.5.8g. Copyright 2001 Pavel Kouznetsov.
-// Jad home page: http://www.kpdus.com/jad.html
-// Decompiler options: packimports(3) 
-// Source File Name:   CharacterSetFactoryThin.java
-
 package com.meidusa.amoeba.oracle.charset;
 
-
-// Referenced classes of package oracle.sql:
-//            CharacterSetFactory, CharacterSetAL16UTF16, CharacterSetUTF, CharacterSetAL32UTF8, 
-//            CharacterSetUTFE, CharacterSetAL16UTF16LE, CharacterSetUnknown, CharacterSetWithConverter, 
-//            CharacterSet
 
 class CharacterSetFactoryThin extends CharacterSetFactory
 {
