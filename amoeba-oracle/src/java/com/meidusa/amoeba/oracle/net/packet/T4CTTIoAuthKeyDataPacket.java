@@ -9,9 +9,9 @@ public class T4CTTIoAuthKeyDataPacket extends T4CTTIfunPacket {
     int      userLength = 0;
     long     LOGON_MODE = 0L;
     int      propLen    = 0;
-    byte[]   user;
-    byte[][] keys;
-    byte[][] values;
+    byte[]   user       = null;
+    byte[][] keys       = null;
+    byte[][] values     = null;
 
     public T4CTTIoAuthKeyDataPacket(){
         this.funCode = OSESSKEY;
