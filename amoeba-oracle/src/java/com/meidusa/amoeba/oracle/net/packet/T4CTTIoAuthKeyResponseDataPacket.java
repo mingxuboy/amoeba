@@ -21,7 +21,7 @@ public class T4CTTIoAuthKeyResponseDataPacket extends DataPacket {
     protected void init(AbstractPacketBuffer absbuffer) {
         super.init(absbuffer);
         T4CPacketBuffer meg = (T4CPacketBuffer) absbuffer;
-        new T4CTTIoer(meg);
+        oer = new T4CTTIoer(meg);
 
         while (true) {
             byte byte0 = meg.unmarshalSB1();
@@ -29,9 +29,10 @@ public class T4CTTIoAuthKeyResponseDataPacket extends DataPacket {
                 case 4:
                     oer.init();
                     oer.unmarshal();
-                    if (oer.errorMsg.length > 0) {
+                    if (oer.retCode != 0) {
                         String s = new String(oer.errorMsg);
                         logger.error(s);
+                        return;
                     }
                     break;
                 case 8:
@@ -64,6 +65,7 @@ public class T4CTTIoAuthKeyResponseDataPacket extends DataPacket {
         meg.marshalUB2(len);
         meg.marshalKEYVAL(abyte0, abyte1, new byte[len], len);
         meg.marshalUB1((byte) 4);
+        oer.marshal(meg);
     }
 
     @Override

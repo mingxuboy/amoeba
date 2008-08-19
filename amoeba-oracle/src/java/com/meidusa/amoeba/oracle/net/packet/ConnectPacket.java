@@ -2,8 +2,6 @@ package com.meidusa.amoeba.oracle.net.packet;
 
 import java.io.UnsupportedEncodingException;
 
-import org.apache.log4j.Logger;
-
 import com.meidusa.amoeba.net.Connection;
 import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
 
@@ -13,17 +11,16 @@ import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
  */
 public class ConnectPacket extends AbstractPacket {
 
-    private static Logger logger    = Logger.getLogger(ConnectPacket.class);
-    public static final byte[] CONSTANT_CONNECT_BYTES = new byte[]{1,52,1,44,0,0};
-    protected byte[]      arrayFlag = new byte[6];
-    public int sduSize = NSPDFSDULN;
-    public int tduSize = NSPMXSDULN;
-    public boolean     anoEnabled;
-    public String      data;
+    public static final byte[] CONSTANT_CONNECT_BYTES = new byte[] { 1, 52, 1, 44, 0, 0 };
+    protected byte[]           arrayFlag              = new byte[6];
+    public int                 sduSize                = NSPDFSDULN;
+    public int                 tduSize                = NSPMXSDULN;
+    public boolean             anoEnabled;
+    public String              data;
 
     @Override
-    public void init(byte[] buffer,Connection conn) {
-        super.init(buffer,conn);
+    public void init(byte[] buffer, Connection conn) {
+        super.init(buffer, conn);
         sduSize = buffer[14] & 0xff;
         sduSize <<= 8;
         sduSize |= buffer[15] & 0xff;
@@ -39,64 +36,51 @@ public class ConnectPacket extends AbstractPacket {
             anoEnabled = true;
         }
         dataOffset = buffer[27];
-        data  = extractData();
-        /*if (dataLen > 0) {
-            byte[] dataBytes = new byte[dataLen];
-            System.arraycopy(buffer, dataOffset, data, 0, dataLen);
-            data = new String(dataBytes);
-        }*/
+        data = extractData();
+        /*
+         * if (dataLen > 0) { byte[] dataBytes = new byte[dataLen]; System.arraycopy(buffer, dataOffset, data, 0,
+         * dataLen); data = new String(dataBytes); }
+         */
 
-        if (logger.isDebugEnabled()) {
-            logger.debug(this.toString());
-        }
     }
 
     @Override
     protected void write2Buffer(AbstractPacketBuffer absbuffer) throws UnsupportedEncodingException {
-    	OracleAbstractPacketBuffer buffer = (OracleAbstractPacketBuffer)absbuffer;
-    	this.type = SQLnetDef.NS_PACKT_TYPE_CONNECT;
-    	dataOffset = 34;
-    	super.write2Buffer(buffer);
-    	buffer.writeBytes(CONSTANT_CONNECT_BYTES);
-    	buffer.writeUB2(sduSize);//postion = 14;
-    	buffer.writeUB2(tduSize);
-    	buffer.writeUB1((byte)79);
-    	buffer.writeUB1((byte)-104);
-    	buffer.setPosition(22);
-    	buffer.writeUB1((byte)0);
-    	buffer.writeUB1((byte)1);
-    	byte[] dataBytes = null;
-    	if(data != null){
-    		dataBytes = data.getBytes();
-    		buffer.writeUB2(dataBytes.length);
-    		buffer.setPosition(26);
-    		buffer.writeUB2(dataOffset);//写入data 在buffer中偏移位置
-    		
-    	}else{
-    		buffer.writeUB2((byte)0);
-    	}
-    	
-    	buffer.setPosition(32);
-    	buffer.writeByte(NSINADISABLEFORCONNECTION);
-    	buffer.writeByte(NSINADISABLEFORCONNECTION);
-    	
-    	if(dataBytes != null){
-    		buffer.setPosition(dataOffset);
-    		buffer.writeBytes(dataBytes);//写入data 数据
-    	}
-    	
+        OracleAbstractPacketBuffer buffer = (OracleAbstractPacketBuffer) absbuffer;
+        this.type = SQLnetDef.NS_PACKT_TYPE_CONNECT;
+        dataOffset = 34;
+        super.write2Buffer(buffer);
+        buffer.writeBytes(CONSTANT_CONNECT_BYTES);
+        buffer.writeUB2(sduSize);// postion = 14;
+        buffer.writeUB2(tduSize);
+        buffer.writeUB1((byte) 79);
+        buffer.writeUB1((byte) -104);
+        buffer.setPosition(22);
+        buffer.writeUB1((byte) 0);
+        buffer.writeUB1((byte) 1);
+        byte[] dataBytes = null;
+        if (data != null) {
+            dataBytes = data.getBytes();
+            buffer.writeUB2(dataBytes.length);
+            buffer.setPosition(26);
+            buffer.writeUB2(dataOffset);// 写入data 在buffer中偏移位置
+
+        } else {
+            buffer.writeUB2((byte) 0);
+        }
+
+        buffer.setPosition(32);
+        buffer.writeByte(NSINADISABLEFORCONNECTION);
+        buffer.writeByte(NSINADISABLEFORCONNECTION);
+
+        if (dataBytes != null) {
+            buffer.setPosition(dataOffset);
+            buffer.writeBytes(dataBytes);// 写入data 数据
+        }
+
     }
-    public String toString() {
-        StringBuffer sb = new StringBuffer();
-        sb.append("ConnectPacket info ==============================\n");
-        sb.append("sdu:").append(sduSize).append("\n");
-        sb.append("tdu:").append(tduSize).append("\n");
-        sb.append("anoEnabled:").append(anoEnabled).append("\n");
-        sb.append("data:").append(new String(data)).append("\n");
-        return sb.toString();
-    }
-    
+
     protected Class<? extends AbstractPacketBuffer> getBufferClass() {
-		return AnoPacketBuffer.class;
-	}
+        return AnoPacketBuffer.class;
+    }
 }

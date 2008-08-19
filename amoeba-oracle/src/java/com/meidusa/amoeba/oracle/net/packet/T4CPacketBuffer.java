@@ -13,19 +13,30 @@ import com.meidusa.amoeba.oracle.util.ByteUtil;
  */
 public class T4CPacketBuffer extends OracleAbstractPacketBuffer implements OraclePacketConstant {
 
-    final byte[] tmpBuffer1  = new byte[1];
-    final byte[] tmpBuffer2  = new byte[2];
-    final byte[] tmpBuffer3  = new byte[3];
-    final byte[] tmpBuffer4  = new byte[4];
-    final byte[] tmpBuffer5  = new byte[5];
-    final byte[] tmpBuffer6  = new byte[6];
-    final byte[] tmpBuffer7  = new byte[7];
-    final byte[] tmpBuffer8  = new byte[8];
+    static final int  TTCC_MXL    = 252;
+    static final int  TTCC_ESC    = 253;
+    static final int  TTCC_LNG    = 254;
+    static final int  TTCC_ERR    = 255;
+    static final int  TTCC_MXIN   = 64;
+    static final byte TTCLXMULTI  = 1;
+    static final byte TTCLXMCONV  = 2;
+    static final int  FREE        = -1;
+    static final int  SEND        = 1;
+    static final int  RECEIVE     = 2;
 
-    final byte[] ignored     = new byte[255];
-    final int[]  retLen      = new int[1];
+    final byte[]      tmpBuffer1  = new byte[1];
+    final byte[]      tmpBuffer2  = new byte[2];
+    final byte[]      tmpBuffer3  = new byte[3];
+    final byte[]      tmpBuffer4  = new byte[4];
+    final byte[]      tmpBuffer5  = new byte[5];
+    final byte[]      tmpBuffer6  = new byte[6];
+    final byte[]      tmpBuffer7  = new byte[7];
+    final byte[]      tmpBuffer8  = new byte[8];
 
-    int          c2sNlsRatio = 1;
+    final byte[]      ignored     = new byte[255];
+    final int[]       retLen      = new int[1];
+
+    int               c2sNlsRatio = 1;
 
     public T4CPacketBuffer(byte[] buf){
         super(buf);
@@ -139,12 +150,12 @@ public class T4CPacketBuffer extends OracleAbstractPacketBuffer implements Oracl
     }
 
     void marshalCLR(byte[] ab, int i, int j) {
-        if (j > 64) {
+        if (j > TTCC_MXIN) {
             int i1 = 0;
             writeByte((byte) -2);
             do {
                 int k = j - i1;
-                int l = k <= 64 ? k : 64;
+                int l = k <= TTCC_MXIN ? k : TTCC_MXIN;
                 writeByte((byte) (l & 0xff));
                 writeBytes(ab, i + i1, l);
                 i1 += l;
@@ -333,7 +344,7 @@ public class T4CPacketBuffer extends OracleAbstractPacketBuffer implements Oracl
             ai[0] = 0;
             return;
         }
-        if (word0 != 254) {
+        if (word0 != TTCC_LNG) {
             int i1 = Math.min(j - l, word0);
             k = unmarshalBuffer(abyte0, k, i1);
             l += i1;
@@ -348,7 +359,7 @@ public class T4CPacketBuffer extends OracleAbstractPacketBuffer implements Oracl
                         break;
                     }
                 }
-                if (word0 == 254) {
+                if (word0 == TTCC_LNG) {
                     switch (byte1) {
                         case -1:
                             byte1 = 1;
@@ -379,7 +390,7 @@ public class T4CPacketBuffer extends OracleAbstractPacketBuffer implements Oracl
                     }
                 }
                 byte1 = 0;
-                if (word0 > 252) {
+                if (word0 > TTCC_MXL) {
                     flag = true;
                 }
             } while (true);
@@ -491,7 +502,7 @@ public class T4CPacketBuffer extends OracleAbstractPacketBuffer implements Oracl
     @SuppressWarnings("unchecked")
     byte[] unmarshalCLRforREFS() {
         short word1 = 0;
-        byte abyte0[] = null;
+        byte[] abyte0 = null;
         Vector vector = new Vector(10, 10);
         short word2 = unmarshalUB1();
         if (word2 < 0) {
@@ -501,13 +512,13 @@ public class T4CPacketBuffer extends OracleAbstractPacketBuffer implements Oracl
             return null;
         }
         if (!escapeSequenceNull(word2)) {
-            if (word2 == 254) {
+            if (word2 == TTCC_LNG) {
                 do {
                     short word0;
                     if ((word0 = unmarshalUB1()) <= 0) {
                         break;
                     }
-                    if (word0 != 254 || !typeRep.isServerConversion()) {
+                    if (word0 != TTCC_LNG || !typeRep.isServerConversion()) {
                         word1 += word0;
                         byte[] abyte1 = new byte[word0];
                         unmarshalBuffer(abyte1, 0, word0);
@@ -516,7 +527,7 @@ public class T4CPacketBuffer extends OracleAbstractPacketBuffer implements Oracl
                 } while (true);
             } else {
                 word1 = word2;
-                byte abyte2[] = new byte[word2];
+                byte[] abyte2 = new byte[word2];
                 unmarshalBuffer(abyte2, 0, word2);
                 vector.addElement(abyte2);
             }
@@ -540,9 +551,9 @@ public class T4CPacketBuffer extends OracleAbstractPacketBuffer implements Oracl
             case 0:
                 flag = true;
                 break;
-            case 253:
+            case TTCC_ESC:
                 throw new RuntimeException("Î¥·´Ð­Òé");
-            case 255:
+            case TTCC_ERR:
                 flag = true;
                 break;
         }
