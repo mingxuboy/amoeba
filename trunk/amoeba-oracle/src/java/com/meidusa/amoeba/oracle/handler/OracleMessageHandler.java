@@ -88,8 +88,10 @@ public class OracleMessageHandler implements MessageHandler, Sessionable, SQLnet
             }
 
             if (packet != null) {
-                System.out.println("===================================" + PacketTypeMap.get(message[4]));
-                System.out.println("##source:" + ByteUtil.toHex(message, 0, message.length));
+                if (logger.isDebugEnabled()) {
+                    System.out.println("===================================" + PacketTypeMap.get(message[4]));
+                    System.out.println("##source:" + ByteUtil.toHex(message, 0, message.length));
+                }
                 packet.init(message, conn);
                 byte[] ab = packet.toByteBuffer(conn).array();
                 if (logger.isDebugEnabled()) {
@@ -121,7 +123,9 @@ public class OracleMessageHandler implements MessageHandler, Sessionable, SQLnet
 
             try {
                 if (packet != null) {
-                    System.out.println("@@server source:" + ByteUtil.toHex(message, 0, message.length));
+                    if (logger.isDebugEnabled()) {
+                        System.out.println("@@server source:" + ByteUtil.toHex(message, 0, message.length));
+                    }
                     packet.init(message, conn);
                     message = packet.toByteBuffer(conn).array();
                     if (logger.isDebugEnabled()) {
