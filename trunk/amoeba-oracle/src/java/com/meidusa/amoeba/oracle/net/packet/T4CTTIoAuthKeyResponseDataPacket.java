@@ -10,15 +10,12 @@ import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
  * @author hexianmao
  * @version 2008-8-19 ÏÂÎç02:43:47
  */
-public class T4CTTIoAuthKeyResponseDataPacket extends DataPacket {
+public class T4CTTIoAuthKeyResponseDataPacket extends DataPacket implements T4CTTIoAuth {
 
     private static Logger logger      = Logger.getLogger(T4CTTIoAuthKeyResponseDataPacket.class);
 
     int                   len         = 0;
-
-    String                sesskey     = "AUTH_SESSKEY";
     byte[]                encryptedSK = null;
-
     T4CTTIoer             oer         = null;
 
     @Override
@@ -74,7 +71,7 @@ public class T4CTTIoAuthKeyResponseDataPacket extends DataPacket {
         byte[][] abyte1 = new byte[len][];
         byte[] abyte2 = new byte[len];
         int i = 0;
-        abyte0[i] = sesskey.getBytes();
+        abyte0[i] = AUTH_SESSKEY.getBytes();
         abyte1[i++] = encryptedSK;
         meg.marshalKEYVAL(abyte0, abyte1, abyte2, len);
 
