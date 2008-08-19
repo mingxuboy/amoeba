@@ -16,6 +16,24 @@ public interface T4CTTIoAuth {
     static final int    KPZ_PROXY_AUTH              = 1024;
     static final int    KPZ_SESSION_CACHE           = 2048;
     static final int    KPZ_PASSWD_IS_VFR           = 4096;
+
+    static final String AUTH_VERSION_STRING         = "AUTH_VERSION_STRING";
+    static final String AUTH_CAPABILITY_TABLE       = "AUTH_CAPABILITY_TABLE";
+    static final String AUTH_NLS_LXLAN              = "AUTH_NLS_LXLAN";
+    static final String AUTH_NLS_LXCTERRITORY       = "AUTH_NLS_LXCTERRITORY";
+    static final String AUTH_NLS_LXCCURRENCY        = "AUTH_NLS_LXCCURRENCY";
+    static final String AUTH_NLS_LXCISOCURR         = "AUTH_NLS_LXCISOCURR";
+    static final String AUTH_NLS_LXCNUMERICS        = "AUTH_NLS_LXCNUMERICS";
+    static final String AUTH_NLS_LXCDATEFM          = "AUTH_NLS_LXCDATEFM";
+    static final String AUTH_NLS_LXCDATELANG        = "AUTH_NLS_LXCDATELANG";
+    static final String AUTH_NLS_LXCSORT            = "AUTH_NLS_LXCSORT";
+    static final String AUTH_NLS_LXCCALENDAR        = "AUTH_NLS_LXCCALENDAR";
+    static final String AUTH_NLS_LXCUNIONCUR        = "AUTH_NLS_LXCUNIONCUR";
+    static final String AUTH_NLS_LXCTIMEFM          = "AUTH_NLS_LXCTIMEFM";
+    static final String AUTH_NLS_LXCSTMPFM          = "AUTH_NLS_LXCSTMPFM";
+    static final String AUTH_NLS_LXCTTZNFM          = "AUTH_NLS_LXCTTZNFM";
+    static final String AUTH_NLS_LXCSTZNFM          = "AUTH_NLS_LXCSTZNFM";
+
     static final String AUTH_TERMINAL               = "AUTH_TERMINAL";
     static final String AUTH_PROGRAM_NM             = "AUTH_PROGRAM_NM";
     static final String AUTH_MACHINE                = "AUTH_MACHINE";
