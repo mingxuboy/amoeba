@@ -16,9 +16,9 @@ import java.util.Random;
 
 import com.meidusa.amoeba.mysql.context.MysqlProxyRuntimeContext;
 import com.meidusa.amoeba.mysql.handler.MySqlCommandDispatcher;
-import com.meidusa.amoeba.mysql.packet.ErrorPacket;
-import com.meidusa.amoeba.mysql.packet.HandshakePacket;
-import com.meidusa.amoeba.mysql.packet.OkPacket;
+import com.meidusa.amoeba.mysql.net.packet.ErrorPacket;
+import com.meidusa.amoeba.mysql.net.packet.HandshakePacket;
+import com.meidusa.amoeba.mysql.net.packet.OkPacket;
 import com.meidusa.amoeba.net.AuthResponseData;
 import com.meidusa.amoeba.net.Connection;
 import com.meidusa.amoeba.net.ServerableConnectionManager;

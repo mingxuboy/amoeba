@@ -17,7 +17,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
-import com.meidusa.amoeba.mysql.packet.OKforPreparedStatementPacket;
+import com.meidusa.amoeba.mysql.net.packet.OKforPreparedStatementPacket;
 
 /**
  * 

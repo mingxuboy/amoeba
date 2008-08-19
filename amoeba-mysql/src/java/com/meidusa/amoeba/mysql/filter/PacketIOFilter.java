@@ -15,9 +15,9 @@ import org.apache.log4j.Logger;
 
 import com.meidusa.amoeba.mysql.filter.FilterInvocation.Result;
 import com.meidusa.amoeba.mysql.handler.MySqlCommandDispatcher;
-import com.meidusa.amoeba.mysql.packet.OkPacket;
-import com.meidusa.amoeba.mysql.packet.MysqlPacketBuffer;
-import com.meidusa.amoeba.mysql.packet.QueryCommandPacket;
+import com.meidusa.amoeba.mysql.net.packet.MysqlPacketBuffer;
+import com.meidusa.amoeba.mysql.net.packet.OkPacket;
+import com.meidusa.amoeba.mysql.net.packet.QueryCommandPacket;
 
 /**
  * 

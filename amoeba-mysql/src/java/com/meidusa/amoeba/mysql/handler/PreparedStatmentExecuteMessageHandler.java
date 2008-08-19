@@ -15,9 +15,9 @@ import org.apache.commons.pool.ObjectPool;
 
 import com.meidusa.amoeba.mysql.net.CommandInfo;
 import com.meidusa.amoeba.mysql.net.MysqlClientConnection;
-import com.meidusa.amoeba.mysql.packet.CommandPacket;
-import com.meidusa.amoeba.mysql.packet.MysqlPacketBuffer;
-import com.meidusa.amoeba.mysql.packet.QueryCommandPacket;
+import com.meidusa.amoeba.mysql.net.packet.CommandPacket;
+import com.meidusa.amoeba.mysql.net.packet.MysqlPacketBuffer;
+import com.meidusa.amoeba.mysql.net.packet.QueryCommandPacket;
 import com.meidusa.amoeba.net.Connection;
 
 /**
