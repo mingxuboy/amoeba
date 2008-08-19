@@ -14,7 +14,7 @@
   	</path>
 		
 	<target name="compile" depends="prepare">
-    <javac srcdir="src/java" destdir="${classes.dir}" includeAntRuntime="false"
+    <javac srcdir="src/java" destdir="${classes.dir}" encoding="GBK" includeAntRuntime="false"
            debug="on" optimize="{$build.optimize}" deprecation="on"
            source="1.5" target="1.5">
       <classpath refid="classpath"/>
