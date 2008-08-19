@@ -123,6 +123,7 @@ public class OracleMessageHandler implements MessageHandler, Sessionable, SQLnet
                     packet.init(message, conn);
                     if (logger.isDebugEnabled()) {
                         System.out.println("@@server source:" + ByteUtil.toHex(message, 0, message.length));
+                        System.out.println("@server response:"+packet);
                     }
                     message = packet.toByteBuffer(conn).array();
                     if (logger.isDebugEnabled()) {
