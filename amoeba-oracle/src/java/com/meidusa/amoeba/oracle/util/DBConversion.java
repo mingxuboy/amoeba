@@ -123,7 +123,7 @@ public class DBConversion {
         return word2;
     }
 
-    public static final byte[] stringToDriverCharBytes(String s, short word0) throws SQLException {
+    public static final byte[] stringToDriverCharBytes(String s, short word0) {
         if (s == null) return null;
         byte abyte0[] = null;
         switch (word0) {
@@ -156,7 +156,7 @@ public class DBConversion {
         return abyte0;
     }
 
-    public byte[] StringToCharBytes(String s) throws SQLException {
+    public byte[] StringToCharBytes(String s){
         if (s.length() == 0) return null;
         if (clientCharSetId == -1) return serverCharSet.convertWithReplacement(s);
         else return stringToDriverCharBytes(s, clientCharSetId);
@@ -564,7 +564,7 @@ public class DBConversion {
     // }
     // }
 
-    static final void unexpectedCharset(short word0) throws SQLException {
+    static final void unexpectedCharset(short word0) {
         throw new RuntimeException("code:35 DBConversion");
         // DatabaseError.throwSqlException(35, "DBConversion");
     }
@@ -627,7 +627,7 @@ public class DBConversion {
     protected int               sMaxCharSize;
     protected int               cMaxCharSize;
     protected int               maxNCharSize;
-    protected boolean           isServerCSMultiByte;
+    public boolean           isServerCSMultiByte;
     public static final short   DBCS_CHARSET                   = -1;
     public static final short   UCS2_CHARSET                   = -5;
     public static final short   ASCII_CHARSET                  = 1;

@@ -1,8 +1,10 @@
 package com.meidusa.amoeba.oracle.net.packet;
 
 import java.io.UnsupportedEncodingException;
+import java.sql.SQLException;
 
 import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
+import com.meidusa.amoeba.oracle.util.DBConversion;
 
 /**
  * 协议数据包
@@ -87,6 +89,20 @@ public class T4C8TTIproResponseDataPacket extends T4CTTIMsgPacket {
         for (int l = 0; l < word1; l++) {
             as1[l] = (byte) meg.unmarshalUB1();
         }
+        short word0 = oVersion;
+        short word1 = svrCharSet;
+        short word2 = DBConversion.findDriverCharSet(word1, word0);
+        
+        try {
+			DBConversion conversion = new DBConversion(word1, word2, NCHAR_CHARSET);
+			meg.setConversion(conversion);
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+        meg.getTypeRep().setServerConversion(word2 != word1);
+        meg.getTypeRep().setVersion(word0);
+        
     }
 
     @Override

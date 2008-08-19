@@ -4,6 +4,7 @@ import java.util.Vector;
 
 import com.meidusa.amoeba.oracle.io.OraclePacketConstant;
 import com.meidusa.amoeba.oracle.util.ByteUtil;
+import com.meidusa.amoeba.oracle.util.DBConversion;
 
 /**
  * Oracle,T4C格式的数据包buffer解析
@@ -779,4 +780,11 @@ public class T4CPacketBuffer extends OracleAbstractPacketBuffer implements Oracl
         System.out.println(meg.unmarshalUB2());
     }
 
+    public DBConversion getConversion(){
+    	return this.oconn.getConversion();
+    }
+    
+    public void setConversion(DBConversion conversion){
+    	this.oconn.setConversion(conversion);
+    }
 }

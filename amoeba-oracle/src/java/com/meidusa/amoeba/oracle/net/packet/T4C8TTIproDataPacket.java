@@ -16,7 +16,7 @@ public class T4C8TTIproDataPacket extends T4CTTIMsgPacket {
 	 * 客户端所能解析的版本协议列表
 	 */
     byte[] proCliVerTTC8 = { 6, 5, 4, 3, 2, 1 };
-    
+
     /**
      * 客户端版本信息
      */
