@@ -8,27 +8,18 @@ import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
  * @author hexianmao
  * @version 2008-8-19 ÏÂÎç02:43:40
  */
-public class T4CTTIoAuthKeyDataPacket extends T4CTTIfunPacket {
+public class T4CTTIoAuthKeyDataPacket extends T4CTTIfunPacket implements T4CTTIoAuth {
 
-    int    userLength      = 0;
-    long   LOGON_MODE      = 0L;
-    int    propLen         = 0;
-    String user            = null;
+    int    userLength = 0;
+    long   LOGON_MODE = 0L;
+    int    propLen    = 0;
+    String user       = null;
 
-    String auth_terminal   = "AUTH_TERMINAL";
-    String terminal        = null;
-
-    String auth_program_nm = "AUTH_PROGRAM_NM";
-    String program_nm      = null;
-
-    String auth_machine    = "AUTH_MACHINE";
-    String machine         = null;
-
-    String auth_pid        = "AUTH_PID";
-    String pid             = null;
-
-    String auth_sid        = "AUTH_SID";
-    String sid             = null;
+    String terminal   = null;
+    String program_nm = null;
+    String machine    = null;
+    String pid        = null;
+    String sid        = null;
 
     public T4CTTIoAuthKeyDataPacket(){
         this.funCode = OSESSKEY;
@@ -83,17 +74,17 @@ public class T4CTTIoAuthKeyDataPacket extends T4CTTIfunPacket {
         byte[][] values = new byte[propLen][];
         byte[] abyte2 = new byte[propLen];
         int j = 0;
-        keys[j] = auth_terminal.getBytes();
+        keys[j] = AUTH_TERMINAL.getBytes();
         values[j++] = terminal.getBytes();
         if (program_nm != null) {
-            keys[j] = auth_program_nm.getBytes();
+            keys[j] = AUTH_PROGRAM_NM.getBytes();
             values[j++] = program_nm.getBytes();
         }
-        keys[j] = auth_machine.getBytes();
+        keys[j] = AUTH_MACHINE.getBytes();
         values[j++] = machine.getBytes();
-        keys[j] = auth_pid.getBytes();
+        keys[j] = AUTH_PID.getBytes();
         values[j++] = pid.getBytes();
-        keys[j] = auth_sid.getBytes();
+        keys[j] = AUTH_SID.getBytes();
         values[j++] = sid.getBytes();
 
         meg.marshalKEYVAL(keys, values, abyte2, propLen);

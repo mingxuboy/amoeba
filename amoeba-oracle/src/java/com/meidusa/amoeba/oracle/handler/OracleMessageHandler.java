@@ -21,7 +21,6 @@ import com.meidusa.amoeba.oracle.net.packet.T4CTTIfunPacket;
 import com.meidusa.amoeba.oracle.net.packet.T4CTTIoAuthKeyDataPacket;
 import com.meidusa.amoeba.oracle.net.packet.T4CTTIoAuthKeyResponseDataPacket;
 import com.meidusa.amoeba.oracle.util.ByteUtil;
-import com.meidusa.amoeba.oracle.util.PacketTypeMap;
 
 /**
  * 非常简单的数据包转发程序
@@ -122,8 +121,8 @@ public class OracleMessageHandler implements MessageHandler, Sessionable, SQLnet
                 if (packet != null) {
                     packet.init(message, conn);
                     if (logger.isDebugEnabled()) {
+                        System.out.println("reponse packet:" + packet);
                         System.out.println("@@server source:" + ByteUtil.toHex(message, 0, message.length));
-                        System.out.println("@server response:"+packet);
                     }
                     message = packet.toByteBuffer(conn).array();
                     if (logger.isDebugEnabled()) {
