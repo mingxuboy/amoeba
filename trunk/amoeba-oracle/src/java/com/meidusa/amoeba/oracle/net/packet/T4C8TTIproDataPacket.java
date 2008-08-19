@@ -15,6 +15,10 @@ public class T4C8TTIproDataPacket extends T4CTTIMsgPacket {
     byte[] proCliVerTTC8 = { 6, 5, 4, 3, 2, 1 };
     String proCliStrTTC8 = "Java_TTC-8.2.0";
 
+    public T4C8TTIproDataPacket(){
+        this.msgCode = TTIPRO;
+    }
+
     protected void init(AbstractPacketBuffer absbuffer) {
         super.init(absbuffer);
         if (msgCode != TTIPRO) {
@@ -27,7 +31,6 @@ public class T4C8TTIproDataPacket extends T4CTTIMsgPacket {
 
     @Override
     protected void write2Buffer(AbstractPacketBuffer absbuffer) throws UnsupportedEncodingException {
-        msgCode = TTIPRO;
         super.write2Buffer(absbuffer);
         T4CPacketBuffer meg = (T4CPacketBuffer) absbuffer;
         meg.writeBytes(proCliVerTTC8);

@@ -23,7 +23,7 @@ public class AnoDataPacket extends DataPacket implements AnoServices {
     @Override
     protected void init(AbstractPacketBuffer absbuffer) {
         super.init(absbuffer);
-    	AnoPacketBuffer buffer = (AnoPacketBuffer)absbuffer;        
+        AnoPacketBuffer buffer = (AnoPacketBuffer) absbuffer;
         if (buffer.readUB4() != NA_MAGIC) {
             throw new RuntimeException("Wrong Magic number in na packet");
         }
@@ -32,16 +32,12 @@ public class AnoDataPacket extends DataPacket implements AnoServices {
         anoServiceSize = buffer.readUB2();
         h = buffer.readUB1();
 
-        /*anoService = new AnoService[anoServiceSize];
-        try {
-            String pkgPrefix = "com.meidusa.amoeba.oracle.packet.";
-            for (int i = 0; i < SERV_INORDER_CLASSNAME.length; i++) {
-                anoService[i] = (AnoService) Class.forName(pkgPrefix + SERV_INORDER_CLASSNAME[i]).newInstance();
-                anoService[i].doRead(buffer);
-            }
-        } catch (Exception e) {
-            throw new RuntimeException();
-        }*/
+        /*
+         * anoService = new AnoService[anoServiceSize]; try { String pkgPrefix = "com.meidusa.amoeba.oracle.packet.";
+         * for (int i = 0; i < SERV_INORDER_CLASSNAME.length; i++) { anoService[i] = (AnoService)
+         * Class.forName(pkgPrefix + SERV_INORDER_CLASSNAME[i]).newInstance(); anoService[i].doRead(buffer); } } catch
+         * (Exception e) { throw new RuntimeException(); }
+         */
 
         if (logger.isDebugEnabled()) {
             logger.debug(this.toString());
@@ -55,7 +51,7 @@ public class AnoDataPacket extends DataPacket implements AnoServices {
     @Override
     protected void write2Buffer(AbstractPacketBuffer absbuffer) throws UnsupportedEncodingException {
         super.write2Buffer(absbuffer);
-    	AnoPacketBuffer buffer = (AnoPacketBuffer)absbuffer;        
+        AnoPacketBuffer buffer = (AnoPacketBuffer) absbuffer;
         buffer.writeUB4(NA_MAGIC);
         buffer.writeUB2(m);
         buffer.writeUB4(version);
@@ -81,10 +77,10 @@ public class AnoDataPacket extends DataPacket implements AnoServices {
         sb.append("AnoClientDataPacket info ==============================\n");
         return sb.toString();
     }
-    
+
     @Override
     protected Class<? extends AbstractPacketBuffer> getBufferClass() {
-		return AnoPacketBuffer.class;
-	}
+        return AnoPacketBuffer.class;
+    }
 
 }

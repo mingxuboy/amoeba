@@ -13,6 +13,10 @@ public class T4CTTIoAuthKeyDataPacket extends T4CTTIfunPacket {
     byte[][] keys;
     byte[][] values;
 
+    public T4CTTIoAuthKeyDataPacket(){
+        this.funCode = OSESSKEY;
+    }
+
     @Override
     protected void init(AbstractPacketBuffer buffer) {
         super.init(buffer);
@@ -36,7 +40,6 @@ public class T4CTTIoAuthKeyDataPacket extends T4CTTIfunPacket {
 
     @Override
     protected void write2Buffer(AbstractPacketBuffer buffer) throws UnsupportedEncodingException {
-        setHeader();
         super.write2Buffer(buffer);
         T4CPacketBuffer meg = (T4CPacketBuffer) buffer;
         meg.marshalPTR();
@@ -49,12 +52,6 @@ public class T4CTTIoAuthKeyDataPacket extends T4CTTIfunPacket {
         meg.marshalCHR(user);
         byte[] abyte2 = new byte[propLen];
         meg.marshalKEYVAL(keys, values, abyte2, propLen);
-    }
-
-    protected void setHeader() {
-        this.msgCode = TTIFUN;
-        this.funCode = OSESSKEY;
-        this.seqNumber = 0;
     }
 
 }
