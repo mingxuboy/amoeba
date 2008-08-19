@@ -7,40 +7,40 @@ import com.meidusa.amoeba.oracle.charset.CharacterSetMetaData;
 
 public class DBConversion {
 
-//    class UnicodeStream extends OracleBufferedStream {
-//
-//        public boolean needBytes() {
-//            return !closed && pos < count;
-//        }
-//
-//        UnicodeStream(char ac[], int i, int j){
-//            super(j);
-//            int k = i;
-//            for (int l = 0; l < j;) {
-//                char c = ac[k++];
-//                buf[l++] = (byte) (c >> 8 & 0xff);
-//                buf[l++] = (byte) (c & 0xff);
-//            }
-//
-//            count = j;
-//        }
-//    }
+    // class UnicodeStream extends OracleBufferedStream {
+    //
+    // public boolean needBytes() {
+    // return !closed && pos < count;
+    // }
+    //
+    // UnicodeStream(char ac[], int i, int j){
+    // super(j);
+    // int k = i;
+    // for (int l = 0; l < j;) {
+    // char c = ac[k++];
+    // buf[l++] = (byte) (c >> 8 & 0xff);
+    // buf[l++] = (byte) (c & 0xff);
+    // }
+    //
+    // count = j;
+    // }
+    // }
 
-//    class AsciiStream extends OracleBufferedStream {
-//
-//        public boolean needBytes() {
-//            return !closed && pos < count;
-//        }
-//
-//        AsciiStream(char ac[], int i, int j){
-//            super(j);
-//            int k = i;
-//            for (int l = 0; l < j; l++)
-//                buf[l] = (byte) ac[k++];
-//
-//            count = j;
-//        }
-//    }
+    // class AsciiStream extends OracleBufferedStream {
+    //
+    // public boolean needBytes() {
+    // return !closed && pos < count;
+    // }
+    //
+    // AsciiStream(char ac[], int i, int j){
+    // super(j);
+    // int k = i;
+    // for (int l = 0; l < j; l++)
+    // buf[l] = (byte) ac[k++];
+    //
+    // count = j;
+    // }
+    // }
 
     public DBConversion(short word0, short word1, short word2) throws SQLException{
         switch (word1) {
@@ -64,10 +64,8 @@ public class DBConversion {
         serverCharSet = CharacterSet.make(serverCharSetId);
         serverNCharSetId = word2;
         serverNCharSet = CharacterSet.make(serverNCharSetId);
-        if (word1 == -1)
-            clientCharSet = serverCharSet;
-        else
-            clientCharSet = CharacterSet.make(clientCharSetId);
+        if (word1 == -1) clientCharSet = serverCharSet;
+        else clientCharSet = CharacterSet.make(clientCharSetId);
         c2sNlsRatio = CharacterSetMetaData.getRatio(word0, word1);
         s2cNlsRatio = CharacterSetMetaData.getRatio(word1, word0);
         sMaxCharSize = CharacterSetMetaData.getRatio(word0, 1);
@@ -91,10 +89,8 @@ public class DBConversion {
     }
 
     public short getClientCharSet() {
-        if (clientCharSetId == -1)
-            return serverCharSetId;
-        else
-            return clientCharSetId;
+        if (clientCharSetId == -1) return serverCharSetId;
+        else return clientCharSetId;
     }
 
     public CharacterSet getDbCharSetObj() {
@@ -128,8 +124,7 @@ public class DBConversion {
     }
 
     public static final byte[] stringToDriverCharBytes(String s, short word0) throws SQLException {
-        if (s == null)
-            return null;
+        if (s == null) return null;
         byte abyte0[] = null;
         switch (word0) {
             case -5:
@@ -162,22 +157,19 @@ public class DBConversion {
     }
 
     public byte[] StringToCharBytes(String s) throws SQLException {
-        if (s.length() == 0)
-            return null;
-        if (clientCharSetId == -1)
-            return serverCharSet.convertWithReplacement(s);
-        else
-            return stringToDriverCharBytes(s, clientCharSetId);
+        if (s.length() == 0) return null;
+        if (clientCharSetId == -1) return serverCharSet.convertWithReplacement(s);
+        else return stringToDriverCharBytes(s, clientCharSetId);
     }
 
     public String CharBytesToString(byte abyte0[], int i) throws SQLException {
         return CharBytesToString(abyte0, i, false);
     }
 
+    @SuppressWarnings("deprecation")
     public String CharBytesToString(byte abyte0[], int i, boolean flag) throws SQLException {
         String s = null;
-        if (abyte0.length == 0)
-            return s;
+        if (abyte0.length == 0) return s;
         switch (clientCharSetId) {
             case -5:
                 s = CharacterSet.AL16UTF16BytesToString(abyte0, i);
@@ -210,41 +202,40 @@ public class DBConversion {
         return s;
     }
 
+    @SuppressWarnings("deprecation")
     public String NCharBytesToString(byte abyte0[], int i) throws SQLException {
         String s = null;
-        if (clientCharSetId == -1)
-            s = serverNCharSet.toStringWithReplacement(abyte0, 0, i);
-        else
-            switch (serverNCharSetId) {
-                case -5:
-                case 2000:
-                    s = CharacterSet.AL16UTF16BytesToString(abyte0, i);
-                    break;
+        if (clientCharSetId == -1) s = serverNCharSet.toStringWithReplacement(abyte0, 0, i);
+        else switch (serverNCharSetId) {
+            case -5:
+            case 2000:
+                s = CharacterSet.AL16UTF16BytesToString(abyte0, i);
+                break;
 
-                case 1: // '\001'
-                case 2: // '\002'
-                case 31: // '\037'
-                case 178:
-                    s = new String(abyte0, 0, 0, i);
-                    break;
+            case 1: // '\001'
+            case 2: // '\002'
+            case 31: // '\037'
+            case 178:
+                s = new String(abyte0, 0, 0, i);
+                break;
 
-                case 870:
-                case 871:
-                    s = CharacterSet.UTFToString(abyte0, 0, i);
-                    break;
+            case 870:
+            case 871:
+                s = CharacterSet.UTFToString(abyte0, 0, i);
+                break;
 
-                case 873:
-                    s = CharacterSet.AL32UTF8ToString(abyte0, 0, i);
-                    break;
+            case 873:
+                s = CharacterSet.AL32UTF8ToString(abyte0, 0, i);
+                break;
 
-                case -1:
-                    s = serverCharSet.toStringWithReplacement(abyte0, 0, i);
-                    break;
+            case -1:
+                s = serverCharSet.toStringWithReplacement(abyte0, 0, i);
+                break;
 
-                default:
-                    unexpectedCharset(clientCharSetId);
-                    break;
-            }
+            default:
+                unexpectedCharset(clientCharSetId);
+                break;
+        }
         return s;
     }
 
@@ -313,26 +304,25 @@ public class DBConversion {
     }
 
     public int CHARBytesToJavaChars(byte abyte0[], int i, char ac[], int j, int ai[], int k) throws SQLException {
-        return _CHARBytesToJavaChars(abyte0, i, ac, j, clientCharSetId, ai, k, serverCharSet, serverNCharSet, clientCharSet, false);
+        return _CHARBytesToJavaChars(abyte0, i, ac, j, clientCharSetId, ai, k, serverCharSet, serverNCharSet,
+                                     clientCharSet, false);
     }
 
     public int NCHARBytesToJavaChars(byte abyte0[], int i, char ac[], int j, int ai[], int k) throws SQLException {
-        return _CHARBytesToJavaChars(abyte0, i, ac, j, serverNCharSetId, ai, k, serverCharSet, serverNCharSet, clientCharSet, true);
+        return _CHARBytesToJavaChars(abyte0, i, ac, j, serverNCharSetId, ai, k, serverCharSet, serverNCharSet,
+                                     clientCharSet, true);
     }
 
     static final int _CHARBytesToJavaChars(byte abyte0[], int i, char ac[], int j, short word0, int ai[], int k,
                                            CharacterSet characterset, CharacterSet characterset1,
                                            CharacterSet characterset2, boolean flag) throws SQLException {
         int l = 0;
-        boolean flag1 = false;
         switch (word0) {
             case -5:
             case 2000:
                 int i1 = ai[0] - ai[0] % 2;
-                if (k > ac.length - j)
-                    k = ac.length - j;
-                if (k * 2 < i1)
-                    i1 = k * 2;
+                if (k > ac.length - j) k = ac.length - j;
+                if (k * 2 < i1) i1 = k * 2;
                 l = CharacterSet.convertAL16UTF16BytesToJavaChars(abyte0, i, ac, j, i1, true);
                 ai[0] = ai[0] - i1;
                 break;
@@ -342,24 +332,20 @@ public class DBConversion {
             case 31: // '\037'
             case 178:
                 int j1 = ai[0];
-                if (k > ac.length - j)
-                    k = ac.length - j;
-                if (k < j1)
-                    j1 = k;
+                if (k > ac.length - j) k = ac.length - j;
+                if (k < j1) j1 = k;
                 l = CharacterSet.convertASCIIBytesToJavaChars(abyte0, i, ac, j, j1);
                 ai[0] = ai[0] - j1;
                 break;
 
             case 870:
             case 871:
-                if (k > ac.length - j)
-                    k = ac.length - j;
+                if (k > ac.length - j) k = ac.length - j;
                 l = CharacterSet.convertUTFBytesToJavaChars(abyte0, i, ac, j, ai, true, k);
                 break;
 
             case 873:
-                if (k > ac.length - j)
-                    k = ac.length - j;
+                if (k > ac.length - j) k = ac.length - j;
                 l = CharacterSet.convertAL32UTF8BytesToJavaChars(abyte0, i, ac, j, ai, true, k);
                 break;
 
@@ -370,13 +356,11 @@ public class DBConversion {
 
             default:
                 CharacterSet characterset3 = characterset2;
-                if (flag)
-                    characterset3 = characterset1;
+                if (flag) characterset3 = characterset1;
                 String s = characterset3.toString(abyte0, i, ai[0]);
                 char ac1[] = s.toCharArray();
                 int k1 = ac1.length;
-                if (k1 > k)
-                    k1 = k;
+                if (k1 > k) k1 = k;
                 System.arraycopy(ac1, 0, ac, j, k1);
                 break;
         }
@@ -398,8 +382,7 @@ public class DBConversion {
                 break;
 
             case -1:
-                if (asciiCharSet == null)
-                    asciiCharSet = CharacterSet.make(1);
+                if (asciiCharSet == null) asciiCharSet = CharacterSet.make(1);
                 try {
                     abyte1 = serverCharSet.convert(asciiCharSet, abyte0, 0, abyte0.length);
                 } catch (SQLException sqlexception) {
@@ -546,67 +529,65 @@ public class DBConversion {
         return k;
     }
 
-//    public InputStream ConvertStream(InputStream inputstream, int i) {
-//        return new OracleConversionInputStream(this, inputstream, i);
-//    }
-//
-//    public InputStream ConvertStream(InputStream inputstream, int i, int j) {
-//        return new OracleConversionInputStream(this, inputstream, i, j);
-//    }
-//
-//    public InputStream ConvertStream(Reader reader, int i, int j, short word0) {
-//        OracleConversionInputStream oracleconversioninputstream = new OracleConversionInputStream(this, reader, i, j, word0);
-//        return oracleconversioninputstream;
-//    }
-//
-//    public Reader ConvertCharacterStream(InputStream inputstream, int i) throws SQLException {
-//        return new OracleConversionReader(this, inputstream, i);
-//    }
-//
-//    public Reader ConvertCharacterStream(InputStream inputstream, int i, short word0) throws SQLException {
-//        OracleConversionReader oracleconversionreader = new OracleConversionReader(this, inputstream, i);
-//        oracleconversionreader.setFormOfUse(word0);
-//        return oracleconversionreader;
-//    }
-//
-//    public InputStream CharsToStream(char ac[], int i, int j, int k) throws SQLException {
-//        if (k == 10)
-//            return new AsciiStream(ac, i, j);
-//        if (k == 11) {
-//            return new UnicodeStream(ac, i, j);
-//        } else {
-//            DatabaseError.throwSqlException(39, "unknownConversion");
-//            return null;
-//        }
-//    }
+    // public InputStream ConvertStream(InputStream inputstream, int i) {
+    // return new OracleConversionInputStream(this, inputstream, i);
+    // }
+    //
+    // public InputStream ConvertStream(InputStream inputstream, int i, int j) {
+    // return new OracleConversionInputStream(this, inputstream, i, j);
+    // }
+    //
+    // public InputStream ConvertStream(Reader reader, int i, int j, short word0) {
+    // OracleConversionInputStream oracleconversioninputstream = new OracleConversionInputStream(this, reader, i, j,
+    // word0);
+    // return oracleconversioninputstream;
+    // }
+    //
+    // public Reader ConvertCharacterStream(InputStream inputstream, int i) throws SQLException {
+    // return new OracleConversionReader(this, inputstream, i);
+    // }
+    //
+    // public Reader ConvertCharacterStream(InputStream inputstream, int i, short word0) throws SQLException {
+    // OracleConversionReader oracleconversionreader = new OracleConversionReader(this, inputstream, i);
+    // oracleconversionreader.setFormOfUse(word0);
+    // return oracleconversionreader;
+    // }
+    //
+    // public InputStream CharsToStream(char ac[], int i, int j, int k) throws SQLException {
+    // if (k == 10)
+    // return new AsciiStream(ac, i, j);
+    // if (k == 11) {
+    // return new UnicodeStream(ac, i, j);
+    // } else {
+    // DatabaseError.throwSqlException(39, "unknownConversion");
+    // return null;
+    // }
+    // }
 
     static final void unexpectedCharset(short word0) throws SQLException {
         throw new RuntimeException("code:35 DBConversion");
-//        DatabaseError.throwSqlException(35, "DBConversion");
+        // DatabaseError.throwSqlException(35, "DBConversion");
     }
 
     protected static final void catchBytesLen(byte abyte0[], int i, int j) throws SQLException {
-        if (i + j > abyte0.length){
-            //DatabaseError.throwSqlException(39, "catchBytesLen");
+        if (i + j > abyte0.length) {
+            // DatabaseError.throwSqlException(39, "catchBytesLen");
             throw new RuntimeException("code:39 catchBytesLen");
         }
     }
 
     protected static final void catchCharsLen(char ac[], int i, int j) throws SQLException {
-        if (i + j > ac.length){
-            //DatabaseError.throwSqlException(39, "catchCharsLen");
+        if (i + j > ac.length) {
+            // DatabaseError.throwSqlException(39, "catchCharsLen");
             throw new RuntimeException("code:39 catchBytesLen");
         }
     }
 
     public static final int getUtfLen(char c) {
         byte byte0 = 0;
-        if ((c & 0xff80) == 0)
-            byte0 = 1;
-        else if ((c & 0xf800) == 0)
-            byte0 = 2;
-        else
-            byte0 = 3;
+        if ((c & 0xff80) == 0) byte0 = 1;
+        else if ((c & 0xf800) == 0) byte0 = 2;
+        else byte0 = 3;
         return byte0;
     }
 
@@ -614,11 +595,8 @@ public class DBConversion {
         int i = 0;
         if (s != null) {
             i = s.length();
-            if (i != 0)
-                if (flag)
-                    i = isServerNCharSetFixedWidth ? i * maxNCharSize : serverNCharSet.encodedByteLength(s);
-                else
-                    i = isServerCharSetFixedWidth ? i * sMaxCharSize : serverCharSet.encodedByteLength(s);
+            if (i != 0) if (flag) i = isServerNCharSetFixedWidth ? i * maxNCharSize : serverNCharSet.encodedByteLength(s);
+            else i = isServerCharSetFixedWidth ? i * sMaxCharSize : serverCharSet.encodedByteLength(s);
         }
         return i;
     }
@@ -627,17 +605,14 @@ public class DBConversion {
         int i = 0;
         if (ac != null) {
             i = ac.length;
-            if (i != 0)
-                if (flag)
-                    i = isServerNCharSetFixedWidth ? i * maxNCharSize : serverNCharSet.encodedByteLength(ac);
-                else
-                    i = isServerCharSetFixedWidth ? i * sMaxCharSize : serverCharSet.encodedByteLength(ac);
+            if (i != 0) if (flag) i = isServerNCharSetFixedWidth ? i * maxNCharSize : serverNCharSet.encodedByteLength(ac);
+            else i = isServerCharSetFixedWidth ? i * sMaxCharSize : serverCharSet.encodedByteLength(ac);
         }
         return i;
     }
 
-    public static final boolean DO_CONVERSION_WITH_REPLACEMENT              = true;
-    public static final short   ORACLE8_PROD_VERSION                        = 8030;
+    public static final boolean DO_CONVERSION_WITH_REPLACEMENT = true;
+    public static final short   ORACLE8_PROD_VERSION           = 8030;
     protected short             serverNCharSetId;
     protected short             serverCharSetId;
     protected short             clientCharSetId;
@@ -653,13 +628,13 @@ public class DBConversion {
     protected int               cMaxCharSize;
     protected int               maxNCharSize;
     protected boolean           isServerCSMultiByte;
-    public static final short   DBCS_CHARSET                                = -1;
-    public static final short   UCS2_CHARSET                                = -5;
-    public static final short   ASCII_CHARSET                               = 1;
-    public static final short   ISO_LATIN_1_CHARSET                         = 31;
-    public static final short   AL24UTFFSS_CHARSET                          = 870;
-    public static final short   UTF8_CHARSET                                = 871;
-    public static final short   AL32UTF8_CHARSET                            = 873;
-    public static final short   AL16UTF16_CHARSET                           = 2000;
+    public static final short   DBCS_CHARSET                   = -1;
+    public static final short   UCS2_CHARSET                   = -5;
+    public static final short   ASCII_CHARSET                  = 1;
+    public static final short   ISO_LATIN_1_CHARSET            = 31;
+    public static final short   AL24UTFFSS_CHARSET             = 870;
+    public static final short   UTF8_CHARSET                   = 871;
+    public static final short   AL32UTF8_CHARSET               = 873;
+    public static final short   AL16UTF16_CHARSET              = 2000;
 
 }

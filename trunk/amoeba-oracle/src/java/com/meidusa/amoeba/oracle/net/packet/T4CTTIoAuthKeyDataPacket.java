@@ -4,6 +4,10 @@ import java.io.UnsupportedEncodingException;
 
 import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
 
+/**
+ * @author hexianmao
+ * @version 2008-8-19 обнГ02:43:40
+ */
 public class T4CTTIoAuthKeyDataPacket extends T4CTTIfunPacket {
 
     int      userLength = 0;
