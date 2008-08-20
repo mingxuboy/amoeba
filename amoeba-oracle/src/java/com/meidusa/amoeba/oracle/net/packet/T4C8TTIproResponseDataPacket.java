@@ -14,14 +14,14 @@ import com.meidusa.amoeba.oracle.util.DBConversion;
  */
 public class T4C8TTIproResponseDataPacket extends T4CTTIMsgPacket {
 
-   public byte           proSvrVer        = 6;
-   public  short          oVersion         = -1;
-   public  String         proSvrStr        = "Linuxi386/Linux-2.0.34-8.1.0";
-   public  short          svrCharSet       = 0;
-   public  byte           svrFlags         = 1;
-   public  short          svrCharSetElem   = 0;
-   public  boolean        svrInfoAvailable = false;
-   public  short          NCHAR_CHARSET    = 0;
+    public byte    proSvrVer        = 6;
+    public short   oVersion         = -1;
+    public String  proSvrStr        = "Linuxi386/Linux-2.0.34-8.1.0";
+    public short   svrCharSet       = 0;
+    public byte    svrFlags         = 1;
+    public short   svrCharSetElem   = 0;
+    public boolean svrInfoAvailable = false;
+    public short   NCHAR_CHARSET    = 0;
 
     private int    i                = 0;
     private byte[] abyte0           = null;
@@ -112,17 +112,24 @@ public class T4C8TTIproResponseDataPacket extends T4CTTIMsgPacket {
         }
         byte byte0 = meg.getTypeRep().getRep((byte) 1);
         meg.getTypeRep().setRep((byte) 1, (byte) 0);
+
         meg.marshalUB2(i);
+        // meg.marshalUB2(11);
+
         meg.getTypeRep().setRep((byte) 1, byte0);
+
         meg.marshalB1Array(abyte0);
+        // meg.marshalB1Array(new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x07, (byte) 0xd0 });
 
         if (proSvrVer < 6) {
             return;
         }
-        meg.marshalUB1(word0);
-        meg.marshalB1Array(as0);
-        meg.marshalUB1(word1);
-        meg.marshalB1Array(as1);
+        // meg.marshalUB1(word0);
+        // meg.marshalB1Array(as0);
+        // meg.marshalUB1(word1);
+        // meg.marshalB1Array(as1);
+        meg.marshalNULLPTR();
+        meg.marshalNULLPTR();
     }
 
 }
