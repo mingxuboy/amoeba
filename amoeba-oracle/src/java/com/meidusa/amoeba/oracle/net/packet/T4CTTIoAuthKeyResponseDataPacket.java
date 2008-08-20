@@ -65,6 +65,10 @@ public class T4CTTIoAuthKeyResponseDataPacket extends DataPacket implements T4CT
     protected void write2Buffer(AbstractPacketBuffer absbuffer) throws UnsupportedEncodingException {
         super.write2Buffer(absbuffer);
         T4CPacketBuffer meg = (T4CPacketBuffer) absbuffer;
+        if(oer == null){
+        	oer = new T4CTTIoer(meg);
+        }
+        
         meg.marshalUB1((byte) 8);
         meg.marshalUB2(len);
 
