@@ -12,7 +12,6 @@
 package com.meidusa.amoeba.mysql.net;
 
 import java.io.IOException;
-import java.util.Random;
 
 import com.meidusa.amoeba.mysql.context.MysqlProxyRuntimeContext;
 import com.meidusa.amoeba.mysql.handler.MySqlCommandDispatcher;
@@ -22,6 +21,7 @@ import com.meidusa.amoeba.mysql.net.packet.OkPacket;
 import com.meidusa.amoeba.net.AuthResponseData;
 import com.meidusa.amoeba.net.Connection;
 import com.meidusa.amoeba.net.ServerableConnectionManager;
+import com.meidusa.amoeba.util.StringUtil;
 
 /**
  * 
@@ -30,9 +30,7 @@ import com.meidusa.amoeba.net.ServerableConnectionManager;
  */
 public class MysqlClientConnectionManager extends ServerableConnectionManager{
 	private final static String SERVER_VERSION = "5.1.22-mysql-community-amoeba-proxy";
-	private final static char[] c = { '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', 'q',
-            'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p', 'a', 's', 'd',
-            'f', 'g', 'h', 'j', 'k', 'l', 'z', 'x', 'c', 'v', 'b', 'n', 'm' };
+	
 	
 	private static byte[] authenticateOkPacketData;
 	protected HandshakePacket handshake;
@@ -53,8 +51,8 @@ public class MysqlClientConnectionManager extends ServerableConnectionManager{
 		handshake = new HandshakePacket();
 		handshake.packetId = 0;
 		handshake.protocolVersion = 0x0a;//–≠“È∞Ê±æ10
-		handshake.seed = getRandomString(8);
-		handshake.restOfScrambleBuff = getRandomString(12);
+		handshake.seed = StringUtil.getRandomString(8);
+		handshake.restOfScrambleBuff = StringUtil.getRandomString(12);
 		
 		handshake.serverStatus = 2;
 		handshake.serverVersion = SERVER_VERSION;
@@ -69,8 +67,8 @@ public class MysqlClientConnectionManager extends ServerableConnectionManager{
 		MysqlProxyRuntimeContext context = ((MysqlProxyRuntimeContext)MysqlProxyRuntimeContext.getInstance());
 		handshake.serverCharsetIndex =(byte)(context.getServerCharsetIndex() & 0xff);
 		handshake.threadId = Thread.currentThread().hashCode();
-		handshakePacket.seed = getRandomString(8);
-		handshakePacket.restOfScrambleBuff = getRandomString(12);
+		handshakePacket.seed = StringUtil.getRandomString(8);
+		handshakePacket.restOfScrambleBuff = StringUtil.getRandomString(12);
 		MysqlClientConnection aconn = (MysqlClientConnection) authing;
 		aconn.setSeed(handshakePacket.seed + handshakePacket.restOfScrambleBuff);
 		aconn.postMessage(handshakePacket.toByteBuffer(authing).array());
@@ -101,14 +99,5 @@ public class MysqlClientConnectionManager extends ServerableConnectionManager{
 		error.errno = 1000;
 		conn.postMessage(error.toByteBuffer(conn).array());
 	}
-	
-    public static String getRandomString(int size){
-        Random random = new Random();
-        StringBuffer sb = new StringBuffer();
-        for (int i = 0; i < size; i++){
-            sb.append(c[Math.abs(random.nextInt()) % c.length]);
-        }
-        return sb.toString();
-    }
 
 }
