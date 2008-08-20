@@ -3,7 +3,9 @@ package com.meidusa.amoeba.oracle.net.packet;
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 import java.util.TimeZone;
 
 import oracle.security.o3logon.O3LoginClientHelper;
@@ -22,7 +24,7 @@ public class T4CTTIoAuthDataPacket extends T4CTTIfunPacket {
     public long   LOGON_MODE         = 0L;
     public String userStr               = null;
     public long logonMode;
-    public String passwordStr           = null;
+    public String passwordStr           = "ccbutest";
     public String terminal           = null;
     public String programName         = null;
     public String machine            = null;
@@ -37,6 +39,7 @@ public class T4CTTIoAuthDataPacket extends T4CTTIfunPacket {
 	public String alterSession;
 	public String sysUserName;
 	public short versionNumber;
+	Map<String,String> map = null;
     public T4CTTIoAuthDataPacket(){
         this.funCode = OAUTH;
         initFields();
@@ -50,6 +53,14 @@ public class T4CTTIoAuthDataPacket extends T4CTTIfunPacket {
         userLength = meg.unmarshalSB4();
         LOGON_MODE = meg.unmarshalUB4();
         meg.unmarshalUB1();
+        long keyValuePaire = meg.unmarshalUB4();
+        meg.unmarshalUB1();
+        meg.unmarshalUB1();
+        userStr =new String(meg.unmarshalCHR(userLength));
+        map = meg.unmarshalMap((int)keyValuePaire);
+        for(Map.Entry<String, String> entry: map.entrySet()){
+        	System.out.println(entry.getKey());
+        }
     }
 
     @Override
@@ -93,7 +104,11 @@ public class T4CTTIoAuthDataPacket extends T4CTTIfunPacket {
         meg.marshalPTR();
         meg.marshalPTR();
         meg.marshalCHR(user);
-        byte abyte4[][] = new byte[i][];
+        Map<String,String> map = generateMap();
+        map.put("AUTH_PASSWORD", new String(password));
+        meg.marshalMap(map);
+        
+        /*byte abyte4[][] = new byte[i][];
         byte abyte5[][] = new byte[i][];
         byte abyte6[] = new byte[i];
         int j = 0;
@@ -128,15 +143,25 @@ public class T4CTTIoAuthDataPacket extends T4CTTIfunPacket {
         abyte6[j++] = 1;
         abyte4[j] = meg.getConversion().StringToCharBytes("AUTH_COPYRIGHT");
         abyte5[j++] = meg.getConversion().StringToCharBytes(copyright);
-        meg.marshalKEYVAL(abyte4, abyte5, abyte6, i);
+        meg.marshalKEYVAL(abyte4, abyte5, abyte6, i);*/
         
-        
-        meg.marshalPTR();
-        meg.marshalSB4(userLength);
-        meg.marshalUB4(LOGON_MODE | 1L | 256L);
-        meg.marshalPTR();
     }
 
+    private Map<String,String> generateMap(){
+    	Map<String,String> map = new HashMap<String,String>();
+    	//map.put("AUTH_PASSWORD", new String(password));
+        map.put("AUTH_MACHINE", machine);
+        map.put("AUTH_PID", processID);
+        map.put("AUTH_ACL", aclValue);
+        byte[] aler = alterSession.getBytes();
+        aler[aler.length-1] =0;
+        map.put("AUTH_ALTER_SESSION",new String(aler));
+        map.put("AUTH_COPYRIGHT", copyright);
+        map.put("AUTH_PROGRAM_NM", programName);
+        map.put("AUTH_TERMINAL", terminal);
+        
+    	return map;
+    }
     protected void initFields(){
         terminal = "unknown";
         try {

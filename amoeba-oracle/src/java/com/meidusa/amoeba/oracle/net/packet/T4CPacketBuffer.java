@@ -1,5 +1,8 @@
 package com.meidusa.amoeba.oracle.net.packet;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
 import java.util.Vector;
 
 import com.meidusa.amoeba.oracle.io.OraclePacketConstant;
@@ -188,6 +191,22 @@ public class T4CPacketBuffer extends OracleAbstractPacketBuffer implements Oracl
         }
     }
 
+    void marshalMap(Map<String,String> map){
+    	byte[][] keys = new byte[map.size()][];
+    	byte[][] values = new byte[map.size()][];
+    	int i=0;
+    	for(Map.Entry<String,String> entry: map.entrySet() ){
+    		if(entry.getKey() != null){
+    			keys[i] = this.getConversion().StringToCharBytes(entry.getKey());
+    			if(entry.getValue() != null){
+    				values[i] = this.getConversion().StringToCharBytes(entry.getValue());
+    			}
+    		}
+    		i++;
+    	}
+    	marshalKEYVAL(keys,values,new byte[map.size()],map.size());
+    }
+    
     void marshalKEYVAL(byte[][] ab0, byte[][] ab1, byte[] ab2, int i) {
         int ai[] = new int[i];
         int ai1[] = new int[i];
@@ -416,6 +435,27 @@ public class T4CPacketBuffer extends OracleAbstractPacketBuffer implements Oracl
         }
     }
 
+    Map<String,String> unmarshalMap(int i){
+    	Map<String,String> map = new HashMap<String,String>(i);
+    	byte[][] keys = new byte[i][];
+    	byte[][] values = new byte[i][];
+    	unmarshalKEYVAL(keys,values,i);
+    	for(int j=0;j<i;j++){
+    		String key = null;
+    		String value = null;
+    		if(keys[j]!= null){
+    			key = this.getConversion().CharBytesToString(keys[j], keys[j].length);
+    			if(values[j] != null){
+    				value = this.getConversion().CharBytesToString(values[j], values[j].length);
+    			}
+    		}
+    		if(key != null){
+    			map.put(key, value);
+    		}
+    	}
+    	return map;
+    }
+    
     int unmarshalKEYVAL(byte[][] abyte0, byte[][] abyte1, int i) {
         byte[] abyte2 = new byte[1000];
         int[] ai = new int[1];

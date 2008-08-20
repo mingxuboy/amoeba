@@ -14,9 +14,9 @@ public class T4CTTIoAuthKeyResponseDataPacket extends DataPacket implements T4CT
 
     private static Logger logger      = Logger.getLogger(T4CTTIoAuthKeyResponseDataPacket.class);
 
-    int                   len         = 0;
-    byte[]                encryptedSK = null;
-    T4CTTIoer             oer         = null;
+    public int                   len         = 0;
+    public byte[]                encryptedSK = null;
+    public T4CTTIoer             oer         = null;
 
     @Override
     protected void init(AbstractPacketBuffer absbuffer) {

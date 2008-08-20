@@ -32,15 +32,11 @@ class CharacterSetUTF extends CharacterSet
     {
         char ac[];
         int k;
-        try{
         ac = new char[abyte0.length];
         int ai[] = new int[1];
         ai[0] = j;
         k = CharacterSet.convertUTFBytesToJavaChars(abyte0, i, ac, 0, ai, true);
         return new String(ac, 0, k);
-        }catch(SQLException sqlexception){
-            return "";
-        }
 //        SQLException sqlexception;
 //        sqlexception;
 //        return "";
@@ -51,16 +47,11 @@ class CharacterSetUTF extends CharacterSet
     {
         char ac[];
         int k;
-        try{
         ac = new char[abyte0.length];
         int ai[] = new int[1];
         ai[0] = j;
         k = CharacterSet.convertUTFBytesToJavaChars(abyte0, i, ac, 0, ai, false);
         return new String(ac, 0, k);
-        }catch(SQLException sqlexception){
-            failUTFConversion();
-            return "";
-        }
 //        SQLException sqlexception;
 //        sqlexception;
 //        failUTFConversion();

@@ -7,25 +7,21 @@ public abstract class CharacterSet
     static abstract class CharacterConverterBehavior
     {
 
-        public abstract void onFailConversion(char c)
-            throws SQLException;
+        public abstract void onFailConversion(char c);
 
-        public abstract void onFailConversion()
-            throws SQLException;
+        public abstract void onFailConversion();
 
         public static final char NULL_CHARS[] = new char[1];
         public static final char UTF16_REPLACEMENT_CHAR = 65533;
         public static final CharacterConverterBehavior REPORT_ERROR = new CharacterConverterBehavior("Report Error") {
 
             public void onFailConversion()
-                throws SQLException
             {
 //                DatabaseError.throwSqlException(55);
                 throw new RuntimeException();
             }
 
             public void onFailConversion(char c)
-                throws SQLException
             {
                 if(c == '\uFFFD')
 //                    DatabaseError.throwSqlException(55);
@@ -37,12 +33,10 @@ public abstract class CharacterSet
         public static final CharacterConverterBehavior REPLACEMENT = new CharacterConverterBehavior("Replacement") {
 
             public void onFailConversion()
-                throws SQLException
             {
             }
 
             public void onFailConversion(char c)
-                throws SQLException
             {
             }
 
@@ -188,7 +182,6 @@ public abstract class CharacterSet
     }
 
     public static final String UTFToString(byte abyte0[], int i, int j, boolean flag)
-        throws SQLException
     {
         return new String(UTFToJavaChar(abyte0, i, j, flag));
     }
@@ -206,7 +199,6 @@ public abstract class CharacterSet
     }
 
     public static final char[] UTFToJavaChar(byte abyte0[], int i, int j, boolean flag)
-        throws SQLException
     {
         char ac[] = null;
         ac = new char[j];
@@ -223,7 +215,6 @@ public abstract class CharacterSet
     {
         Object obj = null;
         char ac1[];
-        try{
         char ac[] = new char[j];
         int ai[] = new int[1];
         ai[0] = j;
@@ -232,22 +223,17 @@ public abstract class CharacterSet
         System.arraycopy(ac, 0, ac1, 0, k);
         ac = null;
         return ac1;
-        }catch(SQLException sqlexception){
-            throw new IllegalStateException(sqlexception.getMessage());
-        }
 //        SQLException sqlexception;
 //        sqlexception;
 //        throw new IllegalStateException(sqlexception.getMessage());
     }
 
     public static final int convertUTFBytesToJavaChars(byte abyte0[], int i, char ac[], int j, int ai[], boolean flag)
-        throws SQLException
     {
         return convertUTFBytesToJavaChars(abyte0, i, ac, j, ai, flag, ac.length - j);
     }
 
     public static final int convertUTFBytesToJavaChars(byte abyte0[], int i, char ac[], int j, int ai[], boolean flag, int k)
-        throws SQLException
     {
         CharacterConverterBehavior characterconverterbehavior = flag ? CharacterConverterBehavior.REPLACEMENT : CharacterConverterBehavior.REPORT_ERROR;
         int l = ai[0];
