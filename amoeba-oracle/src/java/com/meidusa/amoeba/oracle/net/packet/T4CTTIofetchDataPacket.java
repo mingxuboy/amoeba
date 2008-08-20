@@ -6,6 +6,9 @@ import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
 
 public class T4CTTIofetchDataPacket extends T4CTTIfunPacket {
 
+    int cursor;
+    int al8i4_1;
+
     public T4CTTIofetchDataPacket(){
         this.funCode = OFETCH;
     }
@@ -13,6 +16,9 @@ public class T4CTTIofetchDataPacket extends T4CTTIfunPacket {
     @Override
     protected void init(AbstractPacketBuffer buffer) {
         super.init(buffer);
+        T4CPacketBuffer meg = (T4CPacketBuffer) buffer;
+        cursor = meg.unmarshalSWORD();
+        al8i4_1 = meg.unmarshalSWORD();
     }
 
     @Override

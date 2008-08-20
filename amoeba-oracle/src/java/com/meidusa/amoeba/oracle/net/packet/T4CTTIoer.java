@@ -1,38 +1,37 @@
 package com.meidusa.amoeba.oracle.net.packet;
 
+public class T4CTTIoer extends T4CTTIMsgPacket {
 
-public class T4CTTIoer {
+    final int       MAXERRBUF = 512;
 
-    final int               MAXERRBUF = 512;
-
-    private T4CPacketBuffer meg;
-    short                   endToEndECIDSequenceNumber;
-    long                    curRowNumber;
-    int                     retCode;
-    int                     arrayElemWError;
-    int                     arrayElemErrno;
-    int                     currCursorID;
-    short                   errorPosition;
-    short                   sqlType;
-    byte                    oerFatal;
-    short                   flags;
-    short                   userCursorOpt;
-    short                   upiParam;
-    short                   warningFlag;
-    int                     osError;
-    short                   stmtNumber;
-    short                   callNumber;
-    int                     pad1;
-    long                    successIters;
-    int                     partitionId;
-    short                   tableId;
-    int                     slotNumber;
-    long                    rba;
-    long                    blockNumber;
-    int                     warnLength;
-    int                     warnFlag;
-    int[]                   errorLength;
-    byte[]                  errorMsg;
+    T4CPacketBuffer meg;
+    short           endToEndECIDSequenceNumber;
+    long            curRowNumber;
+    int             retCode;
+    int             arrayElemWError;
+    int             arrayElemErrno;
+    int             currCursorID;
+    short           errorPosition;
+    short           sqlType;
+    byte            oerFatal;
+    short           flags;
+    short           userCursorOpt;
+    short           upiParam;
+    short           warningFlag;
+    int             osError;
+    short           stmtNumber;
+    short           callNumber;
+    int             pad1;
+    long            successIters;
+    int             partitionId;
+    short           tableId;
+    int             slotNumber;
+    long            rba;
+    long            blockNumber;
+    int             warnLength;
+    int             warnFlag;
+    int[]           errorLength;
+    byte[]          errorMsg;
 
     public T4CTTIoer(T4CPacketBuffer buffer){
         this.meg = buffer;
