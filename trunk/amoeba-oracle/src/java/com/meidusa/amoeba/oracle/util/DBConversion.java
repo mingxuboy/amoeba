@@ -7,6 +7,34 @@ import com.meidusa.amoeba.oracle.charset.CharacterSetMetaData;
 
 public class DBConversion {
 
+    public static final boolean DO_CONVERSION_WITH_REPLACEMENT = true;
+    public static final short   ORACLE8_PROD_VERSION           = 8030;
+    public static final short   DBCS_CHARSET                   = -1;
+    public static final short   UCS2_CHARSET                   = -5;
+    public static final short   ASCII_CHARSET                  = 1;
+    public static final short   ISO_LATIN_1_CHARSET            = 31;
+    public static final short   AL24UTFFSS_CHARSET             = 870;
+    public static final short   UTF8_CHARSET                   = 871;
+    public static final short   AL32UTF8_CHARSET               = 873;
+    public static final short   AL16UTF16_CHARSET              = 2000;
+
+    public boolean              isServerCSMultiByte;
+    public int                  c2sNlsRatio;
+
+    protected short             serverNCharSetId;
+    protected short             serverCharSetId;
+    protected short             clientCharSetId;
+    protected CharacterSet      serverCharSet;
+    protected CharacterSet      serverNCharSet;
+    protected CharacterSet      clientCharSet;
+    protected CharacterSet      asciiCharSet;
+    protected boolean           isServerCharSetFixedWidth;
+    protected boolean           isServerNCharSetFixedWidth;
+    protected int               s2cNlsRatio;
+    protected int               sMaxCharSize;
+    protected int               cMaxCharSize;
+    protected int               maxNCharSize;
+
     // class UnicodeStream extends OracleBufferedStream {
     //
     // public boolean needBytes() {
@@ -64,8 +92,11 @@ public class DBConversion {
         serverCharSet = CharacterSet.make(serverCharSetId);
         serverNCharSetId = word2;
         serverNCharSet = CharacterSet.make(serverNCharSetId);
-        if (word1 == -1) clientCharSet = serverCharSet;
-        else clientCharSet = CharacterSet.make(clientCharSetId);
+        if (word1 == -1) {
+            clientCharSet = serverCharSet;
+        } else {
+            clientCharSet = CharacterSet.make(clientCharSetId);
+        }
         c2sNlsRatio = CharacterSetMetaData.getRatio(word0, word1);
         s2cNlsRatio = CharacterSetMetaData.getRatio(word1, word0);
         sMaxCharSize = CharacterSetMetaData.getRatio(word0, 1);
@@ -156,7 +187,7 @@ public class DBConversion {
         return abyte0;
     }
 
-    public byte[] StringToCharBytes(String s){
+    public byte[] StringToCharBytes(String s) {
         if (s.length() == 0) return null;
         if (clientCharSetId == -1) return serverCharSet.convertWithReplacement(s);
         else return stringToDriverCharBytes(s, clientCharSetId);
@@ -610,31 +641,5 @@ public class DBConversion {
         }
         return i;
     }
-
-    public static final boolean DO_CONVERSION_WITH_REPLACEMENT = true;
-    public static final short   ORACLE8_PROD_VERSION           = 8030;
-    protected short             serverNCharSetId;
-    protected short             serverCharSetId;
-    protected short             clientCharSetId;
-    protected CharacterSet      serverCharSet;
-    protected CharacterSet      serverNCharSet;
-    protected CharacterSet      clientCharSet;
-    protected CharacterSet      asciiCharSet;
-    protected boolean           isServerCharSetFixedWidth;
-    protected boolean           isServerNCharSetFixedWidth;
-    protected int               c2sNlsRatio;
-    protected int               s2cNlsRatio;
-    protected int               sMaxCharSize;
-    protected int               cMaxCharSize;
-    protected int               maxNCharSize;
-    public boolean           isServerCSMultiByte;
-    public static final short   DBCS_CHARSET                   = -1;
-    public static final short   UCS2_CHARSET                   = -5;
-    public static final short   ASCII_CHARSET                  = 1;
-    public static final short   ISO_LATIN_1_CHARSET            = 31;
-    public static final short   AL24UTFFSS_CHARSET             = 870;
-    public static final short   UTF8_CHARSET                   = 871;
-    public static final short   AL32UTF8_CHARSET               = 873;
-    public static final short   AL16UTF16_CHARSET              = 2000;
 
 }

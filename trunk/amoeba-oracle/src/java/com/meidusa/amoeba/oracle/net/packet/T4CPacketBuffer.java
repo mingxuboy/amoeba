@@ -3,7 +3,6 @@ package com.meidusa.amoeba.oracle.net.packet;
 import java.util.Vector;
 
 import com.meidusa.amoeba.oracle.io.OraclePacketConstant;
-import com.meidusa.amoeba.oracle.util.DBConversion;
 
 /**
  * Oracle,T4C格式的数据包buffer解析
@@ -13,30 +12,28 @@ import com.meidusa.amoeba.oracle.util.DBConversion;
  */
 public class T4CPacketBuffer extends OracleAbstractPacketBuffer implements OraclePacketConstant {
 
-    static final int  TTCC_MXL    = 252;
-    static final int  TTCC_ESC    = 253;
-    static final int  TTCC_LNG    = 254;
-    static final int  TTCC_ERR    = 255;
-    static final int  TTCC_MXIN   = 64;
-    static final byte TTCLXMULTI  = 1;
-    static final byte TTCLXMCONV  = 2;
-    static final int  FREE        = -1;
-    static final int  SEND        = 1;
-    static final int  RECEIVE     = 2;
+    static final int  TTCC_MXL   = 252;
+    static final int  TTCC_ESC   = 253;
+    static final int  TTCC_LNG   = 254;
+    static final int  TTCC_ERR   = 255;
+    static final int  TTCC_MXIN  = 64;
+    static final byte TTCLXMULTI = 1;
+    static final byte TTCLXMCONV = 2;
+    static final int  FREE       = -1;
+    static final int  SEND       = 1;
+    static final int  RECEIVE    = 2;
 
-    final byte[]      tmpBuffer1  = new byte[1];
-    final byte[]      tmpBuffer2  = new byte[2];
-    final byte[]      tmpBuffer3  = new byte[3];
-    final byte[]      tmpBuffer4  = new byte[4];
-    final byte[]      tmpBuffer5  = new byte[5];
-    final byte[]      tmpBuffer6  = new byte[6];
-    final byte[]      tmpBuffer7  = new byte[7];
-    final byte[]      tmpBuffer8  = new byte[8];
+    final byte[]      tmpBuffer1 = new byte[1];
+    final byte[]      tmpBuffer2 = new byte[2];
+    final byte[]      tmpBuffer3 = new byte[3];
+    final byte[]      tmpBuffer4 = new byte[4];
+    final byte[]      tmpBuffer5 = new byte[5];
+    final byte[]      tmpBuffer6 = new byte[6];
+    final byte[]      tmpBuffer7 = new byte[7];
+    final byte[]      tmpBuffer8 = new byte[8];
 
-    final byte[]      ignored     = new byte[255];
-    final int[]       retLen      = new int[1];
-
-    int               c2sNlsRatio = 1;
+    final byte[]      ignored    = new byte[255];
+    final int[]       retLen     = new int[1];
 
     public T4CPacketBuffer(byte[] buf){
         super(buf);
@@ -44,10 +41,6 @@ public class T4CPacketBuffer extends OracleAbstractPacketBuffer implements Oracl
 
     public T4CPacketBuffer(int size){
         super(size);
-    }
-
-    public void setC2sNlsRatio(int nlsRatio) {
-        c2sNlsRatio = nlsRatio;
     }
 
     /**
@@ -141,7 +134,7 @@ public class T4CPacketBuffer extends OracleAbstractPacketBuffer implements Oracl
 
     void marshalCHR(byte[] ab, int offset, int len) {
         if (len > 0) {
-            if (typeRep.isConvNeeded()) {
+            if (getTypeRep().isConvNeeded()) {
                 marshalCLR(ab, offset, len);
             } else {
                 writeBytes(ab, offset, len);
@@ -323,7 +316,7 @@ public class T4CPacketBuffer extends OracleAbstractPacketBuffer implements Oracl
 
     byte[] unmarshalCHR(int i) {
         byte abyte0[] = null;
-        if (typeRep.isConvNeeded()) {
+        if (this.getTypeRep().isConvNeeded()) {
             abyte0 = unmarshalCLR(i, retLen);
             if (abyte0.length != retLen[0]) {
                 byte abyte1[] = new byte[retLen[0]];
@@ -337,7 +330,7 @@ public class T4CPacketBuffer extends OracleAbstractPacketBuffer implements Oracl
     }
 
     byte[] unmarshalCLR(int i, int[] ai) {
-        byte abyte0[] = new byte[i * c2sNlsRatio];
+        byte abyte0[] = new byte[i * this.getConversion().c2sNlsRatio];
         unmarshalCLR(abyte0, 0, ai, i);
         return abyte0;
     }
@@ -537,7 +530,7 @@ public class T4CPacketBuffer extends OracleAbstractPacketBuffer implements Oracl
                     if ((word0 = unmarshalUB1()) <= 0) {
                         break;
                     }
-                    if (word0 != TTCC_LNG || !typeRep.isServerConversion()) {
+                    if (word0 != TTCC_LNG || !getTypeRep().isServerConversion()) {
                         word1 += word0;
                         byte[] abyte1 = new byte[word0];
                         unmarshalBuffer(abyte1, 0, word0);
@@ -578,14 +571,6 @@ public class T4CPacketBuffer extends OracleAbstractPacketBuffer implements Oracl
         return j;
     }
 
-    public DBConversion getConversion() {
-        return this.oconn.getConversion();
-    }
-
-    public void setConversion(DBConversion conversion) {
-        this.oconn.setConversion(conversion);
-    }
-
     // ////////////////////////////////////////////////////////
     private boolean escapeSequenceNull(int i) {
         boolean flag = false;
@@ -603,14 +588,14 @@ public class T4CPacketBuffer extends OracleAbstractPacketBuffer implements Oracl
     }
 
     private void addPtr(byte b) {
-        if ((typeRep.getRep(4) & 1) > 0) {
+        if ((getTypeRep().getRep(4) & 1) > 0) {
             writeByte(b);
         } else {
             byte len = 0;
             for (int j = tmpBuffer4.length - 1; j >= 0; j--) {
                 tmpBuffer4[len++] = (byte) ((b >>> (8 * j)) & 0xff);
             }
-            if ((typeRep.getRep(4) & 2) > 0) {
+            if ((getTypeRep().getRep(4) & 2) > 0) {
                 reverseArray(tmpBuffer4, len);
             }
             writeBytes(tmpBuffer4, 0, len);
@@ -618,7 +603,7 @@ public class T4CPacketBuffer extends OracleAbstractPacketBuffer implements Oracl
     }
 
     private int readPtr() {
-        if ((typeRep.getRep(4) & 1) > 0) {
+        if ((getTypeRep().getRep(4) & 1) > 0) {
             readByte();
             return 1;
         } else {
@@ -630,7 +615,7 @@ public class T4CPacketBuffer extends OracleAbstractPacketBuffer implements Oracl
     private long buffer2Long(int b) {
         int i = 0;
         boolean flag = false;
-        if ((typeRep.getRep(b) & 1) > 0) {
+        if ((getTypeRep().getRep(b) & 1) > 0) {
             i = buffer[position++] & 0xff;
             if ((i & 0x80) > 0) {
                 i &= 0x7f;
@@ -654,7 +639,7 @@ public class T4CPacketBuffer extends OracleAbstractPacketBuffer implements Oracl
         long l1 = 0L;
         for (int j = 0; j < ab.length; j++) {
             long l = 0L;
-            if ((typeRep.getRep(b) & 2) > 0) {
+            if ((getTypeRep().getRep(b) & 2) > 0) {
                 l = (long) (ab[ab.length - 1 - j] & 0xff) & 255L;
             } else {
                 l = (long) (ab[j] & 0xff) & 255L;
@@ -671,7 +656,7 @@ public class T4CPacketBuffer extends OracleAbstractPacketBuffer implements Oracl
     private int buffer2Int(byte b) {
         int i = 0;
         boolean flag = false;
-        if ((typeRep.getRep(b) & 1) > 0) {
+        if ((getTypeRep().getRep(b) & 1) > 0) {
             i = buffer[position++] & 0xff;
             if ((i & 0x80) > 0) {
                 i &= 0x7f;
@@ -694,7 +679,7 @@ public class T4CPacketBuffer extends OracleAbstractPacketBuffer implements Oracl
         int i1 = 0;
         for (int j = 0; j < ab.length; j++) {
             int i2 = 0;
-            if ((typeRep.getRep(b) & 2) > 0) {
+            if ((getTypeRep().getRep(b) & 2) > 0) {
                 i2 = ab[ab.length - 1 - j] & 0xff;
             } else {
                 i2 = ab[j] & 0xff;
@@ -711,7 +696,7 @@ public class T4CPacketBuffer extends OracleAbstractPacketBuffer implements Oracl
     private long buffer2Value(byte b, byte[] buffer) {
         int i = 0;
         boolean flag = false;
-        if ((typeRep.getRep(b) & 1) > 0) {
+        if ((getTypeRep().getRep(b) & 1) > 0) {
             i = buffer[0] & 0xff;
             if ((i & 0x80) > 0) {
                 i &= 0x7f;
@@ -733,7 +718,7 @@ public class T4CPacketBuffer extends OracleAbstractPacketBuffer implements Oracl
         long l = 0L;
         for (int j = 0; j < ab.length; j++) {
             short s = 0;
-            if ((typeRep.getRep(b) & 2) > 0) {
+            if ((getTypeRep().getRep(b) & 2) > 0) {
                 s = (short) (ab[ab.length - 1 - j] & 0xff);
             } else {
                 s = (short) (ab[j] & 0xff);
@@ -750,7 +735,7 @@ public class T4CPacketBuffer extends OracleAbstractPacketBuffer implements Oracl
         byte b1 = 0;
         for (int j = ab.length - 1; j >= 0; j--) {
             ab[b1] = (byte) ((i >>> (8 * j)) & 0xff);
-            if ((typeRep.getRep(b) & 1) > 0) {
+            if ((getTypeRep().getRep(b) & 1) > 0) {
                 if (!flag || ab[b1] != 0) {
                     flag = false;
                     b1++;
@@ -760,10 +745,10 @@ public class T4CPacketBuffer extends OracleAbstractPacketBuffer implements Oracl
             }
         }
 
-        if ((typeRep.getRep(b) & 1) > 0) {
+        if ((getTypeRep().getRep(b) & 1) > 0) {
             writeByte(b1);
         }
-        if ((typeRep.getRep(b) & 2) > 0) {
+        if ((getTypeRep().getRep(b) & 2) > 0) {
             reverseArray(ab, b1);
         }
         return b1;
@@ -774,7 +759,7 @@ public class T4CPacketBuffer extends OracleAbstractPacketBuffer implements Oracl
         byte b1 = 0;
         for (int i = ab.length - 1; i >= 0; i--) {
             ab[b1] = (byte) ((l >>> (8 * i)) & 255L);
-            if ((typeRep.getRep(b) & 1) > 0) {
+            if ((getTypeRep().getRep(b) & 1) > 0) {
                 if (!flag || ab[b1] != 0) {
                     flag = false;
                     b1++;
@@ -784,10 +769,10 @@ public class T4CPacketBuffer extends OracleAbstractPacketBuffer implements Oracl
             }
         }
 
-        if ((typeRep.getRep(b) & 1) > 0) {
+        if ((getTypeRep().getRep(b) & 1) > 0) {
             writeByte(b1);
         }
-        if ((typeRep.getRep(b) & 2) > 0) {
+        if ((getTypeRep().getRep(b) & 2) > 0) {
             reverseArray(ab, b1);
         }
         return b1;
