@@ -10,14 +10,21 @@ import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
  */
 public class T4CTTIoexecDataPacket extends T4CTTIfunPacket {
 
+    int cursor;
+    int al8i4_1;
+
     public T4CTTIoexecDataPacket(){
         this.funCode = OEXEC;
     }
 
     @Override
     protected void init(AbstractPacketBuffer buffer) {
-        // TODO Auto-generated method stub
         super.init(buffer);
+        T4CPacketBuffer meg = (T4CPacketBuffer) buffer;
+        cursor = meg.unmarshalSWORD();
+        al8i4_1 = meg.unmarshalSWORD();
+        meg.unmarshalSWORD();
+        meg.unmarshalSWORD();
     }
 
     @Override

@@ -1,6 +1,7 @@
 package com.meidusa.amoeba.oracle.net.packet;
 
 import java.io.UnsupportedEncodingException;
+import java.util.BitSet;
 
 import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
 
@@ -10,8 +11,25 @@ import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
  */
 public class T4CTTIrxdDataPacket extends T4CTTIMsgPacket {
 
+    static final byte NO_BYTES[] = new byte[0];
+
+    byte              buffer[];
+    byte              bufferCHAR[];
+    BitSet            bvcColSent;
+    int               nbOfColumns;
+    boolean           bvcFound;
+    boolean           isFirstCol;
+
     public T4CTTIrxdDataPacket(){
         this.msgCode = TTIRXD;
+        bvcColSent = null;
+        nbOfColumns = 0;
+        bvcFound = false;
+        isFirstCol = true;
+    }
+
+    void init() {
+        isFirstCol = true;
     }
 
     @Override
