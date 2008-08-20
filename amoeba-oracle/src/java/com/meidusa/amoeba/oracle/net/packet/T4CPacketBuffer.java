@@ -3,7 +3,6 @@ package com.meidusa.amoeba.oracle.net.packet;
 import java.util.Vector;
 
 import com.meidusa.amoeba.oracle.io.OraclePacketConstant;
-import com.meidusa.amoeba.oracle.util.ByteUtil;
 import com.meidusa.amoeba.oracle.util.DBConversion;
 
 /**
@@ -122,9 +121,9 @@ public class T4CPacketBuffer extends OracleAbstractPacketBuffer implements Oracl
 
     void marshalO2U(boolean flag) {
         if (flag) {
-            addPtr((byte) 1);
+            marshalPTR();
         } else {
-            addPtr((byte) 0);
+            marshalNULLPTR();
         }
     }
 
@@ -219,16 +218,10 @@ public class T4CPacketBuffer extends OracleAbstractPacketBuffer implements Oracl
         }
     }
 
-    /**
-     * 读取有符号byte
-     */
     byte unmarshalSB1() {
         return buffer[position++];
     }
 
-    /**
-     * 读取无符号byte
-     */
     short unmarshalUB1() {
         return (short) (unmarshalSB1() & 0xff);
     }
@@ -241,6 +234,17 @@ public class T4CPacketBuffer extends OracleAbstractPacketBuffer implements Oracl
         return buffer2Int((byte) 1);
     }
 
+    int unmarshalUCS2(byte[] abyte0, long l) {
+        int i = unmarshalUB2();
+        tmpBuffer2[0] = (byte) ((i & 0xff00) >> 8);
+        tmpBuffer2[1] = (byte) (i & 0xff);
+        if (l + 1L < (long) abyte0.length) {
+            abyte0[(int) l] = tmpBuffer2[0];
+            abyte0[(int) l + 1] = tmpBuffer2[1];
+        }
+        return tmpBuffer2[0] != 0 ? 3 : tmpBuffer2[1] != 0 ? 2 : 1;
+    }
+
     int unmarshalSB4() {
         return (int) unmarshalUB4();
     }
@@ -249,8 +253,18 @@ public class T4CPacketBuffer extends OracleAbstractPacketBuffer implements Oracl
         return buffer2Long((byte) 2);
     }
 
+    int unmarshalSB4(byte[] abyte0) {
+        long l = buffer2Value((byte) 2, abyte0);
+        return (int) l;
+    }
+
     long unmarshalSB8() {
         return buffer2Long((byte) 2);
+    }
+
+    int unmarshalRefCursor(byte[] abyte0) {
+        int i = unmarshalSB4(abyte0);
+        return i;
     }
 
     int unmarshalSWORD() {
@@ -259,6 +273,10 @@ public class T4CPacketBuffer extends OracleAbstractPacketBuffer implements Oracl
 
     long unmarshalUWORD() {
         return unmarshalUB4();
+    }
+
+    int unmarshalPTR() {
+        return readPtr();
     }
 
     byte[] unmarshalArrayWithNull() {
@@ -545,6 +563,29 @@ public class T4CPacketBuffer extends OracleAbstractPacketBuffer implements Oracl
         return abyte0;
     }
 
+    int processIndicator(boolean flag, int i) {
+        short word0 = unmarshalSB2();
+        int j = 0;
+        if (!flag) {
+            if (word0 == 0) {
+                j = i;
+            } else if (word0 == -2 || word0 > 0) {
+                j = word0;
+            } else {
+                j = 0x10000 + word0;
+            }
+        }
+        return j;
+    }
+
+    public DBConversion getConversion() {
+        return this.oconn.getConversion();
+    }
+
+    public void setConversion(DBConversion conversion) {
+        this.oconn.setConversion(conversion);
+    }
+
     // ////////////////////////////////////////////////////////
     private boolean escapeSequenceNull(int i) {
         boolean flag = false;
@@ -565,10 +606,24 @@ public class T4CPacketBuffer extends OracleAbstractPacketBuffer implements Oracl
         if ((typeRep.getRep(4) & 1) > 0) {
             writeByte(b);
         } else {
-            byte byte1 = int2Buffer(b, tmpBuffer4, (byte) 4);
-            if (byte1 != 0) {
-                writeBytes(tmpBuffer4, 0, byte1);
+            byte len = 0;
+            for (int j = tmpBuffer4.length - 1; j >= 0; j--) {
+                tmpBuffer4[len++] = (byte) ((b >>> (8 * j)) & 0xff);
             }
+            if ((typeRep.getRep(4) & 2) > 0) {
+                reverseArray(tmpBuffer4, len);
+            }
+            writeBytes(tmpBuffer4, 0, len);
+        }
+    }
+
+    private int readPtr() {
+        if ((typeRep.getRep(4) & 1) > 0) {
+            readByte();
+            return 1;
+        } else {
+            readBytes(tmpBuffer4, 0, tmpBuffer4.length);
+            return tmpBuffer4.length;
         }
     }
 
@@ -653,7 +708,7 @@ public class T4CPacketBuffer extends OracleAbstractPacketBuffer implements Oracl
         return i1;
     }
 
-    long buffer2Value(byte b, byte[] buffer) {
+    private long buffer2Value(byte b, byte[] buffer) {
         int i = 0;
         boolean flag = false;
         if ((typeRep.getRep(b) & 1) > 0) {
@@ -769,22 +824,17 @@ public class T4CPacketBuffer extends OracleAbstractPacketBuffer implements Oracl
         }
     }
 
+    // ////////////////////////////////////////////////////////////
+
     public static void main(String[] args) {
-        T4CPacketBuffer meg = new T4CPacketBuffer(2);
-        meg.marshalUB2(100);
-        byte[] ab = meg.toByteBuffer().array();
-        System.out.println(ByteUtil.toHex(ab, 0, ab.length));
+        // T4CPacketBuffer meg = new T4CPacketBuffer(2);
+        // meg.marshalUB2(100);
+        // byte[] ab = meg.toByteBuffer().array();
+        // System.out.println(ByteUtil.toHex(ab, 0, ab.length));
+        //
+        // byte[] ab0 = { 0x64, 0x00 };
+        // meg = new T4CPacketBuffer(ab0);
+        // System.out.println(meg.unmarshalUB2());
 
-        byte[] ab0 = { 0x64, 0x00 };
-        meg = new T4CPacketBuffer(ab0);
-        System.out.println(meg.unmarshalUB2());
-    }
-
-    public DBConversion getConversion(){
-    	return this.oconn.getConversion();
-    }
-    
-    public void setConversion(DBConversion conversion){
-    	this.oconn.setConversion(conversion);
     }
 }
