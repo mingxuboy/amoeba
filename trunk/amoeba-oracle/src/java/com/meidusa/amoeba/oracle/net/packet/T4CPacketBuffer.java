@@ -191,22 +191,22 @@ public class T4CPacketBuffer extends OracleAbstractPacketBuffer implements Oracl
         }
     }
 
-    void marshalMap(Map<String,String> map){
-    	byte[][] keys = new byte[map.size()][];
-    	byte[][] values = new byte[map.size()][];
-    	int i=0;
-    	for(Map.Entry<String,String> entry: map.entrySet() ){
-    		if(entry.getKey() != null){
-    			keys[i] = this.getConversion().StringToCharBytes(entry.getKey());
-    			if(entry.getValue() != null){
-    				values[i] = this.getConversion().StringToCharBytes(entry.getValue());
-    			}
-    		}
-    		i++;
-    	}
-    	marshalKEYVAL(keys,values,new byte[map.size()],map.size());
+    void marshalMap(Map<String, String> map) {
+        byte[][] keys = new byte[map.size()][];
+        byte[][] values = new byte[map.size()][];
+        int i = 0;
+        for (Map.Entry<String, String> entry : map.entrySet()) {
+            if (entry.getKey() != null) {
+                keys[i] = this.getConversion().StringToCharBytes(entry.getKey());
+                if (entry.getValue() != null) {
+                    values[i] = this.getConversion().StringToCharBytes(entry.getValue());
+                }
+            }
+            i++;
+        }
+        marshalKEYVAL(keys, values, new byte[map.size()], map.size());
     }
-    
+
     void marshalKEYVAL(byte[][] ab0, byte[][] ab1, byte[] ab2, int i) {
         int ai[] = new int[i];
         int ai1[] = new int[i];
@@ -287,8 +287,10 @@ public class T4CPacketBuffer extends OracleAbstractPacketBuffer implements Oracl
         return unmarshalUB4();
     }
 
-    int unmarshalPTR() {
-        return readPtr();
+    int unmarshalPTR(byte[] ab) {
+        int len = readPtr();
+        ab = tmpBuffer4;
+        return len;
     }
 
     byte[] unmarshalArrayWithNull() {
@@ -435,27 +437,27 @@ public class T4CPacketBuffer extends OracleAbstractPacketBuffer implements Oracl
         }
     }
 
-    Map<String,String> unmarshalMap(int i){
-    	Map<String,String> map = new HashMap<String,String>(i);
-    	byte[][] keys = new byte[i][];
-    	byte[][] values = new byte[i][];
-    	unmarshalKEYVAL(keys,values,i);
-    	for(int j=0;j<i;j++){
-    		String key = null;
-    		String value = null;
-    		if(keys[j]!= null){
-    			key = this.getConversion().CharBytesToString(keys[j], keys[j].length);
-    			if(values[j] != null){
-    				value = this.getConversion().CharBytesToString(values[j], values[j].length);
-    			}
-    		}
-    		if(key != null){
-    			map.put(key, value);
-    		}
-    	}
-    	return map;
+    Map<String, String> unmarshalMap(int i) {
+        Map<String, String> map = new HashMap<String, String>(i);
+        byte[][] keys = new byte[i][];
+        byte[][] values = new byte[i][];
+        unmarshalKEYVAL(keys, values, i);
+        for (int j = 0; j < i; j++) {
+            String key = null;
+            String value = null;
+            if (keys[j] != null) {
+                key = this.getConversion().CharBytesToString(keys[j], keys[j].length);
+                if (values[j] != null) {
+                    value = this.getConversion().CharBytesToString(values[j], values[j].length);
+                }
+            }
+            if (key != null) {
+                map.put(key, value);
+            }
+        }
+        return map;
     }
-    
+
     int unmarshalKEYVAL(byte[][] abyte0, byte[][] abyte1, int i) {
         byte[] abyte2 = new byte[1000];
         int[] ai = new int[1];
@@ -644,7 +646,7 @@ public class T4CPacketBuffer extends OracleAbstractPacketBuffer implements Oracl
 
     private int readPtr() {
         if ((getTypeRep().getRep(4) & 1) > 0) {
-            readByte();
+            tmpBuffer4[0] = readByte();
             return 1;
         } else {
             readBytes(tmpBuffer4, 0, tmpBuffer4.length);
