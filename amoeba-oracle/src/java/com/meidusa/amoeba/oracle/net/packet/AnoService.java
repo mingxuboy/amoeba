@@ -2,7 +2,6 @@ package com.meidusa.amoeba.oracle.net.packet;
 
 import com.meidusa.amoeba.oracle.util.C04;
 import com.meidusa.amoeba.oracle.util.C06;
-import com.meidusa.amoeba.oracle.util.NetException;
 
 /**
  * @author hexianmao
@@ -10,11 +9,11 @@ import com.meidusa.amoeba.oracle.util.NetException;
  */
 public abstract class AnoService implements AnoServices {
 
-    protected int             service;
-    protected int             serviceSubPackets;
-    protected long            version;
-    protected byte[]          selectedDrivers;
-    protected int             level;
+    protected int      service;
+    protected int      serviceSubPackets;
+    protected long     version;
+    protected byte[]   selectedDrivers;
+    protected int      level;
     protected String[] listOfDrivers;
 
     public AnoService(){
@@ -22,19 +21,19 @@ public abstract class AnoService implements AnoServices {
         level = 0;
     }
 
-    public void doRead(AnoPacketBuffer ano){
-    	doReadService(ano);
+    public void doRead(AnoPacketBuffer ano) {
+        doReadService(ano);
         doReadVersion(ano);
     }
-    
-    public void doWrite(AnoPacketBuffer ano){
-    	ano.writeUB2(service);
-    	ano.writeUB2(serviceSubPackets);
-    	ano.writeUB4(0);
-    	ano.writeUB4(version);
-    	ano.sendRaw(selectedDrivers);
+
+    public void doWrite(AnoPacketBuffer ano) {
+        ano.writeUB2(service);
+        ano.writeUB2(serviceSubPackets);
+        ano.writeUB4(0);
+        ano.writeUB4(version);
+        ano.sendRaw(selectedDrivers);
     }
-    
+
     void doReadService(AnoPacketBuffer ano) {
         service = ano.readUB2();
         serviceSubPackets = ano.readUB2();
@@ -47,8 +46,8 @@ public abstract class AnoService implements AnoServices {
     }
 
     void init(AnoPacketBuffer ano) {
-    	doReadService(ano);
-    	doReadServiceStatus(ano);
+        doReadService(ano);
+        doReadServiceStatus(ano);
         b();
     }
 
@@ -58,17 +57,15 @@ public abstract class AnoService implements AnoServices {
     void b() {
     }
 
-    void selectDrivers(String as[], String as1[], int i1) throws NetException {
+    void selectDrivers(String as[], String as1[], int i1) {
         label0: switch (i1) {
             case 0: // '\0'
                 selectedDrivers = new byte[as.length + 1];
                 selectedDrivers[0] = 0;
                 int j1 = 0;
                 do {
-                    if (j1 >= as.length)
-                        break label0;
-                    if (!as[j1].equals(""))
-                        selectedDrivers[j1 + 1] = k(as1, as[j1]);
+                    if (j1 >= as.length) break label0;
+                    if (!as[j1].equals("")) selectedDrivers[j1 + 1] = k(as1, as[j1]);
                     j1++;
                 } while (true);
 
@@ -81,8 +78,7 @@ public abstract class AnoService implements AnoServices {
                 int k1 = 0;
                 selectedDrivers = new byte[as.length + 1];
                 for (k1 = 0; k1 < as.length; k1++)
-                    if (!as[k1].equals(""))
-                        selectedDrivers[k1] = k(as1, as[k1]);
+                    if (!as[k1].equals("")) selectedDrivers[k1] = k(as1, as[k1]);
 
                 selectedDrivers[k1] = 0;
                 break;
@@ -91,26 +87,25 @@ public abstract class AnoService implements AnoServices {
                 selectedDrivers = new byte[as.length];
                 int l1 = 0;
                 do {
-                    if (l1 >= as.length)
-                        break label0;
-                    if (!as[l1].equals(""))
-                        selectedDrivers[l1] = k(as1, as[l1]);
+                    if (l1 >= as.length) break label0;
+                    if (!as[l1].equals("")) selectedDrivers[l1] = k(as1, as[l1]);
                     l1++;
                 } while (true);
 
             default:
-                throw new NetException(304);
+                throw new RuntimeException("Invalid parameter, use one of ACCEPTED, REJECTED, REQUESTED and REQUIRED");
         }
     }
-    
-    byte k(String as[], String s) throws NetException {
-        for (byte byte0 = 0; byte0 < as.length; byte0++)
-            if (s.equals(as[byte0]))
-                return byte0;
 
-        throw new NetException(309);
+    byte k(String as[], String s) {
+        for (byte byte0 = 0; byte0 < as.length; byte0++) {
+            if (s.equals(as[byte0])) {
+                return byte0;
+            }
+        }
+        throw new RuntimeException("Invalid Ano Driver");
     }
-    
+
     void c() {
     }
 }
@@ -148,43 +143,37 @@ class SupervisorService extends AnoService {
         for (int i1 = 0; i1 < r.length; i1++) {
             int j1 = 0;
             do {
-                if (j1 >= h.length)
-                    break;
+                if (j1 >= h.length) break;
                 if (r[i1] == h[j1]) {
                     p++;
                     break;
                 }
                 j1++;
             } while (true);
-            if (j1 == h.length)
-                throw new RuntimeException("Received Invalid Services from Server ");
+            if (j1 == h.length) throw new RuntimeException("Received Invalid Services from Server ");
         }
 
-        if (p != q)
-            throw new RuntimeException("Received Incomplete services from server");
-        else
-            return;
+        if (p != q) throw new RuntimeException("Received Incomplete services from server");
+        else return;
     }
 
 }
 
 class AuthenticationService extends AnoService {
 
-	
     protected int      const1;
     protected int      status;
     protected String[] selectedDriversDesc;
     protected boolean  l;
-	
 
     public AuthenticationService(){
-    	service = 1;
+        service = 1;
         serviceSubPackets = 3;
         level = 3;
         selectDrivers(listOfDrivers, AnoServices.AUTH_CLASSNAME, level);
         serviceSubPackets += selectedDrivers.length * 2;
     }
-    
+
     @Override
     void doReadVersion(AnoPacketBuffer ano) {
         version = ano.receiveVersion();
@@ -200,7 +189,7 @@ class AuthenticationService extends AnoService {
 
     @Override
     void doReadServiceStatus(AnoPacketBuffer ano) {
-    	int numSubPackets = ano.readUB2();
+        int numSubPackets = ano.readUB2();
         if (numSubPackets != 2) {
             throw new RuntimeException("Wrong Number of service subpackets");
         }
@@ -232,7 +221,7 @@ class EncryptionService extends AnoService {
 
     @Override
     void doReadServiceStatus(AnoPacketBuffer ano) {
-    	int numSubPackets = ano.readUB2();
+        int numSubPackets = ano.readUB2();
         if (numSubPackets != serviceSubPackets) {
             throw new RuntimeException("Wrong Number of service subpackets");
         } else {
@@ -246,18 +235,15 @@ class EncryptionService extends AnoService {
     void b() {
         int i = 0;
         do {
-            if (i >= selectedDrivers.length)
-                break;
+            if (i >= selectedDrivers.length) break;
             if (selectedDrivers[i] == algID) {
                 a = i;
                 break;
             }
             i++;
         } while (true);
-        if (i == selectedDrivers.length)
-            throw new RuntimeException("Invalid Encryption Algorithm from server");
-        else
-            return;
+        if (i == selectedDrivers.length) throw new RuntimeException("Invalid Encryption Algorithm from server");
+        else return;
     }
 
 }
@@ -290,11 +276,10 @@ class DataIntegrityService extends AnoService {
             byte abyte1[] = ano.receiveRaw();
             byte abyte2[] = ano.receiveRaw();
             byte abyte3[] = ano.receiveRaw();
-            if (word0 <= 0 || word1 <= 0)
-                throw new RuntimeException("Bad parameters from server");
+            if (word0 <= 0 || word1 <= 0) throw new RuntimeException("Bad parameters from server");
             int l = (word1 + 7) / 8;
-            if (abyte2.length != l || abyte1.length != l)
-                throw new RuntimeException("DiffieHellman negotiation out of synch");
+            if (abyte2.length != l || abyte1.length != l) throw new RuntimeException(
+                                                                                     "DiffieHellman negotiation out of synch");
             C04 c04 = new C04(abyte0, abyte1, word0, word1);
             clientPK = c04.g();
             iv = abyte3;
@@ -307,18 +292,16 @@ class DataIntegrityService extends AnoService {
     void b() {
         int l = 0;
         do {
-            if (l >= selectedDrivers.length)
-                break;
+            if (l >= selectedDrivers.length) break;
             if (selectedDrivers[l] == h) {
                 k = l;
                 break;
             }
             l++;
         } while (true);
-        if (l == selectedDrivers.length)
-            throw new RuntimeException("Invalid DataIntegrity Algorithm received from server");
-        else
-            return;
+        if (l == selectedDrivers.length) throw new RuntimeException(
+                                                                    "Invalid DataIntegrity Algorithm received from server");
+        else return;
     }
 
     void c() {
@@ -335,17 +318,16 @@ class DataIntegrityService extends AnoService {
             int l = 13 + 8 + 4 + clientPK.length;
             sendANOHeader(l, 1, (short) 0);
             serviceSubPackets = 1;
-            /*doReadService();
-            ano.sendRaw(clientPK);*/
+            /*
+             * doReadService(); ano.sendRaw(clientPK);
+             */
         }
     }
 
     private void sendANOHeader(int i, int j, short word) {
-        /*ano.writeUB4(NA_MAGIC);
-        ano.writeUB2(i);
-        ano.writeVersion();
-        ano.writeUB2(j);
-        ano.writeUB1(word);*/
+        /*
+         * ano.writeUB4(NA_MAGIC); ano.writeUB2(i); ano.writeVersion(); ano.writeUB2(j); ano.writeUB1(word);
+         */
     }
 
 }
