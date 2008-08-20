@@ -67,10 +67,10 @@ public class T4C8TTIproResponseDataPacket extends T4CTTIMsgPacket {
         if (proSvrVer < 5) {
             return;
         }
-        byte byte0 = meg.typeRep.getRep((byte) 1);
-        meg.typeRep.setRep((byte) 1, (byte) 0);
+        byte byte0 = meg.getTypeRep().getRep((byte) 1);
+        meg.getTypeRep().setRep((byte) 1, (byte) 0);
         i = meg.unmarshalUB2();
-        meg.typeRep.setRep((byte) 1, byte0);
+        meg.getTypeRep().setRep((byte) 1, byte0);
         abyte0 = meg.unmarshalNBytes(i);
         int j = 6 + (abyte0[5] & 0xff) + (abyte0[6] & 0xff);
         NCHAR_CHARSET = (short) ((abyte0[j + 3] & 0xff) << 8);
@@ -92,17 +92,16 @@ public class T4C8TTIproResponseDataPacket extends T4CTTIMsgPacket {
         short word0 = oVersion;
         short word1 = svrCharSet;
         short word2 = DBConversion.findDriverCharSet(word1, word0);
-        
+
         try {
-			DBConversion conversion = new DBConversion(word1, word2, NCHAR_CHARSET);
-			meg.setConversion(conversion);
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+            DBConversion conversion = new DBConversion(word1, word2, NCHAR_CHARSET);
+            meg.setConversion(conversion);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         meg.getTypeRep().setServerConversion(word2 != word1);
         meg.getTypeRep().setVersion(word0);
-        
+
     }
 
     @Override
@@ -124,10 +123,10 @@ public class T4C8TTIproResponseDataPacket extends T4CTTIMsgPacket {
         if (proSvrVer < 5) {
             return;
         }
-        byte byte0 = meg.typeRep.getRep((byte) 1);
-        meg.typeRep.setRep((byte) 1, (byte) 0);
+        byte byte0 = meg.getTypeRep().getRep((byte) 1);
+        meg.getTypeRep().setRep((byte) 1, (byte) 0);
         meg.marshalUB2(i);
-        meg.typeRep.setRep((byte) 1, byte0);
+        meg.getTypeRep().setRep((byte) 1, byte0);
         meg.marshalB1Array(abyte0);
 
         if (proSvrVer < 6) {
