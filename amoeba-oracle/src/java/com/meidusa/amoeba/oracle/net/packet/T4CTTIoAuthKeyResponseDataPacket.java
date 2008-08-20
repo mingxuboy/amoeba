@@ -57,6 +57,7 @@ public class T4CTTIoAuthKeyResponseDataPacket extends DataPacket implements T4CT
         if (encryptedSK == null || encryptedSK.length != 16) {
             throw new RuntimeException("内部 - 不期望的值");
         }
+        meg.oconn.setEncryptedSK(encryptedSK);
         return;
     }
 
@@ -71,7 +72,7 @@ public class T4CTTIoAuthKeyResponseDataPacket extends DataPacket implements T4CT
         byte[][] abyte1 = new byte[len][];
         byte[] abyte2 = new byte[len];
         int i = 0;
-        abyte0[i] = AUTH_SESSKEY.getBytes();
+        abyte0[i] = meg.getConversion().StringToCharBytes(AUTH_SESSKEY);
         abyte1[i++] = encryptedSK;
         meg.marshalKEYVAL(abyte0, abyte1, abyte2, len);
 
