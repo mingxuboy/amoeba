@@ -14,14 +14,14 @@ import com.meidusa.amoeba.oracle.util.DBConversion;
  */
 public class T4C8TTIproResponseDataPacket extends T4CTTIMsgPacket {
 
-    byte           proSvrVer        = 6;
-    short          oVersion         = -1;
-    String         proSvrStr        = "Linuxi386/Linux-2.0.34-8.1.0";
-    short          svrCharSet       = 0;
-    byte           svrFlags         = 1;
-    short          svrCharSetElem   = 0;
-    boolean        svrInfoAvailable = false;
-    short          NCHAR_CHARSET    = 0;
+   public byte           proSvrVer        = 6;
+   public  short          oVersion         = -1;
+   public  String         proSvrStr        = "Linuxi386/Linux-2.0.34-8.1.0";
+   public  short          svrCharSet       = 0;
+   public  byte           svrFlags         = 1;
+   public  short          svrCharSetElem   = 0;
+   public  boolean        svrInfoAvailable = false;
+   public  short          NCHAR_CHARSET    = 0;
 
     private int    i                = 0;
     private byte[] abyte0           = null;
@@ -89,19 +89,6 @@ public class T4C8TTIproResponseDataPacket extends T4CTTIMsgPacket {
         for (int l = 0; l < word1; l++) {
             as1[l] = (byte) meg.unmarshalUB1();
         }
-        short word0 = oVersion;
-        short word1 = svrCharSet;
-        short word2 = DBConversion.findDriverCharSet(word1, word0);
-
-        try {
-            DBConversion conversion = new DBConversion(word1, word2, NCHAR_CHARSET);
-            meg.setConversion(conversion);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        meg.getTypeRep().setServerConversion(word2 != word1);
-        meg.getTypeRep().setVersion(word0);
-
     }
 
     @Override

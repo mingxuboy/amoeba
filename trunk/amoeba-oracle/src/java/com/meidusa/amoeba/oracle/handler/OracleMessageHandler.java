@@ -1,10 +1,13 @@
 package com.meidusa.amoeba.oracle.handler;
 
+import java.sql.SQLException;
+
 import org.apache.log4j.Logger;
 
 import com.meidusa.amoeba.net.Connection;
 import com.meidusa.amoeba.net.MessageHandler;
 import com.meidusa.amoeba.net.Sessionable;
+import com.meidusa.amoeba.oracle.net.OracleConnection;
 import com.meidusa.amoeba.oracle.net.packet.AnoDataPacket;
 import com.meidusa.amoeba.oracle.net.packet.AnoPacketBuffer;
 import com.meidusa.amoeba.oracle.net.packet.AnoServices;
@@ -18,9 +21,11 @@ import com.meidusa.amoeba.oracle.net.packet.T4C8TTIdtyResponseDataPacket;
 import com.meidusa.amoeba.oracle.net.packet.T4C8TTIproDataPacket;
 import com.meidusa.amoeba.oracle.net.packet.T4C8TTIproResponseDataPacket;
 import com.meidusa.amoeba.oracle.net.packet.T4CTTIfunPacket;
+import com.meidusa.amoeba.oracle.net.packet.T4CTTIoAuthDataPacket;
 import com.meidusa.amoeba.oracle.net.packet.T4CTTIoAuthKeyDataPacket;
 import com.meidusa.amoeba.oracle.net.packet.T4CTTIoAuthKeyResponseDataPacket;
 import com.meidusa.amoeba.oracle.util.ByteUtil;
+import com.meidusa.amoeba.oracle.util.DBConversion;
 
 /**
  * 非常简单的数据包转发程序
@@ -31,19 +36,20 @@ public class OracleMessageHandler implements MessageHandler, Sessionable, SQLnet
 
     private static Logger  logger         = Logger.getLogger(OracleMessageHandler.class);
 
-    private Connection     clientConn;
-    private Connection     serverConn;
+    private OracleConnection     clientConn;
+    private OracleConnection     serverConn;
     private MessageHandler clientHandler;
     private MessageHandler serverHandler;
     private boolean        isEnded        = false;
     private Packet         lastPackt      = null;
     private int            serverMsgCount = 0;
     private int            clientMsgCount = 0;
-
+    private byte[] encryptedSK;
+    
     public OracleMessageHandler(Connection clientConn, Connection serverConn){
-        this.clientConn = clientConn;
+        this.clientConn = (OracleConnection)clientConn;
         clientHandler = clientConn.getMessageHandler();
-        this.serverConn = serverConn;
+        this.serverConn = (OracleConnection)serverConn;
         serverHandler = serverConn.getMessageHandler();
         clientConn.setMessageHandler(this);
         serverConn.setMessageHandler(this);
@@ -71,7 +77,7 @@ public class OracleMessageHandler implements MessageHandler, Sessionable, SQLnet
                             return;
                         }
                     }
-                    if (clientMsgCount <= 8) {
+                    if (clientMsgCount <= 9) {
                         if (T4CTTIfunPacket.isMsgType(message, T4CTTIfunPacket.TTIPRO)) {
                             packet = new T4C8TTIproDataPacket();
                         } else if (T4CTTIfunPacket.isMsgType(message, T4CTTIfunPacket.TTIDTY)) {
@@ -80,6 +86,9 @@ public class OracleMessageHandler implements MessageHandler, Sessionable, SQLnet
                             packet = new T4C7OversionDataPacket();
                         } else if (T4CTTIfunPacket.isFunType(message, T4CTTIfunPacket.OSESSKEY)) {
                             packet = new T4CTTIoAuthKeyDataPacket();
+                        }else if(T4CTTIfunPacket.isFunType(message, T4CTTIfunPacket.OAUTH)){
+                        	packet = new T4CTTIoAuthDataPacket();
+                        	((T4CTTIoAuthDataPacket)packet).encryptedSK = this.encryptedSK;
                         }
                     }
                     break;
@@ -92,7 +101,10 @@ public class OracleMessageHandler implements MessageHandler, Sessionable, SQLnet
                     System.out.println("packet:" + packet);
                     System.out.println("##source:" + ByteUtil.toHex(message, 0, message.length));
                 }
-                message = packet.toByteBuffer(conn).array();
+                
+                //if(!(packet instanceof T4CTTIoAuthDataPacket)){
+                	message = packet.toByteBuffer(conn).array();
+                //}
                 if (logger.isDebugEnabled()) {
                     System.out.println("#warpped:" + ByteUtil.toHex(message, 0, message.length));
                     System.out.println();
@@ -107,10 +119,13 @@ public class OracleMessageHandler implements MessageHandler, Sessionable, SQLnet
                 case NS_PACKT_TYPE_DATA:
                     if (lastPackt instanceof T4C8TTIproDataPacket) {
                         packet = new T4C8TTIproResponseDataPacket();
+                        
                     } else if (lastPackt instanceof T4C8TTIdtyDataPacket) {
                         packet = new T4C8TTIdtyResponseDataPacket();
                     } else if (lastPackt instanceof T4C7OversionDataPacket) {
                         packet = new T4C7OversionResponseDataPacket();
+                        
+                        
                     } else if (lastPackt instanceof T4CTTIoAuthKeyDataPacket) {
                         packet = new T4CTTIoAuthKeyResponseDataPacket();
                     }
@@ -120,6 +135,15 @@ public class OracleMessageHandler implements MessageHandler, Sessionable, SQLnet
             try {
                 if (packet != null) {
                     packet.init(message, conn);
+                    
+                    if(packet instanceof T4C8TTIproResponseDataPacket){
+                    	setConnectionField(clientConn,(T4C8TTIproResponseDataPacket)packet);
+                    	setConnectionField(serverConn,(T4C8TTIproResponseDataPacket)packet);
+                    }else if(packet instanceof T4CTTIoAuthKeyResponseDataPacket){
+                    	this.encryptedSK = ((T4CTTIoAuthKeyResponseDataPacket)packet).encryptedSK;
+                    }
+                    
+                    
                     if (logger.isDebugEnabled()) {
                         System.out.println("reponse packet:" + packet);
                         System.out.println("@@server source:" + ByteUtil.toHex(message, 0, message.length));
@@ -152,6 +176,33 @@ public class OracleMessageHandler implements MessageHandler, Sessionable, SQLnet
         }
     }
 
+    
+    public void setConnectionField(OracleConnection conn,T4C8TTIproResponseDataPacket packet){
+    	T4C8TTIproResponseDataPacket pro = (T4C8TTIproResponseDataPacket)packet;
+        short word0 = pro.oVersion;
+        short word1 = pro.svrCharSet;
+        short word2 = DBConversion.findDriverCharSet(word1, word0);
+        
+        try {
+			DBConversion conversion = new DBConversion(word1, word2, pro.NCHAR_CHARSET);
+			conn.setConversion(conversion);
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		conn.getRep().setServerConversion(word2 != word1);
+		conn.getRep().setVersion(word0);
+        if (DBConversion.isCharSetMultibyte(word2)) {
+            if (DBConversion.isCharSetMultibyte(pro.svrCharSet))
+            	conn.getRep().setFlags((byte) 1);
+            else
+            	conn.getRep().setFlags((byte) 2);
+        } else {
+        	conn.getRep().setFlags(pro.svrFlags);
+        }
+    }
+    
     public boolean isEnded() {
         return isEnded;
     }

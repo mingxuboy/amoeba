@@ -193,12 +193,12 @@ public class DBConversion {
         else return stringToDriverCharBytes(s, clientCharSetId);
     }
 
-    public String CharBytesToString(byte abyte0[], int i) throws SQLException {
+    public String CharBytesToString(byte abyte0[], int i){
         return CharBytesToString(abyte0, i, false);
     }
 
     @SuppressWarnings("deprecation")
-    public String CharBytesToString(byte abyte0[], int i, boolean flag) throws SQLException {
+    public String CharBytesToString(byte abyte0[], int i, boolean flag){
         String s = null;
         if (abyte0.length == 0) return s;
         switch (clientCharSetId) {
