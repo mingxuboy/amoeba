@@ -1,10 +1,8 @@
 package com.meidusa.amoeba.oracle.net.packet;
 
 import java.io.UnsupportedEncodingException;
-import java.sql.SQLException;
 
 import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
-import com.meidusa.amoeba.oracle.util.DBConversion;
 
 /**
  * 协议数据包
@@ -15,19 +13,17 @@ import com.meidusa.amoeba.oracle.util.DBConversion;
 public class T4C8TTIproResponseDataPacket extends T4CTTIMsgPacket {
 
     public byte    proSvrVer        = 6;
-    public short   oVersion         = -1;
+    public short   oVersion         = 8100;
     public String  proSvrStr        = "Linuxi386/Linux-2.0.34-8.1.0";
-    public short   svrCharSet       = 0;
+    public short   svrCharSet       = 1;
     public byte    svrFlags         = 1;
     public short   svrCharSetElem   = 0;
     public boolean svrInfoAvailable = false;
-    public short   NCHAR_CHARSET    = 0;
+    public short   NCHAR_CHARSET    = 2000;
 
-    private int    i                = 0;
-    private byte[] abyte0           = null;
-    private short  word0            = 0;
+    
+    public byte[] abyte0           = new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x07, (byte) 0xd0 };
     private byte[] as0              = null;
-    private short  word1            = 0;
     private byte[] as1              = null;
 
     public T4C8TTIproResponseDataPacket(){
@@ -69,7 +65,7 @@ public class T4C8TTIproResponseDataPacket extends T4CTTIMsgPacket {
         }
         byte byte0 = meg.getTypeRep().getRep((byte) 1);
         meg.getTypeRep().setRep((byte) 1, (byte) 0);
-        i = meg.unmarshalUB2();
+        int i = meg.unmarshalUB2();
         meg.getTypeRep().setRep((byte) 1, byte0);
         abyte0 = meg.unmarshalNBytes(i);
         int j = 6 + (abyte0[5] & 0xff) + (abyte0[6] & 0xff);
@@ -79,12 +75,12 @@ public class T4C8TTIproResponseDataPacket extends T4CTTIMsgPacket {
         if (proSvrVer < 6) {
             return;
         }
-        word0 = meg.unmarshalUB1();
+        short word0 = meg.unmarshalUB1();
         as0 = new byte[word0];
         for (int k = 0; k < word0; k++) {
             as0[k] = (byte) meg.unmarshalUB1();
         }
-        word1 = meg.unmarshalUB1();
+        short word1 = meg.unmarshalUB1();
         as1 = new byte[word1];
         for (int l = 0; l < word1; l++) {
             as1[l] = (byte) meg.unmarshalUB1();
@@ -113,23 +109,28 @@ public class T4C8TTIproResponseDataPacket extends T4CTTIMsgPacket {
         byte byte0 = meg.getTypeRep().getRep((byte) 1);
         meg.getTypeRep().setRep((byte) 1, (byte) 0);
 
-        meg.marshalUB2(i);
-        // meg.marshalUB2(11);
-
+        meg.marshalUB2(abyte0.length);
+        
         meg.getTypeRep().setRep((byte) 1, byte0);
-
         meg.marshalB1Array(abyte0);
-        // meg.marshalB1Array(new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x07, (byte) 0xd0 });
 
         if (proSvrVer < 6) {
             return;
         }
-        // meg.marshalUB1(word0);
-        // meg.marshalB1Array(as0);
-        // meg.marshalUB1(word1);
-        // meg.marshalB1Array(as1);
-        meg.marshalNULLPTR();
-        meg.marshalNULLPTR();
+        
+        if(as0 != null){
+        	meg.marshalUB1((short)as0.length);
+         	meg.marshalB1Array(as0);
+        }else{
+        	meg.marshalNULLPTR();
+        }
+        
+        if(as1 != null){
+        	meg.marshalUB1((short)as1.length);
+        	meg.marshalB1Array(as1);
+        }else{
+        	meg.marshalNULLPTR();
+        }
     }
 
 }
