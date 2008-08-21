@@ -29,9 +29,9 @@ public class AnoResponseDataPacket extends DataPacket implements AnoServices {
     }
 
     @Override
-    protected void init(AbstractPacketBuffer absbuffer) {
-    	OracleAbstractPacketBuffer buffer = (OracleAbstractPacketBuffer)absbuffer;
-        super.init(buffer);
+    protected void init(AbstractPacketBuffer absbuffer) {    	
+        super.init(absbuffer);
+        OracleAbstractPacketBuffer buffer = (OracleAbstractPacketBuffer)absbuffer;
         if (buffer.readUB4() != DEADBEEF) {
             throw new RuntimeException("Wrong Magic number in na packet");
         }
@@ -59,9 +59,9 @@ public class AnoResponseDataPacket extends DataPacket implements AnoServices {
     }
 
     @Override
-    protected void write2Buffer(AbstractPacketBuffer absbuffer) throws UnsupportedEncodingException {
-    	AnoPacketBuffer buffer = (AnoPacketBuffer)absbuffer;
-        super.write2Buffer(buffer);
+    protected void write2Buffer(AbstractPacketBuffer absbuffer) throws UnsupportedEncodingException {    	
+        super.write2Buffer(absbuffer);
+        AnoPacketBuffer buffer = (AnoPacketBuffer)absbuffer;
         buffer.writeUB4(NA_MAGIC);
         buffer.writeUB2(m);
         buffer.writeUB4(version);
@@ -89,6 +89,6 @@ public class AnoResponseDataPacket extends DataPacket implements AnoServices {
 
     @Override
 	protected Class<? extends AbstractPacketBuffer> getBufferClass() {
-		return OracleAbstractPacketBuffer.class;
+		return AnoPacketBuffer.class;
 	}
 }

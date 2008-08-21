@@ -46,8 +46,4 @@ public abstract class DataPacket extends AbstractPacket {
         buffer.writeUB2(dataFlags);
     }
 
-    @Override
-	protected Class<? extends AbstractPacketBuffer> getBufferClass() {
-		return OracleAbstractPacketBuffer.class;
-	}
 }
