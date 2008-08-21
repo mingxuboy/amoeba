@@ -46,7 +46,7 @@ public class T4C8OallDataPacket extends T4CTTIfunPacket {
         super.init(buffer);
         if (funCode == OFETCH) {
             ofetch = new T4CTTIofetchDataPacket();
-            //ofetch.init(buffer);
+            // ofetch.init(buffer);
             this.cursor = ofetch.cursor;
             this.al8i4[1] = ofetch.al8i4_1;
         } else if (funCode == OEXEC) {
@@ -152,9 +152,9 @@ public class T4C8OallDataPacket extends T4CTTIfunPacket {
             }
             T4CTTIoac t4c8ttiuds = oacdefBindsSent[i];
             String s = null;// meg.conv.CharBytesToString(oacdefBindsSent[i].getTypeName(),
-                            // oacdefBindsSent[i].getTypeCharLength());
+            // oacdefBindsSent[i].getTypeCharLength());
             String s1 = null;// meg.conv.CharBytesToString(oacdefBindsSent[i].getSchemaName(),
-                             // oacdefBindsSent[i].getSchemaCharLength());
+            // oacdefBindsSent[i].getSchemaCharLength());
             String s2 = s1 + "." + s;
             int j = t4c8ttiuds.oacmxl;
             // switch (t4c8ttiuds.oacdty) {
