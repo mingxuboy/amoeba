@@ -60,9 +60,9 @@ public class AcceptPacket extends AbstractPacket {
     }
 
     @Override
-    protected void write2Buffer(AbstractPacketBuffer absbuffer) throws UnsupportedEncodingException {
+    protected void write2Buffer(AbstractPacketBuffer absbuffer) throws UnsupportedEncodingException {        
+        super.write2Buffer(absbuffer);
         OracleAbstractPacketBuffer buffer = (OracleAbstractPacketBuffer) absbuffer;
-        super.write2Buffer(buffer);
         buffer.writeUB2(version);
         buffer.writeUB2(options);
         buffer.writeUB2(sduSize);
@@ -85,11 +85,6 @@ public class AcceptPacket extends AbstractPacket {
         sb.append("flag0:").append(flag0).append("\n");
         sb.append("flag1:").append(flag1).append("\n");
         return sb.toString();
-    }
-
-    @Override
-    protected Class<? extends AbstractPacketBuffer> getBufferClass() {
-        return AnoPacketBuffer.class;
     }
 
 }
