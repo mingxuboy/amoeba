@@ -1,5 +1,6 @@
 package com.meidusa.amoeba.oracle.net.packet;
 
+import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
 
 /**
  * @author hexianmao
@@ -14,20 +15,14 @@ public class T4CTTIoexecDataPacket extends T4CTTIfunPacket {
         super(OEXEC);
     }
 
-    // @Override
-    // protected void init(AbstractPacketBuffer buffer) {
-    // super.init(buffer);
-    // T4CPacketBuffer meg = (T4CPacketBuffer) buffer;
-    // cursor = meg.unmarshalSWORD();
-    // al8i4_1 = meg.unmarshalSWORD();
-    // meg.unmarshalSWORD();
-    // meg.unmarshalSWORD();
-    // }
-    //
-    // @Override
-    // protected void write2Buffer(AbstractPacketBuffer buffer) throws UnsupportedEncodingException {
-    // // TODO Auto-generated method stub
-    // super.write2Buffer(buffer);
-    // }
+    @Override
+    protected void init(AbstractPacketBuffer buffer) {
+        super.init(buffer);
+        T4CPacketBuffer meg = (T4CPacketBuffer) buffer;
+        cursor = meg.unmarshalSWORD();
+        al8i4_1 = meg.unmarshalSWORD();
+        meg.unmarshalSWORD();
+        meg.unmarshalSWORD();
+    }
 
 }
