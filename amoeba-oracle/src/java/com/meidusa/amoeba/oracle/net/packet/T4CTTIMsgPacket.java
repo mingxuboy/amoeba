@@ -6,34 +6,6 @@ import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
 
 public abstract class T4CTTIMsgPacket extends DataPacket {
 
-    protected byte msgCode;
-
-    @Override
-    protected void init(AbstractPacketBuffer buffer) {
-        super.init(buffer);
-        T4CPacketBuffer packetBuffer = (T4CPacketBuffer) buffer;
-        msgCode = (byte) packetBuffer.unmarshalUB1();
-    }
-
-    @Override
-    protected void write2Buffer(AbstractPacketBuffer buffer) throws UnsupportedEncodingException {
-        super.write2Buffer(buffer);
-        buffer.writeByte(msgCode);
-    }
-
-    @Override
-    protected Class<? extends AbstractPacketBuffer> getBufferClass() {
-        return T4CPacketBuffer.class;
-    }
-
-    public static boolean isMsgType(byte[] buffer,byte type){
-    	if(buffer.length>11){
-    		return (buffer[10] & 0xff) == (type & 0xff);
-    	}else{
-    		return false;
-    	}
-    }
-    
     public static final byte  TTIPRO                 = 1;
     public static final byte  TTIDTY                 = 2;
     public static final byte  TTIFUN                 = 3;
@@ -67,13 +39,46 @@ public abstract class T4CTTIMsgPacket extends DataPacket {
     public static final byte  OERwITCE               = 8;
     public static final byte  OERwUDnW               = 16;
     public static final byte  OERwCPER               = 32;
-    static final byte  OERwPLEX               = 64;
-    static final short ORACLE8_PROD_VERSION   = 8030;
-    static final short ORACLE81_PROD_VERSION  = 8100;
-    static final short MIN_OVERSION_SUPPORTED = 7230;
-    static final short MIN_TTCVER_SUPPORTED   = 4;
-    static final short V8_TTCVER_SUPPORTED    = 5;
-    static final short MAX_TTCVER_SUPPORTED   = 6;
-    static final int   REFCURSOR_SIZE         = 5;
+    static final byte         OERwPLEX               = 64;
+
+    static final short        ORACLE8_PROD_VERSION   = 8030;
+    static final short        ORACLE81_PROD_VERSION  = 8100;
+    static final short        MIN_OVERSION_SUPPORTED = 7230;
+    static final short        MIN_TTCVER_SUPPORTED   = 4;
+    static final short        V8_TTCVER_SUPPORTED    = 5;
+    static final short        MAX_TTCVER_SUPPORTED   = 6;
+    static final int          REFCURSOR_SIZE         = 5;
+
+    protected byte            msgCode;
+
+    public T4CTTIMsgPacket(byte msgCode){
+        this.msgCode = msgCode;
+    }
+
+    @Override
+    protected void init(AbstractPacketBuffer buffer) {
+        super.init(buffer);
+        T4CPacketBuffer packetBuffer = (T4CPacketBuffer) buffer;
+        msgCode = (byte) packetBuffer.unmarshalUB1();
+    }
+
+    @Override
+    protected void write2Buffer(AbstractPacketBuffer buffer) throws UnsupportedEncodingException {
+        super.write2Buffer(buffer);
+        buffer.writeByte(msgCode);
+    }
+
+    @Override
+    protected Class<? extends AbstractPacketBuffer> getBufferClass() {
+        return T4CPacketBuffer.class;
+    }
+
+    public static boolean isMsgType(byte[] buffer, byte type) {
+        if (buffer.length > 11) {
+            return (buffer[10] & 0xff) == (type & 0xff);
+        } else {
+            return false;
+        }
+    }
 
 }

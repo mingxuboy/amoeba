@@ -50,6 +50,10 @@ public abstract class AbstractPacket implements Packet, OraclePacketConstant {
     protected int   dataOffset;
     protected int   packetCheckSum;
     protected int   headerCheckSum;
+    
+    public AbstractPacket(short type){
+        this.type = type;
+    }
 
     public void init(byte[] buffer,Connection conn) {
         this.buffer = buffer;

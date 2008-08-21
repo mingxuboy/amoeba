@@ -131,16 +131,18 @@ public class T4CTTIoac {
         oacmxl = meg.unmarshalSB4();
         oacmal = meg.unmarshalSB4();
         oacfl2 = meg.unmarshalSB4();
-        if (oacmxl > 0) switch (oacdty) {
-            case 2:
-                oacmxl = 22;
-                break;
-            case 12:
-                oacmxl = 7;
-                break;
-            case 181:
-                oacmxl = 13;
-                break;
+        if (oacmxl > 0) {
+            switch (oacdty) {
+                case 2:
+                    oacmxl = 22;
+                    break;
+                case 12:
+                    oacmxl = 7;
+                    break;
+                case 181:
+                    oacmxl = 13;
+                    break;
+            }
         }
         if (oacdty == 11) {
             oacdty = 104;

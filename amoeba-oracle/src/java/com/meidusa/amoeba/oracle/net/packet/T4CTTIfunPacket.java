@@ -6,39 +6,6 @@ import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
 
 public class T4CTTIfunPacket extends T4CTTIMsgPacket {
 
-    public short funCode;
-    public byte  seqNumber;
-
-    public T4CTTIfunPacket(){
-        this.msgCode = TTIFUN;
-    }
-
-    protected void init(AbstractPacketBuffer buffer) {
-        super.init(buffer);
-        if (msgCode != TTIFUN) {
-            throw new RuntimeException("Œ•∑¥–≠“È");
-        }
-        T4CPacketBuffer meg = (T4CPacketBuffer) buffer;
-        funCode = meg.unmarshalUB1();
-        seqNumber = (byte) meg.unmarshalUB1();
-    }
-
-    @Override
-    protected void write2Buffer(AbstractPacketBuffer buffer) throws UnsupportedEncodingException {
-        super.write2Buffer(buffer);
-        T4CPacketBuffer meg = (T4CPacketBuffer) buffer;
-        meg.marshalUB1(funCode);
-        meg.marshalUB1(seqNumber);
-    }
-
-    public static boolean isFunType(byte[] buffer, short type) {
-        if (buffer == null || buffer.length <= 12) {
-            return false;
-        } else {
-            return isMsgType(buffer, TTIFUN) && ((buffer[11] & 0xff) == (type & 0xff));
-        }
-    }
-
     public static final short OOPEN     = 2;
     public static final short OEXEC     = 4;
     public static final short OFETCH    = 5;
@@ -71,4 +38,45 @@ public class T4CTTIfunPacket extends T4CTTIMsgPacket {
     public static final short OSCID     = 135;
     public static final short OKPFC     = 139;
     public static final short OKEYVAL   = 154;
+
+    public short              funCode;
+    public byte               seqNumber;
+
+    public T4CTTIfunPacket(short funCode){
+        this(funCode, (byte) 0);
+    }
+
+    public T4CTTIfunPacket(short funCode, byte seqNumber){
+        this(TTIFUN, funCode, seqNumber);
+    }
+
+    public T4CTTIfunPacket(byte msgCode, short funCode, byte seqNumber){
+        super(msgCode);
+        this.funCode = funCode;
+        this.seqNumber = seqNumber;
+    }
+
+    protected void init(AbstractPacketBuffer buffer) {
+        super.init(buffer);
+        T4CPacketBuffer meg = (T4CPacketBuffer) buffer;
+        funCode = meg.unmarshalUB1();
+        seqNumber = (byte) meg.unmarshalUB1();
+    }
+
+    @Override
+    protected void write2Buffer(AbstractPacketBuffer buffer) throws UnsupportedEncodingException {
+        super.write2Buffer(buffer);
+        T4CPacketBuffer meg = (T4CPacketBuffer) buffer;
+        meg.marshalUB1(funCode);
+        meg.marshalUB1(seqNumber);
+    }
+
+    public static boolean isFunType(byte[] buffer, short type) {
+        if (buffer == null || buffer.length <= 12) {
+            return false;
+        } else {
+            return isMsgType(buffer, TTIFUN) && ((buffer[11] & 0xff) == (type & 0xff));
+        }
+    }
+
 }

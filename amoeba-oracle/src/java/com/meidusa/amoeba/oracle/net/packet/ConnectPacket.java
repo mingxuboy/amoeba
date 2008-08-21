@@ -18,6 +18,10 @@ public class ConnectPacket extends AbstractPacket {
     public boolean             anoEnabled;
     public String              data;
 
+    public ConnectPacket(){
+        super(NS_PACKT_TYPE_CONNECT);
+    }
+
     @Override
     public void init(byte[] buffer, Connection conn) {
         super.init(buffer, conn);
@@ -46,10 +50,9 @@ public class ConnectPacket extends AbstractPacket {
 
     @Override
     protected void write2Buffer(AbstractPacketBuffer absbuffer) throws UnsupportedEncodingException {
+        super.write2Buffer(absbuffer);
         OracleAbstractPacketBuffer buffer = (OracleAbstractPacketBuffer) absbuffer;
-        this.type = SQLnetDef.NS_PACKT_TYPE_CONNECT;
         dataOffset = 34;
-        super.write2Buffer(buffer);
         buffer.writeBytes(CONSTANT_CONNECT_BYTES);
         buffer.writeUB2(sduSize);// postion = 14;
         buffer.writeUB2(tduSize);
@@ -80,7 +83,4 @@ public class ConnectPacket extends AbstractPacket {
 
     }
 
-    protected Class<? extends AbstractPacketBuffer> getBufferClass() {
-        return AnoPacketBuffer.class;
-    }
 }

@@ -13,19 +13,23 @@ import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
  */
 public class AcceptPacket extends AbstractPacket {
 
-    private static Logger logger = Logger.getLogger(AcceptPacket.class);
+    private static Logger logger        = Logger.getLogger(AcceptPacket.class);
 
-    protected int         version = 308;
-    protected int         options = 0 ;
-    protected int         sduSize = NSPDFSDULN;
-    protected int         tduSize = NSPMXSDULN;
+    protected int         version       = 308;
+    protected int         options       = 0;
+    protected int         sduSize       = NSPDFSDULN;
+    protected int         tduSize       = NSPMXSDULN;
     protected int         myHWByteOrder = 256;
-    protected byte         flag0 = 69;
-    protected byte         flag1 = 0;
+    protected byte        flag0         = 69;
+    protected byte        flag1         = 0;
+
+    public AcceptPacket(){
+        super(NS_PACKT_TYPE_ACCEPT);
+    }
 
     @Override
-    public void init(byte[] buffer,Connection conn) {
-        super.init(buffer,conn);
+    public void init(byte[] buffer, Connection conn) {
+        super.init(buffer, conn);
         version = buffer[8] & 0xff;
         version <<= 8;
         version |= buffer[9] & 0xff;
@@ -54,20 +58,20 @@ public class AcceptPacket extends AbstractPacket {
             logger.debug(this.toString());
         }
     }
-    
+
     @Override
     protected void write2Buffer(AbstractPacketBuffer absbuffer) throws UnsupportedEncodingException {
-    	OracleAbstractPacketBuffer buffer =(OracleAbstractPacketBuffer) absbuffer;
-    	super.write2Buffer(buffer);
-    	buffer.writeUB2(version);
-    	buffer.writeUB2(options);
-    	buffer.writeUB2(sduSize);
-    	buffer.writeUB2(tduSize);
-    	buffer.writeUB2(myHWByteOrder);
-    	buffer.writeUB2(0);
-    	buffer.writeUB2(dataOffset);
-    	buffer.writeUB1(flag0);
-    	buffer.writeUB1(flag1);
+        OracleAbstractPacketBuffer buffer = (OracleAbstractPacketBuffer) absbuffer;
+        super.write2Buffer(buffer);
+        buffer.writeUB2(version);
+        buffer.writeUB2(options);
+        buffer.writeUB2(sduSize);
+        buffer.writeUB2(tduSize);
+        buffer.writeUB2(myHWByteOrder);
+        buffer.writeUB2(0);
+        buffer.writeUB2(dataOffset);
+        buffer.writeUB1(flag0);
+        buffer.writeUB1(flag1);
     }
 
     public String toString() {
@@ -83,9 +87,9 @@ public class AcceptPacket extends AbstractPacket {
         return sb.toString();
     }
 
-	@Override
-	protected Class<? extends AbstractPacketBuffer> getBufferClass() {
-		return AnoPacketBuffer.class;
-	}
+    @Override
+    protected Class<? extends AbstractPacketBuffer> getBufferClass() {
+        return AnoPacketBuffer.class;
+    }
 
 }

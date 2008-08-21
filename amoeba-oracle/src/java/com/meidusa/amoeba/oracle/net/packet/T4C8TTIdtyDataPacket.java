@@ -20,7 +20,7 @@ public class T4C8TTIdtyDataPacket extends T4CTTIMsgPacket {
 	public byte	cliFlags = 0;
 
 	public T4C8TTIdtyDataPacket(){
-		this.msgCode = TTIDTY;
+	    super(TTIDTY);
 	}
 	
 	@Override

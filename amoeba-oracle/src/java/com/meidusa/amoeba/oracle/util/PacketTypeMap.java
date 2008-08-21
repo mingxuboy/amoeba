@@ -7,7 +7,7 @@ import com.meidusa.amoeba.oracle.net.packet.SQLnetDef;
 
 public class PacketTypeMap {
 
-    private static Map<Integer, String> map = new HashMap<Integer, String>();
+    private static Map<Short, String> map = new HashMap<Short, String>();
 
     static {
         map.put(SQLnetDef.NS_PACKT_TYPE_CONNECT, "NS_PACKT_TYPE_CONNECT");

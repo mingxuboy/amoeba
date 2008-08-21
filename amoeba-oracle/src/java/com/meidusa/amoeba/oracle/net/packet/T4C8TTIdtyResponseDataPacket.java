@@ -57,8 +57,9 @@ public class T4C8TTIdtyResponseDataPacket extends T4CTTIMsgPacket {
 		,(byte)0x00,(byte)0xe8,(byte)0xe7,(byte)0x01,(byte)0x00,(byte)0xe9,(byte)0x00,(byte)0xf0,(byte)0x00,(byte)0xf1,(byte)0x6d,(byte)0x01,(byte)0x00,(byte)0xf3,(byte)0x00,(byte)0x00	
 	};
 	public boolean typeValid;
+	
 	public T4C8TTIdtyResponseDataPacket(){
-		this.msgCode = TTIDTY;
+	    super(TTIDTY);
 	}
 	
 	protected void init(AbstractPacketBuffer buffer) {
