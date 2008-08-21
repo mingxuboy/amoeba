@@ -1,7 +1,5 @@
 package com.meidusa.amoeba.oracle.net.packet;
 
-import java.io.UnsupportedEncodingException;
-
 import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
 import com.meidusa.amoeba.oracle.accessor.Accessor;
 
@@ -44,40 +42,44 @@ public class T4C8OallDataPacket extends T4CTTIfunPacket {
     @Override
     protected void init(AbstractPacketBuffer buffer) {
         super.init(buffer);
-        if (funCode == OFETCH) {
-            ofetch = new T4CTTIofetchDataPacket();
-            // ofetch.init(buffer);
-            this.cursor = ofetch.cursor;
-            this.al8i4[1] = ofetch.al8i4_1;
-        } else if (funCode == OEXEC) {
-            oexec = new T4CTTIoexecDataPacket();
-            this.cursor = oexec.cursor;
-            this.al8i4[1] = oexec.al8i4_1;
-            // int[] binds = null;
-            // TODO ...
-            throw new RuntimeException("is not yet support");
-        } else if (funCode == OALL8) {
-            T4CPacketBuffer meg = (T4CPacketBuffer) buffer;
+        if (msgCode == TTIFUN) {
+            if (funCode == OFETCH) {
+                ofetch = new T4CTTIofetchDataPacket();
+                // ofetch.init(buffer);
+                this.cursor = ofetch.cursor;
+                this.al8i4[1] = ofetch.al8i4_1;
+            } else if (funCode == OEXEC) {
+                oexec = new T4CTTIoexecDataPacket();
+                this.cursor = oexec.cursor;
+                this.al8i4[1] = oexec.al8i4_1;
+                // int[] binds = null;
+                // TODO ...
+                throw new RuntimeException("is not yet support");
+            } else if (funCode == OALL8) {
+                T4CPacketBuffer meg = (T4CPacketBuffer) buffer;
 
-            unmarshalPisdef(meg);
+                unmarshalPisdef(meg);
 
-            sqlStmt = meg.unmarshalCHR(sqlStmtLength);
+                sqlStmt = meg.unmarshalCHR(sqlStmtLength);
 
-            meg.unmarshalUB4Array(al8i4);
+                meg.unmarshalUB4Array(al8i4);
 
-            unmarshalBindsTypes(meg);
+                unmarshalBindsTypes(meg);
 
-            if (T4CPacketBuffer.versionNumber >= 9000 && defCols > 0) {
-                oacdefDefines = new T4CTTIoac[defCols];
-                for (int i = 0; i < defCols; i++) {
-                    oacdefDefines[i] = new T4CTTIoac(meg);
-                    oacdefDefines[i].unmarshal();
+                if (T4CPacketBuffer.versionNumber >= 9000 && defCols > 0) {
+                    oacdefDefines = new T4CTTIoac[defCols];
+                    for (int i = 0; i < defCols; i++) {
+                        oacdefDefines[i] = new T4CTTIoac(meg);
+                        oacdefDefines[i].unmarshal();
+                    }
                 }
-            }
 
-            unmarshalBinds(meg);
-        } else {
-            throw new RuntimeException("违反协议");
+                unmarshalBinds(meg);
+            } else {
+                throw new RuntimeException("违反协议");
+            }
+        } else if (msgCode == TTIPFN) {
+
         }
 
     }
@@ -468,11 +470,6 @@ public class T4C8OallDataPacket extends T4CTTIfunPacket {
         }
 
         // colNameSB = null;
-    }
-
-    @Override
-    protected void write2Buffer(AbstractPacketBuffer buffer) throws UnsupportedEncodingException {
-        super.write2Buffer(buffer);
     }
 
 }
