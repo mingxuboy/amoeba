@@ -40,8 +40,9 @@ public class T4CTTIoAuthDataPacket extends T4CTTIfunPacket {
 	public String sysUserName;
 	public short versionNumber;
 	Map<String,String> map = null;
+	
     public T4CTTIoAuthDataPacket(){
-        this.funCode = OAUTH;
+        super(OAUTH);
         initFields();
     }
 

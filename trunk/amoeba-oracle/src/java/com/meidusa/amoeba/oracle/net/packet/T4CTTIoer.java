@@ -1,40 +1,40 @@
 package com.meidusa.amoeba.oracle.net.packet;
 
-public class T4CTTIoer extends T4CTTIMsgPacket {
+public class T4CTTIoer {
 
     final int       MAXERRBUF = 512;
 
     T4CPacketBuffer meg;
-    public short           endToEndECIDSequenceNumber;
-    public long            curRowNumber;
-    public int             retCode;
-    public int             arrayElemWError;
-    public int             arrayElemErrno;
-    public int             currCursorID;
-    public short           errorPosition;
-    public short           sqlType;
-    public byte            oerFatal;
-    public short           flags;
-    public short           userCursorOpt;
-    public short           upiParam;
-    public short           warningFlag;
-    public int             osError;
-    public short           stmtNumber;
-    public short           callNumber;
-    public int             pad1;
-    public long            successIters;
-    public int             partitionId;
-    public short           tableId;
-    public int             slotNumber;
-    public long            rba;
-    public long            blockNumber;
-    public int             warnLength;
-    public int             warnFlag;
-    public int[]           errorLength;
-    public byte[]          errorMsg;
+    public short    endToEndECIDSequenceNumber;
+    public long     curRowNumber;
+    public int      retCode;
+    public int      arrayElemWError;
+    public int      arrayElemErrno;
+    public int      currCursorID;
+    public short    errorPosition;
+    public short    sqlType;
+    public byte     oerFatal;
+    public short    flags;
+    public short    userCursorOpt;
+    public short    upiParam;
+    public short    warningFlag;
+    public int      osError;
+    public short    stmtNumber;
+    public short    callNumber;
+    public int      pad1;
+    public long     successIters;
+    public int      partitionId;
+    public short    tableId;
+    public int      slotNumber;
+    public long     rba;
+    public long     blockNumber;
+    public int      warnLength;
+    public int      warnFlag;
+    public int[]    errorLength;
+    public byte[]   errorMsg;
 
-    public T4CTTIoer(T4CPacketBuffer buffer){
-        this.meg = buffer;
+    public T4CTTIoer(T4CPacketBuffer meg){
+        this.meg = meg;
         warnLength = 0;
         warnFlag = 0;
         errorLength = new int[1];

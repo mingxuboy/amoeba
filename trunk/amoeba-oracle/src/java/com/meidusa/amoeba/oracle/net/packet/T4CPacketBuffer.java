@@ -114,6 +114,13 @@ public class T4CPacketBuffer extends OracleAbstractPacketBuffer implements Oracl
         }
     }
 
+    void unmarshalUB4Array(long[] al) {
+        for (int i = 0; i < al.length; i++) {
+            long l = unmarshalSB4() & -1L;
+            al[i] = l;
+        }
+    }
+
     void marshalO2U(boolean flag) {
         if (flag) {
             marshalPTR();
@@ -286,10 +293,8 @@ public class T4CPacketBuffer extends OracleAbstractPacketBuffer implements Oracl
         return unmarshalUB4();
     }
 
-    int unmarshalPTR(byte[] ab) {
-        int len = readPtr();
-        ab = tmpBuffer4;
-        return len;
+    int unmarshalPTR() {
+        return readPtr();
     }
 
     byte[] unmarshalArrayWithNull() {
@@ -645,7 +650,7 @@ public class T4CPacketBuffer extends OracleAbstractPacketBuffer implements Oracl
 
     private int readPtr() {
         if ((getTypeRep().getRep(4) & 1) > 0) {
-            tmpBuffer4[0] = readByte();
+            readByte();
             return 1;
         } else {
             readBytes(tmpBuffer4, 0, tmpBuffer4.length);

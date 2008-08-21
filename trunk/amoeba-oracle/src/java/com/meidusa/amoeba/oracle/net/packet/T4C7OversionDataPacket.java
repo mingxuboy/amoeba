@@ -19,6 +19,10 @@ public class T4C7OversionDataPacket extends T4CTTIfunPacket {
 	public int                         retVerLen = 0;
 	public boolean                     retVerNumO2U = true;
 	public long                        retVerNum = 0L;
+	
+	public T4C7OversionDataPacket(){
+	    super(OVERSION);
+	}
     
     @Override
     protected void init(AbstractPacketBuffer buffer) {

@@ -22,7 +22,7 @@ public class T4CTTIoAuthKeyDataPacket extends T4CTTIfunPacket implements T4CTTIo
     String sid        = null;
 
     public T4CTTIoAuthKeyDataPacket(){
-        this.funCode = OSESSKEY;
+        super(OSESSKEY);
     }
 
     @Override

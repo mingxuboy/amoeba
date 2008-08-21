@@ -23,14 +23,11 @@ public class T4C8TTIproDataPacket extends T4CTTIMsgPacket {
     String proCliStrTTC8 = "Java_TTC-8.2.0";
 
     public T4C8TTIproDataPacket(){
-        this.msgCode = TTIPRO;
+        super(TTIPRO);
     }
 
     protected void init(AbstractPacketBuffer absbuffer) {
         super.init(absbuffer);
-        if (msgCode != TTIPRO) {
-            throw new RuntimeException("Œ•∑¥–≠“È");
-        }
         T4CPacketBuffer meg = (T4CPacketBuffer) absbuffer;
         proCliVerTTC8 = meg.unmarshalTEXT(10);
         proCliStrTTC8 = new String(meg.unmarshalTEXT(50));

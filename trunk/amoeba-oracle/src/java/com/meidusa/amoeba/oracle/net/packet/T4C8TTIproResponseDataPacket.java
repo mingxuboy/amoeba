@@ -27,14 +27,11 @@ public class T4C8TTIproResponseDataPacket extends T4CTTIMsgPacket {
     private byte[] as1              = null;
 
     public T4C8TTIproResponseDataPacket(){
-        this.msgCode = TTIPRO;
+        super(TTIPRO);
     }
 
     protected void init(AbstractPacketBuffer absbuffer) {
-        super.init(absbuffer);
-        if (msgCode != TTIPRO) {
-            throw new RuntimeException("Œ•∑¥–≠“È");
-        }
+        super.init(absbuffer);       
         T4CPacketBuffer meg = (T4CPacketBuffer) absbuffer;
         proSvrVer = meg.unmarshalSB1();
         switch (proSvrVer) {

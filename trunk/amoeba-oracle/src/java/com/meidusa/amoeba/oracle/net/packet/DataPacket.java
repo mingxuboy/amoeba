@@ -13,7 +13,7 @@ public abstract class DataPacket extends AbstractPacket {
     protected int dataFlags;
 
     public DataPacket(){
-        this.type = NS_PACKT_TYPE_DATA;
+        super(NS_PACKT_TYPE_DATA);
     }
 
 //    public void init(byte[] buffer) {
