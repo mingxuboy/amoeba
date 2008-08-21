@@ -12,7 +12,6 @@ import com.meidusa.amoeba.oracle.net.packet.AcceptPacket;
 import com.meidusa.amoeba.oracle.net.packet.AnoResponseDataPacket;
 import com.meidusa.amoeba.oracle.net.packet.ConnectPacket;
 import com.meidusa.amoeba.oracle.net.packet.Packet;
-import com.meidusa.amoeba.oracle.net.packet.ResendPacket;
 import com.meidusa.amoeba.oracle.net.packet.SQLnetDef;
 import com.meidusa.amoeba.oracle.net.packet.T4C7OversionDataPacket;
 import com.meidusa.amoeba.oracle.net.packet.T4C7OversionResponseDataPacket;
@@ -20,6 +19,7 @@ import com.meidusa.amoeba.oracle.net.packet.T4C8TTIdtyDataPacket;
 import com.meidusa.amoeba.oracle.net.packet.T4C8TTIdtyResponseDataPacket;
 import com.meidusa.amoeba.oracle.net.packet.T4C8TTIproDataPacket;
 import com.meidusa.amoeba.oracle.net.packet.T4C8TTIproResponseDataPacket;
+import com.meidusa.amoeba.oracle.net.packet.T4CTTIMsgPacket;
 import com.meidusa.amoeba.oracle.net.packet.T4CTTIfunPacket;
 import com.meidusa.amoeba.oracle.net.packet.T4CTTIoAuthDataPacket;
 import com.meidusa.amoeba.oracle.net.packet.T4CTTIoAuthKeyDataPacket;
@@ -27,14 +27,15 @@ import com.meidusa.amoeba.oracle.net.packet.T4CTTIoAuthKeyResponseDataPacket;
 import com.meidusa.amoeba.oracle.util.ByteUtil;
 
 public class OracleClientConnection extends OracleConnection implements SQLnetDef {
-	private static Logger  logger         = Logger.getLogger(OracleClientConnection.class);
-    private String     defaultPoolName = null;
-    private ObjectPool pool            = null;
-    private int        msgCount        = 0;
-    private int            clientMsgCount = 0;
-    private byte[] encryptedSK;
-    private Packet         lastPackt      = null;
-    
+
+    private static Logger logger          = Logger.getLogger(OracleClientConnection.class);
+    private String        defaultPoolName = null;
+    private ObjectPool    pool            = null;
+    private int           msgCount        = 0;
+    private int           clientMsgCount  = 0;
+    private byte[]        encryptedSK;
+    private Packet        lastPackt       = null;
+
     public OracleClientConnection(SocketChannel channel, long createStamp){
         super(channel, createStamp);
         defaultPoolName = OracleProxyRuntimeContext.getInstance().getQueryRouter().getDefaultPool();
@@ -43,8 +44,8 @@ public class OracleClientConnection extends OracleConnection implements SQLnetDe
     }
 
     public void handleMessage(Connection conn, byte[] message) {
-    	OracleClientConnection clientConn  = (OracleClientConnection)conn;
-    	clientMsgCount++;
+        OracleClientConnection clientConn = (OracleClientConnection) conn;
+        clientMsgCount++;
         Packet packet = null;
         Packet response = null;
         switch (message[4]) {
@@ -57,29 +58,29 @@ public class OracleClientConnection extends OracleConnection implements SQLnetDe
                 break;
             case NS_PACKT_TYPE_DATA:
                 if (clientMsgCount <= 9) {
-                    if (T4CTTIfunPacket.isMsgType(message, T4CTTIfunPacket.TTIPRO)) {
+                    if (T4CTTIMsgPacket.isMsgType(message, T4CTTIMsgPacket.TTIPRO)) {
                         packet = new T4C8TTIproDataPacket();
                         packet.init(message, conn);
                         response = new T4C8TTIproResponseDataPacket();
-                        
-                    } else if (T4CTTIfunPacket.isMsgType(message, T4CTTIfunPacket.TTIDTY)) {
+
+                    } else if (T4CTTIMsgPacket.isMsgType(message, T4CTTIMsgPacket.TTIDTY)) {
                         packet = new T4C8TTIdtyDataPacket();
                         packet.init(message, conn);
                         response = new T4C8TTIdtyResponseDataPacket();
-                        
+
                     } else if (T4CTTIfunPacket.isFunType(message, T4CTTIfunPacket.OVERSION)) {
                         packet = new T4C7OversionDataPacket();
                         packet.init(message, conn);
                         response = new T4C7OversionResponseDataPacket();
-                        
+
                     } else if (T4CTTIfunPacket.isFunType(message, T4CTTIfunPacket.OSESSKEY)) {
                         packet = new T4CTTIoAuthKeyDataPacket();
                         packet.init(message, conn);
                         response = new T4CTTIoAuthKeyResponseDataPacket();
-                        
-                    }else if(T4CTTIfunPacket.isFunType(message, T4CTTIfunPacket.OAUTH)){
-                    	packet = new T4CTTIoAuthDataPacket();
-                    	((T4CTTIoAuthDataPacket)packet).encryptedSK = this.encryptedSK;
+
+                    } else if (T4CTTIfunPacket.isFunType(message, T4CTTIfunPacket.OAUTH)) {
+                        packet = new T4CTTIoAuthDataPacket();
+                        ((T4CTTIoAuthDataPacket) packet).encryptedSK = this.encryptedSK;
                     }
                 }
                 break;
@@ -92,34 +93,35 @@ public class OracleClientConnection extends OracleConnection implements SQLnetDe
                 System.out.println("packet:" + packet);
                 System.out.println("##source:" + ByteUtil.toHex(message, 0, message.length));
             }
-            
-            //if(!(packet instanceof T4CTTIoAuthDataPacket)){
-            	message = packet.toByteBuffer(conn).array();
-            //}
+
+            // if(!(packet instanceof T4CTTIoAuthDataPacket)){
+            message = packet.toByteBuffer(conn).array();
+            // }
             if (logger.isDebugEnabled()) {
                 System.out.println("#warpped:" + ByteUtil.toHex(message, 0, message.length));
                 System.out.println();
             }
             lastPackt = packet;
         }
-    	
+
         msgCount++;
 
         if (msgCount == 1) {
             if (message[4] == Packet.NS_PACKT_TYPE_CONNECT) {
-            	ConnectPacket connPacket = new ConnectPacket();
-            	connPacket.init(message,conn);
-            	clientConn.setAnoEnabled(connPacket.anoEnabled);
+                ConnectPacket connPacket = new ConnectPacket();
+                connPacket.init(message, conn);
+                clientConn.setAnoEnabled(connPacket.anoEnabled);
                 packet = new AcceptPacket();
             } else {
                 throw new RuntimeException("Error data packet.");
             }
-        }if(msgCount ==2){
-        	if(clientConn.isAnoEnabled()){
-        		packet = new AnoResponseDataPacket(); 
-        	}else{
-        		
-        	}
+        }
+        if (msgCount == 2) {
+            if (clientConn.isAnoEnabled()) {
+                packet = new AnoResponseDataPacket();
+            } else {
+
+            }
         }
         // ...
 

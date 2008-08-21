@@ -2,7 +2,6 @@ package com.meidusa.amoeba.oracle.net.packet;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Vector;
 
 import com.meidusa.amoeba.oracle.io.OraclePacketConstant;
