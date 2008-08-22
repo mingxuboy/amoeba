@@ -1,6 +1,5 @@
 package com.meidusa.amoeba.oracle.net.packet;
 
-import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.util.Date;
 import java.util.HashMap;
@@ -46,28 +45,10 @@ public class T4CTTIoAuthDataPacket extends T4CTTIfunPacket implements T4CTTIoAut
     }
 
     @Override
-    protected void init(AbstractPacketBuffer buffer) {
-        super.init(buffer);
-        T4CPacketBuffer meg = (T4CPacketBuffer) buffer;
-        meg.unmarshalUB1();
-        userLength = meg.unmarshalSB4();
-        LOGON_MODE = meg.unmarshalUB4();
-        meg.unmarshalUB1();
-        long keyValuePaire = meg.unmarshalUB4();
-        meg.unmarshalUB1();
-        meg.unmarshalUB1();
-        userStr = new String(meg.unmarshalCHR(userLength));
-        map = meg.unmarshalMap((int) keyValuePaire);
-        for (Map.Entry<String, String> entry : map.entrySet()) {
-            System.out.println(entry.getKey());
-        }
-    }
+    protected void marshal(AbstractPacketBuffer buffer) {
+        super.marshal(buffer);
 
-    @Override
-    protected void write2Buffer(AbstractPacketBuffer buffer) throws UnsupportedEncodingException {
-        super.write2Buffer(buffer);
         T4CPacketBuffer meg = (T4CPacketBuffer) buffer;
-
         O3LoginClientHelper o3loginclienthelper = new O3LoginClientHelper(meg.getConversion().isServerCSMultiByte);
         byte abyte2[] = o3loginclienthelper.getSessionKey(userStr, passwordStr, encryptedSK);
         byte abyte0[] = meg.getConversion().StringToCharBytes(passwordStr);
@@ -126,7 +107,24 @@ public class T4CTTIoAuthDataPacket extends T4CTTIfunPacket implements T4CTTIoAut
          * abyte4[j] = meg.getConversion().StringToCharBytes("AUTH_COPYRIGHT"); abyte5[j++] =
          * meg.getConversion().StringToCharBytes(copyright); meg.marshalKEYVAL(abyte4, abyte5, abyte6, i);
          */
+    }
 
+    @Override
+    protected void unmarshal(AbstractPacketBuffer buffer) {
+        super.unmarshal(buffer);
+        T4CPacketBuffer meg = (T4CPacketBuffer) buffer;
+        meg.unmarshalUB1();
+        userLength = meg.unmarshalSB4();
+        LOGON_MODE = meg.unmarshalUB4();
+        meg.unmarshalUB1();
+        long keyValuePaire = meg.unmarshalUB4();
+        meg.unmarshalUB1();
+        meg.unmarshalUB1();
+        userStr = new String(meg.unmarshalCHR(userLength));
+        map = meg.unmarshalMap((int) keyValuePaire);
+        for (Map.Entry<String, String> entry : map.entrySet()) {
+            System.out.println(entry.getKey());
+        }
     }
 
     private Map<String, String> generateMap() {

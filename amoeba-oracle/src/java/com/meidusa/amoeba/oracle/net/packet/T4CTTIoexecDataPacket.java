@@ -16,8 +16,8 @@ public class T4CTTIoexecDataPacket extends T4CTTIfunPacket {
     }
 
     @Override
-    protected void init(AbstractPacketBuffer buffer) {
-        super.init(buffer);
+    protected void unmarshal(AbstractPacketBuffer buffer) {
+        super.unmarshal(buffer);
         T4CPacketBuffer meg = (T4CPacketBuffer) buffer;
         cursor = meg.unmarshalSWORD();
         al8i4_1 = meg.unmarshalSWORD();

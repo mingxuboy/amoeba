@@ -58,14 +58,29 @@ public abstract class T4CTTIMsgPacket extends DataPacket {
     @Override
     protected void init(AbstractPacketBuffer buffer) {
         super.init(buffer);
-        T4CPacketBuffer packetBuffer = (T4CPacketBuffer) buffer;
-        msgCode = (byte) packetBuffer.unmarshalUB1();
+        unmarshal(buffer);
+    }
+
+    /**
+     * 不包含头的消息解析
+     */
+    protected void unmarshal(AbstractPacketBuffer buffer) {
+        T4CPacketBuffer meg = (T4CPacketBuffer) buffer;
+        msgCode = (byte) meg.unmarshalUB1();
     }
 
     @Override
     protected void write2Buffer(AbstractPacketBuffer buffer) throws UnsupportedEncodingException {
         super.write2Buffer(buffer);
-        buffer.writeByte(msgCode);
+        marshal(buffer);
+    }
+
+    /**
+     * 不包含头的消息封装
+     */
+    protected void marshal(AbstractPacketBuffer buffer) {
+        T4CPacketBuffer meg = (T4CPacketBuffer) buffer;
+        meg.marshalUB1(msgCode);
     }
 
     @Override

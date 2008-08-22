@@ -1,7 +1,5 @@
 package com.meidusa.amoeba.oracle.net.packet;
 
-import java.io.UnsupportedEncodingException;
-
 import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
 
 /**
@@ -12,24 +10,33 @@ import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
  */
 public class T4C7OversionDataPacket extends T4CTTIfunPacket {
 
-	public byte                        rdbmsVersion[]                              = { 78, 111, 116, 32, 100, 101, 116, 101, 114, 109, 105, 110, 101, 100, 32, 121, 101, 116 };
-	public boolean                     rdbmsVersionO2U = true;
-	public int                         bufLen = 256;
-	public boolean                     retVerLenO2U = true;
-	public int                         retVerLen = 0;
-	public boolean                     retVerNumO2U = true;
-	public long                        retVerNum = 0L;
-	
-	public T4C7OversionDataPacket(){
-	    super(OVERSION);
-	}
-    
+	public byte    rdbmsVersion[]  = { 78, 111, 116, 32, 100, 101, 116, 101, 114, 109, 105, 110, 101, 100, 32, 121, 101, 116 };
+    public boolean rdbmsVersionO2U = true;
+    public int     bufLen          = 256;
+    public boolean retVerLenO2U    = true;
+    public int     retVerLen       = 0;
+    public boolean retVerNumO2U    = true;
+    public long    retVerNum       = 0L;
+
+    public T4C7OversionDataPacket(){
+        super(OVERSION);
+    }
+
     @Override
-    protected void init(AbstractPacketBuffer buffer) {
-        super.init(buffer);
-        
-        T4CPacketBuffer meg = (T4CPacketBuffer)buffer;
-        //rdbmsVersionO2U = meg.unmarshalO2U();
+    protected void marshal(AbstractPacketBuffer buffer) {
+        super.marshal(buffer);
+        T4CPacketBuffer meg = (T4CPacketBuffer) buffer;
+        meg.marshalO2U(rdbmsVersionO2U);
+        meg.marshalSWORD(bufLen);
+        meg.marshalO2U(retVerLenO2U);
+        meg.marshalO2U(retVerNumO2U);
+    }
+
+    @Override
+    protected void unmarshal(AbstractPacketBuffer buffer) {
+        super.unmarshal(buffer);
+        T4CPacketBuffer meg = (T4CPacketBuffer) buffer;
+        // rdbmsVersionO2U = meg.unmarshalO2U();
         meg.marshalSWORD(bufLen);
         meg.marshalO2U(retVerLenO2U);
         meg.marshalO2U(retVerNumO2U);
@@ -70,17 +77,6 @@ public class T4C7OversionDataPacket extends T4CTTIfunPacket {
             }
             break;
         }*/
-    }
-
-    @Override
-    protected void write2Buffer(AbstractPacketBuffer buffer) throws UnsupportedEncodingException {
-        super.write2Buffer(buffer);
-        T4CPacketBuffer meg = (T4CPacketBuffer)buffer;
-        meg.marshalO2U(rdbmsVersionO2U);
-        meg.marshalSWORD(bufLen);
-        meg.marshalO2U(retVerLenO2U);
-        meg.marshalO2U(retVerNumO2U);
-        
-    }
+    }  
 
 }

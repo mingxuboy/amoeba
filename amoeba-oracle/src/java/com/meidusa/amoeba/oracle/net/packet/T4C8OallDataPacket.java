@@ -40,8 +40,8 @@ public class T4C8OallDataPacket extends T4CTTIfunPacket {
     }
 
     @Override
-    protected void init(AbstractPacketBuffer buffer) {
-        super.init(buffer);
+    protected void unmarshal(AbstractPacketBuffer buffer) {
+        super.unmarshal(buffer);
         if (msgCode == TTIFUN) {
             if (funCode == OFETCH) {
                 ofetch = new T4CTTIofetchDataPacket();
@@ -81,7 +81,6 @@ public class T4C8OallDataPacket extends T4CTTIfunPacket {
         } else if (msgCode == TTIPFN) {
 
         }
-
     }
 
     @SuppressWarnings("unused")
