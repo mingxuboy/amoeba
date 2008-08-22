@@ -42,7 +42,6 @@ import com.meidusa.amoeba.oracle.io.OraclePacketConstant;
  */
 public abstract class AbstractPacket implements Packet, OraclePacketConstant {
 
-    private byte[]  buffer;
     protected int   length;
     protected short type;
     protected short flags;
@@ -50,26 +49,25 @@ public abstract class AbstractPacket implements Packet, OraclePacketConstant {
     protected int   dataOffset;
     protected int   packetCheckSum;
     protected int   headerCheckSum;
-    
+
+    private byte[]  buffer;
+
     public AbstractPacket(short type){
         this.type = type;
     }
 
-    public void init(byte[] buffer,Connection conn) {
+    public void init(byte[] buffer, Connection conn) {
         this.buffer = buffer;
-        AbstractPacketBuffer packetbuffer = null;
-        try {
-        	Constructor<? extends AbstractPacketBuffer> constractor = getBufferClass().getConstructor(byte[].class);
-        	packetbuffer = constractor.newInstance(buffer);
-        	packetbuffer.init(conn);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-        init(packetbuffer);
+        AbstractPacketBuffer packetBuffer = constractorBuffer(buffer);
+        packetBuffer.init(conn);
+        init(packetBuffer);
     }
 
+    /**
+     * 包含头的消息解析
+     */
     protected void init(AbstractPacketBuffer buffer) {
-    	OracleAbstractPacketBuffer oracleBuffer = (OracleAbstractPacketBuffer)buffer;
+        OracleAbstractPacketBuffer oracleBuffer = (OracleAbstractPacketBuffer) buffer;
         length = oracleBuffer.readUB2();
         packetCheckSum = oracleBuffer.readUB2();
         type = oracleBuffer.readUB1();
@@ -77,15 +75,35 @@ public abstract class AbstractPacket implements Packet, OraclePacketConstant {
         headerCheckSum = oracleBuffer.readUB2();
     }
 
-    /**
-     * 将数据包转化成ByteBuffer
-     */
     public ByteBuffer toByteBuffer(Connection conn) {
         try {
-            return toBuffer(conn).toByteBuffer();
+            int bufferSize = calculatePacketSize();
+            bufferSize = (bufferSize < (DATA_OFFSET + 1) ? (DATA_OFFSET + 1) : bufferSize);
+            AbstractPacketBuffer packetBuffer = constractorBuffer(bufferSize);
+            packetBuffer.init(conn);
+            return toBuffer(packetBuffer).toByteBuffer();
         } catch (UnsupportedEncodingException e) {
             return null;
         }
+    }
+
+    /**
+     * <pre>
+     *  该方法调用了{@link #write2Buffer(PacketBuffer)} 写入到指定的buffer， 
+     *  并且调用了{@link #afterPacketWritten(PacketBuffer)}
+     * </pre>
+     */
+    private AbstractPacketBuffer toBuffer(AbstractPacketBuffer buffer) throws UnsupportedEncodingException {
+        write2Buffer(buffer);
+        afterPacketWritten(buffer);
+        return buffer;
+    }
+
+    /**
+     * 包含头的消息封装
+     */
+    protected void write2Buffer(AbstractPacketBuffer buffer) throws UnsupportedEncodingException {
+        buffer.setPosition(HEADER_SIZE);
     }
 
     /**
@@ -95,50 +113,14 @@ public abstract class AbstractPacket implements Packet, OraclePacketConstant {
         int position = buffer.getPosition();
         int packetLength = position;
         buffer.setPosition(0);
-        OracleAbstractPacketBuffer oracleBuffer = (OracleAbstractPacketBuffer)buffer;
-    	oracleBuffer.writeUB2(packetLength);
-    	oracleBuffer.writeUB2(packetCheckSum);
-    	oracleBuffer.writeUB1(type);
-    	oracleBuffer.writeUB1(flags);
-    	oracleBuffer.writeUB2(headerCheckSum);
+        OracleAbstractPacketBuffer oracleBuffer = (OracleAbstractPacketBuffer) buffer;
+        oracleBuffer.writeUB2(packetLength);
+        oracleBuffer.writeUB2(packetCheckSum);
+        oracleBuffer.writeUB1(type);
+        oracleBuffer.writeUB1(flags);
+        oracleBuffer.writeUB2(headerCheckSum);
         buffer.setPosition(position);
         buffer.setPacketLength(packetLength);
-    }
-
-    /**
-     * @param buffer 用于输入输出的缓冲
-     * @throws UnsupportedEncodingException 当String to bytes发生编码不支持的时候
-     */
-    protected void write2Buffer(AbstractPacketBuffer buffer) throws UnsupportedEncodingException {
-        buffer.setPosition(HEADER_SIZE);
-    }
-
-    /**
-     * 该方法调用了{@link #write2Buffer(PacketBuffer)} 写入到指定的buffer，并且调用了{@link #afterPacketWritten(PacketBuffer)}
-     */
-    private AbstractPacketBuffer toBuffer(AbstractPacketBuffer buffer) throws UnsupportedEncodingException {
-        write2Buffer(buffer);
-        afterPacketWritten(buffer);
-        return buffer;
-    }
-    
-    protected Class<? extends AbstractPacketBuffer> getBufferClass(){
-    	return OracleAbstractPacketBuffer.class;
-    }
-
-	private AbstractPacketBuffer toBuffer(Connection conn) throws UnsupportedEncodingException {
-        int bufferSize = calculatePacketSize();
-        bufferSize = (bufferSize < (DATA_OFFSET + 1) ? (DATA_OFFSET + 1) : bufferSize);
-        
-        AbstractPacketBuffer buffer = null;
-        try {
-        	Constructor<? extends AbstractPacketBuffer> constractor = getBufferClass().getConstructor(int.class);
-			buffer = constractor.newInstance(bufferSize);
-			buffer.init(conn);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-        return toBuffer(buffer);
     }
 
     /**
@@ -171,6 +153,32 @@ public abstract class AbstractPacket implements Packet, OraclePacketConstant {
             // 逻辑上面不会发生不支持情况
             return null;
         }
+    }
+
+    protected Class<? extends AbstractPacketBuffer> getBufferClass() {
+        return OracleAbstractPacketBuffer.class;
+    }
+
+    private AbstractPacketBuffer constractorBuffer(int bufferSize) {
+        AbstractPacketBuffer buffer = null;
+        try {
+            Constructor<? extends AbstractPacketBuffer> constractor = getBufferClass().getConstructor(int.class);
+            buffer = constractor.newInstance(bufferSize);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return buffer;
+    }
+
+    private AbstractPacketBuffer constractorBuffer(byte[] buffer) {
+        AbstractPacketBuffer packetbuffer = null;
+        try {
+            Constructor<? extends AbstractPacketBuffer> constractor = getBufferClass().getConstructor(byte[].class);
+            packetbuffer = constractor.newInstance(buffer);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return packetbuffer;
     }
 
 }
