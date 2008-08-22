@@ -9,12 +9,25 @@ import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
 public class T4C8OcloseDataPacket extends T4CTTIfunPacket {
 
     public T4C8OcloseDataPacket(){
-        super(TTIPFN, OCCA, (byte) 0);
+        super(TTIPFN, OCANA, (byte) 0);
     }
 
     @Override
-    protected void init(AbstractPacketBuffer buffer) {
-        super.init(buffer);
+    protected void marshal(AbstractPacketBuffer buffer) {
+        super.marshal(buffer);
+    }
+
+    @Override
+    protected void unmarshal(AbstractPacketBuffer buffer) {
+        super.unmarshal(buffer);
+    }
+
+    void initCloseQuery() {
+        this.funCode = OCANA;
+    }
+
+    void initCloseStatement() {
+        this.funCode = OCCA;
     }
 
 }

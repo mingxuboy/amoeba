@@ -1,7 +1,5 @@
 package com.meidusa.amoeba.oracle.net.packet;
 
-import java.io.UnsupportedEncodingException;
-
 import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
 
 public class T4CTTIfunPacket extends T4CTTIMsgPacket {
@@ -39,8 +37,8 @@ public class T4CTTIfunPacket extends T4CTTIMsgPacket {
     public static final short OKPFC     = 139;
     public static final short OKEYVAL   = 154;
 
-    public short              funCode;
-    public byte               seqNumber;
+    protected short           funCode;
+    protected byte            seqNumber;
 
     public T4CTTIfunPacket(short funCode){
         this(funCode, (byte) 0);
@@ -56,16 +54,17 @@ public class T4CTTIfunPacket extends T4CTTIMsgPacket {
         this.seqNumber = seqNumber;
     }
 
-    protected void init(AbstractPacketBuffer buffer) {
-        super.init(buffer);
+    @Override
+    protected void unmarshal(AbstractPacketBuffer buffer) {
+        super.unmarshal(buffer);
         T4CPacketBuffer meg = (T4CPacketBuffer) buffer;
         funCode = meg.unmarshalUB1();
         seqNumber = (byte) meg.unmarshalUB1();
     }
 
     @Override
-    protected void write2Buffer(AbstractPacketBuffer buffer) throws UnsupportedEncodingException {
-        super.write2Buffer(buffer);
+    protected void marshal(AbstractPacketBuffer buffer) {
+        super.marshal(buffer);
         T4CPacketBuffer meg = (T4CPacketBuffer) buffer;
         meg.marshalUB1(funCode);
         meg.marshalUB1(seqNumber);

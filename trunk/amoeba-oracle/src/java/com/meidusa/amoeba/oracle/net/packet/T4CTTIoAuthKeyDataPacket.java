@@ -1,7 +1,5 @@
 package com.meidusa.amoeba.oracle.net.packet;
 
-import java.io.UnsupportedEncodingException;
-
 import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
 
 /**
@@ -26,40 +24,8 @@ public class T4CTTIoAuthKeyDataPacket extends T4CTTIfunPacket implements T4CTTIo
     }
 
     @Override
-    protected void init(AbstractPacketBuffer buffer) {
-        super.init(buffer);
-        if (funCode != OSESSKEY) {
-            throw new RuntimeException("Î¥·´Ð­Òé");
-        }
-        T4CPacketBuffer meg = (T4CPacketBuffer) buffer;
-        meg.unmarshalUB1();
-        userLength = meg.unmarshalSB4();
-        LOGON_MODE = meg.unmarshalUB4();
-        meg.unmarshalUB1();
-        propLen = (int) meg.unmarshalUB4();// key-value length
-        meg.unmarshalUB1();
-        meg.unmarshalUB1();
-        user = new String(meg.unmarshalCHR(userLength));
-
-        byte[][] keys = new byte[propLen][];
-        byte[][] values = new byte[propLen][];
-        meg.unmarshalKEYVAL(keys, values, propLen);
-
-        if (propLen >= 4) {
-            int i = 0;
-            terminal = new String(values[i++]);
-            if (propLen == 5) {
-                program_nm = new String(values[i++]);
-            }
-            machine = new String(values[i++]);
-            pid = new String(values[i++]);
-            sid = new String(values[i++]);
-        }
-    }
-
-    @Override
-    protected void write2Buffer(AbstractPacketBuffer buffer) throws UnsupportedEncodingException {
-        super.write2Buffer(buffer);
+    protected void marshal(AbstractPacketBuffer buffer) {
+        super.marshal(buffer);
         T4CPacketBuffer meg = (T4CPacketBuffer) buffer;
         meg.marshalPTR();
         meg.marshalSB4(userLength);
@@ -88,6 +54,35 @@ public class T4CTTIoAuthKeyDataPacket extends T4CTTIfunPacket implements T4CTTIo
         values[j++] = sid.getBytes();
 
         meg.marshalKEYVAL(keys, values, abyte2, propLen);
+    }
+
+    @Override
+    protected void unmarshal(AbstractPacketBuffer buffer) {
+        super.unmarshal(buffer);
+        T4CPacketBuffer meg = (T4CPacketBuffer) buffer;
+        meg.unmarshalUB1();
+        userLength = meg.unmarshalSB4();
+        LOGON_MODE = meg.unmarshalUB4();
+        meg.unmarshalUB1();
+        propLen = (int) meg.unmarshalUB4();// key-value length
+        meg.unmarshalUB1();
+        meg.unmarshalUB1();
+        user = new String(meg.unmarshalCHR(userLength));
+
+        byte[][] keys = new byte[propLen][];
+        byte[][] values = new byte[propLen][];
+        meg.unmarshalKEYVAL(keys, values, propLen);
+
+        if (propLen >= 4) {
+            int i = 0;
+            terminal = new String(values[i++]);
+            if (propLen == 5) {
+                program_nm = new String(values[i++]);
+            }
+            machine = new String(values[i++]);
+            pid = new String(values[i++]);
+            sid = new String(values[i++]);
+        }
     }
 
 }
