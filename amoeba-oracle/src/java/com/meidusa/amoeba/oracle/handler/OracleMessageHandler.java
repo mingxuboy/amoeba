@@ -79,22 +79,19 @@ public class OracleMessageHandler implements MessageHandler, Sessionable, SQLnet
                             return;
                         }
                     }
-                    if (clientMsgCount <= 9) {
-                        if (T4CTTIMsgPacket.isMsgType(message, T4CTTIMsgPacket.TTIPRO)) {
-                            packet = new T4C8TTIproDataPacket();
-                        } else if (T4CTTIMsgPacket.isMsgType(message, T4CTTIMsgPacket.TTIDTY)) {
-                            packet = new T4C8TTIdtyDataPacket();
-                        } else if (T4CTTIfunPacket.isFunType(message, T4CTTIfunPacket.OVERSION)) {
-                            packet = new T4C7OversionDataPacket();
-                        } else if (T4CTTIfunPacket.isFunType(message, T4CTTIfunPacket.OSESSKEY)) {
-                            packet = new T4CTTIoAuthKeyDataPacket();
-                        } else if (T4CTTIfunPacket.isFunType(message, T4CTTIfunPacket.OAUTH)) {
-                            packet = new T4CTTIoAuthDataPacket();
-                            ((T4CTTIoAuthDataPacket) packet).encryptedSK = this.encryptedSK;
-                        }
-                    }
 
-                    if (T4CTTIfunPacket.isFunType(message, T4CTTIMsgPacket.TTIPFN, T4CTTIfunPacket.OCCA)) {
+                    if (T4CTTIMsgPacket.isMsgType(message, T4CTTIMsgPacket.TTIPRO)) {
+                        packet = new T4C8TTIproDataPacket();
+                    } else if (T4CTTIMsgPacket.isMsgType(message, T4CTTIMsgPacket.TTIDTY)) {
+                        packet = new T4C8TTIdtyDataPacket();
+                    } else if (T4CTTIfunPacket.isFunType(message, T4CTTIfunPacket.OVERSION)) {
+                        packet = new T4C7OversionDataPacket();
+                    } else if (T4CTTIfunPacket.isFunType(message, T4CTTIfunPacket.OSESSKEY)) {
+                        packet = new T4CTTIoAuthKeyDataPacket();
+                    } else if (T4CTTIfunPacket.isFunType(message, T4CTTIfunPacket.OAUTH)) {
+                        packet = new T4CTTIoAuthDataPacket();
+                        ((T4CTTIoAuthDataPacket) packet).encryptedSK = this.encryptedSK;
+                    } else if (T4CTTIfunPacket.isFunType(message, T4CTTIMsgPacket.TTIPFN, T4CTTIfunPacket.OCCA)) {
                         Packet packet1 = new T4C8OcloseDataPacket();
                         packet1.init(message, conn);
                         if (logger.isDebugEnabled()) {
