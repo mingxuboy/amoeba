@@ -71,10 +71,14 @@ public class T4CTTIfunPacket extends T4CTTIMsgPacket {
     }
 
     public static boolean isFunType(byte[] buffer, short type) {
+        return isFunType(buffer, TTIFUN, type);
+    }
+
+    public static boolean isFunType(byte[] buffer, byte msgType, short funType) {
         if (buffer == null || buffer.length <= 12) {
             return false;
         } else {
-            return isMsgType(buffer, TTIFUN) && ((buffer[11] & 0xff) == (type & 0xff));
+            return isMsgType(buffer, msgType) && ((buffer[11] & 0xff) == (funType & 0xff));
         }
     }
 
