@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="gbk"?>
+<!DOCTYPE amoeba:function SYSTEM "function.dtd">
+<amoeba:function xmlns:amoeba="http://amoeba.meidusa.com/">
+
+	<function name="+">
+		<className>com.meidusa.amoeba.parser.function.Add</className>
+	</function>
+
+	<function name="-">
+		<className>com.meidusa.amoeba.parser.function.Sub</className>
+	</function>
+	
+	<function name="*">
+		<className>com.meidusa.amoeba.parser.function.Multiply</className>
+	</function>
+	
+	<function name="/">
+		<className>com.meidusa.amoeba.parser.function.Divide</className>
+	</function>
+	
+	<function name="DIV">
+		<className>com.meidusa.amoeba.parser.function.Divide</className>
+	</function>
+	
+	<function name="MOD">
+		<className>com.meidusa.amoeba.parser.function.Modulus</className>
+	</function>
+	
+	<function name="%">
+		<className>com.meidusa.amoeba.parser.function.Modulus</className>
+	</function>
+	
+	<function name="||">
+		<className>com.meidusa.amoeba.parser.function.Concat</className>
+	</function>
+	
+	<function name="CONCAT">
+		<className>com.meidusa.amoeba.parser.function.Concat</className>
+	</function>
+	
+	<function name="CONCAT_WS">
+		<className>com.meidusa.amoeba.parser.function.ConcatWs</className>
+	</function>
+	
+	<function name="NOW">
+		<className>com.meidusa.amoeba.parser.function.Now</className>
+	</function>
+	
+	<function name="SYSDATE">
+		<className>com.meidusa.amoeba.parser.function.Now</className>
+	</function>
+	
+	<function name="CURRENT_TIMESTAMP">
+		<className>com.meidusa.amoeba.parser.function.Now</className>
+	</function>
+	
+	<function name="CURRENT_DATE">
+		<className>com.meidusa.amoeba.parser.function.CurrentDate</className>
+	</function>
+	
+	<function name="ADDDATE">
+		<className>com.meidusa.amoeba.parser.function.TimeConverter</className>
+		<property name="defaultField">5</property>
+	</function>
+	
+	<function name="YEAR">
+		<className>com.meidusa.amoeba.parser.function.TimeForType</className>
+		<property name="field">1</property>
+	</function>
+	<function name="MONTH">
+		<className>com.meidusa.amoeba.parser.function.TimeForType</className>
+		<property name="field">2</property>
+	</function>
+	<function name="WEEK">
+		<className>com.meidusa.amoeba.parser.function.TimeForType</className>
+		<property name="field">3</property>
+	</function>
+	<function name="DAY">
+		<className>com.meidusa.amoeba.parser.function.TimeForType</className>
+		<property name="field">5</property>
+	</function>
+	<function name="HOUR">
+		<className>com.meidusa.amoeba.parser.function.TimeForType</className>
+		<property name="field">11</property>
+	</function>
+	<function name="MINUTE">
+		<className>com.meidusa.amoeba.parser.function.TimeForType</className>
+		<property name="field">12</property>
+	</function>
+	<function name="SECOND">
+		<className>com.meidusa.amoeba.parser.function.TimeForType</className>
+		<property name="field">13</property>
+	</function>
+	<function name="MICROSECOND">
+		<className>com.meidusa.amoeba.parser.function.TimeForType</className>
+		<property name="field">21</property>
+	</function>
+	
+	<function name="ASCII">
+		<className>com.meidusa.amoeba.parser.function.Ascii</className>
+	</function>
+	
+	<function name="INSERT">
+		<className>com.meidusa.amoeba.parser.function.Insert</className>
+	</function>
+	
+	<function name="INSTR">
+		<className>com.meidusa.amoeba.parser.function.Instr</className>
+	</function>
+	
+	<function name="SUBSTRING">
+		<className>com.meidusa.amoeba.parser.function.Substring</className>
+	</function>
+	
+	<function name="UNKNOWFUNCTION">
+		<className>com.meidusa.amoeba.parser.function.UnknowableFunction</className>
+	</function>
+</amoeba:function>
