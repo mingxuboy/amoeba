@@ -106,11 +106,17 @@ public class ExecutePacket extends CommandPacket {
 		}
 		
 		newParameterBoundFlag = buffer.readByte();
+		
 		for (int i = 0; i < this.parameterCount; i++) {
 			if(values[i] == null){
 				values[i] = new BindValue();
 			}
-			this.values[i].bufferType = buffer.readInt();
+		}
+		
+		if(newParameterBoundFlag == (byte)1){
+			for (int i = 0; i < this.parameterCount; i++) {
+				this.values[i].bufferType = buffer.readInt();
+			}
 		}
 
 		for (int i = 0; i < this.parameterCount; i++) {
@@ -125,9 +131,44 @@ public class ExecutePacket extends CommandPacket {
 			}
 		}
 		
+	}
+	
+	
+	public void write2Buffer(MysqlPacketBuffer buffer) throws UnsupportedEncodingException {
+		super.write2Buffer(buffer);
+		buffer.writeLong(statementId);
+		buffer.writeByte(flags);
+		buffer.writeLong(iterationCount);
+		buffer.writeByte(newParameterBoundFlag);
+		int nullCount = (this.parameterCount + 7) / 8;
+
+		int nullBitsPosition = buffer.getPosition();
+
 		for (int i = 0; i < nullCount; i++) {
-			buffer.readByte();
+			buffer.writeByte((byte) 0);
 		}
+		byte[] nullBitsBuffer = new byte[nullCount];
+		
+		if(newParameterBoundFlag == (byte)1){
+			for (int i = 0; i < this.parameterCount; i++) {
+				buffer.writeInt(this.values[i].bufferType);
+			}
+		}
+		
+		for (int i = 0; i < this.parameterCount; i++) {
+			if (!this.values[i].isLongData) {
+				if (!this.values[i].isNull) {
+					storeBinding(buffer, this.values[i]);
+				} else {
+					nullBitsBuffer[i / 8] |= (1 << (i & 7));
+				}
+			}
+		}
+		
+		int endPosition = buffer.getPosition();
+		buffer.setPosition(nullBitsPosition);
+		buffer.writeBytesNoNull(nullBitsBuffer);
+		buffer.setPosition(endPosition);
 	}
 	
 	private void readBindValue(MysqlPacketBuffer packet, BindValue bindValue) {
@@ -373,30 +414,7 @@ public class ExecutePacket extends CommandPacket {
 	}
 	
 	
-	public void write2Buffer(MysqlPacketBuffer buffer) throws UnsupportedEncodingException {
-		super.write2Buffer(buffer);
-		buffer.writeLong(statementId);
-		buffer.writeByte(flags);
-		buffer.writeLong(iterationCount);
-		buffer.writeByte(newParameterBoundFlag);
-		int nullCount = (this.parameterCount + 7) / 8;
-
-		byte[] nullBitsBuffer = new byte[nullCount];
-		
-		for (int i = 0; i < this.parameterCount; i++) {
-			if (!this.values[i].isLongData) {
-				if (!this.values[i].isNull) {
-					storeBinding(buffer, this.values[i]);
-				} else {
-					nullBitsBuffer[i / 8] |= (1 << (i & 7));
-				}
-			}
-		}
-		
-		for (int i = 0; i < nullCount; i++) {
-			buffer.readByte();
-		}
-	}
+	
 	
 	protected int calculatePacketSize(){
 		int packLength = super.calculatePacketSize();
