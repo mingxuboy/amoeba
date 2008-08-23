@@ -33,6 +33,10 @@ public abstract class AuthingableConnection extends Connection implements Messag
 		return authenticated;
 	}
 	
+	public boolean isAuthenticatedSeted() {
+		return authenticatedSeted;
+	}
+
 	public void setAuthenticated(boolean authenticated){
 		synchronized(this){
 			authenticatedSeted = true;
