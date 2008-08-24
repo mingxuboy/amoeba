@@ -23,6 +23,13 @@ import java.nio.ByteBuffer;
  */
 public abstract class PacketOutputStream extends OutputStream
 {
+    
+    /** The buffer in which we store our packet data. */
+    protected ByteBuffer _buffer;
+
+    /** The default initial size of the internal buffer. */
+    protected static final int INITIAL_BUFFER_SIZE = 32;
+    
     public PacketOutputStream ()
     {
         _buffer = ByteBuffer.allocate(INITIAL_BUFFER_SIZE);
@@ -30,7 +37,7 @@ public abstract class PacketOutputStream extends OutputStream
     }
 
     /**
-     * Writes the specified byte to this framing output stream. 
+     * Writes the specified byte to this output stream. 
      *
      * @param b the byte to be written.
      */
@@ -46,7 +53,7 @@ public abstract class PacketOutputStream extends OutputStream
 
     /**
      * Writes <code>len</code> bytes from the specified byte array
-     * starting at offset <code>off</code> to this framing output stream.
+     * starting at offset <code>off</code> to this output stream.
      *
      * @param b the data.
      * @param off the start offset in the data.
@@ -87,14 +94,14 @@ public abstract class PacketOutputStream extends OutputStream
     }
 
     /**
-     * Writes the frame length to the beginning of our buffer and returns
+     * Writes the packet length to the beginning of our buffer and returns
      * it for writing to the appropriate channel. This should be followed
-     * by a call to {@link #resetFrame} when the frame has been written.
+     * by a call to {@link #resetPacket} when the packet has been written.
      */
     public abstract ByteBuffer returnPacketBuffer ();
 
     /**
-     * Resets our internal buffer and prepares to write a new frame.
+     * Resets our internal buffer and prepares to write a new packet.
      */
     public void resetPacket ()
     {
@@ -103,10 +110,4 @@ public abstract class PacketOutputStream extends OutputStream
     }
 
     protected abstract void initHeader();
-    /** The buffer in which we store our frame data. */
-    protected ByteBuffer _buffer;
-
-    /** The default initial size of the internal buffer. */
-    protected static final int INITIAL_BUFFER_SIZE = 32;
-
 }
