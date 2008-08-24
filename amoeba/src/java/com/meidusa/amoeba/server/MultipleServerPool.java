@@ -13,10 +13,9 @@ package com.meidusa.amoeba.server;
 
 import java.util.StringTokenizer;
 
-import org.apache.commons.pool.ObjectPool;
-
 import com.meidusa.amoeba.context.ProxyRuntimeContext;
 import com.meidusa.amoeba.net.poolable.MultipleLoadBalanceObjectPool;
+import com.meidusa.amoeba.net.poolable.ObjectPool;
 import com.meidusa.amoeba.util.Initialisable;
 import com.meidusa.amoeba.util.InitialisationException;
 import com.meidusa.amoeba.util.StringUtil;

@@ -11,9 +11,8 @@
  */
 package com.meidusa.amoeba.route;
 
-import org.apache.commons.pool.ObjectPool;
-
 import com.meidusa.amoeba.net.DatabaseConnection;
+import com.meidusa.amoeba.net.poolable.ObjectPool;
 
 /**
  * 

@@ -13,10 +13,9 @@ package com.meidusa.amoeba.mysql.parser;
 
 import java.io.StringReader;
 
-import org.apache.commons.pool.ObjectPool;
-
 import com.meidusa.amoeba.mysql.parser.sql.MysqlParser;
 import com.meidusa.amoeba.net.DatabaseConnection;
+import com.meidusa.amoeba.net.poolable.ObjectPool;
 import com.meidusa.amoeba.parser.Parser;
 import com.meidusa.amoeba.parser.expression.Expression;
 import com.meidusa.amoeba.parser.statment.PropertyStatment;

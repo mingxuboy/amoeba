@@ -29,7 +29,6 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.apache.commons.collections.map.LRUMap;
-import org.apache.commons.pool.ObjectPool;
 import org.apache.log4j.Logger;
 import org.apache.log4j.helpers.LogLog;
 import org.w3c.dom.Document;
@@ -115,6 +114,7 @@ import com.meidusa.amoeba.config.ConfigurationException;
 import com.meidusa.amoeba.config.DocumentUtil;
 import com.meidusa.amoeba.context.ProxyRuntimeContext;
 import com.meidusa.amoeba.net.DatabaseConnection;
+import com.meidusa.amoeba.net.poolable.ObjectPool;
 import com.meidusa.amoeba.parser.ParseException;
 import com.meidusa.amoeba.parser.Parser;
 import com.meidusa.amoeba.sqljep.RowJEP;

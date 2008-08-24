@@ -15,7 +15,6 @@ package com.meidusa.amoeba.mysql.handler;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.pool.ObjectPool;
 import org.apache.log4j.Logger;
 
 import com.meidusa.amoeba.context.ProxyRuntimeContext;
@@ -29,6 +28,7 @@ import com.meidusa.amoeba.mysql.net.packet.QueryCommandPacket;
 import com.meidusa.amoeba.net.Connection;
 import com.meidusa.amoeba.net.MessageHandler;
 import com.meidusa.amoeba.net.Sessionable;
+import com.meidusa.amoeba.net.poolable.ObjectPool;
 import com.meidusa.amoeba.route.QueryRouter;
 
 /**

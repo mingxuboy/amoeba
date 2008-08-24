@@ -449,7 +449,7 @@ public class ConnectionManager extends LoopingThread implements Reporter {
 	}
 
 	/**
-	 * Called by {@link #writeMessage} and friends when they write data over the
+	 * Called by {@link Connection#doWrite} and friends when they write data over the
 	 * network.
 	 */
 	protected final void noteWrite(int msgs, int bytes) {

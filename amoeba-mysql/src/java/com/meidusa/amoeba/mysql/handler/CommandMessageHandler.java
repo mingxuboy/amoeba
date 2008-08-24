@@ -21,12 +21,9 @@ import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import org.apache.commons.pool.ObjectPool;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
-import com.meidusa.amoeba.net.packet.Packet;
-import com.meidusa.amoeba.net.poolable.PoolableObject;
 import com.meidusa.amoeba.mysql.net.CommandInfo;
 import com.meidusa.amoeba.mysql.net.CommandListener;
 import com.meidusa.amoeba.mysql.net.MysqlClientConnection;
@@ -40,6 +37,9 @@ import com.meidusa.amoeba.mysql.net.packet.QueryCommandPacket;
 import com.meidusa.amoeba.net.Connection;
 import com.meidusa.amoeba.net.MessageHandler;
 import com.meidusa.amoeba.net.Sessionable;
+import com.meidusa.amoeba.net.packet.Packet;
+import com.meidusa.amoeba.net.poolable.ObjectPool;
+import com.meidusa.amoeba.net.poolable.PoolableObject;
 import com.meidusa.amoeba.util.Reporter;
 import com.meidusa.amoeba.util.StringUtil;
 

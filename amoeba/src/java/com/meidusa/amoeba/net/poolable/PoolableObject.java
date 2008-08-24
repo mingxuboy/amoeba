@@ -11,8 +11,6 @@
  */
 package com.meidusa.amoeba.net.poolable;
 
-import org.apache.commons.pool.ObjectPool;
-
 /**
  * 
  * @author <a href=mailto:piratebase@sina.com>Struct chen</a>

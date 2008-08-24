@@ -11,7 +11,9 @@
  */
 package com.meidusa.amoeba.mysql.parser.data;
 
-import com.meidusa.amoeba.mysql.parser.sql.*;
+import com.meidusa.amoeba.mysql.parser.sql.MysqlParserConstants;
+import com.meidusa.amoeba.mysql.parser.sql.MysqlParserTreeConstants;
+import com.meidusa.amoeba.mysql.parser.sql.Token;
 
 /**
  * 

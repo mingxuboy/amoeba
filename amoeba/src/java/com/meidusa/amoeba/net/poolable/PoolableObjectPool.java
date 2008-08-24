@@ -11,7 +11,6 @@
  */
 package com.meidusa.amoeba.net.poolable;
 
-import org.apache.commons.pool.PoolableObjectFactory;
 
 /**
  * 采用该Poolable ObjectPool，则object 必须实现{@link PoolableObject}
