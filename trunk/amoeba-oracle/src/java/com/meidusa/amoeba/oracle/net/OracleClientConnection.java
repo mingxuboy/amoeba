@@ -2,10 +2,10 @@ package com.meidusa.amoeba.oracle.net;
 
 import java.nio.channels.SocketChannel;
 
-import org.apache.commons.pool.ObjectPool;
 import org.apache.log4j.Logger;
 
 import com.meidusa.amoeba.net.Connection;
+import com.meidusa.amoeba.net.poolable.ObjectPool;
 import com.meidusa.amoeba.oracle.context.OracleProxyRuntimeContext;
 import com.meidusa.amoeba.oracle.handler.OracleMessageHandler;
 import com.meidusa.amoeba.oracle.net.packet.AcceptPacket;
@@ -25,6 +25,7 @@ import com.meidusa.amoeba.oracle.net.packet.T4CTTIoAuthDataPacket;
 import com.meidusa.amoeba.oracle.net.packet.T4CTTIoAuthKeyDataPacket;
 import com.meidusa.amoeba.oracle.net.packet.T4CTTIoAuthKeyResponseDataPacket;
 import com.meidusa.amoeba.oracle.util.ByteUtil;
+import com.meidusa.amoeba.util.StringUtil;
 
 public class OracleClientConnection extends OracleConnection implements SQLnetDef {
 
@@ -77,10 +78,13 @@ public class OracleClientConnection extends OracleConnection implements SQLnetDe
                         packet = new T4CTTIoAuthKeyDataPacket();
                         packet.init(message, conn);
                         response = new T4CTTIoAuthKeyResponseDataPacket();
-
+                        this.encryptedSK = StringUtil.getRandomString(16).getBytes();
+                        ((T4CTTIoAuthKeyResponseDataPacket)response).encryptedSK = this.encryptedSK;
+                        
                     } else if (T4CTTIfunPacket.isFunType(message, T4CTTIfunPacket.OAUTH)) {
                         packet = new T4CTTIoAuthDataPacket();
                         ((T4CTTIoAuthDataPacket) packet).encryptedSK = this.encryptedSK;
+                        
                     }
                 }
                 break;

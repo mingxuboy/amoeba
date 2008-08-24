@@ -17,6 +17,7 @@ import java.io.InputStream;
 import java.sql.SQLException;
 
 import com.meidusa.amoeba.mysql.jdbc.Messages;
+import com.mysql.jdbc.CommunicationsException;
 
 /**
  * ×èÈûÄ£Ê½¶ÁÈ¡ packet

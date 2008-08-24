@@ -34,10 +34,6 @@ import java.util.TimerTask;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import org.apache.commons.pool.BaseObjectPool;
-import org.apache.commons.pool.ObjectPool;
-import org.apache.commons.pool.PoolableObjectFactory;
-
 /**
  * A configurable {@link ObjectPool} implementation.
  * <p>

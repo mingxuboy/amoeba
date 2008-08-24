@@ -2,8 +2,7 @@ package com.meidusa.amoeba.oracle.net;
 
 import java.nio.channels.SocketChannel;
 
-import org.apache.commons.pool.ObjectPool;
-
+import com.meidusa.amoeba.net.poolable.ObjectPool;
 import com.meidusa.amoeba.net.poolable.PoolableObject;
 
 public class OracleServerConnection extends OracleConnection implements PoolableObject {

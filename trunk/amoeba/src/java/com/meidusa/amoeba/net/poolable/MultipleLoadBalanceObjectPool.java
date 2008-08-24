@@ -23,9 +23,6 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import org.apache.commons.pool.ObjectPool;
-import org.apache.commons.pool.PoolableObjectFactory;
-
 /**
  * 该Pool 提供负载均衡、failover、HA策略
  * 采用Load Balance ObjectPool，则object 必须实现{@link PoolableObject}

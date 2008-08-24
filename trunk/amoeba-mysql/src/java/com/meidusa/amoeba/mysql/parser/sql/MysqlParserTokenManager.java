@@ -12,23 +12,6 @@
  * if not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 package com.meidusa.amoeba.mysql.parser.sql;
-import java.io.DataInputStream;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import com.meidusa.amoeba.parser.dbobject.*;
-import com.meidusa.amoeba.parser.expression.*;
-import com.meidusa.amoeba.parser.function.*;
-import com.meidusa.amoeba.parser.Parser;
-import com.meidusa.amoeba.parser.statment.*;
-import java.math.BigDecimal;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.Stack;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.sql.Connection;
-import com.meidusa.amoeba.sqljep.function.Comparative;
 
 public class MysqlParserTokenManager implements MysqlParserConstants
 {

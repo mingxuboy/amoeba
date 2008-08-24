@@ -15,10 +15,10 @@ import java.nio.channels.SocketChannel;
 import java.security.NoSuchAlgorithmException;
 import java.util.concurrent.locks.Lock;
 
-import org.apache.commons.pool.ObjectPool;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
+import com.meidusa.amoeba.net.poolable.ObjectPool;
 import com.meidusa.amoeba.net.poolable.PoolableObject;
 import com.meidusa.amoeba.context.ProxyRuntimeContext;
 import com.meidusa.amoeba.mysql.context.MysqlProxyRuntimeContext;
@@ -58,7 +58,7 @@ public class MysqlServerConnection extends MysqlConnection implements MySqlPacke
 	
 	public MysqlServerConnection(SocketChannel channel, long createStamp) {
 		super(channel, createStamp);
-		commandRunner = new CommandMessageQueueRunner(this);
+		//commandRunner = new CommandMessageQueueRunner(this);
 	}
 	
 	public void handleMessage(Connection conn,byte[] message) {
@@ -154,17 +154,21 @@ public class MysqlServerConnection extends MysqlConnection implements MySqlPacke
 	 */
 	protected void messageProcess(byte[] msg){
 		if(commandInfo != null){
-			if(commandRunner.getRunnerStatus() != CommandMessageQueueRunner.RunnerStatus.RUNNING){
-				final Lock lock = commandRunner.getLock();
-				lock.lock();
-				try{
-					commandRunner.setRunnerStatus(CommandMessageQueueRunner.RunnerStatus.RUNNING);
-					ProxyRuntimeContext.getInstance().getServerSideExecutor().execute(commandRunner);
-				}finally{
-		        	lock.unlock();
-		        }
+			if(commandRunner != null){
+				if(commandRunner.getRunnerStatus() != CommandMessageQueueRunner.RunnerStatus.RUNNING){
+					final Lock lock = commandRunner.getLock();
+					lock.lock();
+					try{
+						commandRunner.setRunnerStatus(CommandMessageQueueRunner.RunnerStatus.RUNNING);
+						ProxyRuntimeContext.getInstance().getServerSideExecutor().execute(commandRunner);
+					}finally{
+			        	lock.unlock();
+			        }
+				}
+				commandRunner.handleMessage(this, msg);
+			}else{
+				super.messageProcess(msg);
 			}
-			commandRunner.handleMessage(this, msg);
 		}else{
 			super.messageProcess(msg);
 		}
@@ -173,8 +177,12 @@ public class MysqlServerConnection extends MysqlConnection implements MySqlPacke
 	
 	public void appendReport(StringBuilder buffer, long now, long sinceLast,
 			boolean reset,Level level) {
-		buffer.append("    -- Command: messageQueueSize:").append(commandRunner.getQueueSize());
-		buffer.append(",runner.Status:").append(commandRunner.getRunnerStatus()).append("\n");
+		
+		if(commandRunner != null){
+			buffer.append("    -- Command: messageQueueSize:").append(commandRunner.getQueueSize());
+			buffer.append(",runner.Status:").append(commandRunner.getRunnerStatus()).append("\n");
+		}
+		
 		if(this._handler instanceof Reporter.SubReporter && this._handler != this){
 			Reporter.SubReporter reporter = (Reporter.SubReporter)(this._handler);
 			reporter.appendReport(buffer, now, sinceLast, reset,level);
@@ -183,14 +191,16 @@ public class MysqlServerConnection extends MysqlConnection implements MySqlPacke
 
 	
 	public void finishedCommand(CommandInfo command) {
-		final Lock lock = commandRunner.getLock();
-	    lock.lock();
-		try{
-	    	commandRunner.setRunnerStatus(CommandMessageQueueRunner.RunnerStatus.WAITTOEND);
-			this.commandInfo = null;
-	    }finally{
-	    	lock.unlock();
-	    }
+		if(commandRunner != null){
+			final Lock lock = commandRunner.getLock();
+		    lock.lock();
+			try{
+		    	commandRunner.setRunnerStatus(CommandMessageQueueRunner.RunnerStatus.WAITTOEND);
+				this.commandInfo = null;
+		    }finally{
+		    	lock.unlock();
+		    }
+		}
 	}
 
 	public void startCommand(CommandInfo command) {
@@ -240,7 +250,7 @@ public class MysqlServerConnection extends MysqlConnection implements MySqlPacke
 		} catch (Exception e) {
 		}
 		
-		if(commandRunner.getRunnerStatus() == CommandMessageQueueRunner.RunnerStatus.RUNNING){
+		if(commandRunner != null && commandRunner.getRunnerStatus() == CommandMessageQueueRunner.RunnerStatus.RUNNING){
 			commandRunner.interrupt();
 		}
 	}

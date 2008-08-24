@@ -19,8 +19,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.pool.ObjectPool;
-
 import com.meidusa.amoeba.mysql.net.CommandInfo;
 import com.meidusa.amoeba.mysql.net.MysqlClientConnection;
 import com.meidusa.amoeba.mysql.net.MysqlServerConnection;
@@ -30,6 +28,7 @@ import com.meidusa.amoeba.mysql.net.packet.OKforPreparedStatementPacket;
 import com.meidusa.amoeba.mysql.net.packet.PreparedStatmentClosePacket;
 import com.meidusa.amoeba.mysql.net.packet.QueryCommandPacket;
 import com.meidusa.amoeba.net.Connection;
+import com.meidusa.amoeba.net.poolable.ObjectPool;
 
 /**
  * 

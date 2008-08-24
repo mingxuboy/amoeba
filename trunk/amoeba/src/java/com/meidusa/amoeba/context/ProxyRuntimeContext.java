@@ -28,8 +28,6 @@ import java.util.concurrent.TimeUnit;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
-import org.apache.commons.pool.ObjectPool;
-import org.apache.commons.pool.PoolableObjectFactory;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.log4j.helpers.LogLog;
@@ -46,7 +44,9 @@ import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
 import com.meidusa.amoeba.net.poolable.MultipleLoadBalanceObjectPool;
+import com.meidusa.amoeba.net.poolable.ObjectPool;
 import com.meidusa.amoeba.net.poolable.PoolableObject;
+import com.meidusa.amoeba.net.poolable.PoolableObjectFactory;
 import com.meidusa.amoeba.config.BeanObjectEntityConfig;
 import com.meidusa.amoeba.config.ConfigurationException;
 import com.meidusa.amoeba.config.DBServerConfig;
