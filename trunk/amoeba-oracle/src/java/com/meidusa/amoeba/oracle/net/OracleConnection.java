@@ -2,6 +2,7 @@ package com.meidusa.amoeba.oracle.net;
 
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
+import java.sql.SQLException;
 
 import org.apache.commons.lang.ArrayUtils;
 
@@ -12,6 +13,7 @@ import com.meidusa.amoeba.net.io.PacketInputStream;
 import com.meidusa.amoeba.net.io.PacketOutputStream;
 import com.meidusa.amoeba.oracle.io.OraclePacketInputStream;
 import com.meidusa.amoeba.oracle.io.OraclePacketOutputStream;
+import com.meidusa.amoeba.oracle.net.packet.T4C8TTIproResponseDataPacket;
 import com.meidusa.amoeba.oracle.util.DBConversion;
 import com.meidusa.amoeba.oracle.util.T4CTypeRep;
 
@@ -24,16 +26,8 @@ public abstract class OracleConnection extends DatabaseConnection {
     public String            protocolVersionStr = "Java_TTC-8.2.0";
     public byte[]            protocolVersion    = new byte[] { 6 };
     private DBConversion     conversion;
-    private byte[]           encryptedSK;
-
-    public byte[] getEncryptedSK() {
-        return encryptedSK;
-    }
-
-    public void setEncryptedSK(byte[] encryptedSK) {
-        this.encryptedSK = encryptedSK;
-    }
-
+    protected String           encryptedSK;
+    
     public DBConversion getConversion() {
         return conversion;
     }
@@ -49,7 +43,7 @@ public abstract class OracleConnection extends DatabaseConnection {
     public OracleConnection(SocketChannel channel, long createStamp){
         super(channel, createStamp);
         rep.setRep((byte) 1, (byte) 2);
-        this.setAuthenticated(true);
+        //this.setAuthenticated(true);
     }
 
     public void handleMessage(Connection conn, byte[] message) {
@@ -110,5 +104,37 @@ public abstract class OracleConnection extends DatabaseConnection {
 
     public void setAnoEnabled(boolean anoEnabled) {
         this.anoEnabled = anoEnabled;
+    }
+    
+    public static void setConnectionField(OracleConnection conn, T4C8TTIproResponseDataPacket packet) {
+        T4C8TTIproResponseDataPacket pro = (T4C8TTIproResponseDataPacket) packet;
+        short word0 = pro.oVersion;
+        short word1 = pro.svrCharSet;
+        short word2 = DBConversion.findDriverCharSet(word1, word0);
+
+        try {
+            DBConversion conversion = new DBConversion(word1, word2, pro.NCHAR_CHARSET);
+            conn.setConversion(conversion);
+        } catch (SQLException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+        conn.getRep().setServerConversion(word2 != word1);
+        conn.getRep().setVersion(word0);
+        if (DBConversion.isCharSetMultibyte(word2)) {
+            if (DBConversion.isCharSetMultibyte(pro.svrCharSet)) conn.getRep().setFlags((byte) 1);
+            else conn.getRep().setFlags((byte) 2);
+        } else {
+            conn.getRep().setFlags(pro.svrFlags);
+        }
+    }
+    
+    public void setBasicTypes() {
+    	getRep().setRep((byte) 0, (byte) 0);
+    	getRep().setRep((byte) 1, (byte) 1);
+    	getRep().setRep((byte) 2, (byte) 1);
+    	getRep().setRep((byte) 3, (byte) 1);
+    	getRep().setRep((byte) 4, (byte) 1);
     }
 }

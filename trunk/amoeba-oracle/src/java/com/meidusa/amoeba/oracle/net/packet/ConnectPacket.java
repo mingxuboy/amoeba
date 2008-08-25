@@ -73,9 +73,13 @@ public class ConnectPacket extends AbstractPacket {
         }
 
         buffer.setPosition(32);
-        buffer.writeByte(NSINADISABLEFORCONNECTION);
-        buffer.writeByte(NSINADISABLEFORCONNECTION);
-
+        if(!anoEnabled){
+        	buffer.writeByte(NSINADISABLEFORCONNECTION);
+        	buffer.writeByte(NSINADISABLEFORCONNECTION);
+        }else{
+        	buffer.writeByte((byte)1);
+        	buffer.writeByte((byte)1);
+        }
         if (dataBytes != null) {
             buffer.setPosition(dataOffset);
             buffer.writeBytes(dataBytes);// Ð´Èëdata Êý¾Ý

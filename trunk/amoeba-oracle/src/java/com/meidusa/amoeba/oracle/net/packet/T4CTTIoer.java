@@ -28,16 +28,12 @@ public class T4CTTIoer {
     public int      slotNumber;
     public long     rba;
     public long     blockNumber;
-    public int      warnLength;
     public int      warnFlag;
-    public int[]    errorLength;
-    public byte[]   errorMsg;
+    public String   errorMsg;
 
     public T4CTTIoer(T4CPacketBuffer meg){
         this.meg = meg;
-        warnLength = 0;
         warnFlag = 0;
-        errorLength = new int[1];
     }
 
     public void init() {
@@ -77,19 +73,17 @@ public class T4CTTIoer {
         pad1 = meg.unmarshalUB2();
         successIters = meg.unmarshalUB4();
         if (retCode != 0) {
-            errorMsg = meg.unmarshalCLRforREFS();
-            errorLength[0] = errorMsg.length;
+            errorMsg = new String(meg.unmarshalCLRforREFS());
         }
         return currCursorID;
     }
 
     void unmarshalWarning() {
         retCode = meg.unmarshalUB2();
-        warnLength = meg.unmarshalUB2();
+        int warnLength = meg.unmarshalUB2();
         warnFlag = meg.unmarshalUB2();
         if (retCode != 0 && warnLength > 0) {
-            errorMsg = meg.unmarshalCHR(warnLength);
-            errorLength[0] = warnLength;
+            errorMsg = new String(meg.unmarshalCHR(warnLength));
         }
     }
 
@@ -120,7 +114,7 @@ public class T4CTTIoer {
         meg.marshalUB2(pad1);
         meg.marshalUB4(successIters);
         if (retCode != 0) {
-            meg.marshalDALC(errorMsg);
+            meg.marshalDALC(errorMsg.getBytes());
         }
     }
 }

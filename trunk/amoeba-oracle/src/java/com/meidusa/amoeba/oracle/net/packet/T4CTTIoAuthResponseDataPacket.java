@@ -1,7 +1,8 @@
 package com.meidusa.amoeba.oracle.net.packet;
 
 import java.io.UnsupportedEncodingException;
-import java.util.Properties;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.log4j.Logger;
 
@@ -14,10 +15,9 @@ import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
 public class T4CTTIoAuthResponseDataPacket extends DataPacket implements T4CTTIoAuth {
 
     private static Logger logger           = Logger.getLogger(T4CTTIoAuthResponseDataPacket.class);
-
-    int                   len              = 0;
-    T4CTTIoer             oer              = null;
-    Properties            connectionValues = new Properties();
+    
+    public T4CTTIoer             oer              = null;
+    public Map<String,String> map;
 
     @Override
     protected void init(AbstractPacketBuffer absbuffer) {
@@ -25,8 +25,7 @@ public class T4CTTIoAuthResponseDataPacket extends DataPacket implements T4CTTIo
         T4CPacketBuffer meg = (T4CPacketBuffer) absbuffer;
         oer = new T4CTTIoer(meg);
 
-        byte[][] abyte0 = null;
-        byte[][] abyte1 = null;
+        int len = 0;
         while (true) {
             byte byte0 = meg.unmarshalSB1();
             switch (byte0) {
@@ -41,9 +40,7 @@ public class T4CTTIoAuthResponseDataPacket extends DataPacket implements T4CTTIo
                     break;
                 case 8:
                     len = meg.unmarshalUB2();
-                    abyte0 = new byte[len][];
-                    abyte1 = new byte[len][];
-                    meg.unmarshalKEYVAL(abyte0, abyte1, len);
+                    map = meg.unmarshalMap(len);
                     continue;
                 case 15:
                     oer.init();
@@ -60,103 +57,59 @@ public class T4CTTIoAuthResponseDataPacket extends DataPacket implements T4CTTIo
             }
             break;
         }
-
-        for (int j = 0; j < len; j++) {
-            String s = new String(abyte0[j]);
-            String s1 = "";
-            if (abyte1[j] != null) {
-                s1 = new String(abyte1[j]);
-            }
-            connectionValues.setProperty(s, s1);
-        }
-
-        return;
     }
 
+    
+    private Map<String,String> genConnectionProperties(){
+    	Map<String,String> connectionValues = new HashMap<String,String>();
+    	connectionValues.put(AUTH_VERSION_STRING, "- Production");
+    	connectionValues.put(AUTH_VERSION_SQL, "18");
+    	connectionValues.put(AUTH_XACTION_TRAITS, "3");
+    	connectionValues.put(AUTH_VERSION_NO, "153093632");
+    	connectionValues.put(AUTH_VERSION_STATUS, "0");
+    	connectionValues.put(AUTH_CAPABILITY_TABLE, "");
+    	
+    	connectionValues.put(AUTH_SESSION_ID, "309");
+    	connectionValues.put(AUTH_SERIAL_NUM, "59463");
+    	
+    	connectionValues.put(AUTH_INSTANCE_NO, "1");
+    	connectionValues.put(AUTH_NLS_LXLAN, "");
+    	connectionValues.put(AUTH_NLS_LXCTERRITORY, "");
+    	connectionValues.put(AUTH_NLS_LXCCURRENCY, "");
+    	connectionValues.put(AUTH_NLS_LXCISOCURR, "");
+    	connectionValues.put(AUTH_NLS_LXCNUMERICS, "");
+    	connectionValues.put(AUTH_NLS_LXCDATEFM, "");
+    	connectionValues.put(AUTH_NLS_LXCDATELANG, "");
+    	
+    	connectionValues.put(AUTH_NLS_LXCSORT, "");
+    	connectionValues.put(AUTH_NLS_LXCCALENDAR, "");
+    	connectionValues.put(AUTH_NLS_LXCUNIONCUR, "");
+    	
+    	connectionValues.put(AUTH_NLS_LXCTIMEFM, "");
+    	connectionValues.put(AUTH_NLS_LXCSTMPFM, "");
+    	connectionValues.put(AUTH_NLS_LXCTTZNFM, "");
+    	connectionValues.put(AUTH_NLS_LXCSTZNFM, "");
+    	
+    	return connectionValues;
+    }
+    
     @Override
     protected void write2Buffer(AbstractPacketBuffer absbuffer) throws UnsupportedEncodingException {
         super.write2Buffer(absbuffer);
         T4CPacketBuffer meg = (T4CPacketBuffer) absbuffer;
         meg.marshalUB1((byte) 8);
+        
+        if(map == null){
+        	map = genConnectionProperties();
+        }
+        int len = map.size();
         meg.marshalUB2(len);
-
-        byte[][] keys = new byte[len][];
-        byte[][] vals = new byte[len][];
-        byte[] abyte2 = new byte[len];
-
-        int i = 0;
-        keys[i] = AUTH_VERSION_STRING.getBytes();
-        vals[i++] = ((String) connectionValues.get(AUTH_VERSION_STRING)).getBytes();
-
-        keys[i] = AUTH_VERSION_SQL.getBytes();
-        vals[i++] = ((String) connectionValues.get(AUTH_VERSION_SQL)).getBytes();
-
-        keys[i] = AUTH_XACTION_TRAITS.getBytes();
-        vals[i++] = ((String) connectionValues.get(AUTH_XACTION_TRAITS)).getBytes();
-
-        keys[i] = AUTH_VERSION_NO.getBytes();
-        vals[i++] = ((String) connectionValues.get(AUTH_VERSION_NO)).getBytes();
-
-        keys[i] = AUTH_VERSION_STATUS.getBytes();
-        vals[i++] = ((String) connectionValues.get(AUTH_VERSION_STATUS)).getBytes();
-
-        keys[i] = AUTH_CAPABILITY_TABLE.getBytes();
-        vals[i++] = ((String) connectionValues.get(AUTH_CAPABILITY_TABLE)).getBytes();
-
-        keys[i] = AUTH_SESSION_ID.getBytes();
-        vals[i++] = ((String) connectionValues.get(AUTH_SESSION_ID)).getBytes();
-
-        keys[i] = AUTH_SERIAL_NUM.getBytes();
-        vals[i++] = ((String) connectionValues.get(AUTH_SERIAL_NUM)).getBytes();
-
-        keys[i] = AUTH_INSTANCE_NO.getBytes();
-        vals[i++] = ((String) connectionValues.get(AUTH_INSTANCE_NO)).getBytes();
-
-        keys[i] = AUTH_NLS_LXLAN.getBytes();
-        vals[i++] = ((String) connectionValues.get(AUTH_NLS_LXLAN)).getBytes();
-
-        keys[i] = AUTH_NLS_LXCTERRITORY.getBytes();
-        vals[i++] = ((String) connectionValues.get(AUTH_NLS_LXCTERRITORY)).getBytes();
-
-        keys[i] = AUTH_NLS_LXCCURRENCY.getBytes();
-        vals[i++] = ((String) connectionValues.get(AUTH_NLS_LXCCURRENCY)).getBytes();
-
-        keys[i] = AUTH_NLS_LXCISOCURR.getBytes();
-        vals[i++] = ((String) connectionValues.get(AUTH_NLS_LXCISOCURR)).getBytes();
-
-        keys[i] = AUTH_NLS_LXCNUMERICS.getBytes();
-        vals[i++] = ((String) connectionValues.get(AUTH_NLS_LXCNUMERICS)).getBytes();
-
-        keys[i] = AUTH_NLS_LXCDATEFM.getBytes();
-        vals[i++] = ((String) connectionValues.get(AUTH_NLS_LXCDATEFM)).getBytes();
-
-        keys[i] = AUTH_NLS_LXCDATELANG.getBytes();
-        vals[i++] = ((String) connectionValues.get(AUTH_NLS_LXCDATELANG)).getBytes();
-
-        keys[i] = AUTH_NLS_LXCSORT.getBytes();
-        vals[i++] = ((String) connectionValues.get(AUTH_NLS_LXCSORT)).getBytes();
-
-        keys[i] = AUTH_NLS_LXCCALENDAR.getBytes();
-        vals[i++] = ((String) connectionValues.get(AUTH_NLS_LXCCALENDAR)).getBytes();
-
-        keys[i] = AUTH_NLS_LXCUNIONCUR.getBytes();
-        vals[i++] = ((String) connectionValues.get(AUTH_NLS_LXCUNIONCUR)).getBytes();
-
-        keys[i] = AUTH_NLS_LXCTIMEFM.getBytes();
-        vals[i++] = ((String) connectionValues.get(AUTH_NLS_LXCTIMEFM)).getBytes();
-
-        keys[i] = AUTH_NLS_LXCSTMPFM.getBytes();
-        vals[i++] = ((String) connectionValues.get(AUTH_NLS_LXCSTMPFM)).getBytes();
-
-        keys[i] = AUTH_NLS_LXCTTZNFM.getBytes();
-        vals[i++] = ((String) connectionValues.get(AUTH_NLS_LXCTTZNFM)).getBytes();
-
-        keys[i] = AUTH_NLS_LXCSTZNFM.getBytes();
-        vals[i++] = ((String) connectionValues.get(AUTH_NLS_LXCSTZNFM)).getBytes();
-
-        meg.marshalKEYVAL(keys, vals, abyte2, len);
-
+        meg.marshalMap(map);
+        
         meg.marshalUB1((byte) 4);
+        if(oer == null){
+        	oer = new T4CTTIoer(meg);
+        }
         oer.marshal(meg);
     }
 
