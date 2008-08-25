@@ -1,6 +1,8 @@
 package com.meidusa.amoeba.oracle.net.packet;
 
 import java.io.UnsupportedEncodingException;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.log4j.Logger;
 
@@ -14,18 +16,16 @@ public class T4CTTIoAuthKeyResponseDataPacket extends DataPacket implements T4CT
 
     private static Logger logger      = Logger.getLogger(T4CTTIoAuthKeyResponseDataPacket.class);
 
-    public int                   len         = 0;
-    public byte[]                encryptedSK = null;
+    public String                encryptedSK = null;
     public T4CTTIoer             oer         = null;
-
+    public Map<String,String> map;
+    
     @Override
     protected void init(AbstractPacketBuffer absbuffer) {
         super.init(absbuffer);
         T4CPacketBuffer meg = (T4CPacketBuffer) absbuffer;
         oer = new T4CTTIoer(meg);
 
-        byte[][] abyte0 = null;
-        byte[][] abyte1 = null;
         while (true) {
             byte byte0 = meg.unmarshalSB1();
             switch (byte0) {
@@ -39,10 +39,8 @@ public class T4CTTIoAuthKeyResponseDataPacket extends DataPacket implements T4CT
                     }
                     break;
                 case 8:
-                    len = meg.unmarshalUB2();
-                    abyte0 = new byte[len][];
-                    abyte1 = new byte[len][];
-                    meg.unmarshalKEYVAL(abyte0, abyte1, len);
+                    int len = meg.unmarshalUB2();
+                    map = meg.unmarshalMap(len);
                     continue;
                 default:
                     throw new RuntimeException("违反协议");
@@ -50,14 +48,13 @@ public class T4CTTIoAuthKeyResponseDataPacket extends DataPacket implements T4CT
             break;
         }
 
-        if (abyte0 == null || abyte0.length < 1) {
+        if (map == null || map.size() < 1) {
             throw new RuntimeException("内部 - 不期望的值");
         }
-        encryptedSK = abyte1[0];
-        if (encryptedSK == null || encryptedSK.length != 16) {
+        encryptedSK = map.get(AUTH_SESSKEY);
+        if (encryptedSK == null || encryptedSK.length() != 16) {
             throw new RuntimeException("内部 - 不期望的值");
         }
-        meg.oconn.setEncryptedSK(encryptedSK);
         return;
     }
 
@@ -69,19 +66,21 @@ public class T4CTTIoAuthKeyResponseDataPacket extends DataPacket implements T4CT
         	oer = new T4CTTIoer(meg);
         }
         
+        if(map == null){
+        	map = genMap();
+        }
         meg.marshalUB1((byte) 8);
-        meg.marshalUB2(len);
-
-        byte[][] abyte0 = new byte[len][];
-        byte[][] abyte1 = new byte[len][];
-        byte[] abyte2 = new byte[len];
-        int i = 0;
-        abyte0[i] = meg.getConversion().StringToCharBytes(AUTH_SESSKEY);
-        abyte1[i++] = encryptedSK;
-        meg.marshalKEYVAL(abyte0, abyte1, abyte2, len);
+        meg.marshalUB2(map.size());
+        meg.marshalMap(map);
 
         meg.marshalUB1((byte) 4);
         oer.marshal(meg);
+    }
+    
+    private Map<String,String> genMap(){
+    	Map<String,String> properties = new HashMap<String,String>();
+    	properties.put(AUTH_SESSKEY, encryptedSK);
+    	return properties;
     }
 
     @Override

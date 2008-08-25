@@ -11,6 +11,7 @@ import oracle.security.o3logon.O3LoginClientHelper;
 
 import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
 import com.meidusa.amoeba.oracle.charset.CharacterSetMetaData;
+import com.meidusa.amoeba.oracle.util.DBConversion;
 import com.meidusa.amoeba.oracle.util.RepConversion;
 
 /**
@@ -23,12 +24,12 @@ public class T4CTTIoAuthDataPacket extends T4CTTIfunPacket implements T4CTTIoAut
     public long         LOGON_MODE         = 0L;
     public String       userStr            = null;
     public long         logonMode;
-    public String       passwordStr        = "ccbutest";
+    public String       passwordStr        = "ccbutest1";
     public String       terminal           = null;
     public String       programName        = null;
     public String       machine            = null;
     private String      ressourceManagerId = "0000";
-    public byte[]       encryptedSK;
+    public String       encryptedSK;
     public String       clientname;
     public String       processID;
     public String       internalName;
@@ -37,21 +38,19 @@ public class T4CTTIoAuthDataPacket extends T4CTTIfunPacket implements T4CTTIoAut
     public String       alterSession;
     public String       sysUserName;
     public short        versionNumber;
-    Map<String, String> map                = null;
-
+    public Map<String, String> map                = null;
+    public String encryptedPassword = null;
+    
+    
     public T4CTTIoAuthDataPacket(){
         super(OAUTH);
         initFields();
     }
 
-    @Override
-    protected void marshal(AbstractPacketBuffer buffer) {
-        super.marshal(buffer);
-
-        T4CPacketBuffer meg = (T4CPacketBuffer) buffer;
-        O3LoginClientHelper o3loginclienthelper = new O3LoginClientHelper(meg.getConversion().isServerCSMultiByte);
+    public static String encryptPassword(String userStr,String passwordStr,byte[] encryptedSK,DBConversion conversion){
+    	O3LoginClientHelper o3loginclienthelper = new O3LoginClientHelper(conversion.isServerCSMultiByte);
         byte abyte2[] = o3loginclienthelper.getSessionKey(userStr, passwordStr, encryptedSK);
-        byte abyte0[] = meg.getConversion().StringToCharBytes(passwordStr);
+        byte abyte0[] = conversion.StringToCharBytes(passwordStr);
         byte byte0;
         if (abyte0.length % 8 > 0) byte0 = (byte) (8 - abyte0.length % 8);
         else byte0 = 0;
@@ -64,6 +63,30 @@ public class T4CTTIoAuthDataPacket extends T4CTTIfunPacket implements T4CTTIoAut
          */
         RepConversion.bArray2Nibbles(abyte3, password);
         password[password.length - 1] = RepConversion.nibbleToHex(byte0);
+        return new String(password);
+    }
+    
+    @Override
+    protected void marshal(AbstractPacketBuffer buffer) {
+        super.marshal(buffer);
+
+        T4CPacketBuffer meg = (T4CPacketBuffer) buffer;
+        /*O3LoginClientHelper o3loginclienthelper = new O3LoginClientHelper(meg.getConversion().isServerCSMultiByte);
+        byte abyte2[] = o3loginclienthelper.getSessionKey(userStr, passwordStr, encryptedSK);
+        byte abyte0[] = meg.getConversion().StringToCharBytes(passwordStr);
+        byte byte0;
+        if (abyte0.length % 8 > 0) byte0 = (byte) (8 - abyte0.length % 8);
+        else byte0 = 0;
+        byte abyte1[] = new byte[abyte0.length + byte0];
+        System.arraycopy(abyte0, 0, abyte1, 0, abyte0.length);
+        byte abyte3[] = o3loginclienthelper.getEPasswd(abyte2, abyte1);
+        byte[] password = new byte[2 * abyte1.length + 1];
+        
+         * if (password.length < 2 abyte3.length) DatabaseError.throwSqlException(413);
+         
+        RepConversion.bArray2Nibbles(abyte3, password);
+        password[password.length - 1] = RepConversion.nibbleToHex(byte0);*/
+        
         meg.marshalPTR();
         byte[] user = meg.getConversion().StringToCharBytes(userStr);
         meg.marshalSB4(user.length);
@@ -81,32 +104,11 @@ public class T4CTTIoAuthDataPacket extends T4CTTIfunPacket implements T4CTTIoAut
         meg.marshalPTR();
         meg.marshalCHR(user);
         Map<String, String> map = generateMap();
-        map.put("AUTH_PASSWORD", new String(password));
+        
+        String password = encryptPassword(userStr,passwordStr,encryptedSK.getBytes(),meg.getConversion());
+        
+        map.put("AUTH_PASSWORD", password);
         meg.marshalMap(map);
-
-        /*
-         * byte abyte4[][] = new byte[i][]; byte abyte5[][] = new byte[i][]; byte abyte6[] = new byte[i]; int j = 0;
-         * abyte4[j] = meg.getConversion().StringToCharBytes("AUTH_PASSWORD"); abyte5[j++] = password; abyte4[j++] =
-         * meg.getConversion().StringToCharBytes("AUTH_TERMINAL"); if (programName != null) { abyte4[j] =
-         * meg.getConversion().StringToCharBytes("AUTH_PROGRAM_NM"); abyte5[j++] =
-         * meg.getConversion().StringToCharBytes(programName); } if (clientname != null) { abyte4[j] =
-         * meg.getConversion().StringToCharBytes("PROXY_CLIENT_NAME"); abyte5[j++] =
-         * meg.getConversion().StringToCharBytes(clientname); } abyte4[j] =
-         * meg.getConversion().StringToCharBytes("AUTH_MACHINE"); abyte5[j++] =
-         * meg.getConversion().StringToCharBytes(machine); abyte4[j] =
-         * meg.getConversion().StringToCharBytes("AUTH_PID"); abyte5[j++] =
-         * meg.getConversion().StringToCharBytes(processID); if (flag1) { abyte4[j] =
-         * meg.getConversion().StringToCharBytes("AUTH_INTERNALNAME_"); abyte4[j][abyte4[j].length - 1] = 0; abyte5[j++]
-         * = meg.getConversion().StringToCharBytes(internalName); abyte4[j] =
-         * meg.getConversion().StringToCharBytes("AUTH_EXTERNALNAME_"); abyte4[j][abyte4[j].length - 1] = 0; abyte5[j++]
-         * = meg.getConversion().StringToCharBytes(externalName); } abyte4[j] =
-         * meg.getConversion().StringToCharBytes("AUTH_ACL"); abyte5[j++] =
-         * meg.getConversion().StringToCharBytes(aclValue); abyte4[j] =
-         * meg.getConversion().StringToCharBytes("AUTH_ALTER_SESSION"); abyte5[j] =
-         * meg.getConversion().StringToCharBytes(alterSession); abyte5[j][abyte5[j].length-1] = 0; abyte6[j++] = 1;
-         * abyte4[j] = meg.getConversion().StringToCharBytes("AUTH_COPYRIGHT"); abyte5[j++] =
-         * meg.getConversion().StringToCharBytes(copyright); meg.marshalKEYVAL(abyte4, abyte5, abyte6, i);
-         */
     }
 
     @Override

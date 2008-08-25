@@ -26,8 +26,10 @@ import com.meidusa.amoeba.oracle.net.packet.T4CTTIfunPacket;
 import com.meidusa.amoeba.oracle.net.packet.T4CTTIoAuthDataPacket;
 import com.meidusa.amoeba.oracle.net.packet.T4CTTIoAuthKeyDataPacket;
 import com.meidusa.amoeba.oracle.net.packet.T4CTTIoAuthKeyResponseDataPacket;
+import com.meidusa.amoeba.oracle.net.packet.T4CTTIoAuthResponseDataPacket;
 import com.meidusa.amoeba.oracle.util.ByteUtil;
 import com.meidusa.amoeba.oracle.util.DBConversion;
+import com.meidusa.amoeba.oracle.util.T4CTypeRep;
 
 /**
  * 非常简单的数据包转发程序
@@ -46,7 +48,7 @@ public class OracleMessageHandler implements MessageHandler, Sessionable, SQLnet
     private Packet           lastPackt      = null;
     private int              serverMsgCount = 0;
     private int              clientMsgCount = 0;
-    private byte[]           encryptedSK;
+    private String           encryptedSK;
 
     public OracleMessageHandler(Connection clientConn, Connection serverConn){
         this.clientConn = (OracleConnection) clientConn;
@@ -135,6 +137,8 @@ public class OracleMessageHandler implements MessageHandler, Sessionable, SQLnet
 
                     } else if (lastPackt instanceof T4CTTIoAuthKeyDataPacket) {
                         packet = new T4CTTIoAuthKeyResponseDataPacket();
+                    } else if (lastPackt instanceof T4CTTIoAuthDataPacket) {
+                        packet = new T4CTTIoAuthResponseDataPacket();
                     }
                     break;
             }
@@ -155,6 +159,12 @@ public class OracleMessageHandler implements MessageHandler, Sessionable, SQLnet
                         System.out.println("@@server source:" + ByteUtil.toHex(message, 0, message.length));
                     }
                     message = packet.toByteBuffer(conn).array();
+                    
+                    if(packet instanceof T4C8TTIdtyResponseDataPacket){
+                    	clientConn.setBasicTypes();
+                    	serverConn.setBasicTypes();
+                    }
+                    
                     if (logger.isDebugEnabled()) {
                         System.out.println("@server warpped:" + ByteUtil.toHex(message, 0, message.length));
                         System.out.println();

@@ -388,6 +388,7 @@ public class ConnectionManager extends LoopingThread implements Reporter {
 			connection.setSelectionKey(selkey);
 			configConnection(connection);
 			_stats.connects.incrementAndGet();
+			connection.init();
 			_selector.wakeup();
 			return;
 		} catch (IOException ioe) {

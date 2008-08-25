@@ -56,7 +56,15 @@ public abstract class Connection implements NetEventHandler {
 		_channel = channel;
 		_lastEvent = createStamp;
 	}
-
+	
+	/**
+	 * when connection registed to ConnectionManager, {@link #init()} will invoked.
+	 * @see  <code> {@link ConnectionManager#registerConnection(Connection, int)}</code>
+	 */
+	protected void init(){
+		
+	}
+	
 	public void setConnectionManager(ConnectionManager cmgr){
 		this._cmgr = cmgr;
 	}

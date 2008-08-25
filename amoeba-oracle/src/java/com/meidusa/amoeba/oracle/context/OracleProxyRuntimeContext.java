@@ -29,8 +29,8 @@ public class OracleProxyRuntimeContext extends ProxyRuntimeContext {
     /**
      * 这儿暂时不初始化所有连接池
      */
-    protected void initPools() {
-
-    }
+    /*protected void initPools() {
+    	
+    }*/
 
 }

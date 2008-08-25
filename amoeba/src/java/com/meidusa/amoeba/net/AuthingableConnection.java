@@ -36,7 +36,7 @@ public abstract class AuthingableConnection extends Connection implements Messag
 	public boolean isAuthenticatedSeted() {
 		return authenticatedSeted;
 	}
-
+	
 	public void setAuthenticated(boolean authenticated){
 		synchronized(this){
 			authenticatedSeted = true;
@@ -53,6 +53,7 @@ public abstract class AuthingableConnection extends Connection implements Messag
 	public boolean isAuthenticatedWithBlocked(long timeout){
 		if(authenticatedSeted) return authenticated;
 		synchronized(this){
+			if(authenticatedSeted) return authenticated;
 			try {
 				this.wait(timeout);
 			} catch (InterruptedException e) {
