@@ -58,7 +58,7 @@ public class MysqlServerConnection extends MysqlConnection implements MySqlPacke
 	
 	public MysqlServerConnection(SocketChannel channel, long createStamp) {
 		super(channel, createStamp);
-		//commandRunner = new CommandMessageQueueRunner(this);
+		commandRunner = new CommandMessageQueueRunner(this);
 	}
 	
 	public void handleMessage(Connection conn,byte[] message) {
