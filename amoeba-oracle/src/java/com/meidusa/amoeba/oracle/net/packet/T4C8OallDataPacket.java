@@ -11,14 +11,15 @@ public class T4C8OallDataPacket extends T4CTTIfunPacket {
 
     long                   options;
     int                    cursor;
-    int                    sqlStmtLength;
-    int                    numberOfBindPositions;
+    public int             sqlStmtLength;
+    public int             numberOfBindPositions;
     int                    defCols;
 
-    byte[]                 sqlStmt;
+    public byte[]          sqlStmt;
     final long[]           al8i4 = new long[13];
-    T4CTTIoac[]            oacdefBindsSent;
+    public T4CTTIoac[]     oacdefBindsSent;
     T4CTTIoac[]            oacdefDefines;
+    public byte[][]        params;
 
     int                    receiveState;
     boolean                plsql;
@@ -127,9 +128,14 @@ public class T4C8OallDataPacket extends T4CTTIfunPacket {
         if (numberOfBindPositions <= 0) {
             return;
         }
-        byte[][] ab = new byte[numberOfBindPositions][];
-        for (int i = 0; i < numberOfBindPositions; i++) {
-            ab[i] = meg.unmarshalDALC();
+        short msgCode = meg.unmarshalUB1();
+        if (msgCode == TTIRXD) {
+            params = new byte[numberOfBindPositions][];
+            for (int i = 0; i < numberOfBindPositions; i++) {
+                //meg.unmarshalCLR(params[i], 0, new int[] { 0 });
+            }
+        } else {
+            throw new RuntimeException();
         }
 
     }

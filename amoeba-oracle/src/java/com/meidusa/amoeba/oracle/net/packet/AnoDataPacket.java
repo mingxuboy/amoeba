@@ -72,15 +72,25 @@ public class AnoDataPacket extends DataPacket implements AnoServices {
 
     }
 
-    public String toString() {
-        StringBuffer sb = new StringBuffer();
-        sb.append("AnoClientDataPacket info ==============================\n");
-        return sb.toString();
-    }
-
     @Override
     protected Class<? extends AbstractPacketBuffer> getBufferClass() {
         return AnoPacketBuffer.class;
+    }
+
+    public static boolean isAnoType(byte[] buffer) {
+        if (buffer != null && buffer.length > 13) {
+            long l = 0L;
+            int i = 10;
+            l |= ((buffer[i++] & 0xff) << 24);
+            l |= ((buffer[i++] & 0xff) << 16);
+            l |= ((buffer[i++] & 0xff) << 8);
+            l |= (buffer[i++] & 0xff);
+            l &= -1L;
+            return (l == NA_MAGIC);
+        } else {
+            return false;
+        }
+
     }
 
 }

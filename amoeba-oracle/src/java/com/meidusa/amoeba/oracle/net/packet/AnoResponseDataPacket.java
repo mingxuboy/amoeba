@@ -2,8 +2,6 @@ package com.meidusa.amoeba.oracle.net.packet;
 
 import java.io.UnsupportedEncodingException;
 
-import org.apache.log4j.Logger;
-
 import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
 
 /**
@@ -12,14 +10,12 @@ import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
  */
 public class AnoResponseDataPacket extends DataPacket implements AnoServices {
 
-    private static Logger logger = Logger.getLogger(AnoResponseDataPacket.class);
+    int          m              = 0;
+    long         version        = 0;
+    int          anoServiceSize = 0; ;
+    short        h              = 0;
 
-    int                   m;
-    long                  version;
-    int                   anoServiceSize;
-    short                 h;
-
-    AnoService[]          anoService;
+    AnoService[] anoService;
 
     public void setAnoService(AnoService[] service) {
         anoService = new AnoService[service.length + 1];
@@ -29,9 +25,9 @@ public class AnoResponseDataPacket extends DataPacket implements AnoServices {
     }
 
     @Override
-    protected void init(AbstractPacketBuffer absbuffer) {    	
+    protected void init(AbstractPacketBuffer absbuffer) {
         super.init(absbuffer);
-        OracleAbstractPacketBuffer buffer = (OracleAbstractPacketBuffer)absbuffer;
+        OracleAbstractPacketBuffer buffer = (OracleAbstractPacketBuffer) absbuffer;
         if (buffer.readUB4() != DEADBEEF) {
             throw new RuntimeException("Wrong Magic number in na packet");
         }
@@ -51,17 +47,12 @@ public class AnoResponseDataPacket extends DataPacket implements AnoServices {
         // for (int i = 0; i < anoServiceSize; i++) {
         //
         // }
-
-        if (logger.isDebugEnabled()) {
-            logger.debug(this.toString());
-        }
-
     }
 
     @Override
-    protected void write2Buffer(AbstractPacketBuffer absbuffer) throws UnsupportedEncodingException {    	
+    protected void write2Buffer(AbstractPacketBuffer absbuffer) throws UnsupportedEncodingException {
         super.write2Buffer(absbuffer);
-        AnoPacketBuffer buffer = (AnoPacketBuffer)absbuffer;
+        AnoPacketBuffer buffer = (AnoPacketBuffer) absbuffer;
         buffer.writeUB4(NA_MAGIC);
         buffer.writeUB2(m);
         buffer.writeUB4(version);
@@ -81,14 +72,9 @@ public class AnoResponseDataPacket extends DataPacket implements AnoServices {
         }
 
     }
-    public String toString() {
-        StringBuffer sb = new StringBuffer();
-        sb.append("AnoServerDataPacket info ==============================\n");
-        return sb.toString();
-    }
 
     @Override
-	protected Class<? extends AbstractPacketBuffer> getBufferClass() {
-		return AnoPacketBuffer.class;
-	}
+    protected Class<? extends AbstractPacketBuffer> getBufferClass() {
+        return AnoPacketBuffer.class;
+    }
 }

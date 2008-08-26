@@ -487,7 +487,9 @@ public class T4CPacketBuffer extends OracleAbstractPacketBuffer implements Oracl
     }
 
     int unmarshalBuffer(byte abyte0[], int i, int j) {
-        if (j <= 0) return i;
+        if (j <= 0) {
+            return i;
+        }
         if (abyte0.length < i + j) {
             unmarshalNBytes(abyte0, i, abyte0.length - i);
             unmarshalNBytes(ignored, 0, (i + j) - abyte0.length);
@@ -501,7 +503,7 @@ public class T4CPacketBuffer extends OracleAbstractPacketBuffer implements Oracl
 
     byte[] unmarshalDALC() {
         long l = unmarshalUB4();
-        byte abyte0[] = new byte[(int) (-1L & l)];
+        byte[] abyte0 = new byte[(int) (-1L & l)];
         if (abyte0.length > 0) {
             abyte0 = unmarshalCLR(abyte0.length, retLen);
             if (abyte0 == null) {
@@ -667,8 +669,12 @@ public class T4CPacketBuffer extends OracleAbstractPacketBuffer implements Oracl
                 i &= 0x7f;
                 flag = true;
             }
-            if (i < 0) throw new RuntimeException("无法从套接字读取更多的数据");
-            if (i == 0) return 0L;
+            if (i < 0) {
+                throw new RuntimeException("无法从套接字读取更多的数据");
+            }
+            if (i == 0) {
+                return 0L;
+            }
             if ((b == 1 && i > 2) || (b == 2 && i > 4) || (b == 3 && i > 8)) {
                 throw new RuntimeException("类型长度大于最大值");
             }

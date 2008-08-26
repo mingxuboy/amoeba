@@ -21,7 +21,6 @@ public class T4C8OcloseDataPacket extends T4CTTIfunPacket {
     @Override
     protected void marshal(AbstractPacketBuffer buffer) {
         super.marshal(buffer);
-
     }
 
     @Override
