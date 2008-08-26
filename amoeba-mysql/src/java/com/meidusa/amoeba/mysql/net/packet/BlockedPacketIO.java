@@ -17,7 +17,6 @@ import java.io.InputStream;
 import java.sql.SQLException;
 
 import com.meidusa.amoeba.mysql.jdbc.Messages;
-import com.mysql.jdbc.CommunicationsException;
 
 /**
  * ×èÈûÄ£Ê½¶ÁÈ¡ packet
@@ -50,7 +49,6 @@ public class BlockedPacketIO {
      *
      * @throws SQLException DOCUMENT ME!
      * @throws IOException 
-     * @throws CommunicationsException DOCUMENT ME!
      */
     public static final MysqlPacketBuffer readFullyPacketBuffer(InputStream mysqlInput) throws IOException {
     	
