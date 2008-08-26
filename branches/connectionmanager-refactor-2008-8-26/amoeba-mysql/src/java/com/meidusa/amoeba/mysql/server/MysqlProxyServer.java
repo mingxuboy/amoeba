@@ -144,7 +144,7 @@ public class MysqlProxyServer {
 		authen.addAuthenticateFilter(new IPAccessController(accessConf));
 		
 		mysqlProxyServerconMger.setAuthenticator(authen);
-		mysqlProxyServerconMger.setExecutor(context.getReadExecutor());
+		mysqlProxyServerconMger.setExecutor(context.getClientSideExecutor());
 		
 		mysqlProxyServerconMger.start();
 		new Thread(){

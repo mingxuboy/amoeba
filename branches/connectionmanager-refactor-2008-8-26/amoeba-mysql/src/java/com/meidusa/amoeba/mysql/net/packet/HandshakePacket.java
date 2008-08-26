@@ -125,7 +125,7 @@ public class HandshakePacket extends AbstractPacket{
 		buffer.writeLong(threadId);
 		buffer.writeString(seed);
 		buffer.writeInt(serverCapabilities);
-		buffer.writeByte(serverCharsetIndex);
+		buffer.writeByte(serverCharsetIndex == 0 ? 14:serverCharsetIndex);
 		buffer.writeInt(serverStatus);
 		buffer.writeBytesNoNull(new byte[13]);
 		buffer.writeString(restOfScrambleBuff);

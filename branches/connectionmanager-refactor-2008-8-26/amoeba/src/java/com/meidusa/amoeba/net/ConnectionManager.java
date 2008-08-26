@@ -30,7 +30,6 @@ import org.apache.log4j.Logger;
 import com.meidusa.amoeba.context.ProxyRuntimeContext;
 import com.meidusa.amoeba.data.ConMgrStats;
 import com.meidusa.amoeba.util.LoopingThread;
-import com.meidusa.amoeba.util.NameableRunner;
 import com.meidusa.amoeba.util.Queue;
 import com.meidusa.amoeba.util.Reporter;
 import com.meidusa.amoeba.util.Tuple;
@@ -41,6 +40,7 @@ import com.meidusa.amoeba.util.Tuple;
  */
 public class ConnectionManager extends LoopingThread implements Reporter {
 	protected static Logger logger = Logger.getLogger(ConnectionManager.class);
+	private static Logger repoterLog = Logger.getLogger("report");
 	protected static final int SELECT_LOOP_TIME = 100;
 
 	// codes for notifyObservers()
@@ -70,7 +70,7 @@ public class ConnectionManager extends LoopingThread implements Reporter {
 
 	private long idleCheckTime = 5000; //Connection idle check per 5 second
 	private long lastIdleCheckTime = 0;
-	
+	private long lastReportTime = 0;
 	public void setIdleCheckTime(long idleCheckTime) {
 		this.idleCheckTime = idleCheckTime;
 	}
@@ -159,6 +159,33 @@ public class ConnectionManager extends LoopingThread implements Reporter {
 			}
 		}
 		
+		if(repoterLog.isDebugEnabled()){
+			if(iterStamp - lastReportTime>60*1000){
+				
+				StringBuilder builder = new StringBuilder();
+				this.appendReport(builder, iterStamp, lastReportTime, false, repoterLog.getLevel());
+				for(SelectionKey key: _selector.keys()){
+		        	if(key.attachment() instanceof Connection){
+		        		Connection conn = (Connection)key.attachment();
+		        		builder.append("- conn: ").append(" framingData:")
+		        		.append(conn.getPacketInputStream().toString())
+		        		.append(" ,outQueue:").append(conn._outQueue.size()).append(" selectKeyOps:"+key.interestOps())
+		        		.append(" ,messagehandler:").append(conn._handler).append("\n");
+		        	}
+		        	
+		        	if(key.attachment() instanceof Reporter.SubReporter){
+		        		Reporter.SubReporter reporter = (Reporter.SubReporter)key.attachment();
+		        		reporter.appendReport(builder, iterStamp, lastReportTime, false,repoterLog.getLevel());
+		        	}
+		        }
+				
+				lastReportTime = iterStamp;
+				repoterLog.debug("---------------------------------");
+				repoterLog.debug(builder.toString());
+				repoterLog.debug("---------------------------------");
+			}
+		}
+		
 		//将注册的连接加入handler map中
 		Tuple<NetEventHandler,Integer> registerHandler = null;
 		while ((registerHandler = _registerQueue.getNonBlocking()) != null) {
@@ -213,9 +240,8 @@ public class ConnectionManager extends LoopingThread implements Reporter {
 		
 		final CountDownLatch latch = new CountDownLatch(ready.size());
 		//处理事件（网络数据流交互等）
-		for (SelectionKey selkey : ready) {
-			NetEventHandler handler = null;
-			handler = (NetEventHandler)selkey.attachment();
+		for (final SelectionKey selkey : ready) {
+			final NetEventHandler handler = (NetEventHandler)selkey.attachment();
 			if (handler == null) {
 				latch.countDown();
 				logger.warn("Received network event but have no registered handler "
@@ -225,43 +251,75 @@ public class ConnectionManager extends LoopingThread implements Reporter {
 			}
 			
 			if(selkey.isWritable()){
-				try{
-					boolean finished = handler.doWrite();
-					if(finished){
+				if(selkey.isValid()){
+					/*synchronized(selkey){
 						selkey.interestOps(selkey.interestOps() & ~SelectionKey.OP_WRITE);
-					}
-				} catch (Exception e) {
-					logger.warn("Error processing network data: " + handler + ".", e);
-
-					if (handler != null && handler instanceof Connection) {
-						closeConnection((Connection) handler,e);
-					}
-				}finally{
-					latch.countDown();
-				}
-			}else if(selkey.isReadable() || selkey.isAcceptable()){
-				final NetEventHandler tmpHandler = handler;
-
-				executor.execute(new NameableRunner(){
-					public void run(){
+					}*/
+					/*executor.execute(new Runnable(){
+						public void run(){*/
 						try{
-							int got = tmpHandler.handleEvent(iterStamp);
-							/*if (got != 0) {
-								lock.lock();
-								try{
-									_stats.bytesIn += got;
-									_stats.msgsIn++;
-								}finally{
-									lock.unlock();
+							if(selkey.isValid()){
+								synchronized(selkey){
+									boolean finished = handler.doWrite();
+									if(finished){
+										if(selkey.isValid()){
+											try{
+												selkey.interestOps(selkey.interestOps() & ~SelectionKey.OP_WRITE);
+											}catch(java.nio.channels.CancelledKeyException e){
+											}
+										}
+									}
 								}
-							}*/
+							}
+						} catch (Exception e) {
+							logger.warn("Error processing network data: " + handler + ".", e);
+		
+							if (handler != null && handler instanceof Connection) {
+								closeConnection((Connection) handler,e);
+							}
 						}finally{
 							latch.countDown();
 						}
+					//}});
+				}
+			}else if(selkey.isReadable()){
+				final NetEventHandler tmpHandler = handler;
+				if(selkey.isValid()){
+					synchronized(selkey){
+						selkey.interestOps(selkey.interestOps() & ~SelectionKey.OP_READ);
 					}
+					executor.execute(new Runnable(){
+						public void run(){
+							try{
+								tmpHandler.handleEvent(iterStamp,SelectionKey.OP_READ);
+							}finally{
+								if(selkey.isValid()){
+									synchronized(selkey){
+										try{
+											selkey.interestOps(selkey.interestOps() | SelectionKey.OP_READ);
+										}catch(java.nio.channels.CancelledKeyException e){
+											if(tmpHandler instanceof Connection){
+												((Connection)tmpHandler).handleFailure(e);
+											}
+										}
+									}
+									selkey.selector().wakeup();
+								}
+								latch.countDown();
+							}
+						}
+					});
+				}
+			}else if(selkey.isAcceptable()){
+				final NetEventHandler tmpHandler = handler;
 
-					public String getRunnerName() {
-						return ConnectionManager.this.getName()+"-Reading";
+				executor.execute(new Runnable(){
+					public void run(){
+						try{
+							tmpHandler.handleEvent(iterStamp,SelectionKey.OP_ACCEPT);
+						}finally{
+							latch.countDown();
+						}
 					}
 				});
 			}else{
@@ -271,10 +329,10 @@ public class ConnectionManager extends LoopingThread implements Reporter {
 		}
 		
 		ready.clear();
-		try {
+		/*try {
 			latch.await();
 		} catch (InterruptedException e) {
-		}
+		}*/
 	}
 	
 	/**
@@ -464,12 +522,12 @@ public class ConnectionManager extends LoopingThread implements Reporter {
 		}*/
 	}
 
-	public void invokeConnectionWriteMessage(Connection connection) {
+	public void notifyMessagePosted(Connection connection) {
 		if(connection.isClosed()) return;
 		try {
 			SelectionKey key = connection.getSelectionKey();
 			if(!key.isValid()){
-				connection.handleFailure(new java.nio.channels.CancelledKeyException());
+				connection.handleFailure(null);
 				return;
 			}
 			synchronized(key){

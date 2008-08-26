@@ -91,7 +91,7 @@ public class ServerableConnectionManager extends AuthingableConnectionManager{
 		// accept new connections
 		NetEventHandler serverNetEvent = new NetEventHandler() {
 			private SelectionKey key;
-			public int handleEvent(long when) {
+			public int handleEvent(long when,int netOps) {
 				acceptConnection(listener);
 				return 0;
 			}

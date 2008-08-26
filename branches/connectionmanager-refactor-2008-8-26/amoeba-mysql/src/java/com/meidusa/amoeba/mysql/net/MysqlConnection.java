@@ -54,7 +54,7 @@ public abstract class MysqlConnection extends DatabaseConnection {
         out.put(msg);
         out.flip();
         _outQueue.append(out);
-        _cmgr.invokeConnectionWriteMessage(this);
+        _cmgr.notifyMessagePosted(this);
     }
 	
 	public String toString(){

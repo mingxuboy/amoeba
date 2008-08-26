@@ -63,7 +63,7 @@ public class PerformaceTest {
 					PreparedStatement statment = null;
 					ResultSet result = null;
 					try{
-						conn = DriverManager.getConnection("jdbc:mysql://"+ip+":3306/test","root",null);
+						conn = DriverManager.getConnection("jdbc:mysql://"+ip+":8066/test","root",null);
 						for(int i=0;i<runcount;i++){
 							try{
 							statment = conn.prepareStatement(sqlext);

@@ -68,7 +68,7 @@ public abstract class OracleConnection extends DatabaseConnection {
         out.put(msg);
         out.flip();
         _outQueue.append(out);
-        _cmgr.invokeConnectionWriteMessage(this);
+        _cmgr.notifyMessagePosted(this);
     }
 
     public int getSdu() {

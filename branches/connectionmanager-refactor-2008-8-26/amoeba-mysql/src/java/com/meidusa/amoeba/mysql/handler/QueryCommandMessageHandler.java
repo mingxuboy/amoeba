@@ -44,6 +44,40 @@ public class QueryCommandMessageHandler extends CommandMessageHandler{
 		public boolean isCompleted(byte[] buffer) {
 			if(this.commandType == QueryCommandPacket.COM_QUERY){
 				boolean isCompleted = false; 
+				/*switch(buffer[4]){
+					case (byte)0xff:{
+						statusCode |= SessionStatus.ERROR;
+						statusCode |= SessionStatus.COMPLETED;
+						isCompleted = true;
+						break;
+					}
+					case (byte)0x00:{
+						if(packetIndex == 0){
+							statusCode |= SessionStatus.OK;
+							statusCode |= SessionStatus.COMPLETED;
+							isCompleted = true;
+							break;
+						}
+					}
+					case (byte)0xfe:{
+						if((statusCode & SessionStatus.EOF_FIELDS) >0){
+							statusCode |= SessionStatus.EOF_ROWS;
+							statusCode |= SessionStatus.COMPLETED;
+							isCompleted = true;
+						}else{
+							statusCode |= SessionStatus.EOF_FIELDS;
+							isCompleted = false;
+						}
+						break;
+					}
+					default :{
+						if(statusCode == SessionStatus.QUERY){
+							statusCode |= SessionStatus.RESULT_HEAD;
+						}
+					}
+				
+				}*/
+				
 				if(MysqlPacketBuffer.isErrorPacket(buffer)){
 					statusCode |= SessionStatus.ERROR;
 					statusCode |= SessionStatus.COMPLETED;
