@@ -27,7 +27,7 @@ public interface NetEventHandler {
 	 * @param when
 	 * @return
 	 */
-	public int handleEvent (long when);
+	public int handleEvent (long when,int netOp);
 	
 	/**
 	 * 检查是否以及处于idle，如果返回true，则需要关闭.

@@ -152,7 +152,7 @@ public abstract class Connection implements NetEventHandler {
 			 // wake up again to trigger thread death
 			selector.wakeup();
 			
-			_selkey = null;
+			//_selkey = null;
 		}
 		
 		logger.debug("Closing channel " + this + ".");
@@ -195,13 +195,13 @@ public abstract class Connection implements NetEventHandler {
 	public void handleFailure(Exception ioe) {
 		//如果已经关闭
 		if (isClosed()) {
-			logger.warn("Failure reported on closed connection " + this + ".",ioe);
+			//logger.warn("Failure reported on closed connection " + this + ".",ioe);
 			return;
 		}
 		postClose(ioe);
 	}
 
-	public int handleEvent(long when) {
+	public synchronized int handleEvent(long when,int netOp) {
 		int bytesInTotle = 0;
 		try {
 			if (_fin == null) {
@@ -223,7 +223,7 @@ public abstract class Connection implements NetEventHandler {
 			}
 		} catch (EOFException eofe) {
 			// close down the socket gracefully
-			handleFailure(eofe);
+			//handleFailure(eofe);
 		} catch (IOException ioe) {
 			// don't log a warning for the ever-popular "the client dropped the
 			// connection" failure
@@ -279,7 +279,10 @@ public abstract class Connection implements NetEventHandler {
 	        out.put(buffer);
 	        out.flip();
 	        _outQueue.append(out);
-	        _cmgr.invokeConnectionWriteMessage(this);
+	        synchronized(this.getSelectionKey()){
+	        	
+	        }
+	        //_cmgr.invokeConnectionWriteMessage(this);
 		} catch (IOException e) {
 			this._cmgr.connectionFailed(this, e);
 		}
@@ -288,7 +291,7 @@ public abstract class Connection implements NetEventHandler {
 	public void postMessage(ByteBuffer msg)
     {
 		_outQueue.append(msg);
-        _cmgr.invokeConnectionWriteMessage(this);
+        _cmgr.notifyMessagePosted(this);
     }
 	
 	public boolean checkIdle(long now) {
