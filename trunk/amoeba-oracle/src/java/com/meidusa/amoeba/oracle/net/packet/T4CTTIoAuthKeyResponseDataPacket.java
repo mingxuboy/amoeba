@@ -14,12 +14,12 @@ import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
  */
 public class T4CTTIoAuthKeyResponseDataPacket extends DataPacket implements T4CTTIoAuth {
 
-    private static Logger logger      = Logger.getLogger(T4CTTIoAuthKeyResponseDataPacket.class);
+    private static Logger      logger      = Logger.getLogger(T4CTTIoAuthKeyResponseDataPacket.class);
 
-    public String                encryptedSK = null;
-    public T4CTTIoer             oer         = null;
-    public Map<String,String> map;
-    
+    public String              encryptedSK = null;
+    public T4CTTIoer           oer         = null;
+    public Map<String, String> map;
+
     @Override
     protected void init(AbstractPacketBuffer absbuffer) {
         super.init(absbuffer);
@@ -62,12 +62,12 @@ public class T4CTTIoAuthKeyResponseDataPacket extends DataPacket implements T4CT
     protected void write2Buffer(AbstractPacketBuffer absbuffer) throws UnsupportedEncodingException {
         super.write2Buffer(absbuffer);
         T4CPacketBuffer meg = (T4CPacketBuffer) absbuffer;
-        if(oer == null){
-        	oer = new T4CTTIoer(meg);
+        if (oer == null) {
+            oer = new T4CTTIoer(meg);
         }
-        
-        if(map == null){
-        	map = genMap();
+
+        if (map == null) {
+            map = genMap();
         }
         meg.marshalUB1((byte) 8);
         meg.marshalUB2(map.size());
@@ -76,11 +76,11 @@ public class T4CTTIoAuthKeyResponseDataPacket extends DataPacket implements T4CT
         meg.marshalUB1((byte) 4);
         oer.marshal(meg);
     }
-    
-    private Map<String,String> genMap(){
-    	Map<String,String> properties = new HashMap<String,String>();
-    	properties.put(AUTH_SESSKEY, encryptedSK);
-    	return properties;
+
+    private Map<String, String> genMap() {
+        Map<String, String> properties = new HashMap<String, String>();
+        properties.put(AUTH_SESSKEY, encryptedSK);
+        return properties;
     }
 
     @Override

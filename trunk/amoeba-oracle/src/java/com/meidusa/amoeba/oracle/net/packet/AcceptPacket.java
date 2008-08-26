@@ -2,8 +2,6 @@ package com.meidusa.amoeba.oracle.net.packet;
 
 import java.io.UnsupportedEncodingException;
 
-import org.apache.log4j.Logger;
-
 import com.meidusa.amoeba.net.Connection;
 import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
 
@@ -13,15 +11,13 @@ import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
  */
 public class AcceptPacket extends AbstractPacket {
 
-    private static Logger logger        = Logger.getLogger(AcceptPacket.class);
-
-    protected int         version       = 308;
-    protected int         options       = 0;
-    protected int         sduSize       = NSPDFSDULN;
-    protected int         tduSize       = NSPMXSDULN;
-    protected int         myHWByteOrder = 256;
-    protected byte        flag0         = 69;
-    protected byte        flag1         = 0;
+    protected int  version       = 308;
+    protected int  options       = 0;
+    protected int  sduSize       = NSPDFSDULN;
+    protected int  tduSize       = NSPMXSDULN;
+    protected int  myHWByteOrder = 256;
+    protected byte flag0         = 69;
+    protected byte flag1         = 0;
 
     public AcceptPacket(){
         super(NS_PACKT_TYPE_ACCEPT);
@@ -53,14 +49,10 @@ public class AcceptPacket extends AbstractPacket {
         dataOffset |= buffer[21] & 0xff;
         flag0 = buffer[22];
         flag1 = buffer[23];
-
-        if (logger.isDebugEnabled()) {
-            logger.debug(this.toString());
-        }
     }
 
     @Override
-    protected void write2Buffer(AbstractPacketBuffer absbuffer) throws UnsupportedEncodingException {        
+    protected void write2Buffer(AbstractPacketBuffer absbuffer) throws UnsupportedEncodingException {
         super.write2Buffer(absbuffer);
         OracleAbstractPacketBuffer buffer = (OracleAbstractPacketBuffer) absbuffer;
         buffer.writeUB2(version);
@@ -72,19 +64,6 @@ public class AcceptPacket extends AbstractPacket {
         buffer.writeUB2(dataOffset);
         buffer.writeUB1(flag0);
         buffer.writeUB1(flag1);
-    }
-
-    public String toString() {
-        StringBuffer sb = new StringBuffer();
-        sb.append("AcceptPacket info ==============================\n");
-        sb.append("version:").append(version).append("\n");
-        sb.append("options:").append(options).append("\n");
-        sb.append("sduSize:").append(sduSize).append("\n");
-        sb.append("tduSize:").append(tduSize).append("\n");
-        sb.append("myHWByteOrder:").append(myHWByteOrder).append("\n");
-        sb.append("flag0:").append(flag0).append("\n");
-        sb.append("flag1:").append(flag1).append("\n");
-        return sb.toString();
     }
 
 }
