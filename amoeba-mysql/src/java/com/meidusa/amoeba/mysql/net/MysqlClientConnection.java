@@ -134,7 +134,7 @@ public class MysqlClientConnection extends MysqlConnection{
 		final PacketFilterInvocation invocation = new PacketFilterInvocation(filterList,this,msg){
 			@Override
 			protected Result doProcess() {
-				/*ProxyRuntimeContext.getInstance().getClientSideExecutor().execute(new NameableRunner(){
+				ProxyRuntimeContext.getInstance().getClientSideExecutor().execute(new NameableRunner(){
 
 					public void run() {
 						MysqlClientConnection.this.getMessageHandler().handleMessage(MysqlClientConnection.this, msg);
@@ -145,9 +145,9 @@ public class MysqlClientConnection extends MysqlConnection{
 					}
 					
 				});
-				return null;*/
-				MysqlClientConnection.this.getMessageHandler().handleMessage(MysqlClientConnection.this, msg);
 				return null;
+				//MysqlClientConnection.this.getMessageHandler().handleMessage(MysqlClientConnection.this, msg);
+				//return null;
 			}
 		};
 		invocation.invoke();
