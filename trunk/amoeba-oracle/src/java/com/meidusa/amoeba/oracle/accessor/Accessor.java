@@ -2,115 +2,74 @@ package com.meidusa.amoeba.oracle.accessor;
 
 public abstract class Accessor {
 
-    static final int FIXED_CHAR         = 999;
-    static final int CHAR               = 96;
-    static final int VARCHAR            = 1;
-    static final int VCS                = 9;
-    static final int LONG               = 8;
-    static final int NUMBER             = 2;
-    static final int VARNUM             = 6;
-    static final int BINARY_FLOAT       = 100;
-    static final int BINARY_DOUBLE      = 101;
-    static final int RAW                = 23;
-    static final int VBI                = 15;
-    static final int LONG_RAW           = 24;
-    static final int ROWID              = 104;
-    static final int ROWID_THIN         = 11;
-    static final int RESULT_SET         = 102;
-    static final int RSET               = 116;
-    static final int DATE               = 12;
-    static final int BLOB               = 113;
-    static final int CLOB               = 112;
-    static final int BFILE              = 114;
-    static final int NAMED_TYPE         = 109;
-    static final int REF_TYPE           = 111;
-    static final int TIMESTAMP          = 180;
-    static final int TIMESTAMPTZ        = 181;
-    static final int TIMESTAMPLTZ       = 231;
-    static final int INTERVALYM         = 182;
-    static final int INTERVALDS         = 183;
-    static final int UROWID             = 208;
-    static final int PLSQL_INDEX_TABLE  = 998;
-    static final int T2S_OVERLONG_RAW   = 997;
-    static final int SET_CHAR_BYTES     = 996;
-    static final int NULL_TYPE          = 995;
-    static final int DML_RETURN_PARAM   = 994;
+    public static final int VARCHAR            = 1;
+    public static final int NUMBER             = 2;
+    public static final int VARNUM             = 6;
+    public static final int LONG               = 8;
+    public static final int VCS                = 9;
+    public static final int ROWID_THIN         = 11;
+    public static final int DATE               = 12;
+    public static final int VBI                = 15;
+    public static final int RAW                = 23;
+    public static final int LONG_RAW           = 24;
+    public static final int CHAR               = 96;
 
-    static final int ONLY_FORM_USABLE   = 0;
-    static final int NOT_USABLE         = 1;
-    static final int NO_NEED_TO_PREPARE = 2;
-    static final int NEED_TO_PREPARE    = 3;
+    public static final int BINARY_FLOAT       = 100;
+    public static final int BINARY_DOUBLE      = 101;
+    public static final int RESULT_SET         = 102;
+    public static final int ROWID              = 104;
+    public static final int NAMED_TYPE         = 109;
+    public static final int REF_TYPE           = 111;
+    public static final int CLOB               = 112;
+    public static final int BLOB               = 113;
+    public static final int BFILE              = 114;
+    public static final int RSET               = 116;
 
-    boolean          outBind;
-    int              internalType;
-    int              internalTypeMaxLength;
-    boolean          isStream;
-    boolean          isColumnNumberAware;
-    short            formOfUse;
+    public static final int TIMESTAMP          = 180;
+    public static final int TIMESTAMPTZ        = 181;
+    public static final int INTERVALYM         = 182;
+    public static final int INTERVALDS         = 183;
+    public static final int UROWID             = 208;
+    public static final int TIMESTAMPLTZ       = 231;
 
-    int              externalType;
-    String           internalTypeName;
-    String           columnName;
-    int              describeType;
-    int              describeMaxLength;
-    boolean          nullable;
-    int              precision;
-    int              scale;
-    int              flags;
-    int              contflag;
-    int              total_elems;
+    public static final int DML_RETURN_PARAM   = 994;
+    public static final int NULL_TYPE          = 995;
+    public static final int SET_CHAR_BYTES     = 996;
+    public static final int T2S_OVERLONG_RAW   = 997;
+    public static final int PLSQL_INDEX_TABLE  = 998;
+    public static final int FIXED_CHAR         = 999;
 
-    String           describeTypeName;
-    int              definedColumnType;
-    int              definedColumnSize;
-    int              oacmxl;
-    byte[]           rowSpaceByte;
-    char[]           rowSpaceChar;
-    short[]          rowSpaceIndicator;
-    int              columnIndex;
-    int              lengthIndex;
-    int              indicatorIndex;
-    int              columnIndexLastRow;
-    int              lengthIndexLastRow;
-    int              indicatorIndexLastRow;
-    int              byteLength;
-    int              charLength;
-    int              defineType;
-    boolean          isDMLReturnedParam;
-    int              lastRowProcessed;
-    public boolean   isUseLess;
-    public int       physicalColumnIndex;
-    boolean          isNullByDescribe;
+    public static final int ONLY_FORM_USABLE   = 0;
+    public static final int NOT_USABLE         = 1;
+    public static final int NO_NEED_TO_PREPARE = 2;
+    public static final int NEED_TO_PREPARE    = 3;
 
-    Accessor(){
-        isStream = false;
-        isColumnNumberAware = false;
-        formOfUse = 2;
-        definedColumnType = 0;
-        definedColumnSize = 0;
-        oacmxl = 0;
-        rowSpaceByte = null;
-        rowSpaceChar = null;
-        rowSpaceIndicator = null;
-        columnIndex = 0;
-        lengthIndex = 0;
-        indicatorIndex = 0;
-        columnIndexLastRow = 0;
-        lengthIndexLastRow = 0;
-        indicatorIndexLastRow = 0;
-        byteLength = 0;
-        charLength = 0;
-        isDMLReturnedParam = false;
-        lastRowProcessed = 0;
-        isUseLess = false;
-        physicalColumnIndex = -2;
-        isNullByDescribe = false;
+    protected byte[]        rowSpaceByte;
+    protected int           internalTypeMaxLength;
+    protected int           definedColumnSize;
+
+    public byte[] getRowSpaceByte() {
+        return rowSpaceByte;
     }
 
-    public boolean unmarshalOneRow() {
-        return false;
+    public void setRowSpaceByte(byte[] rowSpaceByte) {
+        this.rowSpaceByte = rowSpaceByte;
     }
 
-    public void copyRow() {
+    public int getInternalTypeMaxLength() {
+        return internalTypeMaxLength;
     }
+
+    public void setInternalTypeMaxLength(int internalTypeMaxLength) {
+        this.internalTypeMaxLength = internalTypeMaxLength;
+    }
+
+    public int getDefinedColumnSize() {
+        return definedColumnSize;
+    }
+
+    public void setDefinedColumnSize(int definedColumnSize) {
+        this.definedColumnSize = definedColumnSize;
+    }
+
 }

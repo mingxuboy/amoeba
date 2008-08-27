@@ -48,80 +48,80 @@ public class T4CPacketBuffer extends OracleAbstractPacketBuffer implements Oracl
     /**
      * 发送有符号byte
      */
-    void marshalSB1(byte b) {
+    public void marshalSB1(byte b) {
         writeByte(b);
     }
 
     /**
      * 发送无符号byte
      */
-    void marshalUB1(short s) {
+    public void marshalUB1(short s) {
         marshalSB1((byte) (s & 0xff));
     }
 
-    void marshalSB2(short s) {
+    public void marshalSB2(short s) {
         byte b = int2Buffer(s, tmpBuffer2, (byte) 1);
         if (b != 0) {
             writeBytes(tmpBuffer2, 0, b);
         }
     }
 
-    void marshalUB2(int i) {
+    public void marshalUB2(int i) {
         marshalSB2((short) (i & 0xffff));
     }
 
-    void marshalSB4(int i) {
+    public void marshalSB4(int i) {
         byte b = int2Buffer(i, tmpBuffer4, (byte) 2);
         if (b != 0) {
             writeBytes(tmpBuffer4, 0, b);
         }
     }
 
-    void marshalUB4(long l) {
+    public void marshalUB4(long l) {
         marshalSB4((int) (l & -1L));
     }
 
-    void marshalSB8(long l) {
+    public void marshalSB8(long l) {
         byte b = long2Buffer(l, tmpBuffer8, (byte) 3);
         if (b != 0) {
             writeBytes(tmpBuffer8, 0, b);
         }
     }
 
-    void marshalSWORD(int i) {
+    public void marshalSWORD(int i) {
         marshalSB4(i);
     }
 
-    void marshalUWORD(long l) {
+    public void marshalUWORD(long l) {
         marshalSB4((int) (l & -1L));
     }
 
-    void marshalB1Array(byte[] ab) {
+    public void marshalB1Array(byte[] ab) {
         if (ab.length > 0) {
             writeBytes(ab, 0, ab.length);
         }
     }
 
-    void marshalB1Array(byte[] ab, int i, int j) {
+    public void marshalB1Array(byte[] ab, int i, int j) {
         if (ab.length > 0) {
             writeBytes(ab, i, j);
         }
     }
 
-    void marshalUB4Array(long[] al) {
+    public void marshalUB4Array(long[] al) {
         for (int i = 0; i < al.length; i++) {
             marshalSB4((int) (al[i] & -1L));
         }
     }
 
-    void unmarshalUB4Array(long[] al) {
+    public void unmarshalUB4Array(long[] al) {
         for (int i = 0; i < al.length; i++) {
             long l = unmarshalSB4() & -1L;
             al[i] = l;
         }
     }
 
-    void marshalO2U(boolean flag) {
+    public void marshalO2U(boolean flag) {
         if (flag) {
             marshalPTR();
         } else {
@@ -129,19 +129,19 @@ public class T4CPacketBuffer extends OracleAbstractPacketBuffer implements Oracl
         }
     }
 
-    void marshalNULLPTR() {
+    public void marshalNULLPTR() {
         addPtr((byte) 0);
     }
 
-    void marshalPTR() {
+    public void marshalPTR() {
         addPtr((byte) 1);
     }
 
-    void marshalCHR(byte[] ab) {
+    public void marshalCHR(byte[] ab) {
         marshalCHR(ab, 0, ab.length);
     }
 
-    void marshalCHR(byte[] ab, int offset, int len) {
+    public void marshalCHR(byte[] ab, int offset, int len) {
         if (len > 0) {
             if (getTypeRep().isConvNeeded()) {
                 marshalCLR(ab, offset, len);
@@ -151,7 +151,7 @@ public class T4CPacketBuffer extends OracleAbstractPacketBuffer implements Oracl
         }
     }
 
-    void marshalCLR(byte[] ab, int i, int j) {
+    public void marshalCLR(byte[] ab, int i, int j) {
         if (j > TTCC_MXIN) {
             int i1 = 0;
             writeByte((byte) -2);
@@ -171,11 +171,11 @@ public class T4CPacketBuffer extends OracleAbstractPacketBuffer implements Oracl
         }
     }
 
-    void marshalCLR(byte[] ab, int i) {
+    public void marshalCLR(byte[] ab, int i) {
         marshalCLR(ab, 0, i);
     }
 
-    void marshalKEYVAL(byte[][] ab0, int[] ai, byte[][] ab1, int[] ai1, byte[] ab2, int i) {
+    public void marshalKEYVAL(byte[][] ab0, int[] ai, byte[][] ab1, int[] ai1, byte[] ab2, int i) {
         for (int j = 0; j < i; j++) {
             if (ab0[j] != null && ai[j] > 0) {
                 marshalUB4(ai[j]);
@@ -197,7 +197,7 @@ public class T4CPacketBuffer extends OracleAbstractPacketBuffer implements Oracl
         }
     }
 
-    void marshalMap(Map<String, String> map) {
+    public void marshalMap(Map<String, String> map) {
         byte[][] keys = new byte[map.size()][];
         byte[][] values = new byte[map.size()][];
         int i = 0;
@@ -213,7 +213,7 @@ public class T4CPacketBuffer extends OracleAbstractPacketBuffer implements Oracl
         marshalKEYVAL(keys, values, new byte[map.size()], map.size());
     }
 
-    void marshalKEYVAL(byte[][] ab0, byte[][] ab1, byte[] ab2, int i) {
+    public void marshalKEYVAL(byte[][] ab0, byte[][] ab1, byte[] ab2, int i) {
         int ai[] = new int[i];
         int ai1[] = new int[i];
         for (int j = 0; j < i; j++) {
@@ -227,7 +227,7 @@ public class T4CPacketBuffer extends OracleAbstractPacketBuffer implements Oracl
         marshalKEYVAL(ab0, ai, ab1, ai1, ab2, i);
     }
 
-    void marshalDALC(byte[] ab) {
+    public void marshalDALC(byte[] ab) {
         if (ab == null || ab.length < 1) {
             writeByte((byte) 0);
         } else {
@@ -236,23 +236,23 @@ public class T4CPacketBuffer extends OracleAbstractPacketBuffer implements Oracl
         }
     }
 
-    byte unmarshalSB1() {
+    public byte unmarshalSB1() {
         return buffer[position++];
     }
 
-    short unmarshalUB1() {
+    public short unmarshalUB1() {
         return (short) (unmarshalSB1() & 0xff);
     }
 
-    short unmarshalSB2() {
+    public short unmarshalSB2() {
         return (short) unmarshalUB2();
     }
 
-    int unmarshalUB2() {
+    public int unmarshalUB2() {
         return buffer2Int((byte) 1);
     }
 
-    int unmarshalUCS2(byte[] abyte0, long l) {
+    public int unmarshalUCS2(byte[] abyte0, long l) {
         int i = unmarshalUB2();
         tmpBuffer2[0] = (byte) ((i & 0xff00) >> 8);
         tmpBuffer2[1] = (byte) (i & 0xff);
@@ -263,41 +263,41 @@ public class T4CPacketBuffer extends OracleAbstractPacketBuffer implements Oracl
         return tmpBuffer2[0] != 0 ? 3 : tmpBuffer2[1] != 0 ? 2 : 1;
     }
 
-    int unmarshalSB4() {
+    public int unmarshalSB4() {
         return (int) unmarshalUB4();
     }
 
-    long unmarshalUB4() {
+    public long unmarshalUB4() {
         return buffer2Long((byte) 2);
     }
 
-    int unmarshalSB4(byte[] abyte0) {
+    public int unmarshalSB4(byte[] abyte0) {
         long l = buffer2Value((byte) 2, abyte0);
         return (int) l;
     }
 
-    long unmarshalSB8() {
+    public long unmarshalSB8() {
         return buffer2Long((byte) 2);
     }
 
-    int unmarshalRefCursor(byte[] abyte0) {
+    public int unmarshalRefCursor(byte[] abyte0) {
         int i = unmarshalSB4(abyte0);
         return i;
     }
 
-    int unmarshalSWORD() {
+    public int unmarshalSWORD() {
         return (int) unmarshalUB4();
     }
 
-    long unmarshalUWORD() {
+    public long unmarshalUWORD() {
         return unmarshalUB4();
     }
 
-    int unmarshalPTR() {
+    public int unmarshalPTR() {
         return readPtr();
     }
 
-    byte[] unmarshalArrayWithNull() {
+    public byte[] unmarshalArrayWithNull() {
         int currentPosition = this.getPosition();
         while (this.readByte() != 0)
             ;
@@ -308,7 +308,7 @@ public class T4CPacketBuffer extends OracleAbstractPacketBuffer implements Oracl
         return result;
     }
 
-    byte[] unmarshalNBytes(int i) {
+    public byte[] unmarshalNBytes(int i) {
         byte abyte0[] = new byte[i];
         if (readBytes(abyte0, 0, abyte0.length) < 0) {
             throw new RuntimeException("无法从套接字读取更多的数据");
@@ -316,14 +316,14 @@ public class T4CPacketBuffer extends OracleAbstractPacketBuffer implements Oracl
         return abyte0;
     }
 
-    int unmarshalNBytes(byte abyte0[], int i, int j) {
+    public int unmarshalNBytes(byte abyte0[], int i, int j) {
         int k;
         for (k = 0; k < j; k += getNBytes(abyte0, i + k, j - k))
             ;
         return k;
     }
 
-    byte[] getNBytes(int i) {
+    public byte[] getNBytes(int i) {
         byte abyte0[] = new byte[i];
         if (readBytes(abyte0, 0, abyte0.length) < 0) {
             throw new RuntimeException("无法从套接字读取更多的数据");
@@ -331,7 +331,7 @@ public class T4CPacketBuffer extends OracleAbstractPacketBuffer implements Oracl
         return abyte0;
     }
 
-    int getNBytes(byte abyte0[], int i, int j) {
+    public int getNBytes(byte abyte0[], int i, int j) {
         int k = 0;
         if ((k = readBytes(abyte0, i, j)) < 0) {
             throw new RuntimeException("无法从套接字读取更多的数据");
@@ -339,7 +339,7 @@ public class T4CPacketBuffer extends OracleAbstractPacketBuffer implements Oracl
         return k;
     }
 
-    byte[] unmarshalCHR(int i) {
+    public byte[] unmarshalCHR(int i) {
         byte abyte0[] = null;
         if (this.getTypeRep().isConvNeeded()) {
             abyte0 = unmarshalCLR(i, retLen);
@@ -354,17 +354,17 @@ public class T4CPacketBuffer extends OracleAbstractPacketBuffer implements Oracl
         return abyte0;
     }
 
-    byte[] unmarshalCLR(int i, int[] ai) {
+    public byte[] unmarshalCLR(int i, int[] ai) {
         byte abyte0[] = new byte[i * this.getConversion().c2sNlsRatio];
         unmarshalCLR(abyte0, 0, ai, i);
         return abyte0;
     }
 
-    void unmarshalCLR(byte[] ab, int i, int[] ai) {
+    public void unmarshalCLR(byte[] ab, int i, int[] ai) {
         unmarshalCLR(ab, i, ai, 0x7fffffff);
     }
 
-    void unmarshalCLR(byte abyte0[], int i, int ai[], int j) {
+    public void unmarshalCLR(byte abyte0[], int i, int ai[], int j) {
         short word0 = 0;
         int k = i;
         boolean flag = false;
@@ -441,7 +441,7 @@ public class T4CPacketBuffer extends OracleAbstractPacketBuffer implements Oracl
         }
     }
 
-    Map<String, String> unmarshalMap(int i) {
+    public Map<String, String> unmarshalMap(int i) {
         Map<String, String> map = new HashMap<String, String>(i);
         byte[][] keys = new byte[i][];
         byte[][] values = new byte[i][];
@@ -462,7 +462,7 @@ public class T4CPacketBuffer extends OracleAbstractPacketBuffer implements Oracl
         return map;
     }
 
-    int unmarshalKEYVAL(byte[][] abyte0, byte[][] abyte1, int i) {
+    public int unmarshalKEYVAL(byte[][] abyte0, byte[][] abyte1, int i) {
         byte[] abyte2 = new byte[1000];
         int[] ai = new int[1];
         int j = 0;
@@ -486,7 +486,7 @@ public class T4CPacketBuffer extends OracleAbstractPacketBuffer implements Oracl
         return j;
     }
 
-    int unmarshalBuffer(byte abyte0[], int i, int j) {
+    public int unmarshalBuffer(byte abyte0[], int i, int j) {
         if (j <= 0) {
             return i;
         }
@@ -501,7 +501,7 @@ public class T4CPacketBuffer extends OracleAbstractPacketBuffer implements Oracl
         return i;
     }
 
-    byte[] unmarshalDALC() {
+    public byte[] unmarshalDALC() {
         long l = unmarshalUB4();
         byte[] abyte0 = new byte[(int) (-1L & l)];
         if (abyte0.length > 0) {
@@ -515,7 +515,7 @@ public class T4CPacketBuffer extends OracleAbstractPacketBuffer implements Oracl
         return abyte0;
     }
 
-    byte[] unmarshalDALC(int[] ai) {
+    public byte[] unmarshalDALC(int[] ai) {
         long l = unmarshalUB4();
         byte abyte0[] = new byte[(int) (-1L & l)];
         if (abyte0.length > 0) {
@@ -529,7 +529,7 @@ public class T4CPacketBuffer extends OracleAbstractPacketBuffer implements Oracl
         return abyte0;
     }
 
-    long unmarshalDALC(byte[] ab, int i, int[] ai) {
+    public long unmarshalDALC(byte[] ab, int i, int[] ai) {
         long l = unmarshalUB4();
         if (l > 0L) {
             unmarshalCLR(ab, i, ai);
@@ -537,7 +537,7 @@ public class T4CPacketBuffer extends OracleAbstractPacketBuffer implements Oracl
         return l;
     }
 
-    byte[] unmarshalTEXT(int i) {
+    public byte[] unmarshalTEXT(int i) {
         int j = 0;
         byte[] abyte0 = new byte[i];
         do {
@@ -560,7 +560,7 @@ public class T4CPacketBuffer extends OracleAbstractPacketBuffer implements Oracl
     }
 
     @SuppressWarnings("unchecked")
-    byte[] unmarshalCLRforREFS() {
+    public byte[] unmarshalCLRforREFS() {
         short word1 = 0;
         byte[] abyte0 = null;
         Vector vector = new Vector(10, 10);
@@ -604,7 +604,7 @@ public class T4CPacketBuffer extends OracleAbstractPacketBuffer implements Oracl
         return abyte0;
     }
 
-    int processIndicator(boolean flag, int i) {
+    public int processIndicator(boolean flag, int i) {
         short word0 = unmarshalSB2();
         int j = 0;
         if (!flag) {
