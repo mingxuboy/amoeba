@@ -55,13 +55,14 @@ public class MysqlFramedInputStream extends PacketInputStream implements MySqlPa
 		this.readPackedWithHead = readPackedWithHead;
 	}
 	protected int decodeLength() {
-		// if we don't have enough bytes to determine our frame size, stop
-		// here and let the caller know that we're not ready
+		
+		/**
+		 * 判断一下我们当前已经读取的数据包的数据是否比包头长,如果是:则可以计算整个包的长度,否则返回-1
+		 */
 		if (_have < getHeaderSize()) {
 			return -1;
 		}
 
-		// decode the frame length
 		_buffer.rewind();
 		
 		/**
