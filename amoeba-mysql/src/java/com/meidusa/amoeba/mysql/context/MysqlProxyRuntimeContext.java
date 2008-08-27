@@ -23,7 +23,7 @@ public class MysqlProxyRuntimeContext extends ProxyRuntimeContext {
 	
 	public static final String DEFAULT_SERVER_CONNECTION_FACTORY_CLASS = "com.meidusa.amoeba.mysql.net.MysqlServerConnectionFactory";
 	private String serverCharset;
-	private byte serverCharsetIndex;
+	private byte serverCharsetIndex = 14;
 	public MysqlProxyRuntimeContext(){
 		ProxyRuntimeContext.setInstance(this);
 	}

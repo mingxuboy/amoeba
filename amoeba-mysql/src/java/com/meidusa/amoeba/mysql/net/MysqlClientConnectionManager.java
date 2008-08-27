@@ -65,8 +65,8 @@ public class MysqlClientConnectionManager extends ServerableConnectionManager{
 	protected void beforeAuthing(final Connection authing) {
 		HandshakePacket handshakePacket = (HandshakePacket)handshake.clone();
 		MysqlProxyRuntimeContext context = ((MysqlProxyRuntimeContext)MysqlProxyRuntimeContext.getInstance());
-		handshake.serverCharsetIndex =(byte)(context.getServerCharsetIndex() & 0xff);
-		handshake.threadId = Thread.currentThread().hashCode();
+		handshakePacket.serverCharsetIndex =(byte)(context.getServerCharsetIndex() & 0xff);
+		handshakePacket.threadId = Thread.currentThread().hashCode();
 		handshakePacket.seed = StringUtil.getRandomString(8);
 		handshakePacket.restOfScrambleBuff = StringUtil.getRandomString(12);
 		MysqlClientConnection aconn = (MysqlClientConnection) authing;
