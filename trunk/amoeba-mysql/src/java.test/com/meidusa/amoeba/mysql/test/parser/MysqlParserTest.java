@@ -1,4 +1,4 @@
-package com.meidusa.amoeba.mysql.parser;
+package com.meidusa.amoeba.mysql.test.parser;
 
 
 

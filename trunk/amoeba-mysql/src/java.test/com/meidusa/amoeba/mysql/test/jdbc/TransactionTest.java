@@ -1,4 +1,4 @@
-package com.meidusa.amoeba.mysql.jdbc;
+package com.meidusa.amoeba.mysql.test.jdbc;
 
 import java.sql.Connection;
 import java.sql.Date;
