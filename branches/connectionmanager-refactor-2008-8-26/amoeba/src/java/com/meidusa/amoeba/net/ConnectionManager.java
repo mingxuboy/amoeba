@@ -288,7 +288,8 @@ public class ConnectionManager extends LoopingThread implements Reporter {
 				}
 			}else if(selkey.isReadable()){
 				final NetEventHandler tmpHandler = handler;
-				if(selkey.isValid()){
+				tmpHandler.handleEvent(iterStamp,SelectionKey.OP_READ);
+				/*if(selkey.isValid()){
 					synchronized(selkey){
 						if(selkey.isValid()){
 							try{	
@@ -308,7 +309,7 @@ public class ConnectionManager extends LoopingThread implements Reporter {
 							
 						}
 					});
-				}
+				}*/
 			}else if(selkey.isAcceptable()){
 				final NetEventHandler tmpHandler = handler;
 
