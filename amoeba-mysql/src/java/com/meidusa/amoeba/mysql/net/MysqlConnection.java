@@ -50,10 +50,10 @@ public abstract class MysqlConnection extends DatabaseConnection {
 	 */
 	public void postMessage(byte[] msg)
     {
-        ByteBuffer out= ByteBuffer.allocate(msg.length);
+        /*ByteBuffer out= ByteBuffer.allocate(msg.length);
         out.put(msg);
-        out.flip();
-        _outQueue.append(out);
+        out.flip();*/
+        _outQueue.append(ByteBuffer.wrap(msg));
         _cmgr.invokeConnectionWriteMessage(this);
     }
 	

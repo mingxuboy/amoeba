@@ -257,7 +257,7 @@ public abstract class Connection implements NetEventHandler {
 						_outQueue.prepend(buffer);
 						return false;
 					}else{
-						buffer.clear();
+						//buffer.clear();
 						message++;
 					}
 				}
@@ -275,10 +275,10 @@ public abstract class Connection implements NetEventHandler {
 		try {
 			_framer.write(msg);
 			ByteBuffer buffer = _framer.returnPacketBuffer();
-	        ByteBuffer out= ByteBuffer.allocate(buffer.limit());
+	        /*ByteBuffer out= ByteBuffer.allocate(buffer.limit());
 	        out.put(buffer);
-	        out.flip();
-	        _outQueue.append(out);
+	        out.flip();*/
+	        _outQueue.append(buffer);
 	        _cmgr.invokeConnectionWriteMessage(this);
 		} catch (IOException e) {
 			this._cmgr.connectionFailed(this, e);
