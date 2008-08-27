@@ -82,7 +82,7 @@ public class MysqlServerConnection extends MysqlConnection implements MySqlPacke
 				HandshakePacket handpacket = new HandshakePacket();
 				handpacket.init(buffer);
 				MysqlProxyRuntimeContext context = ((MysqlProxyRuntimeContext)MysqlProxyRuntimeContext.getInstance());
-				if(context.getServerCharset() == null){
+				if(context.getServerCharset() == null && handpacket.serverCharsetIndex > 0){
 					context.setServerCharsetIndex(handpacket.serverCharsetIndex);
 				}
 				AuthenticationPacket authing = new AuthenticationPacket();
