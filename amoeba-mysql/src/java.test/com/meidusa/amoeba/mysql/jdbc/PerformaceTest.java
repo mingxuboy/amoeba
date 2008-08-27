@@ -31,6 +31,7 @@ public class PerformaceTest {
 			}
 		}
 		final String ip = System.getProperty("ip");
+		final String port = System.getProperty("port","3306");
 		String sql = System.getProperty("sql");
 		if(sql.startsWith("\"")){
 			sql = sql.substring(1, sql.length() -1);
@@ -49,6 +50,7 @@ public class PerformaceTest {
 		//props.put("roundRobinLoadBalance", "false"); 
 
 		props.put("user", "root"); 
+		props.put("password", "hello"); 
 		//props.put("password", "...."); 
 		int testCount = totleQuery;
 		Class.forName("com.mysql.jdbc.Driver");
@@ -63,7 +65,7 @@ public class PerformaceTest {
 					PreparedStatement statment = null;
 					ResultSet result = null;
 					try{
-						conn = DriverManager.getConnection("jdbc:mysql://"+ip+":3306/test","root",null);
+						conn = DriverManager.getConnection("jdbc:mysql://"+ip+":"+port+"/test","root","hello");
 						for(int i=0;i<runcount;i++){
 							try{
 							statment = conn.prepareStatement(sqlext);
