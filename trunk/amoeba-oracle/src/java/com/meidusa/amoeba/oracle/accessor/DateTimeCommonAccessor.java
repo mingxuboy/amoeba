@@ -40,11 +40,11 @@ abstract class DateTimeCommonAccessor extends Accessor {
     TimeZone          defaultTZ;
     Calendar          defaultCalendar;
 
-    public Date getDate() {
+    Date getDate() {
         return getDate(getDefaultCalendar());
     }
 
-    public Date getDate(Calendar calendar) {
+    Date getDate(Calendar calendar) {
         if (calendar == null) {
             return getDate();
         }
@@ -62,7 +62,7 @@ abstract class DateTimeCommonAccessor extends Accessor {
         return date;
     }
 
-    public Time getTime() {
+    Time getTime() {
         Time time = null;
 
         int j = 0;
@@ -76,7 +76,7 @@ abstract class DateTimeCommonAccessor extends Accessor {
         return time;
     }
 
-    public Time getTime(Calendar calendar) {
+    Time getTime(Calendar calendar) {
         if (calendar == null) {
             return getTime();
         }
@@ -94,11 +94,11 @@ abstract class DateTimeCommonAccessor extends Accessor {
         return time;
     }
 
-    public Timestamp getTimestamp() throws SQLException {
+    Timestamp getTimestamp() throws SQLException {
         return getTimestamp(getDefaultCalendar());
     }
 
-    public Timestamp getTimestamp(Calendar calendar) throws SQLException {
+    Timestamp getTimestamp(Calendar calendar) throws SQLException {
         if (calendar == null) {
             return getTimestamp();
         }

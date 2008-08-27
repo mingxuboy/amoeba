@@ -2,6 +2,7 @@ package com.meidusa.amoeba.oracle.accessor;
 
 public class T4CVarnumAccessor extends VarnumAccessor {
 
+    @Override
     public long getLong() {
         long l = 0L;
         byte[] abyte0 = rowSpaceByte;
