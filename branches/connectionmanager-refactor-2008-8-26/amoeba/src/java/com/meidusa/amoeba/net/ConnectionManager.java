@@ -13,6 +13,7 @@ package com.meidusa.amoeba.net;
 
 import java.io.IOException;
 import java.net.SocketException;
+import java.nio.channels.CancelledKeyException;
 import java.nio.channels.SelectableChannel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
@@ -52,7 +53,14 @@ public class ConnectionManager extends LoopingThread implements Reporter {
 	protected static final int CONNECTION_AUTHENTICATE_FAILD = 4;
 	protected Selector _selector;
 	
-	private Executor executor;
+	/**
+	 * 默认实现,无多线程
+	 */
+	private Executor executor = new Executor(){
+		public void execute(Runnable command) {
+			command.run();
+		}
+	};
 	
 	private List<NetEventHandler> _handlers = new ArrayList<NetEventHandler>();
 	protected ArrayList<ConnectionObserver> _observers = new ArrayList<ConnectionObserver>();
@@ -252,61 +260,52 @@ public class ConnectionManager extends LoopingThread implements Reporter {
 			
 			if(selkey.isWritable()){
 				if(selkey.isValid()){
-					/*synchronized(selkey){
-						selkey.interestOps(selkey.interestOps() & ~SelectionKey.OP_WRITE);
-					}*/
-					/*executor.execute(new Runnable(){
-						public void run(){*/
-						try{
-							if(selkey.isValid()){
-								synchronized(selkey){
-									boolean finished = handler.doWrite();
-									if(finished){
-										if(selkey.isValid()){
-											try{
-												selkey.interestOps(selkey.interestOps() & ~SelectionKey.OP_WRITE);
-											}catch(java.nio.channels.CancelledKeyException e){
-											}
-										}
-									}
+	/*					executor.execute(new Runnable(){
+							public void run(){
+							try{
+								boolean finished = handler.doWrite();
+							} catch (Exception e) {
+								logger.warn("Error processing network data: " + handler + ".", e);
+			
+								if (handler != null && handler instanceof Connection) {
+									closeConnection((Connection) handler,e);
 								}
+							}finally{
+								latch.countDown();
 							}
-						} catch (Exception e) {
-							logger.warn("Error processing network data: " + handler + ".", e);
-		
-							if (handler != null && handler instanceof Connection) {
-								closeConnection((Connection) handler,e);
-							}
-						}finally{
-							latch.countDown();
+						}});*/
+					try{
+						boolean finished = handler.doWrite();
+					} catch (Exception e) {
+						logger.warn("Error processing network data: " + handler + ".", e);
+	
+						if (handler != null && handler instanceof Connection) {
+							closeConnection((Connection) handler,e);
 						}
-					//}});
+					}finally{
+						latch.countDown();
+					}
 				}
 			}else if(selkey.isReadable()){
 				final NetEventHandler tmpHandler = handler;
 				if(selkey.isValid()){
 					synchronized(selkey){
-						selkey.interestOps(selkey.interestOps() & ~SelectionKey.OP_READ);
+						if(selkey.isValid()){
+							try{	
+								selkey.interestOps(selkey.interestOps() & ~SelectionKey.OP_READ);
+							}catch(CancelledKeyException e){
+								if (handler != null && handler instanceof Connection) {
+									((Connection) handler).handleFailure(e);
+								}
+								continue;
+							}
+						}
 					}
+					
 					executor.execute(new Runnable(){
 						public void run(){
-							try{
-								tmpHandler.handleEvent(iterStamp,SelectionKey.OP_READ);
-							}finally{
-								if(selkey.isValid()){
-									synchronized(selkey){
-										try{
-											selkey.interestOps(selkey.interestOps() | SelectionKey.OP_READ);
-										}catch(java.nio.channels.CancelledKeyException e){
-											if(tmpHandler instanceof Connection){
-												((Connection)tmpHandler).handleFailure(e);
-											}
-										}
-									}
-									selkey.selector().wakeup();
-								}
-								latch.countDown();
-							}
+							tmpHandler.handleEvent(iterStamp,SelectionKey.OP_READ);
+							
 						}
 					});
 				}
@@ -530,17 +529,17 @@ public class ConnectionManager extends LoopingThread implements Reporter {
 				connection.handleFailure(null);
 				return;
 			}
-			synchronized(key){
-	            if(key!= null && (key.interestOps() & SelectionKey.OP_WRITE) == 0){
+			/*synchronized(key){
+	            if((key.interestOps() & SelectionKey.OP_WRITE) == 0){*/
 	            	/**
 	            	 * 发送数据，如果返回false，则表示socket send buffer 已经满了。则Selector 需要监听 Writeable event
 					 */
 					boolean finished = connection.doWrite();
-					if(!finished){
+					/*if(!finished){
 						key.interestOps(key.interestOps() | SelectionKey.OP_WRITE);
 					}
 				}
-			}
+			}*/
 		} catch (IOException ioe) {
 			connection.handleFailure(ioe);
 		}

@@ -15,9 +15,12 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.nio.ByteBuffer;
+import java.nio.channels.CancelledKeyException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
+import java.util.LinkedList;
+import java.util.Queue;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -25,8 +28,8 @@ import org.apache.log4j.Logger;
 
 import com.meidusa.amoeba.net.io.PacketInputStream;
 import com.meidusa.amoeba.net.io.PacketOutputStream;
-import com.meidusa.amoeba.util.Queue;
 import com.meidusa.amoeba.util.StringUtil;
+import com.meidusa.amoeba.util.SynchronizedQueue;
 
 /**
  * 
@@ -44,13 +47,15 @@ public abstract class Connection implements NetEventHandler {
 	protected long _lastEvent;
 	protected MessageHandler _handler;
 	protected final Lock closeLock = new ReentrantLock(false);
+	protected final Lock wirteLock = new ReentrantLock(false);
+	protected final Lock readLock = new ReentrantLock(false);
 	protected final Lock postCloseLock = new ReentrantLock(false);
 	protected boolean closePosted = false;
 	private PacketInputStream _fin;
 
 	private PacketOutputStream _fout;
 	
-	protected Queue<ByteBuffer> _outQueue = new Queue<ByteBuffer>();
+	protected Queue<ByteBuffer> _outQueue = new SynchronizedQueue<ByteBuffer>(new LinkedList<ByteBuffer>());
 	private boolean socketClosed = false;
 	public Connection(SocketChannel channel, long createStamp){
 		_channel = channel;
@@ -201,44 +206,60 @@ public abstract class Connection implements NetEventHandler {
 		postClose(ioe);
 	}
 
-	public synchronized int handleEvent(long when,int netOp) {
-		int bytesInTotle = 0;
-		try {
-			if (_fin == null) {
-				_fin = createPacketInputStream();
+	public int handleEvent(long when,int netOp) {
+		if(netOp == SelectionKey.OP_READ){
+			readLock.lock();
+			try{
+				int bytesInTotle = 0;
+				try {
+					if (_fin == null) {
+						_fin = createPacketInputStream();
+					}
+		
+					while (_channel != null && _channel.isOpen() && _fin.readPacket(_channel)) {
+						int bytesIn = 0;
+						//记录最后一次发生时间
+						_lastEvent = when;
+						/**
+						 * 得到FramedInputStream 的所有字节
+						 */
+						bytesIn = _fin.available();
+						bytesInTotle += bytesIn;
+						byte[] msg = new byte[bytesIn];
+						_fin.read(msg);
+						messageProcess(msg);
+					}
+				} catch (EOFException eofe) {
+					// close down the socket gracefully
+					//handleFailure(eofe);
+				} catch (IOException ioe) {
+					// don't log a warning for the ever-popular "the client dropped the
+					// connection" failure
+					String msg = ioe.getMessage();
+					
+					if (msg == null || msg.indexOf("reset by peer") == -1) {
+						logger.info("Error reading message from socket [channel="
+								+ StringUtil.safeToString(_channel) + ", error=" + ioe
+								+ "].",ioe);
+					}
+					// deal with the failure
+					handleFailure(ioe);
+				}
+				return bytesInTotle;
+			}finally{
+				/*synchronized(_selkey){
+					try{
+						if(_selkey.isValid()){
+							_selkey.interestOps(_selkey.interestOps() | SelectionKey.OP_READ);
+						}
+					}catch(CancelledKeyException e){
+						handleFailure(e);
+					}
+				}*/
+				readLock.unlock();
 			}
-
-			while (_channel != null && _channel.isOpen() && _fin.readPacket(_channel)) {
-				int bytesIn = 0;
-				//记录最后一次发生时间
-				_lastEvent = when;
-				/**
-				 * 得到FramedInputStream 的所有字节
-				 */
-				bytesIn = _fin.available();
-				bytesInTotle += bytesIn;
-				byte[] msg = new byte[bytesIn];
-				_fin.read(msg);
-				messageProcess(msg);
-			}
-		} catch (EOFException eofe) {
-			// close down the socket gracefully
-			//handleFailure(eofe);
-		} catch (IOException ioe) {
-			// don't log a warning for the ever-popular "the client dropped the
-			// connection" failure
-			String msg = ioe.getMessage();
-			
-			if (msg == null || msg.indexOf("reset by peer") == -1) {
-				logger.info("Error reading message from socket [channel="
-						+ StringUtil.safeToString(_channel) + ", error=" + ioe
-						+ "].",ioe);
-			}
-			// deal with the failure
-			handleFailure(ioe);
 		}
-
-		return bytesInTotle;
+		return 0;
 	}
 
 	protected void messageProcess(byte[] msg){
@@ -246,25 +267,36 @@ public abstract class Connection implements NetEventHandler {
 	}
 	
 	public boolean doWrite() throws IOException{
-		synchronized(this.getSelectionKey()){
+		wirteLock.lock();
+		boolean finished = false;
+		try{
 			ByteBuffer buffer = null;
 			int wrote = 0;
 			int message = 0;
+			
 			try{
-				while((buffer = _outQueue.getNonBlocking()) != null){
-					wrote += this.getChannel().write(buffer);
+				while((buffer = _outQueue.peek()) != null){
+					int currentwrote = this.getChannel().write(buffer);
+					wrote += currentwrote; 
 					if(buffer.remaining()>0){
-						_outQueue.prepend(buffer);
-						return false;
+						finished = false;
 					}else{
-						buffer.clear();
+						_outQueue.remove();
 						message++;
 					}
 				}
-				return true;
+				finished = true;
+				return finished;
 			}finally{
+				if(!finished){
+					synchronized(this._selkey){
+						this._selkey.interestOps(this._selkey.interestOps() | SelectionKey.OP_WRITE);
+					}
+				}
 				this._cmgr.noteWrite(message, wrote);
 			}
+		}finally{
+			wirteLock.unlock();
 		}
 	}
 
@@ -278,11 +310,8 @@ public abstract class Connection implements NetEventHandler {
 	        ByteBuffer out= ByteBuffer.allocate(buffer.limit());
 	        out.put(buffer);
 	        out.flip();
-	        _outQueue.append(out);
-	        synchronized(this.getSelectionKey()){
-	        	
-	        }
-	        //_cmgr.invokeConnectionWriteMessage(this);
+	        _outQueue.offer(out);
+	        _cmgr.notifyMessagePosted(this);
 		} catch (IOException e) {
 			this._cmgr.connectionFailed(this, e);
 		}
@@ -290,7 +319,7 @@ public abstract class Connection implements NetEventHandler {
 	
 	public void postMessage(ByteBuffer msg)
     {
-		_outQueue.append(msg);
+		_outQueue.offer(msg);
         _cmgr.notifyMessagePosted(this);
     }
 	

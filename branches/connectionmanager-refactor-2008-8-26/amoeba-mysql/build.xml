@@ -16,14 +16,19 @@
 	
 
 	<target name="compile" depends="prepare">
-    <javac srcdir="src/java" destdir="${classes.dir}"  encoding="GBK" includeAntRuntime="false"
-           debug="on" optimize="{$build.optimize}" deprecation="on"
-           source="1.5" target="1.5">
-      <classpath refid="classpath"/>
-    <!--
-      <compilerarg value="-Xlint:unchecked"/>
-      -->
-    </javac>
+	    <javac srcdir="src/java" destdir="${classes.dir}"  encoding="GBK" includeAntRuntime="false"
+	           debug="on" optimize="{$build.optimize}" deprecation="on"
+	           source="1.5" target="1.5">
+	      <classpath refid="classpath"/>
+	    <!--
+	      <compilerarg value="-Xlint:unchecked"/>
+	      -->
+	    </javac>
+	    <javac srcdir="src/java.test" destdir="${classes.dir}"  encoding="GBK" includeAntRuntime="false"
+	           debug="on" optimize="{$build.optimize}" deprecation="on"
+	           source="1.5" target="1.5">
+	      <classpath refid="classpath"/>
+	    </javac>
     </target>
 	
 	  <!-- common clean tasks -->
@@ -46,9 +51,14 @@
         <mkdir dir="${deploy.dir}"/>
 		<echo>${classes.dir}</echo>
         <jar destfile="${deploy.dir}/${app.name}-${version}.jar" index="true">
-        	
-            <fileset dir="${classes.dir}" casesensitive="yes"/>
-               
+            <fileset dir="${classes.dir}" casesensitive="yes">
+            	<exclude name="**/test/*.class"/>
+            </fileset>
+        </jar>
+        <jar destfile="${deploy.dir}/${app.name}-test-${version}.jar" index="true">
+            <fileset dir="${classes.dir}" casesensitive="yes">
+            	<include name="**/test/*"/>
+            </fileset>
         </jar>
     </target>
     

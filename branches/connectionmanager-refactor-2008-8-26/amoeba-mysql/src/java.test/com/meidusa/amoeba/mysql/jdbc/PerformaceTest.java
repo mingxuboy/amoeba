@@ -32,6 +32,7 @@ public class PerformaceTest {
 		}
 		final String ip = System.getProperty("ip");
 		String sql = System.getProperty("sql");
+		final String port = System.getProperty("port","3306");
 		if(sql.startsWith("\"")){
 			sql = sql.substring(1, sql.length() -1);
 		}
@@ -63,7 +64,7 @@ public class PerformaceTest {
 					PreparedStatement statment = null;
 					ResultSet result = null;
 					try{
-						conn = DriverManager.getConnection("jdbc:mysql://"+ip+":8066/test","root",null);
+						conn = DriverManager.getConnection("jdbc:mysql://"+ip+":"+port+"/test","root",null);
 						for(int i=0;i<runcount;i++){
 							try{
 							statment = conn.prepareStatement(sqlext);
