@@ -53,7 +53,6 @@ public class OracleQueryMessageHandler implements MessageHandler, Sessionable, S
                     System.out.println("sql:" + new String(packet.sqlStmt));
                     System.out.println("numberOfBindPositions:" + packet.numberOfBindPositions);
                     System.out.println("oacdefBindsSent:" + Arrays.toString(packet.oacdefBindsSent));
-                    System.out.println("params:" + Arrays.toString(packet.params));
                 }
             } else if (T4CTTIfunPacket.isFunType(message, T4CTTIfunPacket.OFETCH)) {
                 if (logger.isDebugEnabled()) {

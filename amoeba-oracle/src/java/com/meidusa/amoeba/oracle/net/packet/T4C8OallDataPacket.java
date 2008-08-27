@@ -2,6 +2,8 @@ package com.meidusa.amoeba.oracle.net.packet;
 
 import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
 import com.meidusa.amoeba.oracle.accessor.Accessor;
+import com.meidusa.amoeba.oracle.accessor.T4CVarcharAccessor;
+import com.meidusa.amoeba.oracle.accessor.T4CVarnumAccessor;
 
 /**
  * @author hexianmao
@@ -19,7 +21,7 @@ public class T4C8OallDataPacket extends T4CTTIfunPacket {
     final long[]           al8i4 = new long[13];
     public T4CTTIoac[]     oacdefBindsSent;
     T4CTTIoac[]            oacdefDefines;
-    public byte[][]        params;
+    Accessor[]             definesAccessors;
 
     int                    receiveState;
     boolean                plsql;
@@ -31,6 +33,10 @@ public class T4C8OallDataPacket extends T4CTTIfunPacket {
     T4CTTIofetchDataPacket ofetch;
     T4CTTIoexecDataPacket  oexec;
     T4CTTIfobDataPacket    fob;
+
+    static byte[][]        desc  = { { (byte) 0x06, (byte) 0x03, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x16, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x01, (byte) 0x01, (byte) 0x00 }, { (byte) 0x01, (byte) 0x03, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x05, (byte) 0x00, (byte) 0x01, (byte) 0x10, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x01, (byte) 0x01, (byte) 0x00 }, { (byte) 0x06, (byte) 0x03, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x16, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x01, (byte) 0x01, (byte) 0x00 }, { (byte) 0x01, (byte) 0x03, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x06, (byte) 0x00, (byte) 0x01, (byte) 0x10, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x01, (byte) 0x01, (byte) 0x00 }, { (byte) 0x01, (byte) 0x03, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x0b, (byte) 0x00, (byte) 0x01, (byte) 0x10, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x01, (byte) 0x01, (byte) 0x00 }, { (byte) 0x01, (byte) 0x03, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x0c, (byte) 0x00, (byte) 0x01, (byte) 0x10, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x01, (byte) 0x01, (byte) 0x00 }, { (byte) 0x01, (byte) 0x03, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x08, (byte) 0x00, (byte) 0x01, (byte) 0x10, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x01, (byte) 0x01, (byte) 0x00 }, { (byte) 0x01, (byte) 0x03, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x11, (byte) 0x00, (byte) 0x01, (byte) 0x10, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x01, (byte) 0x01, (byte) 0x00 }, { (byte) 0x01, (byte) 0x03, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x04, (byte) 0x00, (byte) 0x01, (byte) 0x10, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x01, (byte) 0x01, (byte) 0x00 }, { (byte) 0x01, (byte) 0x03, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x07, (byte) 0x00, (byte) 0x01, (byte) 0x10, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x01, (byte) 0x01, (byte) 0x00 }, { (byte) 0x01, (byte) 0x03, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x02, (byte) 0x00, (byte) 0x01, (byte) 0x10, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x01, (byte) 0x01, (byte) 0x00 }, { (byte) 0x01, (byte) 0x03, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x02, (byte) 0x00, (byte) 0x01, (byte) 0x10, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x01, (byte) 0x01, (byte) 0x00 }, { (byte) 0x01, (byte) 0x03, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x05, (byte) 0x00, (byte) 0x01, (byte) 0x10, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x01, (byte) 0x01, (byte) 0x00 }, { (byte) 0x0c, (byte) 0x03, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x07, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x01, (byte) 0x01, (byte) 0x00 }, { (byte) 0x01, (byte) 0x03, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x04, (byte) 0x00, (byte) 0x01, (byte) 0x10, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x01, (byte) 0x01, (byte) 0x00 }, { (byte) 0x01, (byte) 0x03, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x09, (byte) 0x00, (byte) 0x01, (byte) 0x10, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x01, (byte) 0x01, (byte) 0x00 }, { (byte) 0x0c, (byte) 0x03, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x07, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x01, (byte) 0x01, (byte) 0x00 } };
+
+    static byte[][]        data  = { { (byte) 0x06, (byte) 0xc5, (byte) 0x02, (byte) 0x17, (byte) 0x2b, (byte) 0x62, (byte) 0x28 }, { (byte) 0x05, (byte) 0x63, (byte) 0x68, (byte) 0x69, (byte) 0x6e, (byte) 0x61 }, { (byte) 0x05, (byte) 0xc4, (byte) 0x02, (byte) 0x04, (byte) 0x29, (byte) 0x39 }, { (byte) 0x06, (byte) 0x65, (byte) 0x78, (byte) 0x70, (byte) 0x69, (byte) 0x72, (byte) 0x65 }, { (byte) 0x0b, (byte) 0x61, (byte) 0x62, (byte) 0x63, (byte) 0x5f, (byte) 0x73, (byte) 0x75, (byte) 0x62, (byte) 0x6a, (byte) 0x65, (byte) 0x63, (byte) 0x74 }, { (byte) 0x0c, (byte) 0x31, (byte) 0x32, (byte) 0x33, (byte) 0x34, (byte) 0x35, (byte) 0x36, (byte) 0x37, (byte) 0x38, (byte) 0x39, (byte) 0x2b, (byte) 0x2b, (byte) 0x70 }, { (byte) 0x08, (byte) 0x68, (byte) 0x7a, (byte) 0x5f, (byte) 0x63, (byte) 0x68, (byte) 0x69, (byte) 0x6e, (byte) 0x61 }, { (byte) 0x11, (byte) 0x68, (byte) 0x65, (byte) 0x78, (byte) 0x69, (byte) 0x61, (byte) 0x6e, (byte) 0x6d, (byte) 0x61, (byte) 0x6f, (byte) 0x40, (byte) 0x31, (byte) 0x36, (byte) 0x33, (byte) 0x2e, (byte) 0x63, (byte) 0x6f, (byte) 0x6d }, { (byte) 0x04, (byte) 0x33, (byte) 0x35, (byte) 0x31, (byte) 0x34 }, { (byte) 0x07, (byte) 0x61, (byte) 0x6c, (byte) 0x69, (byte) 0x62, (byte) 0x61, (byte) 0x62, (byte) 0x61 }, { (byte) 0x02, (byte) 0x43, (byte) 0x4e }, { (byte) 0x02, (byte) 0x68, (byte) 0x65 }, { (byte) 0x05, (byte) 0x67, (byte) 0x6f, (byte) 0x6f, (byte) 0x64, (byte) 0x21 }, { (byte) 0x07, (byte) 0x78, (byte) 0x6c, (byte) 0x07, (byte) 0x1e, (byte) 0x01, (byte) 0x01, (byte) 0x01 }, { (byte) 0x04, (byte) 0x53, (byte) 0x41, (byte) 0x4c, (byte) 0x45 }, { (byte) 0x09, (byte) 0x70, (byte) 0x75, (byte) 0x62, (byte) 0x6c, (byte) 0x69, (byte) 0x73, (byte) 0x68, (byte) 0x65, (byte) 0x64 }, { (byte) 0x07, (byte) 0x78, (byte) 0x6c, (byte) 0x07, (byte) 0x1e, (byte) 0x01, (byte) 0x01, (byte) 0x01 } };
 
     public T4C8OallDataPacket(){
         super(OALL8);
@@ -130,9 +136,9 @@ public class T4C8OallDataPacket extends T4CTTIfunPacket {
         }
         short msgCode = meg.unmarshalUB1();
         if (msgCode == TTIRXD) {
-            params = new byte[numberOfBindPositions][];
+            // params = new byte[numberOfBindPositions][];
             for (int i = 0; i < numberOfBindPositions; i++) {
-                //meg.unmarshalCLR(params[i], 0, new int[] { 0 });
+                // meg.unmarshalCLR();
             }
         } else {
             throw new RuntimeException();
@@ -140,341 +146,276 @@ public class T4C8OallDataPacket extends T4CTTIfunPacket {
 
     }
 
-    void fillupAccessors(Accessor[] aaccessor, int offset) {
-        int ai[] = null;// statement.definedColumnType;
-        int ai1[] = null;// statement.definedColumnSize;
-        int ai2[] = null;// statement.definedColumnFormOfUse;
-        for (int i = 0; i < numberOfBindPositions; i++) {
-            int l1 = 0;
-            int i2 = 0;
-            int j2 = 0;
-            if (ai != null && ai.length > offset + i && ai[offset + i] != 0) {
-                l1 = ai[offset + i];
-            }
-            if (ai1 != null && ai1.length > offset + i && ai1[offset + i] > 0) {
-                i2 = ai1[offset + i];
-            }
-            if (ai2 != null && ai2.length > offset + i && ai2[offset + i] > 0) {
-                j2 = ai2[offset + i];
-            }
-            T4CTTIoac t4c8ttiuds = oacdefBindsSent[i];
-            String s = null;// meg.conv.CharBytesToString(oacdefBindsSent[i].getTypeName(),
-            // oacdefBindsSent[i].getTypeCharLength());
-            String s1 = null;// meg.conv.CharBytesToString(oacdefBindsSent[i].getSchemaName(),
-            // oacdefBindsSent[i].getSchemaCharLength());
-            String s2 = s1 + "." + s;
-            int j = t4c8ttiuds.oacmxl;
-            // switch (t4c8ttiuds.oacdty) {
-            // case 96:
-            // if (t4c8ttiuds.oacmxlc != 0 && t4c8ttiuds.oacmxlc < j) {
-            // j = 2 * t4c8ttiuds.oacmxlc;
-            // }
-            // int k = j;
-            // if ((l1 == 1 || l1 == 12) && i2 > 0 && i2 < j) {
-            // k = i2;
-            // }
-            // aaccessor[offset + i] = new T4CCharAccessor(statement, k, t4c8ttiuds.udsnull,
-            // t4c8ttiuds.oacflg, t4c8ttiuds.oacpre,
-            // t4c8ttiuds.oacscl, t4c8ttiuds.oacfl2,
-            // t4c8ttiuds.oacmal, t4c8ttiuds.formOfUse,
-            // j, l1, i2, meg);
-            // if ((t4c8ttiuds.oacfl2 & 0x1000) == 4096 || t4c8ttiuds.oacmxlc != 0) {
-            // aaccessor[colOffset + i].setDisplaySize(t4c8ttiuds.oacmxlc);
-            // }
-            // break;
-            //
-            // case 2:
-            // aaccessor[offset + i] = new T4CNumberAccessor(statement, j, t4c8ttiuds.udsnull,
-            // t4c8ttiuds.oacflg, t4c8ttiuds.oacpre,
-            // t4c8ttiuds.oacscl, t4c8ttiuds.oacfl2,
-            // t4c8ttiuds.oacmal,
-            // t4c8ttiuds.formOfUse, l1, i2, meg);
-            // break;
-            //
-            // case 1:
-            // if (t4c8ttiuds.oacmxlc != 0 && t4c8ttiuds.oacmxlc < j) {
-            // j = 2 * t4c8ttiuds.oacmxlc;
-            // }
-            // int l = j;
-            // if ((l1 == 1 || l1 == 12) && i2 > 0 && i2 < j) {
-            // l = i2;
-            // }
-            // aaccessor[offset + i] = new T4CVarcharAccessor(statement, l, t4c8ttiuds.udsnull,
-            // t4c8ttiuds.oacflg, t4c8ttiuds.oacpre,
-            // t4c8ttiuds.oacscl, t4c8ttiuds.oacfl2,
-            // t4c8ttiuds.oacmal,
-            // t4c8ttiuds.formOfUse, j, l1, i2, meg);
-            // if ((t4c8ttiuds.oacfl2 & 0x1000) == 4096 || t4c8ttiuds.oacmxlc != 0) {
-            // aaccessor[colOffset + i].setDisplaySize(t4c8ttiuds.oacmxlc);
-            // }
-            // break;
-            //
-            // case 8:
-            // if ((l1 == 1 || l1 == 12) && meg.versionNumber >= 9000 && i2 < 4001) {
-            // int i1;
-            // if (i2 > 0) i1 = i2;
-            // else i1 = 4000;
-            // j = -1;
-            // aaccessor[offset + i] = new T4CVarcharAccessor(statement, i1, t4c8ttiuds.udsnull,
-            // t4c8ttiuds.oacflg,
-            // t4c8ttiuds.oacpre,
-            // t4c8ttiuds.oacscl,
-            // t4c8ttiuds.oacfl2,
-            // t4c8ttiuds.oacmal,
-            // t4c8ttiuds.formOfUse, j, l1, i2, meg);
-            // aaccessor[offset + i].describeType = 8;
-            // } else {
-            // j = 0;
-            // aaccessor[offset + i] = new T4CLongAccessor(statement, offset + i + 1, j, t4c8ttiuds.udsnull,
-            // t4c8ttiuds.oacflg, t4c8ttiuds.oacpre,
-            // t4c8ttiuds.oacscl, t4c8ttiuds.oacfl2,
-            // t4c8ttiuds.oacmal,
-            // t4c8ttiuds.formOfUse, l1, i2, meg);
-            // }
-            // break;
-            //
-            // case 6:
-            // aaccessor[offset + i] = new T4CVarnumAccessor(statement, j, t4c8ttiuds.udsnull,
-            // t4c8ttiuds.oacflg, t4c8ttiuds.oacpre,
-            // t4c8ttiuds.oacscl, t4c8ttiuds.oacfl2,
-            // t4c8ttiuds.oacmal,
-            // t4c8ttiuds.formOfUse, l1, i2, meg);
-            // break;
-            //
-            // case 100:
-            // aaccessor[offset + i] = new T4CBinaryFloatAccessor(statement, 4, t4c8ttiuds.udsnull,
-            // t4c8ttiuds.oacflg,
-            // t4c8ttiuds.oacpre,
-            // t4c8ttiuds.oacscl,
-            // t4c8ttiuds.oacfl2,
-            // t4c8ttiuds.oacmal,
-            // t4c8ttiuds.formOfUse, l1, i2, meg);
-            // break;
-            //
-            // case 101:
-            // aaccessor[offset + i] = new T4CBinaryDoubleAccessor(statement, 8, t4c8ttiuds.udsnull,
-            // t4c8ttiuds.oacflg,
-            // t4c8ttiuds.oacpre,
-            // t4c8ttiuds.oacscl,
-            // t4c8ttiuds.oacfl2,
-            // t4c8ttiuds.oacmal,
-            // t4c8ttiuds.formOfUse, l1, i2, meg);
-            // break;
-            //
-            // case 23:
-            // aaccessor[offset + i] = new T4CRawAccessor(statement, j, t4c8ttiuds.udsnull,
-            // t4c8ttiuds.oacflg, t4c8ttiuds.oacpre,
-            // t4c8ttiuds.oacscl, t4c8ttiuds.oacfl2,
-            // t4c8ttiuds.oacmal, t4c8ttiuds.formOfUse,
-            // l1, i2, meg);
-            // break;
-            //
-            // case 24:
-            // if (l1 == -2 && i2 < 2001 && meg.versionNumber >= 9000) {
-            // j = -1;
-            // aaccessor[offset + i] = new T4CRawAccessor(statement, j, t4c8ttiuds.udsnull,
-            // t4c8ttiuds.oacflg, t4c8ttiuds.oacpre,
-            // t4c8ttiuds.oacscl, t4c8ttiuds.oacfl2,
-            // t4c8ttiuds.oacmal,
-            // t4c8ttiuds.formOfUse, l1, i2, meg);
-            // aaccessor[offset + i].describeType = 24;
-            // } else {
-            // aaccessor[offset + i] = new T4CLongRawAccessor(statement, offset + i + 1, j,
-            // t4c8ttiuds.udsnull, t4c8ttiuds.oacflg,
-            // t4c8ttiuds.oacpre,
-            // t4c8ttiuds.oacscl,
-            // t4c8ttiuds.oacfl2,
-            // t4c8ttiuds.oacmal,
-            // t4c8ttiuds.formOfUse, l1, i2, meg);
-            // }
-            // break;
-            //
-            // case 104:
-            // case 208:
-            // aaccessor[offset + i] = new T4CRowidAccessor(statement, j, t4c8ttiuds.udsnull,
-            // t4c8ttiuds.oacflg, t4c8ttiuds.oacpre,
-            // t4c8ttiuds.oacscl, t4c8ttiuds.oacfl2,
-            // t4c8ttiuds.oacmal, t4c8ttiuds.formOfUse,
-            // l1, i2, meg);
-            // if (t4c8ttiuds.oacdty == 208) {
-            // aaccessor[i].describeType = t4c8ttiuds.oacdty;
-            // }
-            // break;
-            //
-            // case 102:
-            // aaccessor[offset + i] = new T4CResultSetAccessor(statement, j, t4c8ttiuds.udsnull,
-            // t4c8ttiuds.oacflg,
-            // t4c8ttiuds.oacpre,
-            // t4c8ttiuds.oacscl,
-            // t4c8ttiuds.oacfl2,
-            // t4c8ttiuds.oacmal,
-            // t4c8ttiuds.formOfUse, l1, i2, meg);
-            // break;
-            //
-            // case 12:
-            // aaccessor[offset + i] = new T4CDateAccessor(statement, j, t4c8ttiuds.udsnull,
-            // t4c8ttiuds.oacflg, t4c8ttiuds.oacpre,
-            // t4c8ttiuds.oacscl, t4c8ttiuds.oacfl2,
-            // t4c8ttiuds.oacmal, t4c8ttiuds.formOfUse,
-            // l1, i2, meg);
-            // break;
-            //
-            // case 113:
-            // if (l1 == -4 && meg.versionNumber >= 9000) {
-            // aaccessor[offset + i] = new T4CLongRawAccessor(statement, offset + i + 1, 0x7fffffff,
-            // t4c8ttiuds.udsnull, t4c8ttiuds.oacflg,
-            // t4c8ttiuds.oacpre,
-            // t4c8ttiuds.oacscl,
-            // t4c8ttiuds.oacfl2,
-            // t4c8ttiuds.oacmal,
-            // t4c8ttiuds.formOfUse, l1, i2, meg);
-            // aaccessor[offset + i].describeType = 113;
-            // } else if (l1 == -3 && meg.versionNumber >= 9000) {
-            // aaccessor[offset + i] = new T4CRawAccessor(statement, 4000, t4c8ttiuds.udsnull,
-            // t4c8ttiuds.oacflg, t4c8ttiuds.oacpre,
-            // t4c8ttiuds.oacscl, t4c8ttiuds.oacfl2,
-            // t4c8ttiuds.oacmal,
-            // t4c8ttiuds.formOfUse, l1, i2, meg);
-            // aaccessor[offset + i].describeType = 113;
-            // } else {
-            // aaccessor[offset + i] = new T4CBlobAccessor(statement, j, t4c8ttiuds.udsnull,
-            // t4c8ttiuds.oacflg, t4c8ttiuds.oacpre,
-            // t4c8ttiuds.oacscl, t4c8ttiuds.oacfl2,
-            // t4c8ttiuds.oacmal,
-            // t4c8ttiuds.formOfUse, l1, i2, meg);
-            // }
-            // break;
-            //
-            // case 112:
-            // short word0 = 1;
-            // if (j2 != 0) {
-            // word0 = (short) j2;
-            // }
-            // if (l1 == -1 && meg.versionNumber >= 9000) {
-            // j = 0;
-            // aaccessor[offset + i] = new T4CLongAccessor(statement, offset + i + 1, 0x7fffffff,
-            // t4c8ttiuds.udsnull, t4c8ttiuds.oacflg,
-            // t4c8ttiuds.oacpre, t4c8ttiuds.oacscl,
-            // t4c8ttiuds.oacfl2, t4c8ttiuds.oacmal,
-            // word0, l1, i2, meg);
-            // aaccessor[offset + i].describeType = 112;
-            // } else if ((l1 == 12 || l1 == 1) && meg.versionNumber >= 9000) {
-            // int j1 = 4000;
-            // if (i2 > 0 && i2 < j1) {
-            // j1 = i2;
-            // }
-            // aaccessor[offset + i] = new T4CVarcharAccessor(statement, j1, t4c8ttiuds.udsnull,
-            // t4c8ttiuds.oacflg,
-            // t4c8ttiuds.oacpre,
-            // t4c8ttiuds.oacscl,
-            // t4c8ttiuds.oacfl2,
-            // t4c8ttiuds.oacmal, word0, 4000, l1, i2,
-            // meg);
-            // aaccessor[offset + i].describeType = 112;
-            // } else {
-            // aaccessor[offset + i] = new T4CClobAccessor(statement, j, t4c8ttiuds.udsnull,
-            // t4c8ttiuds.oacflg, t4c8ttiuds.oacpre,
-            // t4c8ttiuds.oacscl, t4c8ttiuds.oacfl2,
-            // t4c8ttiuds.oacmal,
-            // t4c8ttiuds.formOfUse, l1, i2, meg);
-            // }
-            // break;
-            //
-            // case 114:
-            // aaccessor[offset + i] = new T4CBfileAccessor(statement, j, t4c8ttiuds.udsnull,
-            // t4c8ttiuds.oacflg, t4c8ttiuds.oacpre,
-            // t4c8ttiuds.oacscl, t4c8ttiuds.oacfl2,
-            // t4c8ttiuds.oacmal, t4c8ttiuds.formOfUse,
-            // l1, i2, meg);
-            // break;
-            //
-            // case 109:
-            // aaccessor[offset + i] = new T4CNamedTypeAccessor(statement, j, t4c8ttiuds.udsnull,
-            // t4c8ttiuds.oacflg,
-            // t4c8ttiuds.oacpre,
-            // t4c8ttiuds.oacscl,
-            // t4c8ttiuds.oacfl2,
-            // t4c8ttiuds.oacmal,
-            // t4c8ttiuds.formOfUse, s2, l1, i2, meg);
-            // break;
-            //
-            // case 111:
-            // aaccessor[offset + i] = new T4CRefTypeAccessor(statement, j, t4c8ttiuds.udsnull,
-            // t4c8ttiuds.oacflg, t4c8ttiuds.oacpre,
-            // t4c8ttiuds.oacscl, t4c8ttiuds.oacfl2,
-            // t4c8ttiuds.oacmal,
-            // t4c8ttiuds.formOfUse, s2, l1, i2, meg);
-            // break;
-            //
-            // case 180:
-            // aaccessor[offset + i] = new T4CTimestampAccessor(statement, j, t4c8ttiuds.udsnull,
-            // t4c8ttiuds.oacflg,
-            // t4c8ttiuds.oacpre,
-            // t4c8ttiuds.oacscl,
-            // t4c8ttiuds.oacfl2,
-            // t4c8ttiuds.oacmal,
-            // t4c8ttiuds.formOfUse, l1, i2, meg);
-            // break;
-            //
-            // case 181:
-            // aaccessor[offset + i] = new T4CTimestamptzAccessor(statement, j, t4c8ttiuds.udsnull,
-            // t4c8ttiuds.oacflg,
-            // t4c8ttiuds.oacpre,
-            // t4c8ttiuds.oacscl,
-            // t4c8ttiuds.oacfl2,
-            // t4c8ttiuds.oacmal,
-            // t4c8ttiuds.formOfUse, l1, i2, meg);
-            // break;
-            //
-            // case 231:
-            // aaccessor[offset + i] = new T4CTimestampltzAccessor(statement, j, t4c8ttiuds.udsnull,
-            // t4c8ttiuds.oacflg,
-            // t4c8ttiuds.oacpre,
-            // t4c8ttiuds.oacscl,
-            // t4c8ttiuds.oacfl2,
-            // t4c8ttiuds.oacmal,
-            // t4c8ttiuds.formOfUse, l1, i2, meg);
-            // break;
-            //
-            // case 182:
-            // aaccessor[offset + i] = new T4CIntervalymAccessor(statement, j, t4c8ttiuds.udsnull,
-            // t4c8ttiuds.oacflg,
-            // t4c8ttiuds.oacpre,
-            // t4c8ttiuds.oacscl,
-            // t4c8ttiuds.oacfl2,
-            // t4c8ttiuds.oacmal,
-            // t4c8ttiuds.formOfUse, l1, i2, meg);
-            // break;
-            //
-            // case 183:
-            // aaccessor[offset + i] = new T4CIntervaldsAccessor(statement, j, t4c8ttiuds.udsnull,
-            // t4c8ttiuds.oacflg,
-            // t4c8ttiuds.oacpre,
-            // t4c8ttiuds.oacscl,
-            // t4c8ttiuds.oacfl2,
-            // t4c8ttiuds.oacmal,
-            // t4c8ttiuds.formOfUse, l1, i2, meg);
-            // break;
-            //
-            // default:
-            // aaccessor[offset + i] = null;
-            // break;
-            // }
-            // if (t4c8ttiuds.oactoid.length > 0) {
-            // aaccessor[offset + i].internalOtype = new OracleTypeADT(t4c8ttiuds.oactoid,
-            // t4c8ttiuds.oacvsn,
-            // t4c8ttiuds.ncs,
-            // t4c8ttiuds.formOfUse, s1 + "." + s);
-            // } else {
-            // aaccessor[offset + i].internalOtype = null;
-            // }
-            // aaccessor[offset + i].columnName = colnames[i];
-            // if (uds[i].udsoac.oacmxl == 0) {
-            // aaccessor[i].isNullByDescribe = true;
-            // }
-        }
+    static void fillupAccessors() {
+        for (int i = 0; i < desc.length; i++) {
+            switch (desc[i][0] & 0xff) {
+                case Accessor.CHAR:
+                    System.out.print("Accessor.CHAR");
+                    System.out.println();
 
-        // colNameSB = null;
+                    // definesAccessors[offset + i] = new T4CCharAccessor(statement, k, oac.udsnull, oac.oacflg,
+                    // oac.oacpre, oac.oacscl, oac.oacfl2, oac.oacmal,
+                    // oac.formOfUse, j, l1, i2, meg);
+                    break;
+
+                case Accessor.NUMBER:
+                    System.out.print("Accessor.NUMBER");
+                    System.out.println();
+
+                    // definesAccessors[offset + i] = new T4CNumberAccessor(statement, j, oac.udsnull, oac.oacflg,
+                    // oac.oacpre, oac.oacscl, oac.oacfl2,
+                    // oac.oacmal, oac.formOfUse, l1, i2, meg);
+                    break;
+
+                case Accessor.VARCHAR:
+                    System.out.print("Accessor.VARCHAR:");
+
+                    T4CVarcharAccessor varcharAccessor = new T4CVarcharAccessor();
+                    varcharAccessor.setInternalTypeMaxLength(desc[i][5]);
+                    varcharAccessor.setDefinedColumnSize(desc[i][5]);
+                    char[] rowSpaceChar = new char[data[i].length];
+                    for (int j = 0; j < rowSpaceChar.length; j++) {
+                        rowSpaceChar[j] = (char) (data[i][j] & 0xff);
+                    }
+                    varcharAccessor.setRowSpaceChar(rowSpaceChar);
+
+                    System.out.println(varcharAccessor.getString());
+                    System.out.println();
+
+                    break;
+
+                case Accessor.LONG:
+                    System.out.print("Accessor.LONG");
+                    System.out.println();
+
+                    // // definesAccessors[offset + i] = new T4CLongAccessor(statement, offset + i + 1, j, oac.udsnull,
+                    // // oac.oacflg, oac.oacpre, oac.oacscl,
+                    // // oac.oacfl2, oac.oacmal, oac.formOfUse, l1,
+                    // // i2, meg);
+                    // }
+                    break;
+
+                case Accessor.VARNUM:
+                    System.out.print("Accessor.VARNUM:");
+
+                    T4CVarnumAccessor varnumAccessor = new T4CVarnumAccessor();
+                    varnumAccessor.setRowSpaceByte(data[i]);
+                    System.out.println(varnumAccessor.getLong());
+                    System.out.println();
+
+                    break;
+
+                case Accessor.BINARY_FLOAT:
+                    System.out.print("Accessor.BINARY_FLOAT");
+                    System.out.println();
+
+                    // definesAccessors[offset + i] = new T4CBinaryFloatAccessor(statement, 4, oac.udsnull, oac.oacflg,
+                    // oac.oacpre, oac.oacscl, oac.oacfl2,
+                    // oac.oacmal, oac.formOfUse, l1, i2, meg);
+                    break;
+
+                case Accessor.BINARY_DOUBLE:
+                    System.out.print("Accessor.BINARY_DOUBLE");
+                    System.out.println();
+
+                    // definesAccessors[offset + i] = new T4CBinaryDoubleAccessor(statement, 8, oac.udsnull, oac.oacflg,
+                    // oac.oacpre, oac.oacscl, oac.oacfl2,
+                    // oac.oacmal, oac.formOfUse, l1, i2, meg);
+                    break;
+
+                case Accessor.RAW:
+                    System.out.print("Accessor.RAW");
+                    System.out.println();
+
+                    // definesAccessors[offset + i] = new T4CRawAccessor(statement, j, oac.udsnull, oac.oacflg,
+                    // oac.oacpre, oac.oacscl, oac.oacfl2, oac.oacmal,
+                    // oac.formOfUse, l1, i2, meg);
+                    break;
+
+                case Accessor.LONG_RAW:
+                    System.out.print("Accessor.LONG_RAW");
+                    System.out.println();
+
+                    // if (l1 == -2 && i2 < 2001 && T4CPacketBuffer.versionNumber >= 9000) {
+                    // j = -1;
+                    // // definesAccessors[offset + i] = new T4CRawAccessor(statement, j, oac.udsnull, oac.oacflg,
+                    // // oac.oacpre, oac.oacscl, oac.oacfl2,
+                    // // oac.oacmal, oac.formOfUse, l1, i2, meg);
+                    // definesAccessors[offset + i].describeType = 24;
+                    // } else {
+                    // // definesAccessors[offset + i] = new T4CLongRawAccessor(statement, offset + i + 1, j,
+                    // // oac.udsnull, oac.oacflg, oac.oacpre,
+                    // // oac.oacscl, oac.oacfl2, oac.oacmal,
+                    // // oac.formOfUse, l1, i2, meg);
+                    // }
+                    break;
+
+                case Accessor.ROWID:
+                    System.out.print("Accessor.ROWID");
+                    System.out.println();
+
+                case Accessor.UROWID:
+                    System.out.print("Accessor.UROWID");
+                    System.out.println();
+
+                    // definesAccessors[offset + i] = new T4CRowidAccessor(statement, j, oac.udsnull, oac.oacflg,
+                    // oac.oacpre, oac.oacscl, oac.oacfl2, oac.oacmal,
+                    // oac.formOfUse, l1, i2, meg);
+                    // if (oac.oacdty == Accessor.UROWID) {
+                    // definesAccessors[i].describeType = oac.oacdty;
+                    // }
+                    break;
+
+                case Accessor.RESULT_SET:
+                    System.out.print("Accessor.RESULT_SET");
+                    System.out.println();
+
+                    // definesAccessors[offset + i] = new T4CResultSetAccessor(statement, j, oac.udsnull, oac.oacflg,
+                    // oac.oacpre, oac.oacscl, oac.oacfl2,
+                    // oac.oacmal, oac.formOfUse, l1, i2, meg);
+                    break;
+
+                case Accessor.DATE:
+                    System.out.print("Accessor.DATE");
+                    System.out.println();
+
+                    // definesAccessors[offset + i] = new T4CDateAccessor(statement, j, oac.udsnull, oac.oacflg,
+                    // oac.oacpre, oac.oacscl, oac.oacfl2, oac.oacmal,
+                    // oac.formOfUse, l1, i2, meg);
+                    break;
+
+                case Accessor.BLOB:
+                    System.out.print("Accessor.BLOB");
+                    System.out.println();
+
+                    // if (l1 == -4 && T4CPacketBuffer.versionNumber >= 9000) {
+                    // // definesAccessors[offset + i] = new T4CLongRawAccessor(statement, offset + i + 1, 0x7fffffff,
+                    // // oac.udsnull, oac.oacflg, oac.oacpre,
+                    // // oac.oacscl, oac.oacfl2, oac.oacmal,
+                    // // oac.formOfUse, l1, i2, meg);
+                    // definesAccessors[offset + i].describeType = 113;
+                    // } else if (l1 == -3 && T4CPacketBuffer.versionNumber >= 9000) {
+                    // // definesAccessors[offset + i] = new T4CRawAccessor(statement, 4000, oac.udsnull, oac.oacflg,
+                    // // oac.oacpre, oac.oacscl, oac.oacfl2,
+                    // // oac.oacmal, oac.formOfUse, l1, i2, meg);
+                    // definesAccessors[offset + i].describeType = 113;
+                    // } else {
+                    // // definesAccessors[offset + i] = new T4CBlobAccessor(statement, j, oac.udsnull, oac.oacflg,
+                    // // oac.oacpre, oac.oacscl, oac.oacfl2,
+                    // // oac.oacmal, oac.formOfUse, l1, i2, meg);
+                    // }
+                    break;
+
+                case Accessor.CLOB:
+                    System.out.print("Accessor.CLOB");
+                    System.out.println();
+
+                    // short word0 = 1;
+                    // if (j2 != 0) {
+                    // word0 = (short) j2;
+                    // }
+                    // if (l1 == -1 && T4CPacketBuffer.versionNumber >= 9000) {
+                    // j = 0;
+                    // // definesAccessors[offset + i] = new T4CLongAccessor(statement, offset + i + 1, 0x7fffffff,
+                    // // oac.udsnull, oac.oacflg, oac.oacpre,
+                    // // oac.oacscl, oac.oacfl2, oac.oacmal, word0,
+                    // // l1, i2, meg);
+                    // definesAccessors[offset + i].describeType = 112;
+                    // } else if ((l1 == 12 || l1 == 1) && T4CPacketBuffer.versionNumber >= 9000) {
+                    // int j1 = 4000;
+                    // if (i2 > 0 && i2 < j1) {
+                    // j1 = i2;
+                    // }
+                    // // definesAccessors[offset + i] = new T4CVarcharAccessor(statement, j1, oac.udsnull, oac.oacflg,
+                    // // oac.oacpre, oac.oacscl, oac.oacfl2,
+                    // // oac.oacmal, word0, 4000, l1, i2, meg);
+                    // definesAccessors[offset + i].describeType = 112;
+                    // } else {
+                    // // definesAccessors[offset + i] = new T4CClobAccessor(statement, j, oac.udsnull, oac.oacflg,
+                    // // oac.oacpre, oac.oacscl, oac.oacfl2,
+                    // // oac.oacmal, oac.formOfUse, l1, i2, meg);
+                    // }
+                    break;
+
+                case Accessor.BFILE:
+                    System.out.print("Accessor.BFILE");
+                    System.out.println();
+
+                    // definesAccessors[offset + i] = new T4CBfileAccessor(statement, j, oac.udsnull, oac.oacflg,
+                    // oac.oacpre, oac.oacscl, oac.oacfl2, oac.oacmal,
+                    // oac.formOfUse, l1, i2, meg);
+                    break;
+
+                case Accessor.NAMED_TYPE:
+                    System.out.print("Accessor.NAMED_TYPE");
+                    System.out.println();
+
+                    // definesAccessors[offset + i] = new T4CNamedTypeAccessor(statement, j, oac.udsnull, oac.oacflg,
+                    // oac.oacpre, oac.oacscl, oac.oacfl2,
+                    // oac.oacmal, oac.formOfUse, s2, l1, i2, meg);
+                    break;
+
+                case Accessor.REF_TYPE:
+                    System.out.print("Accessor.REF_TYPE");
+                    System.out.println();
+
+                    // definesAccessors[offset + i] = new T4CRefTypeAccessor(statement, j, oac.udsnull, oac.oacflg,
+                    // oac.oacpre, oac.oacscl, oac.oacfl2,
+                    // oac.oacmal, oac.formOfUse, s2, l1, i2, meg);
+                    break;
+
+                case Accessor.TIMESTAMP:
+                    System.out.print("Accessor.TIMESTAMP");
+                    System.out.println();
+
+                    // definesAccessors[offset + i] = new T4CTimestampAccessor(statement, j, oac.udsnull, oac.oacflg,
+                    // oac.oacpre, oac.oacscl, oac.oacfl2,
+                    // oac.oacmal, oac.formOfUse, l1, i2, meg);
+                    break;
+
+                case Accessor.TIMESTAMPTZ:
+                    System.out.print("Accessor.TIMESTAMPTZ");
+                    System.out.println();
+
+                    // definesAccessors[offset + i] = new T4CTimestamptzAccessor(statement, j, oac.udsnull, oac.oacflg,
+                    // oac.oacpre, oac.oacscl, oac.oacfl2,
+                    // oac.oacmal, oac.formOfUse, l1, i2, meg);
+                    break;
+
+                case Accessor.TIMESTAMPLTZ:
+                    System.out.print("Accessor.TIMESTAMPLTZ");
+                    System.out.println();
+
+                    // definesAccessors[offset + i] = new T4CTimestampltzAccessor(statement, j, oac.udsnull, oac.oacflg,
+                    // oac.oacpre, oac.oacscl, oac.oacfl2,
+                    // oac.oacmal, oac.formOfUse, l1, i2, meg);
+                    break;
+
+                case Accessor.INTERVALYM:
+                    System.out.print("Accessor.INTERVALYM");
+                    System.out.println();
+
+                    // definesAccessors[offset + i] = new T4CIntervalymAccessor(statement, j, oac.udsnull, oac.oacflg,
+                    // oac.oacpre, oac.oacscl, oac.oacfl2,
+                    // oac.oacmal, oac.formOfUse, l1, i2, meg);
+                    break;
+
+                case Accessor.INTERVALDS:
+                    System.out.print("Accessor.INTERVALDS");
+                    System.out.println();
+
+                    // definesAccessors[offset + i] = new T4CIntervaldsAccessor(statement, j, oac.udsnull, oac.oacflg,
+                    // oac.oacpre, oac.oacscl, oac.oacfl2,
+                    // oac.oacmal, oac.formOfUse, l1, i2, meg);
+                    break;
+                default:
+                    throw new RuntimeException("unknown type!");
+            }
+        }
+    }
+
+    public static void main(String[] args) {
+        fillupAccessors();
     }
 
 }

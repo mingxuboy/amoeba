@@ -1,7 +1,6 @@
 package com.meidusa.amoeba.oracle.net.packet;
 
 import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
-import com.meidusa.amoeba.oracle.util.T4CTypeRep;
 
 /**
  * 
