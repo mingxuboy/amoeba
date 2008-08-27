@@ -14,9 +14,12 @@ package com.meidusa.amoeba.mysql.net.packet;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.sql.SQLException;
 
 import com.meidusa.amoeba.mysql.jdbc.Messages;
+import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
 
 /**
  * ×èÈûÄ£Ê½¶ÁÈ¡ packet
@@ -50,7 +53,7 @@ public class BlockedPacketIO {
      * @throws SQLException DOCUMENT ME!
      * @throws IOException 
      */
-    public static final MysqlPacketBuffer readFullyPacketBuffer(InputStream mysqlInput) throws IOException {
+    public static final <T extends AbstractPacketBuffer> T readFullyPacketBuffer(InputStream mysqlInput, Class<T> t) throws IOException {
     	
     		byte[] packetHeaderBuf = new byte[4];
             int lengthRead = readFully(mysqlInput,packetHeaderBuf, 0, 4);
@@ -77,12 +80,15 @@ public class BlockedPacketIO {
                 throw new IOException("Short read, expected " +
                     packetLength + " bytes, only read " + numBytesRead);
             }
-
+            T absBuffer = null;
             buffer[bufferLength] = 0;
-            MysqlPacketBuffer packet = new MysqlPacketBuffer(buffer);
-            packet.setBufLength(bufferLength + 1);
+            try {
+            	Constructor<T> constructor =   t.getConstructor(byte[].class);
+				absBuffer = constructor.newInstance(buffer);
+			} catch (Exception e) {
+			}
             
-            return packet;
+            return absBuffer;
     }
     
 }

@@ -389,7 +389,7 @@ public class MysqlPacketBuffer extends AbstractPacketBuffer{
 	// To avoid alloc'ing a new byte array, we
 	// do this by hand, rather than calling getNullTerminatedBytes()
 	//
-	final String readString() {
+	public final String readString() {
 		int i = this.position;
 		int len = 0;
 		int maxLen = getBufLength();
@@ -656,21 +656,21 @@ public class MysqlPacketBuffer extends AbstractPacketBuffer{
 	}
 
 	// Write null-terminated string
-	final void writeString(String s){
+	public final void writeString(String s){
 		ensureCapacity((s.length() * 2) + 1);
 		writeStringNoNull(s);
 		this.buffer[this.position++] = 0;
 	}
 	
 	//	 Write null-terminated string in the given encoding
-	final void writeString(String s, String encoding) throws UnsupportedEncodingException{
+	public final void writeString(String s, String encoding) throws UnsupportedEncodingException{
 		ensureCapacity((s.length() * 2) + 1);
 		writeStringNoNull(s, encoding, encoding, false);
 		this.buffer[this.position++] = 0;
 	}
 
 	// Write string, with no termination
-	final void writeStringNoNull(String s){
+	public final void writeStringNoNull(String s){
 		int len = s.length();
 		ensureCapacity(len * 2);
 		System.arraycopy(s.getBytes(), 0, this.buffer, this.position, len);

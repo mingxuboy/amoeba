@@ -67,7 +67,7 @@ public abstract class OracleConnection extends DatabaseConnection {
         ByteBuffer out = ByteBuffer.allocate(msg.length);
         out.put(msg);
         out.flip();
-        _outQueue.append(out);
+        _outQueue.offer(out);
         _cmgr.notifyMessagePosted(this);
     }
 

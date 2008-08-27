@@ -110,6 +110,7 @@
 	        </tarfileset>
 	        <tarfileset dir="build/build-mysql">
 	        	<exclude name="*/.svn/*"/>
+	        	<exclude name="logs"/>
 	        </tarfileset>
 	    </tar>
 		
@@ -139,6 +140,7 @@
 	        
 	        <zipfileset dir="build/build-mysql">
 	        	<exclude name="*/.svn/*"/>
+	        	<exclude name="logs"/>
 	        </zipfileset>
 		    
 	    </zip>
