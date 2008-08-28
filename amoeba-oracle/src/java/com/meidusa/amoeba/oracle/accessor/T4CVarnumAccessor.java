@@ -2,15 +2,13 @@ package com.meidusa.amoeba.oracle.accessor;
 
 public class T4CVarnumAccessor extends VarnumAccessor {
 
-    @Override
-    public long getLong() {
+    public static long getLong(byte[] abyte0) {
         long l = 0L;
-        byte[] abyte0 = rowSpaceByte;
         int j = 1;
         byte byte0 = abyte0[j - 1];
         byte byte1 = abyte0[j];
-        long l1 = 0L;
-        if ((byte1 & 0xffffff80) != 0) {
+
+        if ((byte1 & 0xffffff80) != 0) {// 表示byte1是负数
             if (byte1 == -128 && byte0 == 1) {
                 return 0L;
             }
@@ -44,13 +42,13 @@ public class T4CVarnumAccessor extends VarnumAccessor {
             int i1 = (byte4 <= byte2 + 1) ? (byte4 + 1) : (byte2 + 2);
             int i2 = i1 + j;
             if (i1 > 1) {
-                l1 = abyte0[j + 1] - 1;
+                l = abyte0[j + 1] - 1;
                 for (int l2 = 2 + j; l2 < i2; l2++) {
-                    l1 = l1 * 100L + (long) (abyte0[l2] - 1);
+                    l = l * 100L + (long) (abyte0[l2] - 1);
                 }
             }
             for (int i3 = byte2 - byte4; i3 >= 0; i3--) {
-                l1 *= 100L;
+                l *= 100L;
             }
         } else {
             byte byte3 = (byte) ((~byte1 & 0xffffff7f) - 65);
@@ -86,17 +84,16 @@ public class T4CVarnumAccessor extends VarnumAccessor {
             int k1 = byte5 <= byte3 + 1 ? byte5 + 1 : byte3 + 2;
             int j2 = k1 + j;
             if (k1 > 1) {
-                l1 = 101 - abyte0[j + 1];
+                l = 101 - abyte0[j + 1];
                 for (int k3 = 2 + j; k3 < j2; k3++) {
-                    l1 = l1 * 100L + (long) (101 - abyte0[k3]);
+                    l = l * 100L + (long) (101 - abyte0[k3]);
                 }
             }
             for (int l3 = byte3 - byte5; l3 >= 0; l3--) {
-                l1 *= 100L;
+                l *= 100L;
             }
-            l1 = -l1;
+            l = -l;
         }
-        l = l1;
         return l;
     }
 

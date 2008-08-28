@@ -2,6 +2,7 @@ package com.meidusa.amoeba.oracle.net.packet;
 
 import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
 import com.meidusa.amoeba.oracle.accessor.Accessor;
+import com.meidusa.amoeba.oracle.accessor.T4CDateAccessor;
 import com.meidusa.amoeba.oracle.accessor.T4CVarcharAccessor;
 import com.meidusa.amoeba.oracle.accessor.T4CVarnumAccessor;
 
@@ -150,17 +151,21 @@ public class T4C8OallDataPacket extends T4CTTIfunPacket {
         for (int i = 0; i < desc.length; i++) {
             switch (desc[i][0] & 0xff) {
                 case Accessor.CHAR:
-                    System.out.print("Accessor.CHAR");
-                    System.out.println();
+                    // System.out.print("Accessor.CHAR");
 
-                    // definesAccessors[offset + i] = new T4CCharAccessor(statement, k, oac.udsnull, oac.oacflg,
-                    // oac.oacpre, oac.oacscl, oac.oacfl2, oac.oacmal,
-                    // oac.formOfUse, j, l1, i2, meg);
+                    // T4CCharAccessor charAccessor = new T4CCharAccessor();
+                    // charAccessor.setDataBytes(data[i]);
+                    // charAccessor.setInternalTypeMaxLength(desc[i][5]);
+                    // charAccessor.setDefinedColumnSize(desc[i][5]);
+                    // String s = charAccessor.getString();
+
+                    // System.out.println(s);
+                    // System.out.println();
                     break;
 
                 case Accessor.NUMBER:
-                    System.out.print("Accessor.NUMBER");
-                    System.out.println();
+                    // System.out.print("Accessor.NUMBER");
+                    // System.out.println();
 
                     // definesAccessors[offset + i] = new T4CNumberAccessor(statement, j, oac.udsnull, oac.oacflg,
                     // oac.oacpre, oac.oacscl, oac.oacfl2,
@@ -170,23 +175,13 @@ public class T4C8OallDataPacket extends T4CTTIfunPacket {
                 case Accessor.VARCHAR:
                     System.out.print("Accessor.VARCHAR:");
 
-                    T4CVarcharAccessor varcharAccessor = new T4CVarcharAccessor();
-                    varcharAccessor.setInternalTypeMaxLength(desc[i][5]);
-                    varcharAccessor.setDefinedColumnSize(desc[i][5]);
-                    char[] rowSpaceChar = new char[data[i].length];
-                    for (int j = 0; j < rowSpaceChar.length; j++) {
-                        rowSpaceChar[j] = (char) (data[i][j] & 0xff);
-                    }
-                    varcharAccessor.setRowSpaceChar(rowSpaceChar);
-
-                    System.out.println(varcharAccessor.getString());
+                    System.out.println(T4CVarcharAccessor.getString(data[i], desc[i][5], desc[i][5]));
                     System.out.println();
-
                     break;
 
                 case Accessor.LONG:
-                    System.out.print("Accessor.LONG");
-                    System.out.println();
+                    // System.out.print("Accessor.LONG");
+                    // System.out.println();
 
                     // // definesAccessors[offset + i] = new T4CLongAccessor(statement, offset + i + 1, j, oac.udsnull,
                     // // oac.oacflg, oac.oacpre, oac.oacscl,
@@ -198,16 +193,13 @@ public class T4C8OallDataPacket extends T4CTTIfunPacket {
                 case Accessor.VARNUM:
                     System.out.print("Accessor.VARNUM:");
 
-                    T4CVarnumAccessor varnumAccessor = new T4CVarnumAccessor();
-                    varnumAccessor.setRowSpaceByte(data[i]);
-                    System.out.println(varnumAccessor.getLong());
+                    System.out.println(T4CVarnumAccessor.getLong(data[i]));
                     System.out.println();
-
                     break;
 
                 case Accessor.BINARY_FLOAT:
-                    System.out.print("Accessor.BINARY_FLOAT");
-                    System.out.println();
+                    // System.out.print("Accessor.BINARY_FLOAT");
+                    // System.out.println();
 
                     // definesAccessors[offset + i] = new T4CBinaryFloatAccessor(statement, 4, oac.udsnull, oac.oacflg,
                     // oac.oacpre, oac.oacscl, oac.oacfl2,
@@ -215,8 +207,8 @@ public class T4C8OallDataPacket extends T4CTTIfunPacket {
                     break;
 
                 case Accessor.BINARY_DOUBLE:
-                    System.out.print("Accessor.BINARY_DOUBLE");
-                    System.out.println();
+                    // System.out.print("Accessor.BINARY_DOUBLE");
+                    // System.out.println();
 
                     // definesAccessors[offset + i] = new T4CBinaryDoubleAccessor(statement, 8, oac.udsnull, oac.oacflg,
                     // oac.oacpre, oac.oacscl, oac.oacfl2,
@@ -224,8 +216,8 @@ public class T4C8OallDataPacket extends T4CTTIfunPacket {
                     break;
 
                 case Accessor.RAW:
-                    System.out.print("Accessor.RAW");
-                    System.out.println();
+                    // System.out.print("Accessor.RAW");
+                    // System.out.println();
 
                     // definesAccessors[offset + i] = new T4CRawAccessor(statement, j, oac.udsnull, oac.oacflg,
                     // oac.oacpre, oac.oacscl, oac.oacfl2, oac.oacmal,
@@ -233,8 +225,8 @@ public class T4C8OallDataPacket extends T4CTTIfunPacket {
                     break;
 
                 case Accessor.LONG_RAW:
-                    System.out.print("Accessor.LONG_RAW");
-                    System.out.println();
+                    // System.out.print("Accessor.LONG_RAW");
+                    // System.out.println();
 
                     // if (l1 == -2 && i2 < 2001 && T4CPacketBuffer.versionNumber >= 9000) {
                     // j = -1;
@@ -251,12 +243,12 @@ public class T4C8OallDataPacket extends T4CTTIfunPacket {
                     break;
 
                 case Accessor.ROWID:
-                    System.out.print("Accessor.ROWID");
-                    System.out.println();
+                    // System.out.print("Accessor.ROWID");
+                    // System.out.println();
 
                 case Accessor.UROWID:
-                    System.out.print("Accessor.UROWID");
-                    System.out.println();
+                    // System.out.print("Accessor.UROWID");
+                    // System.out.println();
 
                     // definesAccessors[offset + i] = new T4CRowidAccessor(statement, j, oac.udsnull, oac.oacflg,
                     // oac.oacpre, oac.oacscl, oac.oacfl2, oac.oacmal,
@@ -267,8 +259,8 @@ public class T4C8OallDataPacket extends T4CTTIfunPacket {
                     break;
 
                 case Accessor.RESULT_SET:
-                    System.out.print("Accessor.RESULT_SET");
-                    System.out.println();
+                    // System.out.print("Accessor.RESULT_SET");
+                    // System.out.println();
 
                     // definesAccessors[offset + i] = new T4CResultSetAccessor(statement, j, oac.udsnull, oac.oacflg,
                     // oac.oacpre, oac.oacscl, oac.oacfl2,
@@ -276,17 +268,19 @@ public class T4C8OallDataPacket extends T4CTTIfunPacket {
                     break;
 
                 case Accessor.DATE:
-                    System.out.print("Accessor.DATE");
+                    System.out.print("Accessor.DATE:");
+
+                    // T4CDateAccessor dateAccessor = new T4CDateAccessor();
+                    // dateAccessor.setDataBytes(data[i]);
+
+                    System.out.println(T4CDateAccessor.getDate(data[i]));
                     System.out.println();
 
-                    // definesAccessors[offset + i] = new T4CDateAccessor(statement, j, oac.udsnull, oac.oacflg,
-                    // oac.oacpre, oac.oacscl, oac.oacfl2, oac.oacmal,
-                    // oac.formOfUse, l1, i2, meg);
                     break;
 
                 case Accessor.BLOB:
-                    System.out.print("Accessor.BLOB");
-                    System.out.println();
+                    // System.out.print("Accessor.BLOB");
+                    // System.out.println();
 
                     // if (l1 == -4 && T4CPacketBuffer.versionNumber >= 9000) {
                     // // definesAccessors[offset + i] = new T4CLongRawAccessor(statement, offset + i + 1, 0x7fffffff,
@@ -307,8 +301,8 @@ public class T4C8OallDataPacket extends T4CTTIfunPacket {
                     break;
 
                 case Accessor.CLOB:
-                    System.out.print("Accessor.CLOB");
-                    System.out.println();
+                    // System.out.print("Accessor.CLOB");
+                    // System.out.println();
 
                     // short word0 = 1;
                     // if (j2 != 0) {
@@ -338,8 +332,8 @@ public class T4C8OallDataPacket extends T4CTTIfunPacket {
                     break;
 
                 case Accessor.BFILE:
-                    System.out.print("Accessor.BFILE");
-                    System.out.println();
+                    // System.out.print("Accessor.BFILE");
+                    // System.out.println();
 
                     // definesAccessors[offset + i] = new T4CBfileAccessor(statement, j, oac.udsnull, oac.oacflg,
                     // oac.oacpre, oac.oacscl, oac.oacfl2, oac.oacmal,
@@ -347,8 +341,8 @@ public class T4C8OallDataPacket extends T4CTTIfunPacket {
                     break;
 
                 case Accessor.NAMED_TYPE:
-                    System.out.print("Accessor.NAMED_TYPE");
-                    System.out.println();
+                    // System.out.print("Accessor.NAMED_TYPE");
+                    // System.out.println();
 
                     // definesAccessors[offset + i] = new T4CNamedTypeAccessor(statement, j, oac.udsnull, oac.oacflg,
                     // oac.oacpre, oac.oacscl, oac.oacfl2,
@@ -356,8 +350,8 @@ public class T4C8OallDataPacket extends T4CTTIfunPacket {
                     break;
 
                 case Accessor.REF_TYPE:
-                    System.out.print("Accessor.REF_TYPE");
-                    System.out.println();
+                    // System.out.print("Accessor.REF_TYPE");
+                    // System.out.println();
 
                     // definesAccessors[offset + i] = new T4CRefTypeAccessor(statement, j, oac.udsnull, oac.oacflg,
                     // oac.oacpre, oac.oacscl, oac.oacfl2,
@@ -365,8 +359,8 @@ public class T4C8OallDataPacket extends T4CTTIfunPacket {
                     break;
 
                 case Accessor.TIMESTAMP:
-                    System.out.print("Accessor.TIMESTAMP");
-                    System.out.println();
+                    // System.out.print("Accessor.TIMESTAMP");
+                    // System.out.println();
 
                     // definesAccessors[offset + i] = new T4CTimestampAccessor(statement, j, oac.udsnull, oac.oacflg,
                     // oac.oacpre, oac.oacscl, oac.oacfl2,
@@ -374,8 +368,8 @@ public class T4C8OallDataPacket extends T4CTTIfunPacket {
                     break;
 
                 case Accessor.TIMESTAMPTZ:
-                    System.out.print("Accessor.TIMESTAMPTZ");
-                    System.out.println();
+                    // System.out.print("Accessor.TIMESTAMPTZ");
+                    // System.out.println();
 
                     // definesAccessors[offset + i] = new T4CTimestamptzAccessor(statement, j, oac.udsnull, oac.oacflg,
                     // oac.oacpre, oac.oacscl, oac.oacfl2,
@@ -383,8 +377,8 @@ public class T4C8OallDataPacket extends T4CTTIfunPacket {
                     break;
 
                 case Accessor.TIMESTAMPLTZ:
-                    System.out.print("Accessor.TIMESTAMPLTZ");
-                    System.out.println();
+                    // System.out.print("Accessor.TIMESTAMPLTZ");
+                    // System.out.println();
 
                     // definesAccessors[offset + i] = new T4CTimestampltzAccessor(statement, j, oac.udsnull, oac.oacflg,
                     // oac.oacpre, oac.oacscl, oac.oacfl2,
@@ -392,8 +386,8 @@ public class T4C8OallDataPacket extends T4CTTIfunPacket {
                     break;
 
                 case Accessor.INTERVALYM:
-                    System.out.print("Accessor.INTERVALYM");
-                    System.out.println();
+                    // System.out.print("Accessor.INTERVALYM");
+                    // System.out.println();
 
                     // definesAccessors[offset + i] = new T4CIntervalymAccessor(statement, j, oac.udsnull, oac.oacflg,
                     // oac.oacpre, oac.oacscl, oac.oacfl2,
@@ -401,8 +395,8 @@ public class T4C8OallDataPacket extends T4CTTIfunPacket {
                     break;
 
                 case Accessor.INTERVALDS:
-                    System.out.print("Accessor.INTERVALDS");
-                    System.out.println();
+                    // System.out.print("Accessor.INTERVALDS");
+                    // System.out.println();
 
                     // definesAccessors[offset + i] = new T4CIntervaldsAccessor(statement, j, oac.udsnull, oac.oacflg,
                     // oac.oacpre, oac.oacscl, oac.oacfl2,
@@ -415,7 +409,14 @@ public class T4C8OallDataPacket extends T4CTTIfunPacket {
     }
 
     public static void main(String[] args) {
-        fillupAccessors();
+
+        long st = System.currentTimeMillis();
+        for (int i = 0; i < 1; i++) {
+            fillupAccessors();
+        }
+        long et = System.currentTimeMillis();
+
+        System.out.println(desc.length + ":" + (et - st) + " ms");
     }
 
 }

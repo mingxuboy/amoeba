@@ -50,11 +50,13 @@ abstract class DateTimeCommonAccessor extends Accessor {
         }
         Date date = null;
 
-        int j = 0;
-        int k = (((rowSpaceByte[0 + j] & 0xff) - 100) * 100 + (rowSpaceByte[1 + j] & 0xff)) - 100;
-        calendar.set(k, oracleMonth(j), oracleDay(j), 0, 0, 0);
+        int j = 1;
+        int y = oracleYear(dataBytes,j);
+        int m = oracleMonth(dataBytes,j);
+        int d = oracleDay(dataBytes,j);
+        calendar.set(y, m, d, 0, 0, 0);
         calendar.set(14, 0);
-        if (k > 0 && calendar.isSet(0)) {
+        if (y > 0 && calendar.isSet(0)) {
             calendar.set(0, 1);
         }
         date = new Date(calendar.getTimeInMillis());
@@ -65,13 +67,13 @@ abstract class DateTimeCommonAccessor extends Accessor {
     Time getTime() {
         Time time = null;
 
-        int j = 0;
+        int j = 1;
         TimeZone timezone = getDefaultTimeZone();
         if (timezone != epochTimeZone) {
             epochTimeZoneOffset = calculateEpochOffset(timezone);
             epochTimeZone = timezone;
         }
-        time = new Time((long) oracleTime(j) - epochTimeZoneOffset);
+        time = new Time((long) oracleTime(dataBytes,j) - epochTimeZoneOffset);
 
         return time;
     }
@@ -82,11 +84,11 @@ abstract class DateTimeCommonAccessor extends Accessor {
         }
         Time time = null;
 
-        int j = 0;
-        int k = (((rowSpaceByte[0 + j] & 0xff) - 100) * 100 + (rowSpaceByte[1 + j] & 0xff)) - 100;
-        calendar.set(1970, 0, 1, oracleHour(j), oracleMin(j), oracleSec(j));
+        int j = 1;
+        int y = (((dataBytes[0 + j] & 0xff) - 100) * 100 + (dataBytes[1 + j] & 0xff)) - 100;
+        calendar.set(1970, 0, 1, oracleHour(dataBytes,j), oracleMin(dataBytes,j), oracleSec(dataBytes,j));
         calendar.set(14, 0);
-        if (k > 0 && calendar.isSet(0)) {
+        if (y > 0 && calendar.isSet(0)) {
             calendar.set(0, 1);
         }
         time = new Time(calendar.getTimeInMillis());
@@ -104,15 +106,20 @@ abstract class DateTimeCommonAccessor extends Accessor {
         }
         Timestamp timestamp = null;
 
-        int j = 0;
-        int k = (((rowSpaceByte[0 + j] & 0xff) - 100) * 100 + (rowSpaceByte[1 + j] & 0xff)) - 100;
-        calendar.set(k, oracleMonth(j), oracleDay(j), oracleHour(j), oracleMin(j), oracleSec(j));
+        int j = 1;
+        int y = oracleYear(dataBytes,j);
+        int m = oracleMonth(dataBytes,j);
+        int d = oracleDay(dataBytes,j);
+        int h = oracleHour(dataBytes,j);
+        calendar.set(y, m, d, h, oracleMin(dataBytes,j), oracleSec(dataBytes,j));
         calendar.set(14, 0);
-        if (k > 0 && calendar.isSet(0)) calendar.set(0, 1);
+        if (y > 0 && calendar.isSet(0)) {
+            calendar.set(0, 1);
+        }
         timestamp = new Timestamp(calendar.getTimeInMillis());
         // short word0 = rowSpaceIndicator[lengthIndex + i];
         // if (word0 >= 11) {
-        timestamp.setNanos(oracleNanos(j));
+        // timestamp.setNanos(oracleNanos(j));
         // }
 
         return timestamp;
@@ -132,54 +139,54 @@ abstract class DateTimeCommonAccessor extends Accessor {
         return defaultCalendar;
     }
 
-    final int oracleYear(int i) {
-        int j = (((rowSpaceByte[0 + i] & 0xff) - 100) * 100 + (rowSpaceByte[1 + i] & 0xff)) - 100;
+    static final int oracleYear(byte[] dataBytes, int i) {
+        int j = (((dataBytes[0 + i] & 0xff) - 100) * 100 + (dataBytes[1 + i] & 0xff)) - 100;
         return j > 0 ? j : j + 1;
     }
 
-    final int oracleMonth(int i) {
-        return rowSpaceByte[2 + i] - 1;
+    static final int oracleMonth(byte[] dataBytes, int i) {
+        return dataBytes[2 + i] - 1;
     }
 
-    final int oracleDay(int i) {
-        return rowSpaceByte[3 + i];
+    static final int oracleDay(byte[] dataBytes, int i) {
+        return dataBytes[3 + i];
     }
 
-    final int oracleHour(int i) {
-        return rowSpaceByte[4 + i] - 1;
+    static final int oracleHour(byte[] dataBytes, int i) {
+        return dataBytes[4 + i] - 1;
     }
 
-    final int oracleMin(int i) {
-        return rowSpaceByte[5 + i] - 1;
+    static final int oracleMin(byte[] dataBytes, int i) {
+        return dataBytes[5 + i] - 1;
     }
 
-    final int oracleSec(int i) {
-        return rowSpaceByte[6 + i] - 1;
+    static final int oracleSec(byte[] dataBytes, int i) {
+        return dataBytes[6 + i] - 1;
     }
 
-    final int oracleTZ1(int i) {
-        return rowSpaceByte[11 + i];
+    static final int oracleTZ1(byte[] dataBytes, int i) {
+        return dataBytes[11 + i];
     }
 
-    final int oracleTZ2(int i) {
-        return rowSpaceByte[12 + i];
+    static final int oracleTZ2(byte[] dataBytes, int i) {
+        return dataBytes[12 + i];
     }
 
-    final int oracleTime(int i) {
-        int j = oracleHour(i);
-        j *= 60;
-        j += oracleMin(i);
-        j *= 60;
-        j += oracleSec(i);
-        j *= 1000;
+    static final int oracleNanos(byte[] dataBytes, int i) {
+        int j = (dataBytes[7 + i] & 0xff) << 24;
+        j |= (dataBytes[8 + i] & 0xff) << 16;
+        j |= (dataBytes[9 + i] & 0xff) << 8;
+        j |= dataBytes[10 + i] & 0xff & 0xff;
         return j;
     }
 
-    final int oracleNanos(int i) {
-        int j = (rowSpaceByte[7 + i] & 0xff) << 24;
-        j |= (rowSpaceByte[8 + i] & 0xff) << 16;
-        j |= (rowSpaceByte[9 + i] & 0xff) << 8;
-        j |= rowSpaceByte[10 + i] & 0xff & 0xff;
+    static final int oracleTime(byte[] dataBytes, int i) {
+        int j = oracleHour(dataBytes, i);
+        j *= 60;
+        j += oracleMin(dataBytes, i);
+        j *= 60;
+        j += oracleSec(dataBytes, i);
+        j *= 1000;
         return j;
     }
 
