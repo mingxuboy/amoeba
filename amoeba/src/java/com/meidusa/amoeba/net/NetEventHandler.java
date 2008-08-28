@@ -23,7 +23,7 @@ public interface NetEventHandler {
 	
 	/**
 	 * 此时handler需要处理 when 时刻 所 handle 的网络事件。
-	 * @param selkey 当前selector中发生io相对应的selectionKey
+	 * 
 	 * @param when
 	 * @return
 	 */
