@@ -44,7 +44,7 @@ public class T4C7OversionResponseDataPacket extends DataPacket {
                         //DatabaseError.throwSqlException(438);
                     }
                     retVerNum = meg.unmarshalUB4();
-                    T4CPacketBuffer.versionNumber = getVersionNumber();
+                    meg.versionNumber = getVersionNumber();
                     flag = true;
                     continue;
                 case 9:

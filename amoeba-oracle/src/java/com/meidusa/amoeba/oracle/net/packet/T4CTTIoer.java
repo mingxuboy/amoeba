@@ -46,7 +46,7 @@ public class T4CTTIoer {
     }
 
     public int unmarshal() {
-        if (T4CPacketBuffer.versionNumber >= 10000) {
+        if (meg.versionNumber >= 10000) {
             endToEndECIDSequenceNumber = (short) meg.unmarshalUB2();
             // connection.endToEndECIDSequenceNumber = endToEndECIDSequenceNumber;
         }
@@ -88,7 +88,7 @@ public class T4CTTIoer {
     }
 
     public void marshal(T4CPacketBuffer meg) {
-        if (T4CPacketBuffer.versionNumber >= 10000) {
+        if (meg.versionNumber >= 10000) {
             meg.marshalUB2(endToEndECIDSequenceNumber);
         }
         meg.marshalUB4(curRowNumber);

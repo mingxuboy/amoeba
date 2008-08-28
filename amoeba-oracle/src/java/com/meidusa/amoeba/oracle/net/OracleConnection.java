@@ -26,9 +26,19 @@ public abstract class OracleConnection extends DatabaseConnection {
     public String            protocolVersionStr = "Java_TTC-8.2.0";
     public byte[]            protocolVersion    = new byte[] { 6 };
     private DBConversion     conversion;
-    protected String           encryptedSK;
+    protected String         encryptedSK;
     
-    public DBConversion getConversion() {
+    private short versionNumber;
+    
+    public short getVersionNumber() {
+		return versionNumber;
+	}
+
+	public void setVersionNumber(short versionNumber) {
+		this.versionNumber = versionNumber;
+	}
+
+	public DBConversion getConversion() {
         return conversion;
     }
 
