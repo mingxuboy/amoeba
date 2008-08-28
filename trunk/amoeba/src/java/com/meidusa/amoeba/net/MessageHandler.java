@@ -25,9 +25,9 @@ public interface MessageHandler {
 	 * 
 	 * 处理一个完整的数据包消息
 	 * 
-	 * @param selkey
-	 *            当前处理的数据所对应发生网络IO事件的SelectionKey
-	 * @param message
+	 * @param conn 表示该数据是从当前conn 发送过来的
+	 * 
+	 * @param message 当前handle 的消息数据
 	 */
 	public void handleMessage(Connection conn, byte[] message);
 	
