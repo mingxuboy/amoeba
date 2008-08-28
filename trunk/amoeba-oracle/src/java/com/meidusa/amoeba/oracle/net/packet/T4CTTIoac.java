@@ -152,7 +152,7 @@ public class T4CTTIoac {
         oacvsn = meg.unmarshalUB2();
         ncs = meg.unmarshalUB2();
         formOfUse = meg.unmarshalUB1();
-        if (T4CPacketBuffer.versionNumber >= 9000) {
+        if (meg.versionNumber >= 9000) {
             oacmxlc = (int) meg.unmarshalUB4();
         }
     }
@@ -169,7 +169,7 @@ public class T4CTTIoac {
         meg.marshalUB2(oacvsn);// TypeVersion
         meg.marshalUB2(ncs);// CharSet
         meg.marshalUB1(formOfUse);// CharSetForm
-        if (T4CPacketBuffer.versionNumber >= 9000) {
+        if (meg.versionNumber >= 9000) {
             meg.marshalUB4(0L);// oacmxlc
         }
     }

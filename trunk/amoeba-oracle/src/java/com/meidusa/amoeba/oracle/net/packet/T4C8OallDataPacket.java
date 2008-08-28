@@ -73,7 +73,7 @@ public class T4C8OallDataPacket extends T4CTTIfunPacket {
 
                 unmarshalBindsTypes(meg);
 
-                if (T4CPacketBuffer.versionNumber >= 9000 && defCols > 0) {
+                if (meg.versionNumber >= 9000 && defCols > 0) {
                     oacdefDefines = new T4CTTIoac[defCols];
                     for (int i = 0; i < defCols; i++) {
                         oacdefDefines[i] = new T4CTTIoac(meg);
@@ -113,7 +113,7 @@ public class T4C8OallDataPacket extends T4CTTIfunPacket {
         meg.unmarshalPTR();
         meg.unmarshalPTR();
 
-        if (T4CPacketBuffer.versionNumber >= 9000) {
+        if (meg.versionNumber >= 9000) {
             meg.unmarshalPTR();
             defCols = meg.unmarshalSWORD();
         }

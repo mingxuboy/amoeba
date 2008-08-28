@@ -8,7 +8,7 @@ import com.meidusa.amoeba.oracle.util.T4CTypeRep;
 
 public class OracleAbstractPacketBuffer extends AbstractPacketBuffer {
 
-    public static short        versionNumber; // 用于存放全局服务器端的版本，amoeba 所代理的多个 oracle server 在版本上面必须要一致
+    public short        versionNumber; // 用于存放全局服务器端的版本，amoeba 所代理的多个 oracle server 在版本上面必须要一致
 
     protected OracleConnection oconn;
 
@@ -23,6 +23,7 @@ public class OracleAbstractPacketBuffer extends AbstractPacketBuffer {
     public void init(Connection conn) {
         super.init(conn);
         this.oconn = (OracleConnection) conn;
+        versionNumber = oconn.getVersionNumber();
     }
 
     public short readUB1() {
