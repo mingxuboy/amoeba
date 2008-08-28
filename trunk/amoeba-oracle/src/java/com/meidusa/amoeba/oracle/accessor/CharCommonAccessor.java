@@ -7,25 +7,34 @@ abstract class CharCommonAccessor extends Accessor {
 
     static final int MAX_NB_CHAR_PLSQL = 32512;
 
-    protected char[] rowSpaceChar;
+    protected int    internalTypeMaxLength;
+    protected int    definedColumnSize;
 
-    public char[] getRowSpaceChar() {
-        return rowSpaceChar;
+    public int getInternalTypeMaxLength() {
+        return internalTypeMaxLength;
     }
 
-    public void setRowSpaceChar(char[] rowSpaceChar) {
-        this.rowSpaceChar = rowSpaceChar;
+    public void setInternalTypeMaxLength(int internalTypeMaxLength) {
+        this.internalTypeMaxLength = internalTypeMaxLength;
+    }
+
+    public int getDefinedColumnSize() {
+        return definedColumnSize;
+    }
+
+    public void setDefinedColumnSize(int definedColumnSize) {
+        this.definedColumnSize = definedColumnSize;
     }
 
     String getString() {
         String s = null;
 
         int j = 0;
-        int k = rowSpaceChar[j];// >> 1;
+        int k = dataBytes[j];
         if (k > internalTypeMaxLength) {
             k = internalTypeMaxLength;
         }
-        s = new String(rowSpaceChar, j + 1, k);
+        s = new String(dataBytes, j + 1, k);
 
         return s;
     }
@@ -34,11 +43,11 @@ abstract class CharCommonAccessor extends Accessor {
         CharArrayReader chararrayreader = null;
 
         int j = 0;
-        int k = rowSpaceChar[j] >> 1;
+        int k = dataBytes[j];
         if (k > internalTypeMaxLength) {
             k = internalTypeMaxLength;
         }
-        chararrayreader = new CharArrayReader(rowSpaceChar, j + 1, k);
+        chararrayreader = new CharArrayReader(getString().toCharArray(), j + 1, k);
 
         return chararrayreader;
     }

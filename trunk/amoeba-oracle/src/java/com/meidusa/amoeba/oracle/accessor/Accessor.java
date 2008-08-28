@@ -44,32 +44,14 @@ public abstract class Accessor {
     public static final int NO_NEED_TO_PREPARE = 2;
     public static final int NEED_TO_PREPARE    = 3;
 
-    protected byte[]        rowSpaceByte;
-    protected int           internalTypeMaxLength;
-    protected int           definedColumnSize;
+    protected byte[]        dataBytes;
 
-    public byte[] getRowSpaceByte() {
-        return rowSpaceByte;
+    public byte[] getDataBytes() {
+        return dataBytes;
     }
 
-    public void setRowSpaceByte(byte[] rowSpaceByte) {
-        this.rowSpaceByte = rowSpaceByte;
-    }
-
-    public int getInternalTypeMaxLength() {
-        return internalTypeMaxLength;
-    }
-
-    public void setInternalTypeMaxLength(int internalTypeMaxLength) {
-        this.internalTypeMaxLength = internalTypeMaxLength;
-    }
-
-    public int getDefinedColumnSize() {
-        return definedColumnSize;
-    }
-
-    public void setDefinedColumnSize(int definedColumnSize) {
-        this.definedColumnSize = definedColumnSize;
+    public void setDataBytes(byte[] dataBytes) {
+        this.dataBytes = dataBytes;
     }
 
 }
