@@ -14,8 +14,6 @@ package com.meidusa.amoeba.net;
 import java.nio.channels.SocketChannel;
 
 public abstract class DatabaseConnection extends AuthingableConnection{
-	
-	protected String charset;
 	private String user;
 	private String password;
 	protected String schema;
@@ -30,6 +28,17 @@ public abstract class DatabaseConnection extends AuthingableConnection{
 	 */
 	protected int transactionIsolation;
 	
+	protected String clientCharset;
+	
+	public String getClientCharset() {
+		return clientCharset;
+	}
+
+	public void setClientCharset(String clientCharset) {
+		this.clientCharset = clientCharset;
+	}
+
+	
 	public DatabaseConnection(SocketChannel channel, long createStamp) {
 		super(channel, createStamp);
 	}
@@ -43,20 +52,6 @@ public abstract class DatabaseConnection extends AuthingableConnection{
 	public void setSchema(String schema) {
 		this.schema = schema;
 	}
-
-
-
-	public String getCharset() {
-		return charset;
-	}
-
-
-
-	public void setCharset(String charset) {
-		this.charset = charset;
-	}
-
-
 
 	public String getUser() {
 		return user;
