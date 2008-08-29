@@ -13,10 +13,13 @@ package com.meidusa.amoeba.mysql.server;
 
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
+import java.util.Map;
 
+import org.apache.commons.collections.map.LRUMap;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
+import com.meidusa.amoeba.mysql.io.MySqlPacketConstant;
 import com.meidusa.amoeba.mysql.net.MysqlClientConnection;
 import com.meidusa.amoeba.mysql.net.packet.AuthenticationPacket;
 import com.meidusa.amoeba.mysql.util.CharsetMapping;
@@ -29,24 +32,22 @@ import com.meidusa.amoeba.util.StringUtil;
 /**
  * 
  * @author <a href=mailto:piratebase@sina.com>Struct chen</a>
- *
  */
-public class MysqlAuthenticator extends DummyAuthenticator {
+@SuppressWarnings("unchecked")
+public class MysqlAuthenticator extends DummyAuthenticator implements MySqlPacketConstant{
 	protected static Logger logger = Logger.getLogger(MysqlAuthenticator.class);
+	private Map map = new LRUMap(100);
 	public MysqlAuthenticator() {
 		
 	}
 
+
 	protected void processAuthentication(AuthingableConnection conn,
 			AuthResponseData rdata) {
 		MysqlClientConnection mysqlConn = (MysqlClientConnection)conn;
-		logger.info("Accepting request: conn=" + conn);
-		if(logger.isDebugEnabled()){
-			StringBuffer buffer = new StringBuffer();
-			for(byte byt : mysqlConn.getAuthenticationMessage()){
-				buffer.append((char)byt);
-			}
-			logger.debug(buffer.toString());
+		
+		if(logger.isInfoEnabled()){
+			logger.info("Accepting request: conn=" + conn);
 		}
 		String errorMessage = "";
 
@@ -55,7 +56,36 @@ public class MysqlAuthenticator extends DummyAuthenticator {
 			autheticationPacket.init(mysqlConn.getAuthenticationMessage(),conn);
 			mysqlConn.setClientCharset(CharsetMapping.INDEX_TO_CHARSET[autheticationPacket.charsetNumber & 0xff]);
 			boolean passwordchecked = false;
-			
+			if(logger.isDebugEnabled()){
+				if(map.get(conn.getInetAddress().getHostName()) == null){
+					map.put(conn.getInetAddress().getHostName(), Boolean.TRUE);
+					long clientParam = autheticationPacket.clientParam;
+					StringBuilder builder = new StringBuilder();
+					builder.append("\n");
+					builder.append("===========").append(conn.getInetAddress().getHostName())
+					.append("   Client Flag ==============\n");
+					builder.append("CLIENT_LONG_PASSWORD:").append(((clientParam & CLIENT_LONG_PASSWORD)!=0)).append("\n");
+					builder.append("CLIENT_FOUND_ROWS:").append(((clientParam & CLIENT_FOUND_ROWS)!=0)).append("\n");
+					builder.append("CLIENT_LONG_FLAG:").append(((clientParam & CLIENT_LONG_FLAG)!=0)).append("\n");
+					builder.append("CLIENT_CONNECT_WITH_DB:").append(((clientParam & CLIENT_CONNECT_WITH_DB)!=0)).append("\n");
+					builder.append("CLIENT_NO_SCHEMA:").append(((clientParam & CLIENT_NO_SCHEMA)!=0)).append("\n");
+					builder.append("CLIENT_COMPRESS:").append(((clientParam & CLIENT_COMPRESS)!=0)).append("\n");
+					builder.append("CLIENT_ODBC:").append(((clientParam & CLIENT_ODBC)!=0)).append("\n");
+					builder.append("CLIENT_LOCAL_FILES:").append(((clientParam & CLIENT_LOCAL_FILES)!=0)).append("\n");
+					builder.append("CLIENT_IGNORE_SPACE:").append(((clientParam & CLIENT_IGNORE_SPACE)!=0)).append("\n");
+					builder.append("CLIENT_PROTOCOL_41:").append(((clientParam & CLIENT_PROTOCOL_41)!=0)).append("\n");
+					builder.append("CLIENT_INTERACTIVE:").append(((clientParam & CLIENT_INTERACTIVE)!=0)).append("\n");
+					builder.append("CLIENT_SSL:").append(((clientParam & CLIENT_SSL)!=0)).append("\n");
+					builder.append("CLIENT_IGNORE_SIGPIPE:").append(((clientParam & CLIENT_IGNORE_SIGPIPE)!=0)).append("\n");
+					builder.append("CLIENT_TRANSACTIONS:").append(((clientParam & CLIENT_TRANSACTIONS)!=0)).append("\n");
+					builder.append("CLIENT_RESERVED:").append(((clientParam & CLIENT_RESERVED)!=0)).append("\n");
+					builder.append("CLIENT_SECURE_CONNECTION:").append(((clientParam & CLIENT_SECURE_CONNECTION)!=0)).append("\n");
+					builder.append("CLIENT_MULTI_STATEMENTS:").append(((clientParam & CLIENT_MULTI_STATEMENTS)!=0)).append("\n");
+					builder.append("CLIENT_MULTI_RESULTS:").append(((clientParam & CLIENT_MULTI_RESULTS)!=0)).append("\n");
+					builder.append("===========================END Client Flag===============================\n");
+					logger.debug(builder.toString());
+				}
+			}
 
 			if(mysqlConn.getPassword() != null){
 				String encryptPassword = new String(Security.scramble411(mysqlConn.getPassword(),mysqlConn.getSeed()),AuthenticationPacket.CODE_PAGE_1252);

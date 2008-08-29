@@ -87,7 +87,7 @@
     </logger>
     
 	<logger name="com.meidusa.amoeba.mysql.server" additivity="false">
-        <level value="warn"/>
+        <level value="debug"/>
         <appender-ref ref="PROJECT"/>
     </logger>
     
