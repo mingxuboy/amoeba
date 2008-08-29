@@ -53,7 +53,7 @@ public class MysqlAuthenticator extends DummyAuthenticator {
 		try{
 			AuthenticationPacket autheticationPacket = new AuthenticationPacket();
 			autheticationPacket.init(mysqlConn.getAuthenticationMessage(),conn);
-			mysqlConn.setCharset(CharsetMapping.INDEX_TO_CHARSET[autheticationPacket.charsetNumber & 0xff]);
+			mysqlConn.setClientCharset(CharsetMapping.INDEX_TO_CHARSET[autheticationPacket.charsetNumber & 0xff]);
 			boolean passwordchecked = false;
 			
 

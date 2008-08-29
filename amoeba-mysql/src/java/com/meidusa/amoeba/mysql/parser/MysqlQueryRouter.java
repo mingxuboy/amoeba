@@ -13,6 +13,7 @@ package com.meidusa.amoeba.mysql.parser;
 
 import java.io.StringReader;
 
+import com.meidusa.amoeba.mysql.net.MysqlConnection;
 import com.meidusa.amoeba.mysql.parser.sql.MysqlParser;
 import com.meidusa.amoeba.net.DatabaseConnection;
 import com.meidusa.amoeba.net.poolable.ObjectPool;
@@ -55,7 +56,7 @@ public class MysqlQueryRouter extends AbstractQueryRouter{
 				conn.setAutoCommit(false);
 			}*/
 		}else if((value = statment.getValue("names")) != null){
-			conn.setCharset((String)value.evaluate(parameters));
+			((MysqlConnection)conn).setClientCharset((String)value.evaluate(parameters));
 		}else if((value = statment.getValue("transactionisolation")) != null){
 			//conn.setTransactionIsolation((int)((Long)comparable).longValue());
 		}else if((value = statment.getValue("schema")) != null){

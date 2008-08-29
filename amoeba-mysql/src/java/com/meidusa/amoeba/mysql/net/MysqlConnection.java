@@ -26,7 +26,7 @@ import com.meidusa.amoeba.net.DatabaseConnection;
  *
  */
 public abstract class MysqlConnection extends DatabaseConnection {
-	
+
 	public MysqlConnection(SocketChannel channel, long createStamp) {
 		super(channel, createStamp);
 	}

@@ -320,10 +320,11 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 					commandQueue.appendCommand(info,true);
 				}
 			}
-			if(sourceMysql.getCharset()!= null &&
-					!StringUtil.equalsIgnoreCase(sourceMysql.getCharset(),destMysqlConn.getCharset())){
+			
+			if(sourceMysql.getClientCharset()!= null &&
+					!StringUtil.equalsIgnoreCase(sourceMysql.getClientCharset(),destMysqlConn.getClientCharset())){
 				QueryCommandPacket charsetCommand = new QueryCommandPacket();
-				charsetCommand.arg = "set names " + sourceMysql.getCharset();
+				charsetCommand.arg = "set names " + sourceMysql.getClientCharset();
 				charsetCommand.command = QueryCommandPacket.COM_QUERY;
 				
 				byte[] buffer = charsetCommand.toByteBuffer(sourceMysql).array();
@@ -334,7 +335,7 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 					public void run() {
 						Set<MysqlServerConnection> connSet = commandQueue.connStatusMap.keySet();
 						for(Connection conn : connSet){
-							((MysqlConnection)conn).setCharset(sourceMysql.getCharset());
+							((MysqlConnection)conn).setClientCharset(sourceMysql.getClientCharset());
 						}
 					}
 				});

@@ -87,7 +87,7 @@ public class MysqlServerConnection extends MysqlConnection implements MySqlPacke
 				}
 				AuthenticationPacket authing = new AuthenticationPacket();
 				authing.charsetNumber = (byte)(DEFAULT_CHARSET_INDEX & 0xff);
-				this.charset = CharsetMapping.INDEX_TO_CHARSET[DEFAULT_CHARSET_INDEX];
+				this.clientCharset = CharsetMapping.INDEX_TO_CHARSET[DEFAULT_CHARSET_INDEX];
 				authing.clientParam = CLIENT_LONG_PASSWORD|CLIENT_PROTOCOL_41|CLIENT_LONG_FLAG
 									|CLIENT_FOUND_ROWS|CLIENT_TRANSACTIONS|CLIENT_SECURE_CONNECTION|CLIENT_MULTI_RESULTS;
 				authing.user = this.getUser();
