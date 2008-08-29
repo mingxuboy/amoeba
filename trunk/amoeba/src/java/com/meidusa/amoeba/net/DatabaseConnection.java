@@ -13,7 +13,10 @@ package com.meidusa.amoeba.net;
 
 import java.nio.channels.SocketChannel;
 
+import org.apache.log4j.Logger;
+
 public abstract class DatabaseConnection extends AuthingableConnection{
+	private static Logger logger = Logger.getLogger(DatabaseConnection.class);
 	private String user;
 	private String password;
 	protected String schema;
@@ -36,6 +39,9 @@ public abstract class DatabaseConnection extends AuthingableConnection{
 
 	public void setClientCharset(String clientCharset) {
 		this.clientCharset = clientCharset;
+		if(logger.isDebugEnabled()){
+			logger.debug("set client charset="+clientCharset);
+		}
 	}
 
 	
