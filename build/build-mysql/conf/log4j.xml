@@ -59,9 +59,13 @@
     </logger>
     
     <logger name="com.meidusa.amoeba.net" additivity="false">
-        <level value="info"/>
+        <level value="debug"/>
         <appender-ref ref="PROJECT"/>
-        
+    </logger>
+    
+    <logger name="com.meidusa.amoeba.net.ServerableConnectionManager" additivity="false">
+        <level value="debug"/>
+        <appender-ref ref="PROJECT"/>
         <!-- for debug -->
         <appender-ref ref="PROJECT-CONSOLE"/>
     </logger>
