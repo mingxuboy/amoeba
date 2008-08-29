@@ -239,6 +239,7 @@ TOKEN: /* SQL Keywords. prefixed with K_ to avoid name clashes */
 |   <K_INDEX:"INDEX">
 |   <K_INNER:"INNER">
 |   <K_INSERT:"INSERT">
+|	<K_REPLACE:"REPLACE">
 |   <K_INTEGER:"INTEGER">
 |   <K_INT:"INT">
 |   <K_JOIN:"JOIN">
@@ -811,7 +812,7 @@ Statment InsertQuery():
 	List<Expression> insertValues = null;
 }
 {
-    "INSERT" "INTO" table = TableName() ([LOOKAHEAD(4) "(" insertColumns = InsertColumns() ")"]
+    (<K_INSERT>|<K_REPLACE>) ["INTO"] table = TableName() ([LOOKAHEAD(4) "(" insertColumns = InsertColumns() ")"]
     ( insertValues = InsertValues() | expression = FullSelectStatement())
     {
     	if(insertValues == null){
@@ -1171,7 +1172,7 @@ void SelectItem():
         LOOKAHEAD(2) EntityName()".*"  /* table.* */
         |   LOOKAHEAD(4) EntityName()"." EntityName() ".*" /* schema.table.* */
         |   SQLSimpleExpression()    // Column or Expression
-    ) [(["AS"] <IDENTIFIER>)] // Column Alias
+    )[("=" SQLSimpleExpression())] [(["AS"] <IDENTIFIER>)] // Column Alias
 }
 
 
@@ -1192,7 +1193,8 @@ void FromItem() :
 void JoinedTable() :
 {}
 {
-	([(["INNER" | "NATURAL" |"CROSS"]) ("LEFT" | "RIGHT") ["OUTER"]]  "JOIN") (LOOKAHEAD(2) TableSpec() (JoinedTable())* | "(" TableSpec() (JoinedTable())* ")") JoinCondition()
+	((["NATURAL"] (("LEFT"|"RIGHT") ["OUTER"])) | (["INNER" | "CROSS"])) "JOIN"
+	(LOOKAHEAD(2) TableSpec() (JoinedTable())* | "(" TableSpec() (JoinedTable())* ")") JoinCondition()
 }
 
 void TableSpec():
@@ -1208,7 +1210,7 @@ void TableSpec():
 void JoinCondition():
 {}
 {
-     "ON" SQLExpression()
+     ("ON" SQLExpression())|("USING" "(" SQLExpression() ")")
 }
 
 Expression WhereClause():
