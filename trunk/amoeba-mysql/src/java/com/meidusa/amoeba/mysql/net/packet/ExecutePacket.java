@@ -21,6 +21,7 @@ import java.util.Date;
 import java.util.Map;
 
 import com.meidusa.amoeba.mysql.jdbc.MysqlDefs;
+import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
 import com.meidusa.amoeba.util.StaticString;
 import com.meidusa.amoeba.util.ThreadLocalMap;
 
@@ -94,8 +95,11 @@ public class ExecutePacket extends CommandPacket {
 				| ((long) (b[position++] & 0xff) << 24);
 	}
 	
-	public void init(MysqlPacketBuffer buffer){
-		super.init(buffer);
+	
+	@Override
+	public void init(AbstractPacketBuffer myBuffer){
+		super.init(myBuffer);
+		MysqlPacketBuffer buffer = (MysqlPacketBuffer)myBuffer;
 		statementId = buffer.readLong();
 		flags = buffer.readByte();
 		iterationCount = buffer.readLong();
@@ -133,9 +137,10 @@ public class ExecutePacket extends CommandPacket {
 		
 	}
 	
-	
-	public void write2Buffer(MysqlPacketBuffer buffer) throws UnsupportedEncodingException {
-		super.write2Buffer(buffer);
+	@Override
+	public void write2Buffer(AbstractPacketBuffer myBuffer) throws UnsupportedEncodingException {
+		super.write2Buffer(myBuffer);
+		MysqlPacketBuffer buffer = (MysqlPacketBuffer)myBuffer;
 		buffer.writeLong(statementId);
 		buffer.writeByte(flags);
 		buffer.writeLong(iterationCount);

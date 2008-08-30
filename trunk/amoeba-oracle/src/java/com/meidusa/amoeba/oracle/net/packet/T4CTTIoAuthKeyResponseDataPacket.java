@@ -84,7 +84,7 @@ public class T4CTTIoAuthKeyResponseDataPacket extends DataPacket implements T4CT
     }
 
     @Override
-    protected Class<? extends AbstractPacketBuffer> getBufferClass() {
+    protected Class<? extends AbstractPacketBuffer> getPacketBufferClass() {
         return T4CPacketBuffer.class;
     }
 

@@ -16,6 +16,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
+
 /**
  * 
  * @author <a href=mailto:piratebase@sina.com>Struct chen</a>
@@ -24,8 +26,10 @@ import java.util.List;
 public class RowDataPacket extends AbstractPacket {
 	public List<String> columns;
 	
-	public void init(MysqlPacketBuffer buffer){
-		super.init(buffer);
+	@Override
+	public void init(AbstractPacketBuffer myBuffer){
+		super.init(myBuffer);
+		MysqlPacketBuffer buffer = (MysqlPacketBuffer)myBuffer;
 		if(columns == null){
 			columns = new ArrayList<String>();
 		}
@@ -35,8 +39,11 @@ public class RowDataPacket extends AbstractPacket {
 		}
 		
 	}
-	protected void write2Buffer(MysqlPacketBuffer buffer) throws UnsupportedEncodingException {
-		super.write2Buffer(buffer);
+	
+	@Override
+	public void write2Buffer(AbstractPacketBuffer myBuffer) throws UnsupportedEncodingException{
+		super.write2Buffer(myBuffer);
+		MysqlPacketBuffer buffer = (MysqlPacketBuffer)myBuffer;
 		if(columns == null)return;
 		Iterator<String> it = columns.iterator();
 		while(it.hasNext()){

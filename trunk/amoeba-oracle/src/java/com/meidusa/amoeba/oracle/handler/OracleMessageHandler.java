@@ -7,12 +7,12 @@ import org.apache.log4j.Logger;
 import com.meidusa.amoeba.net.Connection;
 import com.meidusa.amoeba.net.MessageHandler;
 import com.meidusa.amoeba.net.Sessionable;
+import com.meidusa.amoeba.net.packet.Packet;
 import com.meidusa.amoeba.oracle.net.OracleConnection;
 import com.meidusa.amoeba.oracle.net.packet.AnoDataPacket;
 import com.meidusa.amoeba.oracle.net.packet.AnoPacketBuffer;
 import com.meidusa.amoeba.oracle.net.packet.AnoServices;
 import com.meidusa.amoeba.oracle.net.packet.ConnectPacket;
-import com.meidusa.amoeba.oracle.net.packet.Packet;
 import com.meidusa.amoeba.oracle.net.packet.SQLnetDef;
 import com.meidusa.amoeba.oracle.net.packet.T4C7OversionDataPacket;
 import com.meidusa.amoeba.oracle.net.packet.T4C7OversionResponseDataPacket;
@@ -29,7 +29,6 @@ import com.meidusa.amoeba.oracle.net.packet.T4CTTIoAuthKeyResponseDataPacket;
 import com.meidusa.amoeba.oracle.net.packet.T4CTTIoAuthResponseDataPacket;
 import com.meidusa.amoeba.oracle.util.ByteUtil;
 import com.meidusa.amoeba.oracle.util.DBConversion;
-import com.meidusa.amoeba.oracle.util.T4CTypeRep;
 
 /**
  * 非常简单的数据包转发程序

@@ -12,6 +12,8 @@
 package com.meidusa.amoeba.mysql.net.packet;
 
 import java.io.UnsupportedEncodingException;
+
+import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
 /**
  * From server to client in response to command, if no error and no result set. 
  * <pre>
@@ -85,28 +87,29 @@ public class OkPacket extends AbstractResultPacket {
 	public String message;
 	
 	@Override
-	public void init(MysqlPacketBuffer buffer) {
+	public void init(AbstractPacketBuffer buffer) {
 		super.init(buffer);
+		MysqlPacketBuffer myPacketBuffer = (MysqlPacketBuffer)buffer;
+		affectedRows = myPacketBuffer.readFieldLength();
+		insertId = myPacketBuffer.readFieldLength();
+		serverStatus = myPacketBuffer.readInt();
+		warningCount = myPacketBuffer.readInt();
 		
-		affectedRows = buffer.readFieldLength();
-		insertId = buffer.readFieldLength();
-		serverStatus = buffer.readInt();
-		warningCount = buffer.readInt();
-		
-		if(buffer.getPosition()<buffer.getBufLength()){
-			message	= buffer.readString();
+		if(buffer.getPosition()<myPacketBuffer.getBufLength()){
+			message	= myPacketBuffer.readString();
 		}
 	}
 
 	@Override
-	public void write2Buffer(MysqlPacketBuffer buffer) throws UnsupportedEncodingException {
+	public void write2Buffer(AbstractPacketBuffer buffer) throws UnsupportedEncodingException {
 		super.write2Buffer(buffer);
-		buffer.writeFieldLength(affectedRows);
-		buffer.writeFieldLength(insertId);
-		buffer.writeInt(serverStatus);
-		buffer.writeInt(warningCount);
+		MysqlPacketBuffer myPacketBuffer = (MysqlPacketBuffer)buffer;
+		myPacketBuffer.writeFieldLength(affectedRows);
+		myPacketBuffer.writeFieldLength(insertId);
+		myPacketBuffer.writeInt(serverStatus);
+		myPacketBuffer.writeInt(warningCount);
 		if(message != null){
-			buffer.writeString(message);
+			myPacketBuffer.writeString(message);
 		}
 	}
 	

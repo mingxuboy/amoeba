@@ -74,7 +74,7 @@ public class AnoResponseDataPacket extends DataPacket implements AnoServices {
     }
 
     @Override
-    protected Class<? extends AbstractPacketBuffer> getBufferClass() {
+    protected Class<? extends AbstractPacketBuffer> getPacketBufferClass() {
         return AnoPacketBuffer.class;
     }
 }
