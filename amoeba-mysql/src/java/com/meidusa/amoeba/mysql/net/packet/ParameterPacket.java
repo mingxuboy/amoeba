@@ -13,6 +13,8 @@ package com.meidusa.amoeba.mysql.net.packet;
 
 import java.io.UnsupportedEncodingException;
 
+import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
+
 /**
  * From server to client, for prepared statements which contain parameters. 
  * The Parameter Packets follow a Prepared Statement Initialization Packet which has a positive value in the parameters field.
@@ -41,22 +43,28 @@ public class ParameterPacket extends AbstractPacket {
 	public int flags;
 	public byte decimals;
 	public long length;
-	public void init(MysqlPacketBuffer buffer) {
-		super.init(buffer);
+	
+	@Override
+	public void init(AbstractPacketBuffer myBuffer) {
+		super.init(myBuffer);
+		MysqlPacketBuffer buffer = (MysqlPacketBuffer)myBuffer;
 		type = buffer.readByte();
 		flags = buffer.readInt();
 		decimals = buffer.readByte();
 		length = buffer.readLong();
 	}
 	
-	protected void write2Buffer(MysqlPacketBuffer buffer) throws UnsupportedEncodingException {
-		super.write2Buffer(buffer);
+	@Override
+	protected void write2Buffer(AbstractPacketBuffer myBuffer) throws UnsupportedEncodingException {
+		super.write2Buffer(myBuffer);
+		MysqlPacketBuffer buffer = (MysqlPacketBuffer)myBuffer;
 		buffer.writeInt(type);
 		buffer.writeInt(flags);
 		buffer.writeByte(decimals);
 		buffer.writeLong(length);
 	}
 	
+	@Override
 	protected int calculatePacketSize(){
 		int packLength = super.calculatePacketSize();
 		packLength += 1+2+1+4;

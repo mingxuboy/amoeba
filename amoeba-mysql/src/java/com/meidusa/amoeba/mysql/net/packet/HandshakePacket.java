@@ -12,6 +12,8 @@
 package com.meidusa.amoeba.mysql.net.packet;
 
 import java.io.UnsupportedEncodingException;
+
+import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
 /**
  * From server to client during initial handshake. 
  * <pre>
@@ -92,8 +94,10 @@ public class HandshakePacket extends AbstractPacket{
 	/** 13¸ö×Ö½Ú */
 	public String restOfScrambleBuff;
 
-	public void init(MysqlPacketBuffer buffer) {
-		super.init(buffer);
+	@Override
+	public void init(AbstractPacketBuffer myBuffer) {
+		super.init(myBuffer);
+		MysqlPacketBuffer buffer =  (MysqlPacketBuffer)myBuffer;
 		this.protocolVersion = buffer.readByte();
 		this.serverVersion = buffer.readString();
 		threadId = buffer.readLong();
@@ -111,15 +115,10 @@ public class HandshakePacket extends AbstractPacket{
         restOfScrambleBuff = buffer.readString();
 	}
 
-	public MysqlPacketBuffer toBuffer() throws UnsupportedEncodingException {
-		int serverVersionLength = (serverVersion != null) ? serverVersion.length() : 0;
-		int packLength = 1 + (serverVersionLength + 8+13)*2+8+2+1+2;
-		MysqlPacketBuffer buffer = new MysqlPacketBuffer(packLength);
-		return toBuffer(buffer);
-	}
-	
-	public void write2Buffer(MysqlPacketBuffer buffer) throws UnsupportedEncodingException {
-		super.write2Buffer(buffer);
+	@Override
+	public void write2Buffer(AbstractPacketBuffer mysqlpacketBuffer) throws UnsupportedEncodingException {
+		super.write2Buffer(mysqlpacketBuffer);
+		MysqlPacketBuffer buffer =  (MysqlPacketBuffer)mysqlpacketBuffer;
 		buffer.writeByte(protocolVersion);
 		buffer.writeString(serverVersion,CODE_PAGE_1252);
 		buffer.writeLong(threadId);

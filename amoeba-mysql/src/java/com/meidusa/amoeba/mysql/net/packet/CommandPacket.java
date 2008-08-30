@@ -13,6 +13,8 @@ package com.meidusa.amoeba.mysql.net.packet;
 
 import java.io.UnsupportedEncodingException;
 
+import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
+
 /**
  * 
  * From client to server whenever the client wants the server to do something.
@@ -103,17 +105,20 @@ public abstract class CommandPacket extends AbstractPacket {
 	public static final byte COM_EOF = (byte)0xfe;      //  
 	public byte command;
 	
-	public void init(MysqlPacketBuffer buffer) {
+	@Override
+	public void init(AbstractPacketBuffer buffer) {
 		super.init(buffer);
 		command = buffer.readByte();
 	}
 
-	public void write2Buffer(MysqlPacketBuffer buffer) throws UnsupportedEncodingException {
+	@Override
+	public void write2Buffer(AbstractPacketBuffer buffer) throws UnsupportedEncodingException {
 		super.write2Buffer(buffer);
 		buffer.writeByte(command);
 		
 	}
 
+	@Override
 	protected int calculatePacketSize(){
 		int packLength = super.calculatePacketSize();
         packLength += 1;

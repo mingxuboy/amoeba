@@ -13,6 +13,8 @@ package com.meidusa.amoeba.mysql.net.packet;
 
 import java.io.UnsupportedEncodingException;
 
+import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
+
 /**
  * From server to client in response to command, if error. 
  * <pre>
@@ -85,10 +87,13 @@ public class ErrorPacket extends AbstractResultPacket{
 	public ErrorPacket(){
 		resultPacketType = PACKET_TYPE_ERROR;
 	}
-	public void init(MysqlPacketBuffer buffer) {
+	
+	@Override
+	public void init(AbstractPacketBuffer buffer) {
 		super.init(buffer);
-		errno = buffer.readInt();
-		serverErrorMessage = buffer.readString(CODE_PAGE_1252);
+		MysqlPacketBuffer myBuffer = (MysqlPacketBuffer)buffer;
+		errno = myBuffer.readInt();
+		serverErrorMessage = myBuffer.readString(CODE_PAGE_1252);
 		
 		if (serverErrorMessage.charAt(0) == '#') { //$NON-NLS-1$
             // we have an SQLState
@@ -99,12 +104,15 @@ public class ErrorPacket extends AbstractResultPacket{
         }
 	}
 
-	public void write2Buffer(MysqlPacketBuffer buffer) throws UnsupportedEncodingException {
+	@Override
+	public void write2Buffer(AbstractPacketBuffer buffer) throws UnsupportedEncodingException {
 		super.write2Buffer(buffer);
-		buffer.writeInt(errno);
-		buffer.writeString('#'+sqlstate+serverErrorMessage);
+		MysqlPacketBuffer myBuffer = (MysqlPacketBuffer)buffer;
+		myBuffer.writeInt(errno);
+		myBuffer.writeString('#'+sqlstate+serverErrorMessage);
 	}
 	
+	@Override
 	protected int calculatePacketSize(){
 		int packLength = super.calculatePacketSize();
         packLength += ((sqlstate == null?0:sqlstate.length()) + (serverErrorMessage == null?0:serverErrorMessage.length()))*2 +3;

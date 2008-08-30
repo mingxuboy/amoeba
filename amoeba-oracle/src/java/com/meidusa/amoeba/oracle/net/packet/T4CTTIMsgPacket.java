@@ -84,7 +84,7 @@ public abstract class T4CTTIMsgPacket extends DataPacket {
     }
 
     @Override
-    protected Class<? extends AbstractPacketBuffer> getBufferClass() {
+    protected Class<? extends AbstractPacketBuffer> getPacketBufferClass() {
         return T4CPacketBuffer.class;
     }
 

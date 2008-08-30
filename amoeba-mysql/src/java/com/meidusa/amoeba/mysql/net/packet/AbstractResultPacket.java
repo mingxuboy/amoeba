@@ -12,6 +12,8 @@
 package com.meidusa.amoeba.mysql.net.packet;
 
 import java.io.UnsupportedEncodingException;
+
+import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
 /**
  * A "result packet" is a packet that goes from the server to the client in response to a Client Authentication Packet or Command Packet. 
  * To distinguish between the types of result packets,
@@ -41,13 +43,13 @@ public abstract class AbstractResultPacket extends AbstractPacket {
 	public byte resultPacketType;
 	
 	@Override
-	public void init(MysqlPacketBuffer buffer) {
+	public void init(AbstractPacketBuffer buffer) {
 		super.init(buffer);
 		resultPacketType = buffer.readByte();
 	}
 
 	@Override
-	protected void write2Buffer(MysqlPacketBuffer buffer) throws UnsupportedEncodingException {
+	protected void write2Buffer(AbstractPacketBuffer buffer) throws UnsupportedEncodingException {
 		super.write2Buffer(buffer);
 		buffer.writeByte(resultPacketType);
 	}

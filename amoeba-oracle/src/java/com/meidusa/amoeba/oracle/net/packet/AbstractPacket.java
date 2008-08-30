@@ -1,14 +1,9 @@
 package com.meidusa.amoeba.oracle.net.packet;
 
 import java.io.UnsupportedEncodingException;
-import java.lang.reflect.Constructor;
-import java.nio.ByteBuffer;
-
-import org.apache.commons.lang.builder.ToStringBuilder;
 
 import com.meidusa.amoeba.net.Connection;
 import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
-import com.meidusa.amoeba.net.packet.PacketBuffer;
 import com.meidusa.amoeba.oracle.io.OraclePacketConstant;
 
 /**
@@ -40,7 +35,7 @@ import com.meidusa.amoeba.oracle.io.OraclePacketConstant;
  * 
  * @author struct
  */
-public abstract class AbstractPacket implements Packet, OraclePacketConstant {
+public abstract class AbstractPacket extends com.meidusa.amoeba.net.packet.AbstractPacket implements SQLnetDef, OraclePacketConstant {
 
     protected int   length;
     protected short type;
@@ -57,10 +52,8 @@ public abstract class AbstractPacket implements Packet, OraclePacketConstant {
     }
 
     public void init(byte[] buffer, Connection conn) {
-        this.buffer = buffer;
-        AbstractPacketBuffer packetBuffer = constractorBuffer(buffer);
-        packetBuffer.init(conn);
-        init(packetBuffer);
+    	this.buffer = buffer;
+    	super.init(buffer, conn);
     }
 
     /**
@@ -73,30 +66,6 @@ public abstract class AbstractPacket implements Packet, OraclePacketConstant {
         type = oracleBuffer.readUB1();
         flags = oracleBuffer.readUB1();
         headerCheckSum = oracleBuffer.readUB2();
-    }
-
-    public ByteBuffer toByteBuffer(Connection conn) {
-        try {
-            int bufferSize = calculatePacketSize();
-            bufferSize = (bufferSize < (DATA_OFFSET + 1) ? (DATA_OFFSET + 1) : bufferSize);
-            AbstractPacketBuffer packetBuffer = constractorBuffer(bufferSize);
-            packetBuffer.init(conn);
-            return toBuffer(packetBuffer).toByteBuffer();
-        } catch (UnsupportedEncodingException e) {
-            return null;
-        }
-    }
-
-    /**
-     * <pre>
-     *  该方法调用了{@link #write2Buffer(PacketBuffer)} 写入到指定的buffer， 
-     *  并且调用了{@link #afterPacketWritten(PacketBuffer)}
-     * </pre>
-     */
-    private AbstractPacketBuffer toBuffer(AbstractPacketBuffer buffer) throws UnsupportedEncodingException {
-        write2Buffer(buffer);
-        afterPacketWritten(buffer);
-        return buffer;
     }
 
     /**
@@ -142,43 +111,8 @@ public abstract class AbstractPacket implements Packet, OraclePacketConstant {
         return data;
     }
 
-    public String toString() {
-        return ToStringBuilder.reflectionToString(this);
-    }
-
-    public Object clone() {
-        try {
-            return (AbstractPacket) super.clone();
-        } catch (CloneNotSupportedException e) {
-            // 逻辑上面不会发生不支持情况
-            return null;
-        }
-    }
-
-    protected Class<? extends AbstractPacketBuffer> getBufferClass() {
+    protected Class<? extends AbstractPacketBuffer> getPacketBufferClass() {
         return OracleAbstractPacketBuffer.class;
-    }
-
-    private AbstractPacketBuffer constractorBuffer(int bufferSize) {
-        AbstractPacketBuffer buffer = null;
-        try {
-            Constructor<? extends AbstractPacketBuffer> constractor = getBufferClass().getConstructor(int.class);
-            buffer = constractor.newInstance(bufferSize);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return buffer;
-    }
-
-    private AbstractPacketBuffer constractorBuffer(byte[] buffer) {
-        AbstractPacketBuffer packetbuffer = null;
-        try {
-            Constructor<? extends AbstractPacketBuffer> constractor = getBufferClass().getConstructor(byte[].class);
-            packetbuffer = constractor.newInstance(buffer);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return packetbuffer;
     }
 
 	public String getData() {

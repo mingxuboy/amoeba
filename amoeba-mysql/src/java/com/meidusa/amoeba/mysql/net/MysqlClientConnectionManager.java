@@ -33,7 +33,6 @@ public class MysqlClientConnectionManager extends ServerableConnectionManager{
 	
 	
 	private static byte[] authenticateOkPacketData;
-	protected HandshakePacket handshake;
 	
 	public MysqlClientConnectionManager() throws IOException {
 	}
@@ -46,29 +45,23 @@ public class MysqlClientConnectionManager extends ServerableConnectionManager{
 		super(name,ipAddress,port);
 	}
 	
-	protected void willStart() {
-		super.willStart();
-		handshake = new HandshakePacket();
-		handshake.packetId = 0;
-		handshake.protocolVersion = 0x0a;//协议版本10
-		handshake.seed = StringUtil.getRandomString(8);
-		handshake.restOfScrambleBuff = StringUtil.getRandomString(12);
-		
-		handshake.serverStatus = 2;
-		handshake.serverVersion = SERVER_VERSION;
-		handshake.serverCapabilities = 41516;
-	}
-
 	/**
 	 * 发送服务器端信息，跟用于密码加密的随机字符串
 	 */
 	protected void beforeAuthing(final Connection authing) {
-		HandshakePacket handshakePacket = (HandshakePacket)handshake.clone();
+		HandshakePacket handshakePacket = new HandshakePacket();
+		handshakePacket.packetId = 0;
+		handshakePacket.protocolVersion = 0x0a;//协议版本10
+		handshakePacket.seed = StringUtil.getRandomString(8);
+		handshakePacket.restOfScrambleBuff = StringUtil.getRandomString(12);
+		
+		handshakePacket.serverStatus = 2;
+		handshakePacket.serverVersion = SERVER_VERSION;
+		handshakePacket.serverCapabilities = 41516;
+		
 		MysqlProxyRuntimeContext context = ((MysqlProxyRuntimeContext)MysqlProxyRuntimeContext.getInstance());
 		handshakePacket.serverCharsetIndex =(byte)(context.getServerCharsetIndex() & 0xff);
 		handshakePacket.threadId = Thread.currentThread().hashCode();
-		handshakePacket.seed = StringUtil.getRandomString(8);
-		handshakePacket.restOfScrambleBuff = StringUtil.getRandomString(12);
 		MysqlClientConnection aconn = (MysqlClientConnection) authing;
 		aconn.setSeed(handshakePacket.seed + handshakePacket.restOfScrambleBuff);
 		aconn.postMessage(handshakePacket.toByteBuffer(authing).array());

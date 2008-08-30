@@ -5,11 +5,11 @@ import java.nio.channels.SocketChannel;
 import org.apache.log4j.Logger;
 
 import com.meidusa.amoeba.net.Connection;
+import com.meidusa.amoeba.net.packet.Packet;
 import com.meidusa.amoeba.net.poolable.ObjectPool;
 import com.meidusa.amoeba.net.poolable.PoolableObject;
 import com.meidusa.amoeba.oracle.net.packet.AcceptPacket;
 import com.meidusa.amoeba.oracle.net.packet.ConnectPacket;
-import com.meidusa.amoeba.oracle.net.packet.Packet;
 import com.meidusa.amoeba.oracle.net.packet.RedirectPacket;
 import com.meidusa.amoeba.oracle.net.packet.RefusePacket;
 import com.meidusa.amoeba.oracle.net.packet.SQLnetDef;

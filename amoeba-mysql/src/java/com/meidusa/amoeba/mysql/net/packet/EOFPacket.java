@@ -13,6 +13,8 @@ package com.meidusa.amoeba.mysql.net.packet;
 
 import java.io.UnsupportedEncodingException;
 
+import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
+
 /**
  * 
  * @author <a href=mailto:piratebase@sina.com>Struct chen</a>
@@ -22,10 +24,11 @@ public class EOFPacket extends AbstractResultPacket {
 	public int serverStatus;
 	public int warningCount;
 	
-	public void init(MysqlPacketBuffer buffer){
+	public void init(AbstractPacketBuffer buffer){
 		super.init(buffer);
-		warningCount = buffer.readInt();
-		serverStatus = buffer.readInt();
+		MysqlPacketBuffer myBuffer = (MysqlPacketBuffer)buffer;
+		warningCount = myBuffer.readInt();
+		serverStatus = myBuffer.readInt();
 	}
 	
 	protected int calculatePacketSize(){
@@ -34,10 +37,11 @@ public class EOFPacket extends AbstractResultPacket {
 		return packLength;
 	}
 
-	public void write2Buffer(MysqlPacketBuffer buffer) throws UnsupportedEncodingException{
+	public void write2Buffer(AbstractPacketBuffer buffer) throws UnsupportedEncodingException{
 		super.write2Buffer(buffer);
-		buffer.writeInt(warningCount);
-		buffer.writeInt(serverStatus);
+		MysqlPacketBuffer myBuffer = (MysqlPacketBuffer)buffer;
+		myBuffer.writeInt(warningCount);
+		myBuffer.writeInt(serverStatus);
 	}
 	
 

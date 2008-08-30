@@ -13,6 +13,8 @@ package com.meidusa.amoeba.mysql.net.packet;
 
 import java.io.UnsupportedEncodingException;
 
+import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
+
 /**
  * From client to server during initial handshake. 
  * 
@@ -82,8 +84,9 @@ public class AuthenticationPacket extends AbstractPacket{
 	
 	public String database;
 
-	public void init(MysqlPacketBuffer buffer) {
-		super.init(buffer);
+	public void init(AbstractPacketBuffer mybuffer) {
+		super.init(mybuffer);
+		MysqlPacketBuffer buffer = (MysqlPacketBuffer)mybuffer;
 		clientParam 	= buffer.readLong();
 		maxThreeBytes 	= buffer.readLong();
 		charsetNumber	= buffer.readByte();
@@ -130,8 +133,9 @@ public class AuthenticationPacket extends AbstractPacket{
 		}*/
 	}
 
-	public void write2Buffer(MysqlPacketBuffer buffer) throws UnsupportedEncodingException{
-		super.write2Buffer(buffer);
+	public void write2Buffer(AbstractPacketBuffer mybuffer) throws UnsupportedEncodingException{
+		super.write2Buffer(mybuffer);
+		MysqlPacketBuffer buffer = (MysqlPacketBuffer)mybuffer;
 		buffer.writeLong(clientParam);
 		buffer.writeLong(maxThreeBytes);
 		buffer.writeByte(charsetNumber);

@@ -13,6 +13,8 @@ package com.meidusa.amoeba.mysql.net.packet;
 
 import java.io.UnsupportedEncodingException;
 
+import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
+
 /**
  * 
  * @author <a href=mailto:piratebase@sina.com>Struct chen</a>
@@ -32,8 +34,10 @@ public class FieldPacket extends AbstractPacket {
 	public byte decimals;
 	public String definition;
 	
-	public void init(MysqlPacketBuffer buffer) {
-		super.init(buffer);
+	@Override
+	public void init(AbstractPacketBuffer myBuffer) {
+		super.init(myBuffer);
+		MysqlPacketBuffer buffer = (MysqlPacketBuffer)myBuffer;
 		catalog = buffer.readLengthCodedString(CODE_PAGE_1252);
 		db = buffer.readLengthCodedString(CODE_PAGE_1252);
 		table = buffer.readLengthCodedString(CODE_PAGE_1252);
@@ -48,8 +52,11 @@ public class FieldPacket extends AbstractPacket {
 		decimals = buffer.readByte();
 		definition = buffer.readLengthCodedString(CODE_PAGE_1252);
 	}
-	protected void write2Buffer(MysqlPacketBuffer buffer) throws UnsupportedEncodingException {
-		super.write2Buffer(buffer);
+	
+	@Override
+	protected void write2Buffer(AbstractPacketBuffer myBuffer) throws UnsupportedEncodingException {
+		super.write2Buffer(myBuffer);
+		MysqlPacketBuffer buffer = (MysqlPacketBuffer)myBuffer;
 		buffer.writeLengthCodedString(catalog,CODE_PAGE_1252);
 		
 		buffer.writeLengthCodedString(db,CODE_PAGE_1252);
