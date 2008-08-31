@@ -192,25 +192,6 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable{
 	    ruleFunTab.put("hash", new Hash());         //
 	}
 	
-	public static class TableRule{
-		List<Rule> ruleList = new ArrayList<Rule>();
-		Table table;
-		String[] defaultPools;
-		String[] readPools;
-		String[] writePools;
-	}
-	
-	public static class Rule{
-		String name;
-		Map<String,Integer> parameterMap = new HashMap<String,Integer>();
-		Map<Column,Integer> cloumnMap =  new HashMap<Column,Integer>();
-		String expression;
-		RowJEP rowJep;
-		String[] defaultPools;
-		String[] readPools;
-		String[] writePools;
-	}
-	
 	/* д╛хо1000 */
 	private LRUMap map;
 	private Lock mapLock = new ReentrantLock(false);
