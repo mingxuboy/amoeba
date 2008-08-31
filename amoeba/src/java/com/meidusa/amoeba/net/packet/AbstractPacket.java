@@ -4,6 +4,8 @@ import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Constructor;
 import java.nio.ByteBuffer;
 
+import org.apache.commons.lang.builder.ToStringBuilder;
+
 import com.meidusa.amoeba.net.Connection;
 
 /**
@@ -20,13 +22,13 @@ public abstract class AbstractPacket implements Packet {
 	}
 
 	/**
-	 * 分析数据包
+	 * 分析数据包(分析包头+数据区域,分析完包头以后应该将Buffer的postion设置到数据区)
 	 * @param buffer
 	 */
 	protected abstract void init(AbstractPacketBuffer buffer);
 	
 	
-	 public ByteBuffer toByteBuffer(Connection conn) {
+	public ByteBuffer toByteBuffer(Connection conn) {
         try {
             int bufferSize = calculatePacketSize();
             AbstractPacketBuffer packetBuffer = constractorBuffer(bufferSize);
@@ -89,4 +91,9 @@ public abstract class AbstractPacket implements Packet {
     }
 	
 	protected abstract Class<? extends AbstractPacketBuffer> getPacketBufferClass();
+	
+	public String toString() {
+        return ToStringBuilder.reflectionToString(this);
+    }
+	
 }

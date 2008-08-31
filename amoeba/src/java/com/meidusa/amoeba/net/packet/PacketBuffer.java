@@ -1,5 +1,7 @@
 package com.meidusa.amoeba.net.packet;
 
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.ByteBuffer;
 
 /**
@@ -43,5 +45,9 @@ public interface PacketBuffer {
 	 *            the position (0-based index)
 	 */
 	public void setPosition(int positionToSet);
+
+	public InputStream asInputStream();
+
+	public OutputStream asOutputStream();
 	
 }
