@@ -2,6 +2,7 @@ package com.meidusa.amoeba.manager.net.packet;
 
 import java.io.UnsupportedEncodingException;
 
+import com.meidusa.amoeba.manager.ManagerConstant;
 import com.meidusa.amoeba.net.packet.AbstractPacket;
 import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
 
@@ -10,7 +11,7 @@ import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
  * @author struct
  *
  */
-public class ManagerAbstractPacket extends AbstractPacket implements PacketConstant{
+public class ManagerAbstractPacket extends AbstractPacket implements ManagerConstant{
 	
 	public int lenght;
 	public byte funType;
