@@ -4,6 +4,11 @@ import java.io.UnsupportedEncodingException;
 
 import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
 
+/**
+ * 
+ * @author struct
+ *
+ */
 public class ObjectPacket extends ManagerAbstractPacket {
 	public Object object;
 	
