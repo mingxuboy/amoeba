@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.nio.channels.SocketChannel;
 
 /**
- * 
+ * 需要等待验证得连接工厂
  * @author struct
  *
  */

@@ -26,8 +26,9 @@ public abstract class FrontendConnectionFactory extends AbstractConnectionFactor
 	}
 	
 	protected void initConnection(Connection connection){
-		if(connection instanceof DatabaseConnection){
-			DatabaseConnection conn = (DatabaseConnection)connection;
+		super.initConnection(connection);
+		if(connection instanceof AuthingableConnection){
+			AuthingableConnection conn = (AuthingableConnection)connection;
 			conn.setUser(user);
 			conn.setPassword(password);
 		}

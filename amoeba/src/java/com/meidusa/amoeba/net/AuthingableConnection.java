@@ -24,6 +24,9 @@ public abstract class AuthingableConnection extends Connection implements Messag
 	private static Logger logger = Logger.getLogger(AuthingableConnection.class);
 	protected boolean authenticated;//是否验证通过
 	private boolean authenticatedSeted = false;
+	private String user;
+	private String password;
+	
 	public AuthingableConnection(SocketChannel channel, long createStamp){
 		super(channel, createStamp);
 		setMessageHandler(this);
@@ -66,5 +69,20 @@ public abstract class AuthingableConnection extends Connection implements Messag
 		return authenticated;
 	}
 	
+	public String getUser() {
+		return user;
+	}
+
+	public void setUser(String user) {
+		this.user = user;
+	}
+
+	public String getPassword() {
+		return password;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
+	}
 	
 }

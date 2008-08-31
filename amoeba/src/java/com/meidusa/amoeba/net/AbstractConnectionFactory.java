@@ -6,6 +6,8 @@ import java.nio.channels.SocketChannel;
 
 
 /**
+ * 抽象得连接工厂,必须设置 {@link #setConnectionManager(ConnectionManager)},
+ * 这儿ConnectoinManager将负责管理从这个工厂创建出来得连接.
  * 
  * @author struct
  *
@@ -35,7 +37,7 @@ public abstract class AbstractConnectionFactory implements ConnectionFactory {
 	}
 	
 	/**
-	 * 初始化连接
+	 * 创建以后,在这儿将对新创建得连接做一些初始化
 	 * @param connection
 	 */
 	protected void initConnection(Connection connection){
