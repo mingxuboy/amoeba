@@ -50,14 +50,11 @@ public class OracleServerConnection extends OracleConnection implements Poolable
 
     public void handleMessage(Connection conn, byte[] buffer) {
         OracleServerConnection serverConn = (OracleServerConnection) conn;
-        // Packet packet = null;
-        // Packet response = null;
-
         ByteBuffer byteBuffer = null;
 
         if (logger.isDebugEnabled()) {
             System.out.println("========================================================");
-            System.out.println("@@@@buffer:" + ByteUtil.toHex(buffer, 0, buffer.length));
+            System.out.println("@amoeba receive from dbServer:" + ByteUtil.toHex(buffer, 0, buffer.length));
         }
         switch (buffer[4]) {
             case NS_PACKT_TYPE_RESEND:
@@ -145,6 +142,11 @@ public class OracleServerConnection extends OracleConnection implements Poolable
                 this.postClose(null);
                 return;
             }
+        }
+        if (logger.isDebugEnabled()) {
+            byte[] respMessage = byteBuffer.array();
+            System.out.println("@amoeba send to dbServer:" + ByteUtil.toHex(respMessage, 0, respMessage.length));
+            System.out.println();
         }
 
         if (byteBuffer != null) {
