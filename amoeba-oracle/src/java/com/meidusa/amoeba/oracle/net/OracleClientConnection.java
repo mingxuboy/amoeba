@@ -1,5 +1,6 @@
 package com.meidusa.amoeba.oracle.net;
 
+import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 
 import org.apache.log4j.Logger;
@@ -45,64 +46,64 @@ public class OracleClientConnection extends OracleConnection implements SQLnetDe
 
     public void handleMessage(Connection conn, byte[] message) {
         OracleClientConnection clientConn = (OracleClientConnection) conn;
-        byte[] respMessage = null;
+        ByteBuffer byteBuffer = null;
 
         if (logger.isDebugEnabled()) {
             System.out.println("========================================================");
-            System.out.println("####message:" + ByteUtil.toHex(message, 0, message.length));
+            System.out.println("#amoeba receive from appClient:" + ByteUtil.toHex(message, 0, message.length));
         }
         switch (message[4]) {
             case NS_PACKT_TYPE_CONNECT:
                 ConnectPacket connPacket = new ConnectPacket();
-                connPacket.init(message, conn);
+                connPacket.init(message, clientConn);
 
                 clientConn.setAnoEnabled(connPacket.anoEnabled);
                 AcceptPacket aptPacket = new AcceptPacket();
-                respMessage = aptPacket.toByteBuffer(conn).array();
+                byteBuffer = aptPacket.toByteBuffer(clientConn);
                 break;
 
             case NS_PACKT_TYPE_DATA:
                 if (clientConn.isAnoEnabled() && AnoDataPacket.isAnoType(message)) {
                     AnoResponseDataPacket anoRespPacket = new AnoResponseDataPacket();
-                    respMessage = anoRespPacket.toByteBuffer(conn).array();
+                    byteBuffer = anoRespPacket.toByteBuffer(clientConn);
 
                 } else if (T4CTTIMsgPacket.isMsgType(message, T4CTTIMsgPacket.TTIPRO)) {
                     T4C8TTIproDataPacket proPacket = new T4C8TTIproDataPacket();
-                    proPacket.init(message, conn);
+                    proPacket.init(message, clientConn);
 
                     T4C8TTIproResponseDataPacket proRespPacket = new T4C8TTIproResponseDataPacket();
-                    // OracleConnection.setProtocolField((OracleConnection) conn, proRespPacket);
-                    respMessage = proRespPacket.toByteBuffer(conn).array();
+                    clientConn.setProtocolField(proRespPacket);
+                    byteBuffer = proRespPacket.toByteBuffer(clientConn);
 
                 } else if (T4CTTIMsgPacket.isMsgType(message, T4CTTIMsgPacket.TTIDTY)) {
                     T4C8TTIdtyDataPacket dtyPacket = new T4C8TTIdtyDataPacket();
-                    dtyPacket.init(message, conn);
+                    dtyPacket.init(message, clientConn);
 
                     T4C8TTIdtyResponseDataPacket dtyRespPacket = new T4C8TTIdtyResponseDataPacket();
                     clientConn.setBasicTypes();
-                    respMessage = dtyRespPacket.toByteBuffer(conn).array();
+                    byteBuffer = dtyRespPacket.toByteBuffer(clientConn);
 
                 } else if (T4CTTIfunPacket.isFunType(message, T4CTTIfunPacket.OVERSION)) {
                     T4C7OversionDataPacket versionPacket = new T4C7OversionDataPacket();
-                    versionPacket.init(message, conn);
+                    versionPacket.init(message, clientConn);
 
                     T4C7OversionResponseDataPacket versionRespPacket = new T4C7OversionResponseDataPacket();
-                    respMessage = versionRespPacket.toByteBuffer(conn).array();
+                    byteBuffer = versionRespPacket.toByteBuffer(clientConn);
 
                 } else if (T4CTTIfunPacket.isFunType(message, T4CTTIfunPacket.OSESSKEY)) {
                     T4CTTIoAuthKeyDataPacket authKeyPacket = new T4CTTIoAuthKeyDataPacket();
-                    authKeyPacket.init(message, conn);
+                    authKeyPacket.init(message, clientConn);
 
                     T4CTTIoAuthKeyResponseDataPacket authKeyRespPacket = new T4CTTIoAuthKeyResponseDataPacket();
                     this.encryptedSK = StringUtil.getRandomString(16);
                     authKeyRespPacket.encryptedSK = this.encryptedSK;
-                    respMessage = authKeyRespPacket.toByteBuffer(conn).array();
+                    byteBuffer = authKeyRespPacket.toByteBuffer(clientConn);
 
                 } else if (T4CTTIfunPacket.isFunType(message, T4CTTIfunPacket.OAUTH)) {
                     T4CTTIoAuthDataPacket authPacket = new T4CTTIoAuthDataPacket();
-                    authPacket.init(message, conn);
+                    authPacket.init(message, clientConn);
 
-                    String encryptedPassword = T4CTTIoAuthDataPacket.encryptPassword(this.getUser(), this.getPassword(), this.encryptedSK.getBytes(), this.getConversion());
+                    String encryptedPassword = T4CTTIoAuthDataPacket.encryptPassword(getUser(), getPassword(), encryptedSK.getBytes(), getConversion());
 
                     T4CTTIoAuthResponseDataPacket authRespPacket = new T4CTTIoAuthResponseDataPacket();
                     authRespPacket.oer = new T4CTTIoer(new T4CPacketBuffer(32));
@@ -111,17 +112,18 @@ public class OracleClientConnection extends OracleConnection implements SQLnetDe
                         authRespPacket.oer.errorMsg = "ORA-01017: invalid username/password; logon denied";
                         this.setAuthenticated(false);
                     }
-                    respMessage = authRespPacket.toByteBuffer(conn).array();
+                    byteBuffer = authRespPacket.toByteBuffer(clientConn);
                     switchHandler();
                 }
                 break;
         }
         if (logger.isDebugEnabled()) {
-            System.out.println("respMessage:" + ByteUtil.toHex(respMessage, 0, respMessage.length));
+            byte[] respMessage = byteBuffer.array();
+            System.out.println("#amoeba send to appClient:" + ByteUtil.toHex(respMessage, 0, respMessage.length));
             System.out.println();
         }
 
-        postMessage(respMessage);
+        postMessage(byteBuffer);
     }
 
     private void switchHandler() {

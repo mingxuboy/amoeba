@@ -141,8 +141,8 @@ public class T4C8OallDataPacket extends T4CTTIfunPacket {
         if (msgCode == TTIRXD) {
             // byte[][] params = new byte[numberOfBindPositions][];
             for (int i = 0; i < numberOfBindPositions; i++) {
-                byte[] ab = meg.unmarshalCLRforREFS();
-                System.out.println(ByteUtil.toHex(ab, 0, ab.length));
+                //byte[] ab = meg.unmarshalCLRforREFS();
+                //System.out.println(ByteUtil.toHex(ab, 0, ab.length));
             }
         } else {
             throw new RuntimeException();

@@ -1,10 +1,6 @@
 package com.meidusa.amoeba.oracle.net.packet;
 
-import java.sql.SQLException;
-
 import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
-import com.meidusa.amoeba.oracle.net.OracleConnection;
-import com.meidusa.amoeba.oracle.util.DBConversion;
 
 /**
  * 协议数据包
