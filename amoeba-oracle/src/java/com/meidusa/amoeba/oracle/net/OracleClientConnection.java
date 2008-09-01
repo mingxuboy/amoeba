@@ -106,7 +106,7 @@ public class OracleClientConnection extends OracleConnection implements SQLnetDe
 
                     T4CTTIoAuthResponseDataPacket authRespPacket = new T4CTTIoAuthResponseDataPacket();
                     authRespPacket.oer = new T4CTTIoer(new T4CPacketBuffer(32));
-                    if (!StringUtil.equals(encryptedPassword, authPacket.map.get("AUTH_PASSWORD"))) {
+                    if (!StringUtil.equals(encryptedPassword, authPacket.map.get(T4CTTIoAuthResponseDataPacket.AUTH_PASSWORD))) {
                         authRespPacket.oer.retCode = 1017;
                         authRespPacket.oer.errorMsg = "ORA-01017: invalid username/password; logon denied";
                         this.setAuthenticated(false);
