@@ -23,7 +23,7 @@ public class T4CTTIoAuthResponseDataPacket extends DataPacket implements T4CTTIo
     protected void init(AbstractPacketBuffer absbuffer) {
         super.init(absbuffer);
         T4CPacketBuffer meg = (T4CPacketBuffer) absbuffer;
-        oer = new T4CTTIoer(meg);
+        oer = new T4CTTIoer();
 
         int len = 0;
         while (true) {
@@ -31,7 +31,7 @@ public class T4CTTIoAuthResponseDataPacket extends DataPacket implements T4CTTIo
             switch (byte0) {
                 case 4:
                     oer.init();
-                    oer.unmarshal();
+                    oer.unmarshal(meg);
                     if (oer.retCode != 0) {
                         String s = new String(oer.errorMsg);
                         logger.error(s);
@@ -44,7 +44,7 @@ public class T4CTTIoAuthResponseDataPacket extends DataPacket implements T4CTTIo
                     continue;
                 case 15:
                     oer.init();
-                    oer.unmarshalWarning();
+                    oer.unmarshalWarning(meg);
                     if (oer.retCode != 0) {
                         String s = new String(oer.errorMsg);
                         logger.warn(s);
@@ -108,7 +108,7 @@ public class T4CTTIoAuthResponseDataPacket extends DataPacket implements T4CTTIo
         
         meg.marshalUB1((byte) 4);
         if(oer == null){
-        	oer = new T4CTTIoer(meg);
+        	oer = new T4CTTIoer();
         }
         oer.marshal(meg);
     }

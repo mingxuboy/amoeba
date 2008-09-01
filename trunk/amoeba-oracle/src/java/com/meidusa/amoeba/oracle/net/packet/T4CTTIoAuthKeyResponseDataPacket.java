@@ -24,14 +24,14 @@ public class T4CTTIoAuthKeyResponseDataPacket extends DataPacket implements T4CT
     protected void init(AbstractPacketBuffer absbuffer) {
         super.init(absbuffer);
         T4CPacketBuffer meg = (T4CPacketBuffer) absbuffer;
-        oer = new T4CTTIoer(meg);
+        oer = new T4CTTIoer();
 
         while (true) {
             byte byte0 = meg.unmarshalSB1();
             switch (byte0) {
                 case 4:
                     oer.init();
-                    oer.unmarshal();
+                    oer.unmarshal(meg);
                     if (oer.retCode != 0) {
                         String s = new String(oer.errorMsg);
                         logger.error(s);
@@ -63,7 +63,7 @@ public class T4CTTIoAuthKeyResponseDataPacket extends DataPacket implements T4CT
         super.write2Buffer(absbuffer);
         T4CPacketBuffer meg = (T4CPacketBuffer) absbuffer;
         if (oer == null) {
-            oer = new T4CTTIoer(meg);
+            oer = new T4CTTIoer();
         }
 
         if (map == null) {

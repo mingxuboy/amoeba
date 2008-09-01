@@ -20,13 +20,13 @@ public class T4C7OversionResponseDataPacket extends DataPacket {
         super.init(buffer);
         T4CPacketBuffer meg = (T4CPacketBuffer) buffer;
         boolean flag = false;
-        T4CTTIoer oer = new T4CTTIoer(meg);
+        T4CTTIoer oer = new T4CTTIoer();
         while (true) {
             byte byte0 = meg.unmarshalSB1();
             switch (byte0) {
                 case 4:
                     oer.init();
-                    oer.unmarshal();
+                    oer.unmarshal(meg);
                     // oer.processError();
                     break;
                 case 8:
