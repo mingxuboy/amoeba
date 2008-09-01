@@ -45,7 +45,6 @@ public class OracleServerConnection extends OracleConnection implements Poolable
         ConnectPacket packet = genConnectPacket();
         ByteBuffer byteBuffer = packet.toByteBuffer(this);
         this.postMessage(byteBuffer);
-        lastPacketRequest = packet;
     }
 
     public void handleMessage(Connection conn, byte[] buffer) {
