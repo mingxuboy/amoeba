@@ -81,7 +81,8 @@ public class T4C7OversionResponseDataPacket extends DataPacket {
         return (short) i;
     }
 
-    protected Class<? extends AbstractPacketBuffer> getBufferClass() {
+    @Override
+    protected Class<? extends AbstractPacketBuffer> getPacketBufferClass() {
         return T4CPacketBuffer.class;
     }
 }

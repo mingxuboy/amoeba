@@ -5,7 +5,6 @@ import java.nio.channels.SocketChannel;
 import org.apache.log4j.Logger;
 
 import com.meidusa.amoeba.net.Connection;
-import com.meidusa.amoeba.net.packet.Packet;
 import com.meidusa.amoeba.net.poolable.ObjectPool;
 import com.meidusa.amoeba.oracle.context.OracleProxyRuntimeContext;
 import com.meidusa.amoeba.oracle.handler.OracleQueryMessageHandler;
@@ -28,6 +27,7 @@ import com.meidusa.amoeba.oracle.net.packet.T4CTTIoAuthKeyDataPacket;
 import com.meidusa.amoeba.oracle.net.packet.T4CTTIoAuthKeyResponseDataPacket;
 import com.meidusa.amoeba.oracle.net.packet.T4CTTIoAuthResponseDataPacket;
 import com.meidusa.amoeba.oracle.net.packet.T4CTTIoer;
+import com.meidusa.amoeba.oracle.util.ByteUtil;
 import com.meidusa.amoeba.util.StringUtil;
 
 public class OracleClientConnection extends OracleConnection implements SQLnetDef {
@@ -45,85 +45,83 @@ public class OracleClientConnection extends OracleConnection implements SQLnetDe
 
     public void handleMessage(Connection conn, byte[] message) {
         OracleClientConnection clientConn = (OracleClientConnection) conn;
-        Packet packet = null;
-        Packet response = null;
+        byte[] respMessage = null;
+
+        if (logger.isDebugEnabled()) {
+            System.out.println("========================================================");
+            System.out.println("####message:" + ByteUtil.toHex(message, 0, message.length));
+        }
         switch (message[4]) {
             case NS_PACKT_TYPE_CONNECT:
                 ConnectPacket connPacket = new ConnectPacket();
-                packet = connPacket;
-                packet.init(message, conn);
+                connPacket.init(message, conn);
+
                 clientConn.setAnoEnabled(connPacket.anoEnabled);
-                response = new AcceptPacket();
+                AcceptPacket aptPacket = new AcceptPacket();
+                respMessage = aptPacket.toByteBuffer(conn).array();
                 break;
+
             case NS_PACKT_TYPE_DATA:
                 if (clientConn.isAnoEnabled() && AnoDataPacket.isAnoType(message)) {
-                    response = new AnoResponseDataPacket();
+                    AnoResponseDataPacket anoRespPacket = new AnoResponseDataPacket();
+                    respMessage = anoRespPacket.toByteBuffer(conn).array();
+
                 } else if (T4CTTIMsgPacket.isMsgType(message, T4CTTIMsgPacket.TTIPRO)) {
-                    packet = new T4C8TTIproDataPacket();
-                    packet.init(message, conn);
-                    response = new T4C8TTIproResponseDataPacket();
+                    T4C8TTIproDataPacket proPacket = new T4C8TTIproDataPacket();
+                    proPacket.init(message, conn);
+
+                    T4C8TTIproResponseDataPacket proRespPacket = new T4C8TTIproResponseDataPacket();
+                    // OracleConnection.setProtocolField((OracleConnection) conn, proRespPacket);
+                    respMessage = proRespPacket.toByteBuffer(conn).array();
+
                 } else if (T4CTTIMsgPacket.isMsgType(message, T4CTTIMsgPacket.TTIDTY)) {
-                    packet = new T4C8TTIdtyDataPacket();
-                    packet.init(message, conn);
-                    response = new T4C8TTIdtyResponseDataPacket();
+                    T4C8TTIdtyDataPacket dtyPacket = new T4C8TTIdtyDataPacket();
+                    dtyPacket.init(message, conn);
+
+                    T4C8TTIdtyResponseDataPacket dtyRespPacket = new T4C8TTIdtyResponseDataPacket();
+                    clientConn.setBasicTypes();
+                    respMessage = dtyRespPacket.toByteBuffer(conn).array();
+
                 } else if (T4CTTIfunPacket.isFunType(message, T4CTTIfunPacket.OVERSION)) {
-                    packet = new T4C7OversionDataPacket();
-                    packet.init(message, conn);
-                    response = new T4C7OversionResponseDataPacket();
+                    T4C7OversionDataPacket versionPacket = new T4C7OversionDataPacket();
+                    versionPacket.init(message, conn);
+
+                    T4C7OversionResponseDataPacket versionRespPacket = new T4C7OversionResponseDataPacket();
+                    respMessage = versionRespPacket.toByteBuffer(conn).array();
+
                 } else if (T4CTTIfunPacket.isFunType(message, T4CTTIfunPacket.OSESSKEY)) {
-                    packet = new T4CTTIoAuthKeyDataPacket();
-                    packet.init(message, conn);
-                    response = new T4CTTIoAuthKeyResponseDataPacket();
+                    T4CTTIoAuthKeyDataPacket authKeyPacket = new T4CTTIoAuthKeyDataPacket();
+                    authKeyPacket.init(message, conn);
+
+                    T4CTTIoAuthKeyResponseDataPacket authKeyRespPacket = new T4CTTIoAuthKeyResponseDataPacket();
                     this.encryptedSK = StringUtil.getRandomString(16);
-                    ((T4CTTIoAuthKeyResponseDataPacket) response).encryptedSK = this.encryptedSK;
+                    authKeyRespPacket.encryptedSK = this.encryptedSK;
+                    respMessage = authKeyRespPacket.toByteBuffer(conn).array();
+
                 } else if (T4CTTIfunPacket.isFunType(message, T4CTTIfunPacket.OAUTH)) {
-                    T4CTTIoAuthDataPacket aPacket = new T4CTTIoAuthDataPacket();
-                    packet = aPacket;
-                    // ((T4CTTIoAuthDataPacket) packet).encryptedSK = this.encryptedSK;
-                    packet.init(message, conn);
+                    T4CTTIoAuthDataPacket authPacket = new T4CTTIoAuthDataPacket();
+                    authPacket.init(message, conn);
 
-                    String encryptedPassword = T4CTTIoAuthDataPacket.encryptPassword(this.getUser(),
-                                                                                     this.getPassword(),
-                                                                                     this.encryptedSK.getBytes(),
-                                                                                     this.getConversion());
+                    String encryptedPassword = T4CTTIoAuthDataPacket.encryptPassword(this.getUser(), this.getPassword(), this.encryptedSK.getBytes(), this.getConversion());
 
-                    T4CTTIoAuthResponseDataPacket responsePacket = new T4CTTIoAuthResponseDataPacket();
-                    response = responsePacket;
-                    responsePacket.oer = new T4CTTIoer(new T4CPacketBuffer(32));
-                    if (!StringUtil.equals(encryptedPassword, aPacket.map.get("AUTH_PASSWORD"))) {
-                        responsePacket.oer.retCode = 1017;
-                        responsePacket.oer.errorMsg = "ORA-01017: invalid username/password; logon denied";
+                    T4CTTIoAuthResponseDataPacket authRespPacket = new T4CTTIoAuthResponseDataPacket();
+                    authRespPacket.oer = new T4CTTIoer(new T4CPacketBuffer(32));
+                    if (!StringUtil.equals(encryptedPassword, authPacket.map.get("AUTH_PASSWORD"))) {
+                        authRespPacket.oer.retCode = 1017;
+                        authRespPacket.oer.errorMsg = "ORA-01017: invalid username/password; logon denied";
                         this.setAuthenticated(false);
                     }
+                    respMessage = authRespPacket.toByteBuffer(conn).array();
+                    switchHandler();
                 }
-
                 break;
         }
-
-        if (packet != null) {
-            if (logger.isDebugEnabled()) {
-                System.out.println("========================================================");
-                System.out.println("packet:" + packet);
-                // System.out.println("###source:" + ByteUtil.toHex(message, 0, message.length));
-            }
-        }
-
-        if (response instanceof T4C8TTIproResponseDataPacket) {
-            OracleConnection.setProtocolField((OracleConnection) conn, (T4C8TTIproResponseDataPacket) response);
-        } else if (response instanceof T4C8TTIdtyResponseDataPacket) {
-            clientConn.setBasicTypes();
-        } else if (response instanceof T4CTTIoAuthResponseDataPacket) {
-            switchHandler();
-        }
-
-        byte[] responseMessage = response.toByteBuffer(conn).array();
         if (logger.isDebugEnabled()) {
-            System.out.println("responsePacket:" + response);
-            // System.out.println("#response:" + ByteUtil.toHex(responseMessage, 0, responseMessage.length));
+            System.out.println("respMessage:" + ByteUtil.toHex(respMessage, 0, respMessage.length));
             System.out.println();
         }
 
-        postMessage(responseMessage);
+        postMessage(respMessage);
     }
 
     private void switchHandler() {

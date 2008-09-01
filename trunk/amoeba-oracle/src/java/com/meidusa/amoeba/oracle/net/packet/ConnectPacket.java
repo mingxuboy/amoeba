@@ -15,7 +15,7 @@ public class ConnectPacket extends AbstractPacket {
     protected byte[]           arrayFlag              = new byte[6];
     public int                 sduSize                = NSPDFSDULN;
     public int                 tduSize                = NSPMXSDULN;
-    public boolean             anoEnabled;
+    public boolean             anoEnabled             = false;
     public String              data;
 
     public ConnectPacket(){
@@ -73,12 +73,12 @@ public class ConnectPacket extends AbstractPacket {
         }
 
         buffer.setPosition(32);
-        if(!anoEnabled){
-        	buffer.writeByte(NSINADISABLEFORCONNECTION);
-        	buffer.writeByte(NSINADISABLEFORCONNECTION);
-        }else{
-        	buffer.writeByte((byte)1);
-        	buffer.writeByte((byte)1);
+        if (!anoEnabled) {
+            buffer.writeByte(NSINADISABLEFORCONNECTION);
+            buffer.writeByte(NSINADISABLEFORCONNECTION);
+        } else {
+            buffer.writeByte((byte) 1);
+            buffer.writeByte((byte) 1);
         }
         if (dataBytes != null) {
             buffer.setPosition(dataOffset);
