@@ -2,9 +2,11 @@ package com.meidusa.amoeba.oracle.net.packet;
 
 import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
 import com.meidusa.amoeba.oracle.accessor.Accessor;
+import com.meidusa.amoeba.oracle.accessor.T4CCharAccessor;
 import com.meidusa.amoeba.oracle.accessor.T4CDateAccessor;
 import com.meidusa.amoeba.oracle.accessor.T4CVarcharAccessor;
 import com.meidusa.amoeba.oracle.accessor.T4CVarnumAccessor;
+import com.meidusa.amoeba.oracle.util.ByteUtil;
 
 /**
  * @author hexianmao
@@ -137,9 +139,10 @@ public class T4C8OallDataPacket extends T4CTTIfunPacket {
         }
         short msgCode = meg.unmarshalUB1();
         if (msgCode == TTIRXD) {
-            // params = new byte[numberOfBindPositions][];
+            // byte[][] params = new byte[numberOfBindPositions][];
             for (int i = 0; i < numberOfBindPositions; i++) {
-                // meg.unmarshalCLR();
+                byte[] ab = meg.unmarshalCLRforREFS();
+                System.out.println(ByteUtil.toHex(ab, 0, ab.length));
             }
         } else {
             throw new RuntimeException();
@@ -151,259 +154,150 @@ public class T4C8OallDataPacket extends T4CTTIfunPacket {
         for (int i = 0; i < desc.length; i++) {
             switch (desc[i][0] & 0xff) {
                 case Accessor.CHAR:
-                    // System.out.print("Accessor.CHAR");
-
-                    // T4CCharAccessor charAccessor = new T4CCharAccessor();
-                    // charAccessor.setDataBytes(data[i]);
-                    // charAccessor.setInternalTypeMaxLength(desc[i][5]);
-                    // charAccessor.setDefinedColumnSize(desc[i][5]);
-                    // String s = charAccessor.getString();
-
-                    // System.out.println(s);
-                    // System.out.println();
+                    System.out.print("Accessor.CHAR");
+                    System.out.println(T4CCharAccessor.getString(data[i], desc[i][5], desc[i][5]));
+                    System.out.println();
                     break;
 
                 case Accessor.NUMBER:
-                    // System.out.print("Accessor.NUMBER");
-                    // System.out.println();
-
-                    // definesAccessors[offset + i] = new T4CNumberAccessor(statement, j, oac.udsnull, oac.oacflg,
-                    // oac.oacpre, oac.oacscl, oac.oacfl2,
-                    // oac.oacmal, oac.formOfUse, l1, i2, meg);
+                    System.out.print("Accessor.NUMBER");
+                    // T4CNumberAccessor
+                    System.out.println();
                     break;
 
                 case Accessor.VARCHAR:
                     System.out.print("Accessor.VARCHAR:");
-
                     System.out.println(T4CVarcharAccessor.getString(data[i], desc[i][5], desc[i][5]));
                     System.out.println();
                     break;
 
                 case Accessor.LONG:
-                    // System.out.print("Accessor.LONG");
-                    // System.out.println();
-
-                    // // definesAccessors[offset + i] = new T4CLongAccessor(statement, offset + i + 1, j, oac.udsnull,
-                    // // oac.oacflg, oac.oacpre, oac.oacscl,
-                    // // oac.oacfl2, oac.oacmal, oac.formOfUse, l1,
-                    // // i2, meg);
-                    // }
+                    System.out.print("Accessor.LONG");
+                    // T4CLongAccessor
+                    System.out.println();
                     break;
 
                 case Accessor.VARNUM:
                     System.out.print("Accessor.VARNUM:");
-
                     System.out.println(T4CVarnumAccessor.getLong(data[i]));
                     System.out.println();
                     break;
 
                 case Accessor.BINARY_FLOAT:
-                    // System.out.print("Accessor.BINARY_FLOAT");
-                    // System.out.println();
-
-                    // definesAccessors[offset + i] = new T4CBinaryFloatAccessor(statement, 4, oac.udsnull, oac.oacflg,
-                    // oac.oacpre, oac.oacscl, oac.oacfl2,
-                    // oac.oacmal, oac.formOfUse, l1, i2, meg);
+                    System.out.print("Accessor.BINARY_FLOAT");
+                    // T4CBinaryFloatAccessor
+                    System.out.println();
                     break;
 
                 case Accessor.BINARY_DOUBLE:
-                    // System.out.print("Accessor.BINARY_DOUBLE");
-                    // System.out.println();
-
-                    // definesAccessors[offset + i] = new T4CBinaryDoubleAccessor(statement, 8, oac.udsnull, oac.oacflg,
-                    // oac.oacpre, oac.oacscl, oac.oacfl2,
-                    // oac.oacmal, oac.formOfUse, l1, i2, meg);
+                    System.out.print("Accessor.BINARY_DOUBLE");
+                    // T4CBinaryDoubleAccessor
+                    System.out.println();
                     break;
 
                 case Accessor.RAW:
-                    // System.out.print("Accessor.RAW");
-                    // System.out.println();
-
-                    // definesAccessors[offset + i] = new T4CRawAccessor(statement, j, oac.udsnull, oac.oacflg,
-                    // oac.oacpre, oac.oacscl, oac.oacfl2, oac.oacmal,
-                    // oac.formOfUse, l1, i2, meg);
+                    System.out.print("Accessor.RAW");
+                    // T4CRawAccessor
+                    System.out.println();
                     break;
 
                 case Accessor.LONG_RAW:
-                    // System.out.print("Accessor.LONG_RAW");
-                    // System.out.println();
+                    System.out.print("Accessor.LONG_RAW");
+                    // T4CPacketBuffer.versionNumber >= 9000 T4CRawAccessor
+                    // T4CLongRawAccessor
+                    System.out.println();
 
-                    // if (l1 == -2 && i2 < 2001 && T4CPacketBuffer.versionNumber >= 9000) {
-                    // j = -1;
-                    // // definesAccessors[offset + i] = new T4CRawAccessor(statement, j, oac.udsnull, oac.oacflg,
-                    // // oac.oacpre, oac.oacscl, oac.oacfl2,
-                    // // oac.oacmal, oac.formOfUse, l1, i2, meg);
-                    // definesAccessors[offset + i].describeType = 24;
-                    // } else {
-                    // // definesAccessors[offset + i] = new T4CLongRawAccessor(statement, offset + i + 1, j,
-                    // // oac.udsnull, oac.oacflg, oac.oacpre,
-                    // // oac.oacscl, oac.oacfl2, oac.oacmal,
-                    // // oac.formOfUse, l1, i2, meg);
-                    // }
                     break;
 
                 case Accessor.ROWID:
-                    // System.out.print("Accessor.ROWID");
-                    // System.out.println();
+                    System.out.print("Accessor.ROWID");
+                    System.out.println();
 
                 case Accessor.UROWID:
-                    // System.out.print("Accessor.UROWID");
-                    // System.out.println();
-
-                    // definesAccessors[offset + i] = new T4CRowidAccessor(statement, j, oac.udsnull, oac.oacflg,
-                    // oac.oacpre, oac.oacscl, oac.oacfl2, oac.oacmal,
-                    // oac.formOfUse, l1, i2, meg);
-                    // if (oac.oacdty == Accessor.UROWID) {
-                    // definesAccessors[i].describeType = oac.oacdty;
-                    // }
+                    System.out.print("Accessor.UROWID");
+                    // T4CRowidAccessor
+                    System.out.println();
                     break;
 
                 case Accessor.RESULT_SET:
-                    // System.out.print("Accessor.RESULT_SET");
-                    // System.out.println();
-
-                    // definesAccessors[offset + i] = new T4CResultSetAccessor(statement, j, oac.udsnull, oac.oacflg,
-                    // oac.oacpre, oac.oacscl, oac.oacfl2,
-                    // oac.oacmal, oac.formOfUse, l1, i2, meg);
+                    System.out.print("Accessor.RESULT_SET");
+                    // T4CResultSetAccessor
+                    System.out.println();
                     break;
 
                 case Accessor.DATE:
                     System.out.print("Accessor.DATE:");
-
-                    // T4CDateAccessor dateAccessor = new T4CDateAccessor();
-                    // dateAccessor.setDataBytes(data[i]);
-
                     System.out.println(T4CDateAccessor.getDate(data[i]));
                     System.out.println();
 
                     break;
 
                 case Accessor.BLOB:
-                    // System.out.print("Accessor.BLOB");
-                    // System.out.println();
-
-                    // if (l1 == -4 && T4CPacketBuffer.versionNumber >= 9000) {
-                    // // definesAccessors[offset + i] = new T4CLongRawAccessor(statement, offset + i + 1, 0x7fffffff,
-                    // // oac.udsnull, oac.oacflg, oac.oacpre,
-                    // // oac.oacscl, oac.oacfl2, oac.oacmal,
-                    // // oac.formOfUse, l1, i2, meg);
-                    // definesAccessors[offset + i].describeType = 113;
-                    // } else if (l1 == -3 && T4CPacketBuffer.versionNumber >= 9000) {
-                    // // definesAccessors[offset + i] = new T4CRawAccessor(statement, 4000, oac.udsnull, oac.oacflg,
-                    // // oac.oacpre, oac.oacscl, oac.oacfl2,
-                    // // oac.oacmal, oac.formOfUse, l1, i2, meg);
-                    // definesAccessors[offset + i].describeType = 113;
-                    // } else {
-                    // // definesAccessors[offset + i] = new T4CBlobAccessor(statement, j, oac.udsnull, oac.oacflg,
-                    // // oac.oacpre, oac.oacscl, oac.oacfl2,
-                    // // oac.oacmal, oac.formOfUse, l1, i2, meg);
-                    // }
+                    System.out.print("Accessor.BLOB");
+                    // l1 == -4 && T4CPacketBuffer.versionNumber >= 9000 T4CLongRawAccessor
+                    // l1 == -3 && T4CPacketBuffer.versionNumber >= 9000 T4CRawAccessor
+                    // T4CBlobAccessor
+                    System.out.println();
                     break;
 
                 case Accessor.CLOB:
-                    // System.out.print("Accessor.CLOB");
-                    // System.out.println();
-
-                    // short word0 = 1;
-                    // if (j2 != 0) {
-                    // word0 = (short) j2;
-                    // }
-                    // if (l1 == -1 && T4CPacketBuffer.versionNumber >= 9000) {
-                    // j = 0;
-                    // // definesAccessors[offset + i] = new T4CLongAccessor(statement, offset + i + 1, 0x7fffffff,
-                    // // oac.udsnull, oac.oacflg, oac.oacpre,
-                    // // oac.oacscl, oac.oacfl2, oac.oacmal, word0,
-                    // // l1, i2, meg);
-                    // definesAccessors[offset + i].describeType = 112;
-                    // } else if ((l1 == 12 || l1 == 1) && T4CPacketBuffer.versionNumber >= 9000) {
-                    // int j1 = 4000;
-                    // if (i2 > 0 && i2 < j1) {
-                    // j1 = i2;
-                    // }
-                    // // definesAccessors[offset + i] = new T4CVarcharAccessor(statement, j1, oac.udsnull, oac.oacflg,
-                    // // oac.oacpre, oac.oacscl, oac.oacfl2,
-                    // // oac.oacmal, word0, 4000, l1, i2, meg);
-                    // definesAccessors[offset + i].describeType = 112;
-                    // } else {
-                    // // definesAccessors[offset + i] = new T4CClobAccessor(statement, j, oac.udsnull, oac.oacflg,
-                    // // oac.oacpre, oac.oacscl, oac.oacfl2,
-                    // // oac.oacmal, oac.formOfUse, l1, i2, meg);
-                    // }
+                    System.out.print("Accessor.CLOB");
+                    // l1 == -1 && T4CPacketBuffer.versionNumber >= 9000 T4CLongAccessor
+                    // (l1 == 12 || l1 == 1) && T4CPacketBuffer.versionNumber >= 9000
+                    // T4CVarcharAccessor
+                    // T4CClobAccessor
+                    System.out.println();
                     break;
 
                 case Accessor.BFILE:
-                    // System.out.print("Accessor.BFILE");
-                    // System.out.println();
-
-                    // definesAccessors[offset + i] = new T4CBfileAccessor(statement, j, oac.udsnull, oac.oacflg,
-                    // oac.oacpre, oac.oacscl, oac.oacfl2, oac.oacmal,
-                    // oac.formOfUse, l1, i2, meg);
+                    System.out.print("Accessor.BFILE");
+                    // T4CBfileAccessor
+                    System.out.println();
                     break;
 
                 case Accessor.NAMED_TYPE:
-                    // System.out.print("Accessor.NAMED_TYPE");
-                    // System.out.println();
-
-                    // definesAccessors[offset + i] = new T4CNamedTypeAccessor(statement, j, oac.udsnull, oac.oacflg,
-                    // oac.oacpre, oac.oacscl, oac.oacfl2,
-                    // oac.oacmal, oac.formOfUse, s2, l1, i2, meg);
+                    System.out.print("Accessor.NAMED_TYPE");
+                    // T4CNamedTypeAccessor
+                    System.out.println();
                     break;
 
                 case Accessor.REF_TYPE:
-                    // System.out.print("Accessor.REF_TYPE");
-                    // System.out.println();
-
-                    // definesAccessors[offset + i] = new T4CRefTypeAccessor(statement, j, oac.udsnull, oac.oacflg,
-                    // oac.oacpre, oac.oacscl, oac.oacfl2,
-                    // oac.oacmal, oac.formOfUse, s2, l1, i2, meg);
+                    System.out.print("Accessor.REF_TYPE");
+                    // T4CRefTypeAccessor
+                    System.out.println();
                     break;
 
                 case Accessor.TIMESTAMP:
-                    // System.out.print("Accessor.TIMESTAMP");
-                    // System.out.println();
-
-                    // definesAccessors[offset + i] = new T4CTimestampAccessor(statement, j, oac.udsnull, oac.oacflg,
-                    // oac.oacpre, oac.oacscl, oac.oacfl2,
-                    // oac.oacmal, oac.formOfUse, l1, i2, meg);
+                    System.out.print("Accessor.TIMESTAMP");
+                    // T4CTimestampAccessor
+                    System.out.println();
                     break;
 
                 case Accessor.TIMESTAMPTZ:
-                    // System.out.print("Accessor.TIMESTAMPTZ");
-                    // System.out.println();
-
-                    // definesAccessors[offset + i] = new T4CTimestamptzAccessor(statement, j, oac.udsnull, oac.oacflg,
-                    // oac.oacpre, oac.oacscl, oac.oacfl2,
-                    // oac.oacmal, oac.formOfUse, l1, i2, meg);
+                    System.out.print("Accessor.TIMESTAMPTZ");
+                    // T4CTimestamptzAccessor
+                    System.out.println();
                     break;
 
                 case Accessor.TIMESTAMPLTZ:
-                    // System.out.print("Accessor.TIMESTAMPLTZ");
-                    // System.out.println();
-
-                    // definesAccessors[offset + i] = new T4CTimestampltzAccessor(statement, j, oac.udsnull, oac.oacflg,
-                    // oac.oacpre, oac.oacscl, oac.oacfl2,
-                    // oac.oacmal, oac.formOfUse, l1, i2, meg);
+                    System.out.print("Accessor.TIMESTAMPLTZ");
+                    // T4CTimestampltzAccessor
+                    System.out.println();
                     break;
 
                 case Accessor.INTERVALYM:
-                    // System.out.print("Accessor.INTERVALYM");
-                    // System.out.println();
-
-                    // definesAccessors[offset + i] = new T4CIntervalymAccessor(statement, j, oac.udsnull, oac.oacflg,
-                    // oac.oacpre, oac.oacscl, oac.oacfl2,
-                    // oac.oacmal, oac.formOfUse, l1, i2, meg);
+                    System.out.print("Accessor.INTERVALYM");
+                    // T4CIntervalymAccessor
+                    System.out.println();
                     break;
 
                 case Accessor.INTERVALDS:
-                    // System.out.print("Accessor.INTERVALDS");
-                    // System.out.println();
-
-                    // definesAccessors[offset + i] = new T4CIntervaldsAccessor(statement, j, oac.udsnull, oac.oacflg,
-                    // oac.oacpre, oac.oacscl, oac.oacfl2,
-                    // oac.oacmal, oac.formOfUse, l1, i2, meg);
+                    System.out.print("Accessor.INTERVALDS");
+                    // T4CIntervaldsAccessor
+                    System.out.println();
                     break;
                 default:
-                    throw new RuntimeException("unknown type!");
+                    throw new RuntimeException("unknown data type!");
             }
         }
     }

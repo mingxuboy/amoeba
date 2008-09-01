@@ -1,5 +1,6 @@
 package com.meidusa.amoeba.oracle.net.packet;
 
+import com.meidusa.amoeba.net.Connection;
 import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
 
 /**
@@ -21,7 +22,7 @@ public class T4C7OversionDataPacket extends T4CTTIfunPacket {
     public T4C7OversionDataPacket(){
         super(OVERSION);
     }
-
+    
     @Override
     protected void marshal(AbstractPacketBuffer buffer) {
         super.marshal(buffer);

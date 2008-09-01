@@ -109,7 +109,7 @@ public class OracleClientConnection extends OracleConnection implements SQLnetDe
         }
 
         if (response instanceof T4C8TTIproResponseDataPacket) {
-            OracleConnection.setConnectionField((OracleConnection) conn, (T4C8TTIproResponseDataPacket) response);
+            OracleConnection.setProtocolField((OracleConnection) conn, (T4C8TTIproResponseDataPacket) response);
         } else if (response instanceof T4C8TTIdtyResponseDataPacket) {
             clientConn.setBasicTypes();
         } else if (response instanceof T4CTTIoAuthResponseDataPacket) {

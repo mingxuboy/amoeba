@@ -44,7 +44,7 @@ public abstract class AbstractPacket extends com.meidusa.amoeba.net.packet.Abstr
     protected int   dataOffset;
     protected int   packetCheckSum;
     protected int   headerCheckSum;
-    private String data;
+    private String  data;
     private byte[]  buffer;
 
     public AbstractPacket(short type){
@@ -100,7 +100,7 @@ public abstract class AbstractPacket extends com.meidusa.amoeba.net.packet.Abstr
     }
 
     protected String extractData() {
-        
+
         if (dataLen <= 0) data = new String();
         else if (length > dataOffset) {
             data = new String(buffer, dataOffset, dataLen);
@@ -115,8 +115,8 @@ public abstract class AbstractPacket extends com.meidusa.amoeba.net.packet.Abstr
         return OracleAbstractPacketBuffer.class;
     }
 
-	public String getData() {
-		return data;
-	}
+    public String getData() {
+        return data;
+    }
 
 }

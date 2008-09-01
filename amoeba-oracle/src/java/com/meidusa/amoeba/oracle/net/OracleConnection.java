@@ -13,6 +13,7 @@ import com.meidusa.amoeba.net.io.PacketInputStream;
 import com.meidusa.amoeba.net.io.PacketOutputStream;
 import com.meidusa.amoeba.oracle.io.OraclePacketInputStream;
 import com.meidusa.amoeba.oracle.io.OraclePacketOutputStream;
+import com.meidusa.amoeba.oracle.net.packet.T4C7OversionResponseDataPacket;
 import com.meidusa.amoeba.oracle.net.packet.T4C8TTIproResponseDataPacket;
 import com.meidusa.amoeba.oracle.util.DBConversion;
 import com.meidusa.amoeba.oracle.util.T4CTypeRep;
@@ -27,18 +28,21 @@ public abstract class OracleConnection extends DatabaseConnection {
     public byte[]            protocolVersion    = new byte[] { 6 };
     private DBConversion     conversion;
     protected String         encryptedSK;
-    
-    private short versionNumber;
-    
-    public short getVersionNumber() {
-		return versionNumber;
-	}
 
-	public void setVersionNumber(short versionNumber) {
-		this.versionNumber = versionNumber;
-	}
+    private static short     versionNumber;
 
-	public DBConversion getConversion() {
+    public static short getVersionNumber() {
+        return versionNumber;
+    }
+
+    public static void setVersionNumber(short versionNumber) {
+        if (versionNumber != 0) {
+            return;
+        }
+        OracleConnection.versionNumber = versionNumber;
+    }
+
+    public DBConversion getConversion() {
         return conversion;
     }
 
@@ -53,7 +57,7 @@ public abstract class OracleConnection extends DatabaseConnection {
     public OracleConnection(SocketChannel channel, long createStamp){
         super(channel, createStamp);
         rep.setRep((byte) 1, (byte) 2);
-        //this.setAuthenticated(true);
+        // this.setAuthenticated(true);
     }
 
     public void handleMessage(Connection conn, byte[] message) {
@@ -115,9 +119,8 @@ public abstract class OracleConnection extends DatabaseConnection {
     public void setAnoEnabled(boolean anoEnabled) {
         this.anoEnabled = anoEnabled;
     }
-    
-    public static void setConnectionField(OracleConnection conn, T4C8TTIproResponseDataPacket packet) {
-        T4C8TTIproResponseDataPacket pro = (T4C8TTIproResponseDataPacket) packet;
+
+    public static void setProtocolField(OracleConnection conn, T4C8TTIproResponseDataPacket pro) {
         short word0 = pro.oVersion;
         short word1 = pro.svrCharSet;
         short word2 = DBConversion.findDriverCharSet(word1, word0);
@@ -126,7 +129,6 @@ public abstract class OracleConnection extends DatabaseConnection {
             DBConversion conversion = new DBConversion(word1, word2, pro.NCHAR_CHARSET);
             conn.setConversion(conversion);
         } catch (SQLException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
 
@@ -139,12 +141,16 @@ public abstract class OracleConnection extends DatabaseConnection {
             conn.getRep().setFlags(pro.svrFlags);
         }
     }
-    
+
+    public static void setVersionField(OracleConnection conn, T4C7OversionResponseDataPacket ver) {
+        setVersionNumber(ver.getVersionNumber());
+    }
+
     public void setBasicTypes() {
-    	getRep().setRep((byte) 0, (byte) 0);
-    	getRep().setRep((byte) 1, (byte) 1);
-    	getRep().setRep((byte) 2, (byte) 1);
-    	getRep().setRep((byte) 3, (byte) 1);
-    	getRep().setRep((byte) 4, (byte) 1);
+        getRep().setRep((byte) 0, (byte) 0);
+        getRep().setRep((byte) 1, (byte) 1);
+        getRep().setRep((byte) 2, (byte) 1);
+        getRep().setRep((byte) 3, (byte) 1);
+        getRep().setRep((byte) 4, (byte) 1);
     }
 }
