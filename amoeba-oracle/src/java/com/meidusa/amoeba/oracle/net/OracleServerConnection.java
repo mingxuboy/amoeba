@@ -59,20 +59,36 @@ public class OracleServerConnection extends OracleConnection implements Poolable
             case NS_PACKT_TYPE_RESEND:
                 ConnectPacket connPacket = genConnectPacket();
                 byteBuffer = connPacket.toByteBuffer(serverConn);
+                if (logger.isDebugEnabled()) {
+                    System.out.println("receive NS_PACKT_TYPE_RESEND packet.");
+                    System.out.println("send ConnectPacket.");
+                }
                 break;
             case NS_PACKT_TYPE_ACCEPT:
                 T4C8TTIproDataPacket proPacket = new T4C8TTIproDataPacket();
                 byteBuffer = proPacket.toByteBuffer(serverConn);
+                if (logger.isDebugEnabled()) {
+                    System.out.println("receive NS_PACKT_TYPE_ACCEPT packet.");
+                    System.out.println("send T4C8TTIproDataPacket.");
+                }
                 break;
             case NS_PACKT_TYPE_REDIRECT:
                 RedirectPacket redirectpacket = new RedirectPacket();
                 establishConnection(redirectpacket.getData());
+                if (logger.isDebugEnabled()) {
+                    System.out.println("receive NS_PACKT_TYPE_REDIRECT packet.");
+                    System.out.println("send RedirectPacket.");
+                }
                 break;
             case NS_PACKT_TYPE_REFUTE:
                 RefusePacket refusePacket = new RefusePacket();
                 refusePacket.init(buffer, serverConn);
                 this.setAuthenticated(false);
                 this.postClose(null);
+                if (logger.isDebugEnabled()) {
+                    System.out.println("receive NS_PACKT_TYPE_REFUTE packet.");
+                    System.out.println("send RefusePacket.");
+                }
                 break;
             case 3:
             case NS_PACKT_TYPE_DATA: {
@@ -83,6 +99,10 @@ public class OracleServerConnection extends OracleConnection implements Poolable
 
                     T4C8TTIdtyDataPacket dtyPacket = new T4C8TTIdtyDataPacket();
                     byteBuffer = dtyPacket.toByteBuffer(serverConn);
+                    if (logger.isDebugEnabled()) {
+                        System.out.println("receive T4C8TTIproResponseDataPacket.");
+                        System.out.println("send T4C8TTIdtyDataPacket.");
+                    }
 
                 } else if (T4CTTIMsgPacket.isMsgType(buffer, T4CTTIMsgPacket.TTIDTY)) {
                     T4C8TTIdtyResponseDataPacket dtyResppacket = new T4C8TTIdtyResponseDataPacket();
@@ -92,6 +112,10 @@ public class OracleServerConnection extends OracleConnection implements Poolable
                     T4C7OversionDataPacket versionPacket = new T4C7OversionDataPacket();
                     byteBuffer = versionPacket.toByteBuffer(serverConn);
                     lastPacketRequest = versionPacket;
+                    if (logger.isDebugEnabled()) {
+                        System.out.println("receive T4C8TTIdtyResponseDataPacket.");
+                        System.out.println("send T4C7OversionDataPacket.");
+                    }
 
                 } else if (lastPacketRequest instanceof T4C7OversionDataPacket) {
                     T4C7OversionResponseDataPacket versionRespPacket = new T4C7OversionResponseDataPacket();
@@ -107,6 +131,10 @@ public class OracleServerConnection extends OracleConnection implements Poolable
                     authekeyPacket.machine = "unknow";
                     byteBuffer = authekeyPacket.toByteBuffer(serverConn);
                     lastPacketRequest = authekeyPacket;
+                    if (logger.isDebugEnabled()) {
+                        System.out.println("receive T4C7OversionResponseDataPacket.");
+                        System.out.println("send T4CTTIoAuthKeyDataPacket.");
+                    }
 
                 } else if (lastPacketRequest instanceof T4CTTIoAuthKeyDataPacket) {
                     T4CTTIoAuthKeyResponseDataPacket authkeyRespPacket = new T4CTTIoAuthKeyResponseDataPacket();
@@ -121,15 +149,23 @@ public class OracleServerConnection extends OracleConnection implements Poolable
                     byteBuffer = authPacket.toByteBuffer(serverConn);
                     lastPacketRequest = authPacket;
 
+                    if (logger.isDebugEnabled()) {
+                        System.out.println("receive T4CTTIoAuthKeyResponseDataPacket.");
+                        System.out.println("send T4CTTIoAuthDataPacket.");
+                    }
+
                 } else if (lastPacketRequest instanceof T4CTTIoAuthDataPacket) {
                     T4CTTIoAuthResponseDataPacket authRespPacket = new T4CTTIoAuthResponseDataPacket();
                     authRespPacket.init(buffer, conn);
                     if (authRespPacket.oer.retCode == 0) {
                         this.setAuthenticated(true);
                     }
+                    byteBuffer = null;
 
-                    byteBuffer = authRespPacket.toByteBuffer(serverConn);
                     lastPacketRequest = authRespPacket;
+                    if (logger.isDebugEnabled()) {
+                        System.out.println("receive T4CTTIoAuthResponseDataPacket.");
+                    }
                 }
                 break;
             }
@@ -142,13 +178,13 @@ public class OracleServerConnection extends OracleConnection implements Poolable
                 return;
             }
         }
-        if (logger.isDebugEnabled()) {
-            byte[] respMessage = byteBuffer.array();
-            System.out.println("@amoeba send to dbServer:" + ByteUtil.toHex(respMessage, 0, respMessage.length));
-            System.out.println();
-        }
 
         if (byteBuffer != null) {
+            if (logger.isDebugEnabled()) {
+                byte[] respMessage = byteBuffer.array();
+                System.out.println("@amoeba send to dbServer:" + ByteUtil.toHex(respMessage, 0, respMessage.length));
+                System.out.println();
+            }
             this.postMessage(byteBuffer);
         }
     }
