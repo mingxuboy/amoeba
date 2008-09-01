@@ -23,7 +23,6 @@ public class OracleAbstractPacketBuffer extends AbstractPacketBuffer {
     public void init(Connection conn) {
         super.init(conn);
         this.oconn = (OracleConnection) conn;
-        // versionNumber = OracleConnection.getVersionNumber();
     }
 
     public short readUB1() {

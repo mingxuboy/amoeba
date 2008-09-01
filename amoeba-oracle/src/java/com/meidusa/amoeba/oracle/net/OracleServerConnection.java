@@ -1,5 +1,6 @@
 package com.meidusa.amoeba.oracle.net;
 
+import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 
 import org.apache.log4j.Logger;
@@ -8,7 +9,6 @@ import com.meidusa.amoeba.net.Connection;
 import com.meidusa.amoeba.net.packet.Packet;
 import com.meidusa.amoeba.net.poolable.ObjectPool;
 import com.meidusa.amoeba.net.poolable.PoolableObject;
-import com.meidusa.amoeba.oracle.net.packet.AcceptPacket;
 import com.meidusa.amoeba.oracle.net.packet.ConnectPacket;
 import com.meidusa.amoeba.oracle.net.packet.RedirectPacket;
 import com.meidusa.amoeba.oracle.net.packet.RefusePacket;
@@ -19,10 +19,12 @@ import com.meidusa.amoeba.oracle.net.packet.T4C8TTIdtyDataPacket;
 import com.meidusa.amoeba.oracle.net.packet.T4C8TTIdtyResponseDataPacket;
 import com.meidusa.amoeba.oracle.net.packet.T4C8TTIproDataPacket;
 import com.meidusa.amoeba.oracle.net.packet.T4C8TTIproResponseDataPacket;
+import com.meidusa.amoeba.oracle.net.packet.T4CTTIMsgPacket;
 import com.meidusa.amoeba.oracle.net.packet.T4CTTIoAuthDataPacket;
 import com.meidusa.amoeba.oracle.net.packet.T4CTTIoAuthKeyDataPacket;
 import com.meidusa.amoeba.oracle.net.packet.T4CTTIoAuthKeyResponseDataPacket;
 import com.meidusa.amoeba.oracle.net.packet.T4CTTIoAuthResponseDataPacket;
+import com.meidusa.amoeba.oracle.util.ByteUtil;
 
 /**
  * @author struct
@@ -32,7 +34,6 @@ public class OracleServerConnection extends OracleConnection implements Poolable
     private static Logger logger = Logger.getLogger(OracleServerConnection.class);
     private boolean       active;
     private ObjectPool    objectPool;
-    private int           responsedMsgCount;
     private Packet        lastPacketRequest;
 
     public OracleServerConnection(SocketChannel channel, long createStamp){
@@ -42,111 +43,112 @@ public class OracleServerConnection extends OracleConnection implements Poolable
     @Override
     protected void init() {
         ConnectPacket packet = genConnectPacket();
-        this.postMessage(packet.toByteBuffer(this));
+        ByteBuffer byteBuffer = packet.toByteBuffer(this);
+        this.postMessage(byteBuffer);
         lastPacketRequest = packet;
     }
 
     public void handleMessage(Connection conn, byte[] buffer) {
         OracleServerConnection serverConn = (OracleServerConnection) conn;
-        Packet packet = null;
-        Packet response = null;
-        try {
-            switch (buffer[4]) {
-                case SQLnetDef.NS_PACKT_TYPE_ACCEPT: // '\002'//2
-                    AcceptPacket acceptpacket = new AcceptPacket();
-                    acceptpacket.init(buffer, conn);
-                    packet = new T4C8TTIproDataPacket();
-                    break;
-                case NS_PACKT_TYPE_RESEND: // '\013'//11
-                    packet = genConnectPacket();
-                    break;
-                case NS_PACKT_TYPE_REDIRECT: // '\005'//5
-                    RedirectPacket redirectpacket = new RedirectPacket();
-                    establishConnection(redirectpacket.getData());
-                    break;
-                case NS_PACKT_TYPE_REFUTE: // '\004'//4
-                    RefusePacket refusepacket = new RefusePacket();
-                    refusepacket.init(buffer, conn);
-                    this.setAuthenticated(false);
-                    this.postClose(null);
-                    break;
-                case 3: // '\003'
-                case NS_PACKT_TYPE_DATA: {// '\006'
-                    if (lastPacketRequest instanceof T4C8TTIproDataPacket) {
-                        T4C8TTIproResponseDataPacket pro = new T4C8TTIproResponseDataPacket();
-                        response = pro;
-                        response.init(buffer, conn);
-                        setProtocolField(serverConn, pro);
-                        packet = new T4C8TTIdtyDataPacket();
-                    } else if (lastPacketRequest instanceof T4C8TTIdtyDataPacket) {
-                        T4C8TTIdtyResponseDataPacket idty = new T4C8TTIdtyResponseDataPacket();
-                        response = idty;
-                        response.init(buffer, conn);
-                        serverConn.setBasicTypes();
-                        packet = new T4C7OversionDataPacket();
-                    } else if (lastPacketRequest instanceof T4C7OversionDataPacket) {
-                        T4C7OversionResponseDataPacket version = new T4C7OversionResponseDataPacket();
-                        response = version;
-                        response.init(buffer, conn);
-                        setVersionField(serverConn, version);
-                        T4CTTIoAuthKeyDataPacket authekey = new T4CTTIoAuthKeyDataPacket();
-                        packet = authekey;
-                        authekey.user = this.getUser();
-                        authekey.pid = "1223";
-                        authekey.program_nm = "amoeba proxy";
-                        authekey.sid = this.getSchema();
-                        authekey.terminal = "unkonw";
-                        authekey.machine = "unknow";
-                    } else if (lastPacketRequest instanceof T4CTTIoAuthKeyDataPacket) {
-                        T4CTTIoAuthKeyResponseDataPacket authkey = new T4CTTIoAuthKeyResponseDataPacket();
-                        response = authkey;
-                        response.init(buffer, conn);
-                        T4CTTIoAuthDataPacket auth = new T4CTTIoAuthDataPacket();
-                        packet = auth;
-                        this.encryptedSK = authkey.encryptedSK;
-                        auth.encryptedSK = authkey.encryptedSK;
-                        auth.userStr = this.getUser();
-                        auth.passwordStr = this.getPassword();
-                    } else if (lastPacketRequest instanceof T4CTTIoAuthDataPacket) {
-                        T4CTTIoAuthResponseDataPacket auth = new T4CTTIoAuthResponseDataPacket();
-                        response = auth;
-                        response.init(buffer, conn);
-                        if (auth.oer.retCode == 0) {
-                            this.setAuthenticated(true);
-                        }
+        // Packet packet = null;
+        // Packet response = null;
+
+        ByteBuffer byteBuffer = null;
+
+        if (logger.isDebugEnabled()) {
+            System.out.println("========================================================");
+            System.out.println("@@@@buffer:" + ByteUtil.toHex(buffer, 0, buffer.length));
+        }
+        switch (buffer[4]) {
+            case NS_PACKT_TYPE_RESEND:
+                ConnectPacket connPacket = genConnectPacket();
+                byteBuffer = connPacket.toByteBuffer(serverConn);
+                break;
+            case NS_PACKT_TYPE_ACCEPT:
+                T4C8TTIproDataPacket proPacket = new T4C8TTIproDataPacket();
+                byteBuffer = proPacket.toByteBuffer(serverConn);
+                break;
+            case NS_PACKT_TYPE_REDIRECT:
+                RedirectPacket redirectpacket = new RedirectPacket();
+                establishConnection(redirectpacket.getData());
+                break;
+            case NS_PACKT_TYPE_REFUTE:
+                RefusePacket refusePacket = new RefusePacket();
+                refusePacket.init(buffer, serverConn);
+                this.setAuthenticated(false);
+                this.postClose(null);
+                break;
+            case 3:
+            case NS_PACKT_TYPE_DATA: {
+                if (T4CTTIMsgPacket.isMsgType(buffer, T4CTTIMsgPacket.TTIPRO)) {
+                    T4C8TTIproResponseDataPacket proRespPacket = new T4C8TTIproResponseDataPacket();
+                    proRespPacket.init(buffer, serverConn);
+                    serverConn.setProtocolField(proRespPacket);
+
+                    T4C8TTIdtyDataPacket dtyPacket = new T4C8TTIdtyDataPacket();
+                    byteBuffer = dtyPacket.toByteBuffer(serverConn);
+
+                } else if (T4CTTIMsgPacket.isMsgType(buffer, T4CTTIMsgPacket.TTIDTY)) {
+                    T4C8TTIdtyResponseDataPacket dtyResppacket = new T4C8TTIdtyResponseDataPacket();
+                    dtyResppacket.init(buffer, serverConn);
+                    serverConn.setBasicTypes();
+
+                    T4C7OversionDataPacket versionPacket = new T4C7OversionDataPacket();
+                    byteBuffer = versionPacket.toByteBuffer(serverConn);
+                    lastPacketRequest = versionPacket;
+
+                } else if (lastPacketRequest instanceof T4C7OversionDataPacket) {
+                    T4C7OversionResponseDataPacket versionRespPacket = new T4C7OversionResponseDataPacket();
+                    versionRespPacket.init(buffer, serverConn);
+                    OracleConnection.setVersionNumber(versionRespPacket.getVersionNumber());
+
+                    T4CTTIoAuthKeyDataPacket authekeyPacket = new T4CTTIoAuthKeyDataPacket();
+                    authekeyPacket.user = this.getUser();
+                    authekeyPacket.pid = "1223";
+                    authekeyPacket.program_nm = "amoeba proxy";
+                    authekeyPacket.sid = this.getSchema();
+                    authekeyPacket.terminal = "unkonw";
+                    authekeyPacket.machine = "unknow";
+                    byteBuffer = authekeyPacket.toByteBuffer(serverConn);
+                    lastPacketRequest = authekeyPacket;
+
+                } else if (lastPacketRequest instanceof T4CTTIoAuthKeyDataPacket) {
+                    T4CTTIoAuthKeyResponseDataPacket authkeyRespPacket = new T4CTTIoAuthKeyResponseDataPacket();
+                    authkeyRespPacket.init(buffer, serverConn);
+
+                    T4CTTIoAuthDataPacket authPacket = new T4CTTIoAuthDataPacket();
+                    this.encryptedSK = authkeyRespPacket.encryptedSK;
+                    authPacket.encryptedSK = authkeyRespPacket.encryptedSK;
+                    authPacket.userStr = this.getUser();
+                    authPacket.passwordStr = this.getPassword();
+
+                    byteBuffer = authPacket.toByteBuffer(serverConn);
+                    lastPacketRequest = authPacket;
+
+                } else if (lastPacketRequest instanceof T4CTTIoAuthDataPacket) {
+                    T4CTTIoAuthResponseDataPacket authRespPacket = new T4CTTIoAuthResponseDataPacket();
+                    authRespPacket.init(buffer, conn);
+                    if (authRespPacket.oer.retCode == 0) {
+                        this.setAuthenticated(true);
                     }
-                    break;
-                }
-                case 7: // '\007'
-                case 8: // '\b'
-                case 9: // '\t'
-                case 10: // '\n'
-                default: {
-                    this.postClose(null);
-                    return;
-                }
-            }
 
-            if (packet != null) {
-                this.postMessage(packet.toByteBuffer(conn));
+                    byteBuffer = authRespPacket.toByteBuffer(serverConn);
+                    lastPacketRequest = authRespPacket;
+                }
+                break;
             }
-            responsedMsgCount++;
-        } finally {
-            if (logger.isDebugEnabled()) {
-                // if(response != null){
-                // byte[] message = response.toByteBuffer(conn).array();
-                // System.out.println("@response source:" + ByteUtil.toHex(message, 0, message.length));
-                // System.out.println("@response packet:" + response);
-                // }
-                //            	
-                // if(packet != null){
-                // byte[] message = packet.toByteBuffer(conn).array();
-                // System.out.println("@request source:" + ByteUtil.toHex(message, 0, message.length));
-                // System.out.println("@request packet:" + packet);
-                // }
+            case 7:
+            case 8:
+            case 9:
+            case 10:
+            default: {
+                this.postClose(null);
+                return;
             }
+        }
 
-            lastPacketRequest = packet;
+        if (byteBuffer != null) {
+            this.postMessage(byteBuffer);
         }
     }
 
@@ -204,10 +206,6 @@ public class OracleServerConnection extends OracleConnection implements Poolable
         builder.append(")(PORT=");
         builder.append(this.getChannel().socket().getPort());
         builder.append(")))");
-        // (DESCRIPTION=(CONNECT_DATA=(SID=test)(CID=(PROGRAM=)(HOST=__jdbc__)(USER=)))(ADDRESS=(PROTOCOL=tcp)(HOST=10.0
-        // .65.204)(PORT=1521)))
-        // (DESCRIPTION=(CONNECT_DATA=(SID=ocntest)(CID=(PROGRAM=)(HOST=__jdbc__)(USER=)))(ADDRESS=(PROTOCOL=tcp)(HOST=
-        // 127.0.0.1)(PORT=8066)))
         packet.data = builder.toString();
         return packet;
     }

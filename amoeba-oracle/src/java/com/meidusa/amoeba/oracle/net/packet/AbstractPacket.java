@@ -52,8 +52,8 @@ public abstract class AbstractPacket extends com.meidusa.amoeba.net.packet.Abstr
     }
 
     public void init(byte[] buffer, Connection conn) {
-    	this.buffer = buffer;
-    	super.init(buffer, conn);
+        this.buffer = buffer;
+        super.init(buffer, conn);
     }
 
     /**
@@ -100,7 +100,6 @@ public abstract class AbstractPacket extends com.meidusa.amoeba.net.packet.Abstr
     }
 
     protected String extractData() {
-
         if (dataLen <= 0) data = new String();
         else if (length > dataOffset) {
             data = new String(buffer, dataOffset, dataLen);

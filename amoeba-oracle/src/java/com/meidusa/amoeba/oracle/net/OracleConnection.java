@@ -13,7 +13,6 @@ import com.meidusa.amoeba.net.io.PacketInputStream;
 import com.meidusa.amoeba.net.io.PacketOutputStream;
 import com.meidusa.amoeba.oracle.io.OraclePacketInputStream;
 import com.meidusa.amoeba.oracle.io.OraclePacketOutputStream;
-import com.meidusa.amoeba.oracle.net.packet.T4C7OversionResponseDataPacket;
 import com.meidusa.amoeba.oracle.net.packet.T4C8TTIproResponseDataPacket;
 import com.meidusa.amoeba.oracle.util.DBConversion;
 import com.meidusa.amoeba.oracle.util.T4CTypeRep;
@@ -120,30 +119,29 @@ public abstract class OracleConnection extends DatabaseConnection {
         this.anoEnabled = anoEnabled;
     }
 
-    public static void setProtocolField(OracleConnection conn, T4C8TTIproResponseDataPacket pro) {
+    public void setProtocolField(T4C8TTIproResponseDataPacket pro) {
         short word0 = pro.oVersion;
         short word1 = pro.svrCharSet;
         short word2 = DBConversion.findDriverCharSet(word1, word0);
 
         try {
             DBConversion conversion = new DBConversion(word1, word2, pro.NCHAR_CHARSET);
-            conn.setConversion(conversion);
+            this.setConversion(conversion);
         } catch (SQLException e) {
             e.printStackTrace();
         }
 
-        conn.getRep().setServerConversion(word2 != word1);
-        conn.getRep().setVersion(word0);
+        this.getRep().setServerConversion(word2 != word1);
+        this.getRep().setVersion(word0);
         if (DBConversion.isCharSetMultibyte(word2)) {
-            if (DBConversion.isCharSetMultibyte(pro.svrCharSet)) conn.getRep().setFlags((byte) 1);
-            else conn.getRep().setFlags((byte) 2);
+            if (DBConversion.isCharSetMultibyte(pro.svrCharSet)) {
+                this.getRep().setFlags((byte) 1);
+            } else {
+                this.getRep().setFlags((byte) 2);
+            }
         } else {
-            conn.getRep().setFlags(pro.svrFlags);
+            this.getRep().setFlags(pro.svrFlags);
         }
-    }
-
-    public static void setVersionField(OracleConnection conn, T4C7OversionResponseDataPacket ver) {
-        setVersionNumber(ver.getVersionNumber());
     }
 
     public void setBasicTypes() {

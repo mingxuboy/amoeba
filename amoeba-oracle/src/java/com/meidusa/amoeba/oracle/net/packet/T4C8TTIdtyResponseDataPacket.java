@@ -64,7 +64,6 @@ public class T4C8TTIdtyResponseDataPacket extends T4CTTIMsgPacket {
         super.unmarshal(buffer);
         T4CPacketBuffer meg = (T4CPacketBuffer) buffer;
         typeValid = validTypeReps(meg);
-        //setBasicTypes(meg.getTypeRep());
     }
 
     @Override
