@@ -7,6 +7,10 @@ import com.meidusa.amoeba.net.MessageHandler;
 import com.meidusa.amoeba.net.Sessionable;
 import com.meidusa.amoeba.oracle.net.OracleConnection;
 import com.meidusa.amoeba.oracle.net.packet.SQLnetDef;
+import com.meidusa.amoeba.oracle.net.packet.T4C8OcloseDataPacket;
+import com.meidusa.amoeba.oracle.net.packet.T4CTTIMsgPacket;
+import com.meidusa.amoeba.oracle.net.packet.T4CTTIfunPacket;
+import com.meidusa.amoeba.oracle.util.ByteUtil;
 
 /**
  * 非常简单的数据包转发程序
@@ -34,28 +38,30 @@ public class OracleQueryMessageHandler implements MessageHandler, Sessionable, S
 
     public void handleMessage(Connection conn, byte[] message) {
         if (conn == clientConn) {
-            // System.out.println("query source:" + ByteUtil.toHex(message, 0, message.length));
-            // if (T4CTTIfunPacket.isFunType(message, T4CTTIfunPacket.OALL8)) {
-            // T4C8OallDataPacket packet = new T4C8OallDataPacket();
-            // // packet.init(message, conn);
-            // // if (logger.isDebugEnabled()) {
-            // // System.out.println("query packet:" + T4CTTIfunPacket.OALL8);
-            // // System.out.println("sql:" + new String(packet.sqlStmt));
-            // // System.out.println("numberOfBindPositions:" + packet.numberOfBindPositions);
-            // // System.out.println("oacdefBindsSent:" + Arrays.toString(packet.oacdefBindsSent));
-            // // }
-            // } else if (T4CTTIfunPacket.isFunType(message, T4CTTIfunPacket.OFETCH)) {
-            // if (logger.isDebugEnabled()) {
-            // System.out.println("query packet:" + T4CTTIfunPacket.OFETCH);
-            // }
-            // } else if (T4CTTIfunPacket.isFunType(message, T4CTTIMsgPacket.TTIPFN, T4CTTIfunPacket.OCCA)) {
-            // T4C8OcloseDataPacket packet = new T4C8OcloseDataPacket();
-            // packet.init(message, conn);
-            // if (logger.isDebugEnabled()) {
-            // System.out.println("query packet:" + packet);
-            // }
-            // }
-            // System.out.println();
+            if (T4CTTIfunPacket.isFunType(message, T4CTTIfunPacket.OALL8)) {
+                // T4C8OallDataPacket packet = new T4C8OallDataPacket();
+                // packet.init(message, conn);
+                if (logger.isDebugEnabled()) {
+                    System.out.println("$amoeba receive from appClient:" + ByteUtil.toHex(message, 0, message.length));
+                    // System.out.println("query packet:" + T4CTTIfunPacket.OALL8);
+                    // System.out.println("sql:" + new String(packet.sqlStmt));
+                    // System.out.println("numberOfBindPositions:" + packet.numberOfBindPositions);
+                    // System.out.println("oacdefBindsSent:" + Arrays.toString(packet.oacdefBindsSent));
+                    System.out.println();
+                }
+            } else if (T4CTTIfunPacket.isFunType(message, T4CTTIfunPacket.OFETCH)) {
+                if (logger.isDebugEnabled()) {
+                    System.out.println("query packet:" + T4CTTIfunPacket.OFETCH);
+                    System.out.println();
+                }
+            } else if (T4CTTIfunPacket.isFunType(message, T4CTTIMsgPacket.TTIPFN, T4CTTIfunPacket.OCCA)) {
+                // T4C8OcloseDataPacket packet = new T4C8OcloseDataPacket();
+                // packet.init(message, conn);
+                if (logger.isDebugEnabled()) {
+                    System.out.println("query packet:T4C8OcloseDataPacket");
+                    System.out.println();
+                }
+            }
 
             serverConn.postMessage(message);// proxy-->server
         } else {
