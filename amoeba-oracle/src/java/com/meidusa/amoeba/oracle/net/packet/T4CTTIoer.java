@@ -4,7 +4,6 @@ public class T4CTTIoer {
 
     final int       MAXERRBUF = 512;
 
-    T4CPacketBuffer meg;
     public short    endToEndECIDSequenceNumber;
     public long     curRowNumber;
     public int      retCode;
@@ -31,8 +30,7 @@ public class T4CTTIoer {
     public int      warnFlag;
     public String   errorMsg;
 
-    public T4CTTIoer(T4CPacketBuffer meg){
-        this.meg = meg;
+    public T4CTTIoer(){
         warnFlag = 0;
     }
 
@@ -45,7 +43,7 @@ public class T4CTTIoer {
         return retCode != 0;
     }
 
-    public int unmarshal() {
+    public int unmarshal(T4CPacketBuffer meg) {
         if (meg.versionNumber >= 10000) {
             endToEndECIDSequenceNumber = (short) meg.unmarshalUB2();
             // connection.endToEndECIDSequenceNumber = endToEndECIDSequenceNumber;
@@ -78,7 +76,7 @@ public class T4CTTIoer {
         return currCursorID;
     }
 
-    void unmarshalWarning() {
+    void unmarshalWarning(T4CPacketBuffer meg) {
         retCode = meg.unmarshalUB2();
         int warnLength = meg.unmarshalUB2();
         warnFlag = meg.unmarshalUB2();
