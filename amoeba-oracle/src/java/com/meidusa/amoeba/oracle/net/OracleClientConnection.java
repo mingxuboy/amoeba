@@ -20,7 +20,6 @@ import com.meidusa.amoeba.oracle.net.packet.T4C8TTIdtyDataPacket;
 import com.meidusa.amoeba.oracle.net.packet.T4C8TTIdtyResponseDataPacket;
 import com.meidusa.amoeba.oracle.net.packet.T4C8TTIproDataPacket;
 import com.meidusa.amoeba.oracle.net.packet.T4C8TTIproResponseDataPacket;
-import com.meidusa.amoeba.oracle.net.packet.T4CPacketBuffer;
 import com.meidusa.amoeba.oracle.net.packet.T4CTTIMsgPacket;
 import com.meidusa.amoeba.oracle.net.packet.T4CTTIfunPacket;
 import com.meidusa.amoeba.oracle.net.packet.T4CTTIoAuthDataPacket;
@@ -60,12 +59,20 @@ public class OracleClientConnection extends OracleConnection implements SQLnetDe
                 clientConn.setAnoEnabled(connPacket.anoEnabled);
                 AcceptPacket aptPacket = new AcceptPacket();
                 byteBuffer = aptPacket.toByteBuffer(clientConn);
+                if (logger.isDebugEnabled()) {
+                    System.out.println("receive NS_PACKT_TYPE_CONNECT packet.");
+                    System.out.println("response AcceptPacket.");
+                }
                 break;
 
             case NS_PACKT_TYPE_DATA:
                 if (clientConn.isAnoEnabled() && AnoDataPacket.isAnoType(message)) {
                     AnoResponseDataPacket anoRespPacket = new AnoResponseDataPacket();
                     byteBuffer = anoRespPacket.toByteBuffer(clientConn);
+                    if (logger.isDebugEnabled()) {
+                        System.out.println("receive AnoDataPacket packet.");
+                        System.out.println("response AnoResponseDataPacket.");
+                    }
 
                 } else if (T4CTTIMsgPacket.isMsgType(message, T4CTTIMsgPacket.TTIPRO)) {
                     T4C8TTIproDataPacket proPacket = new T4C8TTIproDataPacket();
@@ -74,6 +81,10 @@ public class OracleClientConnection extends OracleConnection implements SQLnetDe
                     T4C8TTIproResponseDataPacket proRespPacket = new T4C8TTIproResponseDataPacket();
                     clientConn.setProtocolField(proRespPacket);
                     byteBuffer = proRespPacket.toByteBuffer(clientConn);
+                    if (logger.isDebugEnabled()) {
+                        System.out.println("receive T4C8TTIproDataPacket.");
+                        System.out.println("response T4C8TTIproResponseDataPacket.");
+                    }
 
                 } else if (T4CTTIMsgPacket.isMsgType(message, T4CTTIMsgPacket.TTIDTY)) {
                     T4C8TTIdtyDataPacket dtyPacket = new T4C8TTIdtyDataPacket();
@@ -82,6 +93,10 @@ public class OracleClientConnection extends OracleConnection implements SQLnetDe
                     T4C8TTIdtyResponseDataPacket dtyRespPacket = new T4C8TTIdtyResponseDataPacket();
                     clientConn.setBasicTypes();
                     byteBuffer = dtyRespPacket.toByteBuffer(clientConn);
+                    if (logger.isDebugEnabled()) {
+                        System.out.println("receive T4C8TTIdtyDataPacket.");
+                        System.out.println("response T4C8TTIdtyResponseDataPacket.");
+                    }
 
                 } else if (T4CTTIfunPacket.isFunType(message, T4CTTIfunPacket.OVERSION)) {
                     T4C7OversionDataPacket versionPacket = new T4C7OversionDataPacket();
@@ -89,6 +104,10 @@ public class OracleClientConnection extends OracleConnection implements SQLnetDe
 
                     T4C7OversionResponseDataPacket versionRespPacket = new T4C7OversionResponseDataPacket();
                     byteBuffer = versionRespPacket.toByteBuffer(clientConn);
+                    if (logger.isDebugEnabled()) {
+                        System.out.println("receive T4C7OversionDataPacket.");
+                        System.out.println("response T4C7OversionResponseDataPacket.");
+                    }
 
                 } else if (T4CTTIfunPacket.isFunType(message, T4CTTIfunPacket.OSESSKEY)) {
                     T4CTTIoAuthKeyDataPacket authKeyPacket = new T4CTTIoAuthKeyDataPacket();
@@ -98,6 +117,10 @@ public class OracleClientConnection extends OracleConnection implements SQLnetDe
                     this.encryptedSK = StringUtil.getRandomString(16);
                     authKeyRespPacket.encryptedSK = this.encryptedSK;
                     byteBuffer = authKeyRespPacket.toByteBuffer(clientConn);
+                    if (logger.isDebugEnabled()) {
+                        System.out.println("receive T4CTTIoAuthKeyDataPacket.");
+                        System.out.println("response T4CTTIoAuthKeyResponseDataPacket.");
+                    }
 
                 } else if (T4CTTIfunPacket.isFunType(message, T4CTTIfunPacket.OAUTH)) {
                     T4CTTIoAuthDataPacket authPacket = new T4CTTIoAuthDataPacket();
@@ -113,17 +136,23 @@ public class OracleClientConnection extends OracleConnection implements SQLnetDe
                         this.setAuthenticated(false);
                     }
                     byteBuffer = authRespPacket.toByteBuffer(clientConn);
+                    if (logger.isDebugEnabled()) {
+                        System.out.println("receive T4CTTIoAuthDataPacket.");
+                        System.out.println("response T4CTTIoAuthResponseDataPacket.");
+                    }
                     switchHandler();
                 }
                 break;
         }
-        if (logger.isDebugEnabled()) {
-            byte[] respMessage = byteBuffer.array();
-            System.out.println("#amoeba send to appClient:" + ByteUtil.toHex(respMessage, 0, respMessage.length));
-            System.out.println();
-        }
 
-        postMessage(byteBuffer);
+        if (byteBuffer != null) {
+            if (logger.isDebugEnabled()) {
+                byte[] respMessage = byteBuffer.array();
+                System.out.println("#amoeba send to appClient:" + ByteUtil.toHex(respMessage, 0, respMessage.length));
+                System.out.println();
+            }
+            this.postMessage(byteBuffer);
+        }
     }
 
     private void switchHandler() {

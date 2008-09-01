@@ -165,6 +165,7 @@ public class OracleServerConnection extends OracleConnection implements Poolable
                     lastPacketRequest = authRespPacket;
                     if (logger.isDebugEnabled()) {
                         System.out.println("receive T4CTTIoAuthResponseDataPacket.");
+                        System.out.println();
                     }
                 }
                 break;
