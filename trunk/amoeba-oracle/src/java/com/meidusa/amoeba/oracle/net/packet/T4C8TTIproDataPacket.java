@@ -29,9 +29,12 @@ public class T4C8TTIproDataPacket extends T4CTTIMsgPacket {
         super.marshal(buffer);
         T4CPacketBuffer meg = (T4CPacketBuffer) buffer;
         meg.writeBytes(proCliVerTTC8);
-        meg.marshalNULLPTR();
+        // meg.marshalNULLPTR();
+        meg.writeByte((byte) 0);
         meg.writeBytes(proCliStrTTC8.getBytes());
-        meg.marshalNULLPTR();
+        // meg.marshalNULLPTR();
+        meg.writeByte((byte) 0);
+
     }
 
     @Override

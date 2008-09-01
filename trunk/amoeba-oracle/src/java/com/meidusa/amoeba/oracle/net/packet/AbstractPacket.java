@@ -100,8 +100,9 @@ public abstract class AbstractPacket extends com.meidusa.amoeba.net.packet.Abstr
     }
 
     protected String extractData() {
-        if (dataLen <= 0) data = new String();
-        else if (length > dataOffset) {
+        if (dataLen <= 0) {
+            data = new String();
+        } else if (length > dataOffset) {
             data = new String(buffer, dataOffset, dataLen);
         } else {
             byte abyte0[] = new byte[dataLen];

@@ -65,9 +65,8 @@ public class ConnectPacket extends AbstractPacket {
         if (data != null) {
             dataBytes = data.getBytes();
             buffer.writeUB2(dataBytes.length);
-            buffer.setPosition(26);
-            buffer.writeUB2(dataOffset);// 写入data 在buffer中偏移位置
-
+            buffer.setPosition(27);
+            buffer.writeByte((byte) (dataOffset & 0xff));// 写入data 在buffer中偏移位置
         } else {
             buffer.writeUB2((byte) 0);
         }
