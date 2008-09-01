@@ -76,7 +76,7 @@ public class OracleServerConnection extends OracleConnection implements Poolable
                         T4C8TTIproResponseDataPacket pro = new T4C8TTIproResponseDataPacket();
                         response = pro;
                         response.init(buffer, conn);
-                        setConnectionField(serverConn, pro);
+                        setProtocolField(serverConn, pro);
                         packet = new T4C8TTIdtyDataPacket();
                     } else if (lastPacketRequest instanceof T4C8TTIdtyDataPacket) {
                         T4C8TTIdtyResponseDataPacket idty = new T4C8TTIdtyResponseDataPacket();
@@ -88,6 +88,7 @@ public class OracleServerConnection extends OracleConnection implements Poolable
                         T4C7OversionResponseDataPacket version = new T4C7OversionResponseDataPacket();
                         response = version;
                         response.init(buffer, conn);
+                        setVersionField(serverConn, version);
                         T4CTTIoAuthKeyDataPacket authekey = new T4CTTIoAuthKeyDataPacket();
                         packet = authekey;
                         authekey.user = this.getUser();
