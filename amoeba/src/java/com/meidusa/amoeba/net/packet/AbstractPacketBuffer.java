@@ -34,11 +34,15 @@ public class AbstractPacketBuffer implements PacketBuffer {
      * 将从0到当前位置的所有字节写入到ByteBuffer中,并且将ByteBuffer.position设置到0.
      */
     public ByteBuffer toByteBuffer() {
-    	return ByteBuffer.wrap(this.buffer, 0, getPacketLength());
-    	/*ByteBuffer buffer = ByteBuffer.allocate(getPacketLength());
-        buffer.put(this.buffer, 0, getPacketLength());
+    	/*byte[] newbyte = new byte[getPosition()];
+    	System.arraycopy(this.buffer, 0, newbyte, 0, this.getPosition());
+    	ByteBuffer buffer = ByteBuffer.wrap(newbyte);
+    	buffer.rewind();
+    	return buffer;*/
+    	ByteBuffer buffer = ByteBuffer.allocate(getPosition());
+        buffer.put(this.buffer, 0, getPosition());
         buffer.rewind();
-        return buffer;*/
+        return buffer;
     }
 
     public int getPacketLength() {
@@ -54,8 +58,10 @@ public class AbstractPacketBuffer implements PacketBuffer {
     }
 
     public void setPosition(int position) {
-        int length = this.position - position;
-        ensureCapacity(length);
+    	if(this.position<position){
+    		int length = this.position - position;
+    		ensureCapacity(length);
+    	}
         this.position = position;
     }
 

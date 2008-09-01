@@ -29,14 +29,14 @@ public class PreparedStatmentTest {
 		Connection conn = null;
 		PreparedStatement statment = null;
 		ResultSet result = null;
-		conn = DriverManager.getConnection("jdbc:mysql://127.0.0.1:8066/test",
+		conn = DriverManager.getConnection("jdbc:mysql://127.0.0.1:8066/test?useUnicode=true&characterEncoding=gbk",
 				"root", null);
 		try {
 			statment = conn
-					.prepareStatement("update t_qa_question set question_Id=?, title=?, content=?, extend_content=?, category=?, ask_time=?, finish_time=?, user_id=?,"+
+					.prepareStatement("insert into t_qa_question set question_Id=?, title=?, content=?, extend_content=?, category=?, ask_time=?, finish_time=?, user_id=?,"+
 							"offer_score=?, had_append=?, append_score=?, total_score=?, total_gold=?, dead_line=?, is_urgent=?, " +
 							
-							"best_answer=?, anonymous=?, state=?,flowers=?, eggs=?, click=? where id=?");
+							"best_answer=?, anonymous=?, state=?,flowers=?, eggs=?, click=?");
 			statment.setString(1, "hello admoeba");
 			statment.setString(2, "阿瑟多幅");
 			statment.setString(3, "asdfqwerqwer阿瑟多幅第三方");
@@ -68,7 +68,7 @@ public class PreparedStatmentTest {
 			statment.setInt(21, 11234);
 			
 			//id
-			statment.setInt(22, 1);
+			//statment.setInt(22, 1);
 			
 			int count = statment.executeUpdate();
 		} catch (Exception e) {

@@ -80,16 +80,14 @@ public abstract class AbstractPacket extends com.meidusa.amoeba.net.packet.Abstr
      */
     protected void afterPacketWritten(AbstractPacketBuffer buffer) {
         int position = buffer.getPosition();
-        int packetLength = position;
         buffer.setPosition(0);
         OracleAbstractPacketBuffer oracleBuffer = (OracleAbstractPacketBuffer) buffer;
-        oracleBuffer.writeUB2(packetLength);
+        oracleBuffer.writeUB2(position);
         oracleBuffer.writeUB2(packetCheckSum);
         oracleBuffer.writeUB1(type);
         oracleBuffer.writeUB1(flags);
         oracleBuffer.writeUB2(headerCheckSum);
         buffer.setPosition(position);
-        buffer.setPacketLength(packetLength);
     }
 
     /**
