@@ -136,10 +136,12 @@ public class OracleClientConnection extends OracleConnection implements SQLnetDe
                         this.setAuthenticated(false);
                     }
                     byteBuffer = authRespPacket.toByteBuffer(clientConn);
+
                     if (logger.isDebugEnabled()) {
                         System.out.println("receive T4CTTIoAuthDataPacket.");
                         System.out.println("response T4CTTIoAuthResponseDataPacket.");
                     }
+
                     switchHandler();
                 }
                 break;
