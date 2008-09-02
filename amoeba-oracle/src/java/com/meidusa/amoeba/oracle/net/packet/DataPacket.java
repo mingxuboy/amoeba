@@ -16,33 +16,48 @@ public abstract class DataPacket extends AbstractPacket {
         super(NS_PACKT_TYPE_DATA);
     }
 
-    // public void init(byte[] buffer) {
-    // super.init(buffer);
-    // dataOff = pktOffset = 10;
-    // dataLen = length - dataOff;
-    // dataFlags = buffer[8] & 0xff;
-    // dataFlags <<= 8;
-    // dataFlags |= buffer[9] & 0xff;
-    // if (type == 6 && (dataFlags & 0x40) != 0) {
-    // // sAtts.dataEOF = true;
-    // }
-    // if (type == 6 && 0 == dataLen) {
-    // type = 7;
-    // }
-    // }
+    /**
+     * true,表示整个数据流结束，服务器关闭连接。
+     */
+    public boolean isDataEOF() {
+        if ((dataFlags & 0x40) == 0x40) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * true，表示一个数据包已完成。
+     */
+    public boolean isPacketEOF() {
+        if (dataFlags == 0 || isDataEOF()) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * true,表示一个数据包还未完成，等待收取下一个网络包。
+     */
+    public boolean hasNext() {
+        if ((dataFlags & 0x20) == 0x20) {
+            return true;
+        }
+        return false;
+    }
 
     @Override
     protected void init(AbstractPacketBuffer buffer) {
         super.init(buffer);
         OracleAbstractPacketBuffer oasbbuffer = (OracleAbstractPacketBuffer) buffer;
-        oasbbuffer.writeUB2(dataFlags);
+        dataFlags = oasbbuffer.readUB2();
     }
 
     @Override
     protected void write2Buffer(AbstractPacketBuffer buffer) throws UnsupportedEncodingException {
         super.write2Buffer(buffer);
         OracleAbstractPacketBuffer oasbbuffer = (OracleAbstractPacketBuffer) buffer;
-        dataFlags = oasbbuffer.readUB2();
+        oasbbuffer.writeUB2(dataFlags);
     }
 
 }

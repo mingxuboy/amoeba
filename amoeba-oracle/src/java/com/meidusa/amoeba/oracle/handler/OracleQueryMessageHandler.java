@@ -6,7 +6,9 @@ import com.meidusa.amoeba.net.Connection;
 import com.meidusa.amoeba.net.MessageHandler;
 import com.meidusa.amoeba.net.Sessionable;
 import com.meidusa.amoeba.oracle.net.OracleConnection;
+import com.meidusa.amoeba.oracle.net.packet.DataPacket;
 import com.meidusa.amoeba.oracle.net.packet.SQLnetDef;
+import com.meidusa.amoeba.oracle.net.packet.SimpleDataPacket;
 import com.meidusa.amoeba.oracle.net.packet.T4C8OallDataPacket;
 import com.meidusa.amoeba.oracle.net.packet.T4CTTIMsgPacket;
 import com.meidusa.amoeba.oracle.net.packet.T4CTTIfunPacket;
@@ -46,7 +48,8 @@ public class OracleQueryMessageHandler implements MessageHandler, Sessionable, S
                 T4C8OallDataPacket packet = new T4C8OallDataPacket();
                 packet.init(message, conn);
                 if (logger.isDebugEnabled()) {
-                    System.out.println("query packet:T4CTTIfunPacket.OALL8");
+                    System.out.println("type:T4CTTIfunPacket.OALL8");
+                    System.out.println("isPacketEOF:" + packet.isPacketEOF());
                     System.out.println("sqlStmt:" + new String(packet.sqlStmt));
                     System.out.println("numberOfBindPositions:" + packet.numberOfBindPositions);
                     for (int i = 0; packet.bindParams != null && i < packet.bindParams.length; i++) {
@@ -54,18 +57,27 @@ public class OracleQueryMessageHandler implements MessageHandler, Sessionable, S
                     }
                 }
             } else if (T4CTTIfunPacket.isFunType(message, T4CTTIfunPacket.OFETCH)) {
+                DataPacket dataPacket = new SimpleDataPacket();
+                dataPacket.init(message, conn);
                 if (logger.isDebugEnabled()) {
-                    System.out.println("query packet:T4CTTIfunPacket.OFETCH");
+                    System.out.println("type:T4CTTIfunPacket.OFETCH");
+                    System.out.println("isPacketEOF:" + dataPacket.isPacketEOF());
                 }
             } else if (T4CTTIfunPacket.isFunType(message, T4CTTIMsgPacket.TTIPFN, T4CTTIfunPacket.OCCA)) {
                 // T4C8OcloseDataPacket packet = new T4C8OcloseDataPacket();
                 // packet.init(message, conn);
+                DataPacket dataPacket = new SimpleDataPacket();
+                dataPacket.init(message, conn);
                 if (logger.isDebugEnabled()) {
-                    System.out.println("query packet:T4C8OcloseDataPacket");
+                    System.out.println("type:T4C8OcloseDataPacket");
+                    System.out.println("isPacketEOF:" + dataPacket.isPacketEOF());
                 }
             } else {
+                DataPacket dataPacket = new SimpleDataPacket();
+                dataPacket.init(message, conn);
                 if (logger.isDebugEnabled()) {
-                    System.out.println("query packet:OtherePacket");
+                    System.out.println("type:OtherPacket");
+                    System.out.println("isPacketEOF:" + dataPacket.isPacketEOF());
                 }
             }
 
