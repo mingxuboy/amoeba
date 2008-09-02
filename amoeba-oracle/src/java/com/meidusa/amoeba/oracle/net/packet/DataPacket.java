@@ -19,6 +19,39 @@ public abstract class DataPacket extends AbstractPacket {
     /**
      * true,表示整个数据流结束，服务器关闭连接。
      */
+    public static boolean isDataEOF(byte[] buffer) {
+        int dataFlags = ((buffer[8] & 0xff) << 8) | (buffer[9] & 0xff);
+        if ((dataFlags & 0x40) == 0x40) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * true，表示一个数据包已完成。
+     */
+    public static boolean isPacketEOF(byte[] buffer) {
+        int dataFlags = ((buffer[8] & 0xff) << 8) | (buffer[9] & 0xff);
+        if (dataFlags == 0 || isDataEOF(buffer)) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * true,表示一个数据包还未完成，等待收取下一个网络包。
+     */
+    public static boolean hasNext(byte[] buffer) {
+        int dataFlags = ((buffer[8] & 0xff) << 8) | (buffer[9] & 0xff);
+        if ((dataFlags & 0x20) == 0x20) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * true,表示整个数据流结束，服务器关闭连接。
+     */
     public boolean isDataEOF() {
         if ((dataFlags & 0x40) == 0x40) {
             return true;
