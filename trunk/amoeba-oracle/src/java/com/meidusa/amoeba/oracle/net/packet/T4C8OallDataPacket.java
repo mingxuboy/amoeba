@@ -6,7 +6,6 @@ import com.meidusa.amoeba.oracle.accessor.T4CCharAccessor;
 import com.meidusa.amoeba.oracle.accessor.T4CDateAccessor;
 import com.meidusa.amoeba.oracle.accessor.T4CVarcharAccessor;
 import com.meidusa.amoeba.oracle.accessor.T4CVarnumAccessor;
-import com.meidusa.amoeba.oracle.util.ByteUtil;
 
 /**
  * @author hexianmao
@@ -85,7 +84,7 @@ public class T4C8OallDataPacket extends T4CTTIfunPacket {
                     }
                 }
 
-                //unmarshalBinds(meg);
+                // unmarshalBinds(meg);
             } else {
                 throw new RuntimeException("Œ•∑¥–≠“È");
             }
@@ -142,7 +141,7 @@ public class T4C8OallDataPacket extends T4CTTIfunPacket {
         if (msgCode == TTIRXD) {
             bindParams = new byte[numberOfBindPositions][];
             for (int i = 0; i < numberOfBindPositions; i++) {
-                //bindParams[i] = meg.unmarshalCLRforREFS();
+                // bindParams[i] = meg.unmarshalCLRforREFS();
             }
         } else {
             throw new RuntimeException();
