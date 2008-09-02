@@ -47,10 +47,9 @@ public class OracleClientConnection extends OracleConnection implements SQLnetDe
         OracleClientConnection clientConn = (OracleClientConnection) conn;
         ByteBuffer byteBuffer = null;
 
-        if (logger.isDebugEnabled()) {
-            System.out.println("========================================================");
-            System.out.println("#amoeba receive from appClient:" + ByteUtil.toHex(message, 0, message.length));
-        }
+        String receivePacket = null;
+        String responsePacket = null;
+
         switch (message[4]) {
             case NS_PACKT_TYPE_CONNECT:
                 ConnectPacket connPacket = new ConnectPacket();
@@ -60,8 +59,8 @@ public class OracleClientConnection extends OracleConnection implements SQLnetDe
                 AcceptPacket aptPacket = new AcceptPacket();
                 byteBuffer = aptPacket.toByteBuffer(clientConn);
                 if (logger.isDebugEnabled()) {
-                    System.out.println("receive NS_PACKT_TYPE_CONNECT packet.");
-                    System.out.println("response AcceptPacket.");
+                    receivePacket = "NS_PACKT_TYPE_CONNECT";
+                    responsePacket = "AcceptPacket";
                 }
                 break;
 
@@ -70,8 +69,8 @@ public class OracleClientConnection extends OracleConnection implements SQLnetDe
                     AnoResponseDataPacket anoRespPacket = new AnoResponseDataPacket();
                     byteBuffer = anoRespPacket.toByteBuffer(clientConn);
                     if (logger.isDebugEnabled()) {
-                        System.out.println("receive AnoDataPacket packet.");
-                        System.out.println("response AnoResponseDataPacket.");
+                        receivePacket = "AnoDataPacket";
+                        responsePacket = "AnoResponseDataPacket";
                     }
 
                 } else if (T4CTTIMsgPacket.isMsgType(message, T4CTTIMsgPacket.TTIPRO)) {
@@ -82,8 +81,8 @@ public class OracleClientConnection extends OracleConnection implements SQLnetDe
                     clientConn.setProtocolField(proRespPacket);
                     byteBuffer = proRespPacket.toByteBuffer(clientConn);
                     if (logger.isDebugEnabled()) {
-                        System.out.println("receive T4C8TTIproDataPacket.");
-                        System.out.println("response T4C8TTIproResponseDataPacket.");
+                        receivePacket = "T4C8TTIproDataPacket";
+                        responsePacket = "T4C8TTIproResponseDataPacket";
                     }
 
                 } else if (T4CTTIMsgPacket.isMsgType(message, T4CTTIMsgPacket.TTIDTY)) {
@@ -94,8 +93,8 @@ public class OracleClientConnection extends OracleConnection implements SQLnetDe
                     clientConn.setBasicTypes();
                     byteBuffer = dtyRespPacket.toByteBuffer(clientConn);
                     if (logger.isDebugEnabled()) {
-                        System.out.println("receive T4C8TTIdtyDataPacket.");
-                        System.out.println("response T4C8TTIdtyResponseDataPacket.");
+                        receivePacket = "T4C8TTIdtyDataPacket";
+                        responsePacket = "T4C8TTIdtyResponseDataPacket";
                     }
 
                 } else if (T4CTTIfunPacket.isFunType(message, T4CTTIfunPacket.OVERSION)) {
@@ -105,8 +104,8 @@ public class OracleClientConnection extends OracleConnection implements SQLnetDe
                     T4C7OversionResponseDataPacket versionRespPacket = new T4C7OversionResponseDataPacket();
                     byteBuffer = versionRespPacket.toByteBuffer(clientConn);
                     if (logger.isDebugEnabled()) {
-                        System.out.println("receive T4C7OversionDataPacket.");
-                        System.out.println("response T4C7OversionResponseDataPacket.");
+                        receivePacket = "T4C7OversionDataPacket";
+                        responsePacket = "T4C7OversionResponseDataPacket";
                     }
 
                 } else if (T4CTTIfunPacket.isFunType(message, T4CTTIfunPacket.OSESSKEY)) {
@@ -118,8 +117,8 @@ public class OracleClientConnection extends OracleConnection implements SQLnetDe
                     authKeyRespPacket.encryptedSK = this.encryptedSK;
                     byteBuffer = authKeyRespPacket.toByteBuffer(clientConn);
                     if (logger.isDebugEnabled()) {
-                        System.out.println("receive T4CTTIoAuthKeyDataPacket.");
-                        System.out.println("response T4CTTIoAuthKeyResponseDataPacket.");
+                        receivePacket = "T4CTTIoAuthKeyDataPacket";
+                        responsePacket = "T4CTTIoAuthKeyResponseDataPacket";
                     }
 
                 } else if (T4CTTIfunPacket.isFunType(message, T4CTTIfunPacket.OAUTH)) {
@@ -134,27 +133,31 @@ public class OracleClientConnection extends OracleConnection implements SQLnetDe
                         authRespPacket.oer.retCode = 1017;
                         authRespPacket.oer.errorMsg = "ORA-01017: invalid username/password; logon denied";
                         this.setAuthenticated(false);
+                    } else {
+                        switchHandler();
                     }
+
                     byteBuffer = authRespPacket.toByteBuffer(clientConn);
 
                     if (logger.isDebugEnabled()) {
-                        System.out.println("receive T4CTTIoAuthDataPacket.");
-                        System.out.println("response T4CTTIoAuthResponseDataPacket.");
+                        receivePacket = "T4CTTIoAuthDataPacket";
+                        responsePacket = "T4CTTIoAuthResponseDataPacket";
                     }
-
-                    switchHandler();
                 }
+
                 break;
         }
 
         if (byteBuffer != null) {
             if (logger.isDebugEnabled()) {
+                System.out.println("\n#amoeba message from client ========================================================");
+                System.out.println("#receive " + receivePacket + " from client:" + ByteUtil.toHex(message, 0, message.length));
                 byte[] respMessage = byteBuffer.array();
-                System.out.println("#amoeba send to appClient:" + ByteUtil.toHex(respMessage, 0, respMessage.length));
-                System.out.println();
+                System.out.println("#response to client " + responsePacket + ":" + ByteUtil.toHex(respMessage, 0, respMessage.length));
             }
             this.postMessage(byteBuffer);
         }
+
     }
 
     private void switchHandler() {
