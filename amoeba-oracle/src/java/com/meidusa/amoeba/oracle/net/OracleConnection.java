@@ -28,17 +28,16 @@ public abstract class OracleConnection extends DatabaseConnection {
     private DBConversion     conversion;
     protected String         encryptedSK;
 
-    private static short     versionNumber;
+    private static short     versionNumber      = 0;
 
     public static short getVersionNumber() {
         return versionNumber;
     }
 
-    public static void setVersionNumber(short versionNumber) {
-        if (versionNumber != 0) {
-            return;
+    public static synchronized void setVersionNumber(short versionNumber) {
+        if (OracleConnection.versionNumber == 0) {
+            OracleConnection.versionNumber = versionNumber;
         }
-        OracleConnection.versionNumber = versionNumber;
     }
 
     public DBConversion getConversion() {
