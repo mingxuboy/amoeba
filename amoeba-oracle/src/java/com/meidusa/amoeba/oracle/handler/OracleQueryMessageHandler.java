@@ -1,7 +1,5 @@
 package com.meidusa.amoeba.oracle.handler;
 
-import java.util.Arrays;
-
 import org.apache.log4j.Logger;
 
 import com.meidusa.amoeba.net.Connection;
@@ -43,7 +41,7 @@ public class OracleQueryMessageHandler implements MessageHandler, Sessionable, S
         if (conn == clientConn) {
             if (logger.isDebugEnabled()) {
                 System.out.println("\n$amoeba query message ========================================================");
-                System.out.println("$receive from client and send to server packet:" + ByteUtil.toHex(message, 0, message.length));
+                System.out.println("$send packet:" + ByteUtil.toHex(message, 0, message.length));
             }
             if (T4CTTIfunPacket.isFunType(message, T4CTTIfunPacket.OALL8)) {
                 T4C8OallDataPacket packet = new T4C8OallDataPacket();
@@ -51,7 +49,7 @@ public class OracleQueryMessageHandler implements MessageHandler, Sessionable, S
                 if (logger.isDebugEnabled()) {
                     System.out.println("sqlStmt:" + new String(packet.sqlStmt));
                     System.out.println("numberOfBindPositions:" + packet.numberOfBindPositions);
-                    for (int i = 0; i < packet.numberOfBindPositions; i++) {
+                    for (int i = 0; packet.bindParams != null && i < packet.bindParams.length; i++) {
                         System.out.println("params_" + i + ":" + ByteUtil.toHex(packet.bindParams[i], 0, packet.bindParams[i].length));
                     }
                 }
@@ -73,7 +71,7 @@ public class OracleQueryMessageHandler implements MessageHandler, Sessionable, S
         } else {
             if (logger.isDebugEnabled()) {
                 System.out.println("\n%amoeba query message ========================================================");
-                System.out.println("%receive from server and send to client packet:" + ByteUtil.toHex(message, 0, message.length));
+                System.out.println("%receive packet:" + ByteUtil.toHex(message, 0, message.length));
             }
             clientConn.postMessage(message);
         }
