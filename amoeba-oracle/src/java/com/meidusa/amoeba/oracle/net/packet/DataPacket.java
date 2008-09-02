@@ -60,4 +60,12 @@ public abstract class DataPacket extends AbstractPacket {
         oasbbuffer.writeUB2(dataFlags);
     }
 
+    public static boolean isDataType(byte[] buffer) {
+        if (buffer != null && buffer.length >= DATA_PACKET_HEADER_SIZE) {
+            return (buffer[4] & 0xff) == NS_PACKT_TYPE_DATA;
+        } else {
+            return false;
+        }
+    }
+
 }
