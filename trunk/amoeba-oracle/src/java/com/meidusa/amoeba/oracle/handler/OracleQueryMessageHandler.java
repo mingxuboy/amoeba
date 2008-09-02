@@ -1,5 +1,7 @@
 package com.meidusa.amoeba.oracle.handler;
 
+import java.util.Arrays;
+
 import org.apache.log4j.Logger;
 
 import com.meidusa.amoeba.net.Connection;
@@ -47,15 +49,11 @@ public class OracleQueryMessageHandler implements MessageHandler, Sessionable, S
                 T4C8OallDataPacket packet = new T4C8OallDataPacket();
                 packet.init(message, conn);
                 if (logger.isDebugEnabled()) {
-                    // System.out.println("$amoeba receive from appClient:" + ByteUtil.toHex(message, 0,
-                    // message.length));
-                    // System.out.println("$amoeba receive T4C8OallDataPacket.");
-
-                    // System.out.println("query packet:" + T4CTTIfunPacket.OALL8);
-                    // System.out.println("sql:" + new String(packet.sqlStmt));
-                    // System.out.println("numberOfBindPositions:" + packet.numberOfBindPositions);
-                    // System.out.println("oacdefBindsSent:" + Arrays.toString(packet.oacdefBindsSent));
-                    // System.out.println();
+                    System.out.println("sqlStmt:" + new String(packet.sqlStmt));
+                    System.out.println("numberOfBindPositions:" + packet.numberOfBindPositions);
+                    for (int i = 0; i < packet.numberOfBindPositions; i++) {
+                        System.out.println("params_" + i + ":" + ByteUtil.toHex(packet.bindParams[i], 0, packet.bindParams[i].length));
+                    }
                 }
             } else if (T4CTTIfunPacket.isFunType(message, T4CTTIfunPacket.OFETCH)) {
                 // if (logger.isDebugEnabled()) {
