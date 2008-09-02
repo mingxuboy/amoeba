@@ -37,7 +37,6 @@ public class OracleQueryMessageHandler implements MessageHandler, Sessionable, S
     }
 
     public void handleMessage(Connection conn, byte[] message) {
-
         if (conn == clientConn) {
             if (logger.isDebugEnabled()) {
                 System.out.println("\n$amoeba query message ========================================================");
@@ -47,6 +46,7 @@ public class OracleQueryMessageHandler implements MessageHandler, Sessionable, S
                 T4C8OallDataPacket packet = new T4C8OallDataPacket();
                 packet.init(message, conn);
                 if (logger.isDebugEnabled()) {
+                    System.out.println("query packet:T4CTTIfunPacket.OALL8");
                     System.out.println("sqlStmt:" + new String(packet.sqlStmt));
                     System.out.println("numberOfBindPositions:" + packet.numberOfBindPositions);
                     for (int i = 0; packet.bindParams != null && i < packet.bindParams.length; i++) {
@@ -54,25 +54,27 @@ public class OracleQueryMessageHandler implements MessageHandler, Sessionable, S
                     }
                 }
             } else if (T4CTTIfunPacket.isFunType(message, T4CTTIfunPacket.OFETCH)) {
-                // if (logger.isDebugEnabled()) {
-                // System.out.println("query packet:" + T4CTTIfunPacket.OFETCH);
-                // System.out.println();
-                // }
+                if (logger.isDebugEnabled()) {
+                    System.out.println("query packet:T4CTTIfunPacket.OFETCH");
+                }
             } else if (T4CTTIfunPacket.isFunType(message, T4CTTIMsgPacket.TTIPFN, T4CTTIfunPacket.OCCA)) {
                 // T4C8OcloseDataPacket packet = new T4C8OcloseDataPacket();
                 // packet.init(message, conn);
-                // if (logger.isDebugEnabled()) {
-                // System.out.println("query packet:T4C8OcloseDataPacket");
-                // System.out.println();
-                // }
+                if (logger.isDebugEnabled()) {
+                    System.out.println("query packet:T4C8OcloseDataPacket");
+                }
+            } else {
+                if (logger.isDebugEnabled()) {
+                    System.out.println("query packet:OtherePacket");
+                }
             }
 
             serverConn.postMessage(message);
         } else {
-            if (logger.isDebugEnabled()) {
-                System.out.println("\n%amoeba query message ========================================================");
-                System.out.println("%receive packet:" + ByteUtil.toHex(message, 0, message.length));
-            }
+            // if (logger.isDebugEnabled()) {
+            // System.out.println("\n%amoeba query message ========================================================");
+            // System.out.println("%receive packet:" + ByteUtil.toHex(message, 0, message.length));
+            // }
             clientConn.postMessage(message);
         }
     }
