@@ -6,6 +6,7 @@ import com.meidusa.amoeba.oracle.accessor.T4CCharAccessor;
 import com.meidusa.amoeba.oracle.accessor.T4CDateAccessor;
 import com.meidusa.amoeba.oracle.accessor.T4CVarcharAccessor;
 import com.meidusa.amoeba.oracle.accessor.T4CVarnumAccessor;
+import com.meidusa.amoeba.oracle.util.ByteUtil;
 
 /**
  * @author hexianmao
@@ -17,6 +18,7 @@ public class T4C8OallDataPacket extends T4CTTIfunPacket {
     int                    cursor;
     public int             sqlStmtLength;
     public int             numberOfBindPositions;
+    public byte[][]        bindParams;
     int                    defCols;
 
     public byte[]          sqlStmt;
@@ -138,10 +140,9 @@ public class T4C8OallDataPacket extends T4CTTIfunPacket {
         }
         short msgCode = meg.unmarshalUB1();
         if (msgCode == TTIRXD) {
-            // byte[][] params = new byte[numberOfBindPositions][];
+            bindParams = new byte[numberOfBindPositions][];
             for (int i = 0; i < numberOfBindPositions; i++) {
-                // byte[] ab = meg.unmarshalCLRforREFS();
-                // System.out.println(ByteUtil.toHex(ab, 0, ab.length));
+                bindParams[i] = meg.unmarshalCLRforREFS();
             }
         } else {
             throw new RuntimeException();
