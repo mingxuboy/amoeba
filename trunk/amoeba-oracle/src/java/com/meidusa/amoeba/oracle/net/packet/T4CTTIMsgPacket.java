@@ -89,7 +89,7 @@ public abstract class T4CTTIMsgPacket extends DataPacket {
     }
 
     public static boolean isMsgType(byte[] buffer, byte type) {
-        if (buffer != null && buffer.length > 10) {
+        if (isDataType(buffer) && buffer.length >= 11) {
             return (buffer[10] & 0xff) == (type & 0xff);
         } else {
             return false;
