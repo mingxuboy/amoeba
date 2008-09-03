@@ -22,7 +22,17 @@ public class T4C8OcloseDataPacket extends T4CTTIfunPacket {
     protected void unmarshal(AbstractPacketBuffer buffer) {
         super.unmarshal(buffer);
         T4CPacketBuffer meg = (T4CPacketBuffer) buffer;
-        unmarshalPart(meg);
+        parsePacket(meg);
+    }
+
+    void parsePacket(T4CPacketBuffer meg) {
+        if (msgCode == TTIPFN && (funCode == OCCA || funCode == OCANA)) {
+            unmarshalPart(meg);
+            msgCode = (byte) meg.unmarshalUB1();
+            funCode = meg.unmarshalUB1();
+            seqNumber = (byte) meg.unmarshalUB1();
+            parsePacket(meg);
+        }
     }
 
     void unmarshalPart(T4CPacketBuffer meg) {
