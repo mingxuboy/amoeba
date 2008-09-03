@@ -9,6 +9,8 @@
  */
 package com.meidusa.amoeba.oracle.net.packet;
 
+import java.util.Arrays;
+
 /**
  * @author hexianmao
  * @version 2008-8-20 ÏÂÎç02:30:47
@@ -180,6 +182,24 @@ public class T4CTTIoac {
 
     boolean isStream() {
         return isStream;
+    }
+
+    public String toString() {
+        StringBuilder s = new StringBuilder();
+        s.append("[dataType:").append(oacdty);
+        s.append(",flags:").append(oacflg);
+        s.append(",precision:").append(oacpre);
+        s.append(",scale:").append(oacscl);
+        s.append(",describeType:").append(oacmxl);
+        s.append(",total_elems:").append(oacmal);
+        s.append(",oacfl2:").append(oacfl2);
+        s.append(",TOID:").append(Arrays.toString(oactoid));
+        s.append(",TypeVersions:").append(oacvsn);
+        s.append(",CharSet:").append(ncs);
+        s.append(",CharSetForm:").append(formOfUse);
+        // s.append(",oacmxlc:").append(oacmxlc);
+        s.append("]");
+        return s.toString();
     }
 
 }

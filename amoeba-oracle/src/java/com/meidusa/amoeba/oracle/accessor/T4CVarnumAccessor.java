@@ -4,9 +4,8 @@ public class T4CVarnumAccessor extends VarnumAccessor {
 
     public static long getLong(byte[] abyte0) {
         long l = 0L;
-        int j = 1;
-        byte byte0 = abyte0[j - 1];
-        byte byte1 = abyte0[j];
+        byte byte0 = (byte) abyte0.length;
+        byte byte1 = abyte0[0];
 
         if ((byte1 & 0xffffff80) != 0) {// 表示byte1是负数
             if (byte1 == -128 && byte0 == 1) {
@@ -23,7 +22,7 @@ public class T4CVarnumAccessor extends VarnumAccessor {
                     byte6 = 11;
                 }
                 for (; k < byte6; k++) {
-                    int k2 = abyte0[j + k] & 0xff;
+                    int k2 = abyte0[k] & 0xff;
                     int i4 = MAX_LONG[k];
                     if (k2 == i4) {
                         continue;
@@ -40,10 +39,10 @@ public class T4CVarnumAccessor extends VarnumAccessor {
             }
             byte byte4 = (byte) (byte0 - 1);
             int i1 = (byte4 <= byte2 + 1) ? (byte4 + 1) : (byte2 + 2);
-            int i2 = i1 + j;
+            int i2 = i1;
             if (i1 > 1) {
-                l = abyte0[j + 1] - 1;
-                for (int l2 = 2 + j; l2 < i2; l2++) {
+                l = abyte0[1] - 1;
+                for (int l2 = 2; l2 < i2; l2++) {
                     l = l * 100L + (long) (abyte0[l2] - 1);
                 }
             }
@@ -62,7 +61,7 @@ public class T4CVarnumAccessor extends VarnumAccessor {
                     byte7 = 12;
                 }
                 for (; j1 < byte7; j1++) {
-                    int j3 = abyte0[j + j1] & 0xff;
+                    int j3 = abyte0[j1] & 0xff;
                     int j4 = MIN_LONG[j1];
                     if (j3 == j4) {
                         continue;
@@ -78,14 +77,14 @@ public class T4CVarnumAccessor extends VarnumAccessor {
                 }
             }
             byte byte5 = (byte) (byte0 - 1);
-            if (byte5 != 20 || abyte0[j + byte5] == 102) {
+            if (byte5 != 20 || abyte0[byte5] == 102) {
                 byte5--;
             }
             int k1 = byte5 <= byte3 + 1 ? byte5 + 1 : byte3 + 2;
-            int j2 = k1 + j;
+            int j2 = k1;
             if (k1 > 1) {
-                l = 101 - abyte0[j + 1];
-                for (int k3 = 2 + j; k3 < j2; k3++) {
+                l = 101 - abyte0[1];
+                for (int k3 = 2; k3 < j2; k3++) {
                     l = l * 100L + (long) (101 - abyte0[k3]);
                 }
             }
@@ -98,7 +97,7 @@ public class T4CVarnumAccessor extends VarnumAccessor {
     }
 
     static void throwOverflow() {
-        throw new RuntimeException("数字溢出");
+        throw new RuntimeException("Number Overflow!");
     }
 
 }
