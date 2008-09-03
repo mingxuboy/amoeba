@@ -84,7 +84,7 @@ public class T4C8OallDataPacket extends T4CTTIfunPacket {
                     }
                 }
 
-                unmarshalBinds(meg);
+                // unmarshalBinds(meg);
             } else {
                 throw new RuntimeException("Œ•∑¥–≠“È");
             }
