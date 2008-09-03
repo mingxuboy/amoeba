@@ -10,8 +10,6 @@ import com.meidusa.amoeba.oracle.net.OracleConnection;
 import com.meidusa.amoeba.oracle.net.packet.DataPacket;
 import com.meidusa.amoeba.oracle.net.packet.SQLnetDef;
 import com.meidusa.amoeba.oracle.net.packet.T4C8OallDataPacket;
-import com.meidusa.amoeba.oracle.net.packet.T4CTTIMsgPacket;
-import com.meidusa.amoeba.oracle.net.packet.T4CTTIfunPacket;
 import com.meidusa.amoeba.oracle.util.ByteUtil;
 
 /**
@@ -115,7 +113,11 @@ public class OracleQueryMessageHandler implements MessageHandler, Sessionable, S
             System.out.println("$send packet:" + ByteUtil.toHex(message, 0, message.length));
         }
 
-        if (isOall8(message) || isOfetch(message) || isColse(message) || isOlobops(message)) {
+        if (DataPacket.isDataEOF(message)) {
+            if (logger.isDebugEnabled()) {
+                System.out.println("type:DataEOFPacket");
+            }
+        } else if (T4C8OallDataPacket.isParseable(message)) {
             T4C8OallDataPacket packet = new T4C8OallDataPacket();
             packet.init(message, conn);
         } else {
@@ -123,22 +125,6 @@ public class OracleQueryMessageHandler implements MessageHandler, Sessionable, S
                 System.out.println("type:OtherPacket");
             }
         }
-    }
-
-    private boolean isOall8(byte[] message) {
-        return T4CTTIfunPacket.isFunType(message, T4CTTIfunPacket.OALL8);
-    }
-
-    private boolean isOfetch(byte[] message) {
-        return T4CTTIfunPacket.isFunType(message, T4CTTIfunPacket.OFETCH);
-    }
-
-    private boolean isColse(byte[] message) {
-        return T4CTTIfunPacket.isFunType(message, T4CTTIMsgPacket.TTIPFN, T4CTTIfunPacket.OCCA);
-    }
-
-    private boolean isOlobops(byte[] message) {
-        return T4CTTIfunPacket.isFunType(message, T4CTTIfunPacket.OLOBOPS);
     }
 
 }

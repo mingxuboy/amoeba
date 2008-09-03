@@ -56,62 +56,49 @@ public class T4C8OallDataPacket extends T4CTTIfunPacket {
 
         T4CPacketBuffer meg = (T4CPacketBuffer) buffer;
         if (msgCode == TTIFUN) {
-            switch (funCode) {
-                case OALL8:
-                    parseOALL8(meg);
-                    break;
-                case OFETCH:
-                    parseOFETCH(meg);
-                    break;
-                case OEXEC:
-                    parseOEXEC(meg);
-                    break;
-                case OLOBOPS:
-                    parseOLOBOPS(meg);
-                    break;
-                default:
-                    if (logger.isDebugEnabled()) {
-                        System.out.println("type:OtherFunPacket");
-                    }
-            }
-        } else if (msgCode == TTIPFN) {
-            if (funCode == OCCA) {
-                parseOCCA(meg);
-                msgCode = (byte) meg.unmarshalUB1();
-                funCode = meg.unmarshalUB1();
-                seqNumber = (byte) meg.unmarshalUB1();
-
-                if (msgCode == TTIFUN) {
-                    switch (funCode) {
-                        case OALL8:
-                            parseOALL8(meg);
-                            break;
-                        case OLOGOFF:
-                            parseOLOGOFF(meg);
-                            break;
-                        default:
-                            if (logger.isDebugEnabled()) {
-                                System.out.println("type:OtherFunPacket");
-                            }
-                    }
-                } else {
-                    if (logger.isDebugEnabled()) {
-                        System.out.println("type:OtherColsePacket");
-                    }
-                }
-            } else {
-                if (logger.isDebugEnabled()) {
-                    System.out.println("type:OtherTTIPFNPacket");
-                }
-            }
+            parseFunPacket(meg);
+        } else if (msgCode == TTIPFN && funCode == OCCA) {
+            T4C8OcloseDataPacket closePacket = new T4C8OcloseDataPacket();
+            closePacket.initCloseStatement();
+            closePacket.parsePacket(meg);
+            msgCode = closePacket.msgCode;
+            funCode = closePacket.funCode;
+            seqNumber = closePacket.seqNumber;
+            parseFunPacket(meg);
         } else {
             if (logger.isDebugEnabled()) {
-                System.out.println("type:OtherPacket");
+                System.out.println("type:OtherPacket msgCode:" + msgCode + " funCode:" + funCode);
             }
         }
     }
 
-    void parseOALL8(T4CPacketBuffer meg) {
+    void parseFunPacket(T4CPacketBuffer meg) {
+        switch (funCode) {
+            case OALL8:
+                parseOALL8(meg);
+                break;
+            case OFETCH:
+                parseOFETCH(meg);
+                break;
+            case OEXEC:
+                parseOEXEC(meg);
+                break;
+            case OLOBOPS:
+                parseOLOBOPS(meg);
+                break;
+            case OLOGOFF:
+                parseOLOGOFF(meg);
+                break;
+            default:
+                if (logger.isDebugEnabled()) {
+                    System.out.println("type:OtherFunPacket funCode:" + funCode);
+                }
+        }
+    }
+
+    // /////////////////////////////////////////////////////////////////////////////
+
+    private void parseOALL8(T4CPacketBuffer meg) {
         unmarshalPisdef(meg);
         sqlStmt = meg.unmarshalCHR(sqlStmtLength);
         meg.unmarshalUB4Array(al8i4);
@@ -136,47 +123,6 @@ public class T4C8OallDataPacket extends T4CTTIfunPacket {
             }
         }
     }
-
-    void parseOFETCH(T4CPacketBuffer meg) {
-        ofetch = new T4CTTIofetchDataPacket();
-        // ofetch.init(buffer);
-        this.cursor = ofetch.cursor;
-        this.al8i4[1] = ofetch.al8i4_1;
-
-        if (logger.isDebugEnabled()) {
-            System.out.println("type:T4CTTIfunPacket.OFETCH");
-        }
-    }
-
-    void parseOEXEC(T4CPacketBuffer meg) {
-        oexec = new T4CTTIoexecDataPacket();
-        this.cursor = oexec.cursor;
-        this.al8i4[1] = oexec.al8i4_1;
-        // int[] binds = null;
-
-        if (logger.isDebugEnabled()) {
-            System.out.println("type:T4CTTIfunPacket.OEXEC");
-        }
-    }
-
-    void parseOLOBOPS(T4CPacketBuffer meg) {
-        if (logger.isDebugEnabled()) {
-            System.out.println("type:T4CTTIfunPacket.OLOBOPS");
-        }
-    }
-
-    void parseOCCA(T4CPacketBuffer meg) {
-        T4C8OcloseDataPacket packet = new T4C8OcloseDataPacket();
-        packet.unmarshalPart(meg);
-    }
-
-    void parseOLOGOFF(T4CPacketBuffer meg) {
-        if (logger.isDebugEnabled()) {
-            System.out.println("type:T4CTTIfunPacket.OLOGOFF");
-        }
-    }
-
-    // /////////////////////////////////////////////////////////////////////////////
 
     private void unmarshalPisdef(T4CPacketBuffer meg) {
         options = meg.unmarshalUB4();
@@ -232,7 +178,61 @@ public class T4C8OallDataPacket extends T4CTTIfunPacket {
         }
     }
 
+    private void parseOFETCH(T4CPacketBuffer meg) {
+        ofetch = new T4CTTIofetchDataPacket();
+        // ofetch.init(buffer);
+        this.cursor = ofetch.cursor;
+        this.al8i4[1] = ofetch.al8i4_1;
+
+        if (logger.isDebugEnabled()) {
+            System.out.println("type:T4CTTIfunPacket.OFETCH");
+        }
+    }
+
+    private void parseOEXEC(T4CPacketBuffer meg) {
+        oexec = new T4CTTIoexecDataPacket();
+        this.cursor = oexec.cursor;
+        this.al8i4[1] = oexec.al8i4_1;
+        // int[] binds = null;
+
+        if (logger.isDebugEnabled()) {
+            System.out.println("type:T4CTTIfunPacket.OEXEC");
+        }
+    }
+
+    private void parseOLOBOPS(T4CPacketBuffer meg) {
+        if (logger.isDebugEnabled()) {
+            System.out.println("type:T4CTTIfunPacket.OLOBOPS");
+        }
+    }
+
+    private void parseOLOGOFF(T4CPacketBuffer meg) {
+        if (logger.isDebugEnabled()) {
+            System.out.println("type:T4CTTIfunPacket.OLOGOFF");
+        }
+    }
+
     // ///////////////////////////////////////////////////////////////////////////////////
+
+    public static boolean isParseable(byte[] message) {
+        if (T4CTTIfunPacket.isFunType(message, T4CTTIfunPacket.OALL8)) {
+            return true;
+        }
+        if (T4CTTIfunPacket.isFunType(message, T4CTTIfunPacket.OFETCH)) {
+            return true;
+        }
+        if (T4CTTIfunPacket.isFunType(message, T4CTTIfunPacket.OEXEC)) {
+            return true;
+        }
+        if (T4CTTIfunPacket.isFunType(message, T4CTTIfunPacket.OLOBOPS)) {
+            return true;
+        }
+        if (T4CTTIfunPacket.isFunType(message, T4CTTIMsgPacket.TTIPFN, T4CTTIfunPacket.OCCA)) {
+            return true;
+        }
+        return false;
+    }
+
     static byte[][] desc = { { (byte) 0x06, (byte) 0x03, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x16, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x01, (byte) 0x01, (byte) 0x00 }, { (byte) 0x01, (byte) 0x03, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x05, (byte) 0x00, (byte) 0x01, (byte) 0x10, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x01, (byte) 0x01, (byte) 0x00 }, { (byte) 0x06, (byte) 0x03, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x16, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x01, (byte) 0x01, (byte) 0x00 }, { (byte) 0x01, (byte) 0x03, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x06, (byte) 0x00, (byte) 0x01, (byte) 0x10, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x01, (byte) 0x01, (byte) 0x00 }, { (byte) 0x01, (byte) 0x03, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x0b, (byte) 0x00, (byte) 0x01, (byte) 0x10, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x01, (byte) 0x01, (byte) 0x00 }, { (byte) 0x01, (byte) 0x03, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x0c, (byte) 0x00, (byte) 0x01, (byte) 0x10, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x01, (byte) 0x01, (byte) 0x00 }, { (byte) 0x01, (byte) 0x03, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x08, (byte) 0x00, (byte) 0x01, (byte) 0x10, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x01, (byte) 0x01, (byte) 0x00 }, { (byte) 0x01, (byte) 0x03, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x11, (byte) 0x00, (byte) 0x01, (byte) 0x10, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x01, (byte) 0x01, (byte) 0x00 }, { (byte) 0x01, (byte) 0x03, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x04, (byte) 0x00, (byte) 0x01, (byte) 0x10, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x01, (byte) 0x01, (byte) 0x00 }, { (byte) 0x01, (byte) 0x03, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x07, (byte) 0x00, (byte) 0x01, (byte) 0x10, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x01, (byte) 0x01, (byte) 0x00 }, { (byte) 0x01, (byte) 0x03, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x02, (byte) 0x00, (byte) 0x01, (byte) 0x10, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x01, (byte) 0x01, (byte) 0x00 }, { (byte) 0x01, (byte) 0x03, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x02, (byte) 0x00, (byte) 0x01, (byte) 0x10, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x01, (byte) 0x01, (byte) 0x00 }, { (byte) 0x01, (byte) 0x03, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x05, (byte) 0x00, (byte) 0x01, (byte) 0x10, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x01, (byte) 0x01, (byte) 0x00 }, { (byte) 0x0c, (byte) 0x03, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x07, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x01, (byte) 0x01, (byte) 0x00 }, { (byte) 0x01, (byte) 0x03, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x04, (byte) 0x00, (byte) 0x01, (byte) 0x10, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x01, (byte) 0x01, (byte) 0x00 }, { (byte) 0x01, (byte) 0x03, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x09, (byte) 0x00, (byte) 0x01, (byte) 0x10, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x01, (byte) 0x01, (byte) 0x00 }, { (byte) 0x0c, (byte) 0x03, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x07, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x01, (byte) 0x01, (byte) 0x00 } };
 
     static byte[][] data = { { (byte) 0x06, (byte) 0xc5, (byte) 0x02, (byte) 0x17, (byte) 0x2b, (byte) 0x62, (byte) 0x28 }, { (byte) 0x05, (byte) 0x63, (byte) 0x68, (byte) 0x69, (byte) 0x6e, (byte) 0x61 }, { (byte) 0x05, (byte) 0xc4, (byte) 0x02, (byte) 0x04, (byte) 0x29, (byte) 0x39 }, { (byte) 0x06, (byte) 0x65, (byte) 0x78, (byte) 0x70, (byte) 0x69, (byte) 0x72, (byte) 0x65 }, { (byte) 0x0b, (byte) 0x61, (byte) 0x62, (byte) 0x63, (byte) 0x5f, (byte) 0x73, (byte) 0x75, (byte) 0x62, (byte) 0x6a, (byte) 0x65, (byte) 0x63, (byte) 0x74 }, { (byte) 0x0c, (byte) 0x31, (byte) 0x32, (byte) 0x33, (byte) 0x34, (byte) 0x35, (byte) 0x36, (byte) 0x37, (byte) 0x38, (byte) 0x39, (byte) 0x2b, (byte) 0x2b, (byte) 0x70 }, { (byte) 0x08, (byte) 0x68, (byte) 0x7a, (byte) 0x5f, (byte) 0x63, (byte) 0x68, (byte) 0x69, (byte) 0x6e, (byte) 0x61 }, { (byte) 0x11, (byte) 0x68, (byte) 0x65, (byte) 0x78, (byte) 0x69, (byte) 0x61, (byte) 0x6e, (byte) 0x6d, (byte) 0x61, (byte) 0x6f, (byte) 0x40, (byte) 0x31, (byte) 0x36, (byte) 0x33, (byte) 0x2e, (byte) 0x63, (byte) 0x6f, (byte) 0x6d }, { (byte) 0x04, (byte) 0x33, (byte) 0x35, (byte) 0x31, (byte) 0x34 }, { (byte) 0x07, (byte) 0x61, (byte) 0x6c, (byte) 0x69, (byte) 0x62, (byte) 0x61, (byte) 0x62, (byte) 0x61 }, { (byte) 0x02, (byte) 0x43, (byte) 0x4e }, { (byte) 0x02, (byte) 0x68, (byte) 0x65 }, { (byte) 0x05, (byte) 0x67, (byte) 0x6f, (byte) 0x6f, (byte) 0x64, (byte) 0x21 }, { (byte) 0x07, (byte) 0x78, (byte) 0x6c, (byte) 0x07, (byte) 0x1e, (byte) 0x01, (byte) 0x01, (byte) 0x01 }, { (byte) 0x04, (byte) 0x53, (byte) 0x41, (byte) 0x4c, (byte) 0x45 }, { (byte) 0x09, (byte) 0x70, (byte) 0x75, (byte) 0x62, (byte) 0x6c, (byte) 0x69, (byte) 0x73, (byte) 0x68, (byte) 0x65, (byte) 0x64 }, { (byte) 0x07, (byte) 0x78, (byte) 0x6c, (byte) 0x07, (byte) 0x1e, (byte) 0x01, (byte) 0x01, (byte) 0x01 } };
