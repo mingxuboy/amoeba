@@ -1,11 +1,14 @@
 package com.meidusa.amoeba.oracle.net.packet;
 
+import org.apache.log4j.Logger;
+
 import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
 import com.meidusa.amoeba.oracle.accessor.Accessor;
 import com.meidusa.amoeba.oracle.accessor.T4CCharAccessor;
 import com.meidusa.amoeba.oracle.accessor.T4CDateAccessor;
 import com.meidusa.amoeba.oracle.accessor.T4CVarcharAccessor;
 import com.meidusa.amoeba.oracle.accessor.T4CVarnumAccessor;
+import com.meidusa.amoeba.oracle.util.ByteUtil;
 
 /**
  * @author hexianmao
@@ -13,19 +16,21 @@ import com.meidusa.amoeba.oracle.accessor.T4CVarnumAccessor;
  */
 public class T4C8OallDataPacket extends T4CTTIfunPacket {
 
+    private static Logger  logger = Logger.getLogger(T4C8OallDataPacket.class);
+
     long                   options;
     int                    cursor;
-    public int             sqlStmtLength;
     public int             numberOfBindPositions;
     public byte[][]        bindParams;
     int                    defCols;
 
+    int                    al8i4Length;
+    final long[]           al8i4  = new long[13];
+    public int             sqlStmtLength;
     public byte[]          sqlStmt;
-    final long[]           al8i4 = new long[13];
     public T4CTTIoac[]     oacdefBindsSent;
     T4CTTIoac[]            oacdefDefines;
     Accessor[]             definesAccessors;
-
     int                    receiveState;
     boolean                plsql;
 
@@ -36,10 +41,6 @@ public class T4C8OallDataPacket extends T4CTTIfunPacket {
     T4CTTIofetchDataPacket ofetch;
     T4CTTIoexecDataPacket  oexec;
     T4CTTIfobDataPacket    fob;
-
-    static byte[][]        desc  = { { (byte) 0x06, (byte) 0x03, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x16, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x01, (byte) 0x01, (byte) 0x00 }, { (byte) 0x01, (byte) 0x03, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x05, (byte) 0x00, (byte) 0x01, (byte) 0x10, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x01, (byte) 0x01, (byte) 0x00 }, { (byte) 0x06, (byte) 0x03, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x16, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x01, (byte) 0x01, (byte) 0x00 }, { (byte) 0x01, (byte) 0x03, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x06, (byte) 0x00, (byte) 0x01, (byte) 0x10, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x01, (byte) 0x01, (byte) 0x00 }, { (byte) 0x01, (byte) 0x03, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x0b, (byte) 0x00, (byte) 0x01, (byte) 0x10, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x01, (byte) 0x01, (byte) 0x00 }, { (byte) 0x01, (byte) 0x03, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x0c, (byte) 0x00, (byte) 0x01, (byte) 0x10, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x01, (byte) 0x01, (byte) 0x00 }, { (byte) 0x01, (byte) 0x03, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x08, (byte) 0x00, (byte) 0x01, (byte) 0x10, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x01, (byte) 0x01, (byte) 0x00 }, { (byte) 0x01, (byte) 0x03, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x11, (byte) 0x00, (byte) 0x01, (byte) 0x10, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x01, (byte) 0x01, (byte) 0x00 }, { (byte) 0x01, (byte) 0x03, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x04, (byte) 0x00, (byte) 0x01, (byte) 0x10, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x01, (byte) 0x01, (byte) 0x00 }, { (byte) 0x01, (byte) 0x03, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x07, (byte) 0x00, (byte) 0x01, (byte) 0x10, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x01, (byte) 0x01, (byte) 0x00 }, { (byte) 0x01, (byte) 0x03, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x02, (byte) 0x00, (byte) 0x01, (byte) 0x10, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x01, (byte) 0x01, (byte) 0x00 }, { (byte) 0x01, (byte) 0x03, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x02, (byte) 0x00, (byte) 0x01, (byte) 0x10, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x01, (byte) 0x01, (byte) 0x00 }, { (byte) 0x01, (byte) 0x03, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x05, (byte) 0x00, (byte) 0x01, (byte) 0x10, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x01, (byte) 0x01, (byte) 0x00 }, { (byte) 0x0c, (byte) 0x03, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x07, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x01, (byte) 0x01, (byte) 0x00 }, { (byte) 0x01, (byte) 0x03, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x04, (byte) 0x00, (byte) 0x01, (byte) 0x10, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x01, (byte) 0x01, (byte) 0x00 }, { (byte) 0x01, (byte) 0x03, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x09, (byte) 0x00, (byte) 0x01, (byte) 0x10, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x01, (byte) 0x01, (byte) 0x00 }, { (byte) 0x0c, (byte) 0x03, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x07, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x01, (byte) 0x01, (byte) 0x00 } };
-
-    static byte[][]        data  = { { (byte) 0x06, (byte) 0xc5, (byte) 0x02, (byte) 0x17, (byte) 0x2b, (byte) 0x62, (byte) 0x28 }, { (byte) 0x05, (byte) 0x63, (byte) 0x68, (byte) 0x69, (byte) 0x6e, (byte) 0x61 }, { (byte) 0x05, (byte) 0xc4, (byte) 0x02, (byte) 0x04, (byte) 0x29, (byte) 0x39 }, { (byte) 0x06, (byte) 0x65, (byte) 0x78, (byte) 0x70, (byte) 0x69, (byte) 0x72, (byte) 0x65 }, { (byte) 0x0b, (byte) 0x61, (byte) 0x62, (byte) 0x63, (byte) 0x5f, (byte) 0x73, (byte) 0x75, (byte) 0x62, (byte) 0x6a, (byte) 0x65, (byte) 0x63, (byte) 0x74 }, { (byte) 0x0c, (byte) 0x31, (byte) 0x32, (byte) 0x33, (byte) 0x34, (byte) 0x35, (byte) 0x36, (byte) 0x37, (byte) 0x38, (byte) 0x39, (byte) 0x2b, (byte) 0x2b, (byte) 0x70 }, { (byte) 0x08, (byte) 0x68, (byte) 0x7a, (byte) 0x5f, (byte) 0x63, (byte) 0x68, (byte) 0x69, (byte) 0x6e, (byte) 0x61 }, { (byte) 0x11, (byte) 0x68, (byte) 0x65, (byte) 0x78, (byte) 0x69, (byte) 0x61, (byte) 0x6e, (byte) 0x6d, (byte) 0x61, (byte) 0x6f, (byte) 0x40, (byte) 0x31, (byte) 0x36, (byte) 0x33, (byte) 0x2e, (byte) 0x63, (byte) 0x6f, (byte) 0x6d }, { (byte) 0x04, (byte) 0x33, (byte) 0x35, (byte) 0x31, (byte) 0x34 }, { (byte) 0x07, (byte) 0x61, (byte) 0x6c, (byte) 0x69, (byte) 0x62, (byte) 0x61, (byte) 0x62, (byte) 0x61 }, { (byte) 0x02, (byte) 0x43, (byte) 0x4e }, { (byte) 0x02, (byte) 0x68, (byte) 0x65 }, { (byte) 0x05, (byte) 0x67, (byte) 0x6f, (byte) 0x6f, (byte) 0x64, (byte) 0x21 }, { (byte) 0x07, (byte) 0x78, (byte) 0x6c, (byte) 0x07, (byte) 0x1e, (byte) 0x01, (byte) 0x01, (byte) 0x01 }, { (byte) 0x04, (byte) 0x53, (byte) 0x41, (byte) 0x4c, (byte) 0x45 }, { (byte) 0x09, (byte) 0x70, (byte) 0x75, (byte) 0x62, (byte) 0x6c, (byte) 0x69, (byte) 0x73, (byte) 0x68, (byte) 0x65, (byte) 0x64 }, { (byte) 0x07, (byte) 0x78, (byte) 0x6c, (byte) 0x07, (byte) 0x1e, (byte) 0x01, (byte) 0x01, (byte) 0x01 } };
 
     public T4C8OallDataPacket(){
         super(OALL8);
@@ -52,60 +53,140 @@ public class T4C8OallDataPacket extends T4CTTIfunPacket {
     @Override
     protected void unmarshal(AbstractPacketBuffer buffer) {
         super.unmarshal(buffer);
+
+        T4CPacketBuffer meg = (T4CPacketBuffer) buffer;
         if (msgCode == TTIFUN) {
-            if (funCode == OFETCH) {
-                ofetch = new T4CTTIofetchDataPacket();
-                // ofetch.init(buffer);
-                this.cursor = ofetch.cursor;
-                this.al8i4[1] = ofetch.al8i4_1;
-            } else if (funCode == OEXEC) {
-                oexec = new T4CTTIoexecDataPacket();
-                this.cursor = oexec.cursor;
-                this.al8i4[1] = oexec.al8i4_1;
-                // int[] binds = null;
-                // TODO ...
-                throw new RuntimeException("is not yet support");
-            } else if (funCode == OALL8) {
-                T4CPacketBuffer meg = (T4CPacketBuffer) buffer;
-
-                unmarshalPisdef(meg);
-
-                sqlStmt = meg.unmarshalCHR(sqlStmtLength);
-
-                meg.unmarshalUB4Array(al8i4);
-
-                unmarshalBindsTypes(meg);
-
-                if (meg.versionNumber >= 9000 && defCols > 0) {
-                    oacdefDefines = new T4CTTIoac[defCols];
-                    for (int i = 0; i < defCols; i++) {
-                        oacdefDefines[i] = new T4CTTIoac(meg);
-                        oacdefDefines[i].unmarshal();
+            switch (funCode) {
+                case OALL8:
+                    parseOALL8(meg);
+                    break;
+                case OFETCH:
+                    parseOFETCH(meg);
+                    break;
+                case OLOBOPS:
+                    parseOLOBOPS(meg);
+                    break;
+                default:
+                    if (logger.isDebugEnabled()) {
+                        System.out.println("type:OtherFunPacket");
                     }
-                }
-
-                // unmarshalBinds(meg);
-            } else {
-                throw new RuntimeException("Î¥·´Ð­Òé");
             }
         } else if (msgCode == TTIPFN) {
+            if (funCode == OCCA) {
+                parseOCCA(meg);
+                msgCode = (byte) meg.unmarshalUB1();
+                funCode = meg.unmarshalUB1();
+                seqNumber = (byte) meg.unmarshalUB1();
 
+                if (msgCode == TTIFUN) {
+                    switch (funCode) {
+                        case OALL8:
+                            parseOALL8(meg);
+                            break;
+                        case OLOGOFF:
+                            parseOLOGOFF(meg);
+                            break;
+                        default:
+                            if (logger.isDebugEnabled()) {
+                                System.out.println("type:OtherFunPacket");
+                            }
+                    }
+                } else {
+                    if (logger.isDebugEnabled()) {
+                        System.out.println("type:OtherColsePacket");
+                    }
+                }
+            } else {
+                if (logger.isDebugEnabled()) {
+                    System.out.println("type:OtherTTIPFNPacket");
+                }
+            }
+        } else {
+            if (logger.isDebugEnabled()) {
+                System.out.println("type:OtherPacket");
+            }
         }
     }
 
-    @SuppressWarnings("unused")
-    void unmarshalPisdef(T4CPacketBuffer meg) {
+    void parseOALL8(T4CPacketBuffer meg) {
+        unmarshalPisdef(meg);
+        sqlStmt = meg.unmarshalCHR(sqlStmtLength);
+        meg.unmarshalUB4Array(al8i4);
+        unmarshalBindsTypes(meg);
+
+        if (meg.versionNumber >= 9000 && defCols > 0) {
+            oacdefDefines = new T4CTTIoac[defCols];
+            for (int i = 0; i < defCols; i++) {
+                oacdefDefines[i] = new T4CTTIoac(meg);
+                oacdefDefines[i].unmarshal();
+            }
+        }
+
+        // unmarshalBinds(meg);
+
+        if (logger.isDebugEnabled()) {
+            System.out.println("type:T4CTTIfunPacket.OALL8");
+            System.out.println("sqlStmt:" + new String(sqlStmt));
+            System.out.println("numberOfBindPositions:" + numberOfBindPositions);
+            for (int i = 0; bindParams != null && i < bindParams.length; i++) {
+                System.out.println("params_" + i + ":" + ByteUtil.toHex(bindParams[i], 0, bindParams[i].length));
+            }
+        }
+    }
+
+    void parseOFETCH(T4CPacketBuffer meg) {
+        ofetch = new T4CTTIofetchDataPacket();
+        // ofetch.init(buffer);
+        this.cursor = ofetch.cursor;
+        this.al8i4[1] = ofetch.al8i4_1;
+
+        if (logger.isDebugEnabled()) {
+            System.out.println("type:T4CTTIfunPacket.OFETCH");
+        }
+    }
+
+    void parseOEXEC(T4CPacketBuffer meg) {
+        oexec = new T4CTTIoexecDataPacket();
+        this.cursor = oexec.cursor;
+        this.al8i4[1] = oexec.al8i4_1;
+        // int[] binds = null;
+
+        if (logger.isDebugEnabled()) {
+            System.out.println("type:T4CTTIfunPacket.OEXEC");
+        }
+    }
+
+    void parseOLOBOPS(T4CPacketBuffer meg) {
+        if (logger.isDebugEnabled()) {
+            System.out.println("type:T4CTTIfunPacket.OLOBOPS");
+        }
+    }
+
+    void parseOCCA(T4CPacketBuffer meg) {
+        T4C8OcloseDataPacket packet = new T4C8OcloseDataPacket();
+        packet.unmarshalPart(meg);
+    }
+
+    void parseOLOGOFF(T4CPacketBuffer meg) {
+        if (logger.isDebugEnabled()) {
+            System.out.println("type:T4CTTIfunPacket.OLOGOFF");
+        }
+    }
+
+    // /////////////////////////////////////////////////////////////////////////////
+
+    private void unmarshalPisdef(T4CPacketBuffer meg) {
         options = meg.unmarshalUB4();
         cursor = meg.unmarshalSWORD();
         meg.unmarshalPTR();
         sqlStmtLength = meg.unmarshalSWORD();
         meg.unmarshalPTR();
-        int al8i4Length = meg.unmarshalSWORD();
+        al8i4Length = meg.unmarshalSWORD();
         meg.unmarshalPTR();
         meg.unmarshalPTR();
         meg.unmarshalUB4();
         meg.unmarshalUB4();
-        long l = meg.unmarshalUB4();
+        meg.unmarshalUB4();
 
         meg.unmarshalPTR();
         numberOfBindPositions = meg.unmarshalSWORD();
@@ -122,7 +203,7 @@ public class T4C8OallDataPacket extends T4CTTIfunPacket {
         }
     }
 
-    void unmarshalBindsTypes(T4CPacketBuffer meg) {
+    private void unmarshalBindsTypes(T4CPacketBuffer meg) {
         if (numberOfBindPositions <= 0) {
             return;
         }
@@ -133,7 +214,7 @@ public class T4C8OallDataPacket extends T4CTTIfunPacket {
         }
     }
 
-    void unmarshalBinds(T4CPacketBuffer meg) {
+    private void unmarshalBinds(T4CPacketBuffer meg) {
         if (numberOfBindPositions <= 0) {
             return;
         }
@@ -146,8 +227,12 @@ public class T4C8OallDataPacket extends T4CTTIfunPacket {
         } else {
             throw new RuntimeException();
         }
-
     }
+
+    // ///////////////////////////////////////////////////////////////////////////////////
+    static byte[][] desc = { { (byte) 0x06, (byte) 0x03, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x16, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x01, (byte) 0x01, (byte) 0x00 }, { (byte) 0x01, (byte) 0x03, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x05, (byte) 0x00, (byte) 0x01, (byte) 0x10, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x01, (byte) 0x01, (byte) 0x00 }, { (byte) 0x06, (byte) 0x03, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x16, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x01, (byte) 0x01, (byte) 0x00 }, { (byte) 0x01, (byte) 0x03, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x06, (byte) 0x00, (byte) 0x01, (byte) 0x10, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x01, (byte) 0x01, (byte) 0x00 }, { (byte) 0x01, (byte) 0x03, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x0b, (byte) 0x00, (byte) 0x01, (byte) 0x10, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x01, (byte) 0x01, (byte) 0x00 }, { (byte) 0x01, (byte) 0x03, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x0c, (byte) 0x00, (byte) 0x01, (byte) 0x10, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x01, (byte) 0x01, (byte) 0x00 }, { (byte) 0x01, (byte) 0x03, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x08, (byte) 0x00, (byte) 0x01, (byte) 0x10, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x01, (byte) 0x01, (byte) 0x00 }, { (byte) 0x01, (byte) 0x03, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x11, (byte) 0x00, (byte) 0x01, (byte) 0x10, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x01, (byte) 0x01, (byte) 0x00 }, { (byte) 0x01, (byte) 0x03, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x04, (byte) 0x00, (byte) 0x01, (byte) 0x10, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x01, (byte) 0x01, (byte) 0x00 }, { (byte) 0x01, (byte) 0x03, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x07, (byte) 0x00, (byte) 0x01, (byte) 0x10, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x01, (byte) 0x01, (byte) 0x00 }, { (byte) 0x01, (byte) 0x03, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x02, (byte) 0x00, (byte) 0x01, (byte) 0x10, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x01, (byte) 0x01, (byte) 0x00 }, { (byte) 0x01, (byte) 0x03, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x02, (byte) 0x00, (byte) 0x01, (byte) 0x10, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x01, (byte) 0x01, (byte) 0x00 }, { (byte) 0x01, (byte) 0x03, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x05, (byte) 0x00, (byte) 0x01, (byte) 0x10, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x01, (byte) 0x01, (byte) 0x00 }, { (byte) 0x0c, (byte) 0x03, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x07, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x01, (byte) 0x01, (byte) 0x00 }, { (byte) 0x01, (byte) 0x03, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x04, (byte) 0x00, (byte) 0x01, (byte) 0x10, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x01, (byte) 0x01, (byte) 0x00 }, { (byte) 0x01, (byte) 0x03, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x09, (byte) 0x00, (byte) 0x01, (byte) 0x10, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x01, (byte) 0x01, (byte) 0x00 }, { (byte) 0x0c, (byte) 0x03, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x07, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x01, (byte) 0x01, (byte) 0x00 } };
+
+    static byte[][] data = { { (byte) 0x06, (byte) 0xc5, (byte) 0x02, (byte) 0x17, (byte) 0x2b, (byte) 0x62, (byte) 0x28 }, { (byte) 0x05, (byte) 0x63, (byte) 0x68, (byte) 0x69, (byte) 0x6e, (byte) 0x61 }, { (byte) 0x05, (byte) 0xc4, (byte) 0x02, (byte) 0x04, (byte) 0x29, (byte) 0x39 }, { (byte) 0x06, (byte) 0x65, (byte) 0x78, (byte) 0x70, (byte) 0x69, (byte) 0x72, (byte) 0x65 }, { (byte) 0x0b, (byte) 0x61, (byte) 0x62, (byte) 0x63, (byte) 0x5f, (byte) 0x73, (byte) 0x75, (byte) 0x62, (byte) 0x6a, (byte) 0x65, (byte) 0x63, (byte) 0x74 }, { (byte) 0x0c, (byte) 0x31, (byte) 0x32, (byte) 0x33, (byte) 0x34, (byte) 0x35, (byte) 0x36, (byte) 0x37, (byte) 0x38, (byte) 0x39, (byte) 0x2b, (byte) 0x2b, (byte) 0x70 }, { (byte) 0x08, (byte) 0x68, (byte) 0x7a, (byte) 0x5f, (byte) 0x63, (byte) 0x68, (byte) 0x69, (byte) 0x6e, (byte) 0x61 }, { (byte) 0x11, (byte) 0x68, (byte) 0x65, (byte) 0x78, (byte) 0x69, (byte) 0x61, (byte) 0x6e, (byte) 0x6d, (byte) 0x61, (byte) 0x6f, (byte) 0x40, (byte) 0x31, (byte) 0x36, (byte) 0x33, (byte) 0x2e, (byte) 0x63, (byte) 0x6f, (byte) 0x6d }, { (byte) 0x04, (byte) 0x33, (byte) 0x35, (byte) 0x31, (byte) 0x34 }, { (byte) 0x07, (byte) 0x61, (byte) 0x6c, (byte) 0x69, (byte) 0x62, (byte) 0x61, (byte) 0x62, (byte) 0x61 }, { (byte) 0x02, (byte) 0x43, (byte) 0x4e }, { (byte) 0x02, (byte) 0x68, (byte) 0x65 }, { (byte) 0x05, (byte) 0x67, (byte) 0x6f, (byte) 0x6f, (byte) 0x64, (byte) 0x21 }, { (byte) 0x07, (byte) 0x78, (byte) 0x6c, (byte) 0x07, (byte) 0x1e, (byte) 0x01, (byte) 0x01, (byte) 0x01 }, { (byte) 0x04, (byte) 0x53, (byte) 0x41, (byte) 0x4c, (byte) 0x45 }, { (byte) 0x09, (byte) 0x70, (byte) 0x75, (byte) 0x62, (byte) 0x6c, (byte) 0x69, (byte) 0x73, (byte) 0x68, (byte) 0x65, (byte) 0x64 }, { (byte) 0x07, (byte) 0x78, (byte) 0x6c, (byte) 0x07, (byte) 0x1e, (byte) 0x01, (byte) 0x01, (byte) 0x01 } };
 
     static void fillupAccessors() {
         for (int i = 0; i < desc.length; i++) {
