@@ -54,6 +54,12 @@ public class OracleServerConnection extends OracleConnection implements Poolable
         this.postMessage(byteBuffer);
     }
 
+    
+    public boolean checkIdle(long now){
+    	//we are not idle
+    	return false;
+    }
+    
     public void handleMessage(Connection conn, byte[] buffer) {
         OracleServerConnection serverConn = (OracleServerConnection) conn;
         ByteBuffer byteBuffer = null;
