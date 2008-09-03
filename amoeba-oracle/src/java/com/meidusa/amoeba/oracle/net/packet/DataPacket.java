@@ -28,7 +28,7 @@ public abstract class DataPacket extends AbstractPacket {
     }
 
     /**
-     * true，表示一个数据包已完成。
+     * true，表示一个数据包已结束。
      */
     public static boolean isPacketEOF(byte[] buffer) {
         int dataFlags = ((buffer[8] & 0xff) << 8) | (buffer[9] & 0xff);
@@ -36,6 +36,19 @@ public abstract class DataPacket extends AbstractPacket {
             return true;
         }
         return false;
+    }
+
+    /**
+     * 将数据包标记成未结束或者已结束。flag:true表示已结束否则数据包未结束。
+     */
+    public static void setPacketEOF(byte[] buffer, boolean flag) {
+        if (flag) {
+            buffer[8] = 0x00;
+            buffer[9] = 0x00;
+        } else {
+            buffer[8] = 0x00;
+            buffer[9] = 0x20;
+        }
     }
 
     /**

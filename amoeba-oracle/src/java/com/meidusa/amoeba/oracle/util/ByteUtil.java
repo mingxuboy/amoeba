@@ -64,7 +64,7 @@ public final class ByteUtil {
     }
 
     public static String toHex(byte[] b, int offset, int len) {
-        StringBuffer s = new StringBuffer();
+        StringBuilder s = new StringBuilder();
         for (int i = offset; i < (offset + len); i++) {
             s.append(String.format("%1$02x", (b[i] & 0xff)));
             s.append(" ");
