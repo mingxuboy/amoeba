@@ -20,8 +20,8 @@ public class T4C8TTIproResponseDataPacket extends T4CTTIMsgPacket {
     public short   NCHAR_CHARSET    = 2000;
 
     private byte[] abyte0           = new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x07, (byte) 0xd0 };
-    private byte[] as0              = null;
-    private byte[] as1              = null;
+    private byte[] as0              = new byte[]{0};
+    private byte[] as1              = new byte[]{0};;
 
     public T4C8TTIproResponseDataPacket(){
         super(TTIPRO);

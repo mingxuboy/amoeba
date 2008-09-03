@@ -47,7 +47,7 @@ public class ManagerPacketInputStream extends PacketInputStream implements Manag
 		_buffer.rewind();
 		
 		/**
-		 * mysql 数据部分＋包头=整个数据包长度
+		 * manager 数据部分＋包头=整个数据包长度
 		 */
 		int length = (_buffer.get() & 0xff)
 					+ ((_buffer.get() & 0xff) << 8)	
