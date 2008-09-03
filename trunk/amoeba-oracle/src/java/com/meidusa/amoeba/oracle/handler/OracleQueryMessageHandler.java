@@ -5,6 +5,7 @@ import org.apache.log4j.Logger;
 import com.meidusa.amoeba.net.Connection;
 import com.meidusa.amoeba.net.MessageHandler;
 import com.meidusa.amoeba.net.Sessionable;
+import com.meidusa.amoeba.oracle.io.OraclePacketConstant;
 import com.meidusa.amoeba.oracle.net.OracleConnection;
 import com.meidusa.amoeba.oracle.net.packet.DataPacket;
 import com.meidusa.amoeba.oracle.net.packet.SQLnetDef;
@@ -21,15 +22,16 @@ import com.meidusa.amoeba.oracle.util.ByteUtil;
  */
 public class OracleQueryMessageHandler implements MessageHandler, Sessionable, SQLnetDef {
 
-    private static Logger    logger         = Logger.getLogger(OracleQueryMessageHandler.class);
+    private static Logger    logger        = Logger.getLogger(OracleQueryMessageHandler.class);
 
     private OracleConnection clientConn;
     private OracleConnection serverConn;
     private MessageHandler   clientHandler;
     private MessageHandler   serverHandler;
-    private boolean          isEnded        = false;
+    private boolean          isEnded       = false;
 
-    private byte[]           tmpReceiveData = new byte[0];                                       ;
+    private byte[]           tmpBuffer     = null;
+    private boolean          isFirstPacket = true;
 
     public OracleQueryMessageHandler(Connection clientConn, Connection serverConn){
         this.clientConn = (OracleConnection) clientConn;
@@ -42,53 +44,18 @@ public class OracleQueryMessageHandler implements MessageHandler, Sessionable, S
 
     public void handleMessage(Connection conn, byte[] message) {
         if (conn == clientConn) {
-
-            copyDataToTmp(message);
             if (DataPacket.isPacketEOF(message)) {
-                if (logger.isDebugEnabled()) {
-                    System.out.println("\n$amoeba query message ========================================================");
-                    System.out.println("$send packet:" + ByteUtil.toHex(tmpReceiveData, 0, tmpReceiveData.length));
-                }
-
-                if (T4CTTIfunPacket.isFunType(tmpReceiveData, T4CTTIfunPacket.OALL8)) {
-                    T4C8OallDataPacket packet = new T4C8OallDataPacket();
-                    packet.init(tmpReceiveData, conn);
-                    if (logger.isDebugEnabled()) {
-                        System.out.println("type:T4CTTIfunPacket.OALL8");
-                        System.out.println("isPacketEOF:" + packet.isPacketEOF());
-                        System.out.println("sqlStmt:" + new String(packet.sqlStmt));
-                        System.out.println("numberOfBindPositions:" + packet.numberOfBindPositions);
-                        for (int i = 0; packet.bindParams != null && i < packet.bindParams.length; i++) {
-                            System.out.println("params_" + i + ":" + ByteUtil.toHex(packet.bindParams[i], 0, packet.bindParams[i].length));
-                        }
-                    }
-                } else if (T4CTTIfunPacket.isFunType(tmpReceiveData, T4CTTIfunPacket.OFETCH)) {
-                    DataPacket dataPacket = new SimpleDataPacket();
-                    dataPacket.init(tmpReceiveData, conn);
-                    if (logger.isDebugEnabled()) {
-                        System.out.println("type:T4CTTIfunPacket.OFETCH");
-                        System.out.println("isPacketEOF:" + dataPacket.isPacketEOF());
-                    }
-                } else if (T4CTTIfunPacket.isFunType(tmpReceiveData, T4CTTIMsgPacket.TTIPFN, T4CTTIfunPacket.OCCA)) {
-                    // T4C8OcloseDataPacket packet = new T4C8OcloseDataPacket();
-                    // packet.init(message, conn);
-                    DataPacket dataPacket = new SimpleDataPacket();
-                    dataPacket.init(tmpReceiveData, conn);
-                    if (logger.isDebugEnabled()) {
-                        System.out.println("type:T4C8OcloseDataPacket");
-                        System.out.println("isPacketEOF:" + dataPacket.isPacketEOF());
-                    }
+                if (isFirstPacket) {
+                    parseReceivePakcet(message, conn);
                 } else {
-                    DataPacket dataPacket = new SimpleDataPacket();
-                    dataPacket.init(tmpReceiveData, conn);
-                    if (logger.isDebugEnabled()) {
-                        System.out.println("type:OtherPacket");
-                        System.out.println("isPacketEOF:" + dataPacket.isPacketEOF());
-                    }
+                    DataPacket.setPacketEOF(tmpBuffer, true);
+                    parseReceivePakcet(tmpBuffer, conn);
+                    tmpBuffer = null;
+                    isFirstPacket = true;
                 }
-                tmpReceiveData = new byte[0];
+            } else {
+                mergeMessage(message);
             }
-
             serverConn.postMessage(message);
         } else {
             // if (logger.isDebugEnabled()) {
@@ -120,11 +87,67 @@ public class OracleQueryMessageHandler implements MessageHandler, Sessionable, S
     public void startSession() throws Exception {
     }
 
-    private void copyDataToTmp(byte[] message) {
-        byte[] newBytes = new byte[tmpReceiveData.length + message.length];
-        System.arraycopy(tmpReceiveData, 0, newBytes, 0, tmpReceiveData.length);
-        System.arraycopy(message, 0, newBytes, tmpReceiveData.length, message.length);
-        tmpReceiveData = newBytes;
+    /**
+     * 合并数据包并去除多余的包头信息
+     */
+    private void mergeMessage(byte[] message) {
+        if (!DataPacket.isDataType(message)) {
+            return;
+        }
+        if (isFirstPacket) {
+            tmpBuffer = new byte[message.length];
+            System.arraycopy(message, 0, tmpBuffer, 0, message.length);
+            isFirstPacket = false;
+        } else {
+            int appendLength = message.length - OraclePacketConstant.DATA_PACKET_HEADER_SIZE;
+            byte[] newBytes = new byte[tmpBuffer.length + appendLength];
+            System.arraycopy(tmpBuffer, 0, newBytes, 0, tmpBuffer.length);
+            System.arraycopy(message, OraclePacketConstant.DATA_PACKET_HEADER_SIZE, newBytes, tmpBuffer.length, appendLength);
+            tmpBuffer = newBytes;
+        }
+    }
+
+    /**
+     * 解析发送的SQL数据包
+     */
+    private void parseReceivePakcet(byte[] message, Connection conn) {
+        if (logger.isDebugEnabled()) {
+            System.out.println("\n$amoeba query message ========================================================");
+            System.out.println("$send packet:" + ByteUtil.toHex(message, 0, message.length));
+        }
+
+        if (T4CTTIfunPacket.isFunType(message, T4CTTIfunPacket.OALL8)) {
+            T4C8OallDataPacket packet = new T4C8OallDataPacket();
+            packet.init(message, conn);
+            if (logger.isDebugEnabled()) {
+                System.out.println("type:T4CTTIfunPacket.OALL8");
+                System.out.println("sqlStmt:" + new String(packet.sqlStmt));
+                System.out.println("numberOfBindPositions:" + packet.numberOfBindPositions);
+                for (int i = 0; packet.bindParams != null && i < packet.bindParams.length; i++) {
+                    System.out.println("params_" + i + ":" + ByteUtil.toHex(packet.bindParams[i], 0, packet.bindParams[i].length));
+                }
+            }
+        } else if (T4CTTIfunPacket.isFunType(message, T4CTTIfunPacket.OFETCH)) {
+            DataPacket dataPacket = new SimpleDataPacket();
+            dataPacket.init(message, conn);
+            if (logger.isDebugEnabled()) {
+                System.out.println("type:T4CTTIfunPacket.OFETCH");
+            }
+        } else if (T4CTTIfunPacket.isFunType(message, T4CTTIMsgPacket.TTIPFN, T4CTTIfunPacket.OCCA)) {
+            // T4C8OcloseDataPacket packet = new T4C8OcloseDataPacket();
+            // packet.init(message, conn);
+            DataPacket dataPacket = new SimpleDataPacket();
+            dataPacket.init(message, conn);
+            if (logger.isDebugEnabled()) {
+                System.out.println("type:T4C8OcloseDataPacket");
+            }
+        } else {
+            DataPacket dataPacket = new SimpleDataPacket();
+            dataPacket.init(message, conn);
+            if (logger.isDebugEnabled()) {
+                System.out.println("type:OtherPacket");
+            }
+        }
     }
 
 }
