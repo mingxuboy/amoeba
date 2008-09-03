@@ -45,6 +45,7 @@ public class OracleQueryMessageHandler implements MessageHandler, Sessionable, S
                 if (isFirstPacket) {
                     parseReceivePakcet(message, conn);
                 } else {
+                    mergeMessage(message);
                     DataPacket.setPacketEOF(tmpBuffer, true);
                     parseReceivePakcet(tmpBuffer, conn);
                     tmpBuffer = null;

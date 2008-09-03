@@ -4,11 +4,9 @@ import org.apache.log4j.Logger;
 
 import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
 import com.meidusa.amoeba.oracle.accessor.Accessor;
-import com.meidusa.amoeba.oracle.accessor.T4CCharAccessor;
 import com.meidusa.amoeba.oracle.accessor.T4CDateAccessor;
 import com.meidusa.amoeba.oracle.accessor.T4CVarcharAccessor;
 import com.meidusa.amoeba.oracle.accessor.T4CVarnumAccessor;
-import com.meidusa.amoeba.oracle.util.ByteUtil;
 
 /**
  * @author hexianmao
@@ -18,17 +16,20 @@ public class T4C8OallDataPacket extends T4CTTIfunPacket {
 
     private static Logger  logger = Logger.getLogger(T4C8OallDataPacket.class);
 
+    public byte[]          sqlStmt;
+    public int             numberOfBindPositions;
+    public T4CTTIoac[]     oacBind;
+    public String[]        paramType;
+    public String[]        paramValue;
+
+    // //////////////////////////////////////////////////////////////////
+
     long                   options;
     int                    cursor;
-    public int             numberOfBindPositions;
-    public byte[][]        bindParams;
     int                    defCols;
-
     int                    al8i4Length;
     final long[]           al8i4  = new long[13];
     public int             sqlStmtLength;
-    public byte[]          sqlStmt;
-    public T4CTTIoac[]     oacdefBindsSent;
     T4CTTIoac[]            oacdefDefines;
     Accessor[]             definesAccessors;
     int                    receiveState;
@@ -112,14 +113,20 @@ public class T4C8OallDataPacket extends T4CTTIfunPacket {
             }
         }
 
-        // unmarshalBinds(meg);
+        unmarshalBinds(meg);
 
         if (logger.isDebugEnabled()) {
             System.out.println("type:T4CTTIfunPacket.OALL8");
             System.out.println("sqlStmt:" + new String(sqlStmt));
             System.out.println("numberOfBindPositions:" + numberOfBindPositions);
-            for (int i = 0; bindParams != null && i < bindParams.length; i++) {
-                System.out.println("params_" + i + ":" + ByteUtil.toHex(bindParams[i], 0, bindParams[i].length));
+            for (int i = 0; i < numberOfBindPositions; i++) {
+                System.out.println("param_des_" + i + ":" + oacBind[i]);
+                System.out.print("param_" + i + ": [" + paramType[i] + "]");
+                if (paramValue[i] != null && paramValue[i].length() > 1000) {
+                    System.out.println("-[" + paramValue[i].substring(0, 1000) + "... #dataLength:" + paramValue[i].length() + "]");
+                } else {
+                    System.out.println("-[" + paramValue[i] + "]");
+                }
             }
         }
     }
@@ -139,6 +146,9 @@ public class T4C8OallDataPacket extends T4CTTIfunPacket {
 
         meg.unmarshalPTR();
         numberOfBindPositions = meg.unmarshalSWORD();
+        oacBind = new T4CTTIoac[numberOfBindPositions];
+        paramType = new String[numberOfBindPositions];
+        paramValue = new String[numberOfBindPositions];
 
         meg.unmarshalPTR();
         meg.unmarshalPTR();
@@ -153,13 +163,9 @@ public class T4C8OallDataPacket extends T4CTTIfunPacket {
     }
 
     private void unmarshalBindsTypes(T4CPacketBuffer meg) {
-        if (numberOfBindPositions <= 0) {
-            return;
-        }
-        oacdefBindsSent = new T4CTTIoac[numberOfBindPositions];
         for (int i = 0; i < numberOfBindPositions; i++) {
-            oacdefBindsSent[i] = new T4CTTIoac(meg);
-            oacdefBindsSent[i].unmarshal();
+            oacBind[i] = new T4CTTIoac(meg);
+            oacBind[i].unmarshal();
         }
     }
 
@@ -169,9 +175,8 @@ public class T4C8OallDataPacket extends T4CTTIfunPacket {
         }
         short msgCode = meg.unmarshalUB1();
         if (msgCode == TTIRXD) {
-            bindParams = new byte[numberOfBindPositions][];
             for (int i = 0; i < numberOfBindPositions; i++) {
-                bindParams[i] = meg.unmarshalCLRforREFS();
+                parseParam(i, oacBind[i], meg.unmarshalCLRforREFS());
             }
         } else {
             throw new RuntimeException();
@@ -212,6 +217,133 @@ public class T4C8OallDataPacket extends T4CTTIfunPacket {
         }
     }
 
+    private void parseParam(int idx, T4CTTIoac oac, byte[] data) {
+        switch (oac.oacdty) {
+            case Accessor.CHAR:
+                paramType[idx] = "CHAR";
+                // System.out.println(T4CCharAccessor.getString(data, desc[i][5], desc[i][5]));
+                break;
+
+            case Accessor.NUMBER:
+                paramType[idx] = "NUMBER";
+                // T4CNumberAccessor
+                break;
+
+            case Accessor.VARCHAR:
+                paramType[idx] = "VARCHAR";
+                paramValue[idx] = T4CVarcharAccessor.getString(data, oac.oacmxl, oac.oacmxl);
+                break;
+
+            case Accessor.LONG:
+                paramType[idx] = "LONG";
+                // T4CLongAccessor
+                break;
+
+            case Accessor.VARNUM:
+                paramType[idx] = "VARNUM";
+                paramValue[idx] = Long.toString(T4CVarnumAccessor.getLong(data));
+                // System.out.println(T4CVarnumAccessor.getLong(data));
+                break;
+
+            case Accessor.BINARY_FLOAT:
+                paramType[idx] = "BINARY_FLOAT";
+                // T4CBinaryFloatAccessor
+                break;
+
+            case Accessor.BINARY_DOUBLE:
+                paramType[idx] = "BINARY_DOUBLE";
+                // T4CBinaryDoubleAccessor
+                break;
+
+            case Accessor.RAW:
+                paramType[idx] = "RAW";
+                // T4CRawAccessor
+                break;
+
+            case Accessor.LONG_RAW:
+                paramType[idx] = "LONG_RAW";
+                // T4CPacketBuffer.versionNumber >= 9000 T4CRawAccessor
+                // T4CLongRawAccessor
+
+                break;
+
+            case Accessor.ROWID:
+                paramType[idx] = "ROWID";
+
+            case Accessor.UROWID:
+                paramType[idx] = "UROWID";
+                // T4CRowidAccessor
+                break;
+
+            case Accessor.RESULT_SET:
+                paramType[idx] = "RESULT_SET";
+                // T4CResultSetAccessor
+                break;
+
+            case Accessor.DATE:
+                paramType[idx] = "DATE";
+                paramValue[idx] = T4CDateAccessor.getDate(data).toString();
+                break;
+
+            case Accessor.BLOB:
+                paramType[idx] = "BLOB";
+                // l1 == -4 && T4CPacketBuffer.versionNumber >= 9000 T4CLongRawAccessor
+                // l1 == -3 && T4CPacketBuffer.versionNumber >= 9000 T4CRawAccessor
+                // T4CBlobAccessor
+                break;
+
+            case Accessor.CLOB:
+                paramType[idx] = "CLOB";
+                // l1 == -1 && T4CPacketBuffer.versionNumber >= 9000 T4CLongAccessor
+                // (l1 == 12 || l1 == 1) && T4CPacketBuffer.versionNumber >= 9000
+                // T4CVarcharAccessor
+                // T4CClobAccessor
+                break;
+
+            case Accessor.BFILE:
+                paramType[idx] = "BFILE";
+                // T4CBfileAccessor
+                break;
+
+            case Accessor.NAMED_TYPE:
+                paramType[idx] = "NAMED_TYPE";
+                // T4CNamedTypeAccessor
+                break;
+
+            case Accessor.REF_TYPE:
+                paramType[idx] = "REF_TYPE";
+                // T4CRefTypeAccessor
+                break;
+
+            case Accessor.TIMESTAMP:
+                paramType[idx] = "TIMESTAMP";
+                // T4CTimestampAccessor
+                break;
+
+            case Accessor.TIMESTAMPTZ:
+                paramType[idx] = "TIMESTAMPTZ";
+                // T4CTimestamptzAccessor
+                break;
+
+            case Accessor.TIMESTAMPLTZ:
+                paramType[idx] = "TIMESTAMPLTZ";
+                // T4CTimestampltzAccessor
+                break;
+
+            case Accessor.INTERVALYM:
+                paramType[idx] = "INTERVALYM";
+                // T4CIntervalymAccessor
+                break;
+
+            case Accessor.INTERVALDS:
+                paramType[idx] = "INTERVALDS";
+                // T4CIntervaldsAccessor
+                break;
+            default:
+                throw new RuntimeException("unknown data type!");
+        }
+    }
+
     // ///////////////////////////////////////////////////////////////////////////////////
 
     public static boolean isParseable(byte[] message) {
@@ -231,173 +363,6 @@ public class T4C8OallDataPacket extends T4CTTIfunPacket {
             return true;
         }
         return false;
-    }
-
-    static byte[][] desc = { { (byte) 0x06, (byte) 0x03, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x16, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x01, (byte) 0x01, (byte) 0x00 }, { (byte) 0x01, (byte) 0x03, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x05, (byte) 0x00, (byte) 0x01, (byte) 0x10, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x01, (byte) 0x01, (byte) 0x00 }, { (byte) 0x06, (byte) 0x03, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x16, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x01, (byte) 0x01, (byte) 0x00 }, { (byte) 0x01, (byte) 0x03, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x06, (byte) 0x00, (byte) 0x01, (byte) 0x10, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x01, (byte) 0x01, (byte) 0x00 }, { (byte) 0x01, (byte) 0x03, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x0b, (byte) 0x00, (byte) 0x01, (byte) 0x10, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x01, (byte) 0x01, (byte) 0x00 }, { (byte) 0x01, (byte) 0x03, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x0c, (byte) 0x00, (byte) 0x01, (byte) 0x10, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x01, (byte) 0x01, (byte) 0x00 }, { (byte) 0x01, (byte) 0x03, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x08, (byte) 0x00, (byte) 0x01, (byte) 0x10, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x01, (byte) 0x01, (byte) 0x00 }, { (byte) 0x01, (byte) 0x03, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x11, (byte) 0x00, (byte) 0x01, (byte) 0x10, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x01, (byte) 0x01, (byte) 0x00 }, { (byte) 0x01, (byte) 0x03, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x04, (byte) 0x00, (byte) 0x01, (byte) 0x10, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x01, (byte) 0x01, (byte) 0x00 }, { (byte) 0x01, (byte) 0x03, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x07, (byte) 0x00, (byte) 0x01, (byte) 0x10, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x01, (byte) 0x01, (byte) 0x00 }, { (byte) 0x01, (byte) 0x03, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x02, (byte) 0x00, (byte) 0x01, (byte) 0x10, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x01, (byte) 0x01, (byte) 0x00 }, { (byte) 0x01, (byte) 0x03, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x02, (byte) 0x00, (byte) 0x01, (byte) 0x10, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x01, (byte) 0x01, (byte) 0x00 }, { (byte) 0x01, (byte) 0x03, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x05, (byte) 0x00, (byte) 0x01, (byte) 0x10, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x01, (byte) 0x01, (byte) 0x00 }, { (byte) 0x0c, (byte) 0x03, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x07, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x01, (byte) 0x01, (byte) 0x00 }, { (byte) 0x01, (byte) 0x03, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x04, (byte) 0x00, (byte) 0x01, (byte) 0x10, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x01, (byte) 0x01, (byte) 0x00 }, { (byte) 0x01, (byte) 0x03, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x09, (byte) 0x00, (byte) 0x01, (byte) 0x10, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x01, (byte) 0x01, (byte) 0x00 }, { (byte) 0x0c, (byte) 0x03, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x07, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x01, (byte) 0x01, (byte) 0x01, (byte) 0x00 } };
-
-    static byte[][] data = { { (byte) 0x06, (byte) 0xc5, (byte) 0x02, (byte) 0x17, (byte) 0x2b, (byte) 0x62, (byte) 0x28 }, { (byte) 0x05, (byte) 0x63, (byte) 0x68, (byte) 0x69, (byte) 0x6e, (byte) 0x61 }, { (byte) 0x05, (byte) 0xc4, (byte) 0x02, (byte) 0x04, (byte) 0x29, (byte) 0x39 }, { (byte) 0x06, (byte) 0x65, (byte) 0x78, (byte) 0x70, (byte) 0x69, (byte) 0x72, (byte) 0x65 }, { (byte) 0x0b, (byte) 0x61, (byte) 0x62, (byte) 0x63, (byte) 0x5f, (byte) 0x73, (byte) 0x75, (byte) 0x62, (byte) 0x6a, (byte) 0x65, (byte) 0x63, (byte) 0x74 }, { (byte) 0x0c, (byte) 0x31, (byte) 0x32, (byte) 0x33, (byte) 0x34, (byte) 0x35, (byte) 0x36, (byte) 0x37, (byte) 0x38, (byte) 0x39, (byte) 0x2b, (byte) 0x2b, (byte) 0x70 }, { (byte) 0x08, (byte) 0x68, (byte) 0x7a, (byte) 0x5f, (byte) 0x63, (byte) 0x68, (byte) 0x69, (byte) 0x6e, (byte) 0x61 }, { (byte) 0x11, (byte) 0x68, (byte) 0x65, (byte) 0x78, (byte) 0x69, (byte) 0x61, (byte) 0x6e, (byte) 0x6d, (byte) 0x61, (byte) 0x6f, (byte) 0x40, (byte) 0x31, (byte) 0x36, (byte) 0x33, (byte) 0x2e, (byte) 0x63, (byte) 0x6f, (byte) 0x6d }, { (byte) 0x04, (byte) 0x33, (byte) 0x35, (byte) 0x31, (byte) 0x34 }, { (byte) 0x07, (byte) 0x61, (byte) 0x6c, (byte) 0x69, (byte) 0x62, (byte) 0x61, (byte) 0x62, (byte) 0x61 }, { (byte) 0x02, (byte) 0x43, (byte) 0x4e }, { (byte) 0x02, (byte) 0x68, (byte) 0x65 }, { (byte) 0x05, (byte) 0x67, (byte) 0x6f, (byte) 0x6f, (byte) 0x64, (byte) 0x21 }, { (byte) 0x07, (byte) 0x78, (byte) 0x6c, (byte) 0x07, (byte) 0x1e, (byte) 0x01, (byte) 0x01, (byte) 0x01 }, { (byte) 0x04, (byte) 0x53, (byte) 0x41, (byte) 0x4c, (byte) 0x45 }, { (byte) 0x09, (byte) 0x70, (byte) 0x75, (byte) 0x62, (byte) 0x6c, (byte) 0x69, (byte) 0x73, (byte) 0x68, (byte) 0x65, (byte) 0x64 }, { (byte) 0x07, (byte) 0x78, (byte) 0x6c, (byte) 0x07, (byte) 0x1e, (byte) 0x01, (byte) 0x01, (byte) 0x01 } };
-
-    static void fillupAccessors() {
-        for (int i = 0; i < desc.length; i++) {
-            switch (desc[i][0] & 0xff) {
-                case Accessor.CHAR:
-                    System.out.print("Accessor.CHAR");
-                    System.out.println(T4CCharAccessor.getString(data[i], desc[i][5], desc[i][5]));
-                    System.out.println();
-                    break;
-
-                case Accessor.NUMBER:
-                    System.out.print("Accessor.NUMBER");
-                    // T4CNumberAccessor
-                    System.out.println();
-                    break;
-
-                case Accessor.VARCHAR:
-                    System.out.print("Accessor.VARCHAR:");
-                    System.out.println(T4CVarcharAccessor.getString(data[i], desc[i][5], desc[i][5]));
-                    System.out.println();
-                    break;
-
-                case Accessor.LONG:
-                    System.out.print("Accessor.LONG");
-                    // T4CLongAccessor
-                    System.out.println();
-                    break;
-
-                case Accessor.VARNUM:
-                    System.out.print("Accessor.VARNUM:");
-                    System.out.println(T4CVarnumAccessor.getLong(data[i]));
-                    System.out.println();
-                    break;
-
-                case Accessor.BINARY_FLOAT:
-                    System.out.print("Accessor.BINARY_FLOAT");
-                    // T4CBinaryFloatAccessor
-                    System.out.println();
-                    break;
-
-                case Accessor.BINARY_DOUBLE:
-                    System.out.print("Accessor.BINARY_DOUBLE");
-                    // T4CBinaryDoubleAccessor
-                    System.out.println();
-                    break;
-
-                case Accessor.RAW:
-                    System.out.print("Accessor.RAW");
-                    // T4CRawAccessor
-                    System.out.println();
-                    break;
-
-                case Accessor.LONG_RAW:
-                    System.out.print("Accessor.LONG_RAW");
-                    // T4CPacketBuffer.versionNumber >= 9000 T4CRawAccessor
-                    // T4CLongRawAccessor
-                    System.out.println();
-
-                    break;
-
-                case Accessor.ROWID:
-                    System.out.print("Accessor.ROWID");
-                    System.out.println();
-
-                case Accessor.UROWID:
-                    System.out.print("Accessor.UROWID");
-                    // T4CRowidAccessor
-                    System.out.println();
-                    break;
-
-                case Accessor.RESULT_SET:
-                    System.out.print("Accessor.RESULT_SET");
-                    // T4CResultSetAccessor
-                    System.out.println();
-                    break;
-
-                case Accessor.DATE:
-                    System.out.print("Accessor.DATE:");
-                    System.out.println(T4CDateAccessor.getDate(data[i]));
-                    System.out.println();
-
-                    break;
-
-                case Accessor.BLOB:
-                    System.out.print("Accessor.BLOB");
-                    // l1 == -4 && T4CPacketBuffer.versionNumber >= 9000 T4CLongRawAccessor
-                    // l1 == -3 && T4CPacketBuffer.versionNumber >= 9000 T4CRawAccessor
-                    // T4CBlobAccessor
-                    System.out.println();
-                    break;
-
-                case Accessor.CLOB:
-                    System.out.print("Accessor.CLOB");
-                    // l1 == -1 && T4CPacketBuffer.versionNumber >= 9000 T4CLongAccessor
-                    // (l1 == 12 || l1 == 1) && T4CPacketBuffer.versionNumber >= 9000
-                    // T4CVarcharAccessor
-                    // T4CClobAccessor
-                    System.out.println();
-                    break;
-
-                case Accessor.BFILE:
-                    System.out.print("Accessor.BFILE");
-                    // T4CBfileAccessor
-                    System.out.println();
-                    break;
-
-                case Accessor.NAMED_TYPE:
-                    System.out.print("Accessor.NAMED_TYPE");
-                    // T4CNamedTypeAccessor
-                    System.out.println();
-                    break;
-
-                case Accessor.REF_TYPE:
-                    System.out.print("Accessor.REF_TYPE");
-                    // T4CRefTypeAccessor
-                    System.out.println();
-                    break;
-
-                case Accessor.TIMESTAMP:
-                    System.out.print("Accessor.TIMESTAMP");
-                    // T4CTimestampAccessor
-                    System.out.println();
-                    break;
-
-                case Accessor.TIMESTAMPTZ:
-                    System.out.print("Accessor.TIMESTAMPTZ");
-                    // T4CTimestamptzAccessor
-                    System.out.println();
-                    break;
-
-                case Accessor.TIMESTAMPLTZ:
-                    System.out.print("Accessor.TIMESTAMPLTZ");
-                    // T4CTimestampltzAccessor
-                    System.out.println();
-                    break;
-
-                case Accessor.INTERVALYM:
-                    System.out.print("Accessor.INTERVALYM");
-                    // T4CIntervalymAccessor
-                    System.out.println();
-                    break;
-
-                case Accessor.INTERVALDS:
-                    System.out.print("Accessor.INTERVALDS");
-                    // T4CIntervaldsAccessor
-                    System.out.println();
-                    break;
-                default:
-                    throw new RuntimeException("unknown data type!");
-            }
-        }
-    }
-
-    public static void main(String[] args) {
-
-        long st = System.currentTimeMillis();
-        for (int i = 0; i < 1; i++) {
-            fillupAccessors();
-        }
-        long et = System.currentTimeMillis();
-
-        System.out.println(desc.length + ":" + (et - st) + " ms");
     }
 
 }
