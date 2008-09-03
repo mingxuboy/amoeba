@@ -63,6 +63,9 @@ public class T4C8OallDataPacket extends T4CTTIfunPacket {
                 case OFETCH:
                     parseOFETCH(meg);
                     break;
+                case OEXEC:
+                    parseOEXEC(meg);
+                    break;
                 case OLOBOPS:
                     parseOLOBOPS(meg);
                     break;
