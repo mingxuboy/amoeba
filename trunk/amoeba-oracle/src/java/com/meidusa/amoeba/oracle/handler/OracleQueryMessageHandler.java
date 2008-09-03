@@ -9,7 +9,6 @@ import com.meidusa.amoeba.oracle.io.OraclePacketConstant;
 import com.meidusa.amoeba.oracle.net.OracleConnection;
 import com.meidusa.amoeba.oracle.net.packet.DataPacket;
 import com.meidusa.amoeba.oracle.net.packet.SQLnetDef;
-import com.meidusa.amoeba.oracle.net.packet.SimpleDataPacket;
 import com.meidusa.amoeba.oracle.net.packet.T4C8OallDataPacket;
 import com.meidusa.amoeba.oracle.net.packet.T4CTTIMsgPacket;
 import com.meidusa.amoeba.oracle.net.packet.T4CTTIfunPacket;
@@ -116,38 +115,30 @@ public class OracleQueryMessageHandler implements MessageHandler, Sessionable, S
             System.out.println("$send packet:" + ByteUtil.toHex(message, 0, message.length));
         }
 
-        if (T4CTTIfunPacket.isFunType(message, T4CTTIfunPacket.OALL8)) {
+        if (isOall8(message) || isOfetch(message) || isColse(message) || isOlobops(message)) {
             T4C8OallDataPacket packet = new T4C8OallDataPacket();
             packet.init(message, conn);
-            if (logger.isDebugEnabled()) {
-                System.out.println("type:T4CTTIfunPacket.OALL8");
-                System.out.println("sqlStmt:" + new String(packet.sqlStmt));
-                System.out.println("numberOfBindPositions:" + packet.numberOfBindPositions);
-                for (int i = 0; packet.bindParams != null && i < packet.bindParams.length; i++) {
-                    System.out.println("params_" + i + ":" + ByteUtil.toHex(packet.bindParams[i], 0, packet.bindParams[i].length));
-                }
-            }
-        } else if (T4CTTIfunPacket.isFunType(message, T4CTTIfunPacket.OFETCH)) {
-            DataPacket dataPacket = new SimpleDataPacket();
-            dataPacket.init(message, conn);
-            if (logger.isDebugEnabled()) {
-                System.out.println("type:T4CTTIfunPacket.OFETCH");
-            }
-        } else if (T4CTTIfunPacket.isFunType(message, T4CTTIMsgPacket.TTIPFN, T4CTTIfunPacket.OCCA)) {
-            // T4C8OcloseDataPacket packet = new T4C8OcloseDataPacket();
-            // packet.init(message, conn);
-            DataPacket dataPacket = new SimpleDataPacket();
-            dataPacket.init(message, conn);
-            if (logger.isDebugEnabled()) {
-                System.out.println("type:T4C8OcloseDataPacket");
-            }
         } else {
-            DataPacket dataPacket = new SimpleDataPacket();
-            dataPacket.init(message, conn);
             if (logger.isDebugEnabled()) {
                 System.out.println("type:OtherPacket");
             }
         }
+    }
+
+    private boolean isOall8(byte[] message) {
+        return T4CTTIfunPacket.isFunType(message, T4CTTIfunPacket.OALL8);
+    }
+
+    private boolean isOfetch(byte[] message) {
+        return T4CTTIfunPacket.isFunType(message, T4CTTIfunPacket.OFETCH);
+    }
+
+    private boolean isColse(byte[] message) {
+        return T4CTTIfunPacket.isFunType(message, T4CTTIMsgPacket.TTIPFN, T4CTTIfunPacket.OCCA);
+    }
+
+    private boolean isOlobops(byte[] message) {
+        return T4CTTIfunPacket.isFunType(message, T4CTTIfunPacket.OLOBOPS);
     }
 
 }

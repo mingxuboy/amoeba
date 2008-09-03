@@ -19,14 +19,13 @@ public class T4C8OcloseDataPacket extends T4CTTIfunPacket {
     }
 
     @Override
-    protected void marshal(AbstractPacketBuffer buffer) {
-        super.marshal(buffer);
-    }
-
-    @Override
     protected void unmarshal(AbstractPacketBuffer buffer) {
         super.unmarshal(buffer);
         T4CPacketBuffer meg = (T4CPacketBuffer) buffer;
+        unmarshalPart(meg);
+    }
+
+    void unmarshalPart(T4CPacketBuffer meg) {
         meg.unmarshalPTR();
         if (funCode == OCCA) {
             cursorToCloseOffset = (int) meg.unmarshalUB4();

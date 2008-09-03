@@ -27,11 +27,11 @@ public class T4CTTIfunPacket extends T4CTTIMsgPacket {
     public static final short ODNY      = 98;
     public static final short OTXSE     = 103;
     public static final short OTXEN     = 104;
-    public static final short OCCA      = 105;
+    public static final short OCCA      = 105;//colse statement
     public static final short O80SES    = 107;
     public static final short OAUTH     = 115;
     public static final short OSESSKEY  = 118;
-    public static final short OCANA     = 120;
+    public static final short OCANA     = 120;//colse resultset
     public static final short OOTCM     = 127;
     public static final short OSCID     = 135;
     public static final short OKPFC     = 139;
