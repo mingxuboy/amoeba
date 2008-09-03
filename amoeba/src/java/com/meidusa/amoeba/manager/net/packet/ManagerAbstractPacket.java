@@ -23,9 +23,10 @@ public class ManagerAbstractPacket extends AbstractPacket implements ManagerCons
 		+ ((buffer.readByte() & 0xff) << 8)	
 		+ ((buffer.readByte() & 0xff) << 16);
 		funType = buffer.readByte();
-		buffer.setPosition(HEADER_SIZE);
 	}
-
+	
+	
+	
 	@Override
 	protected void write2Buffer(AbstractPacketBuffer buffer)
 			throws UnsupportedEncodingException {
@@ -35,7 +36,7 @@ public class ManagerAbstractPacket extends AbstractPacket implements ManagerCons
 	@Override
 	protected void afterPacketWritten(AbstractPacketBuffer buffer) {
 		int position = buffer.getPosition();
-		lenght = position-HEADER_SIZE;
+		lenght = position;
 		buffer.setPosition(0);
 		buffer.writeByte((byte)(lenght & 0xff));
 		buffer.writeByte((byte) (lenght >>> 8));
@@ -52,5 +53,10 @@ public class ManagerAbstractPacket extends AbstractPacket implements ManagerCons
 	@Override
 	protected Class<? extends AbstractPacketBuffer> getPacketBufferClass() {
 		return ManagerPacketBuffer.class;
+	}
+
+	@Override
+	protected void afterInit(AbstractPacketBuffer buffer) {
+		buffer.setPosition(HEADER_SIZE);
 	}
 }

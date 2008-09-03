@@ -25,6 +25,7 @@ import com.meidusa.amoeba.net.io.PacketInputStream;
  *  1                     Packet TYPE
  * </p>
  * 
+ * 数据包Packet Length 为 整个数据包长度(包括数据＋header)
  * @author <a href=mailto:piratebase@sina.com>Struct chen</a>
  * 
  */
@@ -51,8 +52,8 @@ public class ManagerPacketInputStream extends PacketInputStream implements Manag
 		 */
 		int length = (_buffer.get() & 0xff)
 					+ ((_buffer.get() & 0xff) << 8)	
-					+ ((_buffer.get() & 0xff) << 16)
-					+ this.getHeaderSize();
+					+ ((_buffer.get() & 0xff) << 16);
+					
 		_buffer.position(_have);
 		return length;
 	}
