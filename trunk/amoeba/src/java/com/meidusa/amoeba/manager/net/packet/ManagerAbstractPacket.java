@@ -40,7 +40,7 @@ public class ManagerAbstractPacket extends AbstractPacket implements ManagerCons
 		buffer.writeByte((byte)(lenght & 0xff));
 		buffer.writeByte((byte) (lenght >>> 8));
 		buffer.writeByte((byte) (lenght >>> 16));
-		buffer.writeByte((byte) funType);// packet id
+		buffer.writeByte((byte) funType);
 		buffer.setPosition(position);
 	}
 
