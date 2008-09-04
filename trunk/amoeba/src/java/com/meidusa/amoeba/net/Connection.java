@@ -52,8 +52,16 @@ public abstract class Connection implements NetEventHandler {
 	
 	protected Queue<ByteBuffer> _outQueue = new Queue<ByteBuffer>();
 	private boolean socketClosed = false;
+	protected String host;
+	protected int port;
 	public Connection(SocketChannel channel, long createStamp){
 		_channel = channel;
+		try{
+			host = channel.socket().getInetAddress().getHostAddress();
+			port = channel.socket().getPort();
+		}catch(Exception e){
+			logger.error("socket not connect",e);
+		}
 		_lastEvent = createStamp;
 	}
 	

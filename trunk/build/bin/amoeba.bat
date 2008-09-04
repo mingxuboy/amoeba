@@ -28,8 +28,8 @@ goto END
 
 :START_AMOEBA
 
-set DEFAULT_OPTS="-server -Xms128m -Xmx128m -Xss128k"
-set DEFAULT_OPTS=%DEFAULT_OPTS% "-XX:+AggressiveOpts -XX:+UseParallelGC -XX:+UseBiasedLocking -XX:NewSize=64m"
+set DEFAULT_OPTS=-server -Xms128m -Xmx128m -Xss128k
+set DEFAULT_OPTS=%DEFAULT_OPTS% -XX:+AggressiveOpts -XX:+UseParallelGC -XX:+UseBiasedLocking -XX:NewSize=64m
 set DEFAULT_OPTS=%DEFAULT_OPTS% "-Damoeba.home=%AMOEBA_HOME%"
 set DEFAULT_OPTS=%DEFAULT_OPTS% "-Dclassworlds.conf=%AMOEBA_HOME%\bin\amoeba.classworlds"
 

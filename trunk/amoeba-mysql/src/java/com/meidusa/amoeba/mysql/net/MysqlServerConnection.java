@@ -81,6 +81,9 @@ public class MysqlServerConnection extends MysqlConnection implements MySqlPacke
 			if(status == Status.WAITE_HANDSHAKE){
 				HandshakePacket handpacket = new HandshakePacket();
 				handpacket.init(buffer);
+				if(logger.isDebugEnabled()){
+					logger.debug("receive HandshakePacket packet from server:"+this.host +":"+this.port);
+				}
 				MysqlProxyRuntimeContext context = ((MysqlProxyRuntimeContext)MysqlProxyRuntimeContext.getInstance());
 				if(context.getServerCharset() == null && handpacket.serverCharsetIndex > 0){
 					context.setServerCharsetIndex(handpacket.serverCharsetIndex);
@@ -108,8 +111,14 @@ public class MysqlServerConnection extends MysqlConnection implements MySqlPacke
 					}
 				}
 				status = Status.AUTHING;
+				if(logger.isDebugEnabled()){
+					logger.debug("authing packet sent to server:"+this.host +":"+this.port);
+				}
 				this.postMessage(authing.toByteBuffer(conn).array());
 			}else if(status == Status.AUTHING){
+				if(logger.isDebugEnabled()){
+					logger.debug("authing result packet from server:"+this.host +":"+this.port);
+				}
 				if(MysqlPacketBuffer.isOkPacket(message)){
 					setAuthenticated(true);
 					return;
