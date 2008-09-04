@@ -22,8 +22,6 @@ public class T4C8OallDataPacket extends T4CTTIfunPacket {
     public String[]        paramType;
     public String[]        paramValue;
 
-    // //////////////////////////////////////////////////////////////////
-
     long                   options;
     int                    cursor;
     int                    defCols;
@@ -120,8 +118,8 @@ public class T4C8OallDataPacket extends T4CTTIfunPacket {
             System.out.println("sqlStmt:" + new String(sqlStmt));
             System.out.println("numberOfBindPositions:" + numberOfBindPositions);
             for (int i = 0; i < numberOfBindPositions; i++) {
-                // System.out.println("param_des_" + i + ":" + oacBind[i]);
-                System.out.print("param_" + i + ": [" + paramType[i] + "]");
+                System.out.println("param_info_" + i + ":" + oacBind[i]);
+                System.out.print("param_value_" + i + ": [" + paramType[i] + "]");
                 if (paramValue[i] != null && paramValue[i].length() > 1000) {
                     System.out.println("-[" + paramValue[i].substring(0, 1000) + "... #dataLength:" + paramValue[i].length() + "]");
                 } else {
