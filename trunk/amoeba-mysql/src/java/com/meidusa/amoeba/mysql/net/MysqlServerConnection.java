@@ -12,7 +12,6 @@
 package com.meidusa.amoeba.mysql.net;
 
 import java.nio.channels.SocketChannel;
-import java.security.NoSuchAlgorithmException;
 import java.util.concurrent.locks.Lock;
 
 import org.apache.log4j.Level;
@@ -28,7 +27,6 @@ import com.meidusa.amoeba.mysql.net.packet.ErrorPacket;
 import com.meidusa.amoeba.mysql.net.packet.HandshakePacket;
 import com.meidusa.amoeba.mysql.net.packet.MysqlPacketBuffer;
 import com.meidusa.amoeba.mysql.util.CharsetMapping;
-import com.meidusa.amoeba.mysql.util.Security;
 import com.meidusa.amoeba.net.Connection;
 import com.meidusa.amoeba.net.Sessionable;
 import com.meidusa.amoeba.util.Reporter;
@@ -158,13 +156,7 @@ public class MysqlServerConnection extends MysqlConnection implements MySqlPacke
 				}
 				
 				authing.maxThreeBytes = 1073741824;
-				if(this.getPassword() != null){
-					try {
-						authing.encryptedPassword = Security.scramble411(this.getPassword(),handpacket.seed+handpacket.restOfScrambleBuff);
-					} catch (NoSuchAlgorithmException e) {
-						logger.error("encrypt Password error",e);
-					}
-				}
+				
 				status = Status.AUTHING;
 				if(logger.isDebugEnabled()){
 					logger.debug("authing packet sent to server:"+this.host +":"+this.port);

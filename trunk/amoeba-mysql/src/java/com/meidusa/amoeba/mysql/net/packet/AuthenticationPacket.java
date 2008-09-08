@@ -12,7 +12,9 @@
 package com.meidusa.amoeba.mysql.net.packet;
 
 import java.io.UnsupportedEncodingException;
+import java.security.NoSuchAlgorithmException;
 
+import com.meidusa.amoeba.mysql.util.Security;
 import com.meidusa.amoeba.mysql.util.Util;
 import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
 
@@ -127,9 +129,19 @@ public class AuthenticationPacket extends AbstractPacket{
 			}
 			buffer.writeString(user);
 			
-			if(encryptedPassword != null && encryptedPassword.length != 0){
-				buffer.writeFieldLength(encryptedPassword.length);
-				buffer.writeBytesNoNull(encryptedPassword);
+			if(this.password != null && password.length() != 0){
+				try {
+					encryptedPassword = Security.scramble411(password,this.seed);
+				} catch (NoSuchAlgorithmException e) {
+					logger.error("encrypt Password error",e);
+				}
+				
+				if(encryptedPassword != null && encryptedPassword.length != 0){
+					buffer.writeFieldLength(encryptedPassword.length);
+					buffer.writeBytesNoNull(encryptedPassword);
+				}else{
+					buffer.writeByte((byte)0);
+				}
 			}else{
 				buffer.writeByte((byte)0);
 			}
@@ -147,7 +159,7 @@ public class AuthenticationPacket extends AbstractPacket{
              // charset, JDBC will connect as 'latin1',
              // and use 'SET NAMES' to change to the desired
              // charset after the connection is established.
-			buffer.writeByte((byte) 8);
+			buffer.writeByte(charsetNumber);
 
              // Set of bytes reserved for future use.
 			buffer.writeBytesNoNull(new byte[23]);
