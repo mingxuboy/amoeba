@@ -55,6 +55,15 @@ public class MysqlServerConnection extends MysqlConnection implements MySqlPacke
 	private ObjectPool objectPool;
 	private long createTime = System.currentTimeMillis();
 	private boolean active;
+	private long serverCapabilities;
+
+	private String serverVersion;
+
+	private int serverMajorVersion;
+
+	private int serverMinorVersion;
+
+	private int serverSubMinorVersion;
 	
 	public MysqlServerConnection(SocketChannel channel, long createStamp) {
 		super(channel, createStamp);
@@ -81,6 +90,10 @@ public class MysqlServerConnection extends MysqlConnection implements MySqlPacke
 			if(status == Status.WAITE_HANDSHAKE){
 				HandshakePacket handpacket = new HandshakePacket();
 				handpacket.init(buffer);
+				this.serverCapabilities = handpacket.serverCapabilities;
+		        this.serverVersion = handpacket.serverVersion;
+		        splitVersion();
+		        
 				if(logger.isDebugEnabled()){
 					logger.debug("receive HandshakePacket packet from server:"+this.host +":"+this.port);
 				}
@@ -89,11 +102,48 @@ public class MysqlServerConnection extends MysqlConnection implements MySqlPacke
 					context.setServerCharsetIndex(handpacket.serverCharsetIndex);
 					logger.info("mysql server Handshake= "+handpacket.toString());
 				}
+				
+				
 				AuthenticationPacket authing = new AuthenticationPacket();
+				authing.password = this.getPassword();
+				authing.seed = handpacket.seed+handpacket.restOfScrambleBuff;
+				authing.clientParam = CLIENT_FOUND_ROWS;
 				authing.charsetNumber = (byte)(DEFAULT_CHARSET_INDEX & 0xff);
 				this.clientCharset = CharsetMapping.INDEX_TO_CHARSET[DEFAULT_CHARSET_INDEX];
-				authing.clientParam = CLIENT_LONG_PASSWORD|CLIENT_PROTOCOL_41|CLIENT_LONG_FLAG
-									|CLIENT_FOUND_ROWS|CLIENT_TRANSACTIONS|CLIENT_SECURE_CONNECTION|CLIENT_MULTI_RESULTS;
+				
+				if (versionMeetsMinimum(4, 1, 0)) {
+		            if (versionMeetsMinimum(4, 1, 1)) {
+		            	authing.clientParam |= CLIENT_PROTOCOL_41;
+		                // Need this to get server status values
+		            	authing.clientParam |= CLIENT_TRANSACTIONS;
+
+		                // We always allow multiple result sets
+		            	authing.clientParam |= CLIENT_MULTI_RESULTS;
+
+		                // We allow the user to configure whether
+		                // or not they want to support multiple queries
+		                // (by default, this is disabled).
+		                /*if (this.connection.getAllowMultiQueries()) {
+		                    this.clientParam |= CLIENT_MULTI_QUERIES;
+		                }*/
+		            } else {
+		            	authing.clientParam |= CLIENT_RESERVED;
+		            }
+		        }
+				if (handpacket.protocolVersion > 9) {
+					authing.clientParam |= CLIENT_LONG_PASSWORD; // for long passwords
+		        } else {
+		        	authing.clientParam &= ~CLIENT_LONG_PASSWORD;
+		        }
+				
+				if ((this.serverCapabilities & CLIENT_LONG_FLAG) != 0) {
+					authing.clientParam |= CLIENT_LONG_FLAG;
+		        }
+				
+				if ((this.serverCapabilities & CLIENT_SECURE_CONNECTION) != 0) {
+					authing.clientParam |= CLIENT_SECURE_CONNECTION;
+				}
+				
 				authing.user = this.getUser();
 				authing.packetId = 1;
 				
@@ -119,16 +169,127 @@ public class MysqlServerConnection extends MysqlConnection implements MySqlPacke
 				if(logger.isDebugEnabled()){
 					logger.debug("authing result packet from server:"+this.host +":"+this.port);
 				}
+				setAuthenticated(true);
+				
 				if(MysqlPacketBuffer.isOkPacket(message)){
-					setAuthenticated(true);
 					return;
+				}else{
+					logger.warn("server response packet from :"+this._channel.socket().getRemoteSocketAddress()+" :\n"+StringUtil.dumpAsHex(message, message.length));
 				}
+				
 			}
+
 		}else{
 			logger.warn("server "+this._channel.socket().getRemoteSocketAddress()+" raw handler message:"+StringUtil.dumpAsHex(message, message.length));
 		}
 		
 	}
+	
+	public boolean versionMeetsMinimum(int major, int minor, int subminor) {
+        if (getServerMajorVersion() >= major) {
+            if (getServerMajorVersion() == major) {
+                if (getServerMinorVersion() >= minor) {
+                    if (getServerMinorVersion() == minor) {
+                        return (getServerSubMinorVersion() >= subminor);
+                    }
+
+                    // newer than major.minor
+                    return true;
+                }
+
+                // older than major.minor
+                return false;
+            }
+
+            // newer than major  
+            return true;
+        }
+
+        return false;
+    }
+	
+    /**
+     * Get the major version of the MySQL server we are talking to.
+     *
+     * @return DOCUMENT ME!
+     */
+    final int getServerMajorVersion() {
+        return this.serverMajorVersion;
+    }
+
+    /**
+     * Get the minor version of the MySQL server we are talking to.
+     *
+     * @return DOCUMENT ME!
+     */
+    final int getServerMinorVersion() {
+        return this.serverMinorVersion;
+    }
+
+    /**
+     * Get the sub-minor version of the MySQL server we are talking to.
+     *
+     * @return DOCUMENT ME!
+     */
+    final int getServerSubMinorVersion() {
+        return this.serverSubMinorVersion;
+    }
+
+    /**
+     * Get the version string of the server we are talking to
+     *
+     * @return DOCUMENT ME!
+     */
+    String getServerVersion() {
+        return this.serverVersion;
+    }
+	private void splitVersion(){
+		// Parse the server version into major/minor/subminor
+        int point = this.serverVersion.indexOf("."); //$NON-NLS-1$
+
+        if (point != -1) {
+            try {
+                int n = Integer.parseInt(this.serverVersion.substring(0, point));
+                this.serverMajorVersion = n;
+            } catch (NumberFormatException NFE1) {
+                ;
+            }
+
+            String remaining = this.serverVersion.substring(point + 1,
+                    this.serverVersion.length());
+            point = remaining.indexOf("."); //$NON-NLS-1$
+
+            if (point != -1) {
+                try {
+                    int n = Integer.parseInt(remaining.substring(0, point));
+                    this.serverMinorVersion = n;
+                } catch (NumberFormatException nfe) {
+                    ;
+                }
+
+                remaining = remaining.substring(point + 1, remaining.length());
+
+                int pos = 0;
+
+                while (pos < remaining.length()) {
+                    if ((remaining.charAt(pos) < '0') ||
+                            (remaining.charAt(pos) > '9')) {
+                        break;
+                    }
+
+                    pos++;
+                }
+
+                try {
+                    int n = Integer.parseInt(remaining.substring(0, pos));
+                    this.serverSubMinorVersion = n;
+                } catch (NumberFormatException nfe) {
+                    ;
+                }
+            }
+        }
+	}
+	
 	/**
 	 * 正在处于验证的Connection Idle时间可以设置相应的少一点。
 	 */

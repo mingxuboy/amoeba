@@ -20,6 +20,7 @@ import com.meidusa.amoeba.mysql.io.Constants;
 import com.meidusa.amoeba.mysql.io.MySqlPacketConstant;
 import com.meidusa.amoeba.mysql.util.MysqlStringUtil;
 import com.meidusa.amoeba.mysql.util.SingleByteCharsetConverter;
+import com.meidusa.amoeba.net.Connection;
 import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
 import com.meidusa.amoeba.util.StringUtil;
 
@@ -45,6 +46,10 @@ public class MysqlPacketBuffer extends AbstractPacketBuffer{
 		
 		super(buf);
 		this.position = MySqlPacketConstant.HEADER_SIZE;
+	}
+	
+	public void init(Connection conn){
+		super.init(conn);
 	}
 	
 	public int getPacketLength(){
