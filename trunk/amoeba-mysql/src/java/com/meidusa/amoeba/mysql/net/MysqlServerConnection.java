@@ -93,6 +93,10 @@ public class MysqlServerConnection extends MysqlConnection implements MySqlPacke
 				this.serverCapabilities = handpacket.serverCapabilities;
 		        this.serverVersion = handpacket.serverVersion;
 		        splitVersion();
+		        if (!versionMeetsMinimum(4, 1, 1) || handpacket.protocolVersion != 10){
+		        	logger.error("amoeba support version minimum 4.1.1  and protocol version 10");
+		        	System.exit(-1);
+		        }
 		        
 				if(logger.isDebugEnabled()){
 					logger.debug("receive HandshakePacket packet from server:"+this.host +":"+this.port);
@@ -130,6 +134,7 @@ public class MysqlServerConnection extends MysqlConnection implements MySqlPacke
 		            	authing.clientParam |= CLIENT_RESERVED;
 		            }
 		        }
+				
 				if (handpacket.protocolVersion > 9) {
 					authing.clientParam |= CLIENT_LONG_PASSWORD; // for long passwords
 		        } else {
