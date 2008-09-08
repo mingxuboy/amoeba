@@ -1661,5 +1661,15 @@ public class GenericObjectPool extends BaseObjectPool implements ObjectPool {
      * My idle object eviction {@link TimerTask}, if any.
      */
     private Evictor _evictor = null;
+    
+    private boolean enable;
+    
+	public boolean isEnable() {
+		return enable;
+	}
+
+	public void setEnable(boolean isEnabled) {
+		this.enable = isEnabled;
+	}
 
 }

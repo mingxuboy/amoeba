@@ -35,6 +35,8 @@ public class MultipleLoadBalanceObjectPool implements ObjectPool{
 	
 	public static final int LOADBALANCING_ROUNDROBIN = 1;
 	public static final int LOADBALANCING_WEIGHTBASED = 2;
+	private boolean enable;
+	
 	protected static class ActiveNumComparator implements Comparator<ObjectPool>{
 		public int compare(ObjectPool o1, ObjectPool o2) {
 			return o1.getNumActive() - o2.getNumActive();
@@ -321,6 +323,14 @@ public class MultipleLoadBalanceObjectPool implements ObjectPool{
 	public void setFactory(PoolableObjectFactory factory)
 			throws IllegalStateException, UnsupportedOperationException {
 		throw new UnsupportedOperationException();
+	}
+    
+	public boolean isEnable() {
+		return enable;
+	}
+
+	public void setEnable(boolean isEnabled) {
+		this.enable = isEnabled;
 	}
 
 }

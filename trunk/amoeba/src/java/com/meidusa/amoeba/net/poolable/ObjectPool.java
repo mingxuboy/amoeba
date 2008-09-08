@@ -139,4 +139,12 @@ public interface ObjectPool {
      * @throws UnsupportedOperationException if this implementation does not support the operation
      */
     void setFactory(PoolableObjectFactory factory) throws IllegalStateException, UnsupportedOperationException;
+    
+    /**
+     * return this pool enabled/disabled status
+     * @return
+     */
+    boolean isEnable();
+    
+    void setEnable(boolean isEnabled);
 }
