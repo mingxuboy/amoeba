@@ -13,6 +13,7 @@ package com.meidusa.amoeba.mysql.net.packet;
 
 import java.io.UnsupportedEncodingException;
 
+import com.meidusa.amoeba.mysql.util.Util;
 import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
 
 /**
@@ -79,6 +80,10 @@ public class AuthenticationPacket extends AbstractPacket{
     
 	public String user;
     
+	public String seed;
+	
+	public String password;
+	
 	//16字节
 	public byte[] encryptedPassword;
 	
@@ -92,7 +97,7 @@ public class AuthenticationPacket extends AbstractPacket{
 		charsetNumber	= buffer.readByte();
 		//跳过23个填充字节
 		buffer.setPosition(buffer.getPosition()+23);
-		user			= buffer.readString(CODE_PAGE_1252);
+		user			= buffer.readString();
 		//buffer.read
 		long passwordLength = buffer.readFieldLength();
 		
@@ -102,66 +107,62 @@ public class AuthenticationPacket extends AbstractPacket{
 		buffer.setPosition(buffer.getPosition()+(int)passwordLength);
 		if((clientParam & CLIENT_CONNECT_WITH_DB) != 0){
 			if(buffer.getPosition() < buffer.getBufLength()){
-				database		= buffer.readString(CODE_PAGE_1252);
+				database		= buffer.readString();
 			}
 		}
-		
-		/*if(logger.isDebugEnabled()){
-			StringBuilder builder = new StringBuilder();
-			builder.append("\n");
-			builder.append("==============================Client Flag===============================\n");
-			builder.append("CLIENT_LONG_PASSWORD:").append(((clientParam & CLIENT_LONG_PASSWORD)!=0)).append("\n");
-			builder.append("CLIENT_FOUND_ROWS:").append(((clientParam & CLIENT_FOUND_ROWS)!=0)).append("\n");
-			builder.append("CLIENT_LONG_FLAG:").append(((clientParam & CLIENT_LONG_FLAG)!=0)).append("\n");
-			builder.append("CLIENT_CONNECT_WITH_DB:").append(((clientParam & CLIENT_CONNECT_WITH_DB)!=0)).append("\n");
-			builder.append("CLIENT_NO_SCHEMA:").append(((clientParam & CLIENT_NO_SCHEMA)!=0)).append("\n");
-			builder.append("CLIENT_COMPRESS:").append(((clientParam & CLIENT_COMPRESS)!=0)).append("\n");
-			builder.append("CLIENT_ODBC:").append(((clientParam & CLIENT_ODBC)!=0)).append("\n");
-			builder.append("CLIENT_LOCAL_FILES:").append(((clientParam & CLIENT_LOCAL_FILES)!=0)).append("\n");
-			builder.append("CLIENT_IGNORE_SPACE:").append(((clientParam & CLIENT_IGNORE_SPACE)!=0)).append("\n");
-			builder.append("CLIENT_PROTOCOL_41:").append(((clientParam & CLIENT_PROTOCOL_41)!=0)).append("\n");
-			builder.append("CLIENT_INTERACTIVE:").append(((clientParam & CLIENT_INTERACTIVE)!=0)).append("\n");
-			builder.append("CLIENT_SSL:").append(((clientParam & CLIENT_SSL)!=0)).append("\n");
-			builder.append("CLIENT_IGNORE_SIGPIPE:").append(((clientParam & CLIENT_IGNORE_SIGPIPE)!=0)).append("\n");
-			builder.append("CLIENT_TRANSACTIONS:").append(((clientParam & CLIENT_TRANSACTIONS)!=0)).append("\n");
-			builder.append("CLIENT_RESERVED:").append(((clientParam & CLIENT_RESERVED)!=0)).append("\n");
-			builder.append("CLIENT_SECURE_CONNECTION:").append(((clientParam & CLIENT_SECURE_CONNECTION)!=0)).append("\n");
-			builder.append("CLIENT_MULTI_STATEMENTS:").append(((clientParam & CLIENT_MULTI_STATEMENTS)!=0)).append("\n");
-			builder.append("CLIENT_MULTI_RESULTS:").append(((clientParam & CLIENT_MULTI_RESULTS)!=0)).append("\n");
-			builder.append("===========================END Client Flag===============================\n");
-			logger.debug(builder.toString());
-		}*/
 	}
 
 	public void write2Buffer(AbstractPacketBuffer mybuffer) throws UnsupportedEncodingException{
 		super.write2Buffer(mybuffer);
 		MysqlPacketBuffer buffer = (MysqlPacketBuffer)mybuffer;
-		buffer.writeLong(clientParam);
-		buffer.writeLong(maxThreeBytes);
-		buffer.writeByte(charsetNumber);
-		buffer.writeBytesNoNull(new byte[23]);
-		
-		if(user == null){
-			user = "";
-		}
-		buffer.writeString(user, CODE_PAGE_1252);
-		
-		/*if(encryptedPassword == null){
-			encryptedPassword = "";
-		}*/
-		//buffer.writeString(encryptedPassword, CODE_PAGE_1252);
-		if(encryptedPassword != null && encryptedPassword.length != 0){
-			buffer.writeFieldLength(encryptedPassword.length);
-			buffer.writeBytesNoNull(encryptedPassword);
-		}else{
-			buffer.writeByte((byte)0);
-		}
-		
-		if((clientParam & CLIENT_CONNECT_WITH_DB) != 0){
-			if(database != null){
-				buffer.writeString(database, CODE_PAGE_1252);
+
+		if ((this.clientParam & CLIENT_SECURE_CONNECTION) != 0){
+			buffer.writeLong(clientParam);
+			buffer.writeLong(maxThreeBytes);
+			buffer.writeByte(charsetNumber);
+			buffer.writeBytesNoNull(new byte[23]);
+			
+			if(user == null){
+				user = "";
 			}
+			buffer.writeString(user);
+			
+			if(encryptedPassword != null && encryptedPassword.length != 0){
+				buffer.writeFieldLength(encryptedPassword.length);
+				buffer.writeBytesNoNull(encryptedPassword);
+			}else{
+				buffer.writeByte((byte)0);
+			}
+			
+			if((clientParam & CLIENT_CONNECT_WITH_DB) != 0){
+				if(database != null){
+					buffer.writeString(database);
+				}
+			}
+			
+		}else{
+			buffer.writeLong(this.clientParam);
+			buffer.writeLong(this.maxThreeBytes);
+
+             // charset, JDBC will connect as 'latin1',
+             // and use 'SET NAMES' to change to the desired
+             // charset after the connection is established.
+			buffer.writeByte((byte) 8);
+
+             // Set of bytes reserved for future use.
+			buffer.writeBytesNoNull(new byte[23]);
+			
+			buffer.writeString(user, CODE_PAGE_1252);
+			buffer.writeString(Util.newCrypt(password, this.seed), CODE_PAGE_1252);
+			
+            if((clientParam & CLIENT_CONNECT_WITH_DB) != 0){
+				if(database != null){
+					buffer.writeString(database,CODE_PAGE_1252);
+				}
+			}
+			
 		}
+		
 		
 	}
 	
@@ -174,4 +175,7 @@ public class AuthenticationPacket extends AbstractPacket{
 		return packLength;
 	}
 
+	public static void main(String[] args){
+		System.out.println(41516 & CLIENT_SECURE_CONNECTION);
+	}
 }
