@@ -7,7 +7,11 @@ abstract class CharCommonAccessor extends Accessor {
     String getString(byte[] data) {
         String s = null;
 
-        s = new String(data, 0, data.length);
+        if (oac.formOfUse == 2) {
+            s = oac.meg.getConversion().NCharBytesToString(data, data.length);
+        } else {
+            s = oac.meg.getConversion().CharBytesToString(data, data.length);
+        }
 
         return s;
     }

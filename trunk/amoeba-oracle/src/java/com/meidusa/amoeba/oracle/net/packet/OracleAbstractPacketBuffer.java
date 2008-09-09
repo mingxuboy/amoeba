@@ -63,11 +63,11 @@ public class OracleAbstractPacketBuffer extends AbstractPacketBuffer {
         return this.oconn.getRep();
     }
 
-    protected DBConversion getConversion() {
+    public DBConversion getConversion() {
         return this.oconn.getConversion();
     }
 
-    protected void setConversion(DBConversion conversion) {
+    public void setConversion(DBConversion conversion) {
         this.oconn.setConversion(conversion);
     }
 

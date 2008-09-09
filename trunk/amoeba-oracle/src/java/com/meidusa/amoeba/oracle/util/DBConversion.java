@@ -193,12 +193,12 @@ public class DBConversion {
         else return stringToDriverCharBytes(s, clientCharSetId);
     }
 
-    public String CharBytesToString(byte abyte0[], int i){
+    public String CharBytesToString(byte abyte0[], int i) {
         return CharBytesToString(abyte0, i, false);
     }
 
     @SuppressWarnings("deprecation")
-    public String CharBytesToString(byte abyte0[], int i, boolean flag){
+    public String CharBytesToString(byte abyte0[], int i, boolean flag) {
         String s = null;
         if (abyte0.length == 0) return s;
         switch (clientCharSetId) {
@@ -234,7 +234,7 @@ public class DBConversion {
     }
 
     @SuppressWarnings("deprecation")
-    public String NCharBytesToString(byte abyte0[], int i) throws SQLException {
+    public String NCharBytesToString(byte abyte0[], int i) {
         String s = null;
         if (clientCharSetId == -1) s = serverNCharSet.toStringWithReplacement(abyte0, 0, i);
         else switch (serverNCharSetId) {
@@ -335,13 +335,11 @@ public class DBConversion {
     }
 
     public int CHARBytesToJavaChars(byte abyte0[], int i, char ac[], int j, int ai[], int k) throws SQLException {
-        return _CHARBytesToJavaChars(abyte0, i, ac, j, clientCharSetId, ai, k, serverCharSet, serverNCharSet,
-                                     clientCharSet, false);
+        return _CHARBytesToJavaChars(abyte0, i, ac, j, clientCharSetId, ai, k, serverCharSet, serverNCharSet, clientCharSet, false);
     }
 
     public int NCHARBytesToJavaChars(byte abyte0[], int i, char ac[], int j, int ai[], int k) throws SQLException {
-        return _CHARBytesToJavaChars(abyte0, i, ac, j, serverNCharSetId, ai, k, serverCharSet, serverNCharSet,
-                                     clientCharSet, true);
+        return _CHARBytesToJavaChars(abyte0, i, ac, j, serverNCharSetId, ai, k, serverCharSet, serverNCharSet, clientCharSet, true);
     }
 
     static final int _CHARBytesToJavaChars(byte abyte0[], int i, char ac[], int j, short word0, int ai[], int k,
