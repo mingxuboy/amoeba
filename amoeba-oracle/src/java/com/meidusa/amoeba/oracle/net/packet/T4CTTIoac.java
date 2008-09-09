@@ -17,37 +17,37 @@ import java.util.Arrays;
  */
 public class T4CTTIoac {
 
-    static final short  UACFIND    = 1;
-    static final short  UACFALN    = 2;
-    static final short  UACFRCP    = 4;
-    static final short  UACFBBV    = 8;
-    static final short  UACFNCP    = 16;
-    static final short  UACFBLP    = 32;
-    static final short  UACFARR    = 64;
-    static final short  UACFIGN    = 128;
-    static final short  UACFNSCL   = 1;
-    static final short  UACFBUC    = 2;
-    static final short  UACFSKP    = 4;
-    static final short  UACFCHRCNT = 8;
-    static final short  UACFNOADJ  = 16;
-    static final short  UACFCUS    = 4096;
-    static final byte[] NO_BYTES   = new byte[0];
+    static final short     UACFIND    = 1;
+    static final short     UACFALN    = 2;
+    static final short     UACFRCP    = 4;
+    static final short     UACFBBV    = 8;
+    static final short     UACFNCP    = 16;
+    static final short     UACFBLP    = 32;
+    static final short     UACFARR    = 64;
+    static final short     UACFIGN    = 128;
+    static final short     UACFNSCL   = 1;
+    static final short     UACFBUC    = 2;
+    static final short     UACFSKP    = 4;
+    static final short     UACFCHRCNT = 8;
+    static final short     UACFNOADJ  = 16;
+    static final short     UACFCUS    = 4096;
+    static final byte[]    NO_BYTES   = new byte[0];
 
-    T4CPacketBuffer     meg;
-    boolean             isStream;
-    short               oacdty;                  // dataType
-    short               oacflg;                  // flags
-    short               oacpre;                  // precision
-    short               oacscl;                  // scale
-    int                 oacmxl;                  // describeType
-    int                 oacmxlc;
-    int                 oacmal;                  // total_elems
-    int                 oacfl2;                  // oacfl2
-    byte[]              oactoid;                 // toid
-    int                 oactoidl;
-    int                 oacvsn;                  // TypeVersions
-    int                 ncs;                     // CharSet
-    short               formOfUse;               // CharSetForm
+    public T4CPacketBuffer meg;
+    public boolean         isStream;
+    public short           oacdty;                  // dataType
+    public short           oacflg;                  // flags
+    public short           oacpre;                  // precision
+    public short           oacscl;                  // scale
+    public int             oacmxl;                  // describeType
+    public int             oacmxlc;
+    public int             oacmal;                  // total_elems
+    public int             oacfl2;                  // oacfl2
+    public byte[]          oactoid;                 // toid
+    public int             oactoidl;
+    public int             oacvsn;                  // TypeVersions
+    public int             ncs;                     // CharSet
+    public short           formOfUse;               // CharSetForm
 
     public T4CTTIoac(T4CPacketBuffer meg){
         this.meg = meg;
