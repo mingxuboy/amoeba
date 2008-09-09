@@ -188,6 +188,18 @@ public class AuthenticationPacket extends AbstractPacket{
 	}
 
 	public static void main(String[] args){
+		AuthenticationPacket auth = new AuthenticationPacket();
+		auth.charsetNumber = 8;
+		auth.password = "hello12323";
+		auth.seed = "12345678912345678901";
+		auth.packetId = 1;
+		auth.database = "test";
+		auth.clientParam = 63487;
+		auth.user = "testamoeba";
+		AuthenticationPacket other = new AuthenticationPacket();
+		other.init(auth.toByteBuffer(null).array(), null);
+		System.out.println(other);
+		
 		System.out.println(41516 & CLIENT_SECURE_CONNECTION);
 	}
 }

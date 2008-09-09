@@ -257,6 +257,10 @@ TOKEN: /* SQL Keywords. prefixed with K_ to avoid name clashes */
 |   <K_REAL:"REAL">
 |	<K_OPTION:"OPTION">
 
+|	<K_INTERSECT:"INTERSECT">
+|	<K_MINUS:"MINUS">
+|	<K_NOWAIT:"NOWAIT">
+|	<K_PARTITION:"PARTITION">
 |   <K_SELECT:"SELECT">
 |   <K_SET:"SET">
 |   <K_SOME:"SOME">
@@ -1058,10 +1062,10 @@ Table TableName() :
 	
 }
 {
-     schemaName = EntityName() 
+     (schemaName = EntityName() 
      ["." 
      	tableName= EntityName()
-     ]{
+     ] ["PARTITION" "("EntityName()")"]){
      	if(tableName == null){
      		tableName = schemaName;
      		schemaName = null;	
@@ -1156,7 +1160,7 @@ Expression FullSelectStatement():
 void UnionClause():
 {}
 {
-        "UNION" ["ALL"]
+        ("UNION" ["ALL"]) | "INTERSECT" | "MINUS"
 }
 
 Expression SubSelectStatement():
@@ -1990,7 +1994,7 @@ void DataTypes()      :
 void ForUpdateClause() :
 {}
 {
-    "FOR" "UPDATE" "OF" ColumnName() ("," ColumnName())*
+    "FOR" "UPDATE" ["OF" [ColumnName() ("," ColumnName())*]] [<K_NOWAIT>]
 }
 
 void ReadOnlyClause() :

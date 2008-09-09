@@ -1,0 +1,150 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3c.org/TR/1999/REC-html401-19991224/loose.dtd">
+
+<HTML dir=ltr xmlns="http://www.w3.org/1999/xhtml"><HEAD><TITLE>Amoeba 开发者博客 › General Options — WordPress</TITLE>
+<META http-equiv=Content-Type content="text/html; charset=UTF-8"><LINK 
+href="install.files/wp-admin.css" type=text/css rel=stylesheet>
+<SCRIPT type=text/javascript>
+//<![CDATA[
+function addLoadEvent(func) {if ( typeof wpOnload!='function'){wpOnload=func;}else{ var oldonload=wpOnload;wpOnload=function(){oldonload();func();}}}
+//]]>
+</SCRIPT>
+
+<SCRIPT src="install.files/fat.js" type=text/javascript></SCRIPT>
+
+<META content="MSHTML 6.00.2900.3395" name=GENERATOR></HEAD>
+<BODY>
+<DIV id=wphead>
+  <H1 align="center">Amoeba Configuration</H1>
+</DIV>
+<UL id=adminmenu>
+  <LI><A 
+  href="http://amoeba.meidusa.com/wordpress/wp-admin/index.php">Dashboard</A> 
+  <LI><A 
+  href="http://amoeba.meidusa.com/wordpress/wp-admin/post-new.php">Write</A> 
+  <LI><A href="http://amoeba.meidusa.com/wordpress/wp-admin/edit.php">Manage</A> 
+
+  <LI><A 
+  href="http://amoeba.meidusa.com/wordpress/wp-admin/edit-comments.php">Comments</A> 
+
+  <LI><A 
+  href="http://amoeba.meidusa.com/wordpress/wp-admin/link-manager.php">Blogroll</A> 
+
+  <LI><A 
+  href="http://amoeba.meidusa.com/wordpress/wp-admin/themes.php">Presentation</A> 
+
+  <LI><A 
+  href="http://amoeba.meidusa.com/wordpress/wp-admin/plugins.php">Plugins</A> 
+  <LI><A href="http://amoeba.meidusa.com/wordpress/wp-admin/users.php">Users</A> 
+
+  <LI><A class=current 
+  href="http://amoeba.meidusa.com/wordpress/wp-admin/options-general.php">Options</A></LI></UL>
+<UL id=submenu>
+  <LI><A class=current 
+  href="http://amoeba.meidusa.com/wordpress/wp-admin/options-general.php">General</A> 
+
+  <LI><A 
+  href="http://amoeba.meidusa.com/wordpress/wp-admin/options-writing.php">Writing</A> 
+
+  <LI><A 
+  href="http://amoeba.meidusa.com/wordpress/wp-admin/options-reading.php">Reading</A> 
+
+  <LI><A 
+  href="http://amoeba.meidusa.com/wordpress/wp-admin/options-discussion.php">Discussion</A> 
+
+  <LI><A 
+  href="http://amoeba.meidusa.com/wordpress/wp-admin/options-privacy.php">Privacy</A> 
+
+  <LI><A 
+  href="http://amoeba.meidusa.com/wordpress/wp-admin/options-permalink.php">Permalinks</A> 
+
+  <LI><A 
+  href="http://amoeba.meidusa.com/wordpress/wp-admin/options-misc.php">Miscellaneous</A> 
+  </LI></UL>
+<DIV class=wrap>
+  <H2 align="center">General Options</H2>
+<FORM action=options.php method=post>
+    <P class=submit><INPUT type=submit value="Update Options >>" name=Submit></P>
+<TABLE class=optiontable>
+  <TBODY>
+  <TR vAlign=top>
+    <TH scope=row>Weblog title:</TH>
+    <TD><INPUT id=blogname size=40 value="Amoeba 开发者博客" name=blogname></TD></TR>
+  <TR vAlign=top>
+    <TH scope=row>Tagline:</TH>
+    <TD><INPUT id=blogdescription style="WIDTH: 95%" size=45 
+      value="Keep Amoeba Simple And Stupid" name=blogdescription> <BR>In a few 
+      words, explain what this weblog is about.</TD></TR>
+  <TR vAlign=top>
+    <TH scope=row>WordPress address (URL):</TH>
+    <TD><INPUT class=code id=siteurl size=40 
+      value=http://amoeba.meidusa.com/wordpress name=siteurl></TD></TR>
+  <TR vAlign=top>
+    <TH scope=row>Blog address (URL):</TH>
+    <TD><INPUT class=code id=home size=40 
+      value=http://amoeba.meidusa.com/wordpress name=home><BR>Enter the address 
+      here if you want your blog homepage <A 
+      href="http://codex.wordpress.org/Giving_WordPress_Its_Own_Directory">to be 
+      different from the directory</A> you installed WordPress.</TD></TR>
+  <TR vAlign=top>
+    <TH scope=row>E-mail address: </TH>
+    <TD><INPUT class=code id=admin_email size=40 value=piratebase@sina.com 
+      name=admin_email> <BR>This address is used only for admin purposes.</TD></TR>
+  <TR vAlign=top>
+    <TH scope=row>Membership:</TH>
+    <TD><LABEL for=users_can_register><INPUT id=users_can_register 
+      type=checkbox value=1 name=users_can_register> Anyone can 
+      register</LABEL><BR><LABEL for=comment_registration><INPUT 
+      id=comment_registration type=checkbox value=1 name=comment_registration> 
+      Users must be registered and logged in to comment</LABEL> </TD></TR>
+  <TR vAlign=top>
+    <TH scope=row>New User Default Role:</TH>
+    <TD><LABEL for=default_role><SELECT id=default_role name=default_role> 
+        <OPTION value=subscriber selected>Subscriber</OPTION> <OPTION 
+        value=administrator>Administrator</OPTION> <OPTION 
+        value=editor>Editor</OPTION> <OPTION value=author>Author</OPTION> 
+        <OPTION value=contributor>Contributor</OPTION></SELECT></LABEL> 
+  </TD></TR></TBODY></TABLE>
+<FIELDSET class=options><LEGEND>Date and Time</LEGEND>
+<TABLE class=optiontable>
+  <TBODY>
+  <TR>
+    <TH scope=row><ABBR title="Coordinated Universal Time">UTC</ABBR> time is: 
+    </TH>
+    <TD><CODE>2008-09-09 1:53:46 am</CODE></TD></TR>
+  <TR>
+    <TH scope=row>Times in the weblog should differ by: </TH>
+    <TD><INPUT id=gmt_offset size=2 value=8 name=gmt_offset> hours (Your 
+      timezone offset, for example <CODE>-6</CODE> for Central Time.)</TD></TR>
+  <TR>
+    <TH scope=row>Default date format:</TH>
+    <TD><INPUT id=date_format size=30 value="F j, Y" 
+      name=date_format><BR>Output: <STRONG>September 9, 2008</STRONG></TD></TR>
+  <TR>
+    <TH scope=row>Default time format:</TH>
+    <TD><INPUT id=time_format size=30 value="g:i a" 
+      name=time_format><BR>Output: <STRONG>9:53 am</STRONG></TD></TR>
+  <TR>
+    <TH scope=row>&nbsp;</TH>
+    <TD><A 
+      href="http://codex.wordpress.org/Formatting_Date_and_Time">Documentation 
+      on date formatting</A>. Click "Update options" to update sample output. 
+  </TD></TR>
+  <TR>
+    <TH scope=row>Weeks in the calendar should start on:</TH>
+    <TD><SELECT id=start_of_week name=start_of_week> <OPTION 
+        value=0>Sunday</OPTION> <OPTION value=1 selected>Monday</OPTION> <OPTION 
+        value=2>Tuesday</OPTION> <OPTION value=3>Wednesday</OPTION> <OPTION 
+        value=4>Thursday</OPTION> <OPTION value=5>Friday</OPTION> <OPTION 
+        value=6>Saturday</OPTION></SELECT></TD></TR></TBODY></TABLE></FIELDSET> 
+<P class=submit><INPUT type=submit value="Update Options »" name=Submit> <INPUT 
+type=hidden value=update name=action> <INPUT type=hidden 
+value=siteurl,home,blogname,blogdescription,admin_email,users_can_register,gmt_offset,date_format,time_format,start_of_week,comment_registration,default_role 
+name=page_options> </P></FORM></DIV>
+<DIV id=footer>
+  <P class=logo>&nbsp;</P>
+<P class=docs><A href="http://codex.wordpress.org/">Documentation</A> — <A 
+href="http://wordpress.org/support/">Support Forums</A><BR>2.2.1 — 0.55 
+seconds</P></DIV>
+<P id=bh style="TEXT-ALIGN: center">&nbsp;</P>
+<SCRIPT type=text/javascript>if(typeof wpOnload=='function')wpOnload();</SCRIPT>
+</BODY></HTML>

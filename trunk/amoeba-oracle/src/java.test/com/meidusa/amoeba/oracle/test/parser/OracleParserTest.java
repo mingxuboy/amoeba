@@ -14,7 +14,6 @@ import com.meidusa.amoeba.parser.statment.PropertyStatment;
 import com.meidusa.amoeba.parser.statment.Statment;
 import com.meidusa.amoeba.parser.expression.Expression;
 import com.meidusa.amoeba.parser.function.*;
-import com.meidusa.amoeba.mysql.parser.sql.MysqlParser;
 import com.meidusa.amoeba.route.AbstractQueryRouter;
 import com.meidusa.amoeba.sqljep.function.Comparative;
 
@@ -64,7 +63,12 @@ public class OracleParserTest {
 					"FROM cdb_threads t INNER JOIN cdb_forums f ON f.fid=t.fid	LEFT JOIN cdb_forumfields ff ON ff.fid=f.fid  WHERE t.tid='1397087' AND t.displayorder>='0' LIMIT 1",
 				"SELECT f.fid, f.fup, f.type, f.name, f.threads, f.posts, f.todayposts, f.lastpost, f.inheritedmod, f.forumcolumns, f.simple, ff.description, ff.moderators, ff.icon, ff.viewperm, ff.redirect FROM cdb_forums f LEFT JOIN cdb_forumfields ff USING(fid)	WHERE f.status>0 ORDER BY f.type, f.displayorder",
 				"update offer_detail set details=:1 where id=:2",
-				"SELECT o.* FROM  (SELECT row_id   FROM  (SELECT row_id,    rownum rn     FROM    (SELECT rowid row_id       FROM offer      WHERE member_id = 'asdasdf'    AND status        = 'Y'    AND gmt_expire    > sysdate    AND type = ?   ORDER BY MEMBER_ID,      STATUS         ,      GMT_EXPIRE DESC    )    WHERE rownum<=?  )  WHERE rn >= 100  ) t,  offer o  WHERE t.row_id=o.rowid "
+				"SELECT o.* FROM  (SELECT row_id   FROM  (SELECT row_id,    rownum rn     FROM    (SELECT rowid row_id       FROM offer      WHERE member_id = 'asdasdf'    AND status        = 'Y'    AND gmt_expire    > sysdate    AND type = ?   ORDER BY MEMBER_ID,      STATUS         ,      GMT_EXPIRE DESC    )    WHERE rownum<=?  )  WHERE rn >= 100  ) t,  offer o  WHERE t.row_id=o.rowid ",
+				"select * from member partition (member_0809) tt",
+				"select seq_news.nextval from dual",
+				"select seq_news.CURRVAL  from dual",
+				"SELECT * from test where gmt_create between YEAR('1998-02-03') and YEAR('2003-01-03')"
+				
 		};
 		
 		for(String sql: sqls){
