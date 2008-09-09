@@ -1,7 +1,6 @@
 package com.meidusa.amoeba.oracle.accessor;
 
 import java.sql.Date;
-import java.sql.SQLException;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.Calendar;
@@ -40,16 +39,16 @@ abstract class DateTimeCommonAccessor extends Accessor {
     TimeZone          defaultTZ;
     Calendar          defaultCalendar;
 
-    Date getDate() {
-        return getDate(getDefaultCalendar());
+    Date getDate(byte[] dataBytes) {
+        return getDate(getDefaultCalendar(), dataBytes);
     }
 
-    Date getDate(Calendar calendar) {
+    Date getDate(Calendar calendar, byte[] dataBytes) {
         if (calendar == null) {
-            return getDate();
+            return getDate(dataBytes);
         }
-        Date date = null;
 
+        Date date = null;
         int y = oracleYear(dataBytes);
         int m = oracleMonth(dataBytes);
         int d = oracleDay(dataBytes);
@@ -63,7 +62,7 @@ abstract class DateTimeCommonAccessor extends Accessor {
         return date;
     }
 
-    Time getTime() {
+    Time getTime(byte[] dataBytes) {
         Time time = null;
 
         TimeZone timezone = getDefaultTimeZone();
@@ -76,10 +75,11 @@ abstract class DateTimeCommonAccessor extends Accessor {
         return time;
     }
 
-    Time getTime(Calendar calendar) {
+    Time getTime(Calendar calendar, byte[] dataBytes) {
         if (calendar == null) {
-            return getTime();
+            return getTime(dataBytes);
         }
+
         Time time = null;
 
         int y = (((dataBytes[0] & 0xff) - 100) * 100 + (dataBytes[1] & 0xff)) - 100;
@@ -93,13 +93,13 @@ abstract class DateTimeCommonAccessor extends Accessor {
         return time;
     }
 
-    Timestamp getTimestamp() throws SQLException {
-        return getTimestamp(getDefaultCalendar());
+    Timestamp getTimestamp(byte[] dataBytes) {
+        return getTimestamp(getDefaultCalendar(), dataBytes);
     }
 
-    Timestamp getTimestamp(Calendar calendar) throws SQLException {
+    Timestamp getTimestamp(Calendar calendar, byte[] dataBytes) {
         if (calendar == null) {
-            return getTimestamp();
+            return getTimestamp(dataBytes);
         }
         Timestamp timestamp = null;
 
@@ -135,6 +135,7 @@ abstract class DateTimeCommonAccessor extends Accessor {
         return defaultCalendar;
     }
 
+    // ///////////////////////////////////////////////////////////////////////////////////////////////
     static final int oracleYear(byte[] dataBytes) {
         int j = (((dataBytes[0] & 0xff) - 100) * 100 + (dataBytes[1] & 0xff)) - 100;
         return j > 0 ? j : j + 1;

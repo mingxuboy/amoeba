@@ -1,6 +1,10 @@
 package com.meidusa.amoeba.oracle.accessor;
 
+public class T4CNumberAccessor extends NumberCommonAccessor {
 
-public class T4CNumberAccessor extends NumberAccessor {
+    @Override
+    public Object getObject(byte[] dataBytes) {
+        return super.getLong(dataBytes);
+    }
 
 }

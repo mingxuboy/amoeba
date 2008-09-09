@@ -4,7 +4,9 @@ import org.apache.log4j.Logger;
 
 import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
 import com.meidusa.amoeba.oracle.accessor.Accessor;
+import com.meidusa.amoeba.oracle.accessor.T4CCharAccessor;
 import com.meidusa.amoeba.oracle.accessor.T4CDateAccessor;
+import com.meidusa.amoeba.oracle.accessor.T4CNumberAccessor;
 import com.meidusa.amoeba.oracle.accessor.T4CVarcharAccessor;
 import com.meidusa.amoeba.oracle.accessor.T4CVarnumAccessor;
 
@@ -16,30 +18,32 @@ public class T4C8OallDataPacket extends T4CTTIfunPacket {
 
     private static Logger  logger = Logger.getLogger(T4C8OallDataPacket.class);
 
-    public byte[]          sqlStmt;
-    public int             numberOfBindPositions;
-    public T4CTTIoac[]     oacBind;
-    public String[]        paramType;
-    public String[]        paramValue;
+    byte[]                 sqlStmt;
+    int                    numberOfBindPositions;
+    T4CTTIoac[]            oacBind;
+    Accessor[]             accessors;
+    byte[][]               paramBytes;
 
     long                   options;
     int                    cursor;
-    int                    defCols;
     int                    al8i4Length;
     final long[]           al8i4  = new long[13];
-    public int             sqlStmtLength;
+
+    int                    sqlStmtLength;
     T4CTTIoac[]            oacdefDefines;
     Accessor[]             definesAccessors;
     int                    receiveState;
     boolean                plsql;
+    int                    defCols;
 
-    T4CTTIrxdDataPacket    rxd;
-    T4C8TTIrxhDataPacket   rxh;
-    T4CTTIoac              oac;
-    T4CTTIdcbDataPacket    dcb;
+    // T4CTTIrxdDataPacket rxd;
+    // T4C8TTIrxhDataPacket rxh;
+    // T4CTTIoac oac;
+    // T4CTTIdcbDataPacket dcb;
     T4CTTIofetchDataPacket ofetch;
     T4CTTIoexecDataPacket  oexec;
-    T4CTTIfobDataPacket    fob;
+
+    // T4CTTIfobDataPacket fob;
 
     public T4C8OallDataPacket(){
         super(OALL8);
@@ -99,9 +103,14 @@ public class T4C8OallDataPacket extends T4CTTIfunPacket {
 
     private void parseOALL8(T4CPacketBuffer meg) {
         unmarshalPisdef(meg);
+
         sqlStmt = meg.unmarshalCHR(sqlStmtLength);
+
         meg.unmarshalUB4Array(al8i4);
-        unmarshalBindsTypes(meg);
+
+        oacBind = new T4CTTIoac[numberOfBindPositions];
+        accessors = new Accessor[numberOfBindPositions];
+        unmarshalBindsTypes(meg);// 解析参数描述，并初始化相应的accessor。
 
         if (meg.versionNumber >= 9000 && defCols > 0) {
             oacdefDefines = new T4CTTIoac[defCols];
@@ -111,20 +120,29 @@ public class T4C8OallDataPacket extends T4CTTIfunPacket {
             }
         }
 
-        unmarshalBinds(meg);
+        paramBytes = new byte[numberOfBindPositions][];
+        if (numberOfBindPositions > 0) {
+            unmarshalBinds(meg);// 解析参数，并读取相应的参数值。
+        }
 
         if (logger.isDebugEnabled()) {
             System.out.println("type:T4CTTIfunPacket.OALL8");
             System.out.println("sqlStmt:" + new String(sqlStmt));
             System.out.println("numberOfBindPositions:" + numberOfBindPositions);
             for (int i = 0; i < numberOfBindPositions; i++) {
-                System.out.println("param_info_" + i + ":" + oacBind[i]);
-                System.out.print("param_value_" + i + ": [" + paramType[i] + "]");
-                if (paramValue[i] != null && paramValue[i].length() > 1000) {
-                    System.out.println("-[" + paramValue[i].substring(0, 1000) + "... #dataLength:" + paramValue[i].length() + "]");
+                System.out.println("param_des_" + i + ":" + oacBind[i]);
+                Object object = accessors[i].getObject(paramBytes[i]);
+                if (object instanceof String) {
+                    String s = (String) object;
+                    if (s.length() > 4000) {
+                        System.out.println("param_val_" + i + ":" + s.substring(0, 4000) + "... #dataLength:" + s.length());
+                    } else {
+                        System.out.println("param_val_" + i + ":" + s);
+                    }
                 } else {
-                    System.out.println("-[" + paramValue[i] + "]");
+                    System.out.println("param_val_" + i + ":" + object);
                 }
+
             }
         }
     }
@@ -144,9 +162,6 @@ public class T4C8OallDataPacket extends T4CTTIfunPacket {
 
         meg.unmarshalPTR();
         numberOfBindPositions = meg.unmarshalSWORD();
-        oacBind = new T4CTTIoac[numberOfBindPositions];
-        paramType = new String[numberOfBindPositions];
-        paramValue = new String[numberOfBindPositions];
 
         meg.unmarshalPTR();
         meg.unmarshalPTR();
@@ -164,18 +179,130 @@ public class T4C8OallDataPacket extends T4CTTIfunPacket {
         for (int i = 0; i < numberOfBindPositions; i++) {
             oacBind[i] = new T4CTTIoac(meg);
             oacBind[i].unmarshal();
+            fillAccessor(i, oacBind[i], meg);
+        }
+    }
+
+    private void fillAccessor(int i, T4CTTIoac oac, T4CPacketBuffer meg) {
+        switch (oac.oacdty) {
+            case Accessor.CHAR:
+                accessors[i] = new T4CCharAccessor();
+                break;
+            case Accessor.NUMBER:
+                accessors[i] = new T4CNumberAccessor();
+                break;
+            case Accessor.VARCHAR:
+                accessors[i] = new T4CVarcharAccessor();
+                break;
+            case Accessor.LONG:
+                // accessors[idx] = new T4CLongAccessor();
+                break;
+            case Accessor.VARNUM:
+                accessors[i] = new T4CVarnumAccessor();
+                break;
+            case Accessor.BINARY_FLOAT:
+                // accessors[idx] = new T4CBinaryFloatAccessor();
+                break;
+            case Accessor.BINARY_DOUBLE:
+                // accessors[idx] = new T4CBinaryDoubleAccessor();
+                break;
+            case Accessor.RAW:
+                // accessors[idx] = new T4CRawAccessor();
+                break;
+            case Accessor.LONG_RAW:
+                // if (meg.versionNumber >= 9000) {
+                // accessors[idx] = new T4CRawAccessor();
+                // } else {
+                // accessors[idx] = new T4CLongRawAccessor();
+                // }
+                break;
+            case Accessor.ROWID:
+            case Accessor.UROWID:
+                // accessors[idx] = new T4CRowidAccessor();
+                break;
+            case Accessor.RESULT_SET:
+                // accessors[idx] = new T4CResultSetAccessor();
+                break;
+            case Accessor.DATE:
+                accessors[i] = new T4CDateAccessor();
+                break;
+            case Accessor.BLOB:
+                // if (meg.versionNumber >= 9000 && l1 == -4) {
+                // accessors[idx] = new T4CLongRawAccessor();
+                // } else if (meg.versionNumber >= 9000 && l1 == -3) {
+                // accessors[idx] = new T4CRawAccessor();
+                // } else {
+                // accessors[idx] = new T4CBlobAccessor();
+                // }
+                break;
+            case Accessor.CLOB:
+                // if (meg.versionNumber >= 9000 && l1 == -1) {
+                // accessors[idx] = new T4CLongAccessor();
+                // } else if (meg.versionNumber >= 9000 && (l1 == 12 || l1 == 1)) {
+                // accessors[idx] = new T4CVarcharAccessor();
+                // } else {
+                // accessors[idx] = new T4CClobAccessor();
+                // }
+                break;
+            case Accessor.BFILE:
+                // accessors[idx] = new T4CBfileAccessor();
+                break;
+            case Accessor.NAMED_TYPE:
+                // accessors[idx] = new T4CNamedTypeAccessor();
+                break;
+            case Accessor.REF_TYPE:
+                // accessors[idx] = new T4CRefTypeAccessor();
+                break;
+            case Accessor.TIMESTAMP:
+                // accessors[idx] = new T4CTimestampAccessor();
+                break;
+            case Accessor.TIMESTAMPTZ:
+                // accessors[idx] = new T4CTimestamptzAccessor();
+                break;
+            case Accessor.TIMESTAMPLTZ:
+                // accessors[idx] = new T4CTimestampltzAccessor();
+                break;
+            case Accessor.INTERVALYM:
+                // accessors[idx] = new T4CIntervalymAccessor();
+                break;
+            case Accessor.INTERVALDS:
+                // accessors[idx] = new T4CIntervaldsAccessor();
+                break;
+            default:
+                throw new RuntimeException("unknown data type!");
+        }
+
+        if (accessors[i] != null) {
+            accessors[i].init(oac);
         }
     }
 
     private void unmarshalBinds(T4CPacketBuffer meg) {
-        if (numberOfBindPositions <= 0) {
-            return;
-        }
         short msgCode = meg.unmarshalUB1();
         if (msgCode == TTIRXD) {
-            for (int i = 0; i < numberOfBindPositions; i++) {
-                parseParam(i, oacBind[i], meg.unmarshalCLRforREFS());
+            byte[][] tmp = new byte[numberOfBindPositions][];
+            byte[][] bigTmp = new byte[numberOfBindPositions][];
+
+            int m = 0, l = 0;
+            for (int k = 0; k < numberOfBindPositions; k++) {
+                byte[] tmpBytes = meg.unmarshalCLRforREFS();
+                if (tmpBytes != null && tmpBytes.length > 4000) {
+                    bigTmp[m++] = tmpBytes;
+                } else {
+                    tmp[l++] = tmpBytes;
+                }
             }
+
+            int x = 0, y = 0;
+            for (int i = 0; i < numberOfBindPositions; i++) {
+                if (oacBind[i].oacmxl > 4000) {
+                    paramBytes[i] = bigTmp[x++];
+                } else {
+                    paramBytes[i] = tmp[y++];
+                }
+            }
+            tmp = null;
+            bigTmp = null;
         } else {
             throw new RuntimeException();
         }
@@ -212,133 +339,6 @@ public class T4C8OallDataPacket extends T4CTTIfunPacket {
     private void parseOLOGOFF(T4CPacketBuffer meg) {
         if (logger.isDebugEnabled()) {
             System.out.println("type:T4CTTIfunPacket.OLOGOFF");
-        }
-    }
-
-    private void parseParam(int idx, T4CTTIoac oac, byte[] data) {
-        switch (oac.oacdty) {
-            case Accessor.CHAR:
-                paramType[idx] = "CHAR";
-                // System.out.println(T4CCharAccessor.getString(data, desc[i][5], desc[i][5]));
-                break;
-
-            case Accessor.NUMBER:
-                paramType[idx] = "NUMBER";
-                // T4CNumberAccessor
-                break;
-
-            case Accessor.VARCHAR:
-                paramType[idx] = "VARCHAR";
-                paramValue[idx] = T4CVarcharAccessor.getString(data, oac.oacmxl, oac.oacmxl);
-                break;
-
-            case Accessor.LONG:
-                paramType[idx] = "LONG";
-                // T4CLongAccessor
-                break;
-
-            case Accessor.VARNUM:
-                paramType[idx] = "VARNUM";
-                paramValue[idx] = Long.toString(T4CVarnumAccessor.getLong(data));
-                // System.out.println(T4CVarnumAccessor.getLong(data));
-                break;
-
-            case Accessor.BINARY_FLOAT:
-                paramType[idx] = "BINARY_FLOAT";
-                // T4CBinaryFloatAccessor
-                break;
-
-            case Accessor.BINARY_DOUBLE:
-                paramType[idx] = "BINARY_DOUBLE";
-                // T4CBinaryDoubleAccessor
-                break;
-
-            case Accessor.RAW:
-                paramType[idx] = "RAW";
-                // T4CRawAccessor
-                break;
-
-            case Accessor.LONG_RAW:
-                paramType[idx] = "LONG_RAW";
-                // T4CPacketBuffer.versionNumber >= 9000 T4CRawAccessor
-                // T4CLongRawAccessor
-
-                break;
-
-            case Accessor.ROWID:
-                paramType[idx] = "ROWID";
-
-            case Accessor.UROWID:
-                paramType[idx] = "UROWID";
-                // T4CRowidAccessor
-                break;
-
-            case Accessor.RESULT_SET:
-                paramType[idx] = "RESULT_SET";
-                // T4CResultSetAccessor
-                break;
-
-            case Accessor.DATE:
-                paramType[idx] = "DATE";
-                paramValue[idx] = T4CDateAccessor.getDate(data).toString();
-                break;
-
-            case Accessor.BLOB:
-                paramType[idx] = "BLOB";
-                // l1 == -4 && T4CPacketBuffer.versionNumber >= 9000 T4CLongRawAccessor
-                // l1 == -3 && T4CPacketBuffer.versionNumber >= 9000 T4CRawAccessor
-                // T4CBlobAccessor
-                break;
-
-            case Accessor.CLOB:
-                paramType[idx] = "CLOB";
-                // l1 == -1 && T4CPacketBuffer.versionNumber >= 9000 T4CLongAccessor
-                // (l1 == 12 || l1 == 1) && T4CPacketBuffer.versionNumber >= 9000
-                // T4CVarcharAccessor
-                // T4CClobAccessor
-                break;
-
-            case Accessor.BFILE:
-                paramType[idx] = "BFILE";
-                // T4CBfileAccessor
-                break;
-
-            case Accessor.NAMED_TYPE:
-                paramType[idx] = "NAMED_TYPE";
-                // T4CNamedTypeAccessor
-                break;
-
-            case Accessor.REF_TYPE:
-                paramType[idx] = "REF_TYPE";
-                // T4CRefTypeAccessor
-                break;
-
-            case Accessor.TIMESTAMP:
-                paramType[idx] = "TIMESTAMP";
-                // T4CTimestampAccessor
-                break;
-
-            case Accessor.TIMESTAMPTZ:
-                paramType[idx] = "TIMESTAMPTZ";
-                // T4CTimestamptzAccessor
-                break;
-
-            case Accessor.TIMESTAMPLTZ:
-                paramType[idx] = "TIMESTAMPLTZ";
-                // T4CTimestampltzAccessor
-                break;
-
-            case Accessor.INTERVALYM:
-                paramType[idx] = "INTERVALYM";
-                // T4CIntervalymAccessor
-                break;
-
-            case Accessor.INTERVALDS:
-                paramType[idx] = "INTERVALDS";
-                // T4CIntervaldsAccessor
-                break;
-            default:
-                throw new RuntimeException("unknown data type!");
         }
     }
 

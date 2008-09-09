@@ -3,7 +3,7 @@ package com.meidusa.amoeba.oracle.accessor;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
-public class NumberCommonAccessor extends Accessor {
+abstract class NumberCommonAccessor extends Accessor {
 
     static final boolean    GET_XXX_ROUNDS     = false;
     static final int        LNXSGNBT           = 128;
@@ -182,6 +182,7 @@ public class NumberCommonAccessor extends Accessor {
     static final double     tablemaxexponent   = 127D;
     static final double     tableminexponent;
     static final int        tablemax;
+
     static {
         tablemax = factorTable.length;
         tableminexponent = tablemaxexponent - (double) (tablemax - 20);
@@ -189,7 +190,7 @@ public class NumberCommonAccessor extends Accessor {
 
     int[]                   digs               = new int[27];                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               ;
 
-    int getInt() {
+    int getInt(byte[] dataBytes) {
         int j = 0;
         byte abyte0[] = dataBytes;
         int k = 1;
@@ -273,7 +274,7 @@ public class NumberCommonAccessor extends Accessor {
         return j;
     }
 
-    boolean getBoolean() {
+    boolean getBoolean(byte[] dataBytes) {
         boolean flag = false;
 
         byte abyte0[] = dataBytes;
@@ -284,7 +285,7 @@ public class NumberCommonAccessor extends Accessor {
         return flag;
     }
 
-    short getShort() {
+    short getShort(byte[] dataBytes) {
         short word0 = 0;
         byte abyte0[] = dataBytes;
         int j = 1;
@@ -331,7 +332,7 @@ public class NumberCommonAccessor extends Accessor {
         return word0;
     }
 
-    byte getByte() {
+    byte getByte(byte[] dataBytes) {
         byte byte0 = 0;
         byte abyte0[] = dataBytes;
         int j = 1;
@@ -395,17 +396,21 @@ public class NumberCommonAccessor extends Accessor {
         return byte0;
     }
 
-    long getLong() {
+    long getLong(byte[] dataBytes) {
         long l = 0L;
         byte[] abyte0 = dataBytes;
-        int j = 1;
-        byte byte0 = abyte0[j - 1];
+        int j = 0;
+        byte byte0 = (byte) dataBytes.length;// abyte0[j - 1];
         byte byte1 = abyte0[j];
         long l1 = 0L;
         if ((byte1 & 0xffffff80) != 0) {
-            if (byte1 == -128 && byte0 == 1) return 0L;
+            if (byte1 == -128 && byte0 == 1) {
+                return 0L;
+            }
             byte byte2 = (byte) ((byte1 & 0xffffff7f) - 65);
-            if (byte2 > 9) throwOverflow();
+            if (byte2 > 9) {
+                throwOverflow();
+            }
             if (byte2 == 9) {
                 int k = 1;
                 byte byte6 = byte0;
@@ -418,49 +423,65 @@ public class NumberCommonAccessor extends Accessor {
                     throwOverflow();
                 }
 
-                if (k == byte6 && byte0 > 11) throwOverflow();
+                if (k == byte6 && byte0 > 11) {
+                    throwOverflow();
+                }
             }
             byte byte4 = (byte) (byte0 - 1);
             int i1 = (byte4 <= byte2 + 1) ? (byte4 + 1) : (byte2 + 2);
             int i2 = i1 + j;
             if (i1 > 1) {
                 l1 = abyte0[j + 1] - 1;
-                for (int l2 = 2 + j; l2 < i2; l2++)
+                for (int l2 = 2 + j; l2 < i2; l2++) {
                     l1 = l1 * 100L + (long) (abyte0[l2] - 1);
-
+                }
             }
-            for (int i3 = byte2 - byte4; i3 >= 0; i3--)
+            for (int i3 = byte2 - byte4; i3 >= 0; i3--) {
                 l1 *= 100L;
+            }
 
         } else {
             byte byte3 = (byte) ((~byte1 & 0xffffff7f) - 65);
-            if (byte3 > 9) throwOverflow();
+            if (byte3 > 9) {
+                throwOverflow();
+            }
             if (byte3 == 9) {
                 int j1 = 1;
                 byte byte7 = byte0;
-                if (byte0 > 12) byte7 = 12;
+                if (byte0 > 12) {
+                    byte7 = 12;
+                }
                 for (; j1 < byte7; j1++) {
                     int j3 = abyte0[j + j1] & 0xff;
                     int j4 = MIN_LONG[j1];
-                    if (j3 == j4) continue;
-                    if (j3 > j4) break;
+                    if (j3 == j4) {
+                        continue;
+                    }
+                    if (j3 > j4) {
+                        break;
+                    }
                     throwOverflow();
                 }
 
-                if (j1 == byte7 && byte0 < 12) throwOverflow();
+                if (j1 == byte7 && byte0 < 12) {
+                    throwOverflow();
+                }
             }
             byte byte5 = (byte) (byte0 - 1);
-            if (byte5 != 20 || abyte0[j + byte5] == 102) byte5--;
+            if (byte5 != 20 || abyte0[j + byte5] == 102) {
+                byte5--;
+            }
             int k1 = byte5 <= byte3 + 1 ? byte5 + 1 : byte3 + 2;
             int j2 = k1 + j;
             if (k1 > 1) {
                 l1 = 101 - abyte0[j + 1];
-                for (int k3 = 2 + j; k3 < j2; k3++)
+                for (int k3 = 2 + j; k3 < j2; k3++) {
                     l1 = l1 * 100L + (long) (101 - abyte0[k3]);
-
+                }
             }
-            for (int l3 = byte3 - byte5; l3 >= 0; l3--)
+            for (int l3 = byte3 - byte5; l3 >= 0; l3--) {
                 l1 *= 100L;
+            }
 
             l1 = -l1;
         }
@@ -469,7 +490,7 @@ public class NumberCommonAccessor extends Accessor {
         return l;
     }
 
-    float getFloat() {
+    float getFloat(byte[] dataBytes) {
         float f = 0.0F;
 
         byte abyte0[] = dataBytes;
@@ -565,7 +586,7 @@ public class NumberCommonAccessor extends Accessor {
         return f;
     }
 
-    double getDouble() {
+    double getDouble(byte[] dataBytes) {
         double d = 0.0D;
 
         byte abyte0[] = dataBytes;
@@ -1376,7 +1397,7 @@ public class NumberCommonAccessor extends Accessor {
         return d;
     }
 
-    double getDoubleImprecise() {
+    double getDoubleImprecise(byte[] dataBytes) {
         double d = 0.0D;
 
         byte abyte0[] = dataBytes;
@@ -1438,7 +1459,7 @@ public class NumberCommonAccessor extends Accessor {
         return d;
     }
 
-    BigDecimal getBigDecimal() {
+    BigDecimal getBigDecimal(byte[] dataBytes) {
         BigDecimal bigdecimal = null;
 
         byte abyte0[] = dataBytes;
@@ -4296,7 +4317,7 @@ public class NumberCommonAccessor extends Accessor {
         return bigdecimal;
     }
 
-    BigDecimal getBigDecimaln() {
+    BigDecimal getBigDecimaln(byte[] dataBytes) {
         BigDecimal bigdecimal = null;
 
         byte abyte0[] = dataBytes;
@@ -4435,8 +4456,8 @@ public class NumberCommonAccessor extends Accessor {
         return bigdecimal;
     }
 
-    BigDecimal getBigDecimal(int j) {
-        return getBigDecimal().setScale(j, 6);
+    BigDecimal getBigDecimal(int j, byte[] dataBytes) {
+        return getBigDecimal(dataBytes).setScale(j, 6);
     }
 
     byte[] getBytes(byte[] rowSpaceByte) {
@@ -4451,7 +4472,7 @@ public class NumberCommonAccessor extends Accessor {
     }
 
     private void throwOverflow() {
-        throw new RuntimeException("Êý×ÖÒç³ö");
+        throw new RuntimeException("Number Overflow");
     }
 
 }
