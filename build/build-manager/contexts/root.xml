@@ -42,7 +42,7 @@ detected.
   <Get name="securityHandler">
     <Set name="userRealm">
       <New class="org.mortbay.jetty.security.HashUserRealm">
-	    <Set name="name">Test Realm</Set>
+	    <Set name="name">Amoeba Admin Realm</Set>
 	    <Set name="config"><SystemProperty name="jetty.home" default="."/>/conf/realm.properties</Set>
       </New>
     </Set>
