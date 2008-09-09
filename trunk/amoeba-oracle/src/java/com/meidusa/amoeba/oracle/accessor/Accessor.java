@@ -1,5 +1,7 @@
 package com.meidusa.amoeba.oracle.accessor;
 
+import com.meidusa.amoeba.oracle.net.packet.T4CTTIoac;
+
 public abstract class Accessor {
 
     public static final int VARCHAR            = 1;
@@ -44,14 +46,12 @@ public abstract class Accessor {
     public static final int NO_NEED_TO_PREPARE = 2;
     public static final int NEED_TO_PREPARE    = 3;
 
-    protected byte[]        dataBytes;
+    protected T4CTTIoac     oac;
 
-    public byte[] getDataBytes() {
-        return dataBytes;
+    public void init(T4CTTIoac oac) {
+        this.oac = oac;
     }
 
-    public void setDataBytes(byte[] dataBytes) {
-        this.dataBytes = dataBytes;
-    }
+    public abstract Object getObject(byte[] data);
 
 }
