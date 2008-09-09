@@ -218,7 +218,7 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 		/**
 		 * 是否append 成功，如果成功则表示以前曾经堆积过，需要队列来保证发送命令的循序。
 		 * 如果队列中没有堆积的命令，则返回false.
-		 * 否则返回false， 则表示可直接发送命令
+		 * 否则返回true， 则表示可直接发送命令
 		 * @param commandInfo
 		 * @param force 强制append 命令，返回为true
 		 * @return
@@ -634,8 +634,8 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 	
 	/**
 	 * 合并多服务端的消息，发送到客户端
-	 * 只有在多连接的情况下需要进行数据包聚合，聚合以后逐一将数据包通过 {@link #dispatchMessage}方法发送出去,
-	 * 一对一的连接直接通过{@link #dispatchMessage} 方法 直接发送出去。
+	 * 只有在多连接的情况下需要进行数据包聚合，聚合以后逐一将数据包通过 {@link #dispatchMessageFrom(Connection, byte[])}方法发送出去,
+	 * 一对一的连接直接通过{@link #dispatchMessageFrom(Connection, byte[])} 方法 直接发送出去,而不需要merge。
 	 * @return
 	 */
 	protected List<byte[]> mergeMessages(){

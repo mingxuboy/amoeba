@@ -79,61 +79,65 @@ public interface OracleParserConstants {
   int K_READ = 65;
   int K_REAL = 66;
   int K_OPTION = 67;
-  int K_SELECT = 68;
-  int K_SET = 69;
-  int K_SOME = 70;
-  int K_TABLE = 71;
-  int K_SHOW = 72;
-  int K_MOD = 73;
-  int K_DIV = 74;
-  int K_THEN = 75;
-  int K_TO = 76;
-  int K_UNION = 77;
-  int K_UNIQUE = 78;
-  int K_UPDATE = 79;
-  int K_USE = 80;
-  int K_USING = 81;
-  int K_VALUES = 82;
-  int K_VARCHAR2 = 83;
-  int K_VARCHAR = 84;
-  int K_WHEN = 85;
-  int K_WHERE = 86;
-  int K_WHILE = 87;
-  int K_WITH = 88;
-  int K_TRUE = 89;
-  int K_FALSE = 90;
-  int K_LIMIT = 91;
-  int K_RIGHT = 92;
-  int K_INTERVAL = 93;
-  int K_YEAR = 94;
-  int K_MICROSECOND = 95;
-  int K_SECOND = 96;
-  int K_DAY = 97;
-  int K_MINUTE = 98;
-  int K_MONTH = 99;
-  int K_HOUR = 100;
-  int K_COMMIT = 101;
-  int K_ROLLBACK = 102;
-  int K_TRANSACTION_ISOLATION_LEVEL = 103;
-  int K_START_TRANSACTION = 104;
-  int K_SESSION = 105;
-  int K_TRANSACTION_READ_COMMITTED = 106;
-  int K_TRANSACTION_READ_UNCOMMITTED = 107;
-  int K_TRANSACTION_REPEATABLE_READ = 108;
-  int K_TRANSACTION_SERIALIZABLE = 109;
-  int INTEGER_LITERAL = 110;
-  int FLOATING_POINT_LITERAL = 111;
-  int EXPONENT = 112;
-  int DIGIT = 113;
-  int LINE_COMMENT = 114;
-  int MULTI_LINE_COMMENT = 115;
-  int IDENTIFIER = 116;
-  int LETTER = 117;
-  int SPECIAL_CHARS = 118;
-  int STRING_LITERAL = 119;
-  int S_QUOTED_IDENTIFIER = 120;
-  int S_COMMA_IDENTIFIER = 121;
-  int S_PARAMETER_MARKER = 122;
+  int K_INTERSECT = 68;
+  int K_MINUS = 69;
+  int K_NOWAIT = 70;
+  int K_PARTITION = 71;
+  int K_SELECT = 72;
+  int K_SET = 73;
+  int K_SOME = 74;
+  int K_TABLE = 75;
+  int K_SHOW = 76;
+  int K_MOD = 77;
+  int K_DIV = 78;
+  int K_THEN = 79;
+  int K_TO = 80;
+  int K_UNION = 81;
+  int K_UNIQUE = 82;
+  int K_UPDATE = 83;
+  int K_USE = 84;
+  int K_USING = 85;
+  int K_VALUES = 86;
+  int K_VARCHAR2 = 87;
+  int K_VARCHAR = 88;
+  int K_WHEN = 89;
+  int K_WHERE = 90;
+  int K_WHILE = 91;
+  int K_WITH = 92;
+  int K_TRUE = 93;
+  int K_FALSE = 94;
+  int K_LIMIT = 95;
+  int K_RIGHT = 96;
+  int K_INTERVAL = 97;
+  int K_YEAR = 98;
+  int K_MICROSECOND = 99;
+  int K_SECOND = 100;
+  int K_DAY = 101;
+  int K_MINUTE = 102;
+  int K_MONTH = 103;
+  int K_HOUR = 104;
+  int K_COMMIT = 105;
+  int K_ROLLBACK = 106;
+  int K_TRANSACTION_ISOLATION_LEVEL = 107;
+  int K_START_TRANSACTION = 108;
+  int K_SESSION = 109;
+  int K_TRANSACTION_READ_COMMITTED = 110;
+  int K_TRANSACTION_READ_UNCOMMITTED = 111;
+  int K_TRANSACTION_REPEATABLE_READ = 112;
+  int K_TRANSACTION_SERIALIZABLE = 113;
+  int INTEGER_LITERAL = 114;
+  int FLOATING_POINT_LITERAL = 115;
+  int EXPONENT = 116;
+  int DIGIT = 117;
+  int LINE_COMMENT = 118;
+  int MULTI_LINE_COMMENT = 119;
+  int IDENTIFIER = 120;
+  int LETTER = 121;
+  int SPECIAL_CHARS = 122;
+  int STRING_LITERAL = 123;
+  int S_QUOTED_IDENTIFIER = 124;
+  int S_COMMA_IDENTIFIER = 125;
+  int S_PARAMETER_MARKER = 126;
 
   int DEFAULT = 0;
 
@@ -206,6 +210,10 @@ public interface OracleParserConstants {
     "\"READ\"",
     "\"REAL\"",
     "\"OPTION\"",
+    "\"INTERSECT\"",
+    "\"MINUS\"",
+    "\"NOWAIT\"",
+    "\"PARTITION\"",
     "\"SELECT\"",
     "\"SET\"",
     "\"SOME\"",
