@@ -32,7 +32,7 @@ public class JettyServer {
             server.start();
             //server.join();
         } catch (Exception e) {
-        	logger.error("Jetty Server failure to start",e);
+        	logger.error("Jetty Server fail to start",e);
         	System.exit(-1);
         }
     }
