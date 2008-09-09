@@ -193,8 +193,8 @@ abstract class NumberCommonAccessor extends Accessor {
     int getInt(byte[] dataBytes) {
         int j = 0;
         byte abyte0[] = dataBytes;
-        int k = 1;
-        byte byte0 = abyte0[k - 1];
+        int k = 0;// 1;
+        byte byte0 = (byte) abyte0.length;// abyte0[k - 1];
         byte byte1 = abyte0[k];
         int l = 0;
         if ((byte1 & 0xffffff80) != 0) {
@@ -278,9 +278,9 @@ abstract class NumberCommonAccessor extends Accessor {
         boolean flag = false;
 
         byte abyte0[] = dataBytes;
-        int j = 1;
-        byte byte0 = abyte0[j - 1];
-        flag = byte0 != 1 || abyte0[j] != -128;
+        int j = 0;// 1;
+        byte byte0 = (byte) abyte0.length;// abyte0[j - 1];
+        flag = (byte0 != 1 || abyte0[j] != -128);
 
         return flag;
     }
@@ -288,8 +288,8 @@ abstract class NumberCommonAccessor extends Accessor {
     short getShort(byte[] dataBytes) {
         short word0 = 0;
         byte abyte0[] = dataBytes;
-        int j = 1;
-        byte byte0 = abyte0[j - 1];
+        int j = 0;// 1;
+        byte byte0 = (byte) dataBytes.length;// abyte0[j - 1];
         byte byte1 = abyte0[j];
         int k = 0;
         if ((byte1 & 0xffffff80) != 0) {
@@ -335,8 +335,8 @@ abstract class NumberCommonAccessor extends Accessor {
     byte getByte(byte[] dataBytes) {
         byte byte0 = 0;
         byte abyte0[] = dataBytes;
-        int j = 1;
-        byte byte1 = abyte0[j - 1];
+        int j = 0;
+        byte byte1 = (byte) dataBytes.length;// abyte0[j - 1];
         byte byte2 = abyte0[j];
         int k = 0;
         if ((byte2 & 0xffffff80) != 0) {
@@ -494,8 +494,8 @@ abstract class NumberCommonAccessor extends Accessor {
         float f = 0.0F;
 
         byte abyte0[] = dataBytes;
-        int j = 1;
-        byte byte0 = abyte0[j - 1];
+        int j = 0;// 1;
+        byte byte0 = (byte) abyte0.length;// abyte0[j - 1];
         byte byte1 = abyte0[j];
         double d = 0.0D;
         int k1 = j + 1;
@@ -590,8 +590,8 @@ abstract class NumberCommonAccessor extends Accessor {
         double d = 0.0D;
 
         byte abyte0[] = dataBytes;
-        int j = 1;
-        byte byte0 = abyte0[j - 1];
+        int j = 0;// 1;
+        byte byte0 = (byte) abyte0.length;// abyte0[j - 1];
         byte byte1 = abyte0[j];
         int k = j + 1;
         int l = byte0 - 1;
@@ -1370,8 +1370,9 @@ abstract class NumberCommonAccessor extends Accessor {
                     break;
 
                 case 2: // '\002'
-                    if (i16 > 16) l16 |= k11 << i16 - 16;
-                    else if (i16 == 16) {
+                    if (i16 > 16) {
+                        l16 |= k11 << i16 - 16;
+                    } else if (i16 == 16) {
                         l16 |= k11;
                     } else {
                         l16 |= k11 >> 16 - i16;
@@ -1401,14 +1402,18 @@ abstract class NumberCommonAccessor extends Accessor {
         double d = 0.0D;
 
         byte abyte0[] = dataBytes;
-        int j = 1;
-        byte byte0 = abyte0[j - 1];
+        int j = 0;// 1;
+        byte byte0 = (byte) abyte0.length;// abyte0[j - 1];
         byte byte1 = abyte0[j];
         double d1 = 0.0D;
         int k1 = j + 1;
         if ((byte1 & 0xffffff80) != 0) {
-            if (byte1 == -128 && byte0 == 1) return 0.0D;
-            if (byte0 == 2 && byte1 == -1 && abyte0[j + 1] == 101) return (1.0D / 0.0D);
+            if (byte1 == -128 && byte0 == 1) {
+                return 0.0D;
+            }
+            if (byte0 == 2 && byte1 == -1 && abyte0[j + 1] == 101) {
+                return (1.0D / 0.0D);
+            }
             int k = (byte) ((byte1 & 0xffffff7f) - 65);
             int j2 = byte0 - 1;
             int i1 = (int) (127D - (double) k);
@@ -1463,8 +1468,8 @@ abstract class NumberCommonAccessor extends Accessor {
         BigDecimal bigdecimal = null;
 
         byte abyte0[] = dataBytes;
-        int j = 1;
-        byte byte0 = abyte0[j - 1];
+        int j = 0;// 1;
+        byte byte0 = (byte) abyte0.length;// abyte0[j - 1];
         int k = 0;
         int l = 0;
         int i1 = 0;
@@ -1501,8 +1506,12 @@ abstract class NumberCommonAccessor extends Accessor {
         byte byte57;
         int j8;
         if ((byte56 & 0xffffff80) != 0) {
-            if (byte56 == -128 && byte0 == 1) return BIGDEC_ZERO;
-            if (byte0 == 2 && byte56 == -1 && abyte0[j + 1] == 101) throwOverflow();
+            if (byte56 == -128 && byte0 == 1) {
+                return BIGDEC_ZERO;
+            }
+            if (byte0 == 2 && byte56 == -1 && abyte0[j + 1] == 101) {
+                throwOverflow();
+            }
             byte57 = 1;
             byte byte58 = (byte) ((byte56 & 0xffffff7f) - 65);
             i8 = byte0 - 1;
@@ -1513,12 +1522,17 @@ abstract class NumberCommonAccessor extends Accessor {
                 j7 = byte58;
             } else if (j8 < 0) flag1 = (abyte0[j + i8] - 1) % 10 == 0;
             i7 = abyte0[j + byte1++] - 1;
-            for (; (j7 & 1) != 0; j7--)
-                if (byte1 > i8) i7 *= 100;
-                else i7 = i7 * 100 + (abyte0[j + byte1++] - 1);
-
+            for (; (j7 & 1) != 0; j7--) {
+                if (byte1 > i8) {
+                    i7 *= 100;
+                } else {
+                    i7 = i7 * 100 + (abyte0[j + byte1++] - 1);
+                }
+            }
         } else {
-            if (byte56 == 0 && byte0 == 1) throwOverflow();
+            if (byte56 == 0 && byte0 == 1) {
+                throwOverflow();
+            }
             byte57 = -1;
             byte byte59 = (byte) ((~byte56 & 0xffffff7f) - 65);
             i8 = byte0 - 1;
@@ -1528,11 +1542,16 @@ abstract class NumberCommonAccessor extends Accessor {
             if (j8 > 0) {
                 j8 = 0;
                 j7 = byte59;
-            } else if (j8 < 0) flag1 = (101 - abyte0[j + i8]) % 10 == 0;
+            } else if (j8 < 0) {
+                flag1 = (101 - abyte0[j + i8]) % 10 == 0;
+            }
             i7 = 101 - abyte0[j + byte1++];
             for (; (j7 & 1) != 0; j7--)
-                if (byte1 > i8) i7 *= 100;
-                else i7 = i7 * 100 + (101 - abyte0[j + byte1++]);
+                if (byte1 > i8) {
+                    i7 *= 100;
+                } else {
+                    i7 = i7 * 100 + (101 - abyte0[j + byte1++]);
+                }
 
         }
         if (flag1) {
@@ -4321,10 +4340,11 @@ abstract class NumberCommonAccessor extends Accessor {
         BigDecimal bigdecimal = null;
 
         byte abyte0[] = dataBytes;
-        int j = 1;
-        byte byte0 = abyte0[j - 1];
-        for (int k = 0; k < 27; k++)
+        int j = 0;// 1;
+        byte byte0 = (byte) abyte0.length;// abyte0[j - 1];
+        for (int k = 0; k < 27; k++) {
             digs[k] = 0;
+        }
 
         int l = 0;
         byte byte1 = 1;
@@ -4336,8 +4356,12 @@ abstract class NumberCommonAccessor extends Accessor {
         byte byte4;
         int j2;
         if ((byte3 & 0xffffff80) != 0) {
-            if (byte3 == -128 && byte0 == 1) return BIGDEC_ZERO;
-            if (byte0 == 2 && byte3 == -1 && abyte0[j + 1] == 101) throwOverflow();
+            if (byte3 == -128 && byte0 == 1) {
+                return BIGDEC_ZERO;
+            }
+            if (byte0 == 2 && byte3 == -1 && abyte0[j + 1] == 101) {
+                throwOverflow();
+            }
             byte4 = 1;
             byte byte5 = (byte) ((byte3 & 0xffffff7f) - 65);
             i2 = byte0 - 1;
@@ -4346,28 +4370,43 @@ abstract class NumberCommonAccessor extends Accessor {
             if (j2 > 0) {
                 j2 = 0;
                 i1 = byte5;
-            } else if (j2 < 0) flag1 = (abyte0[j + i2] - 1) % 10 == 0;
+            } else if (j2 < 0) {
+                flag1 = (abyte0[j + i2] - 1) % 10 == 0;
+            }
             l = abyte0[j + byte1++] - 1;
-            for (; (i1 & 1) != 0; i1--)
-                if (byte1 > i2) l *= 100;
-                else l = l * 100 + (abyte0[j + byte1++] - 1);
-
+            for (; (i1 & 1) != 0; i1--) {
+                if (byte1 > i2) {
+                    l *= 100;
+                } else {
+                    l = l * 100 + (abyte0[j + byte1++] - 1);
+                }
+            }
         } else {
-            if (byte3 == 0 && byte0 == 1) throwOverflow();
+            if (byte3 == 0 && byte0 == 1) {
+                throwOverflow();
+            }
             byte4 = -1;
             byte byte6 = (byte) ((~byte3 & 0xffffff7f) - 65);
             i2 = byte0 - 1;
-            if (i2 != 20 || abyte0[j + i2] == 102) i2--;
+            if (i2 != 20 || abyte0[j + i2] == 102) {
+                i2--;
+            }
             i1 = i2 - 1;
             j2 = (byte6 - i2) + 1 << 1;
             if (j2 > 0) {
                 j2 = 0;
                 i1 = byte6;
-            } else if (j2 < 0) flag1 = (101 - abyte0[j + i2]) % 10 == 0;
+            } else if (j2 < 0) {
+                flag1 = (101 - abyte0[j + i2]) % 10 == 0;
+            }
             l = 101 - abyte0[j + byte1++];
-            for (; (i1 & 1) != 0; i1--)
-                if (byte1 > i2) l *= 100;
-                else l = l * 100 + (101 - abyte0[j + byte1++]);
+            for (; (i1 & 1) != 0; i1--) {
+                if (byte1 > i2) {
+                    l *= 100;
+                } else {
+                    l = l * 100 + (101 - abyte0[j + byte1++]);
+                }
+            }
 
         }
         if (flag1) {
@@ -4463,8 +4502,8 @@ abstract class NumberCommonAccessor extends Accessor {
     byte[] getBytes(byte[] rowSpaceByte) {
         byte abyte0[] = null;
 
-        int j = 1;
-        byte byte0 = rowSpaceByte[j - 1];
+        int j = 0;// 1;
+        byte byte0 = (byte) rowSpaceByte.length;// rowSpaceByte[j - 1];
         abyte0 = new byte[byte0];
         System.arraycopy(rowSpaceByte, j, abyte0, 0, byte0);
 
