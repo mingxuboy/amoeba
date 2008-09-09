@@ -30,7 +30,7 @@ public class JettyServer {
             configuration = new XmlConfiguration(new FileInputStream(jettyConf));
             configuration.configure(server);
             server.start();
-            server.join();
+            //server.join();
         } catch (Exception e) {
         	logger.error("Jetty Server failure to start",e);
         	System.exit(-1);
