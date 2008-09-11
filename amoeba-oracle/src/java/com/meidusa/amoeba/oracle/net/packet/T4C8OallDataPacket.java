@@ -16,41 +16,40 @@ import com.meidusa.amoeba.oracle.accessor.T4CVarnumAccessor;
  */
 public class T4C8OallDataPacket extends T4CTTIfunPacket {
 
-    private static Logger  logger = Logger.getLogger(T4C8OallDataPacket.class);
+    private static Logger logger = Logger.getLogger(T4C8OallDataPacket.class);
 
-    byte[]                 sqlStmt;
-    int                    numberOfBindPositions;
-    T4CTTIoac[]            oacBind;
-    Accessor[]             accessors;
-    byte[][]               paramBytes;
+    long                  options;
+    int                   cursor;
+    int                   sqlStmtLength;
+    int                   numberOfParams;
+    int                   al8i4Length;
+    int                   defCols;
 
-    long                   options;
-    int                    cursor;
-    int                    al8i4Length;
-    final long[]           al8i4  = new long[13];
-
-    int                    sqlStmtLength;
-    T4CTTIoac[]            oacdefDefines;
-    Accessor[]             definesAccessors;
-    int                    receiveState;
-    boolean                plsql;
-    int                    defCols;
-
-    // T4CTTIrxdDataPacket rxd;
-    // T4C8TTIrxhDataPacket rxh;
-    // T4CTTIoac oac;
-    // T4CTTIdcbDataPacket dcb;
-    T4CTTIofetchDataPacket ofetch;
-    T4CTTIoexecDataPacket  oexec;
-
-    // T4CTTIfobDataPacket fob;
+    byte[]                sqlStmt;
+    long[]                al8i4;
+    T4CTTIoac[]           oacBind;
+    Accessor[]            accessors;
+    T4CTTIoac[]           oacdefDefines;
+    Accessor[]            definesAccessors;
+    byte[][]              paramBytes;
 
     public T4C8OallDataPacket(){
         super(OALL8);
-        this.receiveState = 0;
-        this.sqlStmt = new byte[0];
-        this.plsql = false;
         this.defCols = 0;
+        this.sqlStmt = new byte[0];
+        this.al8i4 = new long[13];
+    }
+
+    public byte[] getSqlStmt() {
+        return sqlStmt;
+    }
+
+    public Accessor[] getAccessors() {
+        return accessors;
+    }
+
+    public byte[][] getParamBytes() {
+        return paramBytes;
     }
 
     @Override
@@ -75,7 +74,8 @@ public class T4C8OallDataPacket extends T4CTTIfunPacket {
         }
     }
 
-    void parseFunPacket(T4CPacketBuffer meg) {
+    // ///////////////////////////////////////////////////////////////////////////////////////
+    private void parseFunPacket(T4CPacketBuffer meg) {
         switch (funCode) {
             case OALL8:
                 parseOALL8(meg);
@@ -99,8 +99,6 @@ public class T4C8OallDataPacket extends T4CTTIfunPacket {
         }
     }
 
-    // /////////////////////////////////////////////////////////////////////////////
-
     private void parseOALL8(T4CPacketBuffer meg) {
         unmarshalPisdef(meg);
 
@@ -108,8 +106,8 @@ public class T4C8OallDataPacket extends T4CTTIfunPacket {
 
         meg.unmarshalUB4Array(al8i4);
 
-        oacBind = new T4CTTIoac[numberOfBindPositions];
-        accessors = new Accessor[numberOfBindPositions];
+        oacBind = new T4CTTIoac[numberOfParams];
+        accessors = new Accessor[numberOfParams];
         unmarshalBindsTypes(meg);// 解析参数描述，并初始化相应的accessor。
 
         if (meg.versionNumber >= 9000 && defCols > 0) {
@@ -120,16 +118,16 @@ public class T4C8OallDataPacket extends T4CTTIfunPacket {
             }
         }
 
-        paramBytes = new byte[numberOfBindPositions][];
-        if (numberOfBindPositions > 0) {
+        paramBytes = new byte[numberOfParams][];
+        if (numberOfParams > 0) {
             unmarshalBinds(meg);// 解析参数，并读取相应的参数值。
         }
 
         if (logger.isDebugEnabled()) {
             System.out.println("type:T4CTTIfunPacket.OALL8");
             System.out.println("sqlStmt:" + new String(sqlStmt));
-            System.out.println("numberOfBindPositions:" + numberOfBindPositions);
-            for (int i = 0; i < numberOfBindPositions; i++) {
+            System.out.println("numberOfParams:" + numberOfParams);
+            for (int i = 0; i < numberOfParams; i++) {
                 System.out.println("param_des_" + i + ":" + oacBind[i]);
                 Object object = accessors[i].getObject(paramBytes[i]);
                 if (object instanceof String) {
@@ -161,7 +159,7 @@ public class T4C8OallDataPacket extends T4CTTIfunPacket {
         meg.unmarshalUB4();
 
         meg.unmarshalPTR();
-        numberOfBindPositions = meg.unmarshalSWORD();
+        numberOfParams = meg.unmarshalSWORD();
 
         meg.unmarshalPTR();
         meg.unmarshalPTR();
@@ -176,7 +174,7 @@ public class T4C8OallDataPacket extends T4CTTIfunPacket {
     }
 
     private void unmarshalBindsTypes(T4CPacketBuffer meg) {
-        for (int i = 0; i < numberOfBindPositions; i++) {
+        for (int i = 0; i < numberOfParams; i++) {
             oacBind[i] = new T4CTTIoac(meg);
             oacBind[i].unmarshal();
             fillAccessor(i, oacBind[i], meg);
@@ -280,11 +278,11 @@ public class T4C8OallDataPacket extends T4CTTIfunPacket {
     private void unmarshalBinds(T4CPacketBuffer meg) {
         short msgCode = meg.unmarshalUB1();
         if (msgCode == TTIRXD) {
-            byte[][] tmp = new byte[numberOfBindPositions][];
-            byte[][] bigTmp = new byte[numberOfBindPositions][];
+            byte[][] tmp = new byte[numberOfParams][];
+            byte[][] bigTmp = new byte[numberOfParams][];
 
             int m = 0, l = 0;
-            for (int k = 0; k < numberOfBindPositions; k++) {
+            for (int k = 0; k < numberOfParams; k++) {
                 byte[] tmpBytes = meg.unmarshalCLRforREFS();
                 if (tmpBytes != null && tmpBytes.length > 4000) {
                     bigTmp[m++] = tmpBytes;
@@ -294,7 +292,7 @@ public class T4C8OallDataPacket extends T4CTTIfunPacket {
             }
 
             int x = 0, y = 0;
-            for (int i = 0; i < numberOfBindPositions; i++) {
+            for (int i = 0; i < numberOfParams; i++) {
                 if (oacBind[i].oacmxl > 4000) {
                     paramBytes[i] = bigTmp[x++];
                 } else {
@@ -309,22 +307,12 @@ public class T4C8OallDataPacket extends T4CTTIfunPacket {
     }
 
     private void parseOFETCH(T4CPacketBuffer meg) {
-        ofetch = new T4CTTIofetchDataPacket();
-        // ofetch.init(buffer);
-        this.cursor = ofetch.cursor;
-        this.al8i4[1] = ofetch.al8i4_1;
-
         if (logger.isDebugEnabled()) {
             System.out.println("type:T4CTTIfunPacket.OFETCH");
         }
     }
 
     private void parseOEXEC(T4CPacketBuffer meg) {
-        oexec = new T4CTTIoexecDataPacket();
-        this.cursor = oexec.cursor;
-        this.al8i4[1] = oexec.al8i4_1;
-        // int[] binds = null;
-
         if (logger.isDebugEnabled()) {
             System.out.println("type:T4CTTIfunPacket.OEXEC");
         }
