@@ -1,12 +1,19 @@
 package com.meidusa.amoeba.oracle.handler;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
 import org.apache.log4j.Logger;
 
 import com.meidusa.amoeba.net.Connection;
 import com.meidusa.amoeba.net.MessageHandler;
 import com.meidusa.amoeba.net.Sessionable;
+import com.meidusa.amoeba.net.poolable.ObjectPool;
 import com.meidusa.amoeba.oracle.io.OraclePacketConstant;
 import com.meidusa.amoeba.oracle.net.OracleConnection;
+import com.meidusa.amoeba.oracle.net.OracleServerConnection;
 import com.meidusa.amoeba.oracle.net.packet.DataPacket;
 import com.meidusa.amoeba.oracle.net.packet.SQLnetDef;
 import com.meidusa.amoeba.oracle.net.packet.T4C8OallDataPacket;
@@ -20,23 +27,38 @@ import com.meidusa.amoeba.oracle.util.ByteUtil;
 public class OracleQueryMessageHandler implements MessageHandler, Sessionable, SQLnetDef {
 
     private static Logger    logger        = Logger.getLogger(OracleQueryMessageHandler.class);
-
+    static abstract class ConnectionStatuts{
+    	protected Connection conn;
+		public ConnectionStatuts(Connection conn){
+			this.conn = conn;
+		}
+		
+		/**
+		 * 判断从服务器端返回得数据包是否表示当前请求的结束。
+		 * @param buffer
+		 * @return
+		 */
+		public boolean isCompleted(byte[] buffer) {
+			return false;
+		}
+    }
     private OracleConnection clientConn;
-    private OracleConnection serverConn;
     private MessageHandler   clientHandler;
-    private MessageHandler   serverHandler;
     private boolean          isEnded       = false;
 
     private byte[]           tmpBuffer     = null;
     private boolean          isFirstPacket = true;
-
-    public OracleQueryMessageHandler(Connection clientConn, Connection serverConn){
+    
+    private final Lock lock = new ReentrantLock(false);
+	protected Map<OracleServerConnection,ConnectionStatuts> connStatusMap = new HashMap<OracleServerConnection,ConnectionStatuts>();
+	protected Map<OracleServerConnection,MessageHandler> handlerMap = new HashMap<OracleServerConnection,MessageHandler>();
+	private ObjectPool[] pools;
+	private OracleServerConnection[] serverConns;
+    public OracleQueryMessageHandler(Connection clientConn,ObjectPool[] pools){
         this.clientConn = (OracleConnection) clientConn;
         clientHandler = clientConn.getMessageHandler();
-        this.serverConn = (OracleConnection) serverConn;
-        serverHandler = serverConn.getMessageHandler();
+        this.pools = pools;
         clientConn.setMessageHandler(this);
-        serverConn.setMessageHandler(this);
     }
 
     public void handleMessage(Connection conn, byte[] message) {
@@ -54,16 +76,26 @@ public class OracleQueryMessageHandler implements MessageHandler, Sessionable, S
             } else {
                 mergeMessage(message);
             }
-            serverConn.postMessage(message);
         } else {
-            // if (logger.isDebugEnabled()) {
-            // System.out.println("\n%amoeba query message ========================================================");
-            // System.out.println("%receive packet:" + ByteUtil.toHex(message, 0, message.length));
-            // }
-            clientConn.postMessage(message);
+             if (logger.isDebugEnabled()) {
+             System.out.println("\n%amoeba query message "+ message +" ========================================================");
+            System.out.println("%receive packet:" + ByteUtil.toHex(message, 0, message.length));
+             }
         }
+        
+        dispatchFromMessage(conn,message);
     }
 
+    protected void dispatchFromMessage(Connection conn,byte[] message){
+    	if(conn == clientConn){
+    		for(int i=0;i<serverConns.length;i++){
+    			serverConns[i].postMessage(message);
+    		}
+    	}else{
+    		clientConn.postMessage(message);
+    	}
+    }
+    
     public boolean checkIdle(long now) {
         return false;
     }
@@ -72,9 +104,14 @@ public class OracleQueryMessageHandler implements MessageHandler, Sessionable, S
         if (!isEnded()) {
             isEnded = true;
             clientConn.setMessageHandler(clientHandler);
-            serverConn.setMessageHandler(serverHandler);
+            
+            for(int i=0;i<serverConns.length;i++){
+            	if(serverConns[i] != null){
+            		serverConns[i].setMessageHandler(handlerMap.get(serverConns[i]));
+            		serverConns[i].postClose(null);
+            	}
+            }
             clientConn.postClose(null);
-            serverConn.postClose(null);
         }
     }
 
@@ -83,6 +120,18 @@ public class OracleQueryMessageHandler implements MessageHandler, Sessionable, S
     }
 
     public void startSession() throws Exception {
+    	if(logger.isInfoEnabled()){
+			logger.info(this+" session start");
+		}
+    	serverConns = new OracleServerConnection[pools.length];
+		for(int i=0;i<pools.length;i++){
+			ObjectPool pool = pools[i];
+			OracleServerConnection conn;
+			conn = (OracleServerConnection)pool.borrowObject();
+			serverConns[i] = conn;
+			handlerMap.put(conn, conn.getMessageHandler());
+			conn.setMessageHandler(this);
+		}
     }
 
     /**
