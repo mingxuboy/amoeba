@@ -6,6 +6,7 @@ import java.nio.channels.SocketChannel;
 import org.apache.log4j.Logger;
 
 import com.meidusa.amoeba.net.Connection;
+import com.meidusa.amoeba.net.Sessionable;
 import com.meidusa.amoeba.net.poolable.ObjectPool;
 import com.meidusa.amoeba.oracle.context.OracleProxyRuntimeContext;
 import com.meidusa.amoeba.oracle.handler.OracleQueryMessageHandler;
@@ -161,11 +162,11 @@ public class OracleClientConnection extends OracleConnection implements SQLnetDe
     }
 
     private void switchHandler() {
+    	OracleQueryMessageHandler handler = new OracleQueryMessageHandler(this, new ObjectPool[]{pool});
         try {
-            Connection dst = (Connection) pool.borrowObject();
-            new OracleQueryMessageHandler(this, dst);
+        	handler.startSession();
         } catch (Exception e) {
-            e.printStackTrace();
+        	handler.endSession();
         }
     }
 
