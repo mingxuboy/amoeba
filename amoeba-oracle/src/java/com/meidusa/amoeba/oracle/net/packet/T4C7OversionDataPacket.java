@@ -1,6 +1,5 @@
 package com.meidusa.amoeba.oracle.net.packet;
 
-import com.meidusa.amoeba.net.Connection;
 import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
 
 /**
@@ -11,7 +10,7 @@ import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
  */
 public class T4C7OversionDataPacket extends T4CTTIfunPacket {
 
-	public byte    rdbmsVersion[]  = { 78, 111, 116, 32, 100, 101, 116, 101, 114, 109, 105, 110, 101, 100, 32, 121, 101, 116 };
+    public byte    rdbmsVersion[]  = { 78, 111, 116, 32, 100, 101, 116, 101, 114, 109, 105, 110, 101, 100, 32, 121, 101, 116 };
     public boolean rdbmsVersionO2U = true;
     public int     bufLen          = 256;
     public boolean retVerLenO2U    = true;
@@ -22,7 +21,7 @@ public class T4C7OversionDataPacket extends T4CTTIfunPacket {
     public T4C7OversionDataPacket(){
         super(OVERSION);
     }
-    
+
     @Override
     protected void marshal(AbstractPacketBuffer buffer) {
         super.marshal(buffer);
@@ -41,43 +40,17 @@ public class T4C7OversionDataPacket extends T4CTTIfunPacket {
         meg.marshalSWORD(bufLen);
         meg.marshalO2U(retVerLenO2U);
         meg.marshalO2U(retVerNumO2U);
-        
-        /*T4CPacketBuffer meg = (T4CPacketBuffer)buffer;
-        boolean flag = false;
-        T4CTTIoer oer = new T4CTTIoer(meg);
-        while (true) {
-            byte byte0 = meg.unmarshalSB1();
-            switch (byte0) {
-                case 4:
-                    oer.init();
-                    oer.unmarshal();
-                    //oer.processError();
-                    break;
-                case 8:
-                    if (flag){
-                        //DatabaseError.throwSqlException(401);
-                    }
-                    retVerLen = meg.unmarshalUB2();
-                    rdbmsVersion = meg.unmarshalCHR(retVerLen);
-                    if (rdbmsVersion == null){
-                        //DatabaseError.throwSqlException(438);
-                    }
-                    retVerNum = meg.unmarshalUB4();
-                    T4CPacketBuffer.versionNumber = getVersionNumber();
-                    flag = true;
-                    continue;
-                case 9:
-                    if (getVersionNumber() >= 10000) {
-                        short word0 = (short) meg.unmarshalUB2();
-                        //connection.endToEndECIDSequenceNumber = word0;
-                    }
-                    break;
-                default:{
-                    //DatabaseError.throwSqlException(401);
-                }
-            }
-            break;
-        }*/
-    }  
+
+        /*
+         * T4CPacketBuffer meg = (T4CPacketBuffer)buffer; boolean flag = false; T4CTTIoer oer = new T4CTTIoer(meg);
+         * while (true) { byte byte0 = meg.unmarshalSB1(); switch (byte0) { case 4: oer.init(); oer.unmarshal();
+         * //oer.processError(); break; case 8: if (flag){ //DatabaseError.throwSqlException(401); } retVerLen =
+         * meg.unmarshalUB2(); rdbmsVersion = meg.unmarshalCHR(retVerLen); if (rdbmsVersion == null){
+         * //DatabaseError.throwSqlException(438); } retVerNum = meg.unmarshalUB4(); T4CPacketBuffer.versionNumber =
+         * getVersionNumber(); flag = true; continue; case 9: if (getVersionNumber() >= 10000) { short word0 = (short)
+         * meg.unmarshalUB2(); //connection.endToEndECIDSequenceNumber = word0; } break; default:{
+         * //DatabaseError.throwSqlException(401); } } break; }
+         */
+    }
 
 }
