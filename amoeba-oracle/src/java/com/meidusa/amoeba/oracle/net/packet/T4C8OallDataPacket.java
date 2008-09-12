@@ -25,22 +25,21 @@ public class T4C8OallDataPacket extends T4CTTIfunPacket {
     int                   al8i4Length;
     int                   defCols;
 
-    byte[]                sqlStmt;
+    public	String                sqlStmt;//sql 
     long[]                al8i4;
     T4CTTIoac[]           oacBind;
-    Accessor[]            accessors;
+    public	Accessor[]            accessors;  //parameter Accessors
     T4CTTIoac[]           oacdefDefines;
-    Accessor[]            definesAccessors;
-    byte[][]              paramBytes;
+    public	Accessor[]            definesAccessors;
+    public	byte[][]              paramBytes; //parameter bytes
 
     public T4C8OallDataPacket(){
         super(OALL8);
         this.defCols = 0;
-        this.sqlStmt = new byte[0];
         this.al8i4 = new long[13];
     }
 
-    public byte[] getSqlStmt() {
+    public String getSqlStmt() {
         return sqlStmt;
     }
 
@@ -102,8 +101,10 @@ public class T4C8OallDataPacket extends T4CTTIfunPacket {
     private void parseOALL8(T4CPacketBuffer meg) {
         unmarshalPisdef(meg);
 
-        sqlStmt = meg.unmarshalCHR(sqlStmtLength);
-
+        byte[] sqlStmtBytes = meg.unmarshalCHR(sqlStmtLength);
+        
+        sqlStmt = meg.getConversion().CharBytesToString(sqlStmtBytes, sqlStmtLength);
+        
         meg.unmarshalUB4Array(al8i4);
 
         oacBind = new T4CTTIoac[numberOfParams];
@@ -125,7 +126,7 @@ public class T4C8OallDataPacket extends T4CTTIfunPacket {
 
         if (logger.isDebugEnabled()) {
             System.out.println("type:T4CTTIfunPacket.OALL8");
-            System.out.println("sqlStmt:" + new String(sqlStmt));
+            System.out.println("sqlStmt:" + sqlStmt);
             System.out.println("numberOfParams:" + numberOfParams);
             for (int i = 0; i < numberOfParams; i++) {
                 System.out.println("param_des_" + i + ":" + oacBind[i]);
