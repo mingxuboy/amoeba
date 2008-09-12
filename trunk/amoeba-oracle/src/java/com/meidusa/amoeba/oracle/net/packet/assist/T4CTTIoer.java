@@ -1,34 +1,36 @@
-package com.meidusa.amoeba.oracle.net.packet;
+package com.meidusa.amoeba.oracle.net.packet.assist;
+
+import com.meidusa.amoeba.oracle.net.packet.T4CPacketBuffer;
 
 public class T4CTTIoer {
 
-    final int       MAXERRBUF = 512;
+    final int     MAXERRBUF = 512;
 
-    public short    endToEndECIDSequenceNumber;
-    public long     curRowNumber;
-    public int      retCode;
-    public int      arrayElemWError;
-    public int      arrayElemErrno;
-    public int      currCursorID;
-    public short    errorPosition;
-    public short    sqlType;
-    public byte     oerFatal;
-    public short    flags;
-    public short    userCursorOpt;
-    public short    upiParam;
-    public short    warningFlag;
-    public int      osError;
-    public short    stmtNumber;
-    public short    callNumber;
-    public int      pad1;
-    public long     successIters;
-    public int      partitionId;
-    public short    tableId;
-    public int      slotNumber;
-    public long     rba;
-    public long     blockNumber;
-    public int      warnFlag;
-    public String   errorMsg;
+    public short  endToEndECIDSequenceNumber;
+    public long   curRowNumber;
+    public int    retCode;
+    public int    arrayElemWError;
+    public int    arrayElemErrno;
+    public int    currCursorID;
+    public short  errorPosition;
+    public short  sqlType;
+    public byte   oerFatal;
+    public short  flags;
+    public short  userCursorOpt;
+    public short  upiParam;
+    public short  warningFlag;
+    public int    osError;
+    public short  stmtNumber;
+    public short  callNumber;
+    public int    pad1;
+    public long   successIters;
+    public int    partitionId;
+    public short  tableId;
+    public int    slotNumber;
+    public long   rba;
+    public long   blockNumber;
+    public int    warnFlag;
+    public String errorMsg;
 
     public T4CTTIoer(){
         warnFlag = 0;
@@ -71,12 +73,13 @@ public class T4CTTIoer {
         pad1 = meg.unmarshalUB2();
         successIters = meg.unmarshalUB4();
         if (retCode != 0) {
-            errorMsg = new String(meg.unmarshalCLRforREFS());
+            byte[] msg = meg.unmarshalCLRforREFS();
+            errorMsg = meg.getConversion().CharBytesToString(msg, msg.length);
         }
         return currCursorID;
     }
 
-    void unmarshalWarning(T4CPacketBuffer meg) {
+    public void unmarshalWarning(T4CPacketBuffer meg) {
         retCode = meg.unmarshalUB2();
         int warnLength = meg.unmarshalUB2();
         warnFlag = meg.unmarshalUB2();

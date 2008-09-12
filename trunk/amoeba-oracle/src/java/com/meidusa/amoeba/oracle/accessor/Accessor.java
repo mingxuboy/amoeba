@@ -1,6 +1,6 @@
 package com.meidusa.amoeba.oracle.accessor;
 
-import com.meidusa.amoeba.oracle.net.packet.T4CTTIoac;
+import com.meidusa.amoeba.oracle.net.packet.assist.T4CTTIoac;
 
 public abstract class Accessor {
 

@@ -26,7 +26,7 @@ import com.meidusa.amoeba.oracle.net.packet.T4CTTIoAuthDataPacket;
 import com.meidusa.amoeba.oracle.net.packet.T4CTTIoAuthKeyDataPacket;
 import com.meidusa.amoeba.oracle.net.packet.T4CTTIoAuthKeyResponseDataPacket;
 import com.meidusa.amoeba.oracle.net.packet.T4CTTIoAuthResponseDataPacket;
-import com.meidusa.amoeba.oracle.net.packet.T4CTTIoer;
+import com.meidusa.amoeba.oracle.net.packet.assist.T4CTTIoer;
 import com.meidusa.amoeba.oracle.util.ByteUtil;
 import com.meidusa.amoeba.util.StringUtil;
 
