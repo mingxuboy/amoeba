@@ -1,18 +1,14 @@
 package com.meidusa.amoeba.oracle.net.packet.assist;
 
-import com.meidusa.amoeba.oracle.net.packet.T4CTTIMsgPacket;
-
-
 /**
  * @author hexianmao
  * @version 2008-8-20 обнГ02:02:23
  */
-public class T4C8TTIrxh extends T4CTTIMsgPacket {
+public class T4C8TTIrxh {
 
     public T4C8TTIrxh(){
-        super(TTIRXH);
+        // super(TTIRXH);
     }
-
     // @Override
     // protected void init(AbstractPacketBuffer buffer) {
     // // TODO Auto-generated method stub
