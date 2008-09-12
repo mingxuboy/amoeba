@@ -9,6 +9,7 @@ import com.meidusa.amoeba.oracle.accessor.T4CDateAccessor;
 import com.meidusa.amoeba.oracle.accessor.T4CNumberAccessor;
 import com.meidusa.amoeba.oracle.accessor.T4CVarcharAccessor;
 import com.meidusa.amoeba.oracle.accessor.T4CVarnumAccessor;
+import com.meidusa.amoeba.oracle.net.packet.assist.T4CTTIoac;
 
 /**
  * @author hexianmao
@@ -25,13 +26,13 @@ public class T4C8OallDataPacket extends T4CTTIfunPacket {
     int                   al8i4Length;
     int                   defCols;
 
-    public	String                sqlStmt;//sql 
+    public String         sqlStmt;                                             // sql
     long[]                al8i4;
     T4CTTIoac[]           oacBind;
-    public	Accessor[]            accessors;  //parameter Accessors
+    public Accessor[]     accessors;                                          // parameter Accessors
     T4CTTIoac[]           oacdefDefines;
-    public	Accessor[]            definesAccessors;
-    public	byte[][]              paramBytes; //parameter bytes
+    public Accessor[]     definesAccessors;
+    public byte[][]       paramBytes;                                         // parameter bytes
 
     public T4C8OallDataPacket(){
         super(OALL8);
@@ -102,9 +103,9 @@ public class T4C8OallDataPacket extends T4CTTIfunPacket {
         unmarshalPisdef(meg);
 
         byte[] sqlStmtBytes = meg.unmarshalCHR(sqlStmtLength);
-        
+
         sqlStmt = meg.getConversion().CharBytesToString(sqlStmtBytes, sqlStmtLength);
-        
+
         meg.unmarshalUB4Array(al8i4);
 
         oacBind = new T4CTTIoac[numberOfParams];

@@ -7,9 +7,11 @@
  * into with Alibaba.com.
  * </pre>
  */
-package com.meidusa.amoeba.oracle.net.packet;
+package com.meidusa.amoeba.oracle.net.packet.assist;
 
 import java.util.Arrays;
+
+import com.meidusa.amoeba.oracle.net.packet.T4CPacketBuffer;
 
 /**
  * @author hexianmao
@@ -34,6 +36,7 @@ public class T4CTTIoac {
     static final byte[]    NO_BYTES   = new byte[0];
 
     public T4CPacketBuffer meg;
+
     public boolean         isStream;
     public short           oacdty;                  // dataType
     public short           oacflg;                  // flags
@@ -121,7 +124,7 @@ public class T4CTTIoac {
         }
     }
 
-    void unmarshal() {
+    public void unmarshal() {
         oacdty = meg.unmarshalUB1();
         oacflg = meg.unmarshalUB1();
         oacpre = meg.unmarshalUB1();

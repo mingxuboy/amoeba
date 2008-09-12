@@ -7,17 +7,17 @@
  * into with Alibaba.com.
  * </pre>
  */
-package com.meidusa.amoeba.oracle.net.packet;
+package com.meidusa.amoeba.oracle.net.packet.assist;
 
 /**
  * @author hexianmao
  * @version 2008-8-20 обнГ02:20:26
  */
-public class T4CTTIfobDataPacket extends T4CTTIMsgPacket {
+public class T4CTTIfob {
 
-    public T4CTTIfobDataPacket(){
-        super(TTIFOB);
-    }
+    // public T4CTTIfob(){
+    // super(TTIFOB);
+    // }
 
     // @Override
     // protected void init(AbstractPacketBuffer buffer) {
