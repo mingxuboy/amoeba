@@ -36,11 +36,15 @@ public class T4C8OallDataPacket extends T4CTTIfunPacket {
     public byte[][]                   paramBytes;                                         // parameter bytes
 
     private OracleQueryMessageHandler handler;
-
-    public T4C8OallDataPacket(OracleQueryMessageHandler handler){
+       
+    public T4C8OallDataPacket(){
         super(OALL8);
         this.defCols = 0;
         this.al8i4 = new long[13];
+    }
+    
+    public T4C8OallDataPacket(OracleQueryMessageHandler handler){
+        this();
         this.handler = handler;
     }
 
