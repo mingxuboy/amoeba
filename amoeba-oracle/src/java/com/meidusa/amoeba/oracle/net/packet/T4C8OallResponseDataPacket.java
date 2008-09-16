@@ -1,7 +1,12 @@
 package com.meidusa.amoeba.oracle.net.packet;
 
 import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
+import com.meidusa.amoeba.oracle.accessor.Accessor;
+import com.meidusa.amoeba.oracle.handler.OracleQueryMessageHandler;
+import com.meidusa.amoeba.oracle.net.packet.assist.T4C8TTIrxh;
+import com.meidusa.amoeba.oracle.net.packet.assist.T4CTTIdcb;
 import com.meidusa.amoeba.oracle.net.packet.assist.T4CTTIoer;
+import com.meidusa.amoeba.oracle.net.packet.assist.T4CTTIrxd;
 
 /**
  * @author hexianmao
@@ -9,10 +14,22 @@ import com.meidusa.amoeba.oracle.net.packet.assist.T4CTTIoer;
  */
 public class T4C8OallResponseDataPacket extends DataPacket {
 
-    T4CTTIoer oer;
-    int       cursor;
-    long      rowsProcessed;
-    int       receiveState;
+    int                               cursor;
+    long                              rowsProcessed;
+    int                               receiveState;
+
+    T4CTTIoer                         oer = new T4CTTIoer();
+    T4C8TTIrxh                        rxh = new T4C8TTIrxh();
+    T4CTTIrxd                         rxd = new T4CTTIrxd();
+    T4CTTIdcb                         dcb = new T4CTTIdcb();
+
+    Accessor[]                        definesAccessors;
+
+    private OracleQueryMessageHandler handler;
+
+    public T4C8OallResponseDataPacket(OracleQueryMessageHandler handler){
+        this.handler = handler;
+    }
 
     @Override
     protected void init(AbstractPacketBuffer buffer) {
@@ -28,6 +45,7 @@ public class T4C8OallResponseDataPacket extends DataPacket {
                     rowsProcessed = oer.curRowNumber;
                     if (oer.retCode != 1403) {
                         try {
+                            // TODO
                             // oer.processError(oracleStatement);
                         } catch (Exception e) {
                             receiveState = 0;
@@ -40,27 +58,24 @@ public class T4C8OallResponseDataPacket extends DataPacket {
                     receiveState = 0;
                     return;
                 case 6:
-                    // rxh.init();
-                    // rxh.unmarshalV10(rxd);
-                    // if (rxh.uacBufLength > 0) {
-                    // DatabaseError.throwSqlException(405);
-                    // }
-                    // flag1 = true;
+                    rxh.init();
+                    rxh.unmarshalV10(rxd, meg);
+                    if (rxh.uacBufLength > 0) {
+                        throw new RuntimeException("无效的列类型");
+                    }
                     break;
-                case 7:// _L4
-                    // if (receiveState != 1) {
-                    // DatabaseError.throwSqlException(447);
-                    // }
-                    // receiveState = 2;
-                    // if (oracleStatement.returnParamAccessors == null || numberOfBindPositions <= 0) {// L49
+                case 7:
+                    if (receiveState != 1) {
+                        throw new RuntimeException("OALL8 处于不一致状态");
+                    }
+                    receiveState = 2;
+                    // if (handler.numberOfParams <= 0) {
                     // if (!flag3 && (outBindAccessors == null || definesAccessors != null)) {
                     // if (!rxd.unmarshal(definesAccessors, definesLength)) {
                     // receiveState = 1;
                     // break;
                     // } else {
                     // receiveState = 3;
-                    // meg.sentCancel = false;
-                    // meg.pipeState = -1;
                     // return;
                     // }
                     // } else {
@@ -69,21 +84,18 @@ public class T4C8OallResponseDataPacket extends DataPacket {
                     // break;
                     // } else {
                     // receiveState = 3;
-                    // meg.sentCancel = false;
-                    // meg.pipeState = -1;
                     // return;
                     // }
                     // }
-                    // } else {// L50
-                    // boolean flag4 = false;// 7
-                    // for (int k = 0; k < oracleStatement.numberOfBindPositions; k++) {// L52
-                    // Accessor accessor = oracleStatement.returnParamAccessors[k];// 9// L54
+                    // } else {
+                    // boolean flag4 = false;
+                    // for (int k = 0; k < handler.numberOfParams; k++) {
+                    // Accessor accessor = oracleStatement.returnParamAccessors[k];
                     // if (accessor == null) {
                     // continue;
                     // }
-                    // int j1 = (int) meg.unmarshalUB4();// 10// L56
+                    // int j1 = (int) meg.unmarshalUB4();
                     // if (!flag4) {
-                    // // L61
                     // oracleStatement.rowsDmlReturned = j1;
                     // oracleStatement.allocateDmlReturnStorage();
                     // oracleStatement.setupReturnParamAccessors();
@@ -91,10 +103,10 @@ public class T4C8OallResponseDataPacket extends DataPacket {
                     // }
                     // // L60
                     // for (int l1 = 0; l1 < j1; l1++) {
-                    // accessor.unmarshalOneRow();// L66
+                    // accessor.unmarshalOneRow();
                     // }
                     // }
-                    // oracleStatement.returnParamsFetched = true;// L53
+                    // oracleStatement.returnParamsFetched = true;
                     // receiveState = 1;// L8
                     // break;
                     // }
@@ -132,8 +144,8 @@ public class T4C8OallResponseDataPacket extends DataPacket {
                     // flag3 = true;
                     break;
                 case 16:// _L7
-                    // dcb.init(oracleStatement, 0);
-                    // definesAccessors = dcb.receive(definesAccessors);
+                    dcb.init(0);
+//                    definesAccessors = dcb.receive(definesAccessors);
                     // numberOfDefinePositions = dcb.numuds;
                     // definesLength = numberOfDefinePositions;
                     // rxd.setNumberOfColumns(numberOfDefinePositions);

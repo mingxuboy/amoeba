@@ -50,6 +50,7 @@ public class T4C7OversionResponseDataPacket extends DataPacket {
                     continue;
                 case 9:
                     if (getVersionNumber() >= 10000) {
+                        @SuppressWarnings("unused")
                         short word0 = (short) meg.unmarshalUB2();
                         // connection.endToEndECIDSequenceNumber = word0;
                     }
