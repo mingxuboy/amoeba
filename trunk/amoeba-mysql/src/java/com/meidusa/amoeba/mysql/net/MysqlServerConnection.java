@@ -32,7 +32,6 @@ import com.meidusa.amoeba.net.Connection;
 import com.meidusa.amoeba.net.Sessionable;
 import com.meidusa.amoeba.util.Reporter;
 import com.meidusa.amoeba.util.StringUtil;
-import com.mysql.jdbc.Util;
 
 /**
  * 设计为连接mysql server的客户端Connection

@@ -2,8 +2,8 @@ package com.meidusa.amoeba.mysql.net.packet;
 
 import java.io.UnsupportedEncodingException;
 
+import com.meidusa.amoeba.mysql.util.Util;
 import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
-import com.mysql.jdbc.Util;
 
 /**
   * By sending this very specific reply server asks us to send scrambled 
