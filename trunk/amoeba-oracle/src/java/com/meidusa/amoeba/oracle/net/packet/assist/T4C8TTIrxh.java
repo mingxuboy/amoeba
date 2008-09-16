@@ -1,24 +1,41 @@
 package com.meidusa.amoeba.oracle.net.packet.assist;
 
+import com.meidusa.amoeba.oracle.net.packet.T4CPacketBuffer;
+
 /**
  * @author hexianmao
  * @version 2008-8-20 ÏÂÎç02:02:23
  */
 public class T4C8TTIrxh {
 
-    public T4C8TTIrxh(){
-        // super(TTIRXH);
+    static final byte FU2O = 1;
+    static final byte FEOR = 2;
+    static final byte PLSV = 4;
+
+    public short      flags;
+    public int        numRqsts;
+    public int        iterNum;
+    public int        numItersThisTime;
+    public int        uacBufLength;
+
+    public void init() {
+        flags = 0;
+        numRqsts = 0;
+        iterNum = 0;
+        numItersThisTime = 0;
+        uacBufLength = 0;
     }
-    // @Override
-    // protected void init(AbstractPacketBuffer buffer) {
-    // // TODO Auto-generated method stub
-    // super.init(buffer);
-    // }
-    //
-    // @Override
-    // protected void write2Buffer(AbstractPacketBuffer buffer) throws UnsupportedEncodingException {
-    // // TODO Auto-generated method stub
-    // super.write2Buffer(buffer);
-    // }
+
+    public void unmarshalV10(T4CTTIrxd rxd, T4CPacketBuffer meg) {
+        flags = meg.unmarshalUB1();
+        numRqsts = meg.unmarshalUB2();
+        iterNum = meg.unmarshalUB2();
+        numRqsts += iterNum * 256;
+        numItersThisTime = meg.unmarshalUB2();
+        uacBufLength = meg.unmarshalUB2();
+        byte abyte0[] = meg.unmarshalDALC();
+        // rxd.readBitVector(abyte0);
+        byte abyte1[] = meg.unmarshalDALC();
+    }
 
 }
