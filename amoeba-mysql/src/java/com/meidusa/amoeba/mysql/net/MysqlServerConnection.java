@@ -26,11 +26,13 @@ import com.meidusa.amoeba.mysql.net.packet.AuthenticationPacket;
 import com.meidusa.amoeba.mysql.net.packet.ErrorPacket;
 import com.meidusa.amoeba.mysql.net.packet.HandshakePacket;
 import com.meidusa.amoeba.mysql.net.packet.MysqlPacketBuffer;
+import com.meidusa.amoeba.mysql.net.packet.Scramble323Packet;
 import com.meidusa.amoeba.mysql.util.CharsetMapping;
 import com.meidusa.amoeba.net.Connection;
 import com.meidusa.amoeba.net.Sessionable;
 import com.meidusa.amoeba.util.Reporter;
 import com.meidusa.amoeba.util.StringUtil;
+import com.mysql.jdbc.Util;
 
 /**
  * 设计为连接mysql server的客户端Connection
@@ -62,7 +64,7 @@ public class MysqlServerConnection extends MysqlConnection implements MySqlPacke
 	private int serverMinorVersion;
 
 	private int serverSubMinorVersion;
-	
+	private String seed;
 	public MysqlServerConnection(SocketChannel channel, long createStamp) {
 		super(channel, createStamp);
 		//commandRunner = new CommandMessageQueueRunner(this);
@@ -108,7 +110,7 @@ public class MysqlServerConnection extends MysqlConnection implements MySqlPacke
 				
 				AuthenticationPacket authing = new AuthenticationPacket();
 				authing.password = this.getPassword();
-				authing.seed = handpacket.seed+handpacket.restOfScrambleBuff;
+				this.seed = authing.seed = handpacket.seed+handpacket.restOfScrambleBuff;
 				authing.clientParam = CLIENT_FOUND_ROWS;
 				authing.charsetNumber = (byte)(DEFAULT_CHARSET_INDEX & 0xff);
 				this.clientCharset = CharsetMapping.INDEX_TO_CHARSET[DEFAULT_CHARSET_INDEX];
@@ -166,14 +168,22 @@ public class MysqlServerConnection extends MysqlConnection implements MySqlPacke
 				if(logger.isDebugEnabled()){
 					logger.debug("authing result packet from server:"+this.host +":"+this.port);
 				}
-				setAuthenticated(true);
 				
 				if(MysqlPacketBuffer.isOkPacket(message)){
+					setAuthenticated(true);
 					return;
 				}else{
-					logger.warn("server response packet from :"+this._channel.socket().getRemoteSocketAddress()+" :\n"+StringUtil.dumpAsHex(message, message.length));
+					if(message.length<9 && MysqlPacketBuffer.isEofPacket(message)){
+						Scramble323Packet packet = new Scramble323Packet();
+						packet.packetId = 3;
+						packet.seed323 = this.seed.substring(0, 8);
+						packet.password = this.getPassword();
+						this.postMessage(packet.toByteBuffer(conn).array());
+						logger.debug("server request scrambled password in old format");
+					}else{
+						logger.warn("server response packet from :"+this._channel.socket().getRemoteSocketAddress()+" :\n"+StringUtil.dumpAsHex(message, message.length));
+					}
 				}
-				
 			}
 
 		}else{
