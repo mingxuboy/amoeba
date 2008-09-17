@@ -31,43 +31,46 @@ public class T4C8OallResponseDataPacket extends DataPacket {
         this.handler = handler;
     }
 
+    public T4C8OallResponseDataPacket(){
+    }
+
     @Override
     protected void init(AbstractPacketBuffer buffer) {
         super.init(buffer);
         T4CPacketBuffer meg = (T4CPacketBuffer) buffer;
         while (true) {
-            byte byte0 = meg.unmarshalSB1();
+            byte byte0 =4;// meg.unmarshalSB1();
             switch (byte0) {
-                case 4:
-                    oer.init();
-                    oer.unmarshal(meg);
-                    cursor = oer.currCursorID;
-                    rowsProcessed = oer.curRowNumber;
-                    if (oer.retCode != 1403) {
-                        try {
-                            // TODO
-                            // oer.processError(oracleStatement);
-                        } catch (Exception e) {
-                            receiveState = 0;
-                        }
-                    }
-
-                    if (receiveState != 1) {
-                        throw new RuntimeException("OALL8 处于不一致状态");
-                    }
-                    receiveState = 0;
+                case 4:// 表示数据结束返回结果描述                    
+//                    oer.init();
+//                    oer.unmarshal(meg);
+//                    cursor = oer.currCursorID;
+//                    rowsProcessed = oer.curRowNumber;
+//                    if (oer.retCode != 1403) {
+//                        try {
+//                            // TODO
+//                            // oer.processError(oracleStatement);
+//                        } catch (Exception e) {
+//                            receiveState = 0;
+//                        }
+//                    }
+//
+//                    // if (receiveState != 1) {
+//                    // throw new RuntimeException("OALL8 处于不一致状态");
+//                    // }
+//                    receiveState = 0;
                     return;
                 case 6:
-                    rxh.init();
-                    rxh.unmarshalV10(rxd, meg);
-                    if (rxh.uacBufLength > 0) {
-                        throw new RuntimeException("无效的列类型");
-                    }
+                    // rxh.init();
+                    // rxh.unmarshalV10(rxd, meg);
+                    // if (rxh.uacBufLength > 0) {
+                    // throw new RuntimeException("无效的列类型");
+                    // }
                     break;
                 case 7:
-                    if (receiveState != 1) {
-                        throw new RuntimeException("OALL8 处于不一致状态");
-                    }
+                    // if (receiveState != 1) {
+                    // throw new RuntimeException("OALL8 处于不一致状态");
+                    // }
                     receiveState = 2;
                     // if (handler.numberOfParams <= 0) {
                     // if (!flag3 && (outBindAccessors == null || definesAccessors != null)) {
@@ -143,9 +146,9 @@ public class T4C8OallResponseDataPacket extends DataPacket {
                     // }
                     // flag3 = true;
                     break;
-                case 16:// _L7
-                    dcb.init(0);
-//                    definesAccessors = dcb.receive(definesAccessors);
+                case 16:// 表示查询字段的描述
+                    // dcb.init(0);
+                    // definesAccessors = dcb.receive(definesAccessors);
                     // numberOfDefinePositions = dcb.numuds;
                     // definesLength = numberOfDefinePositions;
                     // rxd.setNumberOfColumns(numberOfDefinePositions);
@@ -158,7 +161,8 @@ public class T4C8OallResponseDataPacket extends DataPacket {
                     // rxd.unmarshalBVC(i);
                     break;
                 default:
-                    throw new RuntimeException("protocol error");
+                    // System.err.println("protocol error");
+                    // throw new RuntimeException("protocol error");
             }
 
             // meg.sentCancel = false;
@@ -170,6 +174,12 @@ public class T4C8OallResponseDataPacket extends DataPacket {
     @Override
     protected Class<? extends AbstractPacketBuffer> getPacketBufferClass() {
         return T4CPacketBuffer.class;
+    }
+
+    // ///////////////////////////////////////////////////////////////////////////////////
+
+    public static boolean isParseable(byte[] message) {
+        return true;
     }
 
 }

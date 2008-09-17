@@ -17,6 +17,7 @@ import com.meidusa.amoeba.oracle.net.OracleServerConnection;
 import com.meidusa.amoeba.oracle.net.packet.DataPacket;
 import com.meidusa.amoeba.oracle.net.packet.SQLnetDef;
 import com.meidusa.amoeba.oracle.net.packet.T4C8OallDataPacket;
+import com.meidusa.amoeba.oracle.net.packet.T4C8OallResponseDataPacket;
 import com.meidusa.amoeba.oracle.util.ByteUtil;
 
 /**
@@ -46,17 +47,21 @@ public class OracleQueryMessageHandler implements MessageHandler, Sessionable, S
 
     private OracleConnection                                 clientConn;
     private MessageHandler                                   clientHandler;
-    private boolean                                          isEnded       = false;
+    private boolean                                          isEnded             = false;
 
-    private byte[]                                           tmpBuffer     = null;
-    private boolean                                          isFirstPacket = true;
+    private byte[]                                           tmpBuffer           = null;
+    private boolean                                          isFirstClientPacket = true;
 
-    private final Lock                                       lock          = new ReentrantLock(false);
-    protected Map<OracleServerConnection, ConnectionStatuts> connStatusMap = new HashMap<OracleServerConnection, ConnectionStatuts>();
-    protected Map<OracleServerConnection, MessageHandler>    handlerMap    = new HashMap<OracleServerConnection, MessageHandler>();
+    private byte[]                                           tmpBuffer2          = null;
+    private boolean                                          isFirstServerPacket = true;
+
+    private final Lock                                       lock                = new ReentrantLock(false);
+    protected Map<OracleServerConnection, ConnectionStatuts> connStatusMap       = new HashMap<OracleServerConnection, ConnectionStatuts>();
+    protected Map<OracleServerConnection, MessageHandler>    handlerMap          = new HashMap<OracleServerConnection, MessageHandler>();
     private ObjectPool[]                                     pools;
     private OracleServerConnection[]                         serverConns;
 
+    //
     public int                                               numberOfParams;
 
     public OracleQueryMessageHandler(Connection clientConn, ObjectPool[] pools){
@@ -69,22 +74,30 @@ public class OracleQueryMessageHandler implements MessageHandler, Sessionable, S
     public void handleMessage(Connection conn, byte[] message) {
         if (conn == clientConn) {
             if (DataPacket.isPacketEOF(message)) {
-                if (isFirstPacket) {
-                    parseReceivePakcet(message, conn);
+                if (isFirstClientPacket) {
+                    parseClientPakcet(message, conn);
                 } else {
-                    mergeMessage(message);
+                    mergeClientMessage(message);
                     DataPacket.setPacketEOF(tmpBuffer, true);
-                    parseReceivePakcet(tmpBuffer, conn);
+                    parseClientPakcet(tmpBuffer, conn);
                     tmpBuffer = null;
-                    isFirstPacket = true;
+                    isFirstClientPacket = true;
                 }
             } else {
-                mergeMessage(message);
+                mergeClientMessage(message);
             }
         } else {
-            if (logger.isDebugEnabled()) {
-                System.out.println("\n%amoeba query message " + message + " ========================================================");
-                System.out.println("%receive packet:" + ByteUtil.toHex(message, 0, message.length));
+            if (DataPacket.isPacketEOF(message)) {
+                if (isFirstServerPacket) {
+                    parseServerPakcet(message, conn);
+                } else {
+                    mergeServerMessage(message);
+                    parseServerPakcet(tmpBuffer2, conn);
+                    tmpBuffer2 = null;
+                    isFirstServerPacket = true;
+                }
+            } else {
+                mergeServerMessage(message);
             }
         }
 
@@ -140,16 +153,16 @@ public class OracleQueryMessageHandler implements MessageHandler, Sessionable, S
     }
 
     /**
-     * 合并数据包并去除多余的包头信息
+     * 合并客户端数据包
      */
-    private void mergeMessage(byte[] message) {
+    private void mergeClientMessage(byte[] message) {
         if (!DataPacket.isDataType(message)) {
             return;
         }
-        if (isFirstPacket) {
+        if (isFirstClientPacket) {
             tmpBuffer = new byte[message.length];
             System.arraycopy(message, 0, tmpBuffer, 0, message.length);
-            isFirstPacket = false;
+            isFirstClientPacket = false;
         } else {
             int appendLength = message.length - OraclePacketConstant.DATA_PACKET_HEADER_SIZE;
             byte[] newBytes = new byte[tmpBuffer.length + appendLength];
@@ -160,9 +173,22 @@ public class OracleQueryMessageHandler implements MessageHandler, Sessionable, S
     }
 
     /**
-     * 解析发送的SQL数据包
+     * 合并服务器端数据包
      */
-    private void parseReceivePakcet(byte[] message, Connection conn) {
+    private void mergeServerMessage(byte[] message) {
+        if (!DataPacket.isDataType(message)) {
+            return;
+        }
+        if (isFirstServerPacket) {
+            isFirstServerPacket = false;
+        } else {
+        }
+    }
+
+    /**
+     * 解析客户端的SQL数据包
+     */
+    private void parseClientPakcet(byte[] message, Connection conn) {
         if (logger.isDebugEnabled()) {
             System.out.println("\n$amoeba query message ========================================================");
             System.out.println("$send packet:" + ByteUtil.toHex(message, 0, message.length));
@@ -180,6 +206,21 @@ public class OracleQueryMessageHandler implements MessageHandler, Sessionable, S
             if (logger.isDebugEnabled()) {
                 System.out.println("type:OtherPacket");
             }
+        }
+    }
+
+    /**
+     * 解析服务器端的SQL数据包
+     */
+    private void parseServerPakcet(byte[] message, Connection conn) {
+        if (logger.isDebugEnabled()) {
+            System.out.println("\n%amoeba query message ========================================================");
+            System.out.println("%receive packet:" + ByteUtil.toHex(message, 0, message.length));
+        }
+
+        if (T4C8OallResponseDataPacket.isParseable(message)) {
+            T4C8OallResponseDataPacket responsePacket = new T4C8OallResponseDataPacket(this);
+            responsePacket.init(message, conn);
         }
     }
 
