@@ -35,7 +35,7 @@ public class T4C8TTIrxh {
         uacBufLength = meg.unmarshalUB2();
         byte abyte0[] = meg.unmarshalDALC();
         // rxd.readBitVector(abyte0);
-        byte abyte1[] = meg.unmarshalDALC();
+        meg.unmarshalDALC();
     }
 
 }

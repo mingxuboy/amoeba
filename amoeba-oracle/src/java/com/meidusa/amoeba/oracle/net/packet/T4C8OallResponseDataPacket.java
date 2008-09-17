@@ -38,101 +38,65 @@ public class T4C8OallResponseDataPacket extends DataPacket {
     protected void init(AbstractPacketBuffer buffer) {
         super.init(buffer);
         T4CPacketBuffer meg = (T4CPacketBuffer) buffer;
+        boolean flag = false;
         while (true) {
-            byte byte0 =4;// meg.unmarshalSB1();
+            byte byte0 = meg.unmarshalSB1();
             switch (byte0) {
-                case 4:// 表示数据结束返回结果描述                    
-//                    oer.init();
-//                    oer.unmarshal(meg);
-//                    cursor = oer.currCursorID;
-//                    rowsProcessed = oer.curRowNumber;
-//                    if (oer.retCode != 1403) {
-//                        try {
-//                            // TODO
-//                            // oer.processError(oracleStatement);
-//                        } catch (Exception e) {
-//                            receiveState = 0;
-//                        }
-//                    }
-//
-//                    // if (receiveState != 1) {
-//                    // throw new RuntimeException("OALL8 处于不一致状态");
-//                    // }
-//                    receiveState = 0;
+                case 4:// 表示数据结束返回结果描述
+                    oer.init();
+                    oer.unmarshal(meg);
+                    cursor = oer.currCursorID;
+                    rowsProcessed = oer.curRowNumber;
+                    if (oer.retCode != 1403) {
+                        try {
+                            // TODO
+                            // oer.processError(oracleStatement);
+                        } catch (Exception e) {
+                            receiveState = 0;
+                        }
+                    }
+
+                    // if (receiveState != 1) {
+                    // throw new RuntimeException("OALL8 处于不一致状态");
+                    // }
+                    receiveState = 0;
                     return;
                 case 6:
-                    // rxh.init();
-                    // rxh.unmarshalV10(rxd, meg);
-                    // if (rxh.uacBufLength > 0) {
-                    // throw new RuntimeException("无效的列类型");
-                    // }
+                    rxh.init();
+                    rxh.unmarshalV10(rxd, meg);
+                    if (rxh.uacBufLength > 0) {
+                        throw new RuntimeException("无效的列类型");
+                    }
                     break;
                 case 7:
                     // if (receiveState != 1) {
                     // throw new RuntimeException("OALL8 处于不一致状态");
                     // }
                     receiveState = 2;
-                    // if (handler.numberOfParams <= 0) {
-                    // if (!flag3 && (outBindAccessors == null || definesAccessors != null)) {
-                    // if (!rxd.unmarshal(definesAccessors, definesLength)) {
-                    // receiveState = 1;
-                    // break;
-                    // } else {
-                    // receiveState = 3;
-                    // return;
-                    // }
-                    // } else {
-                    // if (!rxd.unmarshal(outBindAccessors, numberOfBindPositions)) {
-                    // receiveState = 1;
-                    // break;
-                    // } else {
-                    // receiveState = 3;
-                    // return;
-                    // }
-                    // }
-                    // } else {
-                    // boolean flag4 = false;
-                    // for (int k = 0; k < handler.numberOfParams; k++) {
-                    // Accessor accessor = oracleStatement.returnParamAccessors[k];
-                    // if (accessor == null) {
-                    // continue;
-                    // }
-                    // int j1 = (int) meg.unmarshalUB4();
-                    // if (!flag4) {
-                    // oracleStatement.rowsDmlReturned = j1;
-                    // oracleStatement.allocateDmlReturnStorage();
-                    // oracleStatement.setupReturnParamAccessors();
-                    // flag4 = true;
-                    // }
-                    // // L60
-                    // for (int l1 = 0; l1 < j1; l1++) {
-                    // accessor.unmarshalOneRow();
-                    // }
-                    // }
-                    // oracleStatement.returnParamsFetched = true;
-                    // receiveState = 1;// L8
-                    // break;
-                    // }
+                    for (int k = 0; k < rxh.numRqsts; k++) {
+                        meg.unmarshalCLRforREFS();
+                    }
+                    break;
                 case 8:// _L5
-                    // if (flag) {
-                    // DatabaseError.throwSqlException(401);
-                    // }
-                    // int j = meg.unmarshalUB2();
-                    // int ai[] = new int[j];
-                    // for (int l = 0; l < j; l++) {
-                    // ai[l] = (int) meg.unmarshalUB4();
-                    // }
-                    // cursor = ai[2];
-                    // meg.unmarshalUB2();
-                    // int i1 = meg.unmarshalUB2();
-                    // if (i1 > 0) {
-                    // for (int k1 = 0; k1 < i1; k1++) {
-                    // int i2 = (int) meg.unmarshalUB4();
-                    // meg.unmarshalDALC();
-                    // int j2 = meg.unmarshalUB2();
-                    // }
-                    // }
-                    // flag = true;
+                    if (flag) {
+                        throw new RuntimeException("protocol error");
+                    }
+                    int j = meg.unmarshalUB2();
+                    int ai[] = new int[j];
+                    for (int l = 0; l < j; l++) {
+                        ai[l] = (int) meg.unmarshalUB4();
+                    }
+                    cursor = ai[2];
+                    meg.unmarshalUB2();
+                    int i1 = meg.unmarshalUB2();
+                    if (i1 > 0) {
+                        for (int k1 = 0; k1 < i1; k1++) {
+                            meg.unmarshalUB4();
+                            meg.unmarshalDALC();
+                            meg.unmarshalUB2();
+                        }
+                    }
+                    flag = true;
                     break;
                 case 11:// _L6
                     // T4CTTIiov t4cttiiov = new T4CTTIiov(meg, rxh, rxd);
@@ -147,8 +111,8 @@ public class T4C8OallResponseDataPacket extends DataPacket {
                     // flag3 = true;
                     break;
                 case 16:// 表示查询字段的描述
-                    // dcb.init(0);
-                    // definesAccessors = dcb.receive(definesAccessors);
+                    dcb.init(0);
+                    definesAccessors = dcb.receive(definesAccessors, meg);
                     // numberOfDefinePositions = dcb.numuds;
                     // definesLength = numberOfDefinePositions;
                     // rxd.setNumberOfColumns(numberOfDefinePositions);
@@ -162,7 +126,7 @@ public class T4C8OallResponseDataPacket extends DataPacket {
                     break;
                 default:
                     // System.err.println("protocol error");
-                    // throw new RuntimeException("protocol error");
+                    throw new RuntimeException("protocol error");
             }
 
             // meg.sentCancel = false;
@@ -179,6 +143,15 @@ public class T4C8OallResponseDataPacket extends DataPacket {
     // ///////////////////////////////////////////////////////////////////////////////////
 
     public static boolean isParseable(byte[] message) {
+        return true;
+    }
+
+    public static boolean isPacketEOF(byte[] buffer) {
+        int i = 0;
+        switch (i) {
+            case 4:
+                // ...
+        }
         return true;
     }
 

@@ -61,9 +61,6 @@ public class OracleQueryMessageHandler implements MessageHandler, Sessionable, S
     private ObjectPool[]                                     pools;
     private OracleServerConnection[]                         serverConns;
 
-    //
-    public int                                               numberOfParams;
-
     public OracleQueryMessageHandler(Connection clientConn, ObjectPool[] pools){
         this.clientConn = (OracleConnection) clientConn;
         clientHandler = clientConn.getMessageHandler();
@@ -87,7 +84,7 @@ public class OracleQueryMessageHandler implements MessageHandler, Sessionable, S
                 mergeClientMessage(message);
             }
         } else {
-            if (DataPacket.isPacketEOF(message)) {
+            if (T4C8OallResponseDataPacket.isPacketEOF(tmpBuffer2)) {
                 if (isFirstServerPacket) {
                     parseServerPakcet(message, conn);
                 } else {
