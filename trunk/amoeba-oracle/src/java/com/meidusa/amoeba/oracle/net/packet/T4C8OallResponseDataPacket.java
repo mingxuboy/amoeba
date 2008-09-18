@@ -2,9 +2,10 @@ package com.meidusa.amoeba.oracle.net.packet;
 
 import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
 import com.meidusa.amoeba.oracle.accessor.Accessor;
-import com.meidusa.amoeba.oracle.handler.OracleQueryMessageHandler;
 import com.meidusa.amoeba.oracle.net.packet.assist.T4C8TTIrxh;
 import com.meidusa.amoeba.oracle.net.packet.assist.T4CTTIdcb;
+import com.meidusa.amoeba.oracle.net.packet.assist.T4CTTIfob;
+import com.meidusa.amoeba.oracle.net.packet.assist.T4CTTIiov;
 import com.meidusa.amoeba.oracle.net.packet.assist.T4CTTIoer;
 import com.meidusa.amoeba.oracle.net.packet.assist.T4CTTIrxd;
 
@@ -14,70 +15,57 @@ import com.meidusa.amoeba.oracle.net.packet.assist.T4CTTIrxd;
  */
 public class T4C8OallResponseDataPacket extends DataPacket {
 
-    int                               cursor;
-    long                              rowsProcessed;
-    int                               receiveState;
+    int        cursor;
+    long       rowsProcessed;
+    boolean    isCompleted = false;
 
-    T4CTTIoer                         oer = new T4CTTIoer();
-    T4C8TTIrxh                        rxh = new T4C8TTIrxh();
-    T4CTTIrxd                         rxd = new T4CTTIrxd();
-    T4CTTIdcb                         dcb = new T4CTTIdcb();
+    T4CTTIoer  oer         = new T4CTTIoer();
+    T4C8TTIrxh rxh         = new T4C8TTIrxh();
+    T4CTTIrxd  rxd         = new T4CTTIrxd();
+    T4CTTIdcb  dcb         = new T4CTTIdcb();
+    T4CTTIfob  fob         = new T4CTTIfob();
 
-    Accessor[]                        definesAccessors;
+    Accessor[] definesAccessors;
+    Accessor[] outBindAccessors;
 
-    private OracleQueryMessageHandler handler;
-
-    public T4C8OallResponseDataPacket(OracleQueryMessageHandler handler){
-        this.handler = handler;
-    }
-
-    public T4C8OallResponseDataPacket(){
+    public boolean isCompleted() {
+        return isCompleted;
     }
 
     @Override
     protected void init(AbstractPacketBuffer buffer) {
         super.init(buffer);
-        T4CPacketBuffer meg = (T4CPacketBuffer) buffer;
         boolean flag = false;
+        T4CPacketBuffer meg = (T4CPacketBuffer) buffer;
         while (true) {
             byte byte0 = meg.unmarshalSB1();
+            // 其中select 语句有两次数据包的交互，
+            // switch的状态分别为：16,8,4(返回字段描述) 和 6,(7,21,7,21,...),4(返回数据结果)
+            // insert,update,delete 语句是一次数据包交互，switch的状态为：8,4
             switch (byte0) {
-                case 4:// 表示数据结束返回结果描述
+                case 4:// 数据结束返回结果描述
                     oer.init();
                     oer.unmarshal(meg);
                     cursor = oer.currCursorID;
                     rowsProcessed = oer.curRowNumber;
                     if (oer.retCode != 1403) {
-                        try {
-                            // TODO
-                            // oer.processError(oracleStatement);
-                        } catch (Exception e) {
-                            receiveState = 0;
-                        }
+                        // oer.processError(oracleStatement);
                     }
-
-                    // if (receiveState != 1) {
-                    // throw new RuntimeException("OALL8 处于不一致状态");
-                    // }
-                    receiveState = 0;
+                    isCompleted = true;
                     return;
-                case 6:
+                case 6:// select 开始返回查询数据
                     rxh.init();
                     rxh.unmarshalV10(rxd, meg);
                     if (rxh.uacBufLength > 0) {
                         throw new RuntimeException("无效的列类型");
                     }
                     break;
-                case 7:
-                    // if (receiveState != 1) {
-                    // throw new RuntimeException("OALL8 处于不一致状态");
-                    // }
-                    receiveState = 2;
+                case 7:// select 返回一行数据结果
                     for (int k = 0; k < rxh.numRqsts; k++) {
                         meg.unmarshalCLRforREFS();
                     }
                     break;
-                case 8:// _L5
+                case 8:// insert,update,delete 返回描述
                     if (flag) {
                         throw new RuntimeException("protocol error");
                     }
@@ -98,40 +86,35 @@ public class T4C8OallResponseDataPacket extends DataPacket {
                     }
                     flag = true;
                     break;
-                case 11:// _L6
-                    // T4CTTIiov t4cttiiov = new T4CTTIiov(meg, rxh, rxd);
-                    // t4cttiiov.init();
-                    // t4cttiiov.unmarshalV10();
-                    // if (oracleStatement.returnParamAccessors == null && !t4cttiiov.isIOVectorEmpty()) {
-                    // byte abyte0[] = t4cttiiov.getIOVector();
-                    // outBindAccessors = t4cttiiov.processRXD(outBindAccessors, numberOfBindPositions, bindBytes,
-                    // bindChars, bindIndicators, bindIndicatorSubRange, conversion, tmpBindsByteArray, abyte0,
-                    // parameterStream, parameterDatum, parameterOtype, oracleStatement, null, null, null);
+                case 11:
+                    T4CTTIiov iov = new T4CTTIiov(rxh, rxd);
+                    iov.init();
+                    iov.unmarshalV10(meg);
+
+                    // if (!iov.isIOVectorEmpty()) {
+                    // byte abyte0[] = iov.getIOVector();
+                    // iov.processRXD(outBindAccessors, numberOfBindPositions, bindBytes, bindChars, bindIndicators,
+                    // bindIndicatorSubRange, conversion, tmpBindsByteArray, abyte0, parameterStream, parameterDatum,
+                    // parameterOtype, oracleStatement, null, null, null);
                     // }
-                    // flag3 = true;
-                    break;
-                case 16:// 表示查询字段的描述
+
+                    // break;
+                    throw new RuntimeException("unknown result switch type:11 in T4C8OallResponseDataPacket.");
+                case 16:// select 返回查询字段的描述结果
                     dcb.init(0);
                     definesAccessors = dcb.receive(definesAccessors, meg);
-                    // numberOfDefinePositions = dcb.numuds;
-                    // definesLength = numberOfDefinePositions;
-                    // rxd.setNumberOfColumns(numberOfDefinePositions);
+                    rxd.setNumberOfColumns(dcb.getNumuds());
                     break;
-                case 19:// _L8
-                    // fob.marshal();
+                case 19:
+                    fob.marshal(meg);
                     break;
-                case 21:// _L9
-                    // int i = meg.unmarshalUB2();
-                    // rxd.unmarshalBVC(i);
+                case 21:// select 继续返回下一行数据
+                    int i = meg.unmarshalUB2();
+                    rxd.unmarshalBVC(i, meg);
                     break;
                 default:
-                    // System.err.println("protocol error");
                     throw new RuntimeException("protocol error");
             }
-
-            // meg.sentCancel = false;
-            // meg.pipeState = -1;
-
         }
     }
 
@@ -146,12 +129,7 @@ public class T4C8OallResponseDataPacket extends DataPacket {
         return true;
     }
 
-    public static boolean isPacketEOF(byte[] buffer) {
-        int i = 0;
-        switch (i) {
-            case 4:
-                // ...
-        }
+    public static boolean isPacketEOF(byte[] message) {
         return true;
     }
 

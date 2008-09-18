@@ -25,6 +25,10 @@ public class T4CTTIdcb {
         this.colOffset = colOffset;
     }
 
+    public int getNumuds() {
+        return numuds;
+    }
+
     public Accessor[] receive(Accessor aaccessor[], T4CPacketBuffer meg) {
         short word0 = meg.unmarshalUB1();
         if (ignoreBuff.length < word0) {
@@ -65,26 +69,6 @@ public class T4CTTIdcb {
             }
         }
 
-        // if (statement.needToPrepareDefineBuffer) {
-        // if (aaccessor == null || aaccessor.length != numuds + colOffset) {
-        // Accessor aaccessor1[] = new Accessor[numuds + colOffset];
-        // if (aaccessor != null && aaccessor.length == colOffset) {
-        // System.arraycopy(aaccessor, 0, aaccessor1, 0, colOffset);
-        // }
-        // aaccessor = aaccessor1;
-        // fillupAccessors(aaccessor, colOffset);
-        // }
-        // if (!flag) {
-        // statement.describedWithNames = true;
-        // statement.described = true;
-        // statement.numberOfDefinePositions = numuds;
-        // statement.accessors = aaccessor;
-        // if (statement.connection.useFetchSizeWithLongColumn) {
-        // statement.prepareAccessors();
-        // statement.allocateTmpByteArray();
-        // }
-        // }
-        // }
         return aaccessor;
     }
 
