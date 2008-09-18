@@ -131,7 +131,7 @@ public class T4C8OallResponseDataPacket extends DataPacket {
 
     @Override
     protected Class<? extends AbstractPacketBuffer> getPacketBufferClass() {
-        return T4CPacketBuffer.class;
+        return T4CPacketBufferExchanger.class;
     }
 
     // ///////////////////////////////////////////////////////////////////////////////////

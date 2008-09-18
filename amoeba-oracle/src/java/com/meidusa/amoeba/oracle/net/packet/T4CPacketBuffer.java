@@ -237,7 +237,7 @@ public class T4CPacketBuffer extends OracleAbstractPacketBuffer implements Oracl
     }
 
     public byte unmarshalSB1() {
-        return buffer[position++];
+        return this.readByte();
     }
 
     public short unmarshalUB1() {
@@ -664,7 +664,7 @@ public class T4CPacketBuffer extends OracleAbstractPacketBuffer implements Oracl
         int i = 0;
         boolean flag = false;
         if ((getTypeRep().getRep(b) & 1) > 0) {
-            i = buffer[position++] & 0xff;
+            i = this.readByte() & 0xff;
             if ((i & 0x80) > 0) {
                 i &= 0x7f;
                 flag = true;
@@ -709,7 +709,7 @@ public class T4CPacketBuffer extends OracleAbstractPacketBuffer implements Oracl
         int i = 0;
         boolean flag = false;
         if ((getTypeRep().getRep(b) & 1) > 0) {
-            i = buffer[position++] & 0xff;
+            i = this.readByte() & 0xff;
             if ((i & 0x80) > 0) {
                 i &= 0x7f;
                 flag = true;

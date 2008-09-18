@@ -299,8 +299,6 @@ TOKEN: /* SQL Keywords. prefixed with K_ to avoid name clashes */
 |	<K_ROLLBACK:"ROLLBACK">
 
 |	<K_TRANSACTION_ISOLATION_LEVEL:"TRANSACTION ISOLATION LEVEL">
-//|	<K_TRANSACTION:"TRANSACTION">
-//|	<K_BEGIN:"BEGIN">
 |	<K_START_TRANSACTION:"START TRANSACTION">
 |	<K_SESSION:"SESSION">
 
@@ -308,34 +306,6 @@ TOKEN: /* SQL Keywords. prefixed with K_ to avoid name clashes */
 |	<K_TRANSACTION_READ_UNCOMMITTED:"READ UNCOMMITTED">
 |	<K_TRANSACTION_REPEATABLE_READ:"REPEATABLE READ">
 |	<K_TRANSACTION_SERIALIZABLE:"SERIALIZABLE">
-
-/*
-|   <K_MICROSECOND:"MICROSECOND">
-|   <K_MILLISECOND:"MILLISECOND">
-|   <K_SECOND:"SECOND">
-|   <K_DAY:"DAY">
-|   <K_MINUTE:"MINUTE">
-|   <K_MONTH:"MONTH">
-|   <K_HOUR:"HOUR">
-
-|   <K_TIME:"TIME">
-|   <K_TIMESTAMP:"TIMESTAMP">
-|   <K_DATE:"DATE">
-|   <K_CONCAT:"CONCAT">
-|   <K_NOW:"NOW">
-|   <K_CURRENTDATE:"CURRENT_DATE">
-|   <K_CURRENTTIME:"CURRENT_TIME">
-|   <K_CURRENTTIMESTAMP:"CURRENT_TIMESTAMP">
-
-|	<K_ISOLATION:"ISOLATION">
-
-|	<K_LEVEL:"LEVEL">
-|	<K_CHAIN:"CHAIN">
-|	<K_RELEASE:"RELEASE">
-|	<K_SNAPSHOT:"SNAPSHOT">
-|	<K_WORK:"WORK">
-|	<K_NO:"NO">
-*/
 }
 
 TOKEN : /* Numeric Constants */
@@ -1899,45 +1869,6 @@ Expression OverloadedFunctionCall() #void:
 				return funExpression;
 			}
 		}	
-	
-	/**
-        ("DATE"{functionName="DATE";} "(" SQLSimpleExpression() ")"
-        | "TIME"{functionName="TIME";} "(" SQLSimpleExpression() ")"
-        | "TIMESTAMP"{functionName="TIMESTAMP";} "(" SQLSimpleExpression() ["," SQLSimpleExpression() ] ")"
-        | "FLOAT"{functionName="FLOAT";} "(" SQLSimpleExpression() ")"
-        | "DOUBLE"{functionName="DOUBLE";} "(" SQLSimpleExpression() ")"
-        | "INTEGER"{functionName="INTEGER";} "(" SQLSimpleExpression() ")"
-        | "INT"{functionName="INT";} "(" SQLSimpleExpression() ")"
-        | "DECIMAL"{functionName="DECIMAL";} "(" SQLSimpleExpression() ["," <FLOATING_POINT_LITERAL> ["," <FLOATING_POINT_LITERAL> ["," <FLOATING_POINT_LITERAL>]]] ")"
-        | "DEC"{functionName="DEC";} "(" SQLSimpleExpression() ["," <FLOATING_POINT_LITERAL> ["," <FLOATING_POINT_LITERAL> ["," <FLOATING_POINT_LITERAL>]]]  ")"
-        | "LEFT"{functionName="LEFT";} "(" SQLSimpleExpression() "," <FLOATING_POINT_LITERAL> ")"
-        | "NOW"{functionName="NOW";} "(" [SQLSimpleExpression()] ")"
-        | "SYSDATE"{functionName="NOW";} "(" [SQLSimpleExpression()] ")"
-        | "RIGHT"{functionName="RIGHT";} "(" SQLSimpleExpression() "," <FLOATING_POINT_LITERAL> ")"
-        | "VARCHAR"{functionName="VARCHAR";} "(" SQLSimpleExpression() ["," <FLOATING_POINT_LITERAL>] ")"
-        | "CHAR"{functionName="CHAR";} "(" SQLSimpleExpression() ["," <FLOATING_POINT_LITERAL>] ")"
-        | "DAY"{functionName="DAY";} "(" SQLSimpleExpression() ")"
-        | "DAYS"{functionName="DAYS";} "(" SQLSimpleExpression() ")"
-        | "HOUR"{functionName="HOUR";} "(" SQLSimpleExpression() ")"
-        | "MICROSECOND"{functionName="MICROSECOND";} "(" SQLSimpleExpression() ")"
-        | "MINUTE"{functionName="MINUTE";} "(" SQLSimpleExpression() ")"
-        | "MONTH"{functionName="MONTH";} "(" SQLSimpleExpression() ")"
-        | "SECOND"{functionName="SECOND";} "(" SQLSimpleExpression() ")"
-        | "YEAR"{functionName="YEAR";} "(" SQLSimpleExpression() ")"
-        | "CURRENT_TIMESTAMP"{functionName="NOW";}
-		| "CURRENT_TIME"{functionName="CURRENT_TIME";}
-		| "CURRENT_DATE"{functionName="CURRENT_DATE";}
-        | "TO_DATE"{functionName="TO_DATE";} "("expression = SQLSimpleExpression() ")"){
-        	function = getFunction(functionName);
-        	if(function == null){return null;}
-        	FunctionExpression funExpression = new FunctionExpression();
-        	funExpression.setFunction(function);
-        	if(expression != null){
-        		funExpression.addArgExpression(expression);
-        	}
-        	return funExpression;
-        }
-        **/
 }
 
 void DataTypes() #void:
