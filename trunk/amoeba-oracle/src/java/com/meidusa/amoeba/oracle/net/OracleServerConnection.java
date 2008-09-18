@@ -2,9 +2,12 @@ package com.meidusa.amoeba.oracle.net;
 
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.log4j.Logger;
 
+import com.meidusa.amoeba.context.ProxyRuntimeContext;
 import com.meidusa.amoeba.net.Connection;
 import com.meidusa.amoeba.net.packet.Packet;
 import com.meidusa.amoeba.net.poolable.ObjectPool;
@@ -25,6 +28,8 @@ import com.meidusa.amoeba.oracle.net.packet.T4CTTIoAuthKeyDataPacket;
 import com.meidusa.amoeba.oracle.net.packet.T4CTTIoAuthKeyResponseDataPacket;
 import com.meidusa.amoeba.oracle.net.packet.T4CTTIoAuthResponseDataPacket;
 import com.meidusa.amoeba.oracle.util.ByteUtil;
+import com.meidusa.amoeba.util.StaticString;
+import com.meidusa.amoeba.util.ThreadLocalMap;
 
 /**
  * @author struct
@@ -35,7 +40,11 @@ public class OracleServerConnection extends OracleConnection implements Poolable
     private boolean       active;
     private ObjectPool    objectPool;
     private Packet        lastPacketRequest;
-
+    /**
+	 * 该lock表示 该connection处于handleMessage中
+	 */
+	public final Lock processLock = new ReentrantLock(false);
+	
     public OracleServerConnection(SocketChannel channel, long createStamp){
         super(channel, createStamp);
     }
@@ -205,6 +214,38 @@ public class OracleServerConnection extends OracleConnection implements Poolable
 
     private void establishConnection(String data) {
 
+    }
+    
+    @SuppressWarnings("unchecked")
+	@Override
+    protected void messageProcess(final byte[] msg){
+    	if(_handler instanceof MessageQueuedHandler){
+    		final MessageQueuedHandler<byte[]> exchanger = (MessageQueuedHandler<byte[]>) _handler;
+    		synchronized (this.processLock) {
+    			if(exchanger.inHandleProcess(this)){
+						exchanger.push(this, msg);
+    			}else{
+    				ProxyRuntimeContext.getInstance().getServerSideExecutor().execute(new Runnable(){
+    	    			public void run() {
+    	    				ThreadLocalMap.put(StaticString.HANDLER, exchanger);
+    	    				try{
+    	    					_handler.handleMessage(OracleServerConnection.this,msg);
+    	    				}finally{
+    	    					ThreadLocalMap.remove(StaticString.HANDLER);
+    	    				}
+    	    			}
+    	        	});
+    			}
+    			
+    			try {
+					processLock.wait();
+				} catch (InterruptedException e) {
+				}
+    		}
+    	}else{
+    		_handler.handleMessage(this,msg);
+    	}
+    	
     }
 
     public ObjectPool getObjectPool() {

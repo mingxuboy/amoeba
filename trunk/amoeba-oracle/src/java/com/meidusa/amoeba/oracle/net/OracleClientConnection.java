@@ -6,7 +6,6 @@ import java.nio.channels.SocketChannel;
 import org.apache.log4j.Logger;
 
 import com.meidusa.amoeba.net.Connection;
-import com.meidusa.amoeba.net.Sessionable;
 import com.meidusa.amoeba.net.poolable.ObjectPool;
 import com.meidusa.amoeba.oracle.context.OracleProxyRuntimeContext;
 import com.meidusa.amoeba.oracle.handler.OracleQueryMessageHandler;

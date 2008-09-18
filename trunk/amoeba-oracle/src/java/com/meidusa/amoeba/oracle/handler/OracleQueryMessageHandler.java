@@ -25,7 +25,7 @@ import com.meidusa.amoeba.oracle.util.ByteUtil;
  * 
  * @author struct
  */
-public class OracleQueryMessageHandler implements MessageHandler, Sessionable, SQLnetDef {
+public class OracleQueryMessageHandler extends AbstractMessageQueuedHandler implements MessageHandler, Sessionable, SQLnetDef {
 
     private static Logger logger = Logger.getLogger(OracleQueryMessageHandler.class);
 
@@ -68,7 +68,7 @@ public class OracleQueryMessageHandler implements MessageHandler, Sessionable, S
         clientConn.setMessageHandler(this);
     }
 
-    public void handleMessage(Connection conn, byte[] message) {
+    public void doHandleMessage(Connection conn, byte[] message) {
         if (conn == clientConn) {
             if (DataPacket.isPacketEOF(message)) {
                 if (isFirstClientPacket) {
@@ -204,7 +204,6 @@ public class OracleQueryMessageHandler implements MessageHandler, Sessionable, S
             }
         }
     }
-
     /**
      * 解析服务器端的SQL数据包
      */
