@@ -196,12 +196,11 @@ public class OracleQueryMessageHandler implements MessageHandler, Sessionable, S
                 System.out.println("type:DataEOFPacket");
             }
         } else if (T4C8OallDataPacket.isParseable(message)) {
-            T4C8OallDataPacket packet = new T4C8OallDataPacket(this);
-            packet.init(message, conn);
-            packet.setHandlerProps();
+            T4C8OallDataPacket clientPacket = new T4C8OallDataPacket();
+            clientPacket.init(message, conn);
         } else {
             if (logger.isDebugEnabled()) {
-                System.out.println("type:OtherPacket");
+                System.out.println("type:OtherClientPacket");
             }
         }
     }
@@ -215,9 +214,14 @@ public class OracleQueryMessageHandler implements MessageHandler, Sessionable, S
             System.out.println("%receive packet:" + ByteUtil.toHex(message, 0, message.length));
         }
 
-        if (T4C8OallResponseDataPacket.isParseable(message)) {
-            T4C8OallResponseDataPacket responsePacket = new T4C8OallResponseDataPacket(this);
-            responsePacket.init(message, conn);
+        if (T4C8OallResponseDataPacket.isParseable(message)) {            
+            T4C8OallResponseDataPacket serverPacket = new T4C8OallResponseDataPacket();
+            serverPacket.init(message, conn);
+            serverPacket.isCompleted();
+        } else {
+            if (logger.isDebugEnabled()) {
+                System.out.println("type:OtherServerPacket");
+            }
         }
     }
 

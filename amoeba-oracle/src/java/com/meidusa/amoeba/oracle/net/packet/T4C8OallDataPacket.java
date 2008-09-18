@@ -9,7 +9,6 @@ import com.meidusa.amoeba.oracle.accessor.T4CDateAccessor;
 import com.meidusa.amoeba.oracle.accessor.T4CNumberAccessor;
 import com.meidusa.amoeba.oracle.accessor.T4CVarcharAccessor;
 import com.meidusa.amoeba.oracle.accessor.T4CVarnumAccessor;
-import com.meidusa.amoeba.oracle.handler.OracleQueryMessageHandler;
 import com.meidusa.amoeba.oracle.net.packet.assist.T4CTTIoac;
 
 /**
@@ -18,37 +17,27 @@ import com.meidusa.amoeba.oracle.net.packet.assist.T4CTTIoac;
  */
 public class T4C8OallDataPacket extends T4CTTIfunPacket {
 
-    private static Logger             logger = Logger.getLogger(T4C8OallDataPacket.class);
+    private static Logger logger = Logger.getLogger(T4C8OallDataPacket.class);
 
-    long                              options;
-    int                               cursor;
-    int                               sqlStmtLength;
-    int                               numberOfParams;
-    int                               al8i4Length;
-    int                               defCols;
+    long                  options;
+    int                   cursor;
+    int                   sqlStmtLength;
+    int                   numberOfParams;
+    int                   al8i4Length;
+    int                   defCols;
 
-    public String                     sqlStmt;                                            // sql
-    long[]                            al8i4;
-    T4CTTIoac[]                       oacBind;
-    public Accessor[]                 accessors;                                          // parameter Accessors
-    T4CTTIoac[]                       oacdefDefines;
-    public Accessor[]                 definesAccessors;
-    public byte[][]                   paramBytes;                                         // parameter bytes
-
-    private OracleQueryMessageHandler handler;
+    public String         sqlStmt;                                            // sql
+    long[]                al8i4;
+    T4CTTIoac[]           oacBind;
+    public Accessor[]     accessors;                                          // parameter Accessors
+    T4CTTIoac[]           oacdefDefines;
+    public Accessor[]     definesAccessors;
+    public byte[][]       paramBytes;                                         // parameter bytes
 
     public T4C8OallDataPacket(){
         super(OALL8);
         this.defCols = 0;
         this.al8i4 = new long[13];
-    }
-
-    public T4C8OallDataPacket(OracleQueryMessageHandler handler){
-        this();
-        this.handler = handler;
-    }
-
-    public void setHandlerProps() {
     }
 
     public String getSqlStmt() {

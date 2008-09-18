@@ -34,7 +34,8 @@ public class T4C8TTIrxh {
         numItersThisTime = meg.unmarshalUB2();
         uacBufLength = meg.unmarshalUB2();
         byte abyte0[] = meg.unmarshalDALC();
-        // rxd.readBitVector(abyte0);
+        rxd.setNumberOfColumns(numRqsts);
+        rxd.readBitVector(abyte0);
         meg.unmarshalDALC();
     }
 

@@ -17,7 +17,7 @@ public abstract class DataPacket extends AbstractPacket {
     }
 
     /**
-     * true,表示整个数据流结束，服务器关闭连接。
+     * true,表示整个数据流结束，服务器关闭连接。（客户端发出的数据包）
      */
     public static boolean isDataEOF(byte[] buffer) {
         int dataFlags = ((buffer[8] & 0xff) << 8) | (buffer[9] & 0xff);
