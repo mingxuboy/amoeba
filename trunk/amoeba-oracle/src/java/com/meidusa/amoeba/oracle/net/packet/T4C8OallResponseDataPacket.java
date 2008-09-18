@@ -15,18 +15,24 @@ import com.meidusa.amoeba.oracle.net.packet.assist.T4CTTIrxd;
  */
 public class T4C8OallResponseDataPacket extends DataPacket {
 
-    int        cursor;
-    long       rowsProcessed;
-    boolean    isCompleted = false;
+    static final int QUERY_DESC   = 16;
+    static final int QUERY_RESULT = 6;
+    static final int EXEC_RESULT  = 8;
 
-    T4CTTIoer  oer         = new T4CTTIoer();
-    T4C8TTIrxh rxh         = new T4C8TTIrxh();
-    T4CTTIrxd  rxd         = new T4CTTIrxd();
-    T4CTTIdcb  dcb         = new T4CTTIdcb();
-    T4CTTIfob  fob         = new T4CTTIfob();
+    int              cursor;
+    long             rowsProcessed;
 
-    Accessor[] definesAccessors;
-    Accessor[] outBindAccessors;
+    boolean          isLastPacket = false;
+    boolean          isCompleted  = false;
+
+    T4CTTIoer        oer          = new T4CTTIoer();
+    T4C8TTIrxh       rxh          = new T4C8TTIrxh();
+    T4CTTIrxd        rxd          = new T4CTTIrxd();
+    T4CTTIdcb        dcb          = new T4CTTIdcb();
+    T4CTTIfob        fob          = new T4CTTIfob();
+
+    Accessor[]       definesAccessors;
+    Accessor[]       outBindAccessors;
 
     public boolean isCompleted() {
         return isCompleted;
@@ -37,10 +43,12 @@ public class T4C8OallResponseDataPacket extends DataPacket {
         super.init(buffer);
         boolean flag = false;
         T4CPacketBuffer meg = (T4CPacketBuffer) buffer;
+        byte byte0 = meg.unmarshalSB1();
+        if (byte0 == QUERY_RESULT || byte0 == EXEC_RESULT) {
+            isLastPacket = true;
+        }
         while (true) {
-            byte byte0 = meg.unmarshalSB1();
-            // 其中select 语句有两次数据包的交互，
-            // switch的状态分别为：16,8,4(返回字段描述) 和 6,(7,21,7,21,...),4(返回数据结果)
+            // select 语句有两次数据包的交互，switch的状态为：16,8,4(返回字段描述) 和 6,(7,21,7,21,...),4(返回数据结果)
             // insert,update,delete 语句是一次数据包交互，switch的状态为：8,4
             switch (byte0) {
                 case 4:// 数据结束返回结果描述
@@ -51,9 +59,11 @@ public class T4C8OallResponseDataPacket extends DataPacket {
                     if (oer.retCode != 1403) {
                         // oer.processError(oracleStatement);
                     }
-                    isCompleted = true;
+                    if (isLastPacket) {
+                        isCompleted = true;
+                    }
                     return;
-                case 6:// select 开始返回查询数据
+                case QUERY_RESULT:// select 开始返回查询数据
                     rxh.init();
                     rxh.unmarshalV10(rxd, meg);
                     if (rxh.uacBufLength > 0) {
@@ -65,7 +75,7 @@ public class T4C8OallResponseDataPacket extends DataPacket {
                         meg.unmarshalCLRforREFS();
                     }
                     break;
-                case 8:// insert,update,delete 返回描述
+                case EXEC_RESULT:// insert,update,delete 返回描述
                     if (flag) {
                         throw new RuntimeException("protocol error");
                     }
@@ -100,7 +110,7 @@ public class T4C8OallResponseDataPacket extends DataPacket {
 
                     // break;
                     throw new RuntimeException("unknown result switch type:11 in T4C8OallResponseDataPacket.");
-                case 16:// select 返回查询字段的描述结果
+                case QUERY_DESC:// select 返回查询字段的描述结果
                     dcb.init(0);
                     definesAccessors = dcb.receive(definesAccessors, meg);
                     rxd.setNumberOfColumns(dcb.getNumuds());
@@ -115,6 +125,7 @@ public class T4C8OallResponseDataPacket extends DataPacket {
                 default:
                     throw new RuntimeException("protocol error");
             }
+            byte0 = meg.unmarshalSB1();
         }
     }
 
