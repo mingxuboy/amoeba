@@ -18,7 +18,7 @@ public class AbstractPacketBuffer implements PacketBuffer {
     protected byte[] buffer   = null;
 
     public AbstractPacketBuffer(byte[] buf){
-        buffer = new byte[buf.length + 1];
+        buffer = new byte[buf.length];
         System.arraycopy(buf, 0, buffer, 0, buf.length);
         setPacketLength(buffer.length);
         position = 0;

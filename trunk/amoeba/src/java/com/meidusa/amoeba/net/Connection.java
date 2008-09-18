@@ -45,6 +45,7 @@ public abstract class Connection implements NetEventHandler {
 	protected MessageHandler _handler;
 	protected final Lock closeLock = new ReentrantLock(false);
 	protected final Lock postCloseLock = new ReentrantLock(false);
+	
 	protected boolean closePosted = false;
 	private PacketInputStream _fin;
 
