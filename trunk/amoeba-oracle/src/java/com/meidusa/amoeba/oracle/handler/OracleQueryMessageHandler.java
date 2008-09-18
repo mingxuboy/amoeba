@@ -214,10 +214,12 @@ public class OracleQueryMessageHandler implements MessageHandler, Sessionable, S
             System.out.println("%receive packet:" + ByteUtil.toHex(message, 0, message.length));
         }
 
-        if (T4C8OallResponseDataPacket.isParseable(message)) {            
+        if (T4C8OallResponseDataPacket.isParseable(message)) {
             T4C8OallResponseDataPacket serverPacket = new T4C8OallResponseDataPacket();
             serverPacket.init(message, conn);
-            serverPacket.isCompleted();
+            if (logger.isDebugEnabled()) {
+                System.out.println("query has completed:" + serverPacket.isCompleted());
+            }
         } else {
             if (logger.isDebugEnabled()) {
                 System.out.println("type:OtherServerPacket");
