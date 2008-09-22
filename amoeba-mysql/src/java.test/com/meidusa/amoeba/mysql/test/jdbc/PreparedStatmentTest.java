@@ -29,8 +29,8 @@ public class PreparedStatmentTest {
 		Connection conn = null;
 		PreparedStatement statment = null;
 		ResultSet result = null;
-		conn = DriverManager.getConnection("jdbc:mysql://127.0.0.1:8066/test?useUnicode=true&characterEncoding=gbk",
-				"root", null);
+		conn = DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/test?useUnicode=true&characterEncoding=gbk",
+				"blog", "blog");
 		try {
 			statment = conn
 					.prepareStatement("insert into t_qa_question set question_Id=?, title=?, content=?, extend_content=?, category=?, ask_time=?, finish_time=?, user_id=?,"+
