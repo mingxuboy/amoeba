@@ -35,7 +35,7 @@
   </filelist>
   
   <filelist dir="." id="doc.files">
-    <file name="build/doc/amoeba.pdf"/>
+    <file name="build/doc/amoeba-0.1.pdf"/>
   </filelist>
 	
   <path id="classpath">
