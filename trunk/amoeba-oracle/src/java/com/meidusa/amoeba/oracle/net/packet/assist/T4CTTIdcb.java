@@ -1,6 +1,5 @@
 package com.meidusa.amoeba.oracle.net.packet.assist;
 
-import com.meidusa.amoeba.oracle.accessor.Accessor;
 import com.meidusa.amoeba.oracle.net.packet.T4CPacketBuffer;
 
 /**
@@ -9,12 +8,16 @@ import com.meidusa.amoeba.oracle.net.packet.T4CPacketBuffer;
  */
 public class T4CTTIdcb {
 
-    T4C8TTIuds   uds[];
+    T4C8TTIuds[] uds;
     int          numuds;
-    String       colnames[];
+    String[]     colnames;
     int          colOffset;
-    byte         ignoreBuff[];
+    byte[]       ignoreBuff;
     StringBuffer colNameSB;
+
+    long         skip;
+    short        skip2;
+    byte[]       skip3;
 
     public T4CTTIdcb(){
         // super(TTIDCB);
@@ -29,32 +32,31 @@ public class T4CTTIdcb {
         return numuds;
     }
 
-    public Accessor[] receive(Accessor aaccessor[], T4CPacketBuffer meg) {
+    public void unmarshal(T4CPacketBuffer meg) {
         short word0 = meg.unmarshalUB1();
         if (ignoreBuff.length < word0) {
             ignoreBuff = new byte[word0];
         }
         meg.unmarshalNBytes(ignoreBuff, 0, word0);
-        meg.unmarshalUB4();// skip read
-        aaccessor = receiveCommon(aaccessor, false, meg);
-        return aaccessor;
+        skip = meg.unmarshalUB4();// skip read
+        receiveCommon(false, meg);
     }
 
-    public Accessor[] receiveCommon(Accessor aaccessor[], boolean flag, T4CPacketBuffer meg) {
+    public void receiveCommon(boolean flag, T4CPacketBuffer meg) {
         if (flag) {
             numuds = meg.unmarshalUB2();
         } else {
             numuds = (int) meg.unmarshalUB4();
             if (numuds > 0) {
-                meg.unmarshalUB1();
+                skip2 = meg.unmarshalUB1();
             }
         }
 
         uds = new T4C8TTIuds[numuds];
         colnames = new String[numuds];
         for (int i = 0; i < numuds; i++) {
-            uds[i] = new T4C8TTIuds(meg);
-            uds[i].unmarshal();
+            uds[i] = new T4C8TTIuds();
+            uds[i].unmarshal(meg);
             if (meg.versionNumber >= 10000) {
                 meg.unmarshalUB2();
             }
@@ -62,14 +64,46 @@ public class T4CTTIdcb {
         }
 
         if (!flag) {
-            meg.unmarshalDALC();
+            skip3 = meg.unmarshalDALC();
             if (meg.versionNumber >= 10000) {
                 meg.unmarshalUB4();
                 meg.unmarshalUB4();
             }
         }
+    }
 
-        return aaccessor;
+    public void marshal(T4CPacketBuffer meg, boolean flag) {
+        // if (ignoreBuff != null && ignoreBuff.length > 0) {
+        // meg.marshalCLR(ignoreBuff, ignoreBuff.length);
+        // } else {
+        // meg.marshalNULLPTR();
+        // }
+        meg.marshalNULLPTR();// ignoreBuffÊ¹ÓÃ0´úÌæ
+
+        meg.marshalUB4(skip);
+        if (flag) {
+            meg.marshalUB2(numuds);
+        } else {
+            meg.marshalUB4(numuds);
+            if (numuds > 0) {
+                meg.marshalUB1(skip2);
+            }
+        }
+        for (int i = 0; i < numuds; i++) {
+            uds[i].marshal(meg);
+            if (meg.versionNumber >= 10000) {
+                meg.marshalUB2(0);
+            }
+        }
+
+        if (!flag) {
+            meg.marshalDALC(skip3);
+            if (meg.versionNumber >= 10000) {
+                meg.marshalUB4(0L);
+                meg.marshalUB4(0L);
+            }
+        }
+
     }
 
 }

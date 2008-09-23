@@ -28,7 +28,7 @@ public abstract class DataPacket extends AbstractPacket {
     }
 
     /**
-     * true，表示一个数据包已结束。
+     * true，表示一个数据包已结束。（客户端发出的数据包）
      */
     public static boolean isPacketEOF(byte[] buffer) {
         int dataFlags = ((buffer[8] & 0xff) << 8) | (buffer[9] & 0xff);
@@ -52,7 +52,7 @@ public abstract class DataPacket extends AbstractPacket {
     }
 
     /**
-     * true,表示一个数据包还未完成，等待收取下一个网络包。
+     * true,表示一个数据包还未完成，等待收取下一个网络包。（客户端发出的数据包）
      */
     public static boolean hasNext(byte[] buffer) {
         int dataFlags = ((buffer[8] & 0xff) << 8) | (buffer[9] & 0xff);
@@ -63,7 +63,7 @@ public abstract class DataPacket extends AbstractPacket {
     }
 
     /**
-     * true,表示整个数据流结束，服务器关闭连接。
+     * true,表示整个数据流结束，服务器关闭连接。（客户端发出的数据包）
      */
     public boolean isDataEOF() {
         if ((dataFlags & 0x40) == 0x40) {
@@ -73,7 +73,7 @@ public abstract class DataPacket extends AbstractPacket {
     }
 
     /**
-     * true，表示一个数据包已完成。
+     * true，表示一个数据包已完成。（客户端发出的数据包）
      */
     public boolean isPacketEOF() {
         if (dataFlags == 0 || isDataEOF()) {
@@ -83,7 +83,7 @@ public abstract class DataPacket extends AbstractPacket {
     }
 
     /**
-     * true,表示一个数据包还未完成，等待收取下一个网络包。
+     * true,表示一个数据包还未完成，等待收取下一个网络包。（客户端发出的数据包）
      */
     public boolean hasNext() {
         if ((dataFlags & 0x20) == 0x20) {

@@ -52,9 +52,6 @@ public class OracleQueryMessageHandler extends AbstractMessageQueuedHandler impl
     private byte[]                                           tmpBuffer           = null;
     private boolean                                          isFirstClientPacket = true;
 
-    private byte[]                                           tmpBuffer2          = null;
-    private boolean                                          isFirstServerPacket = true;
-
     private final Lock                                       lock                = new ReentrantLock(false);
     protected Map<OracleServerConnection, ConnectionStatuts> connStatusMap       = new HashMap<OracleServerConnection, ConnectionStatuts>();
     protected Map<OracleServerConnection, MessageHandler>    handlerMap          = new HashMap<OracleServerConnection, MessageHandler>();
@@ -83,31 +80,51 @@ public class OracleQueryMessageHandler extends AbstractMessageQueuedHandler impl
             } else {
                 mergeClientMessage(message);
             }
-        } else {
-            if (T4C8OallResponseDataPacket.isPacketEOF(tmpBuffer2)) {
-                if (isFirstServerPacket) {
-                    parseServerPakcet(message, conn);
-                } else {
-                    mergeServerMessage(message);
-                    parseServerPakcet(tmpBuffer2, conn);
-                    tmpBuffer2 = null;
-                    isFirstServerPacket = true;
-                }
-            } else {
-                mergeServerMessage(message);
-            }
-        }
-
-        dispatchFromMessage(conn, message);
-    }
-
-    protected void dispatchFromMessage(Connection conn, byte[] message) {
-        if (conn == clientConn) {
             for (int i = 0; i < serverConns.length; i++) {
                 serverConns[i].postMessage(message);
             }
         } else {
-            clientConn.postMessage(message);
+            // if (logger.isDebugEnabled()) {
+            // System.out.println("\n%amoeba query message ========================================================");
+            // System.out.println("%receive size:" + (((message[0] & 0xff) << 8) | (message[1] & 0xff)));
+            // System.out.println("%receive packet:" + ByteUtil.toHex(message, 0, message.length));
+            // }
+            message = parseServerPakcet(message, conn);
+            byte[][] messagesList = splitMessage(message);
+            for (int i = 0; i < messagesList.length; i++) {
+                if (logger.isDebugEnabled()) {
+                    System.out.println("\n%amoeba query message ========================================================++++++++++++");
+                    System.out.println("%receive size:" + (((messagesList[i][0] & 0xff) << 8) | (messagesList[i][1] & 0xff)));
+                    System.out.println("%receive packet:" + ByteUtil.toHex(messagesList[i], 0, messagesList[i].length));
+                }
+                clientConn.postMessage(messagesList[i]);
+            }
+        }
+    }
+
+    protected byte[][] splitMessage(byte[] message) {
+        if (message.length > RECEIVE_SDU) {
+            int headSize = OraclePacketConstant.DATA_PACKET_HEADER_SIZE;
+            int dataLength = message.length - headSize;
+            int perLength = RECEIVE_SDU - headSize;
+            int arrayLength = (dataLength / perLength) + ((dataLength % perLength) == 0 ? 0 : 1);
+            byte[][] abyte0 = new byte[arrayLength][];
+            int position = headSize;
+            for (int i = 0; i < abyte0.length; i++) {
+                if (i == abyte0.length - 1) {
+                    abyte0[i] = new byte[dataLength % perLength + headSize];
+                } else {
+                    abyte0[i] = new byte[RECEIVE_SDU];
+                }
+                System.arraycopy(message, position, abyte0[i], headSize, abyte0[i].length - headSize);
+                position += abyte0[i].length - headSize;
+                abyte0[i][0] = (byte) ((abyte0[i].length >>> 8) & 0xff);
+                abyte0[i][1] = (byte) (abyte0[i].length & 0xff);
+                abyte0[i][4] = (byte) (NS_PACKT_TYPE_DATA);
+            }
+            return abyte0;
+        } else {
+            return new byte[][] { message };
         }
     }
 
@@ -170,19 +187,6 @@ public class OracleQueryMessageHandler extends AbstractMessageQueuedHandler impl
     }
 
     /**
-     * 合并服务器端数据包
-     */
-    private void mergeServerMessage(byte[] message) {
-        if (!DataPacket.isDataType(message)) {
-            return;
-        }
-        if (isFirstServerPacket) {
-            isFirstServerPacket = false;
-        } else {
-        }
-    }
-
-    /**
      * 解析客户端的SQL数据包
      */
     private void parseClientPakcet(byte[] message, Connection conn) {
@@ -204,25 +208,28 @@ public class OracleQueryMessageHandler extends AbstractMessageQueuedHandler impl
             }
         }
     }
+
     /**
      * 解析服务器端的SQL数据包
      */
-    private void parseServerPakcet(byte[] message, Connection conn) {
-        if (logger.isDebugEnabled()) {
-            System.out.println("\n%amoeba query message ========================================================");
-            System.out.println("%receive packet:" + ByteUtil.toHex(message, 0, message.length));
-        }
-
+    private byte[] parseServerPakcet(byte[] message, Connection conn) {
         if (T4C8OallResponseDataPacket.isParseable(message)) {
+            if (logger.isDebugEnabled()) {
+                System.out.println("\ntype:T4C8OallResponseDataPacket");
+            }
             T4C8OallResponseDataPacket serverPacket = new T4C8OallResponseDataPacket();
             serverPacket.init(message, conn);
-            if (logger.isDebugEnabled()) {
-                System.out.println("query has completed:" + serverPacket.isCompleted());
-            }
+            // if (logger.isDebugEnabled()) {
+            // System.out.println("query has completed:" + serverPacket.isCompleted());
+            // }
+            // if (serverPacket.isMerge()) {
+            // return serverPacket.toByteBuffer(conn).array();// not merge now
+            // } else {
+            // return serverPacket.toByteBuffer(conn).array();
+            // }
+            return serverPacket.toByteBuffer(conn).array();
         } else {
-            if (logger.isDebugEnabled()) {
-                System.out.println("type:OtherServerPacket");
-            }
+            return message;
         }
     }
 

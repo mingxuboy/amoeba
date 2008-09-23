@@ -115,8 +115,8 @@ public class T4C8OallDataPacket extends T4CTTIfunPacket {
         if (meg.versionNumber >= 9000 && defCols > 0) {
             oacdefDefines = new T4CTTIoac[defCols];
             for (int i = 0; i < defCols; i++) {
-                oacdefDefines[i] = new T4CTTIoac(meg);
-                oacdefDefines[i].unmarshal();
+                oacdefDefines[i] = new T4CTTIoac();
+                oacdefDefines[i].unmarshal(meg);
             }
         }
 
@@ -177,8 +177,8 @@ public class T4C8OallDataPacket extends T4CTTIfunPacket {
 
     private void unmarshalBindsTypes(T4CPacketBuffer meg) {
         for (int i = 0; i < numberOfParams; i++) {
-            oacBind[i] = new T4CTTIoac(meg);
-            oacBind[i].unmarshal();
+            oacBind[i] = new T4CTTIoac();
+            oacBind[i].unmarshal(meg);
             fillAccessor(i, oacBind[i], meg);
         }
     }
@@ -273,7 +273,8 @@ public class T4C8OallDataPacket extends T4CTTIfunPacket {
         }
 
         if (accessors[i] != null) {
-            accessors[i].init(oac);
+            accessors[i].setOac(oac);
+            accessors[i].setConv(meg.getConversion());
         }
     }
 

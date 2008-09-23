@@ -19,46 +19,46 @@ import com.meidusa.amoeba.oracle.net.packet.T4CPacketBuffer;
  */
 public class T4CTTIoac {
 
-    static final short     UACFIND    = 1;
-    static final short     UACFALN    = 2;
-    static final short     UACFRCP    = 4;
-    static final short     UACFBBV    = 8;
-    static final short     UACFNCP    = 16;
-    static final short     UACFBLP    = 32;
-    static final short     UACFARR    = 64;
-    static final short     UACFIGN    = 128;
-    static final short     UACFNSCL   = 1;
-    static final short     UACFBUC    = 2;
-    static final short     UACFSKP    = 4;
-    static final short     UACFCHRCNT = 8;
-    static final short     UACFNOADJ  = 16;
-    static final short     UACFCUS    = 4096;
-    static final byte[]    NO_BYTES   = new byte[0];
+    static final short  UACFIND    = 1;
+    static final short  UACFALN    = 2;
+    static final short  UACFRCP    = 4;
+    static final short  UACFBBV    = 8;
+    static final short  UACFNCP    = 16;
+    static final short  UACFBLP    = 32;
+    static final short  UACFARR    = 64;
+    static final short  UACFIGN    = 128;
+    static final short  UACFNSCL   = 1;
+    static final short  UACFBUC    = 2;
+    static final short  UACFSKP    = 4;
+    static final short  UACFCHRCNT = 8;
+    static final short  UACFNOADJ  = 16;
+    static final short  UACFCUS    = 4096;
+    static final byte[] NO_BYTES   = new byte[0];
 
-    public T4CPacketBuffer meg;
+    // public T4CPacketBuffer meg;
 
-    public boolean         isStream;
-    public short           oacdty;                  // dataType
-    public short           oacflg;                  // flags
-    public short           oacpre;                  // precision
-    public short           oacscl;                  // scale
-    public int             oacmxl;                  // describeType
-    public int             oacmxlc;
-    public int             oacmal;                  // total_elems
-    public int             oacfl2;                  // oacfl2
-    public byte[]          oactoid;                 // toid
-    public int             oactoidl;
-    public int             oacvsn;                  // TypeVersions
-    public int             ncs;                     // CharSet
-    public short           formOfUse;               // CharSetForm
+    public boolean      isStream;
+    public short        oacdty;                  // dataType
+    public short        oacflg;                  // flags
+    public short        oacpre;                  // precision
+    public short        oacscl;                  // scale
+    public int          oacmxl;                  // describeType
+    public int          oacmxlc;
+    public int          oacmal;                  // total_elems
+    public int          oacfl2;                  // oacfl2
+    public byte[]       oactoid;                 // toid
+    public int          oactoidl;
+    public int          oacvsn;                  // TypeVersions
+    public int          ncs;                     // CharSet
+    public short        formOfUse;               // CharSetForm
 
-    public T4CTTIoac(T4CPacketBuffer meg){
-        this.meg = meg;
+    public T4CTTIoac(){
+        // this.meg = meg;
         this.oacmxlc = 0;
     }
 
     T4CTTIoac(T4CTTIoac t4cttioac){
-        meg = t4cttioac.meg;
+        // meg = t4cttioac.meg;
         oacmxlc = 0;
         isStream = t4cttioac.isStream;
         ncs = t4cttioac.ncs;
@@ -124,7 +124,7 @@ public class T4CTTIoac {
         }
     }
 
-    public void unmarshal() {
+    public void unmarshal(T4CPacketBuffer meg) {
         oacdty = meg.unmarshalUB1();
         oacflg = meg.unmarshalUB1();
         oacpre = meg.unmarshalUB1();
@@ -162,11 +162,19 @@ public class T4CTTIoac {
         }
     }
 
-    void marshal() {
+    void marshal(T4CPacketBuffer meg) {
+        if (oacdty == 104) {
+            oacdty = 11;
+        }
         meg.marshalUB1(oacdty);// dataType
         meg.marshalUB1(oacflg);// flags
         meg.marshalUB1(oacpre);// precision
-        meg.marshalUB1(oacscl);// scale
+        if (oacdty == 2 || oacdty == 180 || oacdty == 181 || oacdty == 231 || oacdty == 183) {
+            //int i = oacscl & 0xffff;
+            meg.marshalUB2(oacscl);// scale
+        } else {
+            meg.marshalUB1(oacscl);// scale
+        }
         meg.marshalUB4(oacmxl);// describeType
         meg.marshalSB4(oacmal);// total_elems
         meg.marshalSB4(oacfl2);// contflag

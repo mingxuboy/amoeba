@@ -1,6 +1,7 @@
 package com.meidusa.amoeba.oracle.accessor;
 
 import com.meidusa.amoeba.oracle.net.packet.assist.T4CTTIoac;
+import com.meidusa.amoeba.oracle.util.DBConversion;
 
 public abstract class Accessor {
 
@@ -48,8 +49,14 @@ public abstract class Accessor {
 
     protected T4CTTIoac     oac;
 
-    public void init(T4CTTIoac oac) {
+    protected DBConversion  conv;
+
+    public void setOac(T4CTTIoac oac) {
         this.oac = oac;
+    }
+
+    public void setConv(DBConversion conv) {
+        this.conv = conv;
     }
 
     public abstract Object getObject(byte[] data);

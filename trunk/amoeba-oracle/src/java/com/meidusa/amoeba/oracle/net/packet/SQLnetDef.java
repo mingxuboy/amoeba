@@ -81,6 +81,7 @@ public interface SQLnetDef {
     public static final byte    NIQBMARK                              = 1;
     public static final byte    NIQRMARK                              = 2;
     public static final byte    NIQIMARK                              = 3;
+    public static final int     RECEIVE_SDU                           = 2011;
     public static final int     NSPDFSDULN                            = 2048;
     public static final int     NSPMXSDULN                            = 32767;
     public static final int     NSPMNSDULN                            = 512;
