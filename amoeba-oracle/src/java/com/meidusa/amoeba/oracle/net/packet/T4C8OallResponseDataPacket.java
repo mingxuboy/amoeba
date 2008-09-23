@@ -1,11 +1,12 @@
 package com.meidusa.amoeba.oracle.net.packet;
 
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.List;
+
 import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
-import com.meidusa.amoeba.oracle.accessor.Accessor;
 import com.meidusa.amoeba.oracle.net.packet.assist.T4C8TTIrxh;
 import com.meidusa.amoeba.oracle.net.packet.assist.T4CTTIdcb;
-import com.meidusa.amoeba.oracle.net.packet.assist.T4CTTIfob;
-import com.meidusa.amoeba.oracle.net.packet.assist.T4CTTIiov;
 import com.meidusa.amoeba.oracle.net.packet.assist.T4CTTIoer;
 import com.meidusa.amoeba.oracle.net.packet.assist.T4CTTIrxd;
 
@@ -15,24 +16,20 @@ import com.meidusa.amoeba.oracle.net.packet.assist.T4CTTIrxd;
  */
 public class T4C8OallResponseDataPacket extends DataPacket {
 
-    static final int QUERY_DESC   = 16;
-    static final int QUERY_RESULT = 6;
-    static final int EXEC_RESULT  = 8;
+    static final byte                  QUERY_DESC   = 16;
+    static final byte                  QUERY_RESULT = 6;
+    static final byte                  QUERY_DATA   = 7;
+    static final byte                  QUERY_NEXT   = 21;
+    static final byte                  EXEC_RESULT  = 8;
+    static final byte                  QUERY_END    = 4;
 
-    int              cursor;
-    long             rowsProcessed;
+    boolean                            isCompleted  = false;
+    boolean                            isMerge      = false;
 
-    boolean          isLastPacket = false;
-    boolean          isCompleted  = false;
-
-    T4CTTIoer        oer          = new T4CTTIoer();
-    T4C8TTIrxh       rxh          = new T4C8TTIrxh();
-    T4CTTIrxd        rxd          = new T4CTTIrxd();
-    T4CTTIdcb        dcb          = new T4CTTIdcb();
-    T4CTTIfob        fob          = new T4CTTIfob();
-
-    Accessor[]       definesAccessors;
-    Accessor[]       outBindAccessors;
+    byte                               pkgType;
+    T4CQueryDescResponseDataPacket     desc;
+    T4CQueryResultResponseDataPacket   query;
+    T4CExecuteResultResponseDataPacket execute;
 
     public boolean isCompleted() {
         return isCompleted;
@@ -41,91 +38,43 @@ public class T4C8OallResponseDataPacket extends DataPacket {
     @Override
     protected void init(AbstractPacketBuffer buffer) {
         super.init(buffer);
-        boolean flag = false;
-        T4CPacketBuffer meg = (T4CPacketBuffer) buffer;
-        byte byte0 = meg.unmarshalSB1();
-        if (byte0 == QUERY_RESULT || byte0 == EXEC_RESULT) {
-            isLastPacket = true;
+        T4CPacketBufferExchanger meg = (T4CPacketBufferExchanger) buffer;
+        pkgType = meg.unmarshalSB1();
+        // select 语句有两次数据包的交互，switch的状态为：16,8,4(返回字段描述) 和 6,(7,21,7,21,...),4(返回数据结果)
+        // insert,update,delete 语句是一次数据包交互，switch的状态为：8,4
+        switch (pkgType) {
+            case QUERY_DESC:// 16
+                desc = new T4CQueryDescResponseDataPacket();
+                desc.init(meg);
+                break;
+            case QUERY_RESULT:// 6
+                query = new T4CQueryResultResponseDataPacket();
+                query.init(meg);
+                break;
+            case EXEC_RESULT:// 8
+                execute = new T4CExecuteResultResponseDataPacket();
+                execute.init(meg);
+                break;
+            default:
+                throw new RuntimeException("unknown type packet:" + pkgType);
         }
-        while (true) {
-            // select 语句有两次数据包的交互，switch的状态为：16,8,4(返回字段描述) 和 6,(7,21,7,21,...),4(返回数据结果)
-            // insert,update,delete 语句是一次数据包交互，switch的状态为：8,4
-            switch (byte0) {
-                case 4:// 数据结束返回结果描述
-                    oer.init();
-                    oer.unmarshal(meg);
-                    cursor = oer.currCursorID;
-                    rowsProcessed = oer.curRowNumber;
-                    if (oer.retCode != 1403) {
-                        // oer.processError(oracleStatement);
-                    }
-                    if (isLastPacket) {
-                        isCompleted = true;
-                    }
-                    return;
-                case QUERY_RESULT:// select 开始返回查询数据
-                    rxh.init();
-                    rxh.unmarshalV10(rxd, meg);
-                    if (rxh.uacBufLength > 0) {
-                        throw new RuntimeException("无效的列类型");
-                    }
-                    break;
-                case 7:// select 返回一行数据结果
-                    for (int k = 0; k < rxh.numRqsts; k++) {
-                        meg.unmarshalCLRforREFS();
-                    }
-                    break;
-                case EXEC_RESULT:// insert,update,delete 返回描述
-                    if (flag) {
-                        throw new RuntimeException("protocol error");
-                    }
-                    int j = meg.unmarshalUB2();
-                    int ai[] = new int[j];
-                    for (int l = 0; l < j; l++) {
-                        ai[l] = (int) meg.unmarshalUB4();
-                    }
-                    cursor = ai[2];
-                    meg.unmarshalUB2();
-                    int i1 = meg.unmarshalUB2();
-                    if (i1 > 0) {
-                        for (int k1 = 0; k1 < i1; k1++) {
-                            meg.unmarshalUB4();
-                            meg.unmarshalDALC();
-                            meg.unmarshalUB2();
-                        }
-                    }
-                    flag = true;
-                    break;
-                case 11:
-                    T4CTTIiov iov = new T4CTTIiov(rxh, rxd);
-                    iov.init();
-                    iov.unmarshalV10(meg);
+    }
 
-                    // if (!iov.isIOVectorEmpty()) {
-                    // byte abyte0[] = iov.getIOVector();
-                    // iov.processRXD(outBindAccessors, numberOfBindPositions, bindBytes, bindChars, bindIndicators,
-                    // bindIndicatorSubRange, conversion, tmpBindsByteArray, abyte0, parameterStream, parameterDatum,
-                    // parameterOtype, oracleStatement, null, null, null);
-                    // }
-
-                    // break;
-                    throw new RuntimeException("unknown result switch type:11 in T4C8OallResponseDataPacket.");
-                case QUERY_DESC:// select 返回查询字段的描述结果
-                    dcb.init(0);
-                    definesAccessors = dcb.receive(definesAccessors, meg);
-                    rxd.setNumberOfColumns(dcb.getNumuds());
-                    break;
-                case 19:
-                    fob.marshal(meg);
-                    break;
-                case 21:// select 继续返回下一行数据
-                    int i = meg.unmarshalUB2();
-                    rxd.unmarshalBVC(i, meg);
-                    break;
-                default:
-                    throw new RuntimeException("protocol error");
-            }
-            byte0 = meg.unmarshalSB1();
+    @Override
+    protected void write2Buffer(AbstractPacketBuffer buffer) throws UnsupportedEncodingException {
+        super.write2Buffer(buffer);
+        switch (pkgType) {
+            case QUERY_DESC:// 16
+                desc.write2Buffer((T4CPacketBufferExchanger) buffer);
+                break;
+            case QUERY_RESULT:// 6
+                query.write2Buffer((T4CPacketBufferExchanger) buffer);
+                break;
+            case EXEC_RESULT:// 8
+                execute.write2Buffer((T4CPacketBufferExchanger) buffer);
+                break;
+            default:
+                throw new RuntimeException("unknown type packet:" + pkgType);
         }
     }
 
@@ -134,10 +83,234 @@ public class T4C8OallResponseDataPacket extends DataPacket {
         return T4CPacketBufferExchanger.class;
     }
 
+    class T4CQueryDescResponseDataPacket {
+
+        T4CTTIdcb dcb = new T4CTTIdcb();
+
+        int       len1;
+        int[]     ai;
+        int       len2;
+        long[]    skip1;
+        byte[][]  skip2;
+        int[]     skip3;
+
+        T4CTTIoer oer = new T4CTTIoer();
+
+        protected void init(T4CPacketBufferExchanger meg) {
+            // 16
+            dcb.init(0);
+            dcb.unmarshal(meg);
+
+            // 08
+            meg.unmarshalSB1();
+            len1 = meg.unmarshalUB2();
+            ai = new int[len1];
+            for (int l = 0; l < len1; l++) {
+                ai[l] = (int) meg.unmarshalUB4();
+            }
+            meg.unmarshalUB2();
+            len2 = meg.unmarshalUB2();
+            skip1 = new long[len2];
+            skip2 = new byte[len2][];
+            skip3 = new int[len2];
+            for (int k1 = 0; k1 < len2; k1++) {
+                skip1[k1] = meg.unmarshalUB4();
+                skip2[k1] = meg.unmarshalDALC();
+                skip3[k1] = meg.unmarshalUB2();
+            }
+
+            // 04
+            meg.unmarshalSB1();
+            oer.init();
+            oer.unmarshal(meg);
+        }
+
+        protected void write2Buffer(T4CPacketBufferExchanger meg) {
+            // 16
+            meg.marshalSB1(QUERY_DESC);
+            dcb.marshal(meg, false);
+
+            // 8
+            meg.marshalSB1(EXEC_RESULT);
+            meg.marshalUB2(len1);
+            for (int l = 0; l < len1; l++) {
+                meg.marshalUB4(ai[l]);
+            }
+            meg.marshalNULLPTR();
+            meg.marshalUB2(len2);
+            for (int k1 = 0; k1 < len2; k1++) {
+                meg.marshalUB4(skip1[k1]);
+                meg.marshalDALC(skip2[k1]);
+                meg.marshalUB2(skip3[k1]);
+            }
+
+            // 4
+            meg.marshalSB1(QUERY_END);
+            oer.marshal(meg);
+        }
+
+    }
+
+    class T4CQueryResultResponseDataPacket {
+
+        T4CTTIrxd      rxd      = new T4CTTIrxd();
+        T4C8TTIrxh     rxh      = new T4C8TTIrxh();
+
+        byte[][]       firstRow = null;
+        List<byte[]>   listInfo = new ArrayList<byte[]>();
+        List<byte[][]> list     = new ArrayList<byte[][]>();
+
+        T4CTTIoer      oer      = new T4CTTIoer();
+
+        protected void init(T4CPacketBufferExchanger meg) {
+            // 6
+            rxh.init();
+            rxh.unmarshalV10(rxd, meg);
+            if (rxh.uacBufLength > 0) {
+                throw new RuntimeException("无效的列类型");
+            }
+
+            // 7 or 4
+            boolean flag = false;
+            int infoLength = (rxh.numRqsts / 8) + (rxh.numRqsts % 8) == 0 ? 0 : 1;
+            while (true) {
+                byte byte0 = meg.unmarshalSB1();
+                switch (byte0) {
+                    case QUERY_DATA:// 7 定义并读取第一行数据
+                        if (flag) {
+                            throw new RuntimeException("protocol error!");
+                        }
+                        firstRow = new byte[rxh.numRqsts][];
+                        for (int k = 0; k < firstRow.length; k++) {
+                            firstRow[k] = meg.unmarshalCLRforREFS();// 读取一个字段
+                        }
+                        flag = true;
+                        break;
+                    case QUERY_NEXT:// 21
+                        int cols = meg.unmarshalUB2();
+                        listInfo.add(meg.getNBytes(infoLength));
+                        byte byte1 = meg.unmarshalSB1();
+                        if (byte1 == QUERY_DATA) {
+                            byte[][] row = new byte[cols][];
+                            for (int k = 0; k < row.length; k++) {
+                                row[k] = meg.unmarshalCLRforREFS();
+                            }
+                            list.add(row);
+                        } else {
+                            throw new RuntimeException("protocol error!" + byte1);
+                        }
+                        break;
+                    case QUERY_END:// 4
+                        oer.init();
+                        oer.unmarshal(meg);
+                        isCompleted = true;
+                        return;
+                    default:
+                        throw new RuntimeException("unknown type:" + byte0);
+                }
+            }
+        }
+
+        protected void write2Buffer(T4CPacketBufferExchanger meg) {
+            // 6
+            meg.marshalSB1(QUERY_RESULT);
+            rxh.marshalV10(meg);
+
+            // 7,21,...
+            if (firstRow != null) {
+                meg.marshalSB1(QUERY_DATA);// 7,写入第一行数据
+                for (int k = 0; k < firstRow.length; k++) {
+                    meg.marshalCLR(firstRow[k], firstRow[k].length);
+                }
+
+                for (int i = 0; i < listInfo.size(); i++) {
+                    meg.marshalSB1(QUERY_NEXT);// 21
+                    byte[][] abyte0 = list.get(i);
+                    meg.marshalUB2(abyte0.length);// 列数
+                    meg.writeBytes(listInfo.get(i));// 列指示数组
+                    meg.marshalSB1(QUERY_DATA);// 7
+                    for (int j = 0; j < abyte0.length; j++) {
+                        meg.marshalCLR(abyte0[j], abyte0[j].length);
+                    }
+                }
+            }
+
+            // 4
+            meg.marshalSB1(QUERY_END);
+            oer.marshal(meg);
+        }
+    }
+
+    class T4CExecuteResultResponseDataPacket {
+
+        int       len1;
+        int[]     ai;
+        int       len2;
+        long[]    skip1;
+        byte[][]  skip2;
+        int[]     skip3;
+
+        T4CTTIoer oer = new T4CTTIoer();
+
+        protected void init(T4CPacketBufferExchanger meg) {
+            // 08
+            meg.unmarshalSB1();
+            len1 = meg.unmarshalUB2();
+            ai = new int[len1];
+            for (int l = 0; l < len1; l++) {
+                ai[l] = (int) meg.unmarshalUB4();
+            }
+            meg.unmarshalUB2();
+            len2 = meg.unmarshalUB2();
+            skip1 = new long[len2];
+            skip2 = new byte[len2][];
+            skip3 = new int[len2];
+            for (int k1 = 0; k1 < len2; k1++) {
+                skip1[k1] = meg.unmarshalUB4();
+                skip2[k1] = meg.unmarshalDALC();
+                skip3[k1] = meg.unmarshalUB2();
+            }
+
+            // 04
+            meg.unmarshalSB1();
+            oer.init();
+            oer.unmarshal(meg);
+
+            isCompleted = true;
+        }
+
+        protected void write2Buffer(T4CPacketBufferExchanger meg) {
+            // 8
+            meg.marshalSB1(EXEC_RESULT);
+            meg.marshalUB2(len1);
+            for (int l = 0; l < len1; l++) {
+                meg.marshalUB4(ai[l]);
+            }
+            meg.marshalNULLPTR();
+            meg.marshalUB2(len2);
+            for (int k1 = 0; k1 < len2; k1++) {
+                meg.marshalUB4(skip1[k1]);
+                meg.marshalDALC(skip2[k1]);
+                meg.marshalUB2(skip3[k1]);
+            }
+
+            // 4
+            meg.marshalSB1(QUERY_END);
+            oer.marshal(meg);
+        }
+
+    }
+
     // ///////////////////////////////////////////////////////////////////////////////////
 
     public static boolean isParseable(byte[] message) {
-        return true;
+        if (isDataType(message) && message.length >= 11) {
+            int flag = (message[10] & 0xff);
+            if (flag == QUERY_DESC || flag == QUERY_RESULT || flag == EXEC_RESULT) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public static boolean isPacketEOF(byte[] message) {

@@ -4,32 +4,29 @@ import com.meidusa.amoeba.oracle.net.packet.T4CPacketBuffer;
 
 public class T4C8TTIuds {
 
-    T4CTTIoac       udsoac;
+    boolean   udsnull;
+    short     udscnl;
+    byte      optimizeOAC;
+    byte      udscolnm[];
+    short     udscolnl;
+    byte      udssnm[];
+    long      udssnl;
+    int       snnumchar[];
+    byte      udstnm[];
+    long      udstnl;
+    int       tnnumchar[];
+    int       numBytes[];
 
-    boolean         udsnull;
-    short           udscnl;
-    byte            optimizeOAC;
-    byte            udscolnm[];
-    short           udscolnl;
-    byte            udssnm[];
-    long            udssnl;
-    int             snnumchar[];
-    byte            udstnm[];
-    long            udstnl;
-    int             tnnumchar[];
-    int             numBytes[];
+    T4CTTIoac udsoac;
 
-    T4CPacketBuffer meg;
-
-    public T4C8TTIuds(T4CPacketBuffer meg){
-        this.meg = meg;
-        udsoac = new T4CTTIoac(meg);
+    public T4C8TTIuds(){
+        udsoac = new T4CTTIoac();
     }
 
-    void unmarshal() {
-        udsoac.unmarshal();
+    void unmarshal(T4CPacketBuffer meg) {
+        udsoac.unmarshal(meg);
         short word0 = meg.unmarshalUB1();
-        udsnull = word0 > 0;
+        udsnull = (word0 > 0);
         udscnl = meg.unmarshalUB1();
         numBytes = new int[1];
         udscolnm = meg.unmarshalDALC(numBytes);
@@ -39,6 +36,19 @@ public class T4C8TTIuds {
         tnnumchar = new int[1];
         udstnm = meg.unmarshalDALC(tnnumchar);
         udstnl = udstnm.length;
+    }
+
+    void marshal(T4CPacketBuffer meg) {
+        udsoac.marshal(meg);
+        if (udsnull) {
+            meg.marshalUB1((short) 1);
+        } else {
+            meg.marshalUB1((short) 0);
+        }
+        meg.marshalUB1(udscnl);
+        meg.marshalDALC(udscolnm);
+        meg.marshalDALC(udssnm);
+        meg.marshalDALC(udstnm);
     }
 
     byte[] getColumName() {

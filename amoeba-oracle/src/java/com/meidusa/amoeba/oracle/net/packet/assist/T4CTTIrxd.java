@@ -46,7 +46,7 @@ public class T4CTTIrxd {
         for (int i1 = 0; i1 < l; i1++) {
             byte byte0 = (byte) (meg.unmarshalUB1() & 0xff);
             for (int j1 = 0; j1 < 8; j1++) {
-                if ((byte0 & 1 << j1) != 0) {
+                if ((byte0 & (1 << j1)) != 0) {
                     bvcColSent.set(i1 * 8 + j1);
                     j++;
                 }

@@ -8,9 +8,9 @@ abstract class CharCommonAccessor extends Accessor {
         String s = null;
 
         if (oac.formOfUse == 2) {
-            s = oac.meg.getConversion().NCharBytesToString(data, data.length);
+            s = conv.NCharBytesToString(data, data.length);
         } else {
-            s = oac.meg.getConversion().CharBytesToString(data, data.length);
+            s = conv.CharBytesToString(data, data.length);
         }
 
         return s;
