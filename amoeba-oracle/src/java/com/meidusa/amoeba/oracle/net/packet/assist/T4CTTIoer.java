@@ -115,7 +115,8 @@ public class T4CTTIoer {
         meg.marshalUB2(pad1);
         meg.marshalUB4(successIters);
         if (retCode != 0) {
-            meg.marshalDALC(errorMsg.getBytes());
+            byte[] ab = meg.getConversion().StringToCharBytes(errorMsg);
+            meg.marshalCLR(ab, ab.length);
         }
     }
 }

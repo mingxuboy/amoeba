@@ -94,8 +94,8 @@ public class OracleQueryMessageHandler extends AbstractMessageQueuedHandler impl
             for (int i = 0; i < messagesList.length; i++) {
                 if (logger.isDebugEnabled()) {
                     System.out.println("\n%amoeba query message ========================================================++++++++++++");
-                    System.out.println("%receive size:" + (((messagesList[i][0] & 0xff) << 8) | (messagesList[i][1] & 0xff)));
-                    System.out.println("%receive packet:" + ByteUtil.toHex(messagesList[i], 0, messagesList[i].length));
+                    System.out.println("%send to client size:" + (((messagesList[i][0] & 0xff) << 8) | (messagesList[i][1] & 0xff)));
+                    System.out.println("%send to client packet:" + ByteUtil.toHex(messagesList[i], 0, messagesList[i].length));
                 }
                 clientConn.postMessage(messagesList[i]);
             }
