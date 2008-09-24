@@ -14,4 +14,7 @@ public interface MessageQueuedHandler<V> extends MessageHandler {
 	public V pop(OracleServerConnection conn);
 
 	public boolean inHandleProcess(OracleServerConnection conn);
+	
+	public void setInHandleProcess(OracleServerConnection conn,boolean inProcess);
 }
+

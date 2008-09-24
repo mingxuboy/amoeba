@@ -39,20 +39,20 @@ public abstract class AbstractMessageQueuedHandler<V> implements
 		return tuple.left;
 	}
 	
+	public void setInHandleProcess(OracleServerConnection conn,boolean inProcess){
+		Tuple<Boolean,BlockingQueue<V>> tuple = getTuple(conn);
+		synchronized (conn.processLock){
+			tuple.left = inProcess;
+		}
+	}
 	
 	public final void handleMessage(Connection conn, byte[] message){
 		if(conn instanceof OracleServerConnection){
 			OracleServerConnection oconn = (OracleServerConnection) conn;
-			Tuple<Boolean,BlockingQueue<V>> tuple = getTuple(oconn);
 			try{
-				synchronized (oconn.processLock){
-					tuple.left = true;
-				}
 				doHandleMessage(oconn,message);
 			}finally{
-				synchronized (oconn.processLock){
-					tuple.left = false;
-				}
+				setInHandleProcess(oconn,false);
 			}
 		}else{
 			doHandleMessage(conn,message);
