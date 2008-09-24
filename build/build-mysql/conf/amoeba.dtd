@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!ELEMENT className ( #PCDATA ) >
+<!ELEMENT amoeba:configuration ( server, connectionManagerList, dbServerList, queryRouter ) >
+<!ATTLIST amoeba:configuration
+  xmlns:amoeba CDATA #FIXED "http://amoeba.meidusa.com/" 
+>
+<!ELEMENT connectionManager ( className|property )* >
+<!ATTLIST connectionManager name NMTOKEN #REQUIRED >
+
+<!ELEMENT connectionManagerList ( connectionManager+ ) >
+
+<!ELEMENT dbServer ( factoryConfig | poolConfig )* >
+<!ATTLIST dbServer name NMTOKEN #REQUIRED >
+<!ATTLIST dbServer virtual NMTOKEN #IMPLIED >
+
+<!ELEMENT dbServerList ( dbServer+ ) >
+
+<!ELEMENT factoryConfig ( className, property+ ) >
+
+<!ELEMENT poolConfig ( className | property )* >
+
+<!ELEMENT property ( #PCDATA | bean)* >
+
+<!ELEMENT bean ( className|property)* >
+<!ATTLIST bean name NMTOKEN #IMPLIED >
+<!ATTLIST bean class NMTOKEN #IMPLIED >
+
+<!ATTLIST property name NMTOKEN #REQUIRED >
+
+<!ELEMENT queryRouter ( className, property+ ) >
+
+<!ELEMENT server ( property+ ) >
+
