@@ -25,49 +25,23 @@ import com.meidusa.amoeba.oracle.util.ByteUtil;
  * 
  * @author struct
  */
+@SuppressWarnings("unchecked")
 public class OracleQueryMessageHandler extends AbstractMessageQueuedHandler implements MessageHandler, Sessionable, SQLnetDef {
 
-    private static Logger logger = Logger.getLogger(OracleQueryMessageHandler.class);
+    private static Logger                                   logger              = Logger.getLogger(OracleQueryMessageHandler.class);
 
-    static abstract class ConnectionStatuts {
+    private OracleConnection                                clientConn;
+    private MessageHandler                                  clientHandler;
+    private boolean                                         isEnded             = false;
 
-        protected Connection conn;
+    private byte[]                                          tmpBuffer           = null;
+    private boolean                                         isFirstClientPacket = true;
 
-        public ConnectionStatuts(Connection conn){
-            this.conn = conn;
-        }
-
-        /**
-         * 判断从服务器端返回得数据包是否表示当前请求的结束。
-         */
-        public boolean isCompleted(byte[] buffer) {
-            return false;
-        }
-    }
-
-    private OracleConnection                                 clientConn;
-    private MessageHandler                                   clientHandler;
-    private boolean                                          isEnded             = false;
-
-    private byte[]                                           tmpBuffer           = null;
-    private boolean                                          isFirstClientPacket = true;
-
-    private final Lock                                       lock                = new ReentrantLock(false);
-    protected Map<OracleServerConnection, ConnectionStatuts> connStatusMap       = new HashMap<OracleServerConnection, ConnectionStatuts>();
-    protected Map<OracleServerConnection, MessageHandler>    handlerMap          = new HashMap<OracleServerConnection, MessageHandler>();
-    private ObjectPool[]                                     pools;
-    private OracleServerConnection[]                         serverConns;
-
-    // 先假设只有一个serverConns，在这里设置上下文变量
-    int                                                      nbOfCols;
-
-    public void setNbOfCols(int nbOfCols) {
-        this.nbOfCols = nbOfCols;
-    }
-
-    public int getNbOfCols() {
-        return nbOfCols;
-    }
+    private final Lock                                      lock                = new ReentrantLock(false);
+    protected Map<OracleServerConnection, ConnectionStatus> connStatusMap       = new HashMap<OracleServerConnection, ConnectionStatus>();
+    protected Map<OracleServerConnection, MessageHandler>   handlerMap          = new HashMap<OracleServerConnection, MessageHandler>();
+    private ObjectPool[]                                    pools;
+    private OracleServerConnection[]                        serverConns;
 
     public OracleQueryMessageHandler(Connection clientConn, ObjectPool[] pools){
         this.clientConn = (OracleConnection) clientConn;
@@ -95,20 +69,29 @@ public class OracleQueryMessageHandler extends AbstractMessageQueuedHandler impl
                 serverConns[i].postMessage(message);
             }
         } else {
-//            if (logger.isDebugEnabled()) {
-//                System.out.println("\n%amoeba query message =====================================================@@@");
-//                System.out.println("%handler receive from server size:" + (((message[0] & 0xff) << 8) | (message[1] & 0xff)));
-//                System.out.println("%handler receive from server packet:" + ByteUtil.toHex(message, 0, message.length));
-//            }
-            message = parseServerPakcet(message, conn);
-            byte[][] messagesList = splitMessage(message);
-            for (int i = 0; i < messagesList.length; i++) {
-                if (logger.isDebugEnabled()) {
-                    System.out.println("\n%amoeba query message ========================================================");
-                    System.out.println("%send to client size:" + (((messagesList[i][0] & 0xff) << 8) | (messagesList[i][1] & 0xff)));
-                    System.out.println("%send to client packet:" + ByteUtil.toHex(messagesList[i], 0, messagesList[i].length));
+            // if (logger.isDebugEnabled()) {
+            // System.out.println("\n%amoeba query message =====================================================@@@");
+            // System.out.println("%handler receive from server size:" + (((message[0] & 0xff) << 8) | (message[1] &
+            // 0xff)));
+            // System.out.println("%handler receive from server packet:" + ByteUtil.toHex(message, 0, message.length));
+            // }
+
+            if (T4C8OallResponseDataPacket.isParseable(message)) {
+                // 解析和合并服务器端数据包
+                message = parseServerPakcet(message, conn);
+
+                // 切分数据包，并发送给客户端。
+                byte[][] messagesList = splitMessage(message);
+                for (int i = 0; i < messagesList.length; i++) {
+                    if (logger.isDebugEnabled()) {
+                        System.out.println("\n%amoeba query message ========================================================");
+                        System.out.println("%send to client size:" + (((messagesList[i][0] & 0xff) << 8) | (messagesList[i][1] & 0xff)));
+                        System.out.println("%send to client packet:" + ByteUtil.toHex(messagesList[i], 0, messagesList[i].length));
+                    }
+                    clientConn.postMessage(messagesList[i]);
                 }
-                clientConn.postMessage(messagesList[i]);
+            } else {
+                clientConn.postMessage(message);
             }
         }
     }
@@ -169,10 +152,10 @@ public class OracleQueryMessageHandler extends AbstractMessageQueuedHandler impl
         serverConns = new OracleServerConnection[pools.length];
         for (int i = 0; i < pools.length; i++) {
             ObjectPool pool = pools[i];
-            OracleServerConnection conn;
-            conn = (OracleServerConnection) pool.borrowObject();
+            OracleServerConnection conn = (OracleServerConnection) pool.borrowObject();
             serverConns[i] = conn;
             handlerMap.put(conn, conn.getMessageHandler());
+            connStatusMap.put(conn, new ConnectionStatus(conn));
             conn.setMessageHandler(this);
         }
     }
@@ -221,23 +204,69 @@ public class OracleQueryMessageHandler extends AbstractMessageQueuedHandler impl
     }
 
     /**
-     * 解析服务器端的SQL数据包
+     * 解析和合并服务器端的SQL数据包
      */
     private byte[] parseServerPakcet(byte[] message, Connection conn) {
-        if (T4C8OallResponseDataPacket.isParseable(message)) {
-            T4C8OallResponseDataPacket serverPacket = new T4C8OallResponseDataPacket(this);
-            serverPacket.init(message, conn);
-            // if (logger.isDebugEnabled()) {
-            // System.out.println("query has completed:" + serverPacket.isCompleted());
-            // }
-            // if (serverPacket.isMerge()) {
-            // return serverPacket.toByteBuffer(conn).array();// not merge now
-            // } else {
-            // return serverPacket.toByteBuffer(conn).array();
-            // }
-            return serverPacket.toByteBuffer(conn).array();
-        } else {
-            return message;
+        OracleServerConnection oconn = (OracleServerConnection) conn;
+        T4C8OallResponseDataPacket packet = new T4C8OallResponseDataPacket(connStatusMap.get(oconn));
+        packet.init(message, oconn);
+
+        if (connStatusMap.size() > 1) {
+            lock.lock();
+            try {
+                boolean allCompleted = true;
+                for (Map.Entry<OracleServerConnection, ConnectionStatus> entry : connStatusMap.entrySet()) {
+                    if (!entry.getValue().isCompleted()) {
+                        allCompleted = false;
+                        break;
+                    }
+                }
+
+                if (allCompleted) {// 全部数据包已完成接受和解析，准备合并数据包。
+                    // mergePacket();
+                }
+            } finally {
+                lock.unlock();
+            }
+        }
+
+        // 写出合并后的服务器端数据包。
+        return packet.toByteBuffer(oconn).array();
+    }
+
+    public static class ConnectionStatus {
+
+        protected Connection               conn;
+        private int                        nbOfCols;
+        private boolean                    isCompleted;
+        private T4C8OallResponseDataPacket serverPacket;
+
+        public ConnectionStatus(Connection conn){
+            this.conn = conn;
+        }
+
+        public T4C8OallResponseDataPacket getServerPacket() {
+            return serverPacket;
+        }
+
+        public void setServerPacket(T4C8OallResponseDataPacket serverPacket) {
+            this.serverPacket = serverPacket;
+        }
+
+        public boolean isCompleted() {
+            return isCompleted;
+        }
+
+        public void setCompleted(boolean isCompleted) {
+            this.isCompleted = isCompleted;
+        }
+
+        public void setNbOfCols(int nbOfCols) {
+            this.nbOfCols = nbOfCols;
+        }
+
+        public int getNbOfCols() {
+            return nbOfCols;
         }
     }
 

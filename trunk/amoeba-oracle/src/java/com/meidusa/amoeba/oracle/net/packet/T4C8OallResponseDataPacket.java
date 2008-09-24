@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
-import com.meidusa.amoeba.oracle.handler.OracleQueryMessageHandler;
+import com.meidusa.amoeba.oracle.handler.OracleQueryMessageHandler.ConnectionStatus;
 import com.meidusa.amoeba.oracle.net.packet.assist.T4C8TTIrxh;
 import com.meidusa.amoeba.oracle.net.packet.assist.T4CTTIdcb;
 import com.meidusa.amoeba.oracle.net.packet.assist.T4CTTIoer;
@@ -24,22 +24,16 @@ public class T4C8OallResponseDataPacket extends DataPacket {
     static final byte                  EXEC_RESULT  = 8;
     static final byte                  QUERY_END    = 4;
 
-    boolean                            isCompleted  = false;
-    boolean                            isMerge      = false;
-
     byte                               pkgType;
     T4CQueryDescResponseDataPacket     desc;
     T4CQueryResultResponseDataPacket   query;
     T4CExecuteResultResponseDataPacket execute;
 
-    OracleQueryMessageHandler          handler;
+    ConnectionStatus                   connStatus;
 
-    public T4C8OallResponseDataPacket(OracleQueryMessageHandler handler){
-        this.handler = handler;
-    }
-
-    public boolean isCompleted() {
-        return isCompleted;
+    public T4C8OallResponseDataPacket(ConnectionStatus status){
+        this.connStatus = status;
+        this.connStatus.setServerPacket(this);
     }
 
     @Override
@@ -65,6 +59,7 @@ public class T4C8OallResponseDataPacket extends DataPacket {
             default:
                 throw new RuntimeException("unknown type packet:" + pkgType);
         }
+        connStatus.setCompleted(true);
     }
 
     @Override
@@ -107,6 +102,7 @@ public class T4C8OallResponseDataPacket extends DataPacket {
             // 16
             dcb.init(0);
             dcb.unmarshal(meg);
+            connStatus.setNbOfCols(dcb.getNumuds());
 
             // 08
             meg.unmarshalSB1();
@@ -130,8 +126,6 @@ public class T4C8OallResponseDataPacket extends DataPacket {
             meg.unmarshalSB1();
             oer.init();
             oer.unmarshal(meg);
-
-            handler.setNbOfCols(dcb.getNumuds());
         }
 
         protected void write2Buffer(T4CPacketBufferExchanger meg) {
@@ -174,7 +168,7 @@ public class T4C8OallResponseDataPacket extends DataPacket {
         protected void init(T4CPacketBufferExchanger meg) {
             // 6
             rxh.init();
-            rxd.setNumberOfColumns(handler.getNbOfCols());
+            rxd.setNumberOfColumns(connStatus.getNbOfCols());
             rxh.unmarshalV10(rxd, meg);
             if (rxh.uacBufLength > 0) {
                 throw new RuntimeException("无效的列类型");
@@ -182,13 +176,13 @@ public class T4C8OallResponseDataPacket extends DataPacket {
 
             // 7 or 4
             boolean flag = false;
-            int infoLength = (handler.getNbOfCols() / 8) + ((handler.getNbOfCols() % 8) == 0 ? 0 : 1);
+            int infoLength = (connStatus.getNbOfCols() / 8) + ((connStatus.getNbOfCols() % 8) == 0 ? 0 : 1);
             while (true) {
                 byte byte0 = meg.unmarshalSB1();
                 switch (byte0) {
                     case QUERY_DATA:// 7
                         if (flag) {
-                            byte[][] row = new byte[handler.getNbOfCols()][];
+                            byte[][] row = new byte[connStatus.getNbOfCols()][];
                             for (int k = 0; k < row.length; k++) {
                                 row[k] = meg.unmarshalCLRforREFS();
                             }
@@ -218,7 +212,6 @@ public class T4C8OallResponseDataPacket extends DataPacket {
                     case QUERY_END:// 4
                         oer.init();
                         oer.unmarshal(meg);
-                        isCompleted = true;
                         return;
                     default:
                         throw new RuntimeException("unknown type:" + byte0);
@@ -300,8 +293,6 @@ public class T4C8OallResponseDataPacket extends DataPacket {
             meg.unmarshalSB1();
             oer.init();
             oer.unmarshal(meg);
-
-            isCompleted = true;
         }
 
         protected void write2Buffer(T4CPacketBufferExchanger meg) {
