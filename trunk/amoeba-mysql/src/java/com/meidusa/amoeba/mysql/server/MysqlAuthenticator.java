@@ -41,7 +41,6 @@ public class MysqlAuthenticator extends DummyAuthenticator implements MySqlPacke
 		
 	}
 
-
 	protected void processAuthentication(AuthingableConnection conn,
 			AuthResponseData rdata) {
 		MysqlClientConnection mysqlConn = (MysqlClientConnection)conn;

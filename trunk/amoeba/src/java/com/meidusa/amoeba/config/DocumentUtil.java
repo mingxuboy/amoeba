@@ -54,8 +54,11 @@ public class DocumentUtil {
         Element element = DocumentUtil.getTheOnlyElement(current,"className");
         if(element != null){
         	beanConfig.setClassName(element.getTextContent());
+        }else{
+        	beanConfig.setClassName(current.getAttribute("class"));
         }
-        Map<String,String> map = new HashMap<String,String>();
+        
+        Map<String,Object> map = new HashMap<String,Object>();
         for (int i = 0; i < childSize; i++) {
             Node childNode = children.item(i);
             if (childNode instanceof Element) {
@@ -63,8 +66,14 @@ public class DocumentUtil {
                 final String nodeName = child.getNodeName();
 	            if (nodeName.equals("property")) {
 	            	String key = child.getAttribute("name");
-	            	String value = child.getTextContent();
-	            	map.put(key, value);
+	            	NodeList propertyNodes = child.getElementsByTagName("bean");
+	            	if(propertyNodes.getLength() == 0){
+		            	String value = child.getTextContent();
+		            	map.put(key, value);
+	            	}else{
+	            		BeanObjectEntityConfig beanconfig = loadBeanConfig((Element) propertyNodes.item(0));
+	            		map.put(key, beanconfig);
+	            	}
 	            }
             }
         }

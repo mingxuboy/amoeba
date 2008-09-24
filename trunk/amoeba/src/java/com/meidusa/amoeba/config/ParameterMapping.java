@@ -61,32 +61,41 @@ public class ParameterMapping {
 		return (mDescriptors);
 	}
 
-	public static void mappingObject(Object object, Map<String,String> parameter) {
+	public static void mappingObject(Object object, Map<String,Object> parameter) {
 		PropertyDescriptor[] descriptors = getDescriptors(object.getClass());
 
 		for (int i = 0; i < descriptors.length; i++) {
-			String string = (String) parameter.get(descriptors[i].getName());
-			if (!StringUtil.isEmpty(string)) {
-				string = ConfigUtil.filter(string);
-				Class<?> cls = descriptors[i].getPropertyType();
-				if (cls != null) {
-					try {
-						Object value = null;
-						if(isPrimitiveType(cls)){
-							value = deStringize(cls, string);
+			
+			Object obj = parameter.get(descriptors[i].getName());
+			Object value = null;
+			Class<?> cls = descriptors[i].getPropertyType();
+			if(obj instanceof String){
+				String string = (String) obj;
+				if (!StringUtil.isEmpty(string)) {
+					string = ConfigUtil.filter(string);
+				}
+				
+				if(isPrimitiveType(cls)){
+					value = deStringize(cls, string);
+				}
+			}else if(obj instanceof BeanObjectEntityConfig){
+				BeanObjectEntityConfig beanconf = (BeanObjectEntityConfig)obj;
+				value = beanconf.createBeanObject(true);
+				mappingObject(value,beanconf.getParams());
+			}
+			
+			if (cls != null) {
+				try {
+					if (value != null) {
+						Method method = descriptors[i].getWriteMethod();
+						if(method != null){
+							method.invoke(object, new Object[] { value });
+						}else{
+							logger.info(object.getClass()+"@"+descriptors[i].getName()+" can not write able");
 						}
-						
-						if (value != null) {
-							Method method = descriptors[i].getWriteMethod();
-							if(method != null){
-								method.invoke(object, new Object[] { value });
-							}else{
-								logger.info(object.getClass()+"@"+descriptors[i].getName()+" can not write able");
-							}
-						}
-					} catch (Throwable t) {
-						// ignore
 					}
+				} catch (Throwable t) {
+					// ignore
 				}
 			}
 		}
