@@ -34,7 +34,7 @@ public class BeanObjectEntityConfig extends ConfigEntity implements Cloneable{
 	private static final long serialVersionUID = 1L;
 	private String name;
 	private String className;
-	private Map<String,String> params = new HashMap<String,String>();
+	private Map<String,Object> params = new HashMap<String,Object>();
 	private static PureJavaReflectionProvider reflectionProvider = new PureJavaReflectionProvider();
 	public String getClassName() {
 		return className;
@@ -49,10 +49,10 @@ public class BeanObjectEntityConfig extends ConfigEntity implements Cloneable{
 		this.name = name;
 	}
 	
-	public Map<String,String> getParams() {
+	public Map<String,Object> getParams() {
 		return params;
 	}
-	public void setParams(Map<String,String> params) {
+	public void setParams(Map<String,Object> params) {
 		this.params = params;
 	}
 	
@@ -100,7 +100,7 @@ public class BeanObjectEntityConfig extends ConfigEntity implements Cloneable{
 		
 		entityConfig.className = this.className;
 		entityConfig.name = this.name;
-		Map<String,String> params = new HashMap<String,String>();
+		Map<String,Object> params = new HashMap<String,Object>();
 		params.putAll(this.params);
 		return entityConfig;
 	}

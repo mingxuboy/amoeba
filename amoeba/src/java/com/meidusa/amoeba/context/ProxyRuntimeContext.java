@@ -385,7 +385,7 @@ public abstract class ProxyRuntimeContext implements Reporter{
 	private DBServerConfig loadServer(Element current){
 		DBServerConfig serverConfig = new DBServerConfig();
 		NamedNodeMap nodeMap = current.getAttributes();
-		Map<String,String> map = new HashMap<String,String>();
+		Map<String,Object> map = new HashMap<String,Object>();
 		for(int i=0;i<nodeMap.getLength();i++){
 			Node node = nodeMap.item(i);
 			if (node instanceof org.w3c.dom.Attr) {
@@ -422,7 +422,7 @@ public abstract class ProxyRuntimeContext implements Reporter{
 	private void loadServerConfig(Element current,ProxyServerConfig config) {
 		NodeList children = current.getChildNodes();
         int childSize = children.getLength();
-        Map<String,String> map = new HashMap<String,String>();
+        Map<String,Object> map = new HashMap<String,Object>();
         for (int i = 0; i < childSize; i++) {
             Node childNode = children.item(i);
             if (childNode instanceof Element) {
