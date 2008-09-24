@@ -172,7 +172,7 @@ public class T4C8OallResponseDataPacket extends DataPacket {
 
             // 7 or 4
             boolean flag = false;
-            int infoLength = (rxh.numRqsts / 8) + (rxh.numRqsts % 8) == 0 ? 0 : 1;
+            int infoLength = (rxh.numRqsts / 8) + ((rxh.numRqsts % 8) == 0 ? 0 : 1);
             while (true) {
                 byte byte0 = meg.unmarshalSB1();
                 switch (byte0) {
@@ -220,7 +220,11 @@ public class T4C8OallResponseDataPacket extends DataPacket {
             if (firstRow != null) {
                 meg.marshalSB1(QUERY_DATA);// 7,写入第一行数据
                 for (int k = 0; k < firstRow.length; k++) {
-                    meg.marshalCLR(firstRow[k], firstRow[k].length);
+                    if (firstRow[k] == null || firstRow[k].length == 0) {
+                        meg.writeByte((byte) 0);
+                    } else {
+                        meg.marshalCLR(firstRow[k], firstRow[k].length);
+                    }
                 }
 
                 for (int i = 0; i < listInfo.size(); i++) {
@@ -230,7 +234,11 @@ public class T4C8OallResponseDataPacket extends DataPacket {
                     meg.writeBytes(listInfo.get(i));// 列指示数组
                     meg.marshalSB1(QUERY_DATA);// 7
                     for (int j = 0; j < abyte0.length; j++) {
-                        meg.marshalCLR(abyte0[j], abyte0[j].length);
+                        if (abyte0[j] == null || abyte0[j].length == 0) {
+                            meg.writeByte((byte) 0);
+                        } else {
+                            meg.marshalCLR(abyte0[j], abyte0[j].length);
+                        }
                     }
                 }
             }
@@ -309,6 +317,9 @@ public class T4C8OallResponseDataPacket extends DataPacket {
             if (flag == QUERY_DESC || flag == QUERY_RESULT || flag == EXEC_RESULT) {
                 return true;
             }
+            // if (flag == QUERY_DESC || flag == QUERY_RESULT || flag == EXEC_RESULT) {
+            // return true;
+            // }
         }
         return false;
     }
