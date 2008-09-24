@@ -26,7 +26,12 @@ public abstract class AbstractMessageQueuedHandler<V> implements
 	
 	public V pop(OracleServerConnection conn){
 		Tuple<Boolean,BlockingQueue<V>> tuple = getTuple(conn);
-		return tuple.right.poll();
+		try {
+			return tuple.right.take();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 
 	public boolean inHandleProcess(OracleServerConnection conn){
