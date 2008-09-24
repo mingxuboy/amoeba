@@ -58,6 +58,17 @@ public class OracleQueryMessageHandler extends AbstractMessageQueuedHandler impl
     private ObjectPool[]                                     pools;
     private OracleServerConnection[]                         serverConns;
 
+    // 先假设只有一个serverConns，在这里设置上下文变量
+    int                                                      nbOfCols;
+
+    public void setNbOfCols(int nbOfCols) {
+        this.nbOfCols = nbOfCols;
+    }
+
+    public int getNbOfCols() {
+        return nbOfCols;
+    }
+
     public OracleQueryMessageHandler(Connection clientConn, ObjectPool[] pools){
         this.clientConn = (OracleConnection) clientConn;
         clientHandler = clientConn.getMessageHandler();
@@ -84,16 +95,16 @@ public class OracleQueryMessageHandler extends AbstractMessageQueuedHandler impl
                 serverConns[i].postMessage(message);
             }
         } else {
-            // if (logger.isDebugEnabled()) {
-            // System.out.println("\n%amoeba query message ========================================================");
-            // System.out.println("%receive size:" + (((message[0] & 0xff) << 8) | (message[1] & 0xff)));
-            // System.out.println("%receive packet:" + ByteUtil.toHex(message, 0, message.length));
-            // }
+//            if (logger.isDebugEnabled()) {
+//                System.out.println("\n%amoeba query message =====================================================@@@");
+//                System.out.println("%handler receive from server size:" + (((message[0] & 0xff) << 8) | (message[1] & 0xff)));
+//                System.out.println("%handler receive from server packet:" + ByteUtil.toHex(message, 0, message.length));
+//            }
             message = parseServerPakcet(message, conn);
             byte[][] messagesList = splitMessage(message);
             for (int i = 0; i < messagesList.length; i++) {
                 if (logger.isDebugEnabled()) {
-                    System.out.println("\n%amoeba query message ========================================================++++++++++++");
+                    System.out.println("\n%amoeba query message ========================================================");
                     System.out.println("%send to client size:" + (((messagesList[i][0] & 0xff) << 8) | (messagesList[i][1] & 0xff)));
                     System.out.println("%send to client packet:" + ByteUtil.toHex(messagesList[i], 0, messagesList[i].length));
                 }
@@ -214,10 +225,7 @@ public class OracleQueryMessageHandler extends AbstractMessageQueuedHandler impl
      */
     private byte[] parseServerPakcet(byte[] message, Connection conn) {
         if (T4C8OallResponseDataPacket.isParseable(message)) {
-            if (logger.isDebugEnabled()) {
-                System.out.println("\ntype:T4C8OallResponseDataPacket");
-            }
-            T4C8OallResponseDataPacket serverPacket = new T4C8OallResponseDataPacket();
+            T4C8OallResponseDataPacket serverPacket = new T4C8OallResponseDataPacket(this);
             serverPacket.init(message, conn);
             // if (logger.isDebugEnabled()) {
             // System.out.println("query has completed:" + serverPacket.isCompleted());
