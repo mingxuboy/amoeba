@@ -50,6 +50,12 @@ public class ServerableConnectionManager extends AuthingableConnectionManager{
 
 	public void setConnectionFactory(ConnectionFactory connFactory){
 		this.connFactory = connFactory;
+		if(connFactory instanceof AbstractConnectionFactory){
+			AbstractConnectionFactory afactory = (AbstractConnectionFactory) connFactory;
+			if(afactory.getConnectionManager() == null){
+				afactory.setConnectionManager(this);
+			}
+		}
 	}
 	
 	// documentation inherited
