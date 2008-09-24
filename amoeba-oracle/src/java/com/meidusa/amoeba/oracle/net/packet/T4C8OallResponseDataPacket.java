@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
+import com.meidusa.amoeba.oracle.handler.OracleQueryMessageHandler;
 import com.meidusa.amoeba.oracle.net.packet.assist.T4C8TTIrxh;
 import com.meidusa.amoeba.oracle.net.packet.assist.T4CTTIdcb;
 import com.meidusa.amoeba.oracle.net.packet.assist.T4CTTIoer;
@@ -30,6 +31,12 @@ public class T4C8OallResponseDataPacket extends DataPacket {
     T4CQueryDescResponseDataPacket     desc;
     T4CQueryResultResponseDataPacket   query;
     T4CExecuteResultResponseDataPacket execute;
+
+    OracleQueryMessageHandler          handler;
+
+    public T4C8OallResponseDataPacket(OracleQueryMessageHandler handler){
+        this.handler = handler;
+    }
 
     public boolean isCompleted() {
         return isCompleted;
@@ -123,6 +130,8 @@ public class T4C8OallResponseDataPacket extends DataPacket {
             meg.unmarshalSB1();
             oer.init();
             oer.unmarshal(meg);
+
+            handler.setNbOfCols(dcb.getNumuds());
         }
 
         protected void write2Buffer(T4CPacketBufferExchanger meg) {
@@ -157,14 +166,15 @@ public class T4C8OallResponseDataPacket extends DataPacket {
         T4C8TTIrxh     rxh      = new T4C8TTIrxh();
 
         byte[][]       firstRow = null;
-        List<byte[]>   listInfo = new ArrayList<byte[]>();
-        List<byte[][]> list     = new ArrayList<byte[][]>();
+        List<byte[]>   dataDesc = new ArrayList<byte[]>();
+        List<byte[][]> dataList = new ArrayList<byte[][]>();
 
         T4CTTIoer      oer      = new T4CTTIoer();
 
         protected void init(T4CPacketBufferExchanger meg) {
             // 6
             rxh.init();
+            rxd.setNumberOfColumns(handler.getNbOfCols());
             rxh.unmarshalV10(rxd, meg);
             if (rxh.uacBufLength > 0) {
                 throw new RuntimeException("无效的列类型");
@@ -172,30 +182,35 @@ public class T4C8OallResponseDataPacket extends DataPacket {
 
             // 7 or 4
             boolean flag = false;
-            int infoLength = (rxh.numRqsts / 8) + ((rxh.numRqsts % 8) == 0 ? 0 : 1);
+            int infoLength = (handler.getNbOfCols() / 8) + ((handler.getNbOfCols() % 8) == 0 ? 0 : 1);
             while (true) {
                 byte byte0 = meg.unmarshalSB1();
                 switch (byte0) {
-                    case QUERY_DATA:// 7 定义并读取第一行数据
+                    case QUERY_DATA:// 7
                         if (flag) {
-                            throw new RuntimeException("protocol error!");
+                            byte[][] row = new byte[handler.getNbOfCols()][];
+                            for (int k = 0; k < row.length; k++) {
+                                row[k] = meg.unmarshalCLRforREFS();
+                            }
+                            dataList.add(row);
+                        } else {
+                            firstRow = new byte[rxh.numRqsts][];
+                            for (int k = 0; k < firstRow.length; k++) {
+                                firstRow[k] = meg.unmarshalCLRforREFS();// 读取一个字段
+                            }
+                            flag = true;
                         }
-                        firstRow = new byte[rxh.numRqsts][];
-                        for (int k = 0; k < firstRow.length; k++) {
-                            firstRow[k] = meg.unmarshalCLRforREFS();// 读取一个字段
-                        }
-                        flag = true;
                         break;
                     case QUERY_NEXT:// 21
                         int cols = meg.unmarshalUB2();
-                        listInfo.add(meg.getNBytes(infoLength));
+                        dataDesc.add(meg.getNBytes(infoLength));
                         byte byte1 = meg.unmarshalSB1();
                         if (byte1 == QUERY_DATA) {
                             byte[][] row = new byte[cols][];
                             for (int k = 0; k < row.length; k++) {
                                 row[k] = meg.unmarshalCLRforREFS();
                             }
-                            list.add(row);
+                            dataList.add(row);
                         } else {
                             throw new RuntimeException("protocol error!" + byte1);
                         }
@@ -227,11 +242,13 @@ public class T4C8OallResponseDataPacket extends DataPacket {
                     }
                 }
 
-                for (int i = 0; i < listInfo.size(); i++) {
-                    meg.marshalSB1(QUERY_NEXT);// 21
-                    byte[][] abyte0 = list.get(i);
-                    meg.marshalUB2(abyte0.length);// 列数
-                    meg.writeBytes(listInfo.get(i));// 列指示数组
+                for (int i = 0; i < dataList.size(); i++) {
+                    byte[][] abyte0 = dataList.get(i);
+                    if (dataDesc.size() > i) {
+                        meg.marshalSB1(QUERY_NEXT);// 21
+                        meg.marshalUB2(abyte0.length);// 列数
+                        meg.writeBytes(dataDesc.get(i));// 列指示数组
+                    }
                     meg.marshalSB1(QUERY_DATA);// 7
                     for (int j = 0; j < abyte0.length; j++) {
                         if (abyte0[j] == null || abyte0[j].length == 0) {
@@ -314,12 +331,9 @@ public class T4C8OallResponseDataPacket extends DataPacket {
     public static boolean isParseable(byte[] message) {
         if (isDataType(message) && message.length >= 11) {
             int flag = (message[10] & 0xff);
-            if (flag == QUERY_DESC || flag == QUERY_RESULT || flag == EXEC_RESULT) {
+            if (flag == QUERY_DESC || flag == QUERY_RESULT) {// || flag == EXEC_RESULT
                 return true;
             }
-            // if (flag == QUERY_DESC || flag == QUERY_RESULT || flag == EXEC_RESULT) {
-            // return true;
-            // }
         }
         return false;
     }
