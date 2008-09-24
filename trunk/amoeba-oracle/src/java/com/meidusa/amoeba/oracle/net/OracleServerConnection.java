@@ -237,10 +237,10 @@ public class OracleServerConnection extends OracleConnection implements Poolable
     	        	});
     			}
     			
-    			try {
+    			/*try {
 					processLock.wait();
 				} catch (InterruptedException e) {
-				}
+				}*/
     		}
     	}else{
     		_handler.handleMessage(this,msg);
