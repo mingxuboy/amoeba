@@ -225,6 +225,7 @@ public class OracleServerConnection extends OracleConnection implements Poolable
     			if(exchanger.inHandleProcess(this)){
 						exchanger.push(this, msg);
     			}else{
+    				exchanger.setInHandleProcess(this,true);
     				ProxyRuntimeContext.getInstance().getServerSideExecutor().execute(new Runnable(){
     	    			public void run() {
     	    				ThreadLocalMap.put(StaticString.HANDLER, exchanger);
