@@ -47,13 +47,11 @@ public abstract class AbstractMessageQueuedHandler<V> implements
 			try{
 				synchronized (oconn.processLock){
 					tuple.left = true;
-					oconn.processLock.notifyAll();
 				}
 				doHandleMessage(oconn,message);
 			}finally{
 				synchronized (oconn.processLock){
 					tuple.left = false;
-					oconn.processLock.notifyAll();
 				}
 			}
 		}else{
