@@ -28,6 +28,10 @@ public class T4CTTIdcb {
         this.colOffset = colOffset;
     }
 
+    public T4C8TTIuds[] getUds() {
+        return uds;
+    }
+
     public int getNumuds() {
         return numuds;
     }

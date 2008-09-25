@@ -8,7 +8,7 @@ public class T4CTTIiov {
     static final byte BV_OUT_V = 16;
 
     T4C8TTIrxh        rxh;
-    T4CTTIrxd         rxd;
+    // T4CTTIrxd rxd;
 
     byte              bindtype;
     byte              iovector[];
@@ -16,14 +16,14 @@ public class T4CTTIiov {
     int               inbinds;
     int               outbinds;
 
-    public T4CTTIiov(T4C8TTIrxh rxh, T4CTTIrxd rxd){
+    public T4CTTIiov(T4C8TTIrxh rxh){// , T4CTTIrxd rxd
         bindtype = 0;
         bindcnt = 0;
         inbinds = 0;
         outbinds = 0;
 
         this.rxh = rxh;
-        this.rxd = rxd;
+        // this.rxd = rxd;
     }
 
     public void init() {
@@ -38,7 +38,7 @@ public class T4CTTIiov {
     }
 
     public void unmarshalV10(T4CPacketBuffer meg) {
-        rxh.unmarshalV10(rxd, meg);
+        // rxh.unmarshalV10(rxd, meg);
         bindcnt = rxh.numRqsts;
         iovector = new byte[bindcnt];
         for (int i = 0; i < bindcnt; i++) {

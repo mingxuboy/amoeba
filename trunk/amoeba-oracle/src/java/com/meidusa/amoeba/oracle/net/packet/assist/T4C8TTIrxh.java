@@ -18,7 +18,7 @@ public class T4C8TTIrxh {
     public int        numItersThisTime;
     public int        uacBufLength;
 
-    byte[]            abyte0;
+    byte[]            indicate;
     byte[]            abyte1;
 
     public void init() {
@@ -29,16 +29,18 @@ public class T4C8TTIrxh {
         uacBufLength = 0;
     }
 
-    public void unmarshalV10(T4CTTIrxd rxd, T4CPacketBuffer meg) {
+    public byte[] getIndicate() {
+        return indicate;
+    }
+
+    public void unmarshalV10(T4CPacketBuffer meg) {
         flags = meg.unmarshalUB1();
         numRqsts = meg.unmarshalUB2();
         iterNum = meg.unmarshalUB2();
         numRqsts = numRqsts + iterNum * 256;
         numItersThisTime = meg.unmarshalUB2();
         uacBufLength = meg.unmarshalUB2();
-        abyte0 = meg.unmarshalDALC();
-        //rxd.setNumberOfColumns(numRqsts);
-        rxd.readBitVector(abyte0);
+        indicate = meg.unmarshalDALC();
         abyte1 = meg.unmarshalDALC();
     }
 
@@ -48,7 +50,7 @@ public class T4C8TTIrxh {
         meg.marshalUB2(iterNum);
         meg.marshalUB2(numItersThisTime);
         meg.marshalUB2(uacBufLength);
-        meg.marshalDALC(abyte0);
+        meg.marshalDALC(indicate);
         meg.marshalDALC(abyte1);
     }
 
