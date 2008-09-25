@@ -69,19 +69,18 @@ public class OracleQueryMessageHandler extends AbstractMessageQueuedHandler impl
                 serverConns[i].postMessage(message);
             }
         } else {
-            // if (logger.isDebugEnabled()) {
-            // System.out.println("\n%amoeba query message =====================================================@@@");
-            // System.out.println("%handler receive from server size:" + (((message[0] & 0xff) << 8) | (message[1] &
-            // 0xff)));
-            // System.out.println("%handler receive from server packet:" + ByteUtil.toHex(message, 0, message.length));
-            // }
+            if (logger.isDebugEnabled()) {
+                System.out.println("\n%amoeba query message =====================================================@@@");
+                System.out.println("%receive from server size:" + (((message[0] & 0xff) << 8) | (message[1] & 0xff)));
+                System.out.println("%receive from server packet:" + ByteUtil.toHex(message, 0, message.length));
+            }
 
             if (T4C8OallResponseDataPacket.isParseable(message)) {
                 // 解析和合并服务器端数据包
                 message = parseServerPakcet(message, conn);
 
                 // 切分数据包，并发送给客户端。
-                byte[][] messagesList = splitMessage(message);
+                byte[][] messagesList = splitServerMessage(message);
                 for (int i = 0; i < messagesList.length; i++) {
                     if (logger.isDebugEnabled()) {
                         System.out.println("\n%amoeba query message ========================================================");
@@ -93,32 +92,6 @@ public class OracleQueryMessageHandler extends AbstractMessageQueuedHandler impl
             } else {
                 clientConn.postMessage(message);
             }
-        }
-    }
-
-    protected byte[][] splitMessage(byte[] message) {
-        if (message.length > RECEIVE_SDU) {
-            int headSize = OraclePacketConstant.DATA_PACKET_HEADER_SIZE;
-            int dataLength = message.length - headSize;
-            int perLength = RECEIVE_SDU - headSize;
-            int arrayLength = (dataLength / perLength) + ((dataLength % perLength) == 0 ? 0 : 1);
-            byte[][] abyte0 = new byte[arrayLength][];
-            int position = headSize;
-            for (int i = 0; i < abyte0.length; i++) {
-                if (i == abyte0.length - 1) {
-                    abyte0[i] = new byte[dataLength % perLength + headSize];
-                } else {
-                    abyte0[i] = new byte[RECEIVE_SDU];
-                }
-                System.arraycopy(message, position, abyte0[i], headSize, abyte0[i].length - headSize);
-                position += abyte0[i].length - headSize;
-                abyte0[i][0] = (byte) ((abyte0[i].length >>> 8) & 0xff);
-                abyte0[i][1] = (byte) (abyte0[i].length & 0xff);
-                abyte0[i][4] = (byte) (NS_PACKT_TYPE_DATA);
-            }
-            return abyte0;
-        } else {
-            return new byte[][] { message };
         }
     }
 
@@ -172,10 +145,11 @@ public class OracleQueryMessageHandler extends AbstractMessageQueuedHandler impl
             System.arraycopy(message, 0, tmpBuffer, 0, message.length);
             isFirstClientPacket = false;
         } else {
-            int appendLength = message.length - OraclePacketConstant.DATA_PACKET_HEADER_SIZE;
-            byte[] newBytes = new byte[tmpBuffer.length + appendLength];
+            int headSize = OraclePacketConstant.DATA_PACKET_HEADER_SIZE;
+            int appendSize = message.length - headSize;
+            byte[] newBytes = new byte[tmpBuffer.length + appendSize];
             System.arraycopy(tmpBuffer, 0, newBytes, 0, tmpBuffer.length);
-            System.arraycopy(message, OraclePacketConstant.DATA_PACKET_HEADER_SIZE, newBytes, tmpBuffer.length, appendLength);
+            System.arraycopy(message, headSize, newBytes, tmpBuffer.length, appendSize);
             tmpBuffer = newBytes;
         }
     }
@@ -222,8 +196,8 @@ public class OracleQueryMessageHandler extends AbstractMessageQueuedHandler impl
                     }
                 }
 
-                if (allCompleted) {// 全部数据包已完成接受和解析，准备合并数据包。
-                    // mergePacket();
+                if (allCompleted) {// 解析完成，准备合并数据包。
+                    packet = mergeServerPacket();
                 }
             } finally {
                 lock.unlock();
@@ -234,23 +208,72 @@ public class OracleQueryMessageHandler extends AbstractMessageQueuedHandler impl
         return packet.toByteBuffer(oconn).array();
     }
 
+    private T4C8OallResponseDataPacket mergeServerPacket() {
+        T4C8OallResponseDataPacket packet = null;
+        // 这里进行多个T4C8OallResponseDataPacket合并
+        for (Map.Entry<OracleServerConnection, ConnectionStatus> entry : connStatusMap.entrySet()) {
+            packet = entry.getValue().getPacket();
+        }
+        return packet;
+    }
+
+    /**
+     * 切割服务器端消息
+     */
+    private byte[][] splitServerMessage(byte[] message) {
+        if (message.length > RECEIVE_SDU) {
+            int headSize = OraclePacketConstant.DATA_PACKET_HEADER_SIZE;
+            int dataSize = message.length - headSize;
+            int perSize = RECEIVE_SDU - headSize;
+            int arraySize = (dataSize / perSize) + ((dataSize % perSize) == 0 ? 0 : 1);
+            byte[][] abyte0 = new byte[arraySize][];
+            int position = headSize;
+            for (int i = 0; i < abyte0.length; i++) {
+                if (i == abyte0.length - 1) {
+                    abyte0[i] = new byte[dataSize % perSize + headSize];
+                } else {
+                    abyte0[i] = new byte[RECEIVE_SDU];
+                }
+                System.arraycopy(message, position, abyte0[i], headSize, abyte0[i].length - headSize);
+                position += abyte0[i].length - headSize;
+                abyte0[i][0] = (byte) ((abyte0[i].length >>> 8) & 0xff);
+                abyte0[i][1] = (byte) (abyte0[i].length & 0xff);
+                abyte0[i][4] = (byte) (NS_PACKT_TYPE_DATA);
+            }
+            return abyte0;
+        } else {
+            return new byte[][] { message };
+        }
+    }
+
     public static class ConnectionStatus {
 
         protected Connection               conn;
-        private int                        nbOfCols;
+
         private boolean                    isCompleted;
-        private T4C8OallResponseDataPacket serverPacket;
+        private T4C8OallResponseDataPacket packet;
+
+        private int                        nbOfCols;
+        private short[]                    dataType;
 
         public ConnectionStatus(Connection conn){
             this.conn = conn;
         }
 
-        public T4C8OallResponseDataPacket getServerPacket() {
-            return serverPacket;
+        public short[] getDataType() {
+            return dataType;
         }
 
-        public void setServerPacket(T4C8OallResponseDataPacket serverPacket) {
-            this.serverPacket = serverPacket;
+        public void setDataType(short[] dataType) {
+            this.dataType = dataType;
+        }
+
+        public T4C8OallResponseDataPacket getPacket() {
+            return packet;
+        }
+
+        public void setPacket(T4C8OallResponseDataPacket packet) {
+            this.packet = packet;
         }
 
         public boolean isCompleted() {

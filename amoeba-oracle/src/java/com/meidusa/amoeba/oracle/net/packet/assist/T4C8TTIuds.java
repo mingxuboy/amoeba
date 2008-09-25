@@ -23,6 +23,10 @@ public class T4C8TTIuds {
         udsoac = new T4CTTIoac();
     }
 
+    public T4CTTIoac getUdsoac() {
+        return udsoac;
+    }
+
     void unmarshal(T4CPacketBuffer meg) {
         udsoac.unmarshal(meg);
         short word0 = meg.unmarshalUB1();

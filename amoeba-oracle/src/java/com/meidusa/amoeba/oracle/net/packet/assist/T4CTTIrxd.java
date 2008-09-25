@@ -10,14 +10,13 @@ import com.meidusa.amoeba.oracle.net.packet.T4CPacketBuffer;
  */
 public class T4CTTIrxd {
 
-    static final byte NO_BYTES[] = new byte[0];
+    static final byte[]  NO_BYTES     = new byte[0];
+    static final short[] byteIndicate = { 0x1, 0x2, 0x4, 0x8, 0x10, 0x20, 0x40, 0x80 };
 
-    byte[]            buffer;
-    byte[]            bufferCHAR;
-    BitSet            bvcColSent;
-    int               nbOfColumns;
-    boolean           bvcFound;
-    boolean           isFirstCol;
+    BitSet               bvcColSent;
+    int                  nbOfColumns;
+    boolean              bvcFound;
+    boolean              isFirstCol;
 
     public T4CTTIrxd(){
         bvcColSent = null;
@@ -76,6 +75,31 @@ public class T4CTTIrxd {
                 }
             }
             bvcFound = true;
+        }
+    }
+
+    /**
+     * 取得列对应的物理位置
+     */
+    public static int[] getColsPosition(int nbOfCols, byte[] indicate) {
+        if (indicate == null || indicate.length == 0) {
+            return null;
+        } else {
+            int cursor = 0;
+            int[] count = new int[nbOfCols];
+            for (int j = 0; j < indicate.length; j++) {
+                byte byte0 = indicate[j];
+                for (int k = 0; k < byteIndicate.length; k++) {
+                    if ((byte0 & byteIndicate[k]) != 0) {
+                        count[cursor++] = j * 8 + k;
+                    }
+                }
+            }
+            if (nbOfCols != cursor) {
+                throw new RuntimeException("readColumnsPosition error,bits missing in indicate");
+            } else {
+                return count;
+            }
         }
     }
 
