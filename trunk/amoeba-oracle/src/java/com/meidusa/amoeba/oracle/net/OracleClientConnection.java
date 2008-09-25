@@ -8,6 +8,7 @@ import org.apache.log4j.Logger;
 import com.meidusa.amoeba.net.Connection;
 import com.meidusa.amoeba.net.poolable.ObjectPool;
 import com.meidusa.amoeba.oracle.context.OracleProxyRuntimeContext;
+import com.meidusa.amoeba.oracle.handler.OracleQueryDispatcher;
 import com.meidusa.amoeba.oracle.handler.OracleQueryMessageHandler;
 import com.meidusa.amoeba.oracle.net.packet.AcceptPacket;
 import com.meidusa.amoeba.oracle.net.packet.AnoDataPacket;
@@ -134,7 +135,8 @@ public class OracleClientConnection extends OracleConnection implements SQLnetDe
                         authRespPacket.oer.errorMsg = "ORA-01017: invalid username/password; logon denied";
                         this.setAuthenticated(false);
                     } else {
-                        switchHandler();
+                    	this.setMessageHandler(new OracleQueryDispatcher(this));
+                        //switchHandler();
                     }
 
                     byteBuffer = authRespPacket.toByteBuffer(clientConn);
@@ -161,12 +163,12 @@ public class OracleClientConnection extends OracleConnection implements SQLnetDe
     }
 
     private void switchHandler() {
-    	OracleQueryMessageHandler handler = new OracleQueryMessageHandler(this, new ObjectPool[]{pool});
-        try {
+    	OracleQueryDispatcher handler = new OracleQueryDispatcher(this);
+        /*try {
         	handler.startSession();
         } catch (Exception e) {
         	handler.endSession();
-        }
+        }*/
     }
 
 }

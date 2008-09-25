@@ -14,9 +14,7 @@ import com.meidusa.amoeba.net.poolable.ObjectPool;
 import com.meidusa.amoeba.oracle.io.OraclePacketConstant;
 import com.meidusa.amoeba.oracle.net.OracleConnection;
 import com.meidusa.amoeba.oracle.net.OracleServerConnection;
-import com.meidusa.amoeba.oracle.net.packet.DataPacket;
 import com.meidusa.amoeba.oracle.net.packet.SQLnetDef;
-import com.meidusa.amoeba.oracle.net.packet.T4C8OallDataPacket;
 import com.meidusa.amoeba.oracle.net.packet.T4C8OallResponseDataPacket;
 import com.meidusa.amoeba.oracle.util.ByteUtil;
 
@@ -34,9 +32,6 @@ public class OracleQueryMessageHandler extends AbstractMessageQueuedHandler impl
     private MessageHandler                                  clientHandler;
     private boolean                                         isEnded             = false;
 
-    private byte[]                                          tmpBuffer           = null;
-    private boolean                                         isFirstClientPacket = true;
-
     private final Lock                                      lock                = new ReentrantLock(false);
     protected Map<OracleServerConnection, ConnectionStatus> connStatusMap       = new HashMap<OracleServerConnection, ConnectionStatus>();
     protected Map<OracleServerConnection, MessageHandler>   handlerMap          = new HashMap<OracleServerConnection, MessageHandler>();
@@ -52,19 +47,6 @@ public class OracleQueryMessageHandler extends AbstractMessageQueuedHandler impl
 
     public void doHandleMessage(Connection conn, byte[] message) {
         if (conn == clientConn) {
-            if (DataPacket.isPacketEOF(message)) {
-                if (isFirstClientPacket) {
-                    parseClientPakcet(message, conn);
-                } else {
-                    mergeClientMessage(message);
-                    DataPacket.setPacketEOF(tmpBuffer, true);
-                    parseClientPakcet(tmpBuffer, conn);
-                    tmpBuffer = null;
-                    isFirstClientPacket = true;
-                }
-            } else {
-                mergeClientMessage(message);
-            }
             for (int i = 0; i < serverConns.length; i++) {
                 serverConns[i].postMessage(message);
             }
@@ -130,50 +112,6 @@ public class OracleQueryMessageHandler extends AbstractMessageQueuedHandler impl
             handlerMap.put(conn, conn.getMessageHandler());
             connStatusMap.put(conn, new ConnectionStatus(conn));
             conn.setMessageHandler(this);
-        }
-    }
-
-    /**
-     * 合并客户端数据包
-     */
-    private void mergeClientMessage(byte[] message) {
-        if (!DataPacket.isDataType(message)) {
-            return;
-        }
-        if (isFirstClientPacket) {
-            tmpBuffer = new byte[message.length];
-            System.arraycopy(message, 0, tmpBuffer, 0, message.length);
-            isFirstClientPacket = false;
-        } else {
-            int headSize = OraclePacketConstant.DATA_PACKET_HEADER_SIZE;
-            int appendSize = message.length - headSize;
-            byte[] newBytes = new byte[tmpBuffer.length + appendSize];
-            System.arraycopy(tmpBuffer, 0, newBytes, 0, tmpBuffer.length);
-            System.arraycopy(message, headSize, newBytes, tmpBuffer.length, appendSize);
-            tmpBuffer = newBytes;
-        }
-    }
-
-    /**
-     * 解析客户端的SQL数据包
-     */
-    private void parseClientPakcet(byte[] message, Connection conn) {
-        if (logger.isDebugEnabled()) {
-            System.out.println("\n$amoeba query message ========================================================");
-            System.out.println("$send packet:" + ByteUtil.toHex(message, 0, message.length));
-        }
-
-        if (DataPacket.isDataEOF(message)) {
-            if (logger.isDebugEnabled()) {
-                System.out.println("type:DataEOFPacket");
-            }
-        } else if (T4C8OallDataPacket.isParseable(message)) {
-            T4C8OallDataPacket clientPacket = new T4C8OallDataPacket();
-            clientPacket.init(message, conn);
-        } else {
-            if (logger.isDebugEnabled()) {
-                System.out.println("type:OtherClientPacket");
-            }
         }
     }
 
