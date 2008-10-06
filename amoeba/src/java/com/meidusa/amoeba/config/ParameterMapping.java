@@ -61,6 +61,7 @@ public class ParameterMapping {
 		return (mDescriptors);
 	}
 
+	@SuppressWarnings("unchecked")
 	public static void mappingObject(Object object, Map<String,Object> parameter) {
 		PropertyDescriptor[] descriptors = getDescriptors(object.getClass());
 
@@ -81,7 +82,25 @@ public class ParameterMapping {
 			}else if(obj instanceof BeanObjectEntityConfig){
 				BeanObjectEntityConfig beanconf = (BeanObjectEntityConfig)obj;
 				value = beanconf.createBeanObject(true);
-				mappingObject(value,beanconf.getParams());
+				
+				//Map bean
+				if(value instanceof Map){
+					Map map = (Map)value;
+					for(Map.Entry<String, Object> entry:beanconf.getParams().entrySet()){
+						String key = entry.getKey();
+						Object mapValue = entry.getValue();
+						if(mapValue instanceof BeanObjectEntityConfig){
+							BeanObjectEntityConfig mapBeanConfig = (BeanObjectEntityConfig)entry.getValue();
+							mapValue = mapBeanConfig.createBeanObject(true);
+							mappingObject(mapValue,mapBeanConfig.getParams());
+						}
+						map.put(key, mapValue);
+					}
+				}
+				//other bean
+				else{
+					mappingObject(value,beanconf.getParams());
+				}
 			}
 			
 			if (cls != null) {
