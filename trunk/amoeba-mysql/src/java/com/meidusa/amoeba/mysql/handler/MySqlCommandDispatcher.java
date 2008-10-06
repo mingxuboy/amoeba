@@ -12,6 +12,7 @@
 package com.meidusa.amoeba.mysql.handler;
 
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -122,7 +123,7 @@ public class MySqlCommandDispatcher implements MessageHandler {
 					conn.postMessage(error.toByteBuffer(connection).array());
 					logger.warn("Unknown prepared statment id:"+statmentId);
 				}else{
-					Map<Integer,Object> longMap = null;
+					Map<Integer,Object> longMap = new HashMap<Integer,Object>();
 					for(byte[] longdate:conn.getLongDataList()){
 						LongDataPacket packet = new LongDataPacket();
 						packet.init(longdate,connection);
