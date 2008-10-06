@@ -199,7 +199,7 @@ public final class MysqlDefs {
 	/**
 	 * Maps the given MySQL type to the correct JDBC type.
 	 */
-	static int mysqlToJavaType(int mysqlType) {
+	public static int mysqlToJavaType(int mysqlType) {
 		int jdbcType;
 
 		switch (mysqlType) {
@@ -332,6 +332,48 @@ public final class MysqlDefs {
 		}
 
 		return jdbcType;
+	}
+	
+	public static int javaTypeMysql(int javaType) {
+
+		switch (javaType) {
+		case Types.DECIMAL: return MysqlDefs.FIELD_TYPE_DECIMAL;
+
+		case Types.TINYINT : return MysqlDefs.FIELD_TYPE_TINY;
+
+		case Types.SMALLINT : return MysqlDefs.FIELD_TYPE_SHORT;
+
+		case Types.INTEGER: return MysqlDefs.FIELD_TYPE_LONG;
+
+		case Types.REAL: return MysqlDefs.FIELD_TYPE_FLOAT;
+
+		case Types.DOUBLE: return MysqlDefs.FIELD_TYPE_DOUBLE;
+
+		case Types.NULL : return MysqlDefs.FIELD_TYPE_NULL;
+
+		case Types.TIMESTAMP : return MysqlDefs.FIELD_TYPE_TIMESTAMP;
+
+		case Types.BIGINT: return MysqlDefs.FIELD_TYPE_LONGLONG;
+
+		case Types.DATE: return MysqlDefs.FIELD_TYPE_DATE;
+
+		case Types.TIME: return MysqlDefs.FIELD_TYPE_TIME;
+
+		case Types.VARBINARY: return MysqlDefs.FIELD_TYPE_TINY_BLOB;
+
+		case Types.LONGVARBINARY: return MysqlDefs.FIELD_TYPE_BLOB;
+		
+		case Types.VARCHAR: return MysqlDefs.FIELD_TYPE_VARCHAR;
+
+		case Types.CHAR: return MysqlDefs.FIELD_TYPE_STRING;
+		
+		case Types.BINARY: return MysqlDefs.FIELD_TYPE_GEOMETRY;
+
+		case Types.BIT: return  MysqlDefs.FIELD_TYPE_BIT;
+		
+		default: return Types.VARCHAR;
+		}
+
 	}
 
 	/**
