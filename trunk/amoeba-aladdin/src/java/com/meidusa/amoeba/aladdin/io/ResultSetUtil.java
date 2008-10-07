@@ -10,6 +10,11 @@ import com.meidusa.amoeba.mysql.net.packet.FieldPacket;
 import com.meidusa.amoeba.mysql.net.packet.ResultSetHeaderPacket;
 import com.meidusa.amoeba.mysql.net.packet.RowDataPacket;
 
+/**
+ * 
+ * @author struct
+ *
+ */
 public class ResultSetUtil {
 	
 	public static void resultSetToPacket(MysqlResultSetPacket packet,ResultSet rs) throws SQLException{

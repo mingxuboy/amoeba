@@ -2,6 +2,11 @@ package com.meidusa.amoeba.aladdin.io;
 
 import com.meidusa.amoeba.net.Connection;
 
+/**
+ * 
+ * @author struct
+ *
+ */
 public interface ResultPacket {
 	
 	public void setError(int errorCode,String errorMessage);

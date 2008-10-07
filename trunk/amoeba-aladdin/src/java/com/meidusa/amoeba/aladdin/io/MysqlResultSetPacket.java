@@ -9,6 +9,11 @@ import com.meidusa.amoeba.mysql.net.packet.ResultSetHeaderPacket;
 import com.meidusa.amoeba.mysql.net.packet.RowDataPacket;
 import com.meidusa.amoeba.net.Connection;
 
+/**
+ * 
+ * @author struct
+ *
+ */
 public class MysqlResultSetPacket extends ErrorResultPacket {
 	
 	public ResultSetHeaderPacket resulthead;

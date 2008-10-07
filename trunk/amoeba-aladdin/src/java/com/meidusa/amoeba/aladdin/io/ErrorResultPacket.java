@@ -3,6 +3,11 @@ package com.meidusa.amoeba.aladdin.io;
 import com.meidusa.amoeba.mysql.net.packet.ErrorPacket;
 import com.meidusa.amoeba.net.Connection;
 
+/**
+ * 
+ * @author struct
+ *
+ */
 public class ErrorResultPacket implements ResultPacket{
 	private boolean isError;
 	private String errorMessage;
