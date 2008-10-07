@@ -9,7 +9,8 @@ import com.meidusa.amoeba.mysql.net.packet.ResultSetHeaderPacket;
 import com.meidusa.amoeba.mysql.net.packet.RowDataPacket;
 import com.meidusa.amoeba.net.Connection;
 
-public class ResultSetPacket {
+public class MysqlResultSetPacket extends ErrorResultPacket {
+	
 	public ResultSetHeaderPacket resulthead;
 	public FieldPacket[] fieldPackets;
 	public List<RowDataPacket> rowList = new ArrayList<RowDataPacket>();
@@ -20,13 +21,14 @@ public class ResultSetPacket {
 		}
 	}
 	
-	/**
-	 * 将ResultSet这些包合并以后写到Connection
-	 * head--> fields --> eof -->rows --> eof
-	 * @param conn
+	/* (non-Javadoc)
+	 * @see com.meidusa.amoeba.aladdin.io.ResultPacket#wirteToConnection(com.meidusa.amoeba.net.Connection)
 	 */
 	public void wirteToConnection(Connection conn){
-		
+		if(isError()){
+			super.wirteToConnection(conn);
+			return;
+		}
 		//write header bytes
 		byte paketId = resulthead.packetId;
 		conn.postMessage(resulthead.toByteBuffer(conn));
