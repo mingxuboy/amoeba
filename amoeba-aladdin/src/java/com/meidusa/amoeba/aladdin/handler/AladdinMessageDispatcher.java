@@ -72,8 +72,9 @@ public class AladdinMessageDispatcher implements MessageHandler {
 						session.startSession();
 					}catch(Exception e){
 						logger.error("start Session error:",e);
-						session.endSession();
 						throw e;
+					}finally{
+						session.endSession();
 					}
 				}
 			}else if(MysqlPacketBuffer.isPacketType(message, QueryCommandPacket.COM_STMT_PREPARE)){
@@ -94,6 +95,8 @@ public class AladdinMessageDispatcher implements MessageHandler {
 							logger.error("start Session error:",e);
 							session.endSession();
 							throw e;
+						}finally{
+							session.endSession();
 						}
 					}
 				}else{
@@ -138,8 +141,9 @@ public class AladdinMessageDispatcher implements MessageHandler {
 							session.startSession();
 						}catch(Exception e){
 							logger.error("start Session error:",e);
-							session.endSession();
 							throw e;
+						}finally{
+							session.endSession();
 						}
 					}
 				}

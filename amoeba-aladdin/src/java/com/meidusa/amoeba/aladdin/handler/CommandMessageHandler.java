@@ -46,10 +46,12 @@ public abstract class CommandMessageHandler implements MessageHandler, Sessionab
 			this.parameter = parameter;
 			this.packet = packet;
 			this.query = query;
+			this.latch = latch;
 		}
 		
 		protected static boolean isSelect(String query){
-			return false;
+			
+			return true;
 		}
 		
 		protected abstract void doRun();
@@ -65,6 +67,7 @@ public abstract class CommandMessageHandler implements MessageHandler, Sessionab
 	
 	public CommandMessageHandler(MysqlClientConnection source, String query,Object parameter,
 			ObjectPool[] pools, long timeout) {
+		this.source = source;
 		this.query = query;
 		this.pools = pools;
 		this.timeout = timeout;
@@ -108,6 +111,7 @@ public abstract class CommandMessageHandler implements MessageHandler, Sessionab
 		}else{
 			latch.await();
 		}
+		packet.wirteToConnection(source);
 	}
 
 	protected abstract ResultPacket newResultPacket(boolean isSelect);
