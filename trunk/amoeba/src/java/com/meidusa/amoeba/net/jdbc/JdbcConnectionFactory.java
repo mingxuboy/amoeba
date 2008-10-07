@@ -60,7 +60,7 @@ public class JdbcConnectionFactory implements PoolableObjectFactory,Initialisabl
 	}
 
 	public Object makeObject() throws Exception {
-		return driver.connect(url, properties);
+		return new PoolableJdbcConnection(driver.connect(url, properties));
 	}
 
 	public void passivateObject(Object obj) throws Exception {
