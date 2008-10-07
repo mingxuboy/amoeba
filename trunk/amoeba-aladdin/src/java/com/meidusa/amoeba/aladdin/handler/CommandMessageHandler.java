@@ -3,9 +3,11 @@ package com.meidusa.amoeba.aladdin.handler;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import com.meidusa.amoeba.aladdin.io.ResultPacket;
 import com.meidusa.amoeba.context.ProxyRuntimeContext;
 import com.meidusa.amoeba.mysql.net.MysqlClientConnection;
 import com.meidusa.amoeba.net.Connection;
@@ -19,7 +21,7 @@ import com.meidusa.amoeba.net.poolable.ObjectPool;
  * @author struct
  *
  */
-public class CommandMessageHandler implements MessageHandler, Sessionable {
+public abstract class CommandMessageHandler implements MessageHandler, Sessionable {
 	protected MysqlClientConnection source;
 	private boolean completed;
 	private long createTime;
@@ -30,24 +32,43 @@ public class CommandMessageHandler implements MessageHandler, Sessionable {
 	private final Lock lock = new ReentrantLock(false);
 	private Map<java.sql.Connection, ObjectPool> connPoolMap = new HashMap<java.sql.Connection, ObjectPool>();
 	private String query;
-	protected static class QueryRunnable implements Runnable{
+	private Object parameter;
+	
+	protected static abstract class QueryRunnable implements Runnable{
 		protected java.sql.Connection conn;
 		protected Object parameter;
-		QueryRunnable(java.sql.Connection conn,Object parameter){
+		protected CountDownLatch latch;
+		protected ResultPacket packet;
+		protected String query;
+		
+		QueryRunnable(CountDownLatch latch,java.sql.Connection conn,String query,Object parameter, ResultPacket packet){
 			this.conn = conn;
-			this.parameter = conn;
+			this.parameter = parameter;
+			this.packet = packet;
+			this.query = query;
 		}
-
+		
+		protected static boolean isSelect(String query){
+			return false;
+		}
+		
+		protected abstract void doRun();
+		
 		public void run() {
-			
+			try{
+				doRun();
+			}finally{
+				latch.countDown();
+			}
 		}
 	}
 	
-	public CommandMessageHandler(MysqlClientConnection source, String query,
+	public CommandMessageHandler(MysqlClientConnection source, String query,Object parameter,
 			ObjectPool[] pools, long timeout) {
 		this.query = query;
 		this.pools = pools;
 		this.timeout = timeout;
+		this.parameter = parameter;
 	}
 
 	public void handleMessage(Connection conn, byte[] message) {
@@ -72,16 +93,25 @@ public class CommandMessageHandler implements MessageHandler, Sessionable {
 	}
 
 	public void startSession() throws Exception {
+		final CountDownLatch latch = new CountDownLatch(pools.length);
+		ResultPacket packet = newResultPacket(QueryRunnable.isSelect(query));
 		for (ObjectPool pool : pools) {
 			final java.sql.Connection conn = (java.sql.Connection) pool
 					.borrowObject();
 			connPoolMap.put(conn, pool);
-			final CountDownLatch latch = new CountDownLatch(pools.length);
-			QueryRunnable runnable = new QueryRunnable(conn,query);
+			QueryRunnable runnable = newQueryRunnable(latch,conn,query,parameter,packet);
 			ProxyRuntimeContext.getInstance().getServerSideExecutor().execute(runnable);
+		}
+		
+		if(timeout>0){
+			latch.await(timeout,TimeUnit.MILLISECONDS);
+		}else{
+			latch.await();
 		}
 	}
 
+	protected abstract ResultPacket newResultPacket(boolean isSelect);
+	protected abstract QueryRunnable newQueryRunnable(CountDownLatch latch, java.sql.Connection conn, String query2,Object parameter, ResultPacket packet);
 	public void endSession() {
 		lock.lock();
 		try {

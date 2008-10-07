@@ -65,7 +65,7 @@ public class AladdinMessageDispatcher implements MessageHandler {
 					conn.postMessage(STATIC_OK_BUFFER);
 					return;
 				}
-				MessageHandler handler = new QueryCommandMessageHandler(conn,command.arg,pools,timeout);
+				MessageHandler handler = new QueryCommandMessageHandler(conn,command.arg,null,pools,timeout);
 				if(handler instanceof Sessionable){
 					Sessionable session = (Sessionable)handler;
 					try{

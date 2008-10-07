@@ -6,14 +6,13 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 
 import com.meidusa.amoeba.mysql.jdbc.MysqlDefs;
-import com.meidusa.amoeba.mysql.net.MysqlConnection;
 import com.meidusa.amoeba.mysql.net.packet.FieldPacket;
 import com.meidusa.amoeba.mysql.net.packet.ResultSetHeaderPacket;
 import com.meidusa.amoeba.mysql.net.packet.RowDataPacket;
 
 public class ResultSetUtil {
 	
-	public static void resultSetToPacket(ResultSetPacket packet, MysqlConnection conn,ResultSet rs) throws SQLException{
+	public static void resultSetToPacket(MysqlResultSetPacket packet,ResultSet rs) throws SQLException{
 		
 		ResultSetMetaData metaData = rs.getMetaData();
 		int colunmCount = metaData.getColumnCount();
