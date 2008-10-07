@@ -5,6 +5,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.concurrent.CountDownLatch;
 
+import org.apache.log4j.Logger;
+
 import com.meidusa.amoeba.aladdin.io.MysqlResultSetPacket;
 import com.meidusa.amoeba.aladdin.io.MysqlSimpleResultPacket;
 import com.meidusa.amoeba.aladdin.io.ResultPacket;
@@ -19,7 +21,7 @@ import com.meidusa.amoeba.net.poolable.ObjectPool;
  *
  */
 public class QueryCommandMessageHandler extends CommandMessageHandler {
-	
+	private static Logger logger = Logger.getLogger(QueryCommandMessageHandler.class);
 	protected static class QueryRunnable extends CommandMessageHandler.QueryRunnable{
 
 		QueryRunnable(CountDownLatch latch, java.sql.Connection conn,String query,
@@ -35,6 +37,9 @@ public class QueryCommandMessageHandler extends CommandMessageHandler {
 				try {
 					statement = conn.createStatement();
 					rs = statement.executeQuery(query);
+					if(logger.isDebugEnabled()){
+						logger.debug("starting query:"+query);
+					}
 					ResultSetUtil.resultSetToPacket((MysqlResultSetPacket)packet, rs);
 				} catch (SQLException e) {
 					packet.setError(e.getErrorCode(), e.getMessage());

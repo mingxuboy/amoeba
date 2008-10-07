@@ -51,14 +51,16 @@ public class MysqlResultSetPacket extends ErrorResultPacket {
 		eof.packetId = (++paketId);
 		conn.postMessage(eof.toByteBuffer(conn));
 		
-		//write rows bytes
-		for(RowDataPacket row : rowList){
-			row.packetId = (++paketId);
-			conn.postMessage(row.toByteBuffer(conn));
+		if(rowList.size()>0){
+			//write rows bytes
+			for(RowDataPacket row : rowList){
+				row.packetId = (++paketId);
+				conn.postMessage(row.toByteBuffer(conn));
+			}
+	
+			//write eof bytes
+			eof.packetId = (++paketId);
+			conn.postMessage(eof.toByteBuffer(conn));
 		}
-
-		//write eof bytes
-		eof.packetId = (++paketId);
-		conn.postMessage(eof.toByteBuffer(conn));
 	}
 }
