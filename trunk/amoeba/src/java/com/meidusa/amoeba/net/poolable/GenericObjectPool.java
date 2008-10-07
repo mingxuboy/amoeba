@@ -1008,6 +1008,7 @@ public class GenericObjectPool extends BaseObjectPool implements ObjectPool {
 		                pair = new ObjectTimestampPair(obj);
 		                newlyCreated = true;
 	                }catch(Exception e){
+	                	lock.lock();
 	                	try {
 		                    _numActive--;
 		                    numIncreased = false;
