@@ -5,6 +5,11 @@ import java.util.concurrent.atomic.AtomicLong;
 import com.meidusa.amoeba.mysql.net.packet.OkPacket;
 import com.meidusa.amoeba.net.Connection;
 
+/**
+ * 
+ * @author struct
+ *
+ */
 public class MysqlSimpleResultPacket extends ErrorResultPacket {
 	
 	private AtomicLong resultCount = new AtomicLong();
