@@ -2,6 +2,7 @@ package com.meidusa.amoeba.oracle.handler;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -11,6 +12,7 @@ import com.meidusa.amoeba.net.Connection;
 import com.meidusa.amoeba.net.MessageHandler;
 import com.meidusa.amoeba.net.Sessionable;
 import com.meidusa.amoeba.net.poolable.ObjectPool;
+import com.meidusa.amoeba.net.poolable.PoolableObject;
 import com.meidusa.amoeba.oracle.io.OraclePacketConstant;
 import com.meidusa.amoeba.oracle.net.OracleClientConnection;
 import com.meidusa.amoeba.oracle.net.OracleConnection;
@@ -86,7 +88,7 @@ public class OracleQueryMessageHandler extends AbstractMessageQueuedHandler impl
                                 int rowIndex = ByteUtil.toInt32BE(abyte0, 0);
                                 byte[] realBytes = occonn.getLobLocaterMap().get(rowIndex);
                                 System.arraycopy(realBytes, 0, tmpBuffer, offset, realBytes.length);
-                                 message = tmpBuffer;
+                                message = tmpBuffer;
                                 for (int i = 0; i < serverConns.length; i++) {
                                     connStatusMap.get(serverConns[i]).setLobOps(true);
                                     connStatusMap.get(serverConns[i]).setLob(packet.getLob());
@@ -107,6 +109,10 @@ public class OracleQueryMessageHandler extends AbstractMessageQueuedHandler impl
 
             if (MarkerPacket.isMarkerType(message)) {
                 System.out.println("marker! receive");
+                // if (message[10] != 2) {
+                // sendPrint(logger.isDebugEnabled(), message, false);
+                // clientConn.postMessage(message);
+                // }
             }
 
             if (T4C8OallResponseDataPacket.isParseable(message)) {
@@ -131,17 +137,47 @@ public class OracleQueryMessageHandler extends AbstractMessageQueuedHandler impl
     }
 
     public synchronized void endSession() {
-        if (!isEnded()) {
-            isEnded = true;
-            clientConn.setMessageHandler(clientHandler);
+        lock.lock();
 
-            for (int i = 0; serverConns != null && i < serverConns.length; i++) {
-                if (serverConns[i] != null) {
-                    serverConns[i].setMessageHandler(handlerMap.get(serverConns[i]));
-                    // serverConns[i].postClose(null);
+        try {
+            if (!isEnded) {
+                isEnded = true;
+
+                clientConn.setMessageHandler(clientHandler);
+
+                //
+                // for (int i = 0; serverConns != null && i < serverConns.length; i++) {
+                // if (serverConns[i] != null) {
+                // serverConns[i].setMessageHandler(handlerMap.get(serverConns[i]));
+                // }
+                // }
+
+                Set<Map.Entry<OracleServerConnection, MessageHandler>> handlerSet = handlerMap.entrySet();
+                for (Map.Entry<OracleServerConnection, MessageHandler> entry : handlerSet) {
+                    MessageHandler handler = entry.getValue();
+                    OracleServerConnection conn = entry.getKey();
+                    ConnectionServerStatus status = connStatusMap.get(conn);
+                    if (status != null && status.isCompleted) {
+                        conn.setMessageHandler(handler);
+                        if (!conn.isClosed()) {
+                            PoolableObject pooledObject = (PoolableObject) conn;
+                            if (pooledObject.getObjectPool() != null) {
+                                try {
+                                    pooledObject.getObjectPool().returnObject(conn);
+                                    if (logger.isDebugEnabled()) {
+                                        int hash = conn.getObjectPool().hashCode();
+                                        System.out.println("conn:" + hash + " returned to pool +++++++++++++++++++");
+                                    }
+                                } catch (Exception e) {
+                                }
+                            }
+
+                        }
+                    }
                 }
             }
-            // clientConn.postClose(null);
+        } finally {
+            lock.unlock();
         }
     }
 
@@ -211,7 +247,6 @@ public class OracleQueryMessageHandler extends AbstractMessageQueuedHandler impl
 
                 if (allCompleted) {// 解析完成，准备合并数据包。
                     packet = mergeServerPacket();
-                    System.out.println("\n++++++++++++++++++++++++endSession");
                     endSession();
                 }
             } finally {
@@ -277,10 +312,10 @@ public class OracleQueryMessageHandler extends AbstractMessageQueuedHandler impl
         if (isEnabled) {
             int size = ((message[0] & 0xff) << 8) | (message[1] & 0xff);
             if (isClient) {
-                System.out.println(">>amoeba query message ==============================================================");
+                System.out.println(">>amoeba query message =============================================================");
                 System.out.println(">>send to server[" + size + "]:" + ByteUtil.toHex(message, 0, message.length));
             } else {
-                System.out.println("<<amoeba query message ==============================================================");
+                System.out.println("<<amoeba query message =============================================================");
                 System.out.println("<<send to client[" + size + "]:" + ByteUtil.toHex(message, 0, message.length));
             }
         }
