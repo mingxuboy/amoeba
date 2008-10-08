@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="gbk"?>
+
+<!DOCTYPE amoeba:configuration SYSTEM "amoeba.dtd">
+<amoeba:configuration xmlns:amoeba="http://amoeba.meidusa.com/">
+
+	<server>
+		<!-- proxy server绑定的端口 -->
+		<property name="port">8066</property>
+		
+		<!-- proxy server绑定的IP -->
+		<property name="ipAddress">127.0.0.1</property>
+		
+		<!-- proxy server net IO Read thread size -->
+		<property name="readThreadPoolSize">20</property>
+		
+		<!-- proxy server client process thread size -->
+		<property name="clientSideThreadPoolSize">30</property>
+		
+		<!-- mysql server data packet process thread size -->
+		<property name="serverSideThreadPoolSize">30</property>
+		
+		<!-- socket Send and receive BufferSize(unit:K)  -->
+		<property name="netBufferSize">100</property>
+		
+		<!-- Enable/disable TCP_NODELAY (disable/enable Nagle's algorithm). -->
+		<property name="tcpNoDelay">true</property>
+		
+		<!-- 对外验证的用户名 -->
+		<property name="user">root</property>
+		
+		<!-- 对外验证的密码 -->
+		<!--
+		<property name="password">password</property>
+		-->
+	</server>
+	
+	<!-- 
+		每个ConnectionManager都将作为一个线程启动。
+		manager负责Connection IO读写/死亡检测
+	-->
+	<connectionManagerList>
+		<connectionManager name="defaultManager">
+			<className>com.meidusa.amoeba.net.AuthingableConnectionManager</className>
+		</connectionManager>
+	</connectionManagerList>
+	
+	<dbServerList>
+		<!-- 
+			一台mysqlServer 需要配置一个pool，
+			如果多台 平等的mysql需要进行loadBalance， 
+			平台已经提供一个具有负载均衡能力的objectPool：com.meidusa.amoeba.mysql.server.MultipleServerPool
+			简单的配置是属性加上 virtual="true",该Pool 不允许配置factoryConfig
+			或者自己写一个ObjectPool。
+		-->
+		<dbServer name="server1">
+			
+			<!-- PoolableObjectFactory实现类 -->
+			<factoryConfig class="com.meidusa.amoeba.net.jdbc.JdbcConnectionFactory">
+				
+				<!-- driver name -->
+				<property name="driverName">com.mysql.jdbc.Driver</property>
+				
+				<!-- url -->
+				<property name="properties">
+					<bean class="java.util.Properties">
+						<!-- 用于登陆mysql的用户名 -->
+						<property name="user">root</property>
+						
+						<!-- 用于登陆mysql的密码 -->
+						<!--
+						<property name="password">password</property>
+						-->
+					</bean>
+				</property>
+				
+			</factoryConfig>
+			
+			<!-- ObjectPool实现类 -->
+			<poolConfig class="com.meidusa.amoeba.net.poolable.PoolableObjectPool">
+				<property name="maxActive">200</property>
+				<property name="maxIdle">200</property>
+				<property name="minIdle">10</property>
+				<property name="minEvictableIdleTimeMillis">600000</property>
+				<property name="timeBetweenEvictionRunsMillis">600000</property>
+				<property name="testOnBorrow">true</property>
+				<property name="testWhileIdle">true</property>
+			</poolConfig>
+		</dbServer>
+		
+		
+		<dbServer name="multiPool" virtual="true">
+			<poolConfig class="com.meidusa.amoeba.server.MultipleServerPool">
+				<!-- 负载均衡参数 1=ROUNDROBIN , 2=WEIGHTBASED -->
+				<property name="loadbalance">1</property>
+				
+				<!-- 参与该pool负载均衡的poolName列表以逗号分割 -->
+				<property name="poolNames">server1</property>
+			</poolConfig>
+		</dbServer>
+		
+	</dbServerList>
+	
+	<queryRouter>
+		<className>com.meidusa.amoeba.mysql.parser.MysqlQueryRouter</className>
+		<property name="ruleConfig">${amoeba.home}/conf/rule.xml</property>
+		<property name="functionConfig">${amoeba.home}/conf/functionMap.xml</property>
+		<property name="ruleFunctionConfig">${amoeba.home}/conf/ruleFunctionMap.xml</property>
+		<property name="LRUMapSize">1500</property>
+		<property name="defaultPool">server1</property>
+		
+		<!--
+		<property name="writePool">server1</property>
+		<property name="readPool">server1</property>
+		-->
+		<property name="needParse">true</property>
+	</queryRouter>
+</amoeba:configuration>
+
+
+
