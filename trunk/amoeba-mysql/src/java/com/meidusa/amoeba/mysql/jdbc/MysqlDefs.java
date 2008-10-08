@@ -363,7 +363,7 @@ public final class MysqlDefs {
 
 		case Types.LONGVARBINARY: return MysqlDefs.FIELD_TYPE_BLOB;
 		
-		case Types.VARCHAR: return MysqlDefs.FIELD_TYPE_VARCHAR;
+		case Types.VARCHAR: return MysqlDefs.FIELD_TYPE_VAR_STRING;
 
 		case Types.CHAR: return MysqlDefs.FIELD_TYPE_STRING;
 		

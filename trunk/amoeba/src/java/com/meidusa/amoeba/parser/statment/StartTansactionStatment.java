@@ -13,7 +13,7 @@ package com.meidusa.amoeba.parser.statment;
 
 import com.meidusa.amoeba.parser.expression.Expression;
 
-public class StartTansactionStatment implements Statment {
+public class StartTansactionStatment extends AbstractStatment  {
 
 	public Expression getExpression() {
 		// TODO Auto-generated method stub

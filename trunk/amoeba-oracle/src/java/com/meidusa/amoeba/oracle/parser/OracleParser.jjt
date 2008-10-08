@@ -108,11 +108,13 @@ public class OracleParser implements com.meidusa.amoeba.parser.Parser{
 		//return funMap.get(indent);
 	}
 	
-	
-	
 	public Statment doParse() throws com.meidusa.amoeba.parser.ParseException{
 		try{
-			return this.parse();	
+			Statment statment = this.parse();
+			if(statment != null){
+				statment.setParameterCount(parameterIndex);
+			}
+			return statment;
 		}catch(Exception e){
 			throw new com.meidusa.amoeba.parser.ParseException(e);
 		}

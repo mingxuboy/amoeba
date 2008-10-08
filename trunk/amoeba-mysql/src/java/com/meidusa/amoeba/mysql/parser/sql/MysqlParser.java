@@ -107,7 +107,11 @@ public class MysqlParser implements/*@bgen(jjtree)*/ MysqlParserTreeConstants,co
 
         public Statment doParse() throws com.meidusa.amoeba.parser.ParseException{
                 try{
-                        return this.parse();
+                        Statment statment = this.parse();
+                        if(statment != null){
+                                statment.setParameterCount(parameterIndex);
+                        }
+                        return statment;
                 }catch(Exception e){
                         throw new com.meidusa.amoeba.parser.ParseException(e);
                 }
@@ -2998,33 +3002,6 @@ void SQLExpotentExpression() #void:
     finally { jj_save(25, xla); }
   }
 
-  final private boolean jj_3R_126() {
-    if (jj_3R_137()) return true;
-    return false;
-  }
-
-  final private boolean jj_3R_27() {
-    if (jj_scan_token(K_FOR)) return true;
-    if (jj_scan_token(K_UPDATE)) return true;
-    return false;
-  }
-
-  final private boolean jj_3R_80() {
-    if (jj_3R_96()) return true;
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_126()) jj_scanpos = xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_127()) jj_scanpos = xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_128()) jj_scanpos = xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_129()) jj_scanpos = xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_130()) jj_scanpos = xsp;
-    return false;
-  }
-
   final private boolean jj_3R_131() {
     if (jj_scan_token(K_UNION)) return true;
     Token xsp;
@@ -4497,6 +4474,33 @@ void SQLExpotentExpression() #void:
 
   final private boolean jj_3R_127() {
     if (jj_3R_138()) return true;
+    return false;
+  }
+
+  final private boolean jj_3R_126() {
+    if (jj_3R_137()) return true;
+    return false;
+  }
+
+  final private boolean jj_3R_80() {
+    if (jj_3R_96()) return true;
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_126()) jj_scanpos = xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_127()) jj_scanpos = xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_128()) jj_scanpos = xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_129()) jj_scanpos = xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_130()) jj_scanpos = xsp;
+    return false;
+  }
+
+  final private boolean jj_3R_27() {
+    if (jj_scan_token(K_FOR)) return true;
+    if (jj_scan_token(K_UPDATE)) return true;
     return false;
   }
 

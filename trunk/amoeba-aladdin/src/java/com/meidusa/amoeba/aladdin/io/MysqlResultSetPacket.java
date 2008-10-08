@@ -19,6 +19,9 @@ public class MysqlResultSetPacket extends ErrorResultPacket {
 	public ResultSetHeaderPacket resulthead;
 	public FieldPacket[] fieldPackets;
 	public List<RowDataPacket> rowList = new ArrayList<RowDataPacket>();
+	public MysqlResultSetPacket(String query){
+		
+	}
 	
 	public void addRowDataPacket(RowDataPacket row){
 		synchronized (rowList) {
@@ -34,33 +37,36 @@ public class MysqlResultSetPacket extends ErrorResultPacket {
 			super.wirteToConnection(conn);
 			return;
 		}
+		byte paketId = 1;
+		resulthead.packetId = paketId++;
+		
 		//write header bytes
-		byte paketId = resulthead.packetId;
 		conn.postMessage(resulthead.toByteBuffer(conn));
 		
 		//write fields bytes
 		for(int i=0;i<fieldPackets.length;i++){
+			fieldPackets[i].packetId = paketId++;
 			conn.postMessage(fieldPackets[i].toByteBuffer(conn));
-			paketId = fieldPackets[i].packetId;
 		}
 		
 		//write eof bytes
 		EOFPacket eof = new EOFPacket();
 		eof.serverStatus = 2;
 		eof.warningCount = 0;
-		eof.packetId = (++paketId);
+		eof.packetId = paketId++;
 		conn.postMessage(eof.toByteBuffer(conn));
 		
 		if(rowList.size()>0){
 			//write rows bytes
 			for(RowDataPacket row : rowList){
-				row.packetId = (++paketId);
+				row.packetId = paketId++;
 				conn.postMessage(row.toByteBuffer(conn));
 			}
-	
-			//write eof bytes
-			eof.packetId = (++paketId);
-			conn.postMessage(eof.toByteBuffer(conn));
+			
 		}
+		
+		//write eof bytes
+		eof.packetId = paketId++;
+		conn.postMessage(eof.toByteBuffer(conn));
 	}
 }
