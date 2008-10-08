@@ -35,6 +35,7 @@ public class MultipleLoadBalanceObjectPool implements ObjectPool{
 	
 	public static final int LOADBALANCING_ROUNDROBIN = 1;
 	public static final int LOADBALANCING_WEIGHTBASED = 2;
+	public static final int HA = 4;
 	private boolean enable;
 	
 	protected static class ActiveNumComparator implements Comparator<ObjectPool>{
@@ -193,7 +194,7 @@ public class MultipleLoadBalanceObjectPool implements ObjectPool{
 		if(loadbalance == LOADBALANCING_ROUNDROBIN){
 			long current = currentCount.getAndIncrement();
 			pool = poolsTemp[(int)(current % poolsTemp.length)];
-		}else{
+		}else if(loadbalance == LOADBALANCING_WEIGHTBASED){
 			if(poolsTemp.length >1){
 				ObjectPool[] objectPoolsCloned = poolsTemp.clone();
 				Arrays.sort(objectPoolsCloned, comparator);
@@ -201,6 +202,9 @@ public class MultipleLoadBalanceObjectPool implements ObjectPool{
 			}else if(poolsTemp.length == 1){
 				pool = poolsTemp[0];
 			}
+		}else{
+			//HA,只要有效的pool
+			pool = poolsTemp[0];
 		}
 		
 		try{
