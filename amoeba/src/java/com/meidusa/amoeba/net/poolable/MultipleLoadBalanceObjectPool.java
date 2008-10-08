@@ -35,7 +35,7 @@ public class MultipleLoadBalanceObjectPool implements ObjectPool{
 	
 	public static final int LOADBALANCING_ROUNDROBIN = 1;
 	public static final int LOADBALANCING_WEIGHTBASED = 2;
-	public static final int HA = 3;
+	public static final int LOADBALANCING_HA = 3;
 	private boolean enable;
 	
 	protected static class ActiveNumComparator implements Comparator<ObjectPool>{
@@ -202,9 +202,11 @@ public class MultipleLoadBalanceObjectPool implements ObjectPool{
 			}else if(poolsTemp.length == 1){
 				pool = poolsTemp[0];
 			}
-		}else{
+		}else if(loadbalance == LOADBALANCING_HA){
 			//HA,只要有效的pool
 			pool = poolsTemp[0];
+		}else{
+			throw new Exception("loadbalance parameter error,parameter loadbalance in [1,2,3]");
 		}
 		
 		try{
