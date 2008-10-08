@@ -888,7 +888,7 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable{
 	
 	public int parseParameterCount(DatabaseConnection connection,String sql){
 		Statment statment = parseSql(connection,sql);
-		return 0;
+		return statment.getParameterCount();
 	}
 	
 }
