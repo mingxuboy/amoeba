@@ -14,6 +14,8 @@ import com.meidusa.amoeba.oracle.io.OraclePacketConstant;
 import com.meidusa.amoeba.oracle.net.OracleClientConnection;
 import com.meidusa.amoeba.oracle.net.packet.DataPacket;
 import com.meidusa.amoeba.oracle.net.packet.T4C8OallDataPacket;
+import com.meidusa.amoeba.oracle.net.packet.assist.T4C8TTILob;
+import com.meidusa.amoeba.oracle.util.ByteUtil;
 import com.meidusa.amoeba.route.QueryRouter;
 
 public class OracleQueryDispatcher implements MessageHandler {
@@ -46,18 +48,23 @@ public class OracleQueryDispatcher implements MessageHandler {
                         }
                         QueryRouter rt = ProxyRuntimeContext.getInstance().getQueryRouter();
                         ObjectPool[] op = rt.doRoute((DatabaseConnection) conn, sql, false, params);
-                        OracleQueryMessageHandler handler = new OracleQueryMessageHandler(conn, op);
-                        try {
-                            handler.startSession();
-                            for (byte[] msg : listBuffer) {
-                                handler.handleMessage(conn, msg);
-                            }
-                        } catch (Exception e) {
-                            logger.error("start query:[" + packet.sqlStmt + "] error", e);
-                            handler.endSession();
-                        } finally {
-                            clearBuffer();
-                        }
+                        startOracleQueryMessageHandler(conn, op);
+                        return;
+                    } else if (packet.isOlobops()) {
+                        // OracleClientConnection occonn = (OracleClientConnection) conn;
+                        // occonn.setLobOps(true);
+
+                        QueryRouter rt = ProxyRuntimeContext.getInstance().getQueryRouter();
+
+                        int offset = packet.getLob().getSourceLobLocatorOffset();
+                        byte[] abyte0 = new byte[T4C8TTILob.LOB_OPS_BYTES];
+                        System.arraycopy(tmpBuffer, offset, abyte0, 0, abyte0.length);
+                        // int rowIndex = ByteUtil.toInt32BE(abyte0, 0);
+                        // byte[] realBytes = occonn.getLobLocaterMap().get(rowIndex);
+                        int poolHashCode = ByteUtil.toInt32BE(abyte0, 4);
+
+                        ObjectPool[] op = new ObjectPool[] { rt.getObjectPool(poolHashCode) };// null;//QueryRouter.get(...);
+                        startOracleQueryMessageHandler(conn, op);
                         return;
                     }
                 }
@@ -67,6 +74,21 @@ public class OracleQueryDispatcher implements MessageHandler {
         }
 
         clearBuffer();
+    }
+
+    private void startOracleQueryMessageHandler(Connection conn, ObjectPool[] op) {
+        OracleQueryMessageHandler handler = new OracleQueryMessageHandler(conn, op);
+        try {
+            handler.startSession();
+            for (byte[] msg : listBuffer) {
+                handler.handleMessage(conn, msg);
+            }
+        } catch (Exception e) {
+            logger.error("start OracleQueryMessageHandler error", e);
+            handler.endSession();
+        } finally {
+            clearBuffer();
+        }
     }
 
     /**
