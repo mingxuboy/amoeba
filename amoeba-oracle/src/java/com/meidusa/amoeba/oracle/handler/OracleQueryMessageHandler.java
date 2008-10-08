@@ -71,9 +71,6 @@ public class OracleQueryMessageHandler extends AbstractMessageQueuedHandler impl
                         packet.init(tmpBuffer, conn);
 
                         if (occonn.isLobOps()) {
-                            // 根据此hash值找到对应的pool而不是serverConns，并将数据包发给pool对应的Connection。
-                            int poolHashCode = occonn.getPoolHashCode();
-                            // 替换成对应的serverConn
                             for (int i = 0; i < serverConns.length; i++) {
                                 connStatusMap.get(serverConns[i]).setLobOps(true);
                                 connStatusMap.get(serverConns[i]).setLob(packet.getLob());
@@ -81,18 +78,15 @@ public class OracleQueryMessageHandler extends AbstractMessageQueuedHandler impl
                             occonn.setLobOps(false);
                         } else {
                             if (packet.isOlobops()) {
+                                occonn.setLobOps(true);
+
                                 int offset = packet.getLob().getSourceLobLocatorOffset();
                                 byte[] abyte0 = new byte[T4C8TTILob.LOB_OPS_BYTES];
                                 System.arraycopy(tmpBuffer, offset, abyte0, 0, abyte0.length);
                                 int rowIndex = ByteUtil.toInt32BE(abyte0, 0);
-                                occonn.setLobOps(true);
-
                                 byte[] realBytes = occonn.getLobLocaterMap().get(rowIndex);
                                 System.arraycopy(realBytes, 0, tmpBuffer, offset, realBytes.length);
-                                message = tmpBuffer;
-                                // 根据此hash值找到对应的pool而不是serverConns，并将数据包发给pool对应的Connection。
-                                // 替换成对应的serverConn
-                                int poolHashCode = ByteUtil.toInt32BE(abyte0, 4);
+                                 message = tmpBuffer;
                                 for (int i = 0; i < serverConns.length; i++) {
                                     connStatusMap.get(serverConns[i]).setLobOps(true);
                                     connStatusMap.get(serverConns[i]).setLob(packet.getLob());
@@ -144,10 +138,10 @@ public class OracleQueryMessageHandler extends AbstractMessageQueuedHandler impl
             for (int i = 0; serverConns != null && i < serverConns.length; i++) {
                 if (serverConns[i] != null) {
                     serverConns[i].setMessageHandler(handlerMap.get(serverConns[i]));
-                    serverConns[i].postClose(null);
+                    // serverConns[i].postClose(null);
                 }
             }
-            clientConn.postClose(null);
+            // clientConn.postClose(null);
         }
     }
 

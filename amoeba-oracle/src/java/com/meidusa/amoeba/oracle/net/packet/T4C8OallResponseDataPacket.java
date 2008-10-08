@@ -8,6 +8,7 @@ import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
 import com.meidusa.amoeba.oracle.accessor.Accessor;
 import com.meidusa.amoeba.oracle.handler.OracleQueryMessageHandler.ConnectionServerStatus;
 import com.meidusa.amoeba.oracle.net.OracleClientConnection;
+import com.meidusa.amoeba.oracle.net.OracleServerConnection;
 import com.meidusa.amoeba.oracle.net.packet.assist.T4C8TTILob;
 import com.meidusa.amoeba.oracle.net.packet.assist.T4C8TTIrxh;
 import com.meidusa.amoeba.oracle.net.packet.assist.T4CTTIdcb;
@@ -296,7 +297,7 @@ public class T4C8OallResponseDataPacket extends DataPacket {
                         byte[] abyte0 = new byte[T4C8TTILob.LOB_OPS_BYTES];
                         System.arraycopy(ab[k], 0, abyte0, 0, abyte0.length);
                         occonn.getLobLocaterMap().put(rowNumber, abyte0);
-                        int poolHash = occonn.getPoolHashCode();
+                        int poolHash = ((OracleServerConnection) meg.oconn).getObjectPool().hashCode();// occonn.getPoolHashCode();
                         ByteUtil.toByte32BE(rowNumber, ab[k], 0);
                         ByteUtil.toByte32BE(poolHash, ab[k], 4);
                         break;
