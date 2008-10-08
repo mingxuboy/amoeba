@@ -20,11 +20,13 @@ import com.meidusa.amoeba.route.QueryRouter;
 
 public class OracleQueryDispatcher implements MessageHandler {
 
-    protected static Logger logger              = Logger.getLogger(OracleQueryDispatcher.class);
+    private static final byte[] logoffBytes         = new byte[] { 0x00, 0x0b, 0x00, 0x00, 0x06, 0x00, 0x00, 0x00, 0x00, 0x00, 0x09 };
 
-    private boolean         isFirstClientPacket = true;
-    private List<byte[]>    listBuffer          = new ArrayList<byte[]>();
-    private byte[]          tmpBuffer           = null;
+    protected static Logger     logger              = Logger.getLogger(OracleQueryDispatcher.class);
+
+    private boolean             isFirstClientPacket = true;
+    private List<byte[]>        listBuffer          = new ArrayList<byte[]>();
+    private byte[]              tmpBuffer           = null;
 
     public OracleQueryDispatcher(OracleClientConnection clientConn){
         clientConn.setMessageHandler(this);
@@ -34,13 +36,11 @@ public class OracleQueryDispatcher implements MessageHandler {
         listBuffer.add(message);
 
         if (DataPacket.isDataType(message) && !DataPacket.isDataEOF(message)) {
-            // 合并完成，进行数据包解析。
-            if (mergeClientMessage(message)) {
+            if (mergeClientMessage(message)) {// 合并完成，进行数据包解析。
                 if (T4C8OallDataPacket.isParseable(tmpBuffer)) {
                     T4C8OallDataPacket packet = new T4C8OallDataPacket();
                     packet.init(tmpBuffer, conn);
-                    // 只处理包含有SQL语句的数据包，路由到相应的Connection pool。
-                    if (packet.isSqlPacket()) {
+                    if (packet.isSqlPacket()) {// 处理SQL语句数据包的 pool路由
                         String sql = packet.sqlStmt;
                         Object[] params = new Object[packet.getParamBytes().length];
                         for (int i = 0; i < params.length; i++) {
@@ -50,22 +50,29 @@ public class OracleQueryDispatcher implements MessageHandler {
                         ObjectPool[] op = rt.doRoute((DatabaseConnection) conn, sql, false, params);
                         startOracleQueryMessageHandler(conn, op);
                         return;
-                    } else if (packet.isOlobops()) {
-                        // OracleClientConnection occonn = (OracleClientConnection) conn;
-                        // occonn.setLobOps(true);
-
+                    } else if (packet.isOlobops()) {// 处理请求LOB数据包包的pool路由
                         QueryRouter rt = ProxyRuntimeContext.getInstance().getQueryRouter();
-
                         int offset = packet.getLob().getSourceLobLocatorOffset();
                         byte[] abyte0 = new byte[T4C8TTILob.LOB_OPS_BYTES];
                         System.arraycopy(tmpBuffer, offset, abyte0, 0, abyte0.length);
-                        // int rowIndex = ByteUtil.toInt32BE(abyte0, 0);
-                        // byte[] realBytes = occonn.getLobLocaterMap().get(rowIndex);
                         int poolHashCode = ByteUtil.toInt32BE(abyte0, 4);
 
-                        ObjectPool[] op = new ObjectPool[] { rt.getObjectPool(poolHashCode) };// null;//QueryRouter.get(...);
+                        ObjectPool[] op = new ObjectPool[] { rt.getObjectPool(poolHashCode) };
                         startOracleQueryMessageHandler(conn, op);
                         return;
+                    } else if (packet.isOlogoff()) {// 处理logoff数据包
+                        conn.postMessage(logoffBytes);
+                        if (logger.isDebugEnabled()) {
+                            int size = ((message[0] & 0xff) << 8) | (message[1] & 0xff);
+                            System.out.println("%amoeba query message ==============================================================");
+                            System.out.println(">>receive from client[" + size + "]:" + ByteUtil.toHex(message, 0, message.length));
+                            System.out.println("<<amoeba query message =============================================================");
+                            System.out.println("<<send to client[" + logoffBytes.length + "]:" + ByteUtil.toHex(logoffBytes, 0, logoffBytes.length));
+                        }
+                    } else {
+                        if (logger.isDebugEnabled()) {
+                            System.out.println("warning!unprocess data packet.");
+                        }
                     }
                 }
             } else {

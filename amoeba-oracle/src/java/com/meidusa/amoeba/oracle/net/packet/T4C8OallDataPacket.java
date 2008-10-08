@@ -37,8 +37,9 @@ public class T4C8OallDataPacket extends T4CTTIfunPacket {
 
     private boolean       isSqlPacket = false;
     private boolean       isOlobops   = false;
+    private T4C8TTILob    lob;
 
-    T4C8TTILob            lob;
+    private boolean       isOlogoff   = false;
 
     public T4C8OallDataPacket(){
         super(OALL8);
@@ -48,6 +49,10 @@ public class T4C8OallDataPacket extends T4CTTIfunPacket {
 
     public T4C8TTILob getLob() {
         return lob;
+    }
+
+    public boolean isOlogoff() {
+        return isOlogoff;
     }
 
     public boolean isSqlPacket() {
@@ -354,8 +359,9 @@ public class T4C8OallDataPacket extends T4CTTIfunPacket {
 
     private void parseOLOGOFF(T4CPacketBuffer meg) {
         if (logger.isDebugEnabled()) {
-            System.out.println("type:T4CTTIfunPacket.OLOGOFF");
+            System.out.println("\ntype:T4CTTIfunPacket.OLOGOFF");
         }
+        isOlogoff = true;
     }
 
     // ///////////////////////////////////////////////////////////////////////////////////
