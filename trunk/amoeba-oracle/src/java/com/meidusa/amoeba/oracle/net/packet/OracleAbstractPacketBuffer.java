@@ -58,6 +58,8 @@ public class OracleAbstractPacketBuffer extends AbstractPacketBuffer {
         buffer[position++] = (byte) (m & 0xff);
     }
 
+    
+
     // ///////////////////////////////////////////////////////////////
     protected T4CTypeRep getTypeRep() {
         return this.oconn.getRep();

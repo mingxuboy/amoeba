@@ -9,6 +9,7 @@ import com.meidusa.amoeba.oracle.accessor.T4CDateAccessor;
 import com.meidusa.amoeba.oracle.accessor.T4CNumberAccessor;
 import com.meidusa.amoeba.oracle.accessor.T4CVarcharAccessor;
 import com.meidusa.amoeba.oracle.accessor.T4CVarnumAccessor;
+import com.meidusa.amoeba.oracle.net.packet.assist.T4C8TTILob;
 import com.meidusa.amoeba.oracle.net.packet.assist.T4CTTIoac;
 
 /**
@@ -17,7 +18,7 @@ import com.meidusa.amoeba.oracle.net.packet.assist.T4CTTIoac;
  */
 public class T4C8OallDataPacket extends T4CTTIfunPacket {
 
-    private static Logger logger = Logger.getLogger(T4C8OallDataPacket.class);
+    private static Logger logger      = Logger.getLogger(T4C8OallDataPacket.class);
 
     long                  options;
     int                   cursor;
@@ -26,18 +27,35 @@ public class T4C8OallDataPacket extends T4CTTIfunPacket {
     int                   al8i4Length;
     int                   defCols;
 
-    public String         sqlStmt;                                            // sql
+    public String         sqlStmt;                                                 // sql
     long[]                al8i4;
     T4CTTIoac[]           oacBind;
-    public Accessor[]     accessors;                                          // parameter Accessors
+    public Accessor[]     accessors;                                               // parameter Accessors
     T4CTTIoac[]           oacdefDefines;
     public Accessor[]     definesAccessors;
-    public byte[][]       paramBytes;                                         // parameter bytes
+    public byte[][]       paramBytes;                                              // parameter bytes
+
+    private boolean       isSqlPacket = false;
+    private boolean       isOlobops   = false;
+
+    T4C8TTILob            lob;
 
     public T4C8OallDataPacket(){
         super(OALL8);
         this.defCols = 0;
         this.al8i4 = new long[13];
+    }
+
+    public T4C8TTILob getLob() {
+        return lob;
+    }
+
+    public boolean isSqlPacket() {
+        return isSqlPacket;
+    }
+
+    public boolean isOlobops() {
+        return isOlobops;
     }
 
     public String getSqlStmt() {
@@ -100,11 +118,16 @@ public class T4C8OallDataPacket extends T4CTTIfunPacket {
     }
 
     private void parseOALL8(T4CPacketBuffer meg) {
+        if (logger.isDebugEnabled()) {
+            System.out.println("type:T4CTTIfunPacket.OALL8");
+        }
+
         unmarshalPisdef(meg);
 
         byte[] sqlStmtBytes = meg.unmarshalCHR(sqlStmtLength);
 
         sqlStmt = meg.getConversion().CharBytesToString(sqlStmtBytes, sqlStmtLength);
+        isSqlPacket = true;
 
         meg.unmarshalUB4Array(al8i4);
 
@@ -126,21 +149,20 @@ public class T4C8OallDataPacket extends T4CTTIfunPacket {
         }
 
         if (logger.isDebugEnabled()) {
-            System.out.println("type:T4CTTIfunPacket.OALL8");
             System.out.println("sqlStmt:" + sqlStmt);
-            System.out.println("numberOfParams:" + numberOfParams);
+            // System.out.println("numberOfParams:" + numberOfParams);
             for (int i = 0; i < numberOfParams; i++) {
-                System.out.println("param_des_" + i + ":" + oacBind[i]);
+                // System.out.println("param_des_" + i + ":" + oacBind[i]);
                 Object object = accessors[i].getObject(paramBytes[i]);
                 if (object instanceof String) {
                     String s = (String) object;
                     if (s.length() > 4000) {
-                        System.out.println("param_val_" + i + ":" + s.substring(0, 4000) + "... #dataLength:" + s.length());
+                        System.out.println("param_" + i + ":" + s.substring(0, 4000) + "... #dataLength:" + s.length());
                     } else {
-                        System.out.println("param_val_" + i + ":" + s);
+                        System.out.println("param_" + i + ":" + s);
                     }
                 } else {
-                    System.out.println("param_val_" + i + ":" + object);
+                    System.out.println("param_" + i + ":" + object);
                 }
 
             }
@@ -325,6 +347,9 @@ public class T4C8OallDataPacket extends T4CTTIfunPacket {
         if (logger.isDebugEnabled()) {
             System.out.println("type:T4CTTIfunPacket.OLOBOPS");
         }
+        isOlobops = true;
+        lob = new T4C8TTILob();
+        lob.unmarshal(meg);
     }
 
     private void parseOLOGOFF(T4CPacketBuffer meg) {
