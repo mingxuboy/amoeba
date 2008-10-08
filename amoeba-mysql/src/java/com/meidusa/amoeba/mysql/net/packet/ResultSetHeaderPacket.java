@@ -39,7 +39,7 @@ public class ResultSetHeaderPacket extends AbstractPacket {
 		super.write2Buffer(myBuffer);
 		MysqlPacketBuffer buffer = (MysqlPacketBuffer)myBuffer;
 		buffer.writeFieldLength(columns);
-		if(extra >0){
+		if(extra>0){
 			buffer.writeFieldLength(extra);
 		}
 	}

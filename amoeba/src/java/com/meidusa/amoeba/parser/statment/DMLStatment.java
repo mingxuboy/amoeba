@@ -35,7 +35,7 @@ import com.meidusa.amoeba.sqljep.function.ComparativeOR;
  * @author <a href=mailto:piratebase@sina.com>Struct chen</a>
  *
  */
-public abstract class DMLStatment implements Statment {
+public abstract class DMLStatment extends AbstractStatment {
 	private static Logger logger = Logger.getLogger(DMLStatment.class);
 	protected boolean preparedStatment;
 	protected Table[] tables;
@@ -142,5 +142,4 @@ public abstract class DMLStatment implements Statment {
 			}
 		}
 	}
-
 }

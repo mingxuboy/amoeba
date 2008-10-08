@@ -50,8 +50,12 @@ public abstract class CommandMessageHandler implements MessageHandler, Sessionab
 		}
 		
 		protected static boolean isSelect(String query){
-			
-			return true;
+			char ch = query.trim().charAt(0);
+			if(ch == 's' || ch == 'S'){
+				return true;
+			}else{
+				return false;
+			}
 		}
 		
 		protected abstract void doRun();
@@ -97,7 +101,7 @@ public abstract class CommandMessageHandler implements MessageHandler, Sessionab
 
 	public void startSession() throws Exception {
 		final CountDownLatch latch = new CountDownLatch(pools.length);
-		ResultPacket packet = newResultPacket(QueryRunnable.isSelect(query));
+		ResultPacket packet = newResultPacket(query);
 		for (ObjectPool pool : pools) {
 			final java.sql.Connection conn = (java.sql.Connection) pool
 					.borrowObject();
@@ -114,7 +118,7 @@ public abstract class CommandMessageHandler implements MessageHandler, Sessionab
 		packet.wirteToConnection(source);
 	}
 
-	protected abstract ResultPacket newResultPacket(boolean isSelect);
+	protected abstract ResultPacket newResultPacket(String query);
 	protected abstract QueryRunnable newQueryRunnable(CountDownLatch latch, java.sql.Connection conn, String query2,Object parameter, ResultPacket packet);
 	public void endSession() {
 		lock.lock();

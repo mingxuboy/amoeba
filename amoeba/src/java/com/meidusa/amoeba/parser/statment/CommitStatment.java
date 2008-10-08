@@ -13,11 +13,10 @@ package com.meidusa.amoeba.parser.statment;
 
 import com.meidusa.amoeba.parser.expression.Expression;
 
-public class CommitStatment implements Statment {
+public class CommitStatment extends AbstractStatment {
 	
 	public Expression getExpression() {
 		// TODO Auto-generated method stub
 		return null;
 	}
-
 }

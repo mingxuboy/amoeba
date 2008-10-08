@@ -21,4 +21,5 @@ import com.meidusa.amoeba.parser.expression.Expression;
  */
 public interface Statment {
 	public Expression getExpression();
+	public void setParameterCount(int count);
 }

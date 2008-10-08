@@ -13,7 +13,7 @@ package com.meidusa.amoeba.parser.statment;
 
 import com.meidusa.amoeba.parser.expression.Expression;
 
-public class ShowStatment implements Statment {
+public class ShowStatment extends AbstractStatment  {
 	public static ShowStatment  STATMENT = new ShowStatment();
 	private Expression expression;
 	public Expression getExpression() {

@@ -21,7 +21,7 @@ import com.meidusa.amoeba.parser.expression.Expression;
  * @author <a href=mailto:piratebase@sina.com>Struct chen</a>
  *
  */
-public class PropertyStatment implements Statment {
+public class PropertyStatment extends AbstractStatment  {
 	private Map<String,Expression> properties = new HashMap<String,Expression>();
 	
 	public void addProperty(String key,Expression value){

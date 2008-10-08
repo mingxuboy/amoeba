@@ -847,4 +847,48 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable{
 		return null;
 	}
 	
+	public Statment parseSql(DatabaseConnection connection,String sql){
+		Statment statment = null;
+		int sqlWithSchemaHashcode = sql.hashCode();
+		mapLock.lock();
+		try{
+			statment = (Statment)map.get(sqlWithSchemaHashcode);
+		}finally{
+			mapLock.unlock();
+		}
+		if(statment == null){
+			Parser parser = newParser(sql);
+			parser.setFunctionMap(this.functionMap);
+			if(connection.getSchema() != null){
+				Schema schema = new Schema();
+				schema.setName(connection.getSchema());
+				parser.setDefaultSchema(schema);
+			}
+			try {
+				
+				try{
+					statment = parser.doParse();
+					mapLock.lock();
+					try{
+						map.put(sqlWithSchemaHashcode, statment);
+					}finally{
+						mapLock.unlock();
+					}
+				}catch(Error e){
+					logger.error(sql,e);
+					return null;
+				}
+				
+			} catch (ParseException e) {
+				logger.error(sql,e);
+			}
+		}
+		return statment;
+	}
+	
+	public int parseParameterCount(DatabaseConnection connection,String sql){
+		Statment statment = parseSql(connection,sql);
+		return 0;
+	}
+	
 }

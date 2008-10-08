@@ -104,9 +104,9 @@ public class QueryCommandMessageHandler extends CommandMessageHandler {
 	}
 
 	@Override
-	protected ResultPacket newResultPacket(boolean isSelect) {
-		if(isSelect){
-			return new MysqlResultSetPacket();
+	protected ResultPacket newResultPacket(String query) {
+		if(QueryRunnable.isSelect(query)){
+			return new MysqlResultSetPacket(query);
 		}else{
 			return new MysqlSimpleResultPacket();
 		}

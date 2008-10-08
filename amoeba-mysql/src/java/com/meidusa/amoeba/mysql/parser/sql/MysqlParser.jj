@@ -119,7 +119,11 @@ public class MysqlParser implements/*@bgen(jjtree)*/ MysqlParserTreeConstants, /
 	
 	public Statment doParse() throws com.meidusa.amoeba.parser.ParseException{
 		try{
-			return this.parse();	
+			Statment statment = this.parse();
+			if(statment != null){
+				statment.setParameterCount(parameterIndex);
+			}
+			return statment;
 		}catch(Exception e){
 			throw new com.meidusa.amoeba.parser.ParseException(e);
 		}

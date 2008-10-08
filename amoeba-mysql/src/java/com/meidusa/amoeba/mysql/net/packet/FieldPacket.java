@@ -33,7 +33,6 @@ public class FieldPacket extends AbstractPacket {
 	public int flags;
 	public byte decimals;
 	public String definition;
-	
 	@Override
 	public void init(AbstractPacketBuffer myBuffer) {
 		super.init(myBuffer);
@@ -50,6 +49,8 @@ public class FieldPacket extends AbstractPacket {
 		type = buffer.readByte();
 		flags = buffer.readInt();
 		decimals = buffer.readByte();
+		buffer.readByte();
+		buffer.readByte();
 		definition = buffer.readLengthCodedString(CODE_PAGE_1252);
 	}
 	
@@ -70,6 +71,8 @@ public class FieldPacket extends AbstractPacket {
 		buffer.writeByte(type);
 		buffer.writeInt(flags);
 		buffer.writeByte(decimals);
+		buffer.writeByte((byte)0x00);
+		buffer.writeByte((byte)0x00);
 		buffer.writeLengthCodedString(definition,CODE_PAGE_1252);
 		
 	}

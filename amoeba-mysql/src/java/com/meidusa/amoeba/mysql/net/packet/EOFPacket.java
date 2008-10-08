@@ -23,6 +23,9 @@ import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
 public class EOFPacket extends AbstractResultPacket {
 	public int serverStatus;
 	public int warningCount;
+	public EOFPacket(){
+		this.resultPacketType = PACKET_TYPE_EOF;
+	}
 	
 	public void init(AbstractPacketBuffer buffer){
 		super.init(buffer);

@@ -13,6 +13,7 @@ package com.meidusa.amoeba.route;
 
 import com.meidusa.amoeba.net.DatabaseConnection;
 import com.meidusa.amoeba.net.poolable.ObjectPool;
+import com.meidusa.amoeba.parser.statment.Statment;
 
 /**
  * 
@@ -22,5 +23,10 @@ import com.meidusa.amoeba.net.poolable.ObjectPool;
 public interface QueryRouter {
 	public ObjectPool[] doRoute(DatabaseConnection connection,String sql,boolean ispreparedStatment,Object[] parameters);
 	public String getDefaultPool();
+	
+	public Statment parseSql(DatabaseConnection connection,String sql); 
+	
+	public int parseParameterCount(DatabaseConnection connection,String sql);
+	
 	public ObjectPool getObjectPool(Object key);
 }

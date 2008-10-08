@@ -67,7 +67,7 @@ public class AbstractPacket extends com.meidusa.amoeba.net.packet.AbstractPacket
 		buffer.writeByte((byte)(packetLength & 0xff));
 		buffer.writeByte((byte) (packetLength >>> 8));
 		buffer.writeByte((byte) (packetLength >>> 16));
-		buffer.writeByte((byte) packetId);// packet id
+		buffer.writeByte((byte) (packetId & 0xff));// packet id
 		buffer.setPosition(position);
 	}
 
