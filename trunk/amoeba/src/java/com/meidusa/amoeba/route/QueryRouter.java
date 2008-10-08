@@ -22,4 +22,5 @@ import com.meidusa.amoeba.net.poolable.ObjectPool;
 public interface QueryRouter {
 	public ObjectPool[] doRoute(DatabaseConnection connection,String sql,boolean ispreparedStatment,Object[] parameters);
 	public String getDefaultPool();
+	public ObjectPool getObjectPool(Object key);
 }

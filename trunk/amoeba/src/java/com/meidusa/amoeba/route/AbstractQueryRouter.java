@@ -834,4 +834,17 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable{
 		this.ruleFunctionConfig = ruleFunctionConfig;
 	}
 	
+	public ObjectPool getObjectPool(Object key){
+		if(key instanceof String){
+			return ProxyRuntimeContext.getInstance().getPoolMap().get(key);
+		}else{
+			for(ObjectPool pool : ProxyRuntimeContext.getInstance().getPoolMap().values()){
+				if(pool.hashCode() == key.hashCode()){
+					return pool;
+				}
+			}
+		}
+		return null;
+	}
+	
 }
