@@ -14,28 +14,30 @@ import com.meidusa.amoeba.oracle.io.OraclePacketConstant;
  */
 public class T4CPacketBuffer extends OracleAbstractPacketBuffer implements OraclePacketConstant {
 
-    static final int  TTCC_MXL   = 252;
-    static final int  TTCC_ESC   = 253;
-    static final int  TTCC_LNG   = 254;
-    static final int  TTCC_ERR   = 255;
-    static final int  TTCC_MXIN  = 64;
-    static final byte TTCLXMULTI = 1;
-    static final byte TTCLXMCONV = 2;
-    static final int  FREE       = -1;
-    static final int  SEND       = 1;
-    static final int  RECEIVE    = 2;
+    public static final int TTCC_MXIN  = 64;
+    public static final int TTCC_MXOUT = 255;
 
-    final byte[]      tmpBuffer1 = new byte[1];
-    final byte[]      tmpBuffer2 = new byte[2];
-    final byte[]      tmpBuffer3 = new byte[3];
-    final byte[]      tmpBuffer4 = new byte[4];
-    final byte[]      tmpBuffer5 = new byte[5];
-    final byte[]      tmpBuffer6 = new byte[6];
-    final byte[]      tmpBuffer7 = new byte[7];
-    final byte[]      tmpBuffer8 = new byte[8];
+    static final int        TTCC_MXL   = 252;
+    static final int        TTCC_ESC   = 253;
+    static final int        TTCC_LNG   = 254;
+    static final int        TTCC_ERR   = 255;
+    static final byte       TTCLXMULTI = 1;
+    static final byte       TTCLXMCONV = 2;
+    static final int        FREE       = -1;
+    static final int        SEND       = 1;
+    static final int        RECEIVE    = 2;
 
-    final byte[]      ignored    = new byte[255];
-    final int[]       retLen     = new int[1];
+    final byte[]            tmpBuffer1 = new byte[1];
+    final byte[]            tmpBuffer2 = new byte[2];
+    final byte[]            tmpBuffer3 = new byte[3];
+    final byte[]            tmpBuffer4 = new byte[4];
+    final byte[]            tmpBuffer5 = new byte[5];
+    final byte[]            tmpBuffer6 = new byte[6];
+    final byte[]            tmpBuffer7 = new byte[7];
+    final byte[]            tmpBuffer8 = new byte[8];
+
+    final byte[]            ignored    = new byte[255];
+    final int[]             retLen     = new int[1];
 
     public T4CPacketBuffer(byte[] buf){
         super(buf);
@@ -151,28 +153,32 @@ public class T4CPacketBuffer extends OracleAbstractPacketBuffer implements Oracl
         }
     }
 
-    public void marshalCLR(byte[] ab, int i, int j) {
-        if (j > TTCC_MXIN) {
-            int i1 = 0;
+    public void marshalCLR(byte[] ab, int offset, int length) {
+        marshalCLR(ab, offset, length, TTCC_MXIN);
+    }
+
+    public void marshalCLR(byte[] ab, int offset, int length, int max) {
+        if (length > max) {
+            int i = 0;
             writeByte((byte) -2);
             do {
-                int k = j - i1;
-                int l = k <= TTCC_MXIN ? k : TTCC_MXIN;
+                int k = length - i;// 剩余字节长度
+                int l = (k <= max) ? k : max;
                 writeByte((byte) (l & 0xff));
-                writeBytes(ab, i + i1, l);
-                i1 += l;
-            } while (i1 < j);
+                writeBytes(ab, offset + i, l);
+                i += l;
+            } while (i < length);
             writeByte((byte) 0);
         } else {
-            writeByte((byte) (j & 0xff));
+            writeByte((byte) (length & 0xff));
             if (ab.length != 0) {
-                writeBytes(ab, i, j);
+                writeBytes(ab, offset, length);
             }
         }
     }
 
-    public void marshalCLR(byte[] ab, int i) {
-        marshalCLR(ab, 0, i);
+    public void marshalCLR(byte[] ab, int length) {
+        marshalCLR(ab, 0, length);
     }
 
     public void marshalKEYVAL(byte[][] ab0, int[] ai, byte[][] ab1, int[] ai1, byte[] ab2, int i) {
@@ -360,16 +366,16 @@ public class T4CPacketBuffer extends OracleAbstractPacketBuffer implements Oracl
         return abyte0;
     }
 
-    public void unmarshalCLR(byte[] ab, int i, int[] ai) {
-        unmarshalCLR(ab, i, ai, 0x7fffffff);
+    public void unmarshalCLR(byte[] ab, int offset, int[] ai) {
+        unmarshalCLR(ab, offset, ai, 0x7fffffff);
     }
 
-    public void unmarshalCLR(byte abyte0[], int i, int ai[], int j) {
-        short word0 = 0;
-        int k = i;
+    public void unmarshalCLR(byte[] ab, int offset, int ai[], int max) {
+        int k = offset;
         boolean flag = false;
         int l = 0;
-        word0 = unmarshalUB1();
+
+        short word0 = unmarshalUB1();
         if (word0 < 0) {
             throw new RuntimeException("违反协议");
         }
@@ -382,11 +388,13 @@ public class T4CPacketBuffer extends OracleAbstractPacketBuffer implements Oracl
             return;
         }
         if (word0 != TTCC_LNG) {
-            int i1 = Math.min(j - l, word0);
-            k = unmarshalBuffer(abyte0, k, i1);
+            int i1 = Math.min(max - l, word0);
+            k = unmarshalBuffer(ab, k, i1);
             l += i1;
             int k1 = word0 - i1;
-            if (k1 > 0) unmarshalBuffer(ignored, 0, k1);
+            if (k1 > 0) {
+                unmarshalBuffer(ignored, 0, k1);
+            }
         } else {
             byte byte1 = -1;
             do {
@@ -418,8 +426,8 @@ public class T4CPacketBuffer extends OracleAbstractPacketBuffer implements Oracl
                 if (k == -1) {
                     unmarshalBuffer(ignored, 0, word0);
                 } else {
-                    int j1 = Math.min(j - l, word0);
-                    k = unmarshalBuffer(abyte0, k, j1);
+                    int j1 = Math.min(max - l, word0);
+                    k = unmarshalBuffer(ab, k, j1);
                     l += j1;
                     int l1 = word0 - j1;
                     if (l1 > 0) {
@@ -436,7 +444,7 @@ public class T4CPacketBuffer extends OracleAbstractPacketBuffer implements Oracl
             if (k != -1) {
                 ai[0] = l;
             } else {
-                ai[0] = abyte0.length - i;
+                ai[0] = ab.length - offset;
             }
         }
     }
@@ -529,10 +537,10 @@ public class T4CPacketBuffer extends OracleAbstractPacketBuffer implements Oracl
         return abyte0;
     }
 
-    public long unmarshalDALC(byte[] ab, int i, int[] ai) {
+    public long unmarshalDALC(byte[] ab, int offset, int[] ai) {
         long l = unmarshalUB4();
         if (l > 0L) {
-            unmarshalCLR(ab, i, ai);
+            unmarshalCLR(ab, offset, ai);
         }
         return l;
     }
@@ -676,7 +684,7 @@ public class T4CPacketBuffer extends OracleAbstractPacketBuffer implements Oracl
                 return 0L;
             }
             if ((b == 1 && i > 2) || (b == 2 && i > 4) || (b == 3 && i > 8)) {
-                throw new RuntimeException("类型长度大于最大值");
+                throw new RuntimeException("类型长度大于最大值b=" + b + ",i=" + i + ",position=" + getPosition());
             }
         } else if (b == 1) {
             i = 2;

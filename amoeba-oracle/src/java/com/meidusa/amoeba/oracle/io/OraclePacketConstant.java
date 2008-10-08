@@ -7,4 +7,5 @@ public interface OraclePacketConstant {
     public static final int    DATA_OFFSET             = 10;
     public static final long   VERSION                 = 0x8105000L;
     public static final byte[] HEADER_PAD              = new byte[HEADER_SIZE];
+    public static final int    MARKER_PACKET_SIZE      = 11;
 }

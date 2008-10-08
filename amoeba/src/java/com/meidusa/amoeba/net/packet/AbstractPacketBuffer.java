@@ -10,11 +10,11 @@ import com.meidusa.amoeba.net.Connection;
  * @author struct
  */
 public class AbstractPacketBuffer implements PacketBuffer {
-	
+
     protected int    length   = 0;
 
     protected int    position = 0;
-    
+
     protected byte[] buffer   = null;
 
     public AbstractPacketBuffer(byte[] buf){
@@ -34,12 +34,11 @@ public class AbstractPacketBuffer implements PacketBuffer {
      * 将从0到当前位置的所有字节写入到ByteBuffer中,并且将ByteBuffer.position设置到0.
      */
     public ByteBuffer toByteBuffer() {
-    	/*byte[] newbyte = new byte[getPosition()];
-    	System.arraycopy(this.buffer, 0, newbyte, 0, this.getPosition());
-    	ByteBuffer buffer = ByteBuffer.wrap(newbyte);
-    	buffer.rewind();
-    	return buffer;*/
-    	ByteBuffer buffer = ByteBuffer.allocate(getPosition());
+        /*
+         * byte[] newbyte = new byte[getPosition()]; System.arraycopy(this.buffer, 0, newbyte, 0, this.getPosition());
+         * ByteBuffer buffer = ByteBuffer.wrap(newbyte); buffer.rewind(); return buffer;
+         */
+        ByteBuffer buffer = ByteBuffer.allocate(getPosition());
         buffer.put(this.buffer, 0, getPosition());
         buffer.rewind();
         return buffer;
@@ -58,22 +57,22 @@ public class AbstractPacketBuffer implements PacketBuffer {
     }
 
     public void setPosition(int position) {
-    	if(this.position<position){
-    		int length = this.position - position;
-    		ensureCapacity(length);
-    	}
+        if (this.position < position) {
+            int length = this.position - position;
+            ensureCapacity(length);
+        }
         this.position = position;
     }
 
     public byte readByte() {
         return buffer[position++];
     }
-    
+
     public byte readByte(int position) {
-    	this.position = position;
+        this.position = position;
         return buffer[this.position++];
     }
-    
+
     public void writeByte(byte b) {
         ensureCapacity(1);
         buffer[position++] = b;
@@ -117,29 +116,30 @@ public class AbstractPacketBuffer implements PacketBuffer {
             }
         }
     }
-    
-    protected void init(Connection conn){
+
+    protected void init(Connection conn) {
     }
-    
+
     public synchronized void reset() {
-    	this.position = 0;
-    	this.length = 0;
+        this.position = 0;
+        this.length = 0;
     }
-    
-    public int remaining(){
-    	return this.length - this.position;
+
+    public int remaining() {
+        return this.length - this.position;
     }
-    
-    public boolean hasRemaining(){
-    	return (this.length - this.position >0);
+
+    public boolean hasRemaining() {
+        return (this.length - this.position > 0);
     }
-    
-    public void skip(int bytes){
-    	this.position += bytes; 
+
+    public void skip(int bytes) {
+        this.position += bytes;
     }
-    
+
     public InputStream asInputStream() {
         return new InputStream() {
+
             @Override
             public int available() {
                 return AbstractPacketBuffer.this.remaining();
@@ -168,7 +168,7 @@ public class AbstractPacketBuffer implements PacketBuffer {
 
             @Override
             public synchronized void reset() {
-            	AbstractPacketBuffer.this.reset();
+                AbstractPacketBuffer.this.reset();
             }
 
             @Override
@@ -184,17 +184,18 @@ public class AbstractPacketBuffer implements PacketBuffer {
             }
         };
     }
-    
+
     public OutputStream asOutputStream() {
         return new OutputStream() {
+
             @Override
             public void write(byte[] b, int off, int len) {
-            	AbstractPacketBuffer.this.writeBytes(b, off, len);
+                AbstractPacketBuffer.this.writeBytes(b, off, len);
             }
 
             @Override
             public void write(int b) {
-            	AbstractPacketBuffer.this.writeByte((byte) b);
+                AbstractPacketBuffer.this.writeByte((byte) b);
             }
         };
     }

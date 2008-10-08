@@ -6,11 +6,14 @@ import java.util.List;
 
 import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
 import com.meidusa.amoeba.oracle.accessor.Accessor;
-import com.meidusa.amoeba.oracle.handler.OracleQueryMessageHandler.ConnectionStatus;
+import com.meidusa.amoeba.oracle.handler.OracleQueryMessageHandler.ConnectionServerStatus;
+import com.meidusa.amoeba.oracle.net.OracleClientConnection;
+import com.meidusa.amoeba.oracle.net.packet.assist.T4C8TTILob;
 import com.meidusa.amoeba.oracle.net.packet.assist.T4C8TTIrxh;
 import com.meidusa.amoeba.oracle.net.packet.assist.T4CTTIdcb;
 import com.meidusa.amoeba.oracle.net.packet.assist.T4CTTIoer;
 import com.meidusa.amoeba.oracle.net.packet.assist.T4CTTIrxd;
+import com.meidusa.amoeba.oracle.util.ByteUtil;
 
 /**
  * @author hexianmao
@@ -18,67 +21,88 @@ import com.meidusa.amoeba.oracle.net.packet.assist.T4CTTIrxd;
  */
 public class T4C8OallResponseDataPacket extends DataPacket {
 
-    static final byte                          QUERY_DESC   = 16;
-    static final byte                          QUERY_RESULT = 6;
-    static final byte                          QUERY_DATA   = 7;
-    static final byte                          QUERY_NEXT   = 21;
-    static final byte                          EXEC_RESULT  = 8;
-    static final byte                          QUERY_END    = 4;
+    public static final byte                   QUERY_DESC   = 16;
+    public static final byte                   QUERY_RESULT = 6;
+    public static final byte                   QUERY_DATA   = 7;
+    public static final byte                   QUERY_NEXT   = 21;
+    public static final byte                   EXEC_RESULT  = 8;
+    public static final byte                   QUERY_END    = 4;
+    public static final byte                   LOB_OPS      = 8;
+    public static final byte                   LOB_DATA     = 14;
 
     private byte                               packetType;
 
     private T4CQueryDescResponseDataPacket     desc;
     private T4CQueryResultResponseDataPacket   query;
     private T4CExecuteResultResponseDataPacket execute;
-    private ConnectionStatus                   connStatus;
 
-    public T4C8OallResponseDataPacket(ConnectionStatus status){
-        this.connStatus = status;
-        this.connStatus.setCompleted(false);
-        this.connStatus.setPacket(this);
+    private ConnectionServerStatus             status;
+    private OracleClientConnection             occonn;
+
+    public T4C8OallResponseDataPacket(ConnectionServerStatus status, OracleClientConnection occonn){
+        this.status = status;
+        this.status.setCompleted(false);
+        this.status.setPacket(this);
+        this.occonn = occonn;
     }
 
     @Override
     protected void init(AbstractPacketBuffer buffer) {
         super.init(buffer);
         T4CPacketBufferExchanger meg = (T4CPacketBufferExchanger) buffer;
-        packetType = meg.unmarshalSB1();
-        // select 语句有两次数据包的交互，switch的状态为：16,8,4(返回字段描述) 和 6,(7,21,7,21,...),4(返回数据结果)
-        // insert,update,delete 语句是一次数据包交互，switch的状态为：8,4
-        switch (packetType) {
-            case QUERY_DESC:// 16
-                desc = new T4CQueryDescResponseDataPacket();
-                desc.init(meg);
-                break;
-            case QUERY_RESULT:// 6
-                query = new T4CQueryResultResponseDataPacket();
-                query.init(meg);
-                break;
-            case EXEC_RESULT:// 8
-                execute = new T4CExecuteResultResponseDataPacket();
-                execute.init(meg);
-                break;
-            default:
-                throw new RuntimeException("unknown type packet:" + packetType);
+        if (status.isLobOps()) {
+            status.getLob().unmarshalResponse(meg);
+            if (status.getLob().isComplete()) {
+                this.status.setCompleted(true);
+            }
+        } else {
+            packetType = meg.unmarshalSB1();
+            // select 语句有两次数据包的交互，switch的状态为：16,8,4(返回字段描述) 和 6,(7,21,7,21,...),4(返回数据结果)
+            // insert,update,delete 语句是一次数据包交互，switch的状态为：8,4
+            switch (packetType) {
+                case QUERY_DESC:// 16
+                    desc = new T4CQueryDescResponseDataPacket();
+                    desc.init(meg);
+                    break;
+                case QUERY_RESULT:// 6
+                    query = new T4CQueryResultResponseDataPacket();
+                    query.init(meg);
+                    this.status.setCompleted(true);
+                    break;
+                case EXEC_RESULT:// 8
+                    execute = new T4CExecuteResultResponseDataPacket();
+                    execute.init(meg);
+                    this.status.setCompleted(true);
+                    break;
+                default:
+                    throw new RuntimeException("unknown type packet:" + packetType);
+            }
         }
-        this.connStatus.setCompleted(true);
     }
 
     @Override
     protected void write2Buffer(AbstractPacketBuffer buffer) throws UnsupportedEncodingException {
         super.write2Buffer(buffer);
-        switch (packetType) {
-            case QUERY_DESC:// 16
-                desc.write2Buffer((T4CPacketBufferExchanger) buffer);
-                break;
-            case QUERY_RESULT:// 6
-                query.write2Buffer((T4CPacketBufferExchanger) buffer);
-                break;
-            case EXEC_RESULT:// 8
-                execute.write2Buffer((T4CPacketBufferExchanger) buffer);
-                break;
-            default:
-                throw new RuntimeException("unknown type packet:" + packetType);
+        if (status.isLobOps()) {
+            status.getLob().marshalResponse((T4CPacketBuffer) buffer);
+            if (status.getLob().isComplete()) {
+                status.setLobOps(false);
+                status.setLob(null);
+            }
+        } else {
+            switch (packetType) {
+                case QUERY_DESC:// 16
+                    desc.write2Buffer((T4CPacketBufferExchanger) buffer);
+                    break;
+                case QUERY_RESULT:// 6
+                    query.write2Buffer((T4CPacketBufferExchanger) buffer);
+                    break;
+                case EXEC_RESULT:// 8
+                    execute.write2Buffer((T4CPacketBufferExchanger) buffer);
+                    break;
+                default:
+                    throw new RuntimeException("unknown type packet:" + packetType);
+            }
         }
     }
 
@@ -104,12 +128,12 @@ public class T4C8OallResponseDataPacket extends DataPacket {
             // 16
             dcb.init(0);
             dcb.unmarshal(meg);
-            connStatus.setNbOfCols(dcb.getNumuds());
+            status.setNbOfCols(dcb.getNumuds());
             short[] dataType = new short[dcb.getNumuds()];
             for (int i = 0; i < dataType.length; i++) {
                 dataType[i] = dcb.getUds()[i].getUdsoac().oacdty;
             }
-            connStatus.setDataType(dataType);
+            status.setDataType(dataType);
 
             // 08
             meg.unmarshalSB1();
@@ -181,18 +205,21 @@ public class T4C8OallResponseDataPacket extends DataPacket {
 
             // 7 or 4
             boolean flag = false;
-            int colBit = (connStatus.getNbOfCols() / 8) + ((connStatus.getNbOfCols() % 8) == 0 ? 0 : 1);
+            int colBit = (status.getNbOfCols() / 8) + ((status.getNbOfCols() % 8) == 0 ? 0 : 1);
+            int rowNumber = 0;
             while (true) {
                 byte byte0 = meg.unmarshalSB1();
                 switch (byte0) {
                     case QUERY_DATA:// 7
                         if (flag) {
-                            byte[][] row = new byte[connStatus.getNbOfCols()][];
-                            row = unmarshalOneRow(row, null, meg);
+                            byte[][] row = new byte[status.getNbOfCols()][];
+                            rowNumber++;
+                            row = unmarshalOneRow(rowNumber, row, null, meg);
                             rows.add(row);
                         } else {
                             firstRow = new byte[rxh.numRqsts][];
-                            firstRow = unmarshalOneRow(firstRow, rxh.getIndicate(), meg);
+                            rowNumber++;
+                            firstRow = unmarshalOneRow(rowNumber, firstRow, rxh.getIndicate(), meg);
                             flag = true;
                         }
                         break;
@@ -202,7 +229,8 @@ public class T4C8OallResponseDataPacket extends DataPacket {
                         byte byte1 = meg.unmarshalSB1();
                         if (byte1 == QUERY_DATA) {
                             byte[][] row = new byte[cols][];
-                            row = unmarshalOneRow(row, indicate, meg);
+                            rowNumber++;
+                            row = unmarshalOneRow(rowNumber, row, indicate, meg);
                             rowsIndicate.add(indicate);
                             rows.add(row);
                         } else {
@@ -250,13 +278,27 @@ public class T4C8OallResponseDataPacket extends DataPacket {
         /**
          * 读取一行数据
          */
-        private byte[][] unmarshalOneRow(byte[][] ab, byte[] indicate, T4CPacketBuffer meg) {
+        private byte[][] unmarshalOneRow(int rowNumber, byte[][] ab, byte[] indicate, T4CPacketBuffer meg) {
             int[] colsPos = T4CTTIrxd.getColsPosition(ab.length, indicate);
             for (int k = 0; k < ab.length; k++) {
                 int pos = (colsPos == null) ? k : colsPos[k];
-                switch (connStatus.getDataType()[pos]) {
+                switch (status.getDataType()[pos]) {
                     case Accessor.CLOB:
-                        ab[k] = meg.unmarshalDALC();
+                        int i = meg.unmarshalSB4();
+                        short s = meg.unmarshalUB1();
+                        if (i != s) {
+                            throw new RuntimeException("protocol error!");
+                        }
+                        ab[k] = new byte[i];
+                        ab[k] = meg.unmarshalNBytes(i);
+                        // ab[k] = meg.unmarshalDALC();
+                        // 保存原来的数据到ClientConnection中，并重写数据，用于记录CLOB对应的ConnectionPool。
+                        byte[] abyte0 = new byte[T4C8TTILob.LOB_OPS_BYTES];
+                        System.arraycopy(ab[k], 0, abyte0, 0, abyte0.length);
+                        occonn.getLobLocaterMap().put(rowNumber, abyte0);
+                        int poolHash = occonn.getPoolHashCode();
+                        ByteUtil.toByte32BE(rowNumber, ab[k], 0);
+                        ByteUtil.toByte32BE(poolHash, ab[k], 4);
                         break;
                     default:
                         ab[k] = meg.unmarshalCLRforREFS();
@@ -275,9 +317,12 @@ public class T4C8OallResponseDataPacket extends DataPacket {
                     meg.writeByte((byte) 0);
                 } else {
                     int pos = (colsPos == null) ? k : colsPos[k];
-                    switch (connStatus.getDataType()[pos]) {
+                    switch (status.getDataType()[pos]) {
                         case Accessor.CLOB:
-                            meg.marshalDALC(ab[k]);
+                            // meg.marshalDALC(ab[k]);
+                            meg.marshalSB4(ab[k].length);
+                            meg.marshalUB1((short) ab[k].length);
+                            meg.marshalB1Array(ab[k]);
                             break;
                         default:
                             meg.marshalCLR(ab[k], ab[k].length);
@@ -353,7 +398,7 @@ public class T4C8OallResponseDataPacket extends DataPacket {
     public static boolean isParseable(byte[] message) {
         if (isDataType(message) && message.length >= 11) {
             int flag = (message[10] & 0xff);
-            if (flag == QUERY_DESC || flag == QUERY_RESULT || flag == EXEC_RESULT) {
+            if (flag == QUERY_DESC || flag == QUERY_RESULT || flag == EXEC_RESULT || flag == LOB_OPS || flag == LOB_DATA) {
                 return true;
             }
         }
