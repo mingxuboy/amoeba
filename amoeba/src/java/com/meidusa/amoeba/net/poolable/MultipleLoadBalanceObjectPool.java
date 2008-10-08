@@ -35,7 +35,7 @@ public class MultipleLoadBalanceObjectPool implements ObjectPool{
 	
 	public static final int LOADBALANCING_ROUNDROBIN = 1;
 	public static final int LOADBALANCING_WEIGHTBASED = 2;
-	public static final int HA = 4;
+	public static final int HA = 3;
 	private boolean enable;
 	
 	protected static class ActiveNumComparator implements Comparator<ObjectPool>{
