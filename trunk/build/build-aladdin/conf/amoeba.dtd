@@ -17,8 +17,10 @@
 <!ELEMENT dbServerList ( dbServer+ ) >
 
 <!ELEMENT factoryConfig ( className, property+ ) >
+<!ATTLIST factoryConfig class NMTOKEN #IMPLIED >
 
 <!ELEMENT poolConfig ( className | property )* >
+<!ATTLIST poolConfig class NMTOKEN #IMPLIED >
 
 <!ELEMENT property ( #PCDATA | bean)* >
 
