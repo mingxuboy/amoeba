@@ -92,7 +92,7 @@ public class T4C8OallDataPacket extends T4CTTIfunPacket {
             parseFunPacket(meg);
         } else {
             if (logger.isDebugEnabled()) {
-                System.out.println("type:OtherPacket msgCode:" + msgCode + " funCode:" + funCode);
+                logger.debug("type:OtherPacket msgCode:" + msgCode + " funCode:" + funCode);
             }
         }
     }
@@ -117,16 +117,12 @@ public class T4C8OallDataPacket extends T4CTTIfunPacket {
                 break;
             default:
                 if (logger.isDebugEnabled()) {
-                    System.out.println("type:OtherFunPacket funCode:" + funCode);
+                    logger.debug("type:OtherFunPacket funCode:" + funCode);
                 }
         }
     }
 
     private void parseOALL8(T4CPacketBuffer meg) {
-        if (logger.isDebugEnabled()) {
-            System.out.println("type:T4CTTIfunPacket.OALL8");
-        }
-
         unmarshalPisdef(meg);
 
         byte[] sqlStmtBytes = meg.unmarshalCHR(sqlStmtLength);
@@ -151,26 +147,6 @@ public class T4C8OallDataPacket extends T4CTTIfunPacket {
         paramBytes = new byte[numberOfParams][];
         if (numberOfParams > 0) {
             unmarshalBinds(meg);// 解析参数，并读取相应的参数值。
-        }
-
-        if (logger.isDebugEnabled()) {
-            System.out.println("sqlStmt:" + sqlStmt);
-            // System.out.println("numberOfParams:" + numberOfParams);
-            for (int i = 0; i < numberOfParams; i++) {
-                // System.out.println("param_des_" + i + ":" + oacBind[i]);
-                Object object = accessors[i].getObject(paramBytes[i]);
-                if (object instanceof String) {
-                    String s = (String) object;
-                    if (s.length() > 4000) {
-                        System.out.println("param_" + i + ":large data... length:" + s.length());
-                    } else {
-                        System.out.println("param_" + i + ":" + s);
-                    }
-                } else {
-                    System.out.println("param_" + i + ":" + object);
-                }
-
-            }
         }
     }
 
@@ -337,30 +313,21 @@ public class T4C8OallDataPacket extends T4CTTIfunPacket {
     }
 
     private void parseOFETCH(T4CPacketBuffer meg) {
-        if (logger.isDebugEnabled()) {
-            System.out.println("type:T4CTTIfunPacket.OFETCH");
-        }
     }
 
     private void parseOEXEC(T4CPacketBuffer meg) {
         if (logger.isDebugEnabled()) {
-            System.out.println("type:T4CTTIfunPacket.OEXEC");
+            logger.debug("type:T4CTTIfunPacket.OEXEC");
         }
     }
 
     private void parseOLOBOPS(T4CPacketBuffer meg) {
-        if (logger.isDebugEnabled()) {
-            System.out.println("type:T4CTTIfunPacket.OLOBOPS");
-        }
         isOlobops = true;
         lob = new T4C8TTILob();
         lob.unmarshal(meg);
     }
 
     private void parseOLOGOFF(T4CPacketBuffer meg) {
-        if (logger.isDebugEnabled()) {
-            System.out.println("\ntype:T4CTTIfunPacket.OLOGOFF");
-        }
         isOlogoff = true;
     }
 

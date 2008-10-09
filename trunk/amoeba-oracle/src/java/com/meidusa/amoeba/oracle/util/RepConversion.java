@@ -9,11 +9,6 @@ public class RepConversion {
     public RepConversion(){
     }
 
-    public static void printInHex(byte byte0) {
-        System.out.print((char) nibbleToHex((byte) ((byte0 & 0xf0) >> 4)));
-        System.out.print((char) nibbleToHex((byte) (byte0 & 0xf)));
-    }
-
     public static byte nibbleToHex(byte byte0) {
         byte0 &= 0xf;
         return (byte) (byte0 >= 10 ? (byte0 - 10) + 65 : byte0 + 48);

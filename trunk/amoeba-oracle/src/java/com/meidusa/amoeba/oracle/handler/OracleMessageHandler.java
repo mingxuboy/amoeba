@@ -96,7 +96,7 @@ public class OracleMessageHandler implements MessageHandler, Sessionable, SQLnet
                         Packet packet1 = new T4C8OcloseDataPacket();
                         packet1.init(message, conn);
                         if (logger.isDebugEnabled()) {
-                            System.out.println("packet1:" + packet1);
+                            logger.debug("packet1:" + packet1);
                         }
                     }
 
@@ -106,17 +106,17 @@ public class OracleMessageHandler implements MessageHandler, Sessionable, SQLnet
             if (packet != null) {
                 packet.init(message, conn);
                 if (logger.isDebugEnabled()) {
-                    System.out.println("========================================================");
-                    System.out.println("packet:" + packet);
-                    System.out.println("##source:" + ByteUtil.toHex(message, 0, message.length));
+                    logger.debug("========================================================");
+                    logger.debug("packet:" + packet);
+                    logger.debug("##source:" + ByteUtil.toHex(message, 0, message.length));
                 }
 
                 // if(!(packet instanceof T4CTTIoAuthDataPacket)){
                 message = packet.toByteBuffer(conn).array();
                 // }
                 if (logger.isDebugEnabled()) {
-                    System.out.println("#warpped:" + ByteUtil.toHex(message, 0, message.length));
-                    System.out.println();
+                    logger.debug("#warpped:" + ByteUtil.toHex(message, 0, message.length));
+                    logger.debug("");
                 }
                 lastPackt = packet;
             }
@@ -154,8 +154,8 @@ public class OracleMessageHandler implements MessageHandler, Sessionable, SQLnet
                     }
 
                     if (logger.isDebugEnabled()) {
-                        System.out.println("reponse packet:" + packet);
-                        System.out.println("@@server source:" + ByteUtil.toHex(message, 0, message.length));
+                        logger.debug("reponse packet:" + packet);
+                        logger.debug("@@server source:" + ByteUtil.toHex(message, 0, message.length));
                     }
                     message = packet.toByteBuffer(conn).array();
                     
@@ -165,8 +165,8 @@ public class OracleMessageHandler implements MessageHandler, Sessionable, SQLnet
                     }
                     
                     if (logger.isDebugEnabled()) {
-                        System.out.println("@server warpped:" + ByteUtil.toHex(message, 0, message.length));
-                        System.out.println();
+                        logger.debug("@server warpped:" + ByteUtil.toHex(message, 0, message.length));
+                        logger.debug("");
                     }
                 }
             } catch (Exception e) {

@@ -52,6 +52,6 @@ public class T4CPacketBufferExchanger extends T4CPacketBuffer {
         byte[] newBuffer = new byte[remaining + exchangedBuffer.length - head];
         System.arraycopy(buffer, position, newBuffer, 0, remaining);
         System.arraycopy(exchangedBuffer, head, newBuffer, remaining, exchangedBuffer.length - head);
-        System.out.println(Arrays.toString(newBuffer));
+        // System.out.println(Arrays.toString(newBuffer));
     }
 }

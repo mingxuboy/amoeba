@@ -46,11 +46,33 @@ public class OracleQueryDispatcher implements MessageHandler {
                         for (int i = 0; i < params.length; i++) {
                             params[i] = packet.accessors[i].getObject(packet.getParamBytes()[i]);
                         }
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("");
+                            logger.debug("#amoeba query message ==============================================================");
+                            logger.debug("sql:" + sql);
+                            for (int i = 0; i < params.length; i++) {
+                                if (params[i] instanceof String) {
+                                    String s = (String) params[i];
+                                    if (s.length() > 4000) {
+                                        logger.debug("arg_" + i + ":large data... length:" + s.length());
+                                    } else {
+                                        logger.debug("arg_" + i + ":" + s);
+                                    }
+                                } else {
+                                    logger.debug("arg_" + i + ":" + params[i]);
+                                }
+                            }
+                        }
                         QueryRouter rt = ProxyRuntimeContext.getInstance().getQueryRouter();
                         ObjectPool[] op = rt.doRoute((DatabaseConnection) conn, sql, false, params);
                         startOracleQueryMessageHandler(conn, op);
                         return;
                     } else if (packet.isOlobops()) {// 处理请求LOB数据包包的pool路由
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("");
+                            logger.debug("#amoeba query message ==============================================================");
+                            logger.debug("client request lob data");
+                        }
                         QueryRouter rt = ProxyRuntimeContext.getInstance().getQueryRouter();
                         int offset = packet.getLob().getSourceLobLocatorOffset();
                         byte[] abyte0 = new byte[T4C8TTILob.LOB_OPS_BYTES];
@@ -64,16 +86,18 @@ public class OracleQueryDispatcher implements MessageHandler {
                         conn.postMessage(logoffBytes);
                         if (logger.isDebugEnabled()) {
                             int size = ((tmpBuffer[0] & 0xff) << 8) | (tmpBuffer[1] & 0xff);
-                            System.out.println("%amoeba query message ==============================================================");
-                            System.out.println(">>receive from client[" + size + "]:" + ByteUtil.toHex(tmpBuffer, 0, tmpBuffer.length));
-                            System.out.println("<<amoeba query message =============================================================");
-                            System.out.println("<<send to client[" + logoffBytes.length + "]:" + ByteUtil.toHex(logoffBytes, 0, logoffBytes.length));
+                            logger.debug("");
+                            logger.debug("#amoeba logoff message ==============================================================");
+                            logger.debug(">>receive from client[" + size + "]:" + ByteUtil.toHex(tmpBuffer, 0, tmpBuffer.length));
+                            logger.debug("#amoeba logoff message ==============================================================");
+                            logger.debug("<<send to client[" + logoffBytes.length + "]:" + ByteUtil.toHex(logoffBytes, 0, logoffBytes.length));
+                            logger.debug("End.");
                         }
                         clearBuffer();
                         return;
                     } else {
                         if (logger.isDebugEnabled()) {
-                            System.out.println("warning!unprocess data packet.");
+                            logger.debug("warning!unprocess data packet.");
                         }
                     }
                 }

@@ -59,7 +59,7 @@ public abstract class OracleConnection extends DatabaseConnection {
     }
 
     public void handleMessage(Connection conn, byte[] message) {
-        System.out.println(ArrayUtils.toString(message));
+        // System.out.println(ArrayUtils.toString(message));
     }
 
     @Override
