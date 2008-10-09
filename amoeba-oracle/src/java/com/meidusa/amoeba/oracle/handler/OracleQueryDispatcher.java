@@ -93,7 +93,7 @@ public class OracleQueryDispatcher implements MessageHandler {
                 handler.handleMessage(conn, msg);
             }
         } catch (Exception e) {
-            logger.error("start OracleQueryMessageHandler error", e);
+            logger.error("OracleQueryMessageHandler startSession error", e);
             handler.endSession();
         } finally {
             clearBuffer();

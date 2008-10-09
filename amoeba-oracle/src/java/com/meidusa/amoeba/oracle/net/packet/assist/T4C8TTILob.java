@@ -298,8 +298,8 @@ public class T4C8TTILob {
                     oer.init();
                     oer.unmarshal(meg);
                     rowsProcessed = (int) oer.curRowNumber;
-                    if (oer.retCode != 1403) {
-                        // oer.processError();
+                    if (oer.retCode != 0) {
+                        oer.processError();
                     }
                     if (flag) {
                         isComplete = true;

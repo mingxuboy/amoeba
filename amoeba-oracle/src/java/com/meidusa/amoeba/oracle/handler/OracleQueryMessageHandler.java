@@ -60,7 +60,14 @@ public class OracleQueryMessageHandler extends AbstractMessageQueuedHandler impl
             receivePrint(logger.isDebugEnabled(), message, true);
 
             if (MarkerPacket.isMarkerType(message)) {
-                System.out.println("marker! send");
+                if (logger.isDebugEnabled()) {
+                    System.out.println(">>receive marker packet from client!");
+                }
+                message[10] = 2;
+                sendPrint(logger.isDebugEnabled(), message, false);
+                OracleClientConnection occonn = (OracleClientConnection) conn;
+                occonn.postMessage(message);
+                return;
             }
 
             // 解析数据包，否则直接传送数据包到服务器端。
@@ -108,11 +115,14 @@ public class OracleQueryMessageHandler extends AbstractMessageQueuedHandler impl
             receivePrint(logger.isDebugEnabled(), message, false);
 
             if (MarkerPacket.isMarkerType(message)) {
-                System.out.println("marker! receive");
-                // if (message[10] != 2) {
-                // sendPrint(logger.isDebugEnabled(), message, false);
-                // clientConn.postMessage(message);
-                // }
+                if (logger.isDebugEnabled()) {
+                    System.out.println("<<receive marker packet from server!");
+                }
+                message[10] = 2;
+                OracleServerConnection osconn = (OracleServerConnection) conn;
+                sendPrint(logger.isDebugEnabled(), message, true);
+                osconn.postMessage(message);
+                return;
             }
 
             if (T4C8OallResponseDataPacket.isParseable(message)) {
@@ -136,22 +146,32 @@ public class OracleQueryMessageHandler extends AbstractMessageQueuedHandler impl
         return false;
     }
 
+    public void startSession() throws Exception {
+        if (logger.isInfoEnabled()) {
+            logger.info(this + " session start");
+        }
+        serverConns = new OracleServerConnection[pools.length];
+        for (int i = 0; i < pools.length; i++) {
+            ObjectPool pool = pools[i];
+            OracleServerConnection conn = (OracleServerConnection) pool.borrowObject();
+            if (logger.isDebugEnabled()) {
+                int hash = conn.getObjectPool().hashCode();
+                System.out.println("conn:" + hash + " borrow from pool +++++++++++++++++++");
+            }
+            serverConns[i] = conn;
+            handlerMap.put(conn, conn.getMessageHandler());
+            connStatusMap.put(conn, new ConnectionServerStatus(conn));
+            conn.setMessageHandler(this);
+        }
+    }
+
     public synchronized void endSession() {
         lock.lock();
 
         try {
             if (!isEnded) {
                 isEnded = true;
-
                 clientConn.setMessageHandler(clientHandler);
-
-                //
-                // for (int i = 0; serverConns != null && i < serverConns.length; i++) {
-                // if (serverConns[i] != null) {
-                // serverConns[i].setMessageHandler(handlerMap.get(serverConns[i]));
-                // }
-                // }
-
                 Set<Map.Entry<OracleServerConnection, MessageHandler>> handlerSet = handlerMap.entrySet();
                 for (Map.Entry<OracleServerConnection, MessageHandler> entry : handlerSet) {
                     MessageHandler handler = entry.getValue();
@@ -166,12 +186,13 @@ public class OracleQueryMessageHandler extends AbstractMessageQueuedHandler impl
                                     pooledObject.getObjectPool().returnObject(conn);
                                     if (logger.isDebugEnabled()) {
                                         int hash = conn.getObjectPool().hashCode();
-                                        System.out.println("conn:" + hash + " returned to pool +++++++++++++++++++");
+                                        System.out.println("conn:" + hash + " returned to pool -------------------");
                                     }
                                 } catch (Exception e) {
+                                    logger.error("OracleQueryMessageHandler endSession error", e);
                                 }
-                            }
 
+                            }
                         }
                     }
                 }
@@ -183,21 +204,6 @@ public class OracleQueryMessageHandler extends AbstractMessageQueuedHandler impl
 
     public boolean isEnded() {
         return isEnded;
-    }
-
-    public void startSession() throws Exception {
-        if (logger.isInfoEnabled()) {
-            logger.info(this + " session start");
-        }
-        serverConns = new OracleServerConnection[pools.length];
-        for (int i = 0; i < pools.length; i++) {
-            ObjectPool pool = pools[i];
-            OracleServerConnection conn = (OracleServerConnection) pool.borrowObject();
-            serverConns[i] = conn;
-            handlerMap.put(conn, conn.getMessageHandler());
-            connStatusMap.put(conn, new ConnectionServerStatus(conn));
-            conn.setMessageHandler(this);
-        }
     }
 
     /**
