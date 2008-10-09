@@ -1,22 +1,14 @@
 package com.meidusa.amoeba.net.jdbc;
 
-import java.sql.Array;
-import java.sql.Blob;
 import java.sql.CallableStatement;
-import java.sql.Clob;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
-import java.sql.NClob;
 import java.sql.PreparedStatement;
-import java.sql.SQLClientInfoException;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
-import java.sql.SQLXML;
 import java.sql.Savepoint;
 import java.sql.Statement;
-import java.sql.Struct;
 import java.util.Map;
-import java.util.Properties;
 
 public class ConnectionWrapper implements Connection{
 	private Connection conn;
@@ -178,69 +170,4 @@ public class ConnectionWrapper implements Connection{
 	public void setTypeMap(Map<String, Class<?>> map) throws SQLException {
 		conn.setTypeMap(map);
 	}
-    @Override
-    public Array createArrayOf(String typeName, Object[] elements) throws SQLException {
-        // TODO Auto-generated method stub
-        return null;
-    }
-    @Override
-    public Blob createBlob() throws SQLException {
-        // TODO Auto-generated method stub
-        return null;
-    }
-    @Override
-    public Clob createClob() throws SQLException {
-        // TODO Auto-generated method stub
-        return null;
-    }
-    @Override
-    public NClob createNClob() throws SQLException {
-        // TODO Auto-generated method stub
-        return null;
-    }
-    @Override
-    public SQLXML createSQLXML() throws SQLException {
-        // TODO Auto-generated method stub
-        return null;
-    }
-    @Override
-    public Struct createStruct(String typeName, Object[] attributes) throws SQLException {
-        // TODO Auto-generated method stub
-        return null;
-    }
-    @Override
-    public Properties getClientInfo() throws SQLException {
-        // TODO Auto-generated method stub
-        return null;
-    }
-    @Override
-    public String getClientInfo(String name) throws SQLException {
-        // TODO Auto-generated method stub
-        return null;
-    }
-    @Override
-    public boolean isValid(int timeout) throws SQLException {
-        // TODO Auto-generated method stub
-        return false;
-    }
-    @Override
-    public void setClientInfo(Properties properties) throws SQLClientInfoException {
-        // TODO Auto-generated method stub
-        
-    }
-    @Override
-    public void setClientInfo(String name, String value) throws SQLClientInfoException {
-        // TODO Auto-generated method stub
-        
-    }
-    @Override
-    public boolean isWrapperFor(Class<?> iface) throws SQLException {
-        // TODO Auto-generated method stub
-        return false;
-    }
-    @Override
-    public <T> T unwrap(Class<T> iface) throws SQLException {
-        // TODO Auto-generated method stub
-        return null;
-    }
 }
