@@ -19,31 +19,31 @@ import com.meidusa.amoeba.mysql.jdbc.MysqlDefs;
  */
 public class BindValue {
 
-		long boundBeforeExecutionNum = 0;
+		public long boundBeforeExecutionNum = 0;
 		
-		long bindLength; /* Default length of data */
+		public long bindLength; /* Default length of data */
 
-		int bufferType; /* buffer type */
+		public int bufferType; /* buffer type */
 
-		byte byteBinding;
+		public byte byteBinding;
 
-		double doubleBinding;
+		public double doubleBinding;
 
-		float floatBinding;
+		public float floatBinding;
 
-		int intBinding;
+		public int intBinding;
 
-		boolean isLongData; /* long data indicator */
+		public boolean isLongData; /* long data indicator */
 
-		boolean isNull; /* NULL indicator */
+		public boolean isNull; /* NULL indicator */
 
-		boolean isSet = false; /* has this parameter been set? */
+		public boolean isSet = false; /* has this parameter been set? */
 
-		long longBinding;
+		public long longBinding;
 
-		short shortBinding;
+		public short shortBinding;
 
-		Object value; /* The value to store */
+		public Object value; /* The value to store */
 
 		BindValue() {
 		}

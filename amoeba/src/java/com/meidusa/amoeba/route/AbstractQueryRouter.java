@@ -48,11 +48,11 @@ import com.meidusa.amoeba.parser.statment.PropertyStatment;
 import com.meidusa.amoeba.parser.statment.RollbackStatment;
 import com.meidusa.amoeba.parser.statment.ShowStatment;
 import com.meidusa.amoeba.parser.statment.StartTansactionStatment;
-import com.meidusa.amoeba.parser.expression.Expression;
 import com.meidusa.amoeba.parser.function.Function;
 import com.meidusa.amoeba.parser.dbobject.Schema;
 import com.meidusa.amoeba.parser.statment.Statment;
 import com.meidusa.amoeba.parser.dbobject.Table;
+import com.meidusa.amoeba.parser.expression.Expression;
 import com.meidusa.amoeba.sqljep.function.Abs;
 import com.meidusa.amoeba.sqljep.function.AddDate;
 import com.meidusa.amoeba.sqljep.function.AddMonths;
@@ -271,47 +271,13 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable{
 	@SuppressWarnings("unchecked")
 	protected ObjectPool[] selectPool(DatabaseConnection connection,String sql,boolean ispreparedStatment,Object[] parameters){
 		List<String> poolNames = new ArrayList<String>();
-		int sqlWithSchemaHashcode = connection.getSchema()!= null? connection.getSchema().hashCode()^sql.hashCode():sql.hashCode();
 		
-		Statment statment = null;
-		mapLock.lock();
-		try{
-			statment = (Statment)map.get(sqlWithSchemaHashcode);
-		}finally{
-			mapLock.unlock();
-		}
-		if(statment == null){
-			Parser parser = newParser(sql);
-			parser.setFunctionMap(this.functionMap);
-			if(connection.getSchema() != null){
-				Schema schema = new Schema();
-				schema.setName(connection.getSchema());
-				parser.setDefaultSchema(schema);
-			}
-			try {
-				
-				try{
-					statment = parser.doParse();
-					mapLock.lock();
-					try{
-						map.put(sqlWithSchemaHashcode, statment);
-					}finally{
-						mapLock.unlock();
-					}
-				}catch(Error e){
-					logger.error(sql,e);
-					return null;
-				}
-				
+		Statment statment = parseSql(connection,sql);
+
+		if(statment != null){
+			if(logger.isDebugEnabled()){
 				Expression expression = statment.getExpression();
-				if(expression != null){
-					if(logger.isDebugEnabled()){
-						logger.debug("Sql:["+sql +"] Expression=["+expression+"]");
-					}
-				}
-				
-			} catch (ParseException e) {
-				logger.error(sql,e);
+				logger.debug("Sql:["+sql +"] Expression=["+expression+"]");
 			}
 		}
 		
@@ -849,7 +815,7 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable{
 	
 	public Statment parseSql(DatabaseConnection connection,String sql){
 		Statment statment = null;
-		int sqlWithSchemaHashcode = sql.hashCode();
+		int sqlWithSchemaHashcode = connection.getSchema()!= null? connection.getSchema().hashCode()^sql.hashCode():sql.hashCode();
 		mapLock.lock();
 		try{
 			statment = (Statment)map.get(sqlWithSchemaHashcode);
@@ -857,30 +823,35 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable{
 			mapLock.unlock();
 		}
 		if(statment == null){
-			Parser parser = newParser(sql);
-			parser.setFunctionMap(this.functionMap);
-			if(connection.getSchema() != null){
-				Schema schema = new Schema();
-				schema.setName(connection.getSchema());
-				parser.setDefaultSchema(schema);
-			}
-			try {
+			synchronized (sql) {
+				statment = (Statment)map.get(sqlWithSchemaHashcode);
+				if(statment != null) return statment;
 				
-				try{
-					statment = parser.doParse();
-					mapLock.lock();
-					try{
-						map.put(sqlWithSchemaHashcode, statment);
-					}finally{
-						mapLock.unlock();
-					}
-				}catch(Error e){
-					logger.error(sql,e);
-					return null;
+				Parser parser = newParser(sql);
+				parser.setFunctionMap(this.functionMap);
+				if(connection.getSchema() != null){
+					Schema schema = new Schema();
+					schema.setName(connection.getSchema());
+					parser.setDefaultSchema(schema);
 				}
-				
-			} catch (ParseException e) {
-				logger.error(sql,e);
+				try {
+					
+					try{
+						statment = parser.doParse();
+						mapLock.lock();
+						try{
+							map.put(sqlWithSchemaHashcode, statment);
+						}finally{
+							mapLock.unlock();
+						}
+					}catch(Error e){
+						logger.error(sql,e);
+						return null;
+					}
+					
+				} catch (ParseException e) {
+					logger.error(sql,e);
+				}
 			}
 		}
 		return statment;

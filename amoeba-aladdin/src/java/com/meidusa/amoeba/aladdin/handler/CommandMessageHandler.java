@@ -7,6 +7,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import org.apache.log4j.Logger;
+
 import com.meidusa.amoeba.aladdin.io.ResultPacket;
 import com.meidusa.amoeba.context.ProxyRuntimeContext;
 import com.meidusa.amoeba.mysql.net.MysqlClientConnection;
@@ -14,6 +16,7 @@ import com.meidusa.amoeba.net.Connection;
 import com.meidusa.amoeba.net.MessageHandler;
 import com.meidusa.amoeba.net.Sessionable;
 import com.meidusa.amoeba.net.poolable.ObjectPool;
+import com.meidusa.amoeba.net.poolable.PoolableObject;
 
 
 /**
@@ -22,6 +25,7 @@ import com.meidusa.amoeba.net.poolable.ObjectPool;
  *
  */
 public abstract class CommandMessageHandler implements MessageHandler, Sessionable {
+	private static Logger logger = Logger.getLogger(CommandMessageHandler.class);
 	protected MysqlClientConnection source;
 	private boolean completed;
 	private long createTime;
@@ -35,7 +39,7 @@ public abstract class CommandMessageHandler implements MessageHandler, Sessionab
 	private Object parameter;
 	
 	protected static abstract class QueryRunnable implements Runnable{
-		protected java.sql.Connection conn;
+		private java.sql.Connection conn;
 		protected Object parameter;
 		protected CountDownLatch latch;
 		protected ResultPacket packet;
@@ -49,6 +53,10 @@ public abstract class CommandMessageHandler implements MessageHandler, Sessionab
 			this.latch = latch;
 		}
 		
+		public void init(CommandMessageHandler handler){
+			
+		}
+		
 		protected static boolean isSelect(String query){
 			char ch = query.trim().charAt(0);
 			if(ch == 's' || ch == 'S'){
@@ -58,11 +66,28 @@ public abstract class CommandMessageHandler implements MessageHandler, Sessionab
 			}
 		}
 		
-		protected abstract void doRun();
+		/**
+		 * Connection 将在 run中返回到pool中
+		 * @param conn
+		 */
+		protected abstract void doRun(java.sql.Connection conn);
 		
 		public void run() {
 			try{
-				doRun();
+				PoolableObject poolobject = (PoolableObject) conn;
+				try {
+					doRun(conn);
+					try {
+						poolobject.getObjectPool().returnObject(poolobject);
+					} catch (Exception e) {
+					}
+				} catch (Exception e) {
+					logger.error("run query error:",e);
+					try {
+						poolobject.getObjectPool().invalidateObject(poolobject);
+					} catch (Exception e1) {
+					}
+				}
 			}finally{
 				latch.countDown();
 			}
@@ -107,6 +132,7 @@ public abstract class CommandMessageHandler implements MessageHandler, Sessionab
 					.borrowObject();
 			connPoolMap.put(conn, pool);
 			QueryRunnable runnable = newQueryRunnable(latch,conn,query,parameter,packet);
+			runnable.init(this);
 			ProxyRuntimeContext.getInstance().getServerSideExecutor().execute(runnable);
 		}
 		

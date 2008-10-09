@@ -191,6 +191,12 @@ public class MysqlServerConnection extends MysqlConnection implements MySqlPacke
 		
 	}
 	
+    public boolean isVersion(int major, int minor, int subminor) {
+        return ((major == getServerMajorVersion()) &&
+        (minor == getServerMinorVersion()) &&
+        (subminor == getServerSubMinorVersion()));
+    }
+	
 	public boolean versionMeetsMinimum(int major, int minor, int subminor) {
         if (getServerMajorVersion() >= major) {
             if (getServerMajorVersion() == major) {
