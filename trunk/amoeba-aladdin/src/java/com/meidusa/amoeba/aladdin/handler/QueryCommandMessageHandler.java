@@ -30,7 +30,7 @@ public class QueryCommandMessageHandler extends CommandMessageHandler {
 		}
 
 		@Override
-		protected void doRun() {
+		protected void doRun(java.sql.Connection conn) {
 			if(isSelect(query)){
 				Statement statement = null;
 				ResultSet rs = null;

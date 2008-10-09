@@ -93,6 +93,7 @@ public class ResultSetUtil {
 		}
 	}
 	
+	
 	public static void metaDataToPacket(MysqlResultSetPacket packet,ResultSetMetaData metaData) throws SQLException{
 			
 		int colunmCount = metaData.getColumnCount();

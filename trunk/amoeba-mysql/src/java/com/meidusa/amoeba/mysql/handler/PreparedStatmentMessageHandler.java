@@ -50,9 +50,18 @@ public class PreparedStatmentMessageHandler extends QueryCommandMessageHandler{
 			this.preparedStatmentInfo = preparedStatmentInfo;
 		}
 		
+		/**
+		 * packet step:
+		 * 1:OKforPreparedStatementPacket, (parameters ==0,columns==0) end;
+		 * parameters>0 [ n*parameterFieldPacket,PREPAED_PARAMETER_EOF]
+		 * columns>0 [n * columnPacket,PREPAED_FIELD_EOF]
+		 * 
+		 * mysql version 5.0.0 no parameter field packet
+		 */
 		@Override
 		public boolean isCompleted(byte[] buffer) {
 			if(this.commandType == QueryCommandPacket.COM_STMT_PREPARE){
+				MysqlServerConnection connection = (MysqlServerConnection)conn;
 				if(MysqlPacketBuffer.isEofPacket(buffer)){
 					if(preparedStatmentInfo.getOkPrepared().parameters>0 && preparedStatmentInfo.getOkPrepared().columns >0){
 						if((this.statusCode & PreparedStatmentSessionStatus.PREPAED_PARAMETER_EOF) >0){
@@ -60,6 +69,13 @@ public class PreparedStatmentMessageHandler extends QueryCommandMessageHandler{
 							this.statusCode |=  PreparedStatmentSessionStatus.COMPLETED;
 							return true;
 						}else{
+							if(connection.isVersion(5, 0, 0)){
+								if(preparedStatmentInfo.getOkPrepared().columns ==0){
+									this.statusCode |=  PreparedStatmentSessionStatus.PREPAED_FIELD_EOF;
+									this.statusCode |=  PreparedStatmentSessionStatus.COMPLETED;
+									return true;
+								}
+							}
 							this.statusCode |=  PreparedStatmentSessionStatus.PREPAED_PARAMETER_EOF;
 							return false;
 						}
@@ -85,6 +101,13 @@ public class PreparedStatmentMessageHandler extends QueryCommandMessageHandler{
 						this.statusCode |=  PreparedStatmentSessionStatus.COMPLETED;
 						return true;
 					}else{
+						if(connection.isVersion(5, 0, 0)){
+							if(preparedStatmentInfo.getOkPrepared().columns ==0){
+								this.statusCode |=  PreparedStatmentSessionStatus.OK;
+								this.statusCode |=  PreparedStatmentSessionStatus.COMPLETED;
+								return true;
+							}
+						}
 						return false;
 					}
 				}

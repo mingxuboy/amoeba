@@ -79,7 +79,7 @@ public class ExecutePacket extends CommandPacket {
 	public long iterationCount;
 	public byte newParameterBoundFlag;
 	protected transient int parameterCount;
-	private BindValue[] values;
+	public BindValue[] values;
 	private Map<Integer,Object> longPrameters;
 	public ExecutePacket(int parameterCount,Map<Integer,Object> longPrameters){
 		this.parameterCount = parameterCount;
