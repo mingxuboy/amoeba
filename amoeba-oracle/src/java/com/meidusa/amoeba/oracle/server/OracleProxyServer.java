@@ -18,81 +18,81 @@ import com.meidusa.amoeba.util.Reporter;
 import com.meidusa.amoeba.util.StringUtil;
 
 public class OracleProxyServer {
-	private static Logger log = Logger.getLogger(OracleProxyServer.class);
-	private static Logger repoterLog = Logger.getLogger("report");
-	/** Used to generate "state of server" reports. */
-	protected static ArrayList<Reporter> reporters = new ArrayList<Reporter>();
-	/** The time at which the server was started. */
-	protected static long serverStartTime = System.currentTimeMillis();
 
-	/** The last time at which {@link #generateReport} was run. */
-	protected static long lastReportStamp = serverStartTime;
+    private static Logger                log             = Logger.getLogger(OracleProxyServer.class);
+    private static Logger                repoterLog      = Logger.getLogger("report");
+    /** Used to generate "state of server" reports. */
+    protected static ArrayList<Reporter> reporters       = new ArrayList<Reporter>();
+    /** The time at which the server was started. */
+    protected static long                serverStartTime = System.currentTimeMillis();
 
-	public static void registerReporter(Reporter reporter) {
-		reporters.add(reporter);
-	}
+    /** The last time at which {@link #generateReport} was run. */
+    protected static long                lastReportStamp = serverStartTime;
 
-	/**
-	 * Generates a report for all system services registered as a
-	 * {@link Reporter}.
-	 */
-	public static String generateReport() {
-		return generateReport(System.currentTimeMillis(), false);
-	}
+    public static void registerReporter(Reporter reporter) {
+        reporters.add(reporter);
+    }
 
-	/**
-	 * Generates and logs a "state of server" report.
-	 */
-	protected static String generateReport(long now, boolean reset) {
-		long sinceLast = now - lastReportStamp;
-		long uptime = now - serverStartTime;
-		StringBuilder report = new StringBuilder(" State of server report:\n");
+    /**
+     * Generates a report for all system services registered as a {@link Reporter}.
+     */
+    public static String generateReport() {
+        return generateReport(System.currentTimeMillis(), false);
+    }
 
-		report.append("- Uptime: ");
-		report.append(StringUtil.intervalToString(uptime)).append("\n");
-		report.append("- Report period: ");
-		report.append(StringUtil.intervalToString(sinceLast)).append("\n");
+    /**
+     * Generates and logs a "state of server" report.
+     */
+    protected static String generateReport(long now, boolean reset) {
+        long sinceLast = now - lastReportStamp;
+        long uptime = now - serverStartTime;
+        StringBuilder report = new StringBuilder(" State of server report:\n");
 
-		// report on the state of memory
-		Runtime rt = Runtime.getRuntime();
-		long total = rt.totalMemory(), max = rt.maxMemory();
-		long used = (total - rt.freeMemory());
-		report.append("- Memory: ").append(used / 1024).append("k used, ");
-		report.append(total / 1024).append("k total, ");
-		report.append(max / 1024).append("k max\n");
-		
-		for (int ii = 0; ii < reporters.size(); ii++) {
-			Reporter rptr = reporters.get(ii);
-			try {
-				rptr.appendReport(report, now, sinceLast, reset,repoterLog.getLevel());
-			} catch (Throwable t) {
-				log.error("Reporter choked [rptr=" + rptr + "].", t);
-			}
-		}
+        report.append("- Uptime: ");
+        report.append(StringUtil.intervalToString(uptime)).append("\n");
+        report.append("- Report period: ");
+        report.append(StringUtil.intervalToString(sinceLast)).append("\n");
 
-		// only reset the last report time if this is a periodic report
-		if (reset) {
-			lastReportStamp = now;
-		}
+        // report on the state of memory
+        Runtime rt = Runtime.getRuntime();
+        long total = rt.totalMemory(), max = rt.maxMemory();
+        long used = (total - rt.freeMemory());
+        report.append("- Memory: ").append(used / 1024).append("k used, ");
+        report.append(total / 1024).append("k total, ");
+        report.append(max / 1024).append("k max\n");
 
-		return report.toString();
-	}
+        for (int ii = 0; ii < reporters.size(); ii++) {
+            Reporter rptr = reporters.get(ii);
+            try {
+                rptr.appendReport(report, now, sinceLast, reset, repoterLog.getLevel());
+            } catch (Throwable t) {
+                log.error("Reporter choked [rptr=" + rptr + "].", t);
+            }
+        }
 
-	protected static void logReport(String report) {
-		repoterLog.info(report);
-	}
+        // only reset the last report time if this is a periodic report
+        if (reset) {
+            lastReportStamp = now;
+        }
 
-	public static void main(String[] args) throws IOException {
-	    //load log4j config
-		String log4jConf = System.getProperty("log4j.conf", "${amoeba.home}/conf/log4j.xml");
+        return report.toString();
+    }
+
+    protected static void logReport(String report) {
+        repoterLog.info(report);
+    }
+
+    public static void main(String[] args) throws IOException {
+        // load log4j config
+        String log4jConf = System.getProperty("log4j.conf", "${amoeba.home}/conf/log4j.xml");
         log4jConf = ConfigUtil.filter(log4jConf);
         File logconf = new File(log4jConf);
         if (logconf.exists() && logconf.isFile()) {
             DOMConfigurator.configureAndWatch(logconf.getAbsolutePath(), System.getProperties());
         }
-		
-        //load amoeba config
-		Logger logger = Logger.getLogger(OracleProxyServer.class);
+
+        // load amoeba config
+        Logger logger = Logger.getLogger(OracleProxyServer.class);
         ProxyRuntimeContext context = new OracleProxyRuntimeContext();
         String config = System.getProperty("amoeba.conf", "${amoeba.home}/conf/amoeba.xml");
         config = ConfigUtil.filter(config);
@@ -103,45 +103,48 @@ public class OracleProxyServer {
         } else {
             ProxyRuntimeContext.getInstance().init(configFile.getAbsolutePath());
         }
-		
-		registerReporter(context);
-		for(ConnectionManager connMgr :context.getConnectionManagerList().values()){
-			registerReporter(connMgr);
-		}
-		
-		//config proxy server
-		OracleClientConnectionManager oracleProxyServerconMger = new OracleClientConnectionManager("Oracle proxy Server"
-				,context.getConfig().getIpAddress(),context.getConfig().getPort());
-		registerReporter(oracleProxyServerconMger);
-		FrontendConnectionFactory factory = new OracleClientConnectionFactory();
-		factory.setPassword(context.getConfig().getPassword());
-		factory.setUser(context.getConfig().getUser());
-		oracleProxyServerconMger.setConnectionFactory(factory);
-		factory.setConnectionManager(oracleProxyServerconMger);
-		/*MysqlAuthenticator authen = new MysqlAuthenticator();
-		
-		String accessConf = System.getProperty("access.conf","${amoeba.home}/conf/access_list.conf");
-		accessConf = ConfigUtil.filter(accessConf);
-		authen.addAuthenticateFilter(new IPAccessController(accessConf));
-		
-		oracleProxyServerconMger.setAuthenticator(authen);*/
-		
-		oracleProxyServerconMger.setExecutor(context.getReadExecutor());		
-		oracleProxyServerconMger.start();
-		
-		new Thread(){
-			{
-				this.setDaemon(true);
-			}
-			public void run(){
-				while(true){
-					try {
-						Thread.sleep(60*1000);
-					} catch (InterruptedException e) {
-					}
-					logReport(generateReport());
-				}
-			}
-		}.start();
-	}
+
+        registerReporter(context);
+        for (ConnectionManager connMgr : context.getConnectionManagerList().values()) {
+            registerReporter(connMgr);
+        }
+
+        // config proxy server
+        OracleClientConnectionManager oracleProxyServerconMger = new OracleClientConnectionManager(
+                                                                                                   "Oracle proxy Server",
+                                                                                                   context.getConfig().getIpAddress(),
+                                                                                                   context.getConfig().getPort());
+        registerReporter(oracleProxyServerconMger);
+        FrontendConnectionFactory factory = new OracleClientConnectionFactory();
+        factory.setPassword(context.getConfig().getPassword());
+        factory.setUser(context.getConfig().getUser());
+        oracleProxyServerconMger.setConnectionFactory(factory);
+        factory.setConnectionManager(oracleProxyServerconMger);
+        /*
+         * MysqlAuthenticator authen = new MysqlAuthenticator(); String accessConf =
+         * System.getProperty("access.conf","${amoeba.home}/conf/access_list.conf"); accessConf =
+         * ConfigUtil.filter(accessConf); authen.addAuthenticateFilter(new IPAccessController(accessConf));
+         * oracleProxyServerconMger.setAuthenticator(authen);
+         */
+
+        oracleProxyServerconMger.setExecutor(context.getReadExecutor());
+        oracleProxyServerconMger.start();
+
+        new Thread() {
+
+            {
+                this.setDaemon(true);
+            }
+
+            public void run() {
+                while (true) {
+                    try {
+                        Thread.sleep(60 * 1000);
+                    } catch (InterruptedException e) {
+                    }
+                    logReport(generateReport());
+                }
+            }
+        }.start();
+    }
 }

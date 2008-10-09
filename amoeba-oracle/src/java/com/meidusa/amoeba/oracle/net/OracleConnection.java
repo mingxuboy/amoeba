@@ -4,8 +4,6 @@ import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.sql.SQLException;
 
-import org.apache.commons.lang.ArrayUtils;
-
 import com.meidusa.amoeba.net.Connection;
 import com.meidusa.amoeba.net.DatabaseConnection;
 import com.meidusa.amoeba.net.Sessionable;
