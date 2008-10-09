@@ -34,7 +34,7 @@ public class OracleClientConnection extends OracleConnection implements SQLnetDe
 
     private static Logger        logger        = Logger.getLogger(OracleClientConnection.class);
 
-    private String               encryptedSK;
+    private String               encryptedSK   = null;
     private Map<Integer, byte[]> lobLocaterMap = new HashMap<Integer, byte[]>();
     private boolean              isLobOps      = false;
 

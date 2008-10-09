@@ -3,6 +3,10 @@ package com.meidusa.amoeba.oracle.accessor;
 import com.meidusa.amoeba.oracle.net.packet.assist.T4CTTIoac;
 import com.meidusa.amoeba.oracle.util.DBConversion;
 
+/**
+ * @author hexianmao
+ * @version 2008-10-9 обнГ10:04:56
+ */
 public abstract class Accessor {
 
     public static final int VARCHAR            = 1;

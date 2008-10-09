@@ -5,6 +5,12 @@ import java.sql.SQLException;
 import com.meidusa.amoeba.oracle.charset.CharacterSet;
 import com.meidusa.amoeba.oracle.charset.CharacterSetMetaData;
 
+/**
+ * 字符集转换处理工具
+ * 
+ * @author hexianmao
+ * @version 2008-10-9 下午10:14:13
+ */
 public class DBConversion {
 
     public static final boolean DO_CONVERSION_WITH_REPLACEMENT = true;

@@ -2,6 +2,12 @@ package com.meidusa.amoeba.oracle.net.packet.assist;
 
 import com.meidusa.amoeba.oracle.net.packet.T4CPacketBuffer;
 
+/**
+ * 查询返回的描述信息数据包
+ * 
+ * @author hexianmao
+ * @version 2008-10-9 下午10:10:50
+ */
 public class T4C8TTIuds {
 
     boolean   udsnull;

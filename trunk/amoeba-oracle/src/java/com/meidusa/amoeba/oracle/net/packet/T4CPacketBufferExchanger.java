@@ -1,7 +1,5 @@
 package com.meidusa.amoeba.oracle.net.packet;
 
-import java.util.Arrays;
-
 import com.meidusa.amoeba.oracle.net.MessageQueuedHandler;
 import com.meidusa.amoeba.oracle.net.OracleServerConnection;
 import com.meidusa.amoeba.util.StaticString;

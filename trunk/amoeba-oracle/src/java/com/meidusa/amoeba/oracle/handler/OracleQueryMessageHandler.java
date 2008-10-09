@@ -26,8 +26,6 @@ import com.meidusa.amoeba.oracle.net.packet.assist.T4C8TTILob;
 import com.meidusa.amoeba.oracle.util.ByteUtil;
 
 /**
- * 非常简单的数据包转发程序
- * 
  * @author struct
  */
 @SuppressWarnings("unchecked")
