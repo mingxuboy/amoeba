@@ -23,7 +23,6 @@ import com.meidusa.amoeba.parser.expression.AndExpression;
 import com.meidusa.amoeba.parser.expression.BaseExpressionList;
 import com.meidusa.amoeba.parser.expression.ColumnExpression;
 import com.meidusa.amoeba.parser.expression.Expression;
-import com.meidusa.amoeba.route.AbstractQueryRouter;
 import com.meidusa.amoeba.sqljep.function.Comparative;
 import com.meidusa.amoeba.sqljep.function.ComparativeAND;
 import com.meidusa.amoeba.sqljep.function.ComparativeBaseList;

@@ -245,7 +245,7 @@ public class ConnectionManager extends LoopingThread implements Reporter {
 				executor.execute(new NameableRunner(){
 					public void run(){
 						try{
-							int got = tmpHandler.handleEvent(iterStamp);
+							tmpHandler.handleEvent(iterStamp);
 							/*if (got != 0) {
 								lock.lock();
 								try{

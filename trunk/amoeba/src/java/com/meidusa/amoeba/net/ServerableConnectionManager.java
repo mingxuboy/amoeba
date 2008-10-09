@@ -58,8 +58,7 @@ public class ServerableConnectionManager extends AuthingableConnectionManager{
 		}
 	}
 	
-	// documentation inherited
-	@SuppressWarnings("unchecked")
+	// documentation inherited	
 	protected void willStart() {
 		super.willStart();
 		try {
