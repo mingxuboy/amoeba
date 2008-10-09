@@ -36,6 +36,7 @@ public class PreparedResultPacket extends ErrorResultPacket{
 			conn.postMessage(okPaket.toByteBuffer(conn));
 			for(int i=0;i<parameterCount;i++){
 				FieldPacket field = new  FieldPacket();
+				field.packetId = (byte)(2+i);
 				conn.postMessage(field.toByteBuffer(conn));
 			}
 		}

@@ -16,7 +16,6 @@ import com.meidusa.amoeba.net.Connection;
 import com.meidusa.amoeba.net.MessageHandler;
 import com.meidusa.amoeba.net.Sessionable;
 import com.meidusa.amoeba.net.poolable.ObjectPool;
-import com.meidusa.amoeba.net.poolable.PoolableObject;
 
 
 /**
@@ -67,26 +66,26 @@ public abstract class CommandMessageHandler implements MessageHandler, Sessionab
 		}
 		
 		/**
-		 * Connection 将在 run中返回到pool中
+		 * Connection 将在end session 中返回到pool中
 		 * @param conn
 		 */
 		protected abstract void doRun(java.sql.Connection conn);
 		
 		public void run() {
 			try{
-				PoolableObject poolobject = (PoolableObject) conn;
+				//PoolableObject poolobject = (PoolableObject) conn;
 				try {
 					doRun(conn);
-					try {
+					/*try {
 						poolobject.getObjectPool().returnObject(poolobject);
 					} catch (Exception e) {
-					}
+					}*/
 				} catch (Exception e) {
 					logger.error("run query error:",e);
-					try {
+					/*try {
 						poolobject.getObjectPool().invalidateObject(poolobject);
 					} catch (Exception e1) {
-					}
+					}*/
 				}
 			}finally{
 				latch.countDown();
@@ -141,6 +140,7 @@ public abstract class CommandMessageHandler implements MessageHandler, Sessionab
 		}else{
 			latch.await();
 		}
+		endSession();
 		packet.wirteToConnection(source);
 	}
 

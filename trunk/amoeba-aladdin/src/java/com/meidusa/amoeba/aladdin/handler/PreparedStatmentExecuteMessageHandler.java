@@ -55,20 +55,21 @@ public class PreparedStatmentExecuteMessageHandler extends CommandMessageHandler
 				ResultSet rs = null;
 				try {
 					pst = conn.prepareStatement(query);
-				
-					if(isSelect(query)){
-						int i=1;
-						for(BindValue value : executePacket.values){
-							if(!value.isNull){
-								pst.setObject(i++, value.value, MysqlDefs.mysqlToJavaType(value.bufferType));
-							}else{
-								pst.setObject(i++,value.value);
-							}
+					int i=1;
+					for(BindValue value : executePacket.values){
+						if(!value.isNull){
+							pst.setObject(i++, value.value, MysqlDefs.mysqlToJavaType(value.bufferType));
+						}else{
+							pst.setObject(i++,value.value);
 						}
-						
+					}
+					if(isSelect(query)){
 						rs = pst.executeQuery();
 						MysqlResultSetPacket resultPacket = (MysqlResultSetPacket)packet;
 						ResultSetUtil.resultSetToPacket(resultPacket,rs);
+					}else{
+						MysqlSimpleResultPacket simplePacket = (MysqlSimpleResultPacket)packet;
+						simplePacket.addResultCount(pst.executeUpdate());
 					}
 				} catch (SQLException e) {
 					packet.setError(e.getErrorCode(), e.getMessage());
