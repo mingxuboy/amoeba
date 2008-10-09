@@ -24,8 +24,9 @@ public class MysqlSimpleResultPacket extends ErrorResultPacket {
 		}
 		OkPacket packet = new OkPacket();
 		packet.affectedRows = resultCount.get();
-		packet.insertId = 1;
+		packet.insertId = 0;
 		packet.serverStatus = 2;
+		packet.packetId = 1;
 		conn.postMessage(packet.toByteBuffer(conn));
 	}
 

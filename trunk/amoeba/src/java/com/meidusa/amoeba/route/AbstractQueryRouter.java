@@ -660,7 +660,7 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable{
 		String schemaName = current.getAttribute("schema");
 		Table table = new Table();
 		table.setName(name);
-		if(schemaName != null){
+		if(!StringUtil.isEmpty(schemaName)){
 			Schema schema = new Schema();
 			
 			schema.setName(schemaName);
@@ -829,7 +829,7 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable{
 				
 				Parser parser = newParser(sql);
 				parser.setFunctionMap(this.functionMap);
-				if(connection.getSchema() != null){
+				if(!StringUtil.isEmpty(connection.getSchema())){
 					Schema schema = new Schema();
 					schema.setName(connection.getSchema());
 					parser.setDefaultSchema(schema);
