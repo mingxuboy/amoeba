@@ -155,8 +155,8 @@ public class OracleQueryMessageHandler extends AbstractMessageQueuedHandler impl
             ObjectPool pool = pools[i];
             OracleServerConnection conn = (OracleServerConnection) pool.borrowObject();
             if (logger.isDebugEnabled()) {
-                int hash = conn.getObjectPool().hashCode();
-                System.out.println("conn:" + hash + " borrow from pool +++++++++++++++++++");
+                int h = conn.getObjectPool().hashCode();
+                System.out.println("\n+++++++++++++++++++++++++ conn[" + h + "] borrow from pool ++++++++++++++++++++++++++");
             }
             serverConns[i] = conn;
             handlerMap.put(conn, conn.getMessageHandler());
@@ -185,8 +185,8 @@ public class OracleQueryMessageHandler extends AbstractMessageQueuedHandler impl
                                 try {
                                     pooledObject.getObjectPool().returnObject(conn);
                                     if (logger.isDebugEnabled()) {
-                                        int hash = conn.getObjectPool().hashCode();
-                                        System.out.println("conn:" + hash + " returned to pool -------------------");
+                                        int h = conn.getObjectPool().hashCode();
+                                        System.out.println("\n------------------------- conn[" + h + "] returned to pool --------------------------\n");
                                     }
                                 } catch (Exception e) {
                                     logger.error("OracleQueryMessageHandler endSession error", e);
