@@ -8,8 +8,6 @@ import java.util.Map;
 import org.apache.log4j.Logger;
 
 import com.meidusa.amoeba.net.Connection;
-import com.meidusa.amoeba.net.poolable.ObjectPool;
-import com.meidusa.amoeba.oracle.context.OracleProxyRuntimeContext;
 import com.meidusa.amoeba.oracle.handler.OracleQueryDispatcher;
 import com.meidusa.amoeba.oracle.net.packet.AcceptPacket;
 import com.meidusa.amoeba.oracle.net.packet.AnoDataPacket;
@@ -34,33 +32,15 @@ import com.meidusa.amoeba.util.StringUtil;
 
 public class OracleClientConnection extends OracleConnection implements SQLnetDef {
 
-    private static Logger        logger          = Logger.getLogger(OracleClientConnection.class);
-    private String               defaultPoolName = null;
-    private ObjectPool           pool            = null;
-    private String               encryptedSK;
+    private static Logger        logger        = Logger.getLogger(OracleClientConnection.class);
 
-    private Map<Integer, byte[]> lobLocaterMap   = new HashMap<Integer, byte[]>();
-    private boolean              isLobOps        = false;
-    private int                  lobOpsRow       = 0;
-    private int                  poolHashCode    = 0;
+    private String               encryptedSK;
+    private Map<Integer, byte[]> lobLocaterMap = new HashMap<Integer, byte[]>();
+    private boolean              isLobOps      = false;
 
     public OracleClientConnection(SocketChannel channel, long createStamp){
         super(channel, createStamp);
-        defaultPoolName = OracleProxyRuntimeContext.getInstance().getQueryRouter().getDefaultPool();
-        pool = OracleProxyRuntimeContext.getInstance().getPoolMap().get(defaultPoolName);
     }
-
-    public int getPoolHashCode() {
-        return 0;
-    }
-
-//    public int getLobOpsRow() {
-//        return lobOpsRow;
-//    }
-//
-//    public void setLobOpsRow(int lobOpsRow) {
-//        this.lobOpsRow = lobOpsRow;
-//    }
 
     public boolean isLobOps() {
         return isLobOps;
@@ -185,10 +165,14 @@ public class OracleClientConnection extends OracleConnection implements SQLnetDe
 
         if (byteBuffer != null) {
             if (logger.isDebugEnabled()) {
-                System.out.println("\n#amoeba message from client ========================================================");
-                System.out.println("#receive " + receivePacket + " from client:" + ByteUtil.toHex(message, 0, message.length));
+                int size = ((message[0] & 0xff) << 8) | (message[1] & 0xff);
+                logger.debug("");
+                logger.debug("#amoeba auth message from client ===================================================");
+                logger.debug(">>" + receivePacket + " receive from client[" + size + "]:" + ByteUtil.toHex(message, 0, message.length));
+
                 byte[] respMessage = byteBuffer.array();
-                System.out.println("#response to client " + responsePacket + ":" + ByteUtil.toHex(respMessage, 0, respMessage.length));
+                size = ((respMessage[0] & 0xff) << 8) | (respMessage[1] & 0xff);
+                logger.debug("<<" + responsePacket + " send to client[" + size + "]:" + ByteUtil.toHex(respMessage, 0, respMessage.length));
             }
             this.postMessage(byteBuffer);
         }

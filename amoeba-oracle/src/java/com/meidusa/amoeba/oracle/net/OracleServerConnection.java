@@ -36,15 +36,15 @@ import com.meidusa.amoeba.util.ThreadLocalMap;
  */
 public class OracleServerConnection extends OracleConnection implements PoolableObject, SQLnetDef {
 
-    private static Logger logger = Logger.getLogger(OracleServerConnection.class);
+    private static Logger logger      = Logger.getLogger(OracleServerConnection.class);
     private boolean       active;
     private ObjectPool    objectPool;
     private Packet        lastPacketRequest;
     /**
-	 * 该lock表示 该connection处于handleMessage中
-	 */
-	public final Lock processLock = new ReentrantLock(false);
-	
+     * 该lock表示 该connection处于handleMessage中
+     */
+    public final Lock     processLock = new ReentrantLock(false);
+
     public OracleServerConnection(SocketChannel channel, long createStamp){
         super(channel, createStamp);
     }
@@ -55,20 +55,20 @@ public class OracleServerConnection extends OracleConnection implements Poolable
         ByteBuffer byteBuffer = packet.toByteBuffer(this);
 
         if (logger.isDebugEnabled()) {
+            logger.debug("#amoeba auth message from server ===================================================");
             byte[] respMessage = byteBuffer.array();
-            System.out.println("\n@amoeba message from server ========================================================");
-            System.out.println("@send to Server ConnectPacket:" + ByteUtil.toHex(respMessage, 0, respMessage.length));
+            int size = ((respMessage[0] & 0xff) << 8) | (respMessage[1] & 0xff);
+            logger.debug(">>ConnectPacket send to server[" + size + "]:" + ByteUtil.toHex(respMessage, 0, respMessage.length));
         }
 
         this.postMessage(byteBuffer);
     }
 
-    
-    public boolean checkIdle(long now){
-    	//we are not idle
-    	return false;
+    public boolean checkIdle(long now) {
+        // we are not idle
+        return false;
     }
-    
+
     public void handleMessage(Connection conn, byte[] buffer) {
         OracleServerConnection serverConn = (OracleServerConnection) conn;
         ByteBuffer byteBuffer = null;
@@ -177,7 +177,8 @@ public class OracleServerConnection extends OracleConnection implements Poolable
 
                 } else if (lastPacketRequest instanceof T4CTTIoAuthDataPacket) {
                     if (logger.isDebugEnabled()) {
-                        System.out.println("@receive T4CTTIoAuthResponseDataPacket from Server:" + ByteUtil.toHex(buffer, 0, buffer.length));
+                        int size = ((buffer[0] & 0xff) << 8) | (buffer[1] & 0xff);
+                        logger.debug("<<T4CTTIoAuthResponseDataPacket receive  from server[" + size + "]:" + ByteUtil.toHex(buffer, 0, buffer.length));
                     }
 
                     T4CTTIoAuthResponseDataPacket authRespPacket = new T4CTTIoAuthResponseDataPacket();
@@ -203,10 +204,14 @@ public class OracleServerConnection extends OracleConnection implements Poolable
 
         if (byteBuffer != null) {
             if (logger.isDebugEnabled()) {
-                System.out.println("@receive " + receivePacket + " from Server:" + ByteUtil.toHex(buffer, 0, buffer.length));
+                int size = ((buffer[0] & 0xff) << 8) | (buffer[1] & 0xff);
+                logger.debug("<<" + receivePacket + " receive from server[" + size + "]:" + ByteUtil.toHex(buffer, 0, buffer.length));
+
                 byte[] respMessage = byteBuffer.array();
-                System.out.println("\n@amoeba message from server ========================================================");
-                System.out.println("@send to Server " + sendPacket + ":" + ByteUtil.toHex(respMessage, 0, respMessage.length));
+                size = ((respMessage[0] & 0xff) << 8) | (respMessage[1] & 0xff);
+                logger.debug("");
+                logger.debug("#amoeba auth message from server ===================================================");
+                logger.debug(">>" + sendPacket + " send to server[" + size + "]:" + ByteUtil.toHex(respMessage, 0, respMessage.length));
             }
             this.postMessage(byteBuffer);
         }
@@ -215,38 +220,38 @@ public class OracleServerConnection extends OracleConnection implements Poolable
     private void establishConnection(String data) {
 
     }
-    
+
     @SuppressWarnings("unchecked")
-	@Override
-    protected void messageProcess(final byte[] msg){
-    	if(_handler instanceof MessageQueuedHandler){
-    		final MessageQueuedHandler<byte[]> exchanger = (MessageQueuedHandler<byte[]>) _handler;
-    		synchronized (this.processLock) {
-    			if(exchanger.inHandleProcess(this)){
-						exchanger.push(this, msg);
-    			}else{
-    				exchanger.setInHandleProcess(this,true);
-    				ProxyRuntimeContext.getInstance().getServerSideExecutor().execute(new Runnable(){
-    	    			public void run() {
-    	    				ThreadLocalMap.put(StaticString.HANDLER, exchanger);
-    	    				try{
-    	    					_handler.handleMessage(OracleServerConnection.this,msg);
-    	    				}finally{
-    	    					ThreadLocalMap.remove(StaticString.HANDLER);
-    	    				}
-    	    			}
-    	        	});
-    			}
-    			
-    			/*try {
-					processLock.wait();
-				} catch (InterruptedException e) {
-				}*/
-    		}
-    	}else{
-    		_handler.handleMessage(this,msg);
-    	}
-    	
+    @Override
+    protected void messageProcess(final byte[] msg) {
+        if (_handler instanceof MessageQueuedHandler) {
+            final MessageQueuedHandler<byte[]> exchanger = (MessageQueuedHandler<byte[]>) _handler;
+            synchronized (this.processLock) {
+                if (exchanger.inHandleProcess(this)) {
+                    exchanger.push(this, msg);
+                } else {
+                    exchanger.setInHandleProcess(this, true);
+                    ProxyRuntimeContext.getInstance().getServerSideExecutor().execute(new Runnable() {
+
+                        public void run() {
+                            ThreadLocalMap.put(StaticString.HANDLER, exchanger);
+                            try {
+                                _handler.handleMessage(OracleServerConnection.this, msg);
+                            } finally {
+                                ThreadLocalMap.remove(StaticString.HANDLER);
+                            }
+                        }
+                    });
+                }
+
+                /*
+                 * try { processLock.wait(); } catch (InterruptedException e) { }
+                 */
+            }
+        } else {
+            _handler.handleMessage(this, msg);
+        }
+
     }
 
     public ObjectPool getObjectPool() {

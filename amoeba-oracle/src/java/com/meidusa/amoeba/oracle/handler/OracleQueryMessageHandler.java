@@ -61,7 +61,7 @@ public class OracleQueryMessageHandler extends AbstractMessageQueuedHandler impl
 
             if (MarkerPacket.isMarkerType(message)) {
                 if (logger.isDebugEnabled()) {
-                    System.out.println(">>receive marker packet from client!");
+                    logger.debug(">>receive marker packet from client!");
                 }
                 message[10] = 2;
                 sendPrint(logger.isDebugEnabled(), message, false);
@@ -116,7 +116,7 @@ public class OracleQueryMessageHandler extends AbstractMessageQueuedHandler impl
 
             if (MarkerPacket.isMarkerType(message)) {
                 if (logger.isDebugEnabled()) {
-                    System.out.println("<<receive marker packet from server!");
+                    logger.debug("<<receive marker packet from server!");
                 }
                 message[10] = 2;
                 OracleServerConnection osconn = (OracleServerConnection) conn;
@@ -147,16 +147,14 @@ public class OracleQueryMessageHandler extends AbstractMessageQueuedHandler impl
     }
 
     public void startSession() throws Exception {
-        if (logger.isInfoEnabled()) {
-            logger.info(this + " session start");
-        }
         serverConns = new OracleServerConnection[pools.length];
         for (int i = 0; i < pools.length; i++) {
             ObjectPool pool = pools[i];
             OracleServerConnection conn = (OracleServerConnection) pool.borrowObject();
             if (logger.isDebugEnabled()) {
                 int h = conn.getObjectPool().hashCode();
-                System.out.println("\n+++++++++++++++++++++++++ conn[" + h + "] borrow from pool ++++++++++++++++++++++++++");
+                logger.debug("");
+                logger.debug("+++++++++++++++++++++++++ borrowed conn[" + h + "] from pool ++++++++++++++++++++++++");
             }
             serverConns[i] = conn;
             handlerMap.put(conn, conn.getMessageHandler());
@@ -186,7 +184,8 @@ public class OracleQueryMessageHandler extends AbstractMessageQueuedHandler impl
                                     pooledObject.getObjectPool().returnObject(conn);
                                     if (logger.isDebugEnabled()) {
                                         int h = conn.getObjectPool().hashCode();
-                                        System.out.println("\n------------------------- conn[" + h + "] returned to pool --------------------------\n");
+                                        logger.debug("");
+                                        logger.debug("------------------------- returned conn[" + h + "] to pool --------------------------\n");
                                     }
                                 } catch (Exception e) {
                                     logger.error("OracleQueryMessageHandler endSession error", e);
@@ -305,11 +304,12 @@ public class OracleQueryMessageHandler extends AbstractMessageQueuedHandler impl
     private void receivePrint(boolean isEnabled, byte[] message, boolean isClient) {
         if (isEnabled) {
             int size = ((message[0] & 0xff) << 8) | (message[1] & 0xff);
-            System.out.println("\n%amoeba query message ==============================================================");
+            logger.debug("");
+            logger.debug("#amoeba query message ==============================================================");
             if (isClient) {
-                System.out.println(">>receive from client[" + size + "]:" + ByteUtil.toHex(message, 0, message.length));
+                logger.debug(">>receive from client[" + size + "]:" + ByteUtil.toHex(message, 0, message.length));
             } else {
-                System.out.println("<<receive from server[" + size + "]:" + ByteUtil.toHex(message, 0, message.length));
+                logger.debug("<<receive from server[" + size + "]:" + ByteUtil.toHex(message, 0, message.length));
             }
         }
     }
@@ -317,12 +317,11 @@ public class OracleQueryMessageHandler extends AbstractMessageQueuedHandler impl
     private void sendPrint(boolean isEnabled, byte[] message, boolean isClient) {
         if (isEnabled) {
             int size = ((message[0] & 0xff) << 8) | (message[1] & 0xff);
+            logger.debug("#amoeba query message ==============================================================");
             if (isClient) {
-                System.out.println(">>amoeba query message =============================================================");
-                System.out.println(">>send to server[" + size + "]:" + ByteUtil.toHex(message, 0, message.length));
+                logger.debug(">>send to server[" + size + "]:" + ByteUtil.toHex(message, 0, message.length));
             } else {
-                System.out.println("<<amoeba query message =============================================================");
-                System.out.println("<<send to client[" + size + "]:" + ByteUtil.toHex(message, 0, message.length));
+                logger.debug("<<send to client[" + size + "]:" + ByteUtil.toHex(message, 0, message.length));
             }
         }
     }
