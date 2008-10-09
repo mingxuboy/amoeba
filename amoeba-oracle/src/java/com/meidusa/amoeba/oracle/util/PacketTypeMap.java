@@ -29,8 +29,4 @@ public class PacketTypeMap {
         return map.get(i);
     }
 
-    public static void main(String[] args) {
-        System.out.println(PacketTypeMap.get(1));
-    }
-
 }

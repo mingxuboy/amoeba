@@ -158,12 +158,12 @@ public class OracleMessageHandler implements MessageHandler, Sessionable, SQLnet
                         logger.debug("@@server source:" + ByteUtil.toHex(message, 0, message.length));
                     }
                     message = packet.toByteBuffer(conn).array();
-                    
-                    if(packet instanceof T4C8TTIdtyResponseDataPacket){
-                    	clientConn.setBasicTypes();
-                    	serverConn.setBasicTypes();
+
+                    if (packet instanceof T4C8TTIdtyResponseDataPacket) {
+                        clientConn.setBasicTypes();
+                        serverConn.setBasicTypes();
                     }
-                    
+
                     if (logger.isDebugEnabled()) {
                         logger.debug("@server warpped:" + ByteUtil.toHex(message, 0, message.length));
                         logger.debug("");

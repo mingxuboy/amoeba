@@ -6,12 +6,9 @@ import com.meidusa.amoeba.net.FrontendConnectionFactory;
 
 public class OracleClientConnectionFactory extends FrontendConnectionFactory {
 
-	@Override
-	protected OracleConnection newConnectionInstance(SocketChannel channel,
-			long createStamp) {
-		return new OracleClientConnection(channel,createStamp);
-	}
-
-	
+    @Override
+    protected OracleConnection newConnectionInstance(SocketChannel channel, long createStamp) {
+        return new OracleClientConnection(channel, createStamp);
+    }
 
 }

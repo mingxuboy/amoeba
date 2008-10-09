@@ -2,6 +2,12 @@ package com.meidusa.amoeba.oracle.net.packet.assist;
 
 import com.meidusa.amoeba.oracle.net.packet.T4CPacketBuffer;
 
+/**
+ * lob数据处理包
+ * 
+ * @author hexianmao
+ * @version 2008-10-9 下午10:10:10
+ */
 class T4C8TTILobd {
 
     static final int   LOBD_STATE0     = 0;

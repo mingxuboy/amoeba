@@ -1,7 +1,12 @@
 package com.meidusa.amoeba.oracle.util;
 
-import java.util.Arrays;
 
+/**
+ * byte处理工具包
+ * 
+ * @author hexianmao
+ * @version 2008-10-9 下午10:13:30
+ */
 public final class ByteUtil {
 
     private ByteUtil(){
@@ -93,26 +98,4 @@ public final class ByteUtil {
         }
     }
 
-    public static void main(String[] args) throws Exception {
-        // byte[] b = { 1, 2, 3, 4, 50, 60, 70 };
-        // System.out.println(toHex(b, 3, 4));
-
-        // String hex = "41 55 54 48 5f 53 45 53 53 4b 45 59";
-        // System.out.println(fromHex(hex, null));
-
-        long val = 16909060;
-        byte[] src = { 1, 2, 3, 4, 5, 6, 7, 8 };
-
-        long st = System.currentTimeMillis();
-        for (int i = 0; i < 1000 * 10000; i++) {
-            val = ByteUtil.toLong64BE(src, 0);
-            // ByteUtil.toByte64BE(val, src, 0);
-        }
-        long et = System.currentTimeMillis();
-
-        System.out.println("take time:" + (et - st) + " ms");
-        System.out.println("val:" + val);
-        System.out.println("bytes:" + Arrays.toString(src));
-
-    }
 }
