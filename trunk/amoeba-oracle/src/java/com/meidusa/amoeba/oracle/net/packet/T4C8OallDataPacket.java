@@ -162,7 +162,7 @@ public class T4C8OallDataPacket extends T4CTTIfunPacket {
                 if (object instanceof String) {
                     String s = (String) object;
                     if (s.length() > 4000) {
-                        System.out.println("param_" + i + ":" + s.substring(0, 4000) + "... #dataLength:" + s.length());
+                        System.out.println("param_" + i + ":large data... length:" + s.length());
                     } else {
                         System.out.println("param_" + i + ":" + s);
                     }

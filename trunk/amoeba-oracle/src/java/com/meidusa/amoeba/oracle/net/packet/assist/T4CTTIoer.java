@@ -1,36 +1,42 @@
 package com.meidusa.amoeba.oracle.net.packet.assist;
 
+import org.apache.log4j.Logger;
+
 import com.meidusa.amoeba.oracle.net.packet.T4CPacketBuffer;
 
 public class T4CTTIoer {
 
-    final int     MAXERRBUF = 512;
+    public static final int ORA1403   = 1403;                             // 表示数据传输结束
 
-    public short  endToEndECIDSequenceNumber;
-    public long   curRowNumber;
-    public int    retCode;
-    public int    arrayElemWError;
-    public int    arrayElemErrno;
-    public int    currCursorID;
-    public short  errorPosition;
-    public short  sqlType;
-    public byte   oerFatal;
-    public short  flags;
-    public short  userCursorOpt;
-    public short  upiParam;
-    public short  warningFlag;
-    public int    osError;
-    public short  stmtNumber;
-    public short  callNumber;
-    public int    pad1;
-    public long   successIters;
-    public int    partitionId;
-    public short  tableId;
-    public int    slotNumber;
-    public long   rba;
-    public long   blockNumber;
-    public int    warnFlag;
-    public String errorMsg;
+    private static Logger   logger    = Logger.getLogger(T4CTTIoer.class);
+
+    final int               MAXERRBUF = 512;
+
+    public short            endToEndECIDSequenceNumber;
+    public long             curRowNumber;
+    public int              retCode;
+    public int              arrayElemWError;
+    public int              arrayElemErrno;
+    public int              currCursorID;
+    public short            errorPosition;
+    public short            sqlType;
+    public byte             oerFatal;
+    public short            flags;
+    public short            userCursorOpt;
+    public short            upiParam;
+    public short            warningFlag;
+    public int              osError;
+    public short            stmtNumber;
+    public short            callNumber;
+    public int              pad1;
+    public long             successIters;
+    public int              partitionId;
+    public short            tableId;
+    public int              slotNumber;
+    public long             rba;
+    public long             blockNumber;
+    public int              warnFlag;
+    public String           errorMsg;
 
     public T4CTTIoer(){
         warnFlag = 0;
@@ -41,8 +47,8 @@ public class T4CTTIoer {
         errorMsg = null;
     }
 
-    public boolean isErrorPacket() {
-        return retCode != 0;
+    public void processError() {
+        logger.error("code:" + retCode + " message:" + errorMsg);
     }
 
     public int unmarshal(T4CPacketBuffer meg) {

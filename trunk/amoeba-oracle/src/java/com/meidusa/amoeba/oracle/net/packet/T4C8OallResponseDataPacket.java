@@ -54,7 +54,7 @@ public class T4C8OallResponseDataPacket extends DataPacket {
         if (status.isLobOps()) {
             status.getLob().unmarshalResponse(meg);
             if (status.getLob().isComplete()) {
-                this.status.setCompleted(true);
+                status.setCompleted(true);
             }
         } else {
             packetType = meg.unmarshalSB1();
@@ -68,12 +68,11 @@ public class T4C8OallResponseDataPacket extends DataPacket {
                 case QUERY_RESULT:// 6
                     query = new T4CQueryResultResponseDataPacket();
                     query.init(meg);
-                    this.status.setCompleted(true);
                     break;
                 case EXEC_RESULT:// 8
                     execute = new T4CExecuteResultResponseDataPacket();
                     execute.init(meg);
-                    this.status.setCompleted(true);
+                    status.setCompleted(true);
                     break;
                 default:
                     throw new RuntimeException("unknown type packet:" + packetType);
@@ -241,6 +240,11 @@ public class T4C8OallResponseDataPacket extends DataPacket {
                     case QUERY_END:// 4
                         oer.init();
                         oer.unmarshal(meg);
+                        if (oer.retCode == T4CTTIoer.ORA1403) {
+                            status.setCompleted(true);
+                        } else if (oer.retCode != 0) {
+                            oer.processError();
+                        }
                         return;
                     default:
                         throw new RuntimeException("unknown type:" + byte0);
