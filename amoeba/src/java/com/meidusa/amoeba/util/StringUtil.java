@@ -387,6 +387,7 @@ public class StringUtil {
      *
      * @return 分割后的字符串数组，如果原字符串为<code>null</code>，则返回<code>null</code>
      */
+    @SuppressWarnings("unchecked")
     public static String[] split(String str, char separatorChar) {
         if (str == null) {
             return null;
@@ -472,6 +473,7 @@ public class StringUtil {
      *
      * @return 分割后的字符串数组，如果原字符串为<code>null</code>，则返回<code>null</code>
      */
+    @SuppressWarnings("unchecked")
     public static String[] split(String str, String separatorChars, int max) {
         if (str == null) {
             return null;

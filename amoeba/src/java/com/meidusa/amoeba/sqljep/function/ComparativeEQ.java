@@ -12,11 +12,6 @@
 
 package com.meidusa.amoeba.sqljep.function;
 
-import java.math.BigDecimal;
-
-import com.meidusa.amoeba.sqljep.function.Comparative;
-import com.meidusa.amoeba.sqljep.function.ComparativeComparator;
-import com.meidusa.amoeba.sqljep.function.PostfixCommand;
 import com.meidusa.amoeba.sqljep.ASTFunNode;
 import com.meidusa.amoeba.sqljep.JepRuntime;
 import com.meidusa.amoeba.sqljep.ParseException;
