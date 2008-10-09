@@ -63,12 +63,14 @@ public class OracleQueryDispatcher implements MessageHandler {
                     } else if (packet.isOlogoff()) {// 处理logoff数据包
                         conn.postMessage(logoffBytes);
                         if (logger.isDebugEnabled()) {
-                            int size = ((message[0] & 0xff) << 8) | (message[1] & 0xff);
+                            int size = ((tmpBuffer[0] & 0xff) << 8) | (tmpBuffer[1] & 0xff);
                             System.out.println("%amoeba query message ==============================================================");
-                            System.out.println(">>receive from client[" + size + "]:" + ByteUtil.toHex(message, 0, message.length));
+                            System.out.println(">>receive from client[" + size + "]:" + ByteUtil.toHex(tmpBuffer, 0, tmpBuffer.length));
                             System.out.println("<<amoeba query message =============================================================");
                             System.out.println("<<send to client[" + logoffBytes.length + "]:" + ByteUtil.toHex(logoffBytes, 0, logoffBytes.length));
                         }
+                        clearBuffer();
+                        return;
                     } else {
                         if (logger.isDebugEnabled()) {
                             System.out.println("warning!unprocess data packet.");
