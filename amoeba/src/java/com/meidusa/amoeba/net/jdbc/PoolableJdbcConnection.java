@@ -16,12 +16,10 @@ import com.meidusa.amoeba.net.poolable.PoolableObject;
 public class PoolableJdbcConnection extends ConnectionWrapper implements PoolableObject {
 	private static Logger logger = Logger.getLogger(PoolableJdbcConnection.class);
 	private ObjectPool objectPool;
-	private long createTime;
 	private boolean active;
 	
 	public PoolableJdbcConnection(Connection conn){
 		super(conn);
-		createTime = System.currentTimeMillis();
 	}
 
 	public ObjectPool getObjectPool() {
