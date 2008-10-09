@@ -11,7 +11,7 @@
 <!ATTLIST tableRule defaultPools CDATA #REQUIRED >
 <!ATTLIST tableRule name NMTOKEN #REQUIRED >
 <!ATTLIST tableRule readPools CDATA #IMPLIED >
-<!ATTLIST tableRule schema NMTOKEN #REQUIRED >
+<!ATTLIST tableRule schema NMTOKEN #IMPLIED >
 <!ATTLIST tableRule writePools CDATA #IMPLIED >
 
 <!ELEMENT rule ( defaultPools | expression | parameters | readPools | writePools )* >
