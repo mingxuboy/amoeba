@@ -30,16 +30,19 @@ public abstract class DatabaseConnection extends AuthingableConnection{
 	 */
 	protected int transactionIsolation;
 	
-	protected String clientCharset;
+	/**
+	 * 当前连接相关的终端系统(client/dbserver)所采取的字符编码
+	 */
+	protected String charset;
 	
-	public String getClientCharset() {
-		return clientCharset;
+	public String getCharset() {
+		return charset;
 	}
 
-	public void setClientCharset(String clientCharset) {
-		this.clientCharset = clientCharset;
+	public void setCharset(String charset) {
+		this.charset = charset;
 		if(logger.isDebugEnabled()){
-			logger.debug("set client charset="+clientCharset);
+			logger.debug("set client charset="+charset);
 		}
 	}
 

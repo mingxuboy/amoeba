@@ -1,17 +1,13 @@
-package com.meidusa.amoeba.aladdin.io;
+package com.meidusa.amoeba.aladdin.util;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.List;
 
 import org.apache.log4j.Logger;
 
+import com.meidusa.amoeba.aladdin.io.MysqlResultSetPacket;
 import com.meidusa.amoeba.mysql.jdbc.MysqlDefs;
 import com.meidusa.amoeba.mysql.net.MysqlClientConnection;
 import com.meidusa.amoeba.mysql.net.packet.EOFPacket;
@@ -19,6 +15,7 @@ import com.meidusa.amoeba.mysql.net.packet.FieldPacket;
 import com.meidusa.amoeba.mysql.net.packet.MysqlPacketBuffer;
 import com.meidusa.amoeba.mysql.net.packet.ResultSetHeaderPacket;
 import com.meidusa.amoeba.mysql.net.packet.RowDataPacket;
+import com.meidusa.amoeba.net.jdbc.ResultSetHandler;
 
 /**
  * 
@@ -46,8 +43,7 @@ public class ResultSetUtil {
 		return flags;
 	}
 	
-	public static void resultSetToPacket(MysqlResultSetPacket packet,ResultSet rs) throws SQLException{
-		
+	public static void resultSetToPacket(MysqlClientConnection source, MysqlResultSetPacket packet,ResultSet rs, ResultSetHandler handler) throws SQLException{
 		ResultSetMetaData metaData = rs.getMetaData();
 		int colunmCount = metaData.getColumnCount();
 		synchronized (packet) {

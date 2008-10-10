@@ -1,4 +1,7 @@
 package com.meidusa.amoeba.mysql.util;
+
+import com.meidusa.amoeba.util.StringUtil;
+
 public class CharsetMapping {
 	public static final String[] INDEX_TO_CHARSET;
 	static {	
@@ -94,5 +97,26 @@ public class CharsetMapping {
 		INDEX_TO_CHARSET[96] = "cp932";
 		INDEX_TO_CHARSET[97] = "eucjpms";
 		INDEX_TO_CHARSET[98] = "eucjpms";
+	}
+	
+	public static byte getCharsetIndex(String charset){
+		if(StringUtil.isEmpty(charset)){
+			return 0;
+		}else{
+			charset = charset.toLowerCase().trim();
+			if(charset.equalsIgnoreCase("iso_8859_1")){
+				charset = "cp1251"; 
+			}
+			if(charset.equalsIgnoreCase("utf-8")){
+				charset = "utf8"; 
+			}
+			
+			for(byte i=1;i<INDEX_TO_CHARSET.length;i++){
+				if(INDEX_TO_CHARSET[i]!= null && INDEX_TO_CHARSET[i].equals(charset)){
+					return i;
+				}
+			}
+		}
+		return 0;
 	}
 }

@@ -19,6 +19,11 @@ public class JdbcConnectionFactory implements PoolableObjectFactory,Initialisabl
 	private String url;
 	private Driver driver;
 	private Properties properties;
+	private ResultSetHandler resultSetHandler;
+	
+	public void setResultSetHandler(ResultSetHandler ioHandler) {
+		this.resultSetHandler = ioHandler;
+	}
 
 	public String getDriverName() {
 		return driverName;
@@ -60,7 +65,9 @@ public class JdbcConnectionFactory implements PoolableObjectFactory,Initialisabl
 	}
 
 	public Object makeObject() throws Exception {
-		return new PoolableJdbcConnection(driver.connect(url, properties));
+		PoolableJdbcConnection conn = new PoolableJdbcConnection(driver.connect(url, properties));
+		conn.setResultSetHandler(resultSetHandler);
+		return conn;
 	}
 
 	public void passivateObject(Object obj) throws Exception {

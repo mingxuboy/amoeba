@@ -21,6 +21,7 @@ import com.meidusa.amoeba.mysql.io.MySqlPacketConstant;
 import com.meidusa.amoeba.mysql.util.MysqlStringUtil;
 import com.meidusa.amoeba.mysql.util.SingleByteCharsetConverter;
 import com.meidusa.amoeba.net.Connection;
+import com.meidusa.amoeba.net.DatabaseConnection;
 import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
 import com.meidusa.amoeba.util.StringUtil;
 
@@ -50,6 +51,10 @@ public class MysqlPacketBuffer extends AbstractPacketBuffer{
 	
 	public void init(Connection conn){
 		super.init(conn);
+	}
+	
+	public DatabaseConnection getConnection(){
+		return (DatabaseConnection)this.conn;
 	}
 	
 	public int getPacketLength(){

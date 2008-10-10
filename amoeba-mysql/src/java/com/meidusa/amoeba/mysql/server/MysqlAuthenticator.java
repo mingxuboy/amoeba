@@ -53,10 +53,10 @@ public class MysqlAuthenticator extends DummyAuthenticator implements MySqlPacke
 		try{
 			AuthenticationPacket autheticationPacket = new AuthenticationPacket();
 			autheticationPacket.init(mysqlConn.getAuthenticationMessage(),conn);
-			mysqlConn.setClientCharset(CharsetMapping.INDEX_TO_CHARSET[autheticationPacket.charsetNumber & 0xff]);
+			mysqlConn.setCharset(CharsetMapping.INDEX_TO_CHARSET[autheticationPacket.charsetNumber & 0xff]);
 			boolean passwordchecked = false;
 			if(logger.isDebugEnabled()){
-				if(map.get(conn.getInetAddress().getHostAddress()) == null){
+				if(conn.getInetAddress() != null && map.get(conn.getInetAddress().getHostAddress()) == null){
 					map.put(conn.getInetAddress().getHostAddress(), Boolean.TRUE);
 					long clientParam = autheticationPacket.clientParam;
 					StringBuilder builder = new StringBuilder();

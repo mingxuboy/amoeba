@@ -16,7 +16,7 @@ public class AbstractPacketBuffer implements PacketBuffer {
     protected int    position = 0;
 
     protected byte[] buffer   = null;
-
+    protected Connection conn;
     public AbstractPacketBuffer(byte[] buf){
         buffer = new byte[buf.length];
         System.arraycopy(buf, 0, buffer, 0, buf.length);
@@ -118,6 +118,7 @@ public class AbstractPacketBuffer implements PacketBuffer {
     }
 
     protected void init(Connection conn) {
+    	this.conn = conn;
     }
 
     public synchronized void reset() {

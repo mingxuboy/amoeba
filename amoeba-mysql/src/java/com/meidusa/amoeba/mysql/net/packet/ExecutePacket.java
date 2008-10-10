@@ -20,7 +20,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Map;
 
-import com.meidusa.amoeba.mysql.context.MysqlProxyRuntimeContext;
 import com.meidusa.amoeba.mysql.jdbc.MysqlDefs;
 import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
 import com.meidusa.amoeba.util.StaticString;
@@ -213,8 +212,7 @@ public class ExecutePacket extends CommandPacket {
 		case MysqlDefs.FIELD_TYPE_VAR_STRING:
 		case MysqlDefs.FIELD_TYPE_STRING:
 		case MysqlDefs.FIELD_TYPE_VARCHAR:
-			MysqlProxyRuntimeContext context = ((MysqlProxyRuntimeContext)MysqlProxyRuntimeContext.getInstance());
-			String charset = context.getServerCharset();
+			String charset = packet.getConnection().getCharset();
 			bindValue.value = packet.readLengthCodedString(charset);
 		}
 	}

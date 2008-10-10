@@ -22,25 +22,21 @@ import com.meidusa.amoeba.mysql.util.CharsetMapping;
 public class MysqlProxyRuntimeContext extends ProxyRuntimeContext {
 	
 	public static final String DEFAULT_SERVER_CONNECTION_FACTORY_CLASS = "com.meidusa.amoeba.mysql.net.MysqlServerConnectionFactory";
-	private String serverCharset;
-	private byte serverCharsetIndex = 14;
+	
+	private byte serverCharsetIndex;
 	
 	public MysqlProxyRuntimeContext(){
 		ProxyRuntimeContext.setInstance(this);
 	}
-	
-	public String getServerCharset() {
-		return serverCharset;
-	}
 
 	public void setServerCharsetIndex(byte serverCharsetIndex) {
 		this.serverCharsetIndex = serverCharsetIndex;
-		serverCharset = CharsetMapping.INDEX_TO_CHARSET[serverCharsetIndex & 0xff];
+		this.setServerCharset(CharsetMapping.INDEX_TO_CHARSET[serverCharsetIndex & 0xff]);
 	}
-	
 
 	public byte getServerCharsetIndex() {
-		return serverCharsetIndex;
+		if(serverCharsetIndex >0) return serverCharsetIndex;
+		return CharsetMapping.getCharsetIndex(this.getServerCharset());
 	}
 
 	@Override

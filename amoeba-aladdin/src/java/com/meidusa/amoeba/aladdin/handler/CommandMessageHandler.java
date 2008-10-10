@@ -26,7 +26,6 @@ import com.meidusa.amoeba.net.poolable.ObjectPool;
 public abstract class CommandMessageHandler implements MessageHandler, Sessionable {
 	private static Logger logger = Logger.getLogger(CommandMessageHandler.class);
 	protected MysqlClientConnection source;
-	private boolean completed;
 	private long createTime;
 	private long timeout;
 	private long endTime;
@@ -43,6 +42,7 @@ public abstract class CommandMessageHandler implements MessageHandler, Sessionab
 		protected CountDownLatch latch;
 		protected ResultPacket packet;
 		protected String query;
+		protected MysqlClientConnection source;
 		
 		QueryRunnable(CountDownLatch latch,java.sql.Connection conn,String query,Object parameter, ResultPacket packet){
 			this.conn = conn;
@@ -53,7 +53,7 @@ public abstract class CommandMessageHandler implements MessageHandler, Sessionab
 		}
 		
 		public void init(CommandMessageHandler handler){
-			
+			this.source = handler.source;
 		}
 		
 		protected static boolean isSelect(String query){
@@ -147,13 +147,17 @@ public abstract class CommandMessageHandler implements MessageHandler, Sessionab
 	protected abstract ResultPacket newResultPacket(String query);
 	protected abstract QueryRunnable newQueryRunnable(CountDownLatch latch, java.sql.Connection conn, String query2,Object parameter, ResultPacket packet);
 	public void endSession() {
+		if(isEnded()) return;
 		lock.lock();
 		try {
 			if (!ended) {
+				endTime = System.currentTimeMillis();
+				ended = true;
 				for (Map.Entry<java.sql.Connection, ObjectPool> entry : connPoolMap.entrySet()) {
 					try {
 						entry.getValue().returnObject(entry.getKey());
 					} catch (Exception e) {
+						logger.error("return connection to pool error",e);
 					}
 				}
 			}

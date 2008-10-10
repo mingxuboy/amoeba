@@ -106,6 +106,16 @@ public abstract class ProxyRuntimeContext implements Reporter{
 	
 	private QueryRouter queryRouter;
 	
+	private String serverCharset;
+	
+	public String getServerCharset() {
+		return serverCharset;
+	}
+
+	public void setServerCharset(String serverCharset) {
+		this.serverCharset = serverCharset;
+	}
+	
 	static class ReNameableThreadExecutor extends ThreadPoolExecutor{
 		//Map<Thread,String> threadNameMap = new HashMap<Thread,String>();
 		public ReNameableThreadExecutor(int poolSize) {
@@ -162,6 +172,7 @@ public abstract class ProxyRuntimeContext implements Reporter{
 		readExecutor = new ReNameableThreadExecutor(config.getReadThreadPoolSize());
 		serverSideExecutor = new ReNameableThreadExecutor(config.getServerSideThreadPoolSize());
 		clientSideExecutor = new ReNameableThreadExecutor(config.getClientSideThreadPoolSize());
+		this.setServerCharset(config.getServerCharset());
 		
 		for(Map.Entry<String, BeanObjectEntityConfig> entry : config.getManagers().entrySet()){
 			BeanObjectEntityConfig beanObjectEntityConfig = entry.getValue();

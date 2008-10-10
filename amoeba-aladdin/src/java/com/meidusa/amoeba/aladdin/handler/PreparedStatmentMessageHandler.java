@@ -29,7 +29,7 @@ public class PreparedStatmentMessageHandler extends CommandMessageHandler {
 		@Override
 		protected void doRun(java.sql.Connection conn) {
 			try{
-				int count = ProxyRuntimeContext.getInstance().getQueryRouter().parseParameterCount((DatabaseConnection)conn, query);
+				int count = ProxyRuntimeContext.getInstance().getQueryRouter().parseParameterCount((DatabaseConnection)this.source, query);
 				PreparedResultPacket preparedPacket = (PreparedResultPacket)packet;
 				PreparedStatmentInfo preparedInfo = (PreparedStatmentInfo)parameter;
 				OKforPreparedStatementPacket ok = new OKforPreparedStatementPacket();
