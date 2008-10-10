@@ -18,6 +18,16 @@ public class PoolableJdbcConnection extends ConnectionWrapper implements Poolabl
 	private ObjectPool objectPool;
 	private boolean active;
 	
+	private ResultSetHandler resultSetHandler;
+	
+	public ResultSetHandler getResultSetHandler() {
+		return resultSetHandler;
+	}
+
+	public void setResultSetHandler(ResultSetHandler ioHandler) {
+		this.resultSetHandler = ioHandler;
+	}
+
 	public PoolableJdbcConnection(Connection conn){
 		super(conn);
 	}

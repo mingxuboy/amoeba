@@ -1,5 +1,6 @@
 package com.meidusa.amoeba.aladdin.io;
 
+import com.meidusa.amoeba.mysql.net.packet.EOFPacket;
 import com.meidusa.amoeba.mysql.net.packet.FieldPacket;
 import com.meidusa.amoeba.mysql.net.packet.OKforPreparedStatementPacket;
 import com.meidusa.amoeba.net.Connection;
@@ -31,13 +32,32 @@ public class PreparedResultPacket extends ErrorResultPacket{
 			OKforPreparedStatementPacket okPaket = new OKforPreparedStatementPacket();
 			okPaket.columns = 0;
 			okPaket.packetId = 1;
+			byte packetId = 1;
 			okPaket.parameters = parameterCount;
 			okPaket.statementHandlerId = statementId;
 			conn.postMessage(okPaket.toByteBuffer(conn));
-			for(int i=0;i<parameterCount;i++){
-				FieldPacket field = new  FieldPacket();
-				field.packetId = (byte)(2+i);
-				conn.postMessage(field.toByteBuffer(conn));
+			if(parameterCount>0){
+				for(int i=0;i<parameterCount;i++){
+					FieldPacket field = new  FieldPacket();
+					field.packetId = (byte)(++packetId);
+					conn.postMessage(field.toByteBuffer(conn));
+				}
+				EOFPacket eof = new EOFPacket();
+				eof.packetId = ++packetId;
+				eof.serverStatus = 2;
+				conn.postMessage(eof.toByteBuffer(conn));
+			}
+			
+			if(okPaket.columns>0){
+				for(int i=0;i<okPaket.columns;i++){
+					FieldPacket field = new  FieldPacket();
+					field.packetId = (byte)(++packetId);
+					conn.postMessage(field.toByteBuffer(conn));
+				}
+				EOFPacket eof = new EOFPacket();
+				eof.packetId = ++packetId;
+				eof.serverStatus = 2;
+				conn.postMessage(eof.toByteBuffer(conn));
 			}
 		}
 	}

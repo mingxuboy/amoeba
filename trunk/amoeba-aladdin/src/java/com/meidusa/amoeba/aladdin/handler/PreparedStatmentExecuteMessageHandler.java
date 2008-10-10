@@ -3,23 +3,22 @@ package com.meidusa.amoeba.aladdin.handler;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Time;
+import java.sql.Date;
 import java.util.concurrent.CountDownLatch;
 
-import com.meidusa.amoeba.aladdin.handler.CommandMessageHandler.QueryRunnable;
+import org.apache.log4j.Logger;
+
 import com.meidusa.amoeba.aladdin.io.MysqlResultSetPacket;
 import com.meidusa.amoeba.aladdin.io.MysqlSimpleResultPacket;
-import com.meidusa.amoeba.aladdin.io.PreparedResultPacket;
 import com.meidusa.amoeba.aladdin.io.ResultPacket;
-import com.meidusa.amoeba.aladdin.io.ResultSetUtil;
-import com.meidusa.amoeba.context.ProxyRuntimeContext;
+import com.meidusa.amoeba.aladdin.util.ResultSetUtil;
 import com.meidusa.amoeba.mysql.handler.PreparedStatmentInfo;
 import com.meidusa.amoeba.mysql.jdbc.MysqlDefs;
 import com.meidusa.amoeba.mysql.net.MysqlClientConnection;
 import com.meidusa.amoeba.mysql.net.packet.BindValue;
 import com.meidusa.amoeba.mysql.net.packet.ExecutePacket;
-import com.meidusa.amoeba.net.Connection;
-import com.meidusa.amoeba.net.DatabaseConnection;
-import com.meidusa.amoeba.net.MessageHandler;
+import com.meidusa.amoeba.net.jdbc.PoolableJdbcConnection;
 import com.meidusa.amoeba.net.poolable.ObjectPool;
 
 
@@ -30,11 +29,9 @@ import com.meidusa.amoeba.net.poolable.ObjectPool;
  */
 
 public class PreparedStatmentExecuteMessageHandler extends CommandMessageHandler {
-	private MysqlClientConnection sourceConn;
-	private PreparedStatmentInfo preparedInf;
+	private static Logger logger = Logger.getLogger(PreparedStatmentExecuteMessageHandler.class);
 	private ExecutePacket executePacket;
-	private ObjectPool[] pools;
-	private long timeout;
+
 	
 	protected static class PreparedExecuteQueryRunnable extends QueryRunnable{
 		private ExecutePacket executePacket;
@@ -56,22 +53,55 @@ public class PreparedStatmentExecuteMessageHandler extends CommandMessageHandler
 				try {
 					pst = conn.prepareStatement(query);
 					int i=1;
-					for(BindValue value : executePacket.values){
-						if(!value.isNull){
-							pst.setObject(i++, value.value, MysqlDefs.mysqlToJavaType(value.bufferType));
+					for(BindValue bindValue : executePacket.values){
+						if(!bindValue.isNull){
+							switch (bindValue.bufferType) {
+							case MysqlDefs.FIELD_TYPE_TINY:
+								pst.setByte(i++,bindValue.byteBinding);
+								break;
+							case MysqlDefs.FIELD_TYPE_SHORT:
+								pst.setShort(i++,bindValue.shortBinding);
+								break;
+							case MysqlDefs.FIELD_TYPE_LONG:
+								pst.setLong(i++,bindValue.longBinding);
+								break;
+							case MysqlDefs.FIELD_TYPE_LONGLONG:
+								pst.setLong(i++,bindValue.longBinding);
+								break;
+							case MysqlDefs.FIELD_TYPE_FLOAT:
+								pst.setFloat(i++,bindValue.floatBinding);
+								break;
+							case MysqlDefs.FIELD_TYPE_DOUBLE:
+								pst.setDouble(i++,bindValue.doubleBinding);
+								break;
+							case MysqlDefs.FIELD_TYPE_TIME:
+								pst.setTime(i++,(Time)bindValue.value);
+								break;
+							case MysqlDefs.FIELD_TYPE_DATE:
+							case MysqlDefs.FIELD_TYPE_DATETIME:
+							case MysqlDefs.FIELD_TYPE_TIMESTAMP:
+								pst.setDate(i++,(Date)bindValue.value);
+								break;
+							case MysqlDefs.FIELD_TYPE_VAR_STRING:
+							case MysqlDefs.FIELD_TYPE_STRING:
+							case MysqlDefs.FIELD_TYPE_VARCHAR:
+								pst.setString(i++,(String)bindValue.value);
+							}
 						}else{
-							pst.setObject(i++,value.value);
+							pst.setObject(i++,null);
 						}
 					}
 					if(isSelect(query)){
 						rs = pst.executeQuery();
 						MysqlResultSetPacket resultPacket = (MysqlResultSetPacket)packet;
-						ResultSetUtil.resultSetToPacket(resultPacket,rs);
+						PoolableJdbcConnection poolableJdbcConnection = (PoolableJdbcConnection)conn;
+						ResultSetUtil.resultSetToPacket(source,resultPacket,rs,poolableJdbcConnection.getResultSetHandler());
 					}else{
 						MysqlSimpleResultPacket simplePacket = (MysqlSimpleResultPacket)packet;
 						simplePacket.addResultCount(pst.executeUpdate());
 					}
 				} catch (SQLException e) {
+					logger.error("execute error",e);
 					packet.setError(e.getErrorCode(), e.getMessage());
 				}finally{
 					if(rs!= null){
@@ -99,19 +129,15 @@ public class PreparedStatmentExecuteMessageHandler extends CommandMessageHandler
 			PreparedStatmentInfo preparedInf,ExecutePacket executePacket,
 			ObjectPool[] pools, long timeout) {
 		super(conn,preparedInf.getPreparedStatment(),preparedInf,pools,timeout);
-		this.sourceConn = conn;
-		this.preparedInf = preparedInf;
 		this.executePacket = executePacket;
 		executePacket.getParameters();
-		this.pools = pools;
-		this.timeout = timeout;
 	}
 
 	@Override
 	protected QueryRunnable newQueryRunnable(CountDownLatch latch,
-			java.sql.Connection conn, String query2, Object parameter,
+			java.sql.Connection conn, String query, Object parameter,
 			ResultPacket packet) {
-		return null;
+		return new PreparedExecuteQueryRunnable(latch,conn,query,parameter,packet);
 	}
 	
 

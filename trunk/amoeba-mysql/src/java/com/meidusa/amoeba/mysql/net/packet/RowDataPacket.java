@@ -47,7 +47,7 @@ public class RowDataPacket extends AbstractPacket {
 		if(columns == null)return;
 		Iterator<String> it = columns.iterator();
 		while(it.hasNext()){
-			buffer.writeLengthCodedString(it.next(), CODE_PAGE_1252);
+			buffer.writeLengthCodedString(it.next(), "utf8");
 		}
 	}
 	

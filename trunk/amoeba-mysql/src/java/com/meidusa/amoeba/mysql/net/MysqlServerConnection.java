@@ -112,7 +112,7 @@ public class MysqlServerConnection extends MysqlConnection implements MySqlPacke
 				this.seed = authing.seed = handpacket.seed+handpacket.restOfScrambleBuff;
 				authing.clientParam = CLIENT_FOUND_ROWS;
 				authing.charsetNumber = (byte)(DEFAULT_CHARSET_INDEX & 0xff);
-				this.clientCharset = CharsetMapping.INDEX_TO_CHARSET[DEFAULT_CHARSET_INDEX];
+				this.charset = CharsetMapping.INDEX_TO_CHARSET[DEFAULT_CHARSET_INDEX];
 				
 				if (versionMeetsMinimum(4, 1, 0)) {
 		            if (versionMeetsMinimum(4, 1, 1)) {

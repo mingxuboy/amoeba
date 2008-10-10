@@ -80,8 +80,7 @@ public class QueryCommandPacket extends CommandPacket {
 	public void init(AbstractPacketBuffer myBuffer) {
 		super.init(myBuffer);
 		MysqlPacketBuffer buffer = (MysqlPacketBuffer)myBuffer;
-		MysqlProxyRuntimeContext context = ((MysqlProxyRuntimeContext)MysqlProxyRuntimeContext.getInstance());
-		String charset = context.getServerCharset();
+		String charset = buffer.getConnection().getCharset();
 		arg	= (charset == null?buffer.readString():buffer.readString(charset));
 	}
 

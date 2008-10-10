@@ -56,7 +56,9 @@ public class MysqlQueryRouter extends AbstractQueryRouter{
 				conn.setAutoCommit(false);
 			}*/
 		}else if((value = statment.getValue("names")) != null){
-			((MysqlConnection)conn).setClientCharset((String)value.evaluate(parameters));
+			((MysqlConnection)conn).setCharset((String)value.evaluate(parameters));
+		}else if((value = statment.getValue("charset")) != null){
+				((MysqlConnection)conn).setCharset((String)value.evaluate(parameters));
 		}else if((value = statment.getValue("transactionisolation")) != null){
 			//conn.setTransactionIsolation((int)((Long)comparable).longValue());
 		}else if((value = statment.getValue("schema")) != null){

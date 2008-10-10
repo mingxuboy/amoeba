@@ -44,6 +44,8 @@ public class ProxyServerConfig {
 	private int serverSideThreadPoolSize = 16;
 	private boolean tcpNoDelay = false;
 	private int netBufferSize = 16;
+
+	private String serverCharset;
 	
 	private BeanObjectEntityConfig queryRouterConfig;
 	private Map<String,BeanObjectEntityConfig> managers= new HashMap<String,BeanObjectEntityConfig>();
@@ -142,6 +144,14 @@ public class ProxyServerConfig {
 
 	public void setTcpNoDelay(boolean tcpNoDelay) {
 		this.tcpNoDelay = tcpNoDelay;
+	}
+	
+	public String getServerCharset() {
+		return serverCharset;
+	}
+
+	public void setServerCharset(String serverCharset) {
+		this.serverCharset = serverCharset;
 	}
 	
 }

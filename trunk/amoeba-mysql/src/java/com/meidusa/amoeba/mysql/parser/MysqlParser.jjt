@@ -318,7 +318,7 @@ TOKEN: /* SQL Keywords. prefixed with K_ to avoid name clashes */
 |	<K_TRANSACTION_READ_UNCOMMITTED:"READ UNCOMMITTED">
 |	<K_TRANSACTION_REPEATABLE_READ:"REPEATABLE READ">
 |	<K_TRANSACTION_SERIALIZABLE:"SERIALIZABLE">
-
+|	<K_CLIENT_CHARSET:"CLIENT CHARSET">
 /*
 |   <K_MICROSECOND:"MICROSECOND">
 |   <K_MILLISECOND:"MILLISECOND">
@@ -695,6 +695,8 @@ Statment PropertySetQuery(PropertyStatment statment) :{
 				|<K_TRANSACTION_SERIALIZABLE>{value=Connection.TRANSACTION_SERIALIZABLE;}
 				|<K_TRANSACTION_REPEATABLE_READ>{value=Connection.TRANSACTION_REPEATABLE_READ;}
 				)){propertyName = "TRANSACTIONISOLATION";}
+			|
+			<K_CLIENT_CHARSET>{propertyName = "charset";}
 			|
 			(name = <IDENTIFIER>{propertyName = name.image;}["." name=<IDENTIFIER>{propertyName = propertyName+"."+name.image;}] ["="] (
 			valueToken= <K_NULL>{ value = "null";}
