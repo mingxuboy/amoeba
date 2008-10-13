@@ -17,7 +17,7 @@ public class T4CTTIoer {
     public int              retCode;
     public int              arrayElemWError;
     public int              arrayElemErrno;
-    public int              currCursorID;
+    public int              curCursorID;
     public short            errorPosition;
     public short            sqlType;
     public byte             oerFatal;
@@ -60,7 +60,7 @@ public class T4CTTIoer {
         retCode = meg.unmarshalUB2();
         arrayElemWError = meg.unmarshalUB2();
         arrayElemErrno = meg.unmarshalUB2();
-        currCursorID = meg.unmarshalUB2();
+        curCursorID = meg.unmarshalUB2();
         errorPosition = meg.unmarshalSB2();
         sqlType = meg.unmarshalUB1();
         oerFatal = meg.unmarshalSB1();
@@ -82,7 +82,7 @@ public class T4CTTIoer {
             byte[] msg = meg.unmarshalCLRforREFS();
             errorMsg = meg.getConversion().CharBytesToString(msg, msg.length);
         }
-        return currCursorID;
+        return curCursorID;
     }
 
     public void unmarshalWarning(T4CPacketBuffer meg) {
@@ -102,7 +102,7 @@ public class T4CTTIoer {
         meg.marshalUB2(retCode);
         meg.marshalUB2(arrayElemWError);
         meg.marshalUB2(arrayElemErrno);
-        meg.marshalUB2(currCursorID);
+        meg.marshalUB2(curCursorID);
         meg.marshalUB2(errorPosition);
         meg.marshalUB1(sqlType);
         meg.marshalSB1(oerFatal);

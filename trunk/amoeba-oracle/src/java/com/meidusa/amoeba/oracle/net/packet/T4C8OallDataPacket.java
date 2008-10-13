@@ -81,15 +81,27 @@ public class T4C8OallDataPacket extends T4CTTIfunPacket {
 
         T4CPacketBuffer meg = (T4CPacketBuffer) buffer;
         if (msgCode == TTIFUN) {
-            parseFunPacket(meg);
-        } else if (msgCode == TTIPFN && funCode == OCCA) {
-            T4C8OcloseDataPacket closePacket = new T4C8OcloseDataPacket();
-            closePacket.initCloseStatement();
-            closePacket.parsePacket(meg);
-            msgCode = closePacket.msgCode;
-            funCode = closePacket.funCode;
-            seqNumber = closePacket.seqNumber;
-            parseFunPacket(meg);
+            switch (funCode) {
+                case OALL8:
+                    parseOALL8(meg);
+                    break;
+                case OFETCH:
+                    parseOFETCH(meg);
+                    break;
+                case OEXEC:
+                    parseOEXEC(meg);
+                    break;
+                case OLOBOPS:
+                    parseOLOBOPS(meg);
+                    break;
+                case OLOGOFF:
+                    parseOLOGOFF(meg);
+                    break;
+                default:
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("type:OtherFunPacket funCode:" + funCode);
+                    }
+            }
         } else {
             if (logger.isDebugEnabled()) {
                 logger.debug("type:OtherPacket msgCode:" + msgCode + " funCode:" + funCode);
@@ -98,30 +110,6 @@ public class T4C8OallDataPacket extends T4CTTIfunPacket {
     }
 
     // ///////////////////////////////////////////////////////////////////////////////////////
-    private void parseFunPacket(T4CPacketBuffer meg) {
-        switch (funCode) {
-            case OALL8:
-                parseOALL8(meg);
-                break;
-            case OFETCH:
-                parseOFETCH(meg);
-                break;
-            case OEXEC:
-                parseOEXEC(meg);
-                break;
-            case OLOBOPS:
-                parseOLOBOPS(meg);
-                break;
-            case OLOGOFF:
-                parseOLOGOFF(meg);
-                break;
-            default:
-                if (logger.isDebugEnabled()) {
-                    logger.debug("type:OtherFunPacket funCode:" + funCode);
-                }
-        }
-    }
-
     private void parseOALL8(T4CPacketBuffer meg) {
         unmarshalPisdef(meg);
 
@@ -346,7 +334,7 @@ public class T4C8OallDataPacket extends T4CTTIfunPacket {
         if (T4CTTIfunPacket.isFunType(message, T4CTTIfunPacket.OLOBOPS)) {
             return true;
         }
-        if (T4CTTIfunPacket.isFunType(message, T4CTTIMsgPacket.TTIPFN, T4CTTIfunPacket.OCCA)) {
+        if (T4CTTIfunPacket.isFunType(message, T4CTTIfunPacket.OLOGOFF)) {
             return true;
         }
         return false;

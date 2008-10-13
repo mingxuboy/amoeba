@@ -5,12 +5,17 @@ import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import org.apache.log4j.Logger;
+
 import com.meidusa.amoeba.net.Connection;
+import com.meidusa.amoeba.net.Sessionable;
 import com.meidusa.amoeba.oracle.net.MessageQueuedHandler;
 import com.meidusa.amoeba.oracle.net.OracleServerConnection;
 import com.meidusa.amoeba.util.Tuple;
 
-public abstract class AbstractMessageQueuedHandler<V> implements MessageQueuedHandler<V> {
+public abstract class AbstractMessageQueuedHandler<V> implements MessageQueuedHandler<V>, Sessionable {
+
+    private static Logger                                                   logger       = Logger.getLogger(AbstractMessageQueuedHandler.class);
 
     protected Map<OracleServerConnection, Tuple<Boolean, BlockingQueue<V>>> exchangerMap = new HashMap<OracleServerConnection, Tuple<Boolean, BlockingQueue<V>>>();
 
@@ -50,11 +55,19 @@ public abstract class AbstractMessageQueuedHandler<V> implements MessageQueuedHa
             OracleServerConnection oconn = (OracleServerConnection) conn;
             try {
                 doHandleMessage(oconn, message);
+            } catch (Exception e) {
+                logger.error("doHandleMessage Exception", e);
+                endSession();
             } finally {
                 setInHandleProcess(oconn, false);
             }
         } else {
-            doHandleMessage(conn, message);
+            try {
+                doHandleMessage(conn, message);
+            } catch (Exception e) {
+                logger.error("doHandleMessage Exception", e);
+                endSession();
+            }
         }
     }
 

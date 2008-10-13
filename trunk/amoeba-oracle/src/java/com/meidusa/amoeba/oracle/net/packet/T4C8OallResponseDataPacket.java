@@ -54,6 +54,7 @@ public class T4C8OallResponseDataPacket extends DataPacket {
         if (status.isLobOps()) {
             status.getLob().unmarshalResponse(meg);
             if (status.getLob().isComplete()) {
+                T4C8OcloseDataPacket.sendClosePacket(status.getLob().getCursorId(), status.getConn());
                 status.setCompleted(true);
             }
         } else {
@@ -72,6 +73,7 @@ public class T4C8OallResponseDataPacket extends DataPacket {
                 case EXEC_RESULT:// 8
                     execute = new T4CExecuteResultResponseDataPacket();
                     execute.init(meg);
+                    T4C8OcloseDataPacket.sendClosePacket(execute.cursorId, status.getConn());
                     status.setCompleted(true);
                     break;
                 default:
@@ -241,6 +243,7 @@ public class T4C8OallResponseDataPacket extends DataPacket {
                         oer.init();
                         oer.unmarshal(meg);
                         if (oer.retCode == T4CTTIoer.ORA1403) {
+                            T4C8OcloseDataPacket.sendClosePacket(oer.curCursorID, status.getConn());
                             status.setCompleted(true);
                         } else if (oer.retCode != 0) {
                             oer.processError();
@@ -345,6 +348,7 @@ public class T4C8OallResponseDataPacket extends DataPacket {
         long[]    skip1;
         byte[][]  skip2;
         int[]     skip3;
+        int       cursorId;
 
         T4CTTIoer oer = new T4CTTIoer();
 
@@ -372,6 +376,7 @@ public class T4C8OallResponseDataPacket extends DataPacket {
             meg.unmarshalSB1();
             oer.init();
             oer.unmarshal(meg);
+            cursorId = oer.curCursorID;
         }
 
         protected void write2Buffer(T4CPacketBufferExchanger meg) {

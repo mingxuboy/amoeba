@@ -10,7 +10,6 @@ import org.apache.log4j.Logger;
 
 import com.meidusa.amoeba.net.Connection;
 import com.meidusa.amoeba.net.MessageHandler;
-import com.meidusa.amoeba.net.Sessionable;
 import com.meidusa.amoeba.net.poolable.ObjectPool;
 import com.meidusa.amoeba.net.poolable.PoolableObject;
 import com.meidusa.amoeba.oracle.io.OraclePacketConstant;
@@ -29,7 +28,7 @@ import com.meidusa.amoeba.oracle.util.ByteUtil;
  * @author struct
  */
 @SuppressWarnings("unchecked")
-public class OracleQueryMessageHandler extends AbstractMessageQueuedHandler implements MessageHandler, Sessionable, SQLnetDef {
+public class OracleQueryMessageHandler extends AbstractMessageQueuedHandler implements MessageHandler, SQLnetDef {
 
     private static Logger                                         logger              = Logger.getLogger(OracleQueryMessageHandler.class);
 
@@ -152,7 +151,7 @@ public class OracleQueryMessageHandler extends AbstractMessageQueuedHandler impl
             if (logger.isDebugEnabled()) {
                 int h = conn.getObjectPool().hashCode();
                 logger.debug("");
-                logger.debug("+++++++++++++++++++++++++ borrowed conn[" + h + "] from pool ++++++++++++++++++++++++");
+                logger.debug("+++++++++++++++++++++++++ borrowed conn[" + h + "] from pool +++++++++++++++++++++++++");
             }
             serverConns[i] = conn;
             handlerMap.put(conn, conn.getMessageHandler());
@@ -183,7 +182,7 @@ public class OracleQueryMessageHandler extends AbstractMessageQueuedHandler impl
                                     if (logger.isDebugEnabled()) {
                                         int h = conn.getObjectPool().hashCode();
                                         logger.debug("");
-                                        logger.debug("------------------------- returned conn[" + h + "] to pool --------------------------\n");
+                                        logger.debug("------------------------- returned conn[" + h + "] to pool ---------------------------\n");
                                     }
                                 } catch (Exception e) {
                                     logger.error("OracleQueryMessageHandler endSession error", e);
@@ -326,7 +325,7 @@ public class OracleQueryMessageHandler extends AbstractMessageQueuedHandler impl
 
     public static class ConnectionServerStatus {
 
-        protected OracleServerConnection   conn;
+        private OracleServerConnection     conn;
 
         private boolean                    isCompleted;
         private T4C8OallResponseDataPacket packet;
@@ -339,6 +338,10 @@ public class OracleQueryMessageHandler extends AbstractMessageQueuedHandler impl
 
         public ConnectionServerStatus(OracleServerConnection conn){
             this.conn = conn;
+        }
+
+        public OracleServerConnection getConn() {
+            return conn;
         }
 
         public T4C8TTILob getLob() {
