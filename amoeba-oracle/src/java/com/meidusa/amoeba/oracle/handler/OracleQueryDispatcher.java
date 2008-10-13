@@ -14,6 +14,7 @@ import com.meidusa.amoeba.oracle.io.OraclePacketConstant;
 import com.meidusa.amoeba.oracle.net.OracleClientConnection;
 import com.meidusa.amoeba.oracle.net.packet.DataPacket;
 import com.meidusa.amoeba.oracle.net.packet.T4C8OallDataPacket;
+import com.meidusa.amoeba.oracle.net.packet.T4C8OcloseDataPacket;
 import com.meidusa.amoeba.oracle.net.packet.assist.T4C8TTILob;
 import com.meidusa.amoeba.oracle.util.ByteUtil;
 import com.meidusa.amoeba.route.QueryRouter;
@@ -21,7 +22,6 @@ import com.meidusa.amoeba.route.QueryRouter;
 public class OracleQueryDispatcher implements MessageHandler {
 
     private static final byte[] logoffBytes         = new byte[] { 0x00, 0x0b, 0x00, 0x00, 0x06, 0x00, 0x00, 0x00, 0x00, 0x00, 0x09 };
-
     protected static Logger     logger              = Logger.getLogger(OracleQueryDispatcher.class);
 
     private boolean             isFirstClientPacket = true;
@@ -33,9 +33,14 @@ public class OracleQueryDispatcher implements MessageHandler {
     }
 
     public void handleMessage(Connection conn, byte[] message) {
-        listBuffer.add(message);
-
         if (DataPacket.isDataType(message) && !DataPacket.isDataEOF(message)) {
+            // 拦截close resultset和statement数据包
+            if (T4C8OcloseDataPacket.isColseResultSet(message) || T4C8OcloseDataPacket.isColseStatement(message)) {
+                message = T4C8OcloseDataPacket.filter(conn, message);
+            }
+
+            listBuffer.add(message);
+
             if (mergeClientMessage(message)) {// 合并完成，进行数据包解析。
                 if (T4C8OallDataPacket.isParseable(tmpBuffer)) {
                     T4C8OallDataPacket packet = new T4C8OallDataPacket();
@@ -104,9 +109,9 @@ public class OracleQueryDispatcher implements MessageHandler {
             } else {
                 return;
             }
-        }
 
-        clearBuffer();
+            clearBuffer();
+        }
     }
 
     private void startOracleQueryMessageHandler(Connection conn, ObjectPool[] op) {

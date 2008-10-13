@@ -60,6 +60,7 @@ public class T4C8TTILob {
     long                    lobops;
 
     int                     rowsProcessed;
+    int                     cursorId;
     long                    lobBytesRead;
     boolean                 varWidthChar;
     boolean                 littleEndianClob;
@@ -73,6 +74,10 @@ public class T4C8TTILob {
 
     public int getSourceLobLocatorOffset() {
         return sourceLobLocatorOffset;
+    }
+
+    public int getCursorId() {
+        return cursorId;
     }
 
     public boolean isComplete() {
@@ -298,6 +303,7 @@ public class T4C8TTILob {
                     oer.init();
                     oer.unmarshal(meg);
                     rowsProcessed = (int) oer.curRowNumber;
+                    cursorId = oer.curCursorID;
                     if (oer.retCode != 0) {
                         oer.processError();
                     }
