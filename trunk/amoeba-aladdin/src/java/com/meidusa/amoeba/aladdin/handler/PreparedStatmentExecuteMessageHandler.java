@@ -80,7 +80,8 @@ public class PreparedStatmentExecuteMessageHandler extends CommandMessageHandler
 							case MysqlDefs.FIELD_TYPE_DATE:
 							case MysqlDefs.FIELD_TYPE_DATETIME:
 							case MysqlDefs.FIELD_TYPE_TIMESTAMP:
-								pst.setDate(i++,(Date)bindValue.value);
+								java.util.Date date = (java.util.Date)bindValue.value;
+								pst.setDate(i++,new Date(date.getTime()));
 								break;
 							case MysqlDefs.FIELD_TYPE_VAR_STRING:
 							case MysqlDefs.FIELD_TYPE_STRING:

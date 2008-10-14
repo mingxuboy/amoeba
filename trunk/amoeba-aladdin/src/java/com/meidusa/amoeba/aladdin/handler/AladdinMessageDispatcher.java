@@ -1,5 +1,6 @@
 package com.meidusa.amoeba.aladdin.handler;
 
+import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -79,32 +80,12 @@ public class AladdinMessageDispatcher implements MessageHandler {
 				}
 			}else if(MysqlPacketBuffer.isPacketType(message, QueryCommandPacket.COM_STMT_PREPARE)){
 				
-				QueryRouter router = ProxyRuntimeContext.getInstance().getQueryRouter();
-				ObjectPool[] pools = router.doRoute(conn,command.arg,true,null);
-				if(pools.length>0){
-					pools = new ObjectPool[]{pools[0]};
-				}
 				PreparedStatmentInfo preparedInf = conn.getPreparedStatmentInfo(command.arg);
-				if(!preparedInf.isReady()){
-					PreparedStatmentMessageHandler handler = new PreparedStatmentMessageHandler(conn,preparedInf,pools,timeout);
-					if(handler instanceof Sessionable){
-						Sessionable session = (Sessionable)handler;
-						try{
-							session.startSession();
-						}catch(Exception e){
-							logger.error("start Session error:",e);
-							session.endSession();
-							throw e;
-						}finally{
-							session.endSession();
-						}
-					}
-				}else{
-					List<byte[]> list = preparedInf.getPreparedStatmentBuffers();
-					for(byte[] buffer : list){
-						conn.postMessage(buffer);
-					}
+				List<byte[]> list = preparedInf.getPreparedStatmentBuffers();
+				for(byte[] buffer : list){
+					conn.postMessage(buffer);
 				}
+				return;
 				
 			}else if(MysqlPacketBuffer.isPacketType(message, QueryCommandPacket.COM_STMT_SEND_LONG_DATA)){
 				conn.addLongData(message);
@@ -128,7 +109,7 @@ public class AladdinMessageDispatcher implements MessageHandler {
 						longMap.put(packet.parameterIndex, packet.data);
 					}
 					
-					ExecutePacket executePacket = new ExecutePacket(preparedInf.getOkPrepared().parameters,longMap);
+					ExecutePacket executePacket = new ExecutePacket(preparedInf.getParameterCount(),longMap);
 					executePacket.init(message,connection);
 
 					QueryRouter router = ProxyRuntimeContext.getInstance().getQueryRouter();
