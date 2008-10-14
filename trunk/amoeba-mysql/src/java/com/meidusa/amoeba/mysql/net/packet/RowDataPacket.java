@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import com.meidusa.amoeba.context.ProxyRuntimeContext;
 import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
 
 /**
@@ -35,7 +36,7 @@ public class RowDataPacket extends AbstractPacket {
 		}
 		
 		while(buffer.getPosition()<this.packetLength + HEADER_SIZE){
-			columns.add(buffer.readLengthCodedString(CODE_PAGE_1252));
+			columns.add(buffer.readLengthCodedString(ProxyRuntimeContext.getInstance().getServerCharset()));
 		}
 		
 	}
@@ -47,7 +48,7 @@ public class RowDataPacket extends AbstractPacket {
 		if(columns == null)return;
 		Iterator<String> it = columns.iterator();
 		while(it.hasNext()){
-			buffer.writeLengthCodedString(it.next(), "utf8");
+			buffer.writeLengthCodedString(it.next(), ProxyRuntimeContext.getInstance().getServerCharset());
 		}
 	}
 	

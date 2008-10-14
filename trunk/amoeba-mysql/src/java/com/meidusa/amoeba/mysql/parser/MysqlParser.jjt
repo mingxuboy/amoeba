@@ -696,7 +696,11 @@ Statment PropertySetQuery(PropertyStatment statment) :{
 				|<K_TRANSACTION_REPEATABLE_READ>{value=Connection.TRANSACTION_REPEATABLE_READ;}
 				)){propertyName = "TRANSACTIONISOLATION";}
 			|
-			<K_CLIENT_CHARSET>{propertyName = "charset";}
+			(<K_CLIENT_CHARSET>{propertyName = "charset";} 
+				(valueToken = <IDENTIFIER> {value = valueToken.image;}
+				| valueToken = <STRING_LITERAL>{value = valueToken.image;}
+				|valueToken = <S_QUOTED_IDENTIFIER>{value = valueToken.image;}
+				))
 			|
 			(name = <IDENTIFIER>{propertyName = name.image;}["." name=<IDENTIFIER>{propertyName = propertyName+"."+name.image;}] ["="] (
 			valueToken= <K_NULL>{ value = "null";}

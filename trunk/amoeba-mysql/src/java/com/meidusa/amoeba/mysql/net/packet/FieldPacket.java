@@ -51,7 +51,9 @@ public class FieldPacket extends AbstractPacket {
 		decimals = buffer.readByte();
 		buffer.readByte();
 		buffer.readByte();
-		definition = buffer.readLengthCodedString(CODE_PAGE_1252);
+		if(buffer.getPosition()< buffer.getBufLength()){
+			definition = buffer.readLengthCodedString(CODE_PAGE_1252);
+		}
 	}
 	
 	@Override
