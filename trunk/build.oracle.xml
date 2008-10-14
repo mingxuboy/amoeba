@@ -20,6 +20,7 @@
 		<file name="build/etc/lib/commons-pool-1.4.jar" />
 		<file name="build/etc/lib/junit-4.3.jar" />
 		<file name="build/etc/lib/log4j-1.2.12.jar" />
+		<file name="build/etc/lib/jdbc4_part.jar" />
 	</filelist>
 
 	<filelist dir="." id="bin.files">
