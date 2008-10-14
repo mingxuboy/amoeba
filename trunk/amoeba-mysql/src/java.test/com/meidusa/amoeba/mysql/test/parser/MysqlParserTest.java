@@ -7,7 +7,6 @@ import java.io.StringReader;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.meidusa.amoeba.oracle.parser.sql.OracleParser;
 import com.meidusa.amoeba.parser.Parser;
 import com.meidusa.amoeba.parser.dbobject.Column;
 import com.meidusa.amoeba.parser.statment.DMLStatment;
@@ -70,7 +69,7 @@ public class MysqlParserTest {
 		};
 		
 		for(String sql: sqls){
-			Parser parser = new OracleParser(new StringReader(sql));
+			Parser parser = new MysqlParser(new StringReader(sql));
 			parser.setFunctionMap(funMap);
 			try {
 				Statment statment = parser.doParse();
