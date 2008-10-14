@@ -9,13 +9,15 @@
  * 	You should have received a copy of the GNU General Public License along with this program; 
  * if not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-package com.meidusa.amoeba.bean;
+package com.meidusa.amoeba.util;
 
 import java.lang.reflect.Field;
-import java.security.AccessControlException;
 import java.text.AttributedString;
 import java.util.HashMap;
 import java.util.Map;
+
+import com.meidusa.amoeba.bean.PureJavaReflectionProvider;
+import com.meidusa.amoeba.bean.ReflectionProvider;
 
 @SuppressWarnings("unchecked")
 public class JVM {
@@ -47,7 +49,7 @@ public class JVM {
      * @param javaVersion the system property 'java.specification.version'
      * @return A float of the form 1.x
      */
-    private static final float getMajorJavaVersion(String javaVersion) {
+    public static final float getMajorJavaVersion(String javaVersion) {
         try {
             return Float.parseFloat(javaVersion.substring(0, 3));
         } catch ( NumberFormatException e ){
@@ -62,6 +64,10 @@ public class JVM {
 
     public static boolean is15() {
         return majorJavaVersion >= 1.5f;
+    }
+    
+    public static boolean is16() {
+        return majorJavaVersion >= 1.6f;
     }
 
     private static boolean isSun() {
@@ -136,28 +142,15 @@ public class JVM {
         }
     }
 
-    public synchronized ReflectionProvider bestReflectionProvider() {
+    public synchronized ReflectionProvider getReflectionProvider() {
         if (reflectionProvider == null) {
-            try {
-                if ( canUseSun14ReflectionProvider() ) {
-                    String cls = "com.thoughtworks.xstream.converters.reflection.Sun14ReflectionProvider";
-                    reflectionProvider = (ReflectionProvider) loadClass(cls).newInstance();
-                } else {
-                    reflectionProvider = new PureJavaReflectionProvider();
-                }
-            } catch (InstantiationException e) {
-                reflectionProvider = new PureJavaReflectionProvider();
-            } catch (IllegalAccessException e) {
-                reflectionProvider = new PureJavaReflectionProvider();
-            } catch (AccessControlException e) {
-                // thrown when trying to access sun.misc package in Applet context.
-                reflectionProvider = new PureJavaReflectionProvider();
-            }
+            reflectionProvider = new PureJavaReflectionProvider();
         }
         return reflectionProvider;
     }
 
-    private boolean canUseSun14ReflectionProvider() {
+    @SuppressWarnings("unused")
+	private boolean canUseSun14ReflectionProvider() {
         return (isSun() || isApple() || isHPUX() || isIBM() || isBlackdown() || isBEAWithUnsafeSupport()) && is14() && loadClass("sun.misc.Unsafe") != null;
     }
 
@@ -165,4 +158,7 @@ public class JVM {
         return reverseFieldOrder;
     }
 
+    public static void main(String[] args){
+    	System.out.println(majorJavaVersion);
+    }
 }

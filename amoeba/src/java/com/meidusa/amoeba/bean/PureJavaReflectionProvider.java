@@ -29,6 +29,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import com.meidusa.amoeba.util.JVM;
+
 
 /**
  * Pure Java ObjectFactory that instantiates objects using standard Java reflection, however the types of objects

@@ -18,6 +18,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import com.meidusa.amoeba.util.JVM;
+
 
 /**
  * A field dictionary instance caches information about classes fields. 
