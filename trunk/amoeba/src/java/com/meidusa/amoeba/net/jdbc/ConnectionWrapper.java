@@ -197,7 +197,7 @@ public class ConnectionWrapper implements Connection{
 		}
 	}
 	
-	//follow codes for jdk 1.6
+	//following codes for jdk 1.6
 	public Array createArrayOf(String typeName, Object[] elements)
 			throws SQLException {
 		if(JVM.is16()){
