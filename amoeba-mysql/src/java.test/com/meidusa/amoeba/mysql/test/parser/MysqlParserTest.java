@@ -7,6 +7,8 @@ import java.io.StringReader;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.meidusa.amoeba.oracle.parser.sql.OracleParser;
+import com.meidusa.amoeba.parser.Parser;
 import com.meidusa.amoeba.parser.dbobject.Column;
 import com.meidusa.amoeba.parser.statment.DMLStatment;
 import com.meidusa.amoeba.parser.statment.PropertyStatment;
@@ -61,11 +63,14 @@ public class MysqlParserTest {
 				"SELECT sid, uid AS sessionuid, groupid, groupid='6' AS ipbanned, pageviews AS spageviews, styleid, lastolupdate, seccode FROM cdb_sessions WHERE sid='CgShIZ' AND CONCAT_WS('.',ip1,ip2,ip3,ip4)='210.177.156.49'",
 				"SELECT t.tid, t.closed, t.dateline, t.special, t.lastpost AS lastthreadpost,  f.*, ff.*  , f.fid AS fid "+
 					"FROM cdb_threads t INNER JOIN cdb_forums f ON f.fid=t.fid	LEFT JOIN cdb_forumfields ff ON ff.fid=f.fid  WHERE t.tid='1397087' AND t.displayorder>='0' LIMIT 1",
-				"SELECT f.fid, f.fup, f.type, f.name, f.threads, f.posts, f.todayposts, f.lastpost, f.inheritedmod, f.forumcolumns, f.simple, ff.description, ff.moderators, ff.icon, ff.viewperm, ff.redirect FROM cdb_forums f LEFT JOIN cdb_forumfields ff USING(fid)	WHERE f.status>0 ORDER BY f.type, f.displayorder"
+				"SELECT f.fid, f.fup, f.type, f.name, f.threads, f.posts, f.todayposts, f.lastpost, f.inheritedmod, f.forumcolumns, f.simple, ff.description, ff.moderators, ff.icon, ff.viewperm, ff.redirect FROM cdb_forums f LEFT JOIN cdb_forumfields ff USING(fid)	WHERE f.status>0 ORDER BY f.type, f.displayorder",
+				"SELECT o.* FROM  (SELECT row_id   FROM  (SELECT row_id,    rownum rn     FROM    (SELECT rowid row_id       FROM offer      WHERE member_id = ?    AND status        = ?    AND gmt_expire    > sysdate    AND type = ?   ORDER BY MEMBER_ID,      STATUS         ,      GMT_EXPIRE DESC    )    WHERE rownum<=?  )  WHERE rn >= ?  ) t,  offer o  WHERE t.row_id=o.rowid ",
+				"set CLIENT CHARSET gbk",
+				"select * from offer where id in(12,11) limit 1,2"
 		};
 		
 		for(String sql: sqls){
-			MysqlParser parser = new MysqlParser(new StringReader(sql));
+			Parser parser = new OracleParser(new StringReader(sql));
 			parser.setFunctionMap(funMap);
 			try {
 				Statment statment = parser.doParse();
