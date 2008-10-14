@@ -52,7 +52,7 @@ public class MysqlClientConnection extends MysqlConnection{
 	/**
 	 * ´æ´¢sql,statmentId ¶Ô
 	 */
-	private final Map<String,Long> SQL_STATMENT_ID_MAP = Collections.synchronizedMap(new HashMap<String,Long>(128));
+	private final Map<String,Long> SQL_STATMENT_ID_MAP = Collections.synchronizedMap(new HashMap<String,Long>(256));
 	private AtomicLong atomicLong = new AtomicLong(1);
 	
 	/**
@@ -61,7 +61,7 @@ public class MysqlClientConnection extends MysqlConnection{
 	 * value=PreparedStatmentInfo object
 	 */
 	@SuppressWarnings("unchecked")
-	private final Map<Long,PreparedStatmentInfo> PREPARED_STATMENT_MAP = Collections.synchronizedMap(new LRUMap(128){
+	private final Map<Long,PreparedStatmentInfo> PREPARED_STATMENT_MAP = Collections.synchronizedMap(new LRUMap(256){
 		private static final long serialVersionUID = 1L;
 		protected boolean removeLRU(LinkEntry entry) {
 			PreparedStatmentInfo info = (PreparedStatmentInfo)entry.getValue();
@@ -102,8 +102,7 @@ public class MysqlClientConnection extends MysqlConnection{
 		Long id = SQL_STATMENT_ID_MAP.get(preparedSql);
 		PreparedStatmentInfo info = null;
 		if(id == null){
-			info = new PreparedStatmentInfo(atomicLong.getAndIncrement());
-			info.setPreparedStatment(preparedSql);
+			info = new PreparedStatmentInfo(this,atomicLong.getAndIncrement(),preparedSql);
 			PREPARED_STATMENT_MAP.put(info.getStatmentId(), info);
 		}else{
 			info = getPreparedStatmentInfo(id);

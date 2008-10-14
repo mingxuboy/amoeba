@@ -43,11 +43,10 @@ public class PreparedStatmentMessageHandler extends QueryCommandMessageHandler{
 	}
 	
 	static class PreparedStatmentConnectionStatuts extends QueryCommandMessageHandler.QueryConnectionStatus{
-		protected PreparedStatmentInfo preparedStatmentInfo;
-
+		OKforPreparedStatementPacket ok=null;
+		
 		public PreparedStatmentConnectionStatuts(Connection conn,PreparedStatmentInfo preparedStatmentInfo){
 			super(conn);
-			this.preparedStatmentInfo = preparedStatmentInfo;
 		}
 		
 		/**
@@ -63,14 +62,14 @@ public class PreparedStatmentMessageHandler extends QueryCommandMessageHandler{
 			if(this.commandType == QueryCommandPacket.COM_STMT_PREPARE){
 				MysqlServerConnection connection = (MysqlServerConnection)conn;
 				if(MysqlPacketBuffer.isEofPacket(buffer)){
-					if(preparedStatmentInfo.getOkPrepared().parameters>0 && preparedStatmentInfo.getOkPrepared().columns >0){
+					if(ok.parameters>0 && ok.columns >0){
 						if((this.statusCode & PreparedStatmentSessionStatus.PREPAED_PARAMETER_EOF) >0){
 							this.statusCode |=  PreparedStatmentSessionStatus.PREPAED_FIELD_EOF;
 							this.statusCode |=  PreparedStatmentSessionStatus.COMPLETED;
 							return true;
 						}else{
 							if(connection.isVersion(5, 0, 0)){
-								if(preparedStatmentInfo.getOkPrepared().columns ==0){
+								if(ok.columns ==0){
 									this.statusCode |=  PreparedStatmentSessionStatus.PREPAED_FIELD_EOF;
 									this.statusCode |=  PreparedStatmentSessionStatus.COMPLETED;
 									return true;
@@ -90,19 +89,15 @@ public class PreparedStatmentMessageHandler extends QueryCommandMessageHandler{
 					this.statusCode |=  PreparedStatmentSessionStatus.COMPLETED;
 					return true;
 				}else if(packetIndex == 0 && MysqlPacketBuffer.isOkPacket(buffer)){
-					if(!preparedStatmentInfo.isReady()){
-						OKforPreparedStatementPacket ok = new OKforPreparedStatementPacket();
+						ok = new OKforPreparedStatementPacket();
 						ok.init(buffer,null);
-						ok.statementHandlerId = preparedStatmentInfo.getStatmentId();
-						preparedStatmentInfo.setOkPrepared(ok);
-					}
-					if(preparedStatmentInfo.getOkPrepared().parameters == 0 && preparedStatmentInfo.getOkPrepared().columns ==0){
+					if(ok.parameters == 0 && ok.columns ==0){
 						this.statusCode |=  PreparedStatmentSessionStatus.OK;
 						this.statusCode |=  PreparedStatmentSessionStatus.COMPLETED;
 						return true;
 					}else{
 						if(connection.isVersion(5, 0, 0)){
-							if(preparedStatmentInfo.getOkPrepared().columns ==0){
+							if(ok.columns ==0){
 								this.statusCode |=  PreparedStatmentSessionStatus.OK;
 								this.statusCode |=  PreparedStatmentSessionStatus.COMPLETED;
 								return true;
@@ -167,15 +162,15 @@ public class PreparedStatmentMessageHandler extends QueryCommandMessageHandler{
 	protected void dispatchMessageTo(Connection toConn,byte[] message){
 		if(toConn == source){
 			if(commandType == QueryCommandPacket.COM_STMT_PREPARE){
-				if(MysqlPacketBuffer.isOkPacket(message)){
+				/*if(MysqlPacketBuffer.isOkPacket(message)){
 					//替换statmentId 为 proxy statment id 发送到mysql客户端
 					OKforPreparedStatementPacket ok = new OKforPreparedStatementPacket();
 					ok.init(message,toConn);
 					ok.statementHandlerId = preparedStatmentInfo.getStatmentId();
 					preparedStatmentInfo.setOkPrepared(ok);
 					message = ok.toByteBuffer(toConn).array();
-				}
-				preparedStatmentInfo.putPreparedStatmentBuffer(message);
+				}*/
+				return;
 			}
 		}else{
 			if(commandType == CommandPacket.COM_STMT_EXECUTE || commandType == CommandPacket.COM_STMT_SEND_LONG_DATA

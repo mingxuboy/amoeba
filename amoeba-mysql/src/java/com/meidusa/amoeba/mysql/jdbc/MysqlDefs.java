@@ -337,8 +337,10 @@ public final class MysqlDefs {
 	public static int javaTypeMysql(int javaType) {
 
 		switch (javaType) {
+		case Types.NUMERIC: return MysqlDefs.FIELD_TYPE_LONG;
+		
 		case Types.DECIMAL: return MysqlDefs.FIELD_TYPE_DECIMAL;
-
+		
 		case Types.TINYINT : return MysqlDefs.FIELD_TYPE_TINY;
 
 		case Types.SMALLINT : return MysqlDefs.FIELD_TYPE_SHORT;
