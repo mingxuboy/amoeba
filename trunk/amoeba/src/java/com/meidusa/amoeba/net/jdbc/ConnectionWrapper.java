@@ -1,15 +1,31 @@
 package com.meidusa.amoeba.net.jdbc;
 
+import java.lang.reflect.Method;
+import java.sql.Array;
+import java.sql.Blob;
 import java.sql.CallableStatement;
+import java.sql.Clob;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
+import java.sql.NClob;
 import java.sql.PreparedStatement;
+import java.sql.SQLClientInfoException;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
+import java.sql.SQLXML;
 import java.sql.Savepoint;
 import java.sql.Statement;
+import java.sql.Struct;
 import java.util.Map;
+import java.util.Properties;
 
+import com.meidusa.amoeba.util.JVM;
+
+/**
+ * in order to adapt jdbc4 and jdbc3 , copy some jdbc4 class and pack them into jdbc4_part.jar
+ * @author struct
+ *
+ */
 public class ConnectionWrapper implements Connection{
 	private Connection conn;
 	public ConnectionWrapper(Connection conn){
@@ -169,5 +185,120 @@ public class ConnectionWrapper implements Connection{
 
 	public void setTypeMap(Map<String, Class<?>> map) throws SQLException {
 		conn.setTypeMap(map);
+	}
+	
+	@SuppressWarnings("unchecked")
+	private static <T> T invoke(Object obje,Class<T> returnClass ,String methodName,Object[] parameters,Class... parameterTypes){
+		try {
+			Method method = obje.getClass().getMethod(methodName, parameterTypes);
+			return (T)method.invoke(obje, parameters);
+		} catch (Exception e) {
+			throw new UnsupportedOperationException(e);
+		}
+	}
+	
+	//follow codes for jdk 1.6
+	public Array createArrayOf(String typeName, Object[] elements)
+			throws SQLException {
+		if(JVM.is16()){
+			return invoke(conn,Array.class,"createArrayOf",new Object[]{typeName,elements},new Class[]{String.class,Object[].class});
+		}else{
+			throw new UnsupportedOperationException();
+		}
+	}
+	
+	public Blob createBlob() throws SQLException {
+		if(JVM.is16()){
+			return invoke(conn,Blob.class,"createBlob",(Object[])null,(Class[])null);
+		}else{
+			throw new UnsupportedOperationException();
+		}
+	}
+	
+	public Clob createClob() throws SQLException {
+		if(JVM.is16()){
+			return invoke(conn,Clob.class,"createClob",(Object[])null,(Class[])null);
+		}else{
+			throw new UnsupportedOperationException();
+		}
+	}
+	
+	public NClob createNClob() throws SQLException {
+		if(JVM.is16()){
+			return invoke(conn,NClob.class,"createNClob",(Object[])null,(Class[])null);
+		}else{
+			throw new UnsupportedOperationException();
+		}
+	}
+	
+	public SQLXML createSQLXML() throws SQLException {
+		if(JVM.is16()){
+			return invoke(conn,SQLXML.class,"createSQLXML",(Object[])null,(Class[])null);
+		}else{
+			throw new UnsupportedOperationException();
+		}
+		
+	}
+	
+	public Struct createStruct(String typeName, Object[] attributes)
+			throws SQLException {
+		if(JVM.is16()){
+			return invoke(conn,Struct.class,"createStruct",new Object[]{typeName,attributes},new Class[]{String.class,Object[].class});
+		}else{
+			throw new UnsupportedOperationException();
+		}
+	}
+	
+	public Properties getClientInfo() throws SQLException {
+		if(JVM.is16()){
+			return invoke(conn,Properties.class,"getClientInfo",(Object[])null,(Class[])null);
+		}else{
+			throw new UnsupportedOperationException();
+		}
+	}
+	public String getClientInfo(String name) throws SQLException {
+		if(JVM.is16()){
+			return invoke(conn,String.class,"getClientInfo",new Object[]{name},new Class[]{String.class});
+		}else{
+			throw new UnsupportedOperationException();
+		}
+	}
+	public boolean isValid(int timeout) throws SQLException {
+		if(JVM.is16()){
+			return invoke(conn,boolean.class,"isValid",new Object[]{timeout},new Class[]{int.class});
+		}else{
+			throw new UnsupportedOperationException();
+		}
+	}
+	public void setClientInfo(Properties properties)
+			throws SQLClientInfoException {
+		if(JVM.is16()){
+			invoke(conn,void.class,"setClientInfo",new Object[]{properties},new Class[]{Properties.class});
+		}else{
+			throw new UnsupportedOperationException();
+		}
+	}
+	public void setClientInfo(String name, String value)
+			throws SQLClientInfoException {
+		if(JVM.is16()){
+			invoke(conn,void.class,"setClientInfo",new Object[]{name,value},new Class[]{String.class,String.class});
+		}else{
+			throw new UnsupportedOperationException();
+		}
+	}
+	
+	public boolean isWrapperFor(Class<?> iface) throws SQLException {
+		if(JVM.is16()){
+			return invoke(conn,boolean.class,"isWrapperFor",new Object[]{iface},new Class[]{Class.class});
+		}else{
+			throw new UnsupportedOperationException();
+		}
+	}
+	public <T> T unwrap(Class<T> iface) throws SQLException {
+		if(JVM.is16()){
+			return invoke(conn,iface,"unwrap",new Object[]{iface},new Class[]{iface});
+		}else{
+			throw new UnsupportedOperationException();
+		}
 	}
 }
