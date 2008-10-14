@@ -37,13 +37,13 @@ public class PreparedStatmentMessageHandler extends CommandMessageHandler {
 				ok.parameters = count;
 				ok.packetId = 1;
 				ok.statementHandlerId = preparedInfo.getStatmentId();
-				preparedInfo.setOkPrepared(ok);
-				preparedInfo.putPreparedStatmentBuffer(ok.toByteBuffer(null).array());
+				//preparedInfo.setOkPrepared(ok);
+				/*preparedInfo.putPreparedStatmentBuffer(ok.toByteBuffer(null).array());
 				for(int i=0;i<count;i++){
 					FieldPacket field = new  FieldPacket();
 					field.packetId = (byte)(2+i);
 					preparedInfo.putPreparedStatmentBuffer(field.toByteBuffer(null).array());
-				}
+				}*/
 				preparedPacket.setStatementId(preparedInfo.getStatmentId());
 				preparedPacket.setParameterCount(count);
 			}finally{

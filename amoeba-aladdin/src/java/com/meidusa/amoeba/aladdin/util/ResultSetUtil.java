@@ -10,7 +10,6 @@ import org.apache.log4j.Logger;
 import com.meidusa.amoeba.aladdin.io.MysqlResultSetPacket;
 import com.meidusa.amoeba.mysql.jdbc.MysqlDefs;
 import com.meidusa.amoeba.mysql.net.MysqlClientConnection;
-import com.meidusa.amoeba.mysql.net.packet.EOFPacket;
 import com.meidusa.amoeba.mysql.net.packet.FieldPacket;
 import com.meidusa.amoeba.mysql.net.packet.MysqlPacketBuffer;
 import com.meidusa.amoeba.mysql.net.packet.ResultSetHeaderPacket;
@@ -135,7 +134,7 @@ public class ResultSetUtil {
 			fields[i] = new FieldPacket();
 			fields[i].init(buffer);
 		}
-		EOFPacket eof = new EOFPacket();
-		eof.init(buffer);
+		System.out.println(1 | 0200);
+		
 	}
 }
