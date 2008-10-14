@@ -3,6 +3,7 @@ package com.meidusa.amoeba.oracle.handler;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -44,6 +45,9 @@ public class OracleQueryMessageHandler extends AbstractMessageQueuedHandler impl
 
     private boolean                                               isFirstClientPacket = true;
     private byte[]                                                tmpBuffer           = null;
+
+    private static AtomicLong                                     startCount          = new AtomicLong(0L);
+    private static AtomicLong                                     endCount            = new AtomicLong(0L);
 
     public OracleQueryMessageHandler(Connection clientConn, ObjectPool[] pools){
         this.clientConn = (OracleConnection) clientConn;
@@ -148,8 +152,11 @@ public class OracleQueryMessageHandler extends AbstractMessageQueuedHandler impl
         for (int i = 0; i < pools.length; i++) {
             ObjectPool pool = pools[i];
             OracleServerConnection conn = (OracleServerConnection) pool.borrowObject();
+            if (logger.isInfoEnabled()) {
+                logger.info("startSession:" + startCount.incrementAndGet());
+            }
             if (logger.isDebugEnabled()) {
-                int h = conn.getObjectPool().hashCode();
+                int h = conn.hashCode();
                 logger.debug("");
                 logger.debug("+++++++++++++++++++++++++ borrowed conn[" + h + "] from pool +++++++++++++++++++++++++");
             }
@@ -167,29 +174,14 @@ public class OracleQueryMessageHandler extends AbstractMessageQueuedHandler impl
             if (!isEnded) {
                 isEnded = true;
                 clientConn.setMessageHandler(clientHandler);
+
                 Set<Map.Entry<OracleServerConnection, MessageHandler>> handlerSet = handlerMap.entrySet();
                 for (Map.Entry<OracleServerConnection, MessageHandler> entry : handlerSet) {
-                    MessageHandler handler = entry.getValue();
                     OracleServerConnection conn = entry.getKey();
+
                     ConnectionServerStatus status = connStatusMap.get(conn);
                     if (status != null && status.isCompleted) {
-                        conn.setMessageHandler(handler);
-                        if (!conn.isClosed()) {
-                            PoolableObject pooledObject = (PoolableObject) conn;
-                            if (pooledObject.getObjectPool() != null) {
-                                try {
-                                    pooledObject.getObjectPool().returnObject(conn);
-                                    if (logger.isDebugEnabled()) {
-                                        int h = conn.getObjectPool().hashCode();
-                                        logger.debug("");
-                                        logger.debug("------------------------- returned conn[" + h + "] to pool ---------------------------\n");
-                                    }
-                                } catch (Exception e) {
-                                    logger.error("OracleQueryMessageHandler endSession error", e);
-                                }
-
-                            }
-                        }
+                        releaseConn(conn);
                     }
                 }
             }
@@ -198,8 +190,42 @@ public class OracleQueryMessageHandler extends AbstractMessageQueuedHandler impl
         }
     }
 
+    private void releaseConn(OracleServerConnection conn) {
+        lock.lock();
+        try {
+            MessageHandler handler = handlerMap.get(conn);
+            conn.setMessageHandler(handler);
+            if (!conn.isClosed()) {
+                PoolableObject pooledObject = (PoolableObject) conn;
+                if (pooledObject.getObjectPool() != null) {
+                    try {
+                        pooledObject.getObjectPool().returnObject(conn);
+                        if (logger.isInfoEnabled()) {
+                            logger.info("endSession:" + endCount.incrementAndGet());
+                        }
+                        if (logger.isDebugEnabled()) {
+                            int h = conn.hashCode();
+                            logger.debug("");
+                            logger.debug("------------------------- returned conn[" + h + "] to pool ---------------------------\n");
+                        }
+                    } catch (Exception e) {
+                        logger.error("OracleQueryMessageHandler endSession error", e);
+                    }
+
+                }
+            }
+        } finally {
+            lock.unlock();
+        }
+    }
+
     public boolean isEnded() {
-        return isEnded;
+        lock.lock();
+        try {
+            return isEnded;
+        } finally {
+            lock.unlock();
+        }
     }
 
     /**
@@ -244,6 +270,10 @@ public class OracleQueryMessageHandler extends AbstractMessageQueuedHandler impl
                     if (!entry.getValue().isCompleted()) {
                         allCompleted = false;
                         break;
+                    } else {
+                        if (this.isEnded()) {
+                            releaseConn(entry.getKey());
+                        }
                     }
                 }
 
