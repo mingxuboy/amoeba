@@ -29,6 +29,8 @@ import org.apache.log4j.Logger;
 
 import com.meidusa.amoeba.context.ProxyRuntimeContext;
 import com.meidusa.amoeba.data.ConMgrStats;
+import com.meidusa.amoeba.util.Initialisable;
+import com.meidusa.amoeba.util.InitialisationException;
 import com.meidusa.amoeba.util.LoopingThread;
 import com.meidusa.amoeba.util.NameableRunner;
 import com.meidusa.amoeba.util.Queue;
@@ -39,7 +41,7 @@ import com.meidusa.amoeba.util.Tuple;
  * 
  * @author <a href=mailto:piratebase@sina.com>Struct chen</a>
  */
-public class ConnectionManager extends LoopingThread implements Reporter {
+public class ConnectionManager extends LoopingThread implements Reporter,Initialisable {
 	protected static Logger logger = Logger.getLogger(ConnectionManager.class);
 	protected static final int SELECT_LOOP_TIME = 100;
 
@@ -490,6 +492,10 @@ public class ConnectionManager extends LoopingThread implements Reporter {
 
 	public void setExecutor(Executor executor) {
 		this.executor = executor;
+	}
+
+	public void init() throws InitialisationException {
+		
 	}
 	
 }

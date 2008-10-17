@@ -11,9 +11,6 @@
  */
 package com.meidusa.amoeba.net;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.log4j.Logger;
 
 import com.meidusa.amoeba.context.ProxyRuntimeContext;
@@ -27,7 +24,7 @@ import com.meidusa.amoeba.server.AuthenticateFilter;
  */
 public abstract class Authenticator {
 	protected static Logger log = Logger.getLogger(Authenticator.class);
-	private List<AuthenticateFilter> filterList = new ArrayList<AuthenticateFilter>();
+	private AuthenticateFilter filter;
 	protected AuthingableConnectionManager _conmgr;
 
 	public void setConnectionManager(AuthingableConnectionManager conmgr) {
@@ -54,31 +51,21 @@ public abstract class Authenticator {
 		});
 	}
 
+	public AuthenticateFilter getFilter() {
+		return filter;
+	}
+
+	public void setFilter(AuthenticateFilter filter) {
+		this.filter = filter;
+	}
+
 	protected AuthResponseData createResponseData() {
 		return new AuthResponseData();
 	}
 	
-
-	
-	public void addAuthenticateFilter(AuthenticateFilter filter){
-		if(!filterList.contains(filter)){
-			filterList.add(filter);
-		}
-	}
-	
-	public void removeAuthenticateFilter(AuthenticateFilter filter){
-		filterList.remove(filter);
-	}
 	
 	protected boolean doFilte(AuthingableConnection conn,AuthResponseData rdata){
-		for(AuthenticateFilter filter : filterList){
-			if(filter.doFilte(conn,rdata)){
-				continue;
-			}else{
-				return false;
-			}
-		}
-		return true;
+		return filter != null? filter.doFilte(conn, rdata):true;
 	}
 	
 	/**
