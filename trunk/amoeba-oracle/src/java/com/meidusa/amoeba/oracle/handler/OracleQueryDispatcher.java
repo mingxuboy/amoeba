@@ -95,7 +95,7 @@ public class OracleQueryDispatcher implements MessageHandler {
                             logger.debug("#amoeba logoff message ==============================================================");
                             logger.debug(">>receive from client[" + size + "]:" + ByteUtil.toHex(tmpBuffer, 0, tmpBuffer.length));
                             logger.debug("#amoeba logoff message ==============================================================");
-                            logger.debug("<<send to client[" + logoffBytes.length + "]:" + ByteUtil.toHex(logoffBytes, 0, logoffBytes.length));
+                            logger.debug("<<.....send to client[" + logoffBytes.length + "]:" + ByteUtil.toHex(logoffBytes, 0, logoffBytes.length));
                             logger.debug("End.");
                         }
                         clearBuffer();

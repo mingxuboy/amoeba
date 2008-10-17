@@ -302,12 +302,12 @@ public class T4C8TTILob {
                 case 4:
                     oer.init();
                     oer.unmarshal(meg);
-                    rowsProcessed = (int) oer.curRowNumber;
-                    cursorId = oer.curCursorID;
+                    rowsProcessed = (int) oer.curRowNumber;                    
                     if (oer.retCode != 0) {
                         oer.processError();
                     }
                     if (flag) {
+                        cursorId = (int)oer.curRowNumber;
                         isComplete = true;
                     }
                     break label0;

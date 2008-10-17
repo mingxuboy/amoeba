@@ -158,7 +158,7 @@ public class T4CPacketBuffer extends OracleAbstractPacketBuffer implements Oracl
     }
 
     public void marshalCLR(byte[] ab, int offset, int length, int max) {
-        if (length > max) {
+        if (length > TTCC_MXIN) {
             int i = 0;
             writeByte((byte) -2);
             do {
