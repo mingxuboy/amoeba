@@ -61,7 +61,6 @@ public class ParameterMapping {
 		return (mDescriptors);
 	}
 
-	@SuppressWarnings("unchecked")
 	public static void mappingObject(Object object, Map<String,Object> parameter) {
 		PropertyDescriptor[] descriptors = getDescriptors(object.getClass());
 
@@ -80,27 +79,16 @@ public class ParameterMapping {
 					value = deStringize(cls, string);
 				}
 			}else if(obj instanceof BeanObjectEntityConfig){
-				BeanObjectEntityConfig beanconf = (BeanObjectEntityConfig)obj;
-				value = beanconf.createBeanObject(true);
 				
-				//Map bean
-				if(value instanceof Map){
-					Map map = (Map)value;
-					for(Map.Entry<String, Object> entry:beanconf.getParams().entrySet()){
-						String key = entry.getKey();
-						Object mapValue = entry.getValue();
-						if(mapValue instanceof BeanObjectEntityConfig){
-							BeanObjectEntityConfig mapBeanConfig = (BeanObjectEntityConfig)entry.getValue();
-							mapValue = mapBeanConfig.createBeanObject(true);
-							mappingObject(mapValue,mapBeanConfig.getParams());
-						}
-						map.put(key, mapValue);
-					}
+				value = newBean((BeanObjectEntityConfig)obj);
+				
+			}else if(obj instanceof BeanObjectEntityConfig[]){
+				List<Object> list = new ArrayList<Object>();
+				
+				for(BeanObjectEntityConfig beanconfig:(BeanObjectEntityConfig[])obj){
+					list.add(newBean(beanconfig));
 				}
-				//other bean
-				else{
-					mappingObject(value,beanconf.getParams());
-				}
+				value = list.toArray();
 			}
 			
 			if (cls != null) {
@@ -110,6 +98,8 @@ public class ParameterMapping {
 						if(method != null){
 							method.invoke(object, new Object[] { value });
 						}else{
+							/*object.getClass().getMethod(name, parameterTypes)
+							if()*/
 							logger.info(object.getClass()+"@"+descriptors[i].getName()+" can not write able");
 						}
 					}
@@ -121,6 +111,32 @@ public class ParameterMapping {
 	}
 	
 
+	@SuppressWarnings("unchecked")
+	public  static  Object newBean(BeanObjectEntityConfig beanConfig){
+		Object beanvalue = beanConfig.createBeanObject(true);
+		//Map bean
+		if(beanvalue instanceof Map){
+			Map map = (Map)beanvalue;
+			for(Map.Entry<String, Object> entry:beanConfig.getParams().entrySet()){
+				String key = entry.getKey();
+				Object mapValue = entry.getValue();
+				if(mapValue instanceof BeanObjectEntityConfig){
+					BeanObjectEntityConfig mapBeanConfig = (BeanObjectEntityConfig)entry.getValue();
+					mapValue = mapBeanConfig.createBeanObject(true);
+					mappingObject(mapValue,mapBeanConfig.getParams());
+				}
+				map.put(key, mapValue);
+			}
+		}else if(beanvalue instanceof List){
+			
+		}
+		//other bean
+		else{
+			mappingObject(beanvalue,beanConfig.getParams());
+		}
+		
+		return beanvalue;
+	}
 
 	/**
 	 * Convert the given string into an acceptable object for the property

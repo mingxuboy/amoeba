@@ -17,6 +17,8 @@ import com.meidusa.amoeba.config.ConfigUtil;
 import com.meidusa.amoeba.net.AuthResponseData;
 import com.meidusa.amoeba.net.AuthingableConnection;
 import com.meidusa.amoeba.util.IPRule;
+import com.meidusa.amoeba.util.Initialisable;
+import com.meidusa.amoeba.util.InitialisationException;
 import com.meidusa.amoeba.util.StringUtil;
 
 /**
@@ -24,22 +26,17 @@ import com.meidusa.amoeba.util.StringUtil;
  * @author struct
  *
  */
-public class IPAccessController implements AuthenticateFilter {
+public class IPAccessController implements AuthenticateFilter,Initialisable {
 	protected static Logger logger = Logger.getLogger(IPAccessController.class);
 	private static  final  String DENAY_MESSAGE= "Access denied for ip: '${host}' to amoeba server";
 	private boolean isEnabled;
 	private String[] ipRule = null;
-	public IPAccessController(String ipFile){
-		File file = new File(ipFile);
-		if(!file.exists() && !file.isFile()){
-			isEnabled = false;
-			logger.info("ip access control file not found:"+ipFile+", ip access controller disabled.");
-		}
-		
-		IPAccessFileWatchdog dog = new IPAccessFileWatchdog(ipFile);
-		dog.setDaemon(true);
-		dog.setDelay(FileWatchdog.DEFAULT_DELAY);
-		dog.start();
+	private String ipFile;
+	public void setIpFile(String ipFile) {
+		this.ipFile = ipFile;
+	}
+
+	public IPAccessController(){
 	}
 	
 	
@@ -123,5 +120,18 @@ public class IPAccessController implements AuthenticateFilter {
             LogLog.warn("ip access config load completed from file:"+filename);
         }
     }
+
+	public void init() throws InitialisationException {
+		File file = new File(ipFile);
+		if(!file.exists() && !file.isFile()){
+			isEnabled = false;
+			logger.info("ip access control file not found:"+ipFile+", ip access controller disabled.");
+		}
+		
+		IPAccessFileWatchdog dog = new IPAccessFileWatchdog(ipFile);
+		dog.setDaemon(true);
+		dog.setDelay(FileWatchdog.DEFAULT_DELAY);
+		dog.start();
+	}
 	
 }
