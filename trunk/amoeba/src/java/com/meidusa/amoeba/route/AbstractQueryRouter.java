@@ -666,7 +666,7 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable{
 			schema.setName(schemaName);
 			table.setSchema(schema);
 		}
-		
+
 		tableRule.table = table;
 		String defaultPools = current.getAttribute("defaultPools");
 		if(defaultPools != null){

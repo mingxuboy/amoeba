@@ -8,6 +8,8 @@ import com.meidusa.amoeba.mysql.net.packet.FieldPacket;
 import com.meidusa.amoeba.mysql.net.packet.ResultSetHeaderPacket;
 import com.meidusa.amoeba.mysql.net.packet.RowDataPacket;
 import com.meidusa.amoeba.net.Connection;
+import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
+import com.meidusa.amoeba.net.packet.PacketBuffer;
 
 /**
  * 
@@ -19,6 +21,7 @@ public class MysqlResultSetPacket extends ErrorResultPacket {
 	public ResultSetHeaderPacket resulthead;
 	public FieldPacket[] fieldPackets;
 	public List<RowDataPacket> rowList = new ArrayList<RowDataPacket>();
+	
 	public MysqlResultSetPacket(String query){
 		
 	}
@@ -37,16 +40,18 @@ public class MysqlResultSetPacket extends ErrorResultPacket {
 			super.wirteToConnection(conn);
 			return;
 		}
+		
+		PacketBuffer buffer = new AbstractPacketBuffer(2011);
 		byte paketId = 1;
 		resulthead.packetId = paketId++;
 		
 		//write header bytes
-		conn.postMessage(resulthead.toByteBuffer(conn));
+		appendBufferToWrite(resulthead.toByteBuffer(conn).array(),buffer,conn,false);
 		
 		//write fields bytes
 		for(int i=0;i<fieldPackets.length;i++){
 			fieldPackets[i].packetId = paketId++;
-			conn.postMessage(fieldPackets[i].toByteBuffer(conn));
+			appendBufferToWrite(fieldPackets[i].toByteBuffer(conn).array(),buffer,conn,false);
 		}
 		
 		//write eof bytes
@@ -54,19 +59,35 @@ public class MysqlResultSetPacket extends ErrorResultPacket {
 		eof.serverStatus = 2;
 		eof.warningCount = 0;
 		eof.packetId = paketId++;
-		conn.postMessage(eof.toByteBuffer(conn));
+		appendBufferToWrite(eof.toByteBuffer(conn).array(),buffer,conn,false);
 		
 		if(rowList.size()>0){
 			//write rows bytes
 			for(RowDataPacket row : rowList){
 				row.packetId = paketId++;
-				conn.postMessage(row.toByteBuffer(conn));
+				appendBufferToWrite(row.toByteBuffer(conn).array(),buffer,conn,false);
 			}
 			
 		}
 		
 		//write eof bytes
 		eof.packetId = paketId++;
-		conn.postMessage(eof.toByteBuffer(conn));
+		appendBufferToWrite(eof.toByteBuffer(conn).array(),buffer,conn,true);
+	}
+	
+	private  boolean appendBufferToWrite(byte[] byts,PacketBuffer buffer,Connection conn,boolean writeNow){
+		if(writeNow || buffer.remaining() < byts.length){
+			if(buffer.getPosition()>0){
+				buffer.writeBytes(byts);
+				conn.postMessage(buffer.toByteBuffer());
+				buffer.reset();
+			}else{
+				conn.postMessage(byts);
+			}
+			return true;
+		}else{
+			buffer.writeBytes(byts);
+			return true;
+		}
 	}
 }

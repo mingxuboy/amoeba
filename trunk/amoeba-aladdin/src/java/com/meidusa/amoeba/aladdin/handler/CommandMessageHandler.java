@@ -82,7 +82,9 @@ public abstract class CommandMessageHandler implements MessageHandler,
 					logger.error("run query error:", e);
 				}
 			} finally {
-				latch.countDown();
+				if(latch != null){
+					latch.countDown();
+				}
 			}
 		}
 	}
@@ -118,23 +120,32 @@ public abstract class CommandMessageHandler implements MessageHandler,
 	}
 
 	public void startSession() throws Exception {
-		final CountDownLatch latch = new CountDownLatch(pools.length);
 		ResultPacket packet = newResultPacket(query);
-		for (ObjectPool pool : pools) {
-			final java.sql.Connection conn = (java.sql.Connection) pool
-					.borrowObject();
-			connPoolMap.put(conn, pool);
-			QueryRunnable runnable = newQueryRunnable(latch, conn, query,
-					parameter, packet);
+		if(pools.length == 1){
+			final java.sql.Connection conn = (java.sql.Connection) pools[0].borrowObject();
+			connPoolMap.put(conn, pools[0]);
+			QueryRunnable runnable = newQueryRunnable(null, conn, query,parameter, packet);
 			runnable.init(this);
-			ProxyRuntimeContext.getInstance().getClientSideExecutor().execute(
-					runnable);
-		}
-
-		if (timeout > 0) {
-			latch.await(timeout, TimeUnit.MILLISECONDS);
-		} else {
-			latch.await();
+			runnable.run();
+		}else{
+			final CountDownLatch latch = new CountDownLatch(pools.length);
+			
+			for (ObjectPool pool : pools) {
+				final java.sql.Connection conn = (java.sql.Connection) pool
+						.borrowObject();
+				connPoolMap.put(conn, pool);
+				QueryRunnable runnable = newQueryRunnable(latch, conn, query,
+						parameter, packet);
+				runnable.init(this);
+				ProxyRuntimeContext.getInstance().getClientSideExecutor().execute(
+						runnable);
+			}
+	
+			if (timeout > 0) {
+				latch.await(timeout, TimeUnit.MILLISECONDS);
+			} else {
+				latch.await();
+			}
 		}
 		endSession();
 		packet.wirteToConnection(source);
