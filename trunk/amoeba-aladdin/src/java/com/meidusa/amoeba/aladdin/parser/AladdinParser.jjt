@@ -1040,10 +1040,10 @@ Table TableReference():
 	Token token = null;
 }
 {
-    table = TableName() 
+    table = TableName() [
     ["AS"] [token = <IDENTIFIER>{
     	table.setAlias(token.image);
-    }]{
+    }]]{
    	 if(table.getAlias() != null){
    	 	tableAliasMap.put(table.getAlias(),table);	
    	 }

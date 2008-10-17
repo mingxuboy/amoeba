@@ -62,8 +62,8 @@
 	        </jar>
 	    </target>
 	    
-	    <target name="server" description="Amoeba for Mysql" depends="compile">
-	        <java classname="com.meidusa.amoeba.mysql.server.MysqlProxyServer" fork="true" maxmemory="128m">
+	    <target name="server" description="Aladdin" depends="compile">
+	        <java classname="com.meidusa.amoeba.aladdin.server.AladdinProxyServer" fork="true" maxmemory="128m">
 	        <sysproperty key="amoeba.home" value="${basedir}"/>
 	         <classpath>
 				<fileset dir="${libs.dir}">

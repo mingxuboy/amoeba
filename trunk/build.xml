@@ -11,7 +11,7 @@
   	<property file="${basedir}/build.properties" />
   	
   <property name="projects.dir"   value="."/>
-  <property name="projects" 	 value="amoeba,amoeba-mysql"/>
+  <property name="projects" 	 value="amoeba,amoeba-mysql,amoeba-aladdin"/>
   	
   <import file="build/etc/build-support.xml"/>
 
@@ -167,12 +167,15 @@
 	        	<exclude name="*/.svn/*"/>
 	        	<include name="src/java/**"/>
 	        </tarfileset>
-			<!--
+	    	<tarfileset dir="amoeba-mysql">
+	        	<exclude name="*/.svn/*"/>
+	        	<include name="src/java/**"/>
+	        </tarfileset>
 			<tarfileset dir="amoeba-aladdin">
 	        	<exclude name="*/.svn/*"/>
 	        	<include name="src/java/**"/>
 	        </tarfileset>
-	        -->
+	        
 	        <tarfileset dir="build/build-aladdin">
 	        	<exclude name="*/.svn/*"/>
 	        </tarfileset>
@@ -193,16 +196,22 @@
 		    	<exclude name="bin/*"/>
 		    	<include name="*.*"/>
 		    </zipfileset>
+			
 		     <zipfileset dir="amoeba">
 	        	<exclude name="*/.svn/*"/>
 	        	<include name="src/java/**"/>
 	        </zipfileset>
-			<!--
-			<tarfileset dir="amoeba-aladdin">
+			
+			<zipfileset dir="amoeba-mysql">
 	        	<exclude name="*/.svn/*"/>
 	        	<include name="src/java/**"/>
-	        </tarfileset>
-	        -->
+	        </zipfileset>
+			
+			<zipfileset dir="amoeba-aladdin">
+	        	<exclude name="*/.svn/*"/>
+	        	<include name="src/java/**"/>
+	        </zipfileset>
+	       
 	        
 	        <zipfileset dir="build/build-aladdin">
 	        	<exclude name="*/.svn/*"/>

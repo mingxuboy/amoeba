@@ -78,7 +78,6 @@ public abstract class CommandMessageHandler implements MessageHandler,
 			try {
 				try {
 					doRun(conn);
-					
 				} catch (Exception e) {
 					logger.error("run query error:", e);
 				}

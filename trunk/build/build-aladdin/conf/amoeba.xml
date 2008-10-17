@@ -39,9 +39,7 @@
 		manager¸ºÔðConnection IO¶ÁÐ´/ËÀÍö¼ì²â
 	-->
 	<connectionManagerList>
-		<connectionManager name="defaultManager">
-			<className>com.meidusa.amoeba.net.AuthingableConnectionManager</className>
-		</connectionManager>
+		<connectionManager name="defaultManager" class="com.meidusa.amoeba.net.AuthingableConnectionManager"/>
 	</connectionManagerList>
 	
 	<dbServerList>
@@ -100,8 +98,7 @@
 		
 	</dbServerList>
 	
-	<queryRouter>
-		<className>com.meidusa.amoeba.mysql.parser.MysqlQueryRouter</className>
+	<queryRouter class="com.meidusa.amoeba.aladdin.parser.AladdinQueryRouter">
 		<property name="ruleConfig">${amoeba.home}/conf/rule.xml</property>
 		<property name="functionConfig">${amoeba.home}/conf/functionMap.xml</property>
 		<property name="ruleFunctionConfig">${amoeba.home}/conf/ruleFunctionMap.xml</property>

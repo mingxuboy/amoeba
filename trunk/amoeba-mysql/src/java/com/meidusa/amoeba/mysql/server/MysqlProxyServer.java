@@ -25,6 +25,7 @@ import com.meidusa.amoeba.mysql.net.MysqlClientConnectionFactory;
 import com.meidusa.amoeba.mysql.net.MysqlClientConnectionManager;
 import com.meidusa.amoeba.net.ConnectionManager;
 import com.meidusa.amoeba.server.IPAccessController;
+import com.meidusa.amoeba.util.InitialisationException;
 import com.meidusa.amoeba.util.Reporter;
 import com.meidusa.amoeba.util.StringUtil;
 
@@ -141,7 +142,16 @@ public class MysqlProxyServer {
 		
 		String accessConf = System.getProperty("access.conf","${amoeba.home}/conf/access_list.conf");
 		accessConf = ConfigUtil.filter(accessConf);
-		authen.addAuthenticateFilter(new IPAccessController(accessConf));
+		IPAccessController ipfilter = new IPAccessController();
+		ipfilter.setIpFile(accessConf);
+		try {
+			ipfilter.init();
+		} catch (InitialisationException e1) {
+			logger.error("init IPAccessController error:",e1);
+			System.exit(-1);
+		}
+		
+		authen.setFilter(ipfilter);
 		
 		mysqlProxyServerconMger.setAuthenticator(authen);
 		mysqlProxyServerconMger.setExecutor(context.getReadExecutor());
