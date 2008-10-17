@@ -1,6 +1,5 @@
 package com.meidusa.amoeba.aladdin.handler;
 
-import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -103,7 +102,7 @@ public class AladdinMessageDispatcher implements MessageHandler {
 					String sql = command.arg.trim();
 					String show = sql.substring(0, "show".length());
 					if(show.equalsIgnoreCase("show")){
-						conn.postMessage(STATIC_EMPTY_RESULT_BUFFER);
+						resultPacket.wirteToConnection(conn);
 						return;
 					}
 				}
@@ -111,7 +110,7 @@ public class AladdinMessageDispatcher implements MessageHandler {
 				QueryRouter router = ProxyRuntimeContext.getInstance().getQueryRouter();
 				ObjectPool[] pools = router.doRoute(conn,command.arg,false,null);
 				if(pools == null){
-					resultPacket.wirteToConnection(conn);
+					conn.postMessage(STATIC_OK_BUFFER);
 					return;
 				}
 				MessageHandler handler = new QueryCommandMessageHandler(conn,command.arg,null,pools,timeout);
