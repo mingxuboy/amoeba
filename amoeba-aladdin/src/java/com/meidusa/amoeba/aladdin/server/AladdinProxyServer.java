@@ -17,12 +17,12 @@ import java.util.ArrayList;
 
 import org.apache.log4j.Logger;
 
+import com.meidusa.amoeba.aladdin.net.AladdinClientConnectionFactory;
 import com.meidusa.amoeba.aladdin.net.AladdinClientConnectionManager;
 import com.meidusa.amoeba.config.ConfigUtil;
 import com.meidusa.amoeba.context.ProxyRuntimeContext;
 import com.meidusa.amoeba.log4j.DOMConfigurator;
 import com.meidusa.amoeba.mysql.context.MysqlProxyRuntimeContext;
-import com.meidusa.amoeba.mysql.net.MysqlClientConnectionFactory;
 import com.meidusa.amoeba.mysql.server.MysqlAuthenticator;
 import com.meidusa.amoeba.net.ConnectionManager;
 import com.meidusa.amoeba.server.IPAccessController;
@@ -133,7 +133,7 @@ public class AladdinProxyServer {
 		AladdinClientConnectionManager mysqlProxyServerconMger = new AladdinClientConnectionManager("Aladdin proxy Server"
 				,context.getConfig().getIpAddress(),context.getConfig().getPort());
 		registerReporter(mysqlProxyServerconMger);
-		MysqlClientConnectionFactory factory = new MysqlClientConnectionFactory();
+		AladdinClientConnectionFactory factory = new AladdinClientConnectionFactory();
 		factory.setPassword(context.getConfig().getPassword());
 		factory.setUser(context.getConfig().getUser());
 		mysqlProxyServerconMger.setConnectionFactory(factory);

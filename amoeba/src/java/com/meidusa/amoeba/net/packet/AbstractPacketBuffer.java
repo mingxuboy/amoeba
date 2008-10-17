@@ -123,7 +123,7 @@ public class AbstractPacketBuffer implements PacketBuffer {
 
     public synchronized void reset() {
         this.position = 0;
-        this.length = 0;
+        setPacketLength(buffer.length);
     }
 
     public int remaining() {

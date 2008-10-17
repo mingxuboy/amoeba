@@ -18,22 +18,22 @@ import org.apache.log4j.Logger;
 public abstract class DatabaseConnection extends AuthingableConnection{
 	private static Logger logger = Logger.getLogger(DatabaseConnection.class);
 	
-	protected String schema;
+	private String schema;
 	
 	/**
 	 * 是否是自动提交类型
 	 */
-	protected boolean autoCommit = true;
+	private boolean autoCommit = true;
 	
 	/**
 	 * transaction isolation level
 	 */
-	protected int transactionIsolation;
+	private int transactionIsolation;
 	
 	/**
 	 * 当前连接相关的终端系统(client/dbserver)所采取的字符编码
 	 */
-	protected String charset;
+	private String charset;
 	
 	public String getCharset() {
 		return charset;

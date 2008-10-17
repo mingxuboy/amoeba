@@ -22,7 +22,7 @@ public class Table implements DBObjectBase {
 	private Schema schema;
 	private String name;
 	private String alias;
-	
+
 	public String getSql() {
 		return ((schema==null)?name:(schema.getSql()+"."+this.getName()));
 	}
@@ -51,6 +51,7 @@ public class Table implements DBObjectBase {
 		boolean isMatched = true;
 		if(object instanceof Table){
 			Table other = (Table)object;
+
 			if(schema == null){
 				isMatched = isMatched && (other.schema == null);
 			}else{
