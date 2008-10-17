@@ -11,7 +11,6 @@
  */
 package com.meidusa.amoeba.mysql.handler;
 
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
