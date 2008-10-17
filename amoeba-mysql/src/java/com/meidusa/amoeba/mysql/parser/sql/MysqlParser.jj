@@ -259,6 +259,7 @@ TOKEN: /* SQL Keywords. prefixed with K_ to avoid name clashes */
 |   <K_NUMERIC:"NUMERIC">
 |   <K_OF:"OF">
 |   <K_ON:"ON">
+|	<K_NOWAIT:"NOWAIT">
 |   <K_ONLY:"ONLY">
 |   <K_OR:"OR">
 |   <K_ORDER:"ORDER">
@@ -1075,7 +1076,7 @@ Table TableReference():
 }
 {
     table = TableName() 
-    ["AS"] [token = <IDENTIFIER>{
+     [["AS"] token = <IDENTIFIER>{
     	table.setAlias(token.image);
     }]{
    	 if(table.getAlias() != null){
@@ -1172,7 +1173,7 @@ void SelectClause():
 void SelectList() :
 {}
 {
-    "*"("," SelectItem())* | SelectItem() ("," SelectItem())*
+    ("*"("," SelectItem())*) | (SelectItem() ("," SelectItem())*)
 }
 
 void SelectItem():
@@ -1182,7 +1183,7 @@ void SelectItem():
         LOOKAHEAD(2) EntityName()".*"  /* table.* */
         |   LOOKAHEAD(4) EntityName()"." EntityName() ".*" /* schema.table.* */
         |   SQLSimpleExpression()    // Column or Expression
-    )[("=" SQLSimpleExpression())] [(["AS"] <IDENTIFIER>)] // Column Alias
+    )[("=" SQLSimpleExpression())] [["AS"] <IDENTIFIER>] // Column Alias
 }
 
 
@@ -1213,7 +1214,7 @@ void TableSpec():
 }
 {
 	table = TableReference()
-	| (["TABLE"] "(" FullSelectStatement() ")" CorrelationClause())
+	| (["TABLE"] "(" FullSelectStatement() ")" [CorrelationClause()])
 
 }
 
@@ -1917,7 +1918,7 @@ void DataTypes()      :
 void ForUpdateClause() :
 {}
 {
-    "FOR" "UPDATE" "OF" ColumnName() ("," ColumnName())*
+    "FOR" "UPDATE" ["OF" ColumnName() ("," ColumnName())*] [<K_NOWAIT>]
 }
 
 void ReadOnlyClause() :
