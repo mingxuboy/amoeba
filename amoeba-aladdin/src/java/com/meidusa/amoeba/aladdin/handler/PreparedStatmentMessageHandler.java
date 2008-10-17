@@ -21,7 +21,7 @@ public class PreparedStatmentMessageHandler extends CommandMessageHandler {
 
 	protected static class PreparedQueryRunnable extends QueryRunnable{
 
-		PreparedQueryRunnable(CountDownLatch latch, java.sql.Connection conn,
+		protected PreparedQueryRunnable(CountDownLatch latch, java.sql.Connection conn,
 				String query, Object parameter, ResultPacket packet) {
 			super(latch, conn, query, parameter, packet);
 		}
