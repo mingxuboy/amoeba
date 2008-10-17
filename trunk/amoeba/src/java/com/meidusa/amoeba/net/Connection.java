@@ -25,6 +25,8 @@ import org.apache.log4j.Logger;
 
 import com.meidusa.amoeba.net.io.PacketInputStream;
 import com.meidusa.amoeba.net.io.PacketOutputStream;
+import com.meidusa.amoeba.net.packet.Packet;
+import com.meidusa.amoeba.net.packet.PacketFactory;
 import com.meidusa.amoeba.util.Queue;
 import com.meidusa.amoeba.util.StringUtil;
 
@@ -55,6 +57,17 @@ public abstract class Connection implements NetEventHandler {
 	private boolean socketClosed = false;
 	protected String host;
 	protected int port;
+	
+	public PacketFactory<? extends Packet> getPacketFactory() {
+		return packetFactory;
+	}
+
+	public void setPacketFactory(PacketFactory<? extends Packet> packetFactory) {
+		this.packetFactory = packetFactory;
+	}
+
+	protected PacketFactory<? extends Packet> packetFactory; 
+	
 	public Connection(SocketChannel channel, long createStamp){
 		_channel = channel;
 		try{
@@ -250,8 +263,17 @@ public abstract class Connection implements NetEventHandler {
 		return bytesInTotle;
 	}
 
+	@SuppressWarnings("unchecked")
 	protected void messageProcess(byte[] msg){
-		_handler.handleMessage(this,msg);
+		if(_handler instanceof PacketHandler && getPacketFactory() != null){
+			PacketFactory<? extends Packet> factory = getPacketFactory();
+			Packet packet = factory.createPacket(this, msg);
+			PacketHandler  packetHandler = (PacketHandler)_handler;
+			packetHandler.handlePacket(packet);
+		}else{
+			_handler.handleMessage(this,msg);
+		}
+		
 	}
 	
 	public boolean doWrite() throws IOException{
