@@ -2,7 +2,6 @@ options {
 	JDK_VERSION = "1.5";
 	IGNORE_CASE=true ;
 	DEBUG_PARSER=false ;
-   	//NODE_EXTENDS="com.meidusa.amoeba.mysql.parser.data.MysqlSimpleNode";
    	JJTREE_OUTPUT_DIRECTORY ="sql";
    	NODE_PREFIX="Mysql";
    	NODE_SCOPE_HOOK=true;

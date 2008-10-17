@@ -39,9 +39,7 @@
 		manager负责Connection IO读写/死亡检测
 	-->
 	<connectionManagerList>
-		<connectionManager name="defaultManager">
-			<className>com.meidusa.amoeba.net.AuthingableConnectionManager</className>
-		</connectionManager>
+		<connectionManager name="defaultManager" class="com.meidusa.amoeba.net.AuthingableConnectionManager"/>
 	</connectionManagerList>
 	
 	<dbServerList>
@@ -55,8 +53,7 @@
 		<dbServer name="server1">
 			
 			<!-- PoolableObjectFactory实现类 -->
-			<factoryConfig>
-				<className>com.meidusa.amoeba.mysql.net.MysqlServerConnectionFactory</className>
+			<factoryConfig class="com.meidusa.amoeba.mysql.net.MysqlServerConnectionFactory">
 				<property name="manager">defaultManager</property>
 				
 				<!-- 真实mysql数据库端口 -->
@@ -78,8 +75,7 @@
 			</factoryConfig>
 			
 			<!-- ObjectPool实现类 -->
-			<poolConfig>
-				<className>com.meidusa.amoeba.net.poolable.PoolableObjectPool</className>
+			<poolConfig class="com.meidusa.amoeba.net.poolable.PoolableObjectPool">
 				<property name="maxActive">200</property>
 				<property name="maxIdle">200</property>
 				<property name="minIdle">10</property>
@@ -92,8 +88,7 @@
 		
 		
 		<dbServer name="multiPool" virtual="true">
-			<poolConfig>
-				<className>com.meidusa.amoeba.server.MultipleServerPool</className>
+			<poolConfig class="com.meidusa.amoeba.server.MultipleServerPool">
 				<!-- 负载均衡参数 1=ROUNDROBIN , 2=WEIGHTBASED -->
 				<property name="loadbalance">1</property>
 				
@@ -104,8 +99,7 @@
 		
 	</dbServerList>
 	
-	<queryRouter>
-		<className>com.meidusa.amoeba.mysql.parser.MysqlQueryRouter</className>
+	<queryRouter class="com.meidusa.amoeba.mysql.parser.MysqlQueryRouter">
 		<property name="ruleConfig">${amoeba.home}/conf/rule.xml</property>
 		<property name="functionConfig">${amoeba.home}/conf/functionMap.xml</property>
 		<property name="ruleFunctionConfig">${amoeba.home}/conf/ruleFunctionMap.xml</property>
