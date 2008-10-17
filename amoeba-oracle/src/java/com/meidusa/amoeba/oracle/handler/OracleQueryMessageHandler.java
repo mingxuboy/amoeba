@@ -2,7 +2,6 @@ package com.meidusa.amoeba.oracle.handler;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -32,7 +31,7 @@ public class OracleQueryMessageHandler extends AbstractMessageQueuedHandler impl
 
     private static Logger                                       logger              = Logger.getLogger(OracleQueryMessageHandler.class);
 
-    private static AtomicInteger                                session             = new AtomicInteger(0);
+    // private static AtomicInteger session = new AtomicInteger(0);
 
     private OracleConnection                                    clientConn;
     private MessageHandler                                      clientHandler;
@@ -46,25 +45,6 @@ public class OracleQueryMessageHandler extends AbstractMessageQueuedHandler impl
 
     private boolean                                             isFirstClientPacket = true;
     private byte[]                                              tmpBuffer           = null;
-
-    static {
-
-        new Thread(new Runnable() {
-
-            public void run() {
-                while (true) {
-                    try {
-                        Thread.sleep(10000L);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                    if (logger.isInfoEnabled()) {
-                        logger.info("opened session:" + session);
-                    }
-                }
-            }
-        }).start();
-    }
 
     public OracleQueryMessageHandler(Connection clientConn, ObjectPool[] pools){
         this.clientConn = (OracleConnection) clientConn;
@@ -176,7 +156,7 @@ public class OracleQueryMessageHandler extends AbstractMessageQueuedHandler impl
             handlerMap.put(conn, conn.getMessageHandler());
             connStatusMap.put(conn, new ConnectionServerStatus(conn));
             conn.setMessageHandler(this);
-            session.incrementAndGet();
+            // session.incrementAndGet();
         }
     }
 
@@ -210,7 +190,7 @@ public class OracleQueryMessageHandler extends AbstractMessageQueuedHandler impl
                             logger.debug("");
                             logger.debug("------------------------- returned conn[" + h + "] to pool ---------------------------\n");
                         }
-                        session.decrementAndGet();
+                        // session.decrementAndGet();
                     } catch (Exception e) {
                         logger.error("OracleQueryMessageHandler endSession error", e);
                     }
@@ -346,9 +326,9 @@ public class OracleQueryMessageHandler extends AbstractMessageQueuedHandler impl
             int size = ((message[0] & 0xff) << 8) | (message[1] & 0xff);
             logger.debug("#amoeba query message ==============================================================");
             if (isClient) {
-                logger.debug(">>send to server[" + size + "]:" + ByteUtil.toHex(message, 0, message.length));
+                logger.debug(">>.....send to server[" + size + "]:" + ByteUtil.toHex(message, 0, message.length));
             } else {
-                logger.debug("<<send to client[" + size + "]:" + ByteUtil.toHex(message, 0, message.length));
+                logger.debug("<<.....send to client[" + size + "]:" + ByteUtil.toHex(message, 0, message.length));
             }
         }
     }

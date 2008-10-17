@@ -141,7 +141,7 @@ public class OracleProxyServer {
             public void run() {
                 while (true) {
                     try {
-                        Thread.sleep(60000L);
+                        Thread.sleep(10000L);
                     } catch (InterruptedException e) {
                     }
                     logReport(generateReport());
