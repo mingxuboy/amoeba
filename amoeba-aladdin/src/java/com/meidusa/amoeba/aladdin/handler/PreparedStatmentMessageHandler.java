@@ -7,7 +7,6 @@ import com.meidusa.amoeba.aladdin.io.ResultPacket;
 import com.meidusa.amoeba.context.ProxyRuntimeContext;
 import com.meidusa.amoeba.mysql.handler.PreparedStatmentInfo;
 import com.meidusa.amoeba.mysql.net.MysqlClientConnection;
-import com.meidusa.amoeba.mysql.net.packet.FieldPacket;
 import com.meidusa.amoeba.mysql.net.packet.OKforPreparedStatementPacket;
 import com.meidusa.amoeba.net.DatabaseConnection;
 import com.meidusa.amoeba.net.poolable.ObjectPool;
