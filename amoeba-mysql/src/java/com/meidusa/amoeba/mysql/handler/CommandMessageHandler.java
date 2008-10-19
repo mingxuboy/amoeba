@@ -37,7 +37,9 @@ import com.meidusa.amoeba.mysql.net.packet.QueryCommandPacket;
 import com.meidusa.amoeba.net.Connection;
 import com.meidusa.amoeba.net.MessageHandler;
 import com.meidusa.amoeba.net.Sessionable;
+import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
 import com.meidusa.amoeba.net.packet.Packet;
+import com.meidusa.amoeba.net.packet.PacketBuffer;
 import com.meidusa.amoeba.net.poolable.ObjectPool;
 import com.meidusa.amoeba.net.poolable.PoolableObject;
 import com.meidusa.amoeba.util.Reporter;
@@ -260,7 +262,7 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 	protected byte commandType;
 	protected Map<Connection,MessageHandler> handlerMap = new HashMap<Connection,MessageHandler>();
 	private final Lock lock = new ReentrantLock(false);
-	
+	private PacketBuffer buffer = new AbstractPacketBuffer(1400);
 	public CommandMessageHandler(final MysqlClientConnection source,byte[] query,ObjectPool[] pools,long timeout){
 		handlerMap.put(source, source.getMessageHandler());
 		source.setMessageHandler(this);
@@ -569,8 +571,47 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 		}
 	}
 	
+	/**
+	 * 这儿将启动一些缓存机制，避免小数据包频繁调用 系统write, CommandMessageHandler类或者其子类必须通过该方法发送数据包
+	 * @param toConn
+	 * @param message
+	 */
 	protected void dispatchMessageTo(Connection toConn,byte[] message){
-		toConn.postMessage(message);
+		
+		if(toConn == source){
+			if(message != null){
+				appendBufferToWrite(message,buffer,toConn,false);
+			}else{
+				appendBufferToWrite(message,buffer,toConn,true);
+			}
+		}else{
+			toConn.postMessage(message);
+		}
+		
+	}
+	
+	private  boolean appendBufferToWrite(byte[] byts,PacketBuffer buffer,Connection conn,boolean writeNow){
+		if(byts == null){
+			if(buffer.getPosition()>0){
+				conn.postMessage(buffer.toByteBuffer());
+				buffer.reset();
+			}
+			return true;
+		}else{
+			if(writeNow || buffer.remaining() < byts.length){
+				if(buffer.getPosition()>0){
+					buffer.writeBytes(byts);
+					conn.postMessage(buffer.toByteBuffer());
+					buffer.reset();
+				}else{
+					conn.postMessage(byts);
+				}
+				return true;
+			}else{
+				buffer.writeBytes(byts);
+				return true;
+			}
+		}
 	}
 	
 	protected void releaseConnection(Connection conn){
@@ -767,6 +808,7 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 						logger.info(this+" session ended.");
 					}
 				}
+				this.dispatchMessageTo(this.source, null);
 			}
 		}finally{
 			lock.unlock();

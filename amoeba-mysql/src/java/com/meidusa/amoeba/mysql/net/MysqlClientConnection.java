@@ -11,6 +11,7 @@
  */
 package com.meidusa.amoeba.mysql.net;
 
+import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
 import java.util.Collections;
