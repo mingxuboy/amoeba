@@ -197,7 +197,7 @@
 		    	<include name="*.*"/>
 		    </zipfileset>
 			
-		     <zipfileset dir="amoeba">
+		    <zipfileset dir="amoeba">
 	        	<exclude name="*/.svn/*"/>
 	        	<include name="src/java/**"/>
 	        </zipfileset>
