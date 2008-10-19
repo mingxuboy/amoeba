@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="GB2312"?>
 <project default="dist" name="amoeba-aladdin" basedir=".">
-  	<property name="version"     value="0.25"/>
+  	<property name="version"     value="0.1"/>
   	<property name="app.name"     value="amoeba-aladdin"/>
   	<property name="deploy.dir"   value="dist"/>
   	<property name="savedoc.dir"  value="docs"/>
@@ -51,8 +51,8 @@
         </jar>
     </target>
     
-    <target name="server" description="Amoeba for Mysql" depends="compile">
-        <java classname="com.meidusa.amoeba.mysql.server.MysqlProxyServer" fork="true" maxmemory="128m">
+    <target name="server" description="Amoeba for aladdin" depends="compile">
+        <java classname="com.meidusa.amoeba.aladdin.server.AladdinProxyServer" fork="true" maxmemory="128m">
         <sysproperty key="amoeba.home" value="${basedir}"/>
          <classpath>
 			<fileset dir="${libs.dir}">

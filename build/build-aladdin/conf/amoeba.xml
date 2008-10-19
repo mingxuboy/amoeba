@@ -55,8 +55,12 @@
 			<!-- PoolableObjectFactoryÊµÏÖÀà -->
 			<factoryConfig class="com.meidusa.amoeba.net.jdbc.JdbcConnectionFactory">
 				
-				<!-- driver name -->
+				
+				<!-- driver name, pls put mysql jdbc driver into lib folder -->
 				<property name="driverName">com.mysql.jdbc.Driver</property>
+				
+				<!-- jdbc url. -->
+				<property name="url">jdbc:mysql://127.0.0.1:3306/test</property>
 				
 				<!-- url -->
 				<property name="properties">
