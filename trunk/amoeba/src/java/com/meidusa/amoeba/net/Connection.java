@@ -263,17 +263,8 @@ public abstract class Connection implements NetEventHandler {
 		return bytesInTotle;
 	}
 
-	@SuppressWarnings("unchecked")
 	protected void messageProcess(byte[] msg){
-		if(_handler instanceof PacketHandler && getPacketFactory() != null){
-			PacketFactory<? extends Packet> factory = getPacketFactory();
-			Packet packet = factory.createPacket(this, msg);
-			PacketHandler  packetHandler = (PacketHandler)_handler;
-			packetHandler.handlePacket(packet);
-		}else{
-			_handler.handleMessage(this,msg);
-		}
-		
+		_handler.handleMessage(this,msg);
 	}
 	
 	public boolean doWrite() throws IOException{

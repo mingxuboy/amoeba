@@ -41,7 +41,7 @@ public class MysqlResultSetPacket extends ErrorResultPacket {
 			return;
 		}
 		
-		PacketBuffer buffer = new AbstractPacketBuffer(2011);
+		PacketBuffer buffer = new AbstractPacketBuffer(2048);
 		byte paketId = 1;
 		resulthead.packetId = paketId++;
 		
