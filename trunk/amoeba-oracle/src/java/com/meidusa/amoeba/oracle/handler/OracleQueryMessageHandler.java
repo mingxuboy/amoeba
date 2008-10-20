@@ -31,8 +31,6 @@ public class OracleQueryMessageHandler extends AbstractMessageQueuedHandler impl
 
     private static Logger                                       logger              = Logger.getLogger(OracleQueryMessageHandler.class);
 
-    // private static AtomicInteger session = new AtomicInteger(0);
-
     private OracleConnection                                    clientConn;
     private MessageHandler                                      clientHandler;
     private boolean                                             isEnded             = false;
@@ -156,7 +154,6 @@ public class OracleQueryMessageHandler extends AbstractMessageQueuedHandler impl
             handlerMap.put(conn, conn.getMessageHandler());
             connStatusMap.put(conn, new ConnectionServerStatus(conn));
             conn.setMessageHandler(this);
-            // session.incrementAndGet();
         }
     }
 
@@ -190,11 +187,9 @@ public class OracleQueryMessageHandler extends AbstractMessageQueuedHandler impl
                             logger.debug("");
                             logger.debug("------------------------- returned conn[" + h + "] to pool ---------------------------\n");
                         }
-                        // session.decrementAndGet();
                     } catch (Exception e) {
                         logger.error("OracleQueryMessageHandler endSession error", e);
                     }
-
                 }
             }
         } finally {
