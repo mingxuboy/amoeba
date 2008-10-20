@@ -60,6 +60,11 @@ public abstract class BaseExpressionList extends Expression {
 		eList.add(expression);
 	}
 	
+	public int getSize(){
+		if(eList == null) return 0;
+		return eList.size();
+	}
+	
 	protected void toString(StringBuilder builder,String concatString){
 		int current = 0;
 		if(eList.size()>=2){

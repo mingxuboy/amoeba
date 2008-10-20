@@ -693,7 +693,15 @@ Statment UpdateQuery():
    	(table = UpdateStatement()
     [expression= WhereClause() ]){
     	statment = new UpdateStatment();
-    	statment.setExpression(expression);
+    	if(expression != null){
+    		if(expression instanceof BaseExpressionList){
+    			if(((BaseExpressionList)expression).getSize()>0){
+    				statment.setExpression(expression);
+    			}
+    		}else{
+    			statment.setExpression(expression);
+    		}
+    	}
     	return statment;	
     }
 }
@@ -763,7 +771,15 @@ Statment DeleteQuery():
     (table = DeleteStatement()
     [expression = WhereClause()]){
     	statment = new DeleteStatment();
-    	statment.setExpression(expression);
+    	if(expression != null){
+    		if(expression instanceof BaseExpressionList){
+    			if(((BaseExpressionList)expression).getSize()>0){
+    				statment.setExpression(expression);
+    			}
+    		}else{
+    			statment.setExpression(expression);
+    		}
+    	}
     	return 	statment;
     }
 }
@@ -792,7 +808,15 @@ Statment InsertQuery():
     ( insertValues = InsertValues() | expression = FullSelectStatement())
     {
     	if(insertValues == null){
-    		statment.setExpression(expression);
+    		if(expression != null){
+				if(expression instanceof BaseExpressionList){
+					if(((BaseExpressionList)expression).getSize()>0){
+						statment.setExpression(expression);
+					}
+				}else{
+					statment.setExpression(expression);
+				}
+			}
     	}else{
     		if(insertColumns != null){
 	    		AndExpression andExpression = new AndExpression();
@@ -807,11 +831,24 @@ Statment InsertQuery():
 	    			andExpression.addExpression(colExpression);
 	    			index ++;
 	    		}
-	    		statment.setExpression(andExpression);
+
+    			if(andExpression.getSize()>0){
+    				statment.setExpression(andExpression);
+    			}
     		}
     	}
     	
-    } | "SET" expression = AssignmentClause(){statment.setExpression(expression);}){
+    } | "SET" expression = AssignmentClause(){
+	    	if(expression != null){
+	    		if(expression instanceof BaseExpressionList){
+	    			if(((BaseExpressionList)expression).getSize()>0){
+	    				statment.setExpression(expression);
+	    			}
+	    		}else{
+	    			statment.setExpression(expression);
+	    		}
+	    	}
+    	}){
     	return statment;
     }
 }
@@ -872,7 +909,15 @@ Statment SelectQuery():
     (ExtraClauses())*)
     {
     	statment = new SelectStatment();
-    	statment.setExpression(expression);
+    	if(expression != null){
+    		if(expression instanceof BaseExpressionList){
+    			if(((BaseExpressionList)expression).getSize()>0){
+    				statment.setExpression(expression);
+    			}
+    		}else{
+    			statment.setExpression(expression);
+    		}
+    	}
     	return statment;
     }
     
@@ -1041,9 +1086,9 @@ Table TableReference():
 }
 {
     table = TableName() [
-    ["AS"] [token = <IDENTIFIER>{
+    ["AS"] token = <IDENTIFIER>{
     	table.setAlias(token.image);
-    }]]{
+    }]{
    	 if(table.getAlias() != null){
    	 	tableAliasMap.put(table.getAlias(),table);	
    	 }
@@ -1115,17 +1160,23 @@ void UnionClause():
 Expression SubSelectStatement():
 {
 	Expression expression = null;
-	AndExpression andExpression = new AndExpression();
+	AndExpression andExpression = null;
 }
 {
     (SelectClause()
     [expression=FromClause(){
     	if(expression != null){
+    		if(andExpression == null){
+    			andExpression = new AndExpression();	
+    		}
 			andExpression.addExpression(expression);
 		}	
     }]
     [ expression = WhereClause(){
     	if(expression != null){
+    		if(andExpression == null){
+    			andExpression = new AndExpression();	
+    		}
 			andExpression.addExpression(expression);
 		}
     }]
@@ -1164,15 +1215,21 @@ void SelectItem():
 Expression FromClause() :
 {
 	Expression expression = null;
-	AndExpression andExpression = new AndExpression();
+	AndExpression andExpression = null;
 }
 {
     "FROM" expression=FromItem(){
     	if(expression != null){
+    		if(andExpression == null){
+    			andExpression = new AndExpression();
+    		}
 			andExpression.addExpression(expression);
 		}	
     } ( "," expression=FromItem(){
     	if(expression != null){
+    		if(andExpression == null){
+    			andExpression = new AndExpression();
+    		}
 			andExpression.addExpression(expression);
 		}    	
     })*{
@@ -1184,15 +1241,21 @@ Expression FromClause() :
 Expression FromItem() :
 {
 	Expression expression = null;
-	AndExpression andExpression = new AndExpression();
+	AndExpression andExpression = null;
 }
 {
   expression=TableSpec(){
   	if(expression != null){
+  			if(andExpression == null){
+    			andExpression = new AndExpression();
+    		}
 			andExpression.addExpression(expression);
 	}
   } (expression=JoinedTable(){
   	if(expression != null){
+  			if(andExpression == null){
+    			andExpression = new AndExpression();
+    		}
 			andExpression.addExpression(expression);
 	}
   })*
@@ -1205,25 +1268,37 @@ Expression FromItem() :
 Expression JoinedTable() :
 {
 	Expression expression = null;
-	AndExpression andExpression = new AndExpression();
+	AndExpression andExpression = null;
 }
 {
 	(((["NATURAL"] (("LEFT"|"RIGHT") ["OUTER"])) | (["INNER" | "CROSS"])) "JOIN"
 	(LOOKAHEAD(2) expression=TableSpec(){
 		if(expression != null){
+			if(andExpression == null){
+    			andExpression = new AndExpression();
+    		}
 			andExpression.addExpression(expression);
 		}	
 	} (expression=JoinedTable(){
 		if(expression != null){
+			if(andExpression == null){
+    			andExpression = new AndExpression();
+    		}
 			andExpression.addExpression(expression);
 		}	
 	})* | "(" expression=TableSpec(){
 		if(expression != null){
+			if(andExpression == null){
+    			andExpression = new AndExpression();
+    		}
 			andExpression.addExpression(expression);
 		}
 	} (JoinedTable(){
 		if(expression != null){
-		andExpression.addExpression(expression);
+			if(andExpression == null){
+    			andExpression = new AndExpression();
+    		}
+			andExpression.addExpression(expression);
 		}	
 	})* ")") JoinCondition()){
 		return andExpression;
@@ -1904,7 +1979,7 @@ void DataTypes() #void:
 void ForUpdateClause() :
 {}
 {
-    "FOR" "UPDATE" ["OF" [ColumnName() ("," ColumnName())*]] [<K_NOWAIT>]
+    "FOR" "UPDATE"
 }
 
 void ReadOnlyClause() :
