@@ -272,21 +272,18 @@ public abstract class Connection implements NetEventHandler {
 			ByteBuffer buffer = null;
 			int wrote = 0;
 			int message = 0;
-			try{
-				while((buffer = _outQueue.getNonBlocking()) != null){
-					wrote += this.getChannel().write(buffer);
-					if(buffer.remaining()>0){
-						_outQueue.prepend(buffer);
-						return false;
-					}else{
-						//buffer.clear();
-						message++;
-					}
+			while((buffer = _outQueue.getNonBlocking()) != null){
+				wrote += this.getChannel().write(buffer);
+				if(buffer.remaining()>0){
+					_outQueue.prepend(buffer);
+					return false;
+				}else{
+					//buffer.clear();
+					message++;
 				}
-				return true;
-			}finally{
-				this._cmgr.noteWrite(message, wrote);
 			}
+			return true;
+			
 		}
 	}
 

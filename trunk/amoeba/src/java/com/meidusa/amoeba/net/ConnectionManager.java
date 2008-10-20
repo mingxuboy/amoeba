@@ -60,7 +60,7 @@ public class ConnectionManager extends LoopingThread implements Reporter,Initial
 	protected ArrayList<ConnectionObserver> _observers = new ArrayList<ConnectionObserver>();
 	
 	/** Our current runtime stats. */
-	protected ConMgrStats _stats, _lastStats;
+	protected ConMgrStats _stats;
 	
 	/** 连接已经失效或者网络断开的队列 */
 	protected Queue<Tuple<Connection,Exception>> _deathq = new Queue<Tuple<Connection,Exception>>();
@@ -80,50 +80,18 @@ public class ConnectionManager extends LoopingThread implements Reporter,Initial
 	public void appendReport(StringBuilder report, long now, long sinceLast,
 			boolean reset,Level level) {
 		report.append("* ").append(this.getName()).append("\n");
-        report.append("- Registed Connection size: ").append(_selector.keys().size()).append("\n");;
-        report.append("- packet out: ").append(_stats.msgsOut).append("\n");
-        report.append("- bytesOut out: ").append(_stats.bytesOut).append("\n");
+        report.append("- Registed Connection size: ").append(_selector.keys().size()).append("\n");
+        report.append("- created Connection size: ").append(_stats.connects.get()).append("\n");
+        report.append("- disconnect Connection size: ").append(_stats.disconnects.get()).append("\n");
         if(reset){
-        	_lastStats = (ConMgrStats)_stats.clone();
-        	synchronized (this) {
-				_stats.bytesIn =0;
-				_stats.msgsIn =0;
-				_stats.msgsOut = 0;
-				_stats.bytesOut = 0;
-			}
+        	_stats = new ConMgrStats();
         }
-        
-        /*if(level == Level.DEBUG){
-        	Set<SelectionKey> dumpKeys = new HashSet<SelectionKey>();
-        	selectorLock.lock();
-        	try{
-        		Set<SelectionKey> keys = _selector.keys();
-		        dumpKeys.addAll(keys);
-        	}finally{
-        		selectorLock.unlock();
-        	}
-	        for(SelectionKey key: dumpKeys){
-	        	if(key.attachment() instanceof Connection){
-	        		Connection conn = (Connection)key.attachment();
-	        		report.append("- conn: ").append(" framingData:")
-	        		.append(conn.getPacketInputStream().toString())
-	        		.append(" ,outQueue:").append(conn._outQueue.size())
-	        		.append(" ,messagehandler:").append(conn._handler).append("\n");
-	        	}
-	        	
-	        	if(key.attachment() instanceof Reporter.SubReporter){
-	        		Reporter.SubReporter reporter = (Reporter.SubReporter)key.attachment();
-	        		reporter.appendReport(report, now, sinceLast, reset,level);
-	        	}
-	        }
-        }*/
 	}
 
 	public ConnectionManager() throws IOException {
 		_selector = SelectorProvider.provider().openSelector();
 		// create our stats record
 		_stats = new ConMgrStats();
-		_lastStats = new ConMgrStats();
 	}
 	
 	public ConnectionManager(String managerName) throws IOException {
@@ -132,7 +100,6 @@ public class ConnectionManager extends LoopingThread implements Reporter,Initial
 
 		// create our stats record
 		_stats = new ConMgrStats();
-		_lastStats = new ConMgrStats();
 		this.setDaemon(true);
 	}
 
@@ -248,15 +215,6 @@ public class ConnectionManager extends LoopingThread implements Reporter,Initial
 					public void run(){
 						try{
 							tmpHandler.handleEvent(iterStamp);
-							/*if (got != 0) {
-								lock.lock();
-								try{
-									_stats.bytesIn += got;
-									_stats.msgsIn++;
-								}finally{
-									lock.unlock();
-								}
-							}*/
 						}finally{
 							latch.countDown();
 						}
@@ -449,21 +407,6 @@ public class ConnectionManager extends LoopingThread implements Reporter,Initial
 		 * 当发生连接异常时，通知所有Observers
 		 */
 		notifyObservers(CONNECTION_FAILED, conn, ioe);
-	}
-
-	/**
-	 * Called by {@link Connection#doWrite} and friends when they write data over the
-	 * network.
-	 */
-	protected final void noteWrite(int msgs, int bytes) {
-		//ignore 
-		/*lock.lock();
-		try{
-			_stats.msgsOut += msgs;
-			_stats.bytesOut += bytes;
-		}finally{
-			lock.unlock();
-		}*/
 	}
 
 	public void invokeConnectionWriteMessage(Connection connection) {
