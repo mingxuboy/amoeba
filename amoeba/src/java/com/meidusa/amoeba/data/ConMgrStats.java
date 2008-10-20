@@ -27,18 +27,6 @@ public class ConMgrStats implements Cloneable
     /** The number of disconnection events since the server started up. */
     public AtomicLong disconnects = new AtomicLong(0);
 
-    /** The number of bytes read since the server started up. */
-    public long bytesIn;
-
-    /** The number of bytes written since the server started up. */
-    public long bytesOut;
-
-    /** The number of messages read since the server started up. */
-    public long msgsIn;
-
-    /** The number of messages written since the server started up. */
-    public long msgsOut;
-
     @Override // from Object
     public Object clone ()
     {
