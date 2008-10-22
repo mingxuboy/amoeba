@@ -100,6 +100,32 @@
 			</poolConfig>
 		</dbServer>
 		
+		<!-- 
+			if you have no mysql server, _null_table_ pool can provide query response to client,
+			for such sql without table name: select @@sql_mode
+		 -->
+		<dbServer name="_null_table_">
+			<!-- PoolableObjectFactory实现类 -->
+			<factoryConfig class="com.meidusa.amoeba.aladdin.poolable.QueryResponseObjectFactory">
+				
+				<!-- driver name -->
+				<property name="messageHandlerRunner">com.meidusa.amoeba.aladdin.handler.MysqlMessageHandlerRunner</property>
+			
+				
+			</factoryConfig>
+			
+			<!-- ObjectPool实现类 -->
+			<poolConfig class="com.meidusa.amoeba.net.poolable.PoolableObjectPool">
+				<property name="maxActive">200</property>
+				<property name="maxIdle">200</property>
+				<property name="minIdle">10</property>
+				<property name="minEvictableIdleTimeMillis">600000</property>
+				<property name="timeBetweenEvictionRunsMillis">600000</property>
+				<property name="testOnBorrow">true</property>
+				<property name="testWhileIdle">true</property>
+			</poolConfig>
+		</dbServer>
+		
 	</dbServerList>
 	
 	<queryRouter class="com.meidusa.amoeba.aladdin.parser.AladdinQueryRouter">

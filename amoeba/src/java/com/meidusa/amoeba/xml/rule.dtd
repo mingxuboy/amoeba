@@ -1,8 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 
-
-
-
 <!ELEMENT amoeba:rule ( tableRule+ ) >
 <!ATTLIST amoeba:rule
   xmlns:amoeba CDATA #FIXED "http://amoeba.meidusa.com/" 

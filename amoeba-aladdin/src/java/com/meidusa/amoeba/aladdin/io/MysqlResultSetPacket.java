@@ -50,9 +50,11 @@ public class MysqlResultSetPacket extends ErrorResultPacket {
 		appendBufferToWrite(resulthead.toByteBuffer(conn).array(),buffer,conn,false);
 		
 		//write fields bytes
-		for(int i=0;i<fieldPackets.length;i++){
-			fieldPackets[i].packetId = paketId++;
-			appendBufferToWrite(fieldPackets[i].toByteBuffer(conn).array(),buffer,conn,false);
+		if(fieldPackets != null){
+			for(int i=0;i<fieldPackets.length;i++){
+				fieldPackets[i].packetId = paketId++;
+				appendBufferToWrite(fieldPackets[i].toByteBuffer(conn).array(),buffer,conn,false);
+			}
 		}
 		
 		//write eof bytes

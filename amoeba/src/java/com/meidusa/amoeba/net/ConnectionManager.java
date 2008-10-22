@@ -386,7 +386,7 @@ public class ConnectionManager extends LoopingThread implements Reporter,Initial
 		 * 删除即将被关闭的相关对象
 		 */
 		_handlers.remove(conn);
-		
+		_stats.disconnects.incrementAndGet();
 		/**
 		 * 通知所有Observer列表，连接已经关闭
 		 */

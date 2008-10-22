@@ -30,7 +30,7 @@
 <!ATTLIST bean name NMTOKEN #IMPLIED >
 <!ATTLIST bean class NMTOKEN #IMPLIED >
 
-<!ATTLIST property name NMTOKEN #REQUIRED >
+<!ATTLIST property name CDATA #REQUIRED >
 
 <!ATTLIST queryRouter class NMTOKEN #IMPLIED >
 
