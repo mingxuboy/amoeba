@@ -47,6 +47,7 @@ public class MysqlMessageHandlerRunner implements MessageHandlerRunner {
 				resultPacket.resulthead = resultHeader;
 				FieldPacket field = new FieldPacket();
 				field.name = "@@sql_mode";
+				field.length = 8;
 				field.type = (byte)MysqlDefs.FIELD_TYPE_VAR_STRING;
 				
 				resultPacket.fieldPackets = new FieldPacket[]{field};
@@ -64,6 +65,8 @@ public class MysqlMessageHandlerRunner implements MessageHandlerRunner {
 				FieldPacket field = new FieldPacket();
 				field.name = "test";
 				field.type = (byte)MysqlDefs.FIELD_TYPE_VAR_STRING;
+				field.length = 8;
+				resultPacket.fieldPackets = new FieldPacket[]{field};
 			}
 		}else{
 			
