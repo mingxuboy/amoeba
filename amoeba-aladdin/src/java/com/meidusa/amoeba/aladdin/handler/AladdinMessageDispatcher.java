@@ -6,30 +6,20 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 
-import com.meidusa.amoeba.aladdin.io.MysqlResultSetPacket;
 import com.meidusa.amoeba.context.ProxyRuntimeContext;
-
 import com.meidusa.amoeba.mysql.handler.PreparedStatmentInfo;
-import com.meidusa.amoeba.mysql.jdbc.MysqlDefs;
-
 import com.meidusa.amoeba.mysql.net.MysqlClientConnection;
-import com.meidusa.amoeba.mysql.net.packet.EOFPacket;
 import com.meidusa.amoeba.mysql.net.packet.ErrorPacket;
 import com.meidusa.amoeba.mysql.net.packet.ExecutePacket;
-import com.meidusa.amoeba.mysql.net.packet.FieldPacket;
 import com.meidusa.amoeba.mysql.net.packet.LongDataPacket;
 import com.meidusa.amoeba.mysql.net.packet.MysqlPacketBuffer;
 import com.meidusa.amoeba.mysql.net.packet.OkPacket;
 import com.meidusa.amoeba.mysql.net.packet.QueryCommandPacket;
-import com.meidusa.amoeba.mysql.net.packet.ResultSetHeaderPacket;
-
 import com.meidusa.amoeba.net.Connection;
 import com.meidusa.amoeba.net.MessageHandler;
 import com.meidusa.amoeba.net.Sessionable;
 import com.meidusa.amoeba.net.poolable.ObjectPool;
-
 import com.meidusa.amoeba.route.QueryRouter;
-import com.meidusa.amoeba.util.StringUtil;
 
 
 /**
@@ -42,8 +32,6 @@ public class AladdinMessageDispatcher implements MessageHandler {
 	private static long timeout = -1;
 	protected static Logger logger = Logger.getLogger(AladdinMessageDispatcher.class);
 	private static byte[] STATIC_OK_BUFFER;
-	private static byte[] STATIC_EMPTY_RESULT_BUFFER;
-	private static MysqlResultSetPacket resultPacket = new MysqlResultSetPacket(null);
 	static{
 		OkPacket ok = new OkPacket();
 		ok.affectedRows = 0;
@@ -51,34 +39,6 @@ public class AladdinMessageDispatcher implements MessageHandler {
 		ok.packetId = 1;
 		ok.serverStatus = 2;
 		STATIC_OK_BUFFER = ok.toByteBuffer(null).array();
-		
-		ResultSetHeaderPacket resultHeader = new ResultSetHeaderPacket();
-		resultHeader.packetId = 1;
-		resultHeader.columns =1;
-		
-		resultPacket.resulthead = resultHeader;
-		FieldPacket field = new FieldPacket();
-		field.name = "test";
-		field.type = (byte)MysqlDefs.FIELD_TYPE_VAR_STRING;
-		
-		resultPacket.fieldPackets = new FieldPacket[]{field};
-		
-		byte[] head = resultHeader.toByteBuffer(null).array();
-		EOFPacket columnEeof = new EOFPacket();
-		columnEeof.serverStatus = 2;
-		columnEeof.packetId = 2;
-		byte[] columnEofBuffer = columnEeof.toByteBuffer(null).array();
-		STATIC_EMPTY_RESULT_BUFFER = columnEofBuffer;
-		
-		EOFPacket rowEof = new EOFPacket();
-		rowEof.serverStatus = 2;
-		rowEof.packetId = 3;
-		byte[] rowEofBuffer = rowEof.toByteBuffer(null).array();
-		
-		STATIC_EMPTY_RESULT_BUFFER = new byte[head.length+columnEofBuffer.length+rowEofBuffer.length];
-		System.arraycopy(head, 0, STATIC_EMPTY_RESULT_BUFFER, 0, head.length);
-		System.arraycopy(columnEofBuffer, 0, STATIC_EMPTY_RESULT_BUFFER, head.length, columnEofBuffer.length);
-		System.arraycopy(rowEofBuffer, 0, STATIC_EMPTY_RESULT_BUFFER, head.length+columnEofBuffer.length, rowEofBuffer.length);
 	}
 	
 	public void handleMessage(Connection connection,byte[] message) {
@@ -97,15 +57,6 @@ public class AladdinMessageDispatcher implements MessageHandler {
 			}else if(MysqlPacketBuffer.isPacketType(message, QueryCommandPacket.COM_PING)){
 				conn.postMessage(STATIC_OK_BUFFER);
 			}else if(MysqlPacketBuffer.isPacketType(message, QueryCommandPacket.COM_QUERY)){
-				
-				/*if(!StringUtil.isEmpty(command.arg)){
-					String sql = command.arg.trim();
-					String show = sql.substring(0, "show".length());
-					if(show.equalsIgnoreCase("show")){
-						resultPacket.wirteToConnection(conn);
-						return;
-					}
-				}*/
 				
 				QueryRouter router = ProxyRuntimeContext.getInstance().getQueryRouter();
 				ObjectPool[] pools = router.doRoute(conn,command.arg,false,null);
