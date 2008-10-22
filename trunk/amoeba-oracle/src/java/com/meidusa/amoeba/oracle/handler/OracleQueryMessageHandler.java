@@ -44,6 +44,9 @@ public class OracleQueryMessageHandler extends AbstractMessageQueuedHandler impl
     private boolean                                             isFirstClientPacket = true;
     private byte[]                                              tmpBuffer           = null;
 
+    // 从OracleQueryDispatcher过来的client数据包不需要解析
+    private boolean                                             needParseClient     = false;
+
     public OracleQueryMessageHandler(Connection clientConn, ObjectPool[] pools){
         this.clientConn = (OracleConnection) clientConn;
         this.clientHandler = clientConn.getMessageHandler();
@@ -55,50 +58,60 @@ public class OracleQueryMessageHandler extends AbstractMessageQueuedHandler impl
         if (conn == clientConn) {
             receiveLog(logger.isDebugEnabled(), message, true);
 
-            if (MarkerPacket.isMarkerType(message)) {
-                if (logger.isDebugEnabled()) {
-                    logger.debug(">>receive marker packet from client!");
+            if (needParseClient) {
+                // if (logger.isDebugEnabled()) {
+                // logger.debug("#begin parse client packet....");
+                // }
+
+                if (MarkerPacket.isMarkerType(message)) {
+                    if (logger.isDebugEnabled()) {
+                        logger.debug(">>receive marker packet from client!");
+                    }
+                    message[10] = 2;
+                    sendLog(logger.isDebugEnabled(), message, false);
+                    OracleClientConnection occonn = (OracleClientConnection) conn;
+                    occonn.postMessage(message);
+                    return;
                 }
-                message[10] = 2;
-                sendLog(logger.isDebugEnabled(), message, false);
-                OracleClientConnection occonn = (OracleClientConnection) conn;
-                occonn.postMessage(message);
-                return;
-            }
 
-            // 解析数据包，否则直接传送数据包到服务器端。
-            if (DataPacket.isDataType(message) && !DataPacket.isDataEOF(message)) {
-                if (mergeClientMessage(message)) {// 合并完成，进行数据包解析。
-                    if (T4C8OallDataPacket.isParseable(tmpBuffer)) {
-                        OracleClientConnection occonn = (OracleClientConnection) conn;
-                        T4C8OallDataPacket packet = new T4C8OallDataPacket();
-                        packet.init(tmpBuffer, conn);
+                // 解析数据包，否则直接传送数据包到服务器端。
+                if (DataPacket.isDataType(message) && !DataPacket.isDataEOF(message)) {
+                    if (mergeClientMessage(message)) {// 合并完成，进行数据包解析。
+                        if (T4C8OallDataPacket.isParseable(tmpBuffer)) {
+                            OracleClientConnection occonn = (OracleClientConnection) conn;
+                            T4C8OallDataPacket packet = new T4C8OallDataPacket();
+                            packet.init(tmpBuffer, conn);
 
-                        if (occonn.isLobOps()) {
-                            for (int i = 0; i < serverConns.length; i++) {
-                                connStatusMap.get(serverConns[i]).setLobOps(true);
-                                connStatusMap.get(serverConns[i]).setLob(packet.getLob());
-                            }
-                            occonn.setLobOps(false);
-                        } else {
-                            if (packet.isOlobops()) {
-                                occonn.setLobOps(true);
-                                int offset = packet.getLob().getSourceLobLocatorOffset();
-                                byte[] abyte0 = new byte[T4C8TTILob.LOB_OPS_BYTES];
-                                System.arraycopy(tmpBuffer, offset, abyte0, 0, abyte0.length);
-                                int rowIndex = ByteUtil.toInt32BE(abyte0, 0);
-                                byte[] realBytes = occonn.getLobLocaterMap().get(rowIndex);
-                                System.arraycopy(realBytes, 0, tmpBuffer, offset, realBytes.length);
-                                message = tmpBuffer;
+                            // 如果客户端是lob请求，将相应内容设置到服务器端的连接上。
+                            if (occonn.isLobOps()) {
                                 for (int i = 0; i < serverConns.length; i++) {
                                     connStatusMap.get(serverConns[i]).setLobOps(true);
                                     connStatusMap.get(serverConns[i]).setLob(packet.getLob());
                                 }
+                                occonn.setLobOps(false);
                             }
+                            // else {
+                            // if (packet.isOlobops()) {
+                            // occonn.setLobOps(true);
+                            // int offset = packet.getLob().getSourceLobLocatorOffset();
+                            // byte[] abyte0 = new byte[T4C8TTILob.LOB_OPS_BYTES];
+                            // System.arraycopy(tmpBuffer, offset, abyte0, 0, abyte0.length);
+                            // int rowIndex = ByteUtil.toInt32BE(abyte0, 0);
+                            // byte[] realBytes = occonn.getLobLocaterMap().get(rowIndex);
+                            // System.arraycopy(realBytes, 0, tmpBuffer, offset, realBytes.length);
+                            // message = tmpBuffer;
+                            // for (int i = 0; i < serverConns.length; i++) {
+                            // connStatusMap.get(serverConns[i]).setLobOps(true);
+                            // connStatusMap.get(serverConns[i]).setLob(packet.getLob());
+                            // }
+                            // }
+                            // }
                         }
+                        tmpBuffer = null;
                     }
-                    tmpBuffer = null;
                 }
+            } else {
+                needParseClient = true;
             }
 
             for (int i = 0; i < serverConns.length; i++) {
@@ -265,9 +278,11 @@ public class OracleQueryMessageHandler extends AbstractMessageQueuedHandler impl
         return packet.toByteBuffer(osconn).array();
     }
 
+    /**
+     * 合并数据包
+     */
     private T4C8OallResponseDataPacket mergeServerPacket() {
         T4C8OallResponseDataPacket packet = null;
-        // 这里进行多个T4C8OallResponseDataPacket合并
         for (Map.Entry<OracleServerConnection, ConnectionServerStatus> e : connStatusMap.entrySet()) {
             packet = e.getValue().getPacket();
         }
