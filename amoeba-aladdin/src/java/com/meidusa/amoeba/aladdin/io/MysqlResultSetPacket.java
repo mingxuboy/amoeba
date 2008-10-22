@@ -22,6 +22,12 @@ public class MysqlResultSetPacket extends ErrorResultPacket {
 	public FieldPacket[] fieldPackets;
 	private List<RowDataPacket> rowList;
 	
+	private byte[] content;
+	
+	public void setContent(byte[] content) {
+		this.content = content;
+	}
+
 	public MysqlResultSetPacket(String query){
 		
 	}
@@ -39,6 +45,10 @@ public class MysqlResultSetPacket extends ErrorResultPacket {
 	public void wirteToConnection(Connection conn){
 		if(isError()){
 			super.wirteToConnection(conn);
+			return;
+		}
+		if(content != null){
+			conn.postMessage(content);
 			return;
 		}
 		

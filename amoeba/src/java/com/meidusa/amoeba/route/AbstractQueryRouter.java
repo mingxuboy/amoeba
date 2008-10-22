@@ -46,7 +46,6 @@ import com.meidusa.amoeba.parser.statment.CommitStatment;
 import com.meidusa.amoeba.parser.statment.DMLStatment;
 import com.meidusa.amoeba.parser.statment.PropertyStatment;
 import com.meidusa.amoeba.parser.statment.RollbackStatment;
-import com.meidusa.amoeba.parser.statment.ShowStatment;
 import com.meidusa.amoeba.parser.statment.StartTansactionStatment;
 import com.meidusa.amoeba.parser.function.Function;
 import com.meidusa.amoeba.parser.dbobject.Schema;
@@ -291,8 +290,6 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable{
 		}else if(statment instanceof PropertyStatment){
 			setProperty(connection,(PropertyStatment)statment,parameters);
 			return null;
-		}else if(statment instanceof ShowStatment){
-			return this.defaultPools;
 		}else if(statment instanceof StartTansactionStatment){
 			return null;
 		}else if(statment instanceof CommitStatment){
@@ -300,7 +297,6 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable{
 		}else if(statment instanceof RollbackStatment){
 			return null;
 		}
-		
 		
 		if(tables != null && tables.size() >0){
 			Set<Map.Entry<Table,Map<Column,Comparative>>> entrySet  = tables.entrySet();

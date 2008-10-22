@@ -124,7 +124,9 @@ public class PreparedStatmentExecuteMessageHandler extends CommandMessageHandler
 				}
 				
 			}finally{
-				latch.countDown();
+				if(latch != null){
+					latch.countDown();
+				}
 			}
 		}
 	}

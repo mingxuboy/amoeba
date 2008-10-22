@@ -582,7 +582,7 @@ Statment parse() #Statment:
 	Statment statment = null;
 }
 {
-    (
+    (((
     statment = DeleteQuery()
     |
     statment = InsertQuery()
@@ -597,7 +597,9 @@ Statment parse() #Statment:
     |(<K_COMMIT> /*[<K_WORK>] [<K_AND> [<K_NO>] <K_CHAIN>] [[<K_NO>] <K_RELEASE>]*/){statment = new CommitStatment();}
     |(<K_ROLLBACK>/*[<K_WORK>] [<K_AND> [<K_NO>] <K_CHAIN>] [[<K_NO>] <K_RELEASE>]*/){statment = new RollbackStatment();}
     |(<K_START_TRANSACTION>){statment = new StartTansactionStatment();}
-    )(";"|<EOF>)
+    )(";"|<EOF>))
+    |
+    (statment = ShowQuery()))
     {
     	if(statment instanceof DMLStatment){
 	    	List<Table> list = new ArrayList<Table>();
@@ -628,22 +630,24 @@ Statment SelectSchema() :{
 	}
 }
 
-/*
+
 Statment ShowQuery() :{
 	Expression expression = null;
 	Column column = null;
 	Table table = null;
 }{
 	"SHOW"{return ShowStatment.STATMENT;}//[(<K_CREATE> [<K_TABLE>|<IDENTIFIER>])|<K_FULL>] column = ColumnName() [<K_FROM> table = TableReference()]{
+		/**
 		ColumnExpression columnExpression = new ColumnExpression();
 		columnExpression.setColumn(column);
 		ShowStatment show = new ShowStatment();
 		show.setExpression(columnExpression);
 		return show;
 	}
+	**/
 }
-	
-*/
+
+
 Statment PropertySetQuery(PropertyStatment statment) :{
 	Expression expression = null;
 	

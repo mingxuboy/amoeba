@@ -98,14 +98,14 @@ public class AladdinMessageDispatcher implements MessageHandler {
 				conn.postMessage(STATIC_OK_BUFFER);
 			}else if(MysqlPacketBuffer.isPacketType(message, QueryCommandPacket.COM_QUERY)){
 				
-				if(!StringUtil.isEmpty(command.arg)){
+				/*if(!StringUtil.isEmpty(command.arg)){
 					String sql = command.arg.trim();
 					String show = sql.substring(0, "show".length());
 					if(show.equalsIgnoreCase("show")){
 						resultPacket.wirteToConnection(conn);
 						return;
 					}
-				}
+				}*/
 				
 				QueryRouter router = ProxyRuntimeContext.getInstance().getQueryRouter();
 				ObjectPool[] pools = router.doRoute(conn,command.arg,false,null);
