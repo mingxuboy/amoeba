@@ -18,8 +18,10 @@ import com.meidusa.amoeba.mysql.jdbc.MysqlDefs;
 import com.meidusa.amoeba.mysql.net.MysqlClientConnection;
 import com.meidusa.amoeba.mysql.net.packet.BindValue;
 import com.meidusa.amoeba.mysql.net.packet.ExecutePacket;
+import com.meidusa.amoeba.net.MessageHandler;
 import com.meidusa.amoeba.net.jdbc.PoolableJdbcConnection;
 import com.meidusa.amoeba.net.poolable.ObjectPool;
+import com.meidusa.amoeba.net.poolable.PoolableObject;
 
 
 /**
@@ -35,23 +37,24 @@ public class PreparedStatmentExecuteMessageHandler extends CommandMessageHandler
 	
 	protected static class PreparedExecuteQueryRunnable extends QueryRunnable{
 		private ExecutePacket executePacket;
-		PreparedExecuteQueryRunnable(CountDownLatch latch, java.sql.Connection conn,
+		PreparedExecuteQueryRunnable(CountDownLatch latch, PoolableObject conn,
 				String query, Object parameter, ResultPacket packet) {
 			super(latch, conn, query, parameter, packet);
 		}
-
-		public void init(CommandMessageHandler handler){
+		
+		@Override
+		public void init(MessageHandler handler){
 			super.init(handler);
 			executePacket = ((PreparedStatmentExecuteMessageHandler)handler).executePacket;
 		}
 		
 		@Override
-		protected void doRun(java.sql.Connection conn) {
+		protected void doRun(PoolableObject conn) {
 			try{
 				PreparedStatement pst = null;
 				ResultSet rs = null;
 				try {
-					pst = conn.prepareStatement(query);
+					pst = ((java.sql.Connection)conn).prepareStatement(query);
 					int i=1;
 					for(BindValue bindValue : executePacket.values){
 						if(!bindValue.isNull){
@@ -136,7 +139,7 @@ public class PreparedStatmentExecuteMessageHandler extends CommandMessageHandler
 
 	@Override
 	protected QueryRunnable newQueryRunnable(CountDownLatch latch,
-			java.sql.Connection conn, String query, Object parameter,
+			PoolableObject conn, String query, Object parameter,
 			ResultPacket packet) {
 		return new PreparedExecuteQueryRunnable(latch,conn,query,parameter,packet);
 	}

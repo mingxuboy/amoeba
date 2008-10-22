@@ -67,7 +67,7 @@ public class ParameterMapping {
 		for (int i = 0; i < descriptors.length; i++) {
 			
 			Object obj = parameter.get(descriptors[i].getName());
-			Object value = null;
+			Object value = obj;
 			Class<?> cls = descriptors[i].getPropertyType();
 			if(obj instanceof String){
 				String string = (String) obj;

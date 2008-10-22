@@ -8,11 +8,11 @@ import com.meidusa.amoeba.net.MessageHandler;
  */
 public interface MessageQueuedHandler<V> extends MessageHandler {
 
-    public void push(OracleServerConnection conn, V x);
+    public void push(OracleConnection conn, V x);
 
-    public V pop(OracleServerConnection conn);
+    public V pop(OracleConnection conn);
 
-    public boolean inHandleProcess(OracleServerConnection conn);
+    public boolean inHandleProcess(OracleConnection conn);
 
-    public void setInHandleProcess(OracleServerConnection conn, boolean inProcess);
+    public void setInHandleProcess(OracleConnection conn, boolean inProcess);
 }

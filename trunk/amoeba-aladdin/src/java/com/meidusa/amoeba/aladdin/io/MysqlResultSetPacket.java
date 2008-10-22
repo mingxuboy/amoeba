@@ -20,16 +20,17 @@ public class MysqlResultSetPacket extends ErrorResultPacket {
 	
 	public ResultSetHeaderPacket resulthead;
 	public FieldPacket[] fieldPackets;
-	public List<RowDataPacket> rowList = new ArrayList<RowDataPacket>();
+	private List<RowDataPacket> rowList;
 	
 	public MysqlResultSetPacket(String query){
 		
 	}
 	
-	public void addRowDataPacket(RowDataPacket row){
-		synchronized (rowList) {
-			rowList.add(row);
+	public synchronized void addRowDataPacket(RowDataPacket row){
+		if(rowList == null){
+			rowList = new ArrayList<RowDataPacket>();
 		}
+		rowList.add(row);
 	}
 	
 	/* (non-Javadoc)
@@ -61,7 +62,7 @@ public class MysqlResultSetPacket extends ErrorResultPacket {
 		eof.packetId = paketId++;
 		appendBufferToWrite(eof.toByteBuffer(conn).array(),buffer,conn,false);
 		
-		if(rowList.size()>0){
+		if(rowList != null && rowList.size()>0){
 			//write rows bytes
 			for(RowDataPacket row : rowList){
 				row.packetId = paketId++;

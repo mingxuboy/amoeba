@@ -302,7 +302,7 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable{
 		}
 		
 		
-		if(tables != null){
+		if(tables != null && tables.size() >0){
 			Set<Map.Entry<Table,Map<Column,Comparative>>> entrySet  = tables.entrySet();
 			for(Map.Entry<Table,Map<Column,Comparative>> entry : entrySet){
 				Map<Column,Comparative> columnMap = entry.getValue();
@@ -387,8 +387,16 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable{
 					}
 				}
 			}
+		}else{
+			TableRule tableRule =  this.tableRuleMap.get(null);
+			if(tableRule != null && tableRule.defaultPools != null && tableRule.defaultPools.length >0){
+				for(String poolName : tableRule.defaultPools){
+					if(!poolNames.contains(poolName)){
+						poolNames.add(poolName);
+					}
+				}
+			}
 		}
-		
 		
 		ObjectPool[] pools = new ObjectPool[poolNames.size()];
 		int i=0;
@@ -643,7 +651,7 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable{
                 final String nodeName = child.getNodeName();
                 if (nodeName.equals("tableRule")) {
                 	TableRule rule = loadTableRule(child);
-                	tableRuleMap.put(rule.table, rule);
+                	tableRuleMap.put(rule.table.getName() == null?null:rule.table, rule);
                 }
             }
         }

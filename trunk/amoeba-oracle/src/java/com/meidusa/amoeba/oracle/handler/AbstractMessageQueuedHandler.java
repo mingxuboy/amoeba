@@ -10,6 +10,7 @@ import org.apache.log4j.Logger;
 import com.meidusa.amoeba.net.Connection;
 import com.meidusa.amoeba.net.Sessionable;
 import com.meidusa.amoeba.oracle.net.MessageQueuedHandler;
+import com.meidusa.amoeba.oracle.net.OracleConnection;
 import com.meidusa.amoeba.oracle.net.OracleServerConnection;
 import com.meidusa.amoeba.util.Tuple;
 
@@ -17,9 +18,9 @@ public abstract class AbstractMessageQueuedHandler<V> implements MessageQueuedHa
 
     private static Logger                                                   logger       = Logger.getLogger(AbstractMessageQueuedHandler.class);
 
-    protected Map<OracleServerConnection, Tuple<Boolean, BlockingQueue<V>>> exchangerMap = new HashMap<OracleServerConnection, Tuple<Boolean, BlockingQueue<V>>>();
+    protected Map<OracleConnection, Tuple<Boolean, BlockingQueue<V>>> exchangerMap = new HashMap<OracleConnection, Tuple<Boolean, BlockingQueue<V>>>();
 
-    public void push(OracleServerConnection conn, V x) {
+    public void push(OracleConnection conn, V x) {
         Tuple<Boolean, BlockingQueue<V>> tuple = getTuple(conn);
         try {
             tuple.right.put(x);
@@ -28,7 +29,7 @@ public abstract class AbstractMessageQueuedHandler<V> implements MessageQueuedHa
         }
     }
 
-    public V pop(OracleServerConnection conn) {
+    public V pop(OracleConnection conn) {
         Tuple<Boolean, BlockingQueue<V>> tuple = getTuple(conn);
         try {
             return tuple.right.take();
@@ -38,12 +39,12 @@ public abstract class AbstractMessageQueuedHandler<V> implements MessageQueuedHa
         return null;
     }
 
-    public boolean inHandleProcess(OracleServerConnection conn) {
+    public boolean inHandleProcess(OracleConnection conn) {
         Tuple<Boolean, BlockingQueue<V>> tuple = getTuple(conn);
         return tuple.left;
     }
 
-    public void setInHandleProcess(OracleServerConnection conn, boolean inProcess) {
+    public void setInHandleProcess(OracleConnection conn, boolean inProcess) {
         Tuple<Boolean, BlockingQueue<V>> tuple = getTuple(conn);
         synchronized (conn.processLock) {
             tuple.left = inProcess;
@@ -71,7 +72,7 @@ public abstract class AbstractMessageQueuedHandler<V> implements MessageQueuedHa
         }
     }
 
-    private Tuple<Boolean, BlockingQueue<V>> getTuple(OracleServerConnection conn) {
+    private Tuple<Boolean, BlockingQueue<V>> getTuple(OracleConnection conn) {
         Tuple<Boolean, BlockingQueue<V>> tuple = exchangerMap.get(conn);
         if (tuple == null) {
             synchronized (exchangerMap) {

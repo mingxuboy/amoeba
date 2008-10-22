@@ -2,8 +2,6 @@ package com.meidusa.amoeba.oracle.net;
 
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.log4j.Logger;
 
@@ -40,10 +38,6 @@ public class OracleServerConnection extends OracleConnection implements Poolable
     private boolean       active;
     private ObjectPool    objectPool;
     private Packet        lastPacketRequest;
-    /**
-     * 该lock表示 该connection处于handleMessage中
-     */
-    public final Lock     processLock = new ReentrantLock(false);
 
     public OracleServerConnection(SocketChannel channel, long createStamp){
         super(channel, createStamp);

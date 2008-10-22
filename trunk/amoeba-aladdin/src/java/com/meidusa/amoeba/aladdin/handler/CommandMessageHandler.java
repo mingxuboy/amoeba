@@ -16,6 +16,7 @@ import com.meidusa.amoeba.net.Connection;
 import com.meidusa.amoeba.net.MessageHandler;
 import com.meidusa.amoeba.net.Sessionable;
 import com.meidusa.amoeba.net.poolable.ObjectPool;
+import com.meidusa.amoeba.net.poolable.PoolableObject;
 
 /**
  * 
@@ -24,7 +25,7 @@ import com.meidusa.amoeba.net.poolable.ObjectPool;
  */
 public abstract class CommandMessageHandler implements MessageHandler,
 		Sessionable {
-	private static Logger logger = Logger
+	static Logger logger = Logger
 			.getLogger(CommandMessageHandler.class);
 	protected MysqlClientConnection source;
 	private long createTime;
@@ -33,62 +34,10 @@ public abstract class CommandMessageHandler implements MessageHandler,
 	private boolean ended = false;
 	private ObjectPool[] pools;
 	private final Lock lock = new ReentrantLock(false);
-	private Map<java.sql.Connection, ObjectPool> connPoolMap = new HashMap<java.sql.Connection, ObjectPool>();
-	private String query;
+	private Map<Object, ObjectPool> connPoolMap = new HashMap<Object, ObjectPool>();
+	protected String query;
 	private Object parameter;
-
-	protected static abstract class QueryRunnable implements Runnable {
-		private java.sql.Connection conn;
-		protected Object parameter;
-		protected CountDownLatch latch;
-		protected ResultPacket packet;
-		protected String query;
-		protected MysqlClientConnection source;
-
-		QueryRunnable(CountDownLatch latch, java.sql.Connection conn,
-				String query, Object parameter, ResultPacket packet) {
-			this.conn = conn;
-			this.parameter = parameter;
-			this.packet = packet;
-			this.query = query;
-			this.latch = latch;
-		}
-
-		public void init(CommandMessageHandler handler) {
-			this.source = handler.source;
-		}
-
-		protected static boolean isSelect(String query) {
-			char ch = query.trim().charAt(0);
-			if (ch == 's' || ch == 'S') {
-				return true;
-			} else {
-				return false;
-			}
-		}
-
-		/**
-		 * Connection 将在end session 中返回到pool中
-		 * 
-		 * @param conn
-		 */
-		protected abstract void doRun(java.sql.Connection conn);
-
-		public void run() {
-			try {
-				try {
-					doRun(conn);
-				} catch (Exception e) {
-					logger.error("run query error:", e);
-				}
-			} finally {
-				if(latch != null){
-					latch.countDown();
-				}
-			}
-		}
-	}
-
+	protected ResultPacket packet = null;
 	public CommandMessageHandler(MysqlClientConnection source, String query,
 			Object parameter, ObjectPool[] pools, long timeout) {
 		this.source = source;
@@ -96,6 +45,7 @@ public abstract class CommandMessageHandler implements MessageHandler,
 		this.pools = pools;
 		this.timeout = timeout;
 		this.parameter = parameter;
+		packet = newResultPacket(query);
 	}
 
 	public void handleMessage(Connection conn, byte[] message) {
@@ -120,18 +70,24 @@ public abstract class CommandMessageHandler implements MessageHandler,
 	}
 
 	public void startSession() throws Exception {
-		ResultPacket packet = newResultPacket(query);
+		
 		if(pools.length == 1){
-			final java.sql.Connection conn = (java.sql.Connection) pools[0].borrowObject();
+			final PoolableObject conn = (PoolableObject) pools[0].borrowObject();
 			connPoolMap.put(conn, pools[0]);
-			QueryRunnable runnable = newQueryRunnable(null, conn, query,parameter, packet);
+			MessageHandlerRunner runnable = null;
+			if(conn instanceof MessageHandlerRunnerProvider){
+				MessageHandlerRunnerProvider provider = (MessageHandlerRunnerProvider)conn;
+				runnable = provider.getRunner();
+			}else{
+				runnable = newQueryRunnable(null, conn, query,parameter, packet);
+			}
 			runnable.init(this);
 			runnable.run();
 		}else{
 			final CountDownLatch latch = new CountDownLatch(pools.length);
 			
 			for (ObjectPool pool : pools) {
-				final java.sql.Connection conn = (java.sql.Connection) pool
+				final PoolableObject conn = (PoolableObject) pool
 						.borrowObject();
 				connPoolMap.put(conn, pool);
 				QueryRunnable runnable = newQueryRunnable(latch, conn, query,
@@ -154,7 +110,7 @@ public abstract class CommandMessageHandler implements MessageHandler,
 	protected abstract ResultPacket newResultPacket(String query);
 
 	protected abstract QueryRunnable newQueryRunnable(CountDownLatch latch,
-			java.sql.Connection conn, String query2, Object parameter,
+			PoolableObject conn, String query2, Object parameter,
 			ResultPacket packet);
 
 	public void endSession() {
@@ -165,7 +121,7 @@ public abstract class CommandMessageHandler implements MessageHandler,
 			if (!ended) {
 				endTime = System.currentTimeMillis();
 				ended = true;
-				for (Map.Entry<java.sql.Connection, ObjectPool> entry : connPoolMap
+				for (Map.Entry<Object, ObjectPool> entry : connPoolMap
 						.entrySet()) {
 					try {
 						entry.getValue().returnObject(entry.getKey());
