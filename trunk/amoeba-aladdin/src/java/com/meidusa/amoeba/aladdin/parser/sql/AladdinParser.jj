@@ -587,7 +587,7 @@ Statment parse()          :
 {/*@bgen(jjtree) Statment */
     try {
 /*@egen*/
-    (
+    (((
     statment = DeleteQuery()
     |
     statment = InsertQuery()
@@ -602,7 +602,9 @@ Statment parse()          :
     |(<K_COMMIT> /*[<K_WORK>] [<K_AND> [<K_NO>] <K_CHAIN>] [[<K_NO>] <K_RELEASE>]*/){statment = new CommitStatment();}
     |(<K_ROLLBACK>/*[<K_WORK>] [<K_AND> [<K_NO>] <K_CHAIN>] [[<K_NO>] <K_RELEASE>]*/){statment = new RollbackStatment();}
     |(<K_START_TRANSACTION>){statment = new StartTansactionStatment();}
-    )(";"|<EOF>)/*@bgen(jjtree)*/
+    )(";"|<EOF>))
+    |
+    (statment = ShowQuery()))/*@bgen(jjtree)*/
     {
       jjtree.closeNodeScope(jjtn000, true);
       jjtc000 = false;
@@ -658,22 +660,24 @@ Statment SelectSchema() :{
 	}
 }
 
-/*
+
 Statment ShowQuery() :{
 	Expression expression = null;
 	Column column = null;
 	Table table = null;
 }{
 	"SHOW"{return ShowStatment.STATMENT;}//[(<K_CREATE> [<K_TABLE>|<IDENTIFIER>])|<K_FULL>] column = ColumnName() [<K_FROM> table = TableReference()]{
+		/**
 		ColumnExpression columnExpression = new ColumnExpression();
 		columnExpression.setColumn(column);
 		ShowStatment show = new ShowStatment();
 		show.setExpression(columnExpression);
 		return show;
 	}
+	**/
 }
-	
-*/
+
+
 Statment PropertySetQuery(PropertyStatment statment) :{
 	Expression expression = null;
 	
@@ -1200,7 +1204,10 @@ Expression SubSelectStatement():
     			andExpression = new AndExpression();	
     		}
 			andExpression.addExpression(expression);
-		}	
+		}else{
+			
+			
+    	}	
     }]
     [ expression = WhereClause(){
     	if(expression != null){

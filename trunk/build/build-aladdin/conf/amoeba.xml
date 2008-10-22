@@ -110,7 +110,11 @@
 				
 				<!-- driver name -->
 				<property name="messageHandlerRunner">com.meidusa.amoeba.aladdin.handler.MysqlMessageHandlerRunner</property>
-			
+				<property name="runnerParameters">
+					<bean class="java.util.Properties">
+						<property name="xmlTable">${amoeba.home}/conf/table.xml</property>
+					</bean>
+				</property>
 				
 			</factoryConfig>
 			
