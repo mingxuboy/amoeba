@@ -94,13 +94,13 @@ public class T4C8OallResponseDataPacket extends DataPacket {
         } else {
             switch (packetType) {
                 case QUERY_DESC:// 16
-                    desc.write2Buffer((T4CPacketBufferExchanger) buffer);
+                    desc.write2Buffer((T4CPacketBuffer) buffer);
                     break;
                 case QUERY_RESULT:// 6
-                    query.write2Buffer((T4CPacketBufferExchanger) buffer);
+                    query.write2Buffer((T4CPacketBuffer) buffer);
                     break;
                 case EXEC_RESULT:// 8
-                    execute.write2Buffer((T4CPacketBufferExchanger) buffer);
+                    execute.write2Buffer((T4CPacketBuffer) buffer);
                     break;
                 default:
                     throw new RuntimeException("unknown type packet:" + packetType);
@@ -161,7 +161,7 @@ public class T4C8OallResponseDataPacket extends DataPacket {
             oer.unmarshal(meg);
         }
 
-        protected void write2Buffer(T4CPacketBufferExchanger meg) {
+        protected void write2Buffer(T4CPacketBuffer meg) {
             // 16
             meg.marshalSB1(QUERY_DESC);
             dcb.marshal(meg, false);
@@ -255,7 +255,7 @@ public class T4C8OallResponseDataPacket extends DataPacket {
             }
         }
 
-        protected void write2Buffer(T4CPacketBufferExchanger meg) {
+        protected void write2Buffer(T4CPacketBuffer meg) {
             // 6
             meg.marshalSB1(QUERY_RESULT);
             rxh.marshalV10(meg);
@@ -379,7 +379,7 @@ public class T4C8OallResponseDataPacket extends DataPacket {
             cursorId = oer.curCursorID;
         }
 
-        protected void write2Buffer(T4CPacketBufferExchanger meg) {
+        protected void write2Buffer(T4CPacketBuffer meg) {
             // 8
             meg.marshalSB1(EXEC_RESULT);
             meg.marshalUB2(len1);

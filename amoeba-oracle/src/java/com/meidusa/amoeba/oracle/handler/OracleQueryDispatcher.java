@@ -72,18 +72,24 @@ public class OracleQueryDispatcher implements MessageHandler {
                         ObjectPool[] op = rt.doRoute((DatabaseConnection) conn, sql, false, params);
                         startOracleQueryMessageHandler(conn, op);
                         return;
-                    } else if (packet.isOlobops()) {// 处理请求LOB数据包包的pool路由
+                    } else if (packet.isOlobops()) {// 处理请求LOB数据包的pool路由
                         if (logger.isDebugEnabled()) {
                             logger.debug("");
                             logger.debug("#amoeba query message ==============================================================");
                             logger.debug("client request lob data");
                         }
+                        ((OracleClientConnection) conn).setLobOps(true);
                         QueryRouter rt = ProxyRuntimeContext.getInstance().getQueryRouter();
                         int offset = packet.getLob().getSourceLobLocatorOffset();
                         byte[] abyte0 = new byte[T4C8TTILob.LOB_OPS_BYTES];
                         System.arraycopy(tmpBuffer, offset, abyte0, 0, abyte0.length);
-                        int poolHashCode = ByteUtil.toInt32BE(abyte0, 4);
 
+                        int rowIndex = ByteUtil.toInt32BE(abyte0, 0);
+                        byte[] realBytes = ((OracleClientConnection) conn).getLobLocaterMap().get(rowIndex);
+                        System.arraycopy(realBytes, 0, tmpBuffer, offset, realBytes.length);
+                        listBuffer.set(listBuffer.size() - 1, tmpBuffer);
+
+                        int poolHashCode = ByteUtil.toInt32BE(abyte0, 4);
                         ObjectPool[] op = new ObjectPool[] { rt.getObjectPool(poolHashCode) };
                         startOracleQueryMessageHandler(conn, op);
                         return;
