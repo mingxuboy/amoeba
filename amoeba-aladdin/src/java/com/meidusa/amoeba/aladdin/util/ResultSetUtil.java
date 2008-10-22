@@ -9,11 +9,11 @@ import org.apache.log4j.Logger;
 
 import com.meidusa.amoeba.aladdin.io.MysqlResultSetPacket;
 import com.meidusa.amoeba.mysql.jdbc.MysqlDefs;
-import com.meidusa.amoeba.mysql.net.MysqlClientConnection;
 import com.meidusa.amoeba.mysql.net.packet.FieldPacket;
 import com.meidusa.amoeba.mysql.net.packet.MysqlPacketBuffer;
 import com.meidusa.amoeba.mysql.net.packet.ResultSetHeaderPacket;
 import com.meidusa.amoeba.mysql.net.packet.RowDataPacket;
+import com.meidusa.amoeba.net.Connection;
 import com.meidusa.amoeba.net.jdbc.ResultSetHandler;
 
 /**
@@ -42,7 +42,7 @@ public class ResultSetUtil {
 		return flags;
 	}
 	
-	public static void resultSetToPacket(MysqlClientConnection source, MysqlResultSetPacket packet,ResultSet rs, ResultSetHandler handler) throws SQLException{
+	public static void resultSetToPacket(Connection source, MysqlResultSetPacket packet,ResultSet rs, ResultSetHandler handler) throws SQLException{
 		ResultSetMetaData metaData = rs.getMetaData();
 		int colunmCount = metaData.getColumnCount();
 		synchronized (packet) {
@@ -67,7 +67,7 @@ public class ResultSetUtil {
 						packet.fieldPackets[i].flags = toFlag(metaData,j);
 						packet.fieldPackets[i].decimals = (byte)metaData.getScale(j);
 						packet.fieldPackets[i].character = 45;
-						
+						packet.fieldPackets[i].javaType = metaData.getColumnType(j);
 						packet.fieldPackets[i].type = (byte)(MysqlDefs.javaTypeMysql(metaData.getColumnType(j)) & 0xff);
 					}
 				}

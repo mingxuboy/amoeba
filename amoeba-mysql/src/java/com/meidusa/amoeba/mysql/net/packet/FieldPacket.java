@@ -29,7 +29,15 @@ public class FieldPacket extends AbstractPacket {
 	public String orgName;
 	public int character;
 	public long length;
+	/**
+	 * mysql Type
+	 */
 	public byte type;
+	
+	/**
+	 * javaType
+	 */
+	public transient int javaType;
 	public int flags;
 	public byte decimals;
 	public String definition;

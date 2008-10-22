@@ -15,6 +15,7 @@ import com.meidusa.amoeba.mysql.net.MysqlClientConnection;
 import com.meidusa.amoeba.net.Connection;
 import com.meidusa.amoeba.net.jdbc.PoolableJdbcConnection;
 import com.meidusa.amoeba.net.poolable.ObjectPool;
+import com.meidusa.amoeba.net.poolable.PoolableObject;
 
 /**
  * 
@@ -23,20 +24,20 @@ import com.meidusa.amoeba.net.poolable.ObjectPool;
  */
 public class QueryCommandMessageHandler extends CommandMessageHandler {
 	private static Logger logger = Logger.getLogger(QueryCommandMessageHandler.class);
-	protected static class QueryRunnable extends CommandMessageHandler.QueryRunnable{
+	protected static class QueryCommandRunnable extends QueryRunnable{
 
-		QueryRunnable(CountDownLatch latch, java.sql.Connection conn,String query,
+		public QueryCommandRunnable(CountDownLatch latch, PoolableObject conn,String query,
 				Object parameter, ResultPacket packet) {
 			super(latch, conn,query, parameter, packet);
 		}
 
 		@Override
-		protected void doRun(java.sql.Connection conn) {
+		protected void doRun(PoolableObject conn) {
 			if(isSelect(query)){
 				Statement statement = null;
 				ResultSet rs = null;
 				try {
-					statement = conn.createStatement();
+					statement = ((java.sql.Connection)conn).createStatement();
 					rs = statement.executeQuery(query);
 					if(logger.isDebugEnabled()){
 						logger.debug("starting query:"+query);
@@ -65,7 +66,7 @@ public class QueryCommandMessageHandler extends CommandMessageHandler {
 				Statement statement = null;
 				ResultSet rs = null;
 				try {
-					statement = conn.createStatement();
+					statement = ((java.sql.Connection)conn).createStatement();
 					int result = statement.executeUpdate(query);
 					((MysqlSimpleResultPacket)packet).addResultCount(result);
 				} catch (SQLException e) {
@@ -100,9 +101,9 @@ public class QueryCommandMessageHandler extends CommandMessageHandler {
 
 	@Override
 	public QueryRunnable newQueryRunnable(CountDownLatch latch,
-			java.sql.Connection conn, String query2, Object parameter,
+			PoolableObject conn, String query2, Object parameter,
 			ResultPacket packet) {
-		return new QueryRunnable(latch,conn,query2,parameter,packet);
+		return new QueryCommandRunnable(latch,conn,query2,parameter,packet);
 	}
 
 	@Override

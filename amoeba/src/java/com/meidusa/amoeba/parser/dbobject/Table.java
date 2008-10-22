@@ -37,7 +37,7 @@ public class Table implements DBObjectBase {
 		return name;
 	}
 	public void setName(String name) {
-		this.name = name;
+		this.name = StringUtil.isEmpty(name)?null:name.trim();;
 	}
 	public String getAlias() {
 		return alias;
@@ -65,7 +65,7 @@ public class Table implements DBObjectBase {
 	}
 	
 	public int hashCode(){
-		return 211+ (name==null?0:name.hashCode())+(schema == null?0:schema.hashCode());
+		return 211+ (name==null?0:name.toLowerCase().hashCode())+(schema == null?0:schema.hashCode());
 	}
 
 	

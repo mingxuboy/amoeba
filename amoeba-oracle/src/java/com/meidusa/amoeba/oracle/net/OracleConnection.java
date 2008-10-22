@@ -3,6 +3,8 @@ package com.meidusa.amoeba.oracle.net;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.sql.SQLException;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import com.meidusa.amoeba.net.Connection;
 import com.meidusa.amoeba.net.DatabaseConnection;
@@ -28,6 +30,11 @@ public abstract class OracleConnection extends DatabaseConnection {
 
     private static short     versionNumber      = 0;
 
+    /**
+     * 该lock表示 该connection处于handleMessage中
+     */
+    public final Lock     processLock = new ReentrantLock(false);
+    
     public static short getVersionNumber() {
         return versionNumber;
     }

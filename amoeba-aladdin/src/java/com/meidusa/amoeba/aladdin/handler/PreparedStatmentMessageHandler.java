@@ -10,6 +10,7 @@ import com.meidusa.amoeba.mysql.net.MysqlClientConnection;
 import com.meidusa.amoeba.mysql.net.packet.OKforPreparedStatementPacket;
 import com.meidusa.amoeba.net.DatabaseConnection;
 import com.meidusa.amoeba.net.poolable.ObjectPool;
+import com.meidusa.amoeba.net.poolable.PoolableObject;
 
 /**
  * 
@@ -20,13 +21,13 @@ public class PreparedStatmentMessageHandler extends CommandMessageHandler {
 
 	protected static class PreparedQueryRunnable extends QueryRunnable{
 
-		protected PreparedQueryRunnable(CountDownLatch latch, java.sql.Connection conn,
+		protected PreparedQueryRunnable(CountDownLatch latch, PoolableObject conn,
 				String query, Object parameter, ResultPacket packet) {
 			super(latch, conn, query, parameter, packet);
 		}
 
 		@Override
-		protected void doRun(java.sql.Connection conn) {
+		protected void doRun(PoolableObject conn) {
 			try{
 				int count = ProxyRuntimeContext.getInstance().getQueryRouter().parseParameterCount((DatabaseConnection)this.source, query);
 				PreparedResultPacket preparedPacket = (PreparedResultPacket)packet;
@@ -59,7 +60,7 @@ public class PreparedStatmentMessageHandler extends CommandMessageHandler {
 
 	@Override
 	protected QueryRunnable newQueryRunnable(CountDownLatch latch,
-			java.sql.Connection conn, String query, Object parameter,
+			PoolableObject conn, String query, Object parameter,
 			ResultPacket packet) {
 		return new PreparedQueryRunnable(latch,conn,query,parameter,packet);
 	}
