@@ -29,6 +29,8 @@ public class FieldPacket extends AbstractPacket {
 	public String orgName;
 	public int character;
 	public long length;
+	
+	public transient String charsetName;
 	/**
 	 * mysql Type
 	 */

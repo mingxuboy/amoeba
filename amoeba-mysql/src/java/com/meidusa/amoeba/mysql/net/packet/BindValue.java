@@ -44,7 +44,9 @@ public class BindValue {
 		public short shortBinding;
 
 		public Object value; /* The value to store */
-
+		
+		public String charset;
+		
 		public BindValue() {
 		}
 
