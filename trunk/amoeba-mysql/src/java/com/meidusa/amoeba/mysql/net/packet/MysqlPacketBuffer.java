@@ -165,17 +165,10 @@ public class MysqlPacketBuffer extends AbstractPacketBuffer{
 				// Otherwise, re-size, and pad so we can avoid
 				// allocing again in the near future
 				//
-				int newLength = (int) (this.buffer.length * 1.25);
-
-				if (newLength < (this.buffer.length + additionalData)) {
-					newLength = this.buffer.length
-							+ (int) (additionalData * 1.25);
+				int newLength = this.position + (int)(additionalData * 1.5) + 1;
+				while(newLength<this.position + additionalData +1){
+					newLength = (int) (newLength * 1.5);
 				}
-
-				if (newLength < this.buffer.length) {
-					newLength = this.buffer.length + additionalData;
-				}
-
 				byte[] newBytes = new byte[newLength];
 
 				System.arraycopy(this.buffer, 0, newBytes, 0,
@@ -603,9 +596,16 @@ public class MysqlPacketBuffer extends AbstractPacketBuffer{
 		this.position += len;
 	}
 
-	final void writeLengthCodedString(String s,String encoding) throws UnsupportedEncodingException{
+	public final void writeLengthCodedString(String s,String encoding){
 		if(s != null){
-			byte[] b = s.getBytes(encoding);
+			byte[] b;
+			try {
+				b = s.getBytes(encoding);
+			} catch (UnsupportedEncodingException e) {
+				//TODO
+				e.printStackTrace();
+				b = s.getBytes();
+			}
 			ensureCapacity(b.length + 9);
 			this.writeFieldLength(b.length);
 			this.writeBytesNoNull(b);
