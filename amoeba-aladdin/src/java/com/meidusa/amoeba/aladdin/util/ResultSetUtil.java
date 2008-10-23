@@ -10,12 +10,14 @@ import org.apache.log4j.Logger;
 import com.meidusa.amoeba.aladdin.io.MysqlResultSetPacket;
 import com.meidusa.amoeba.mysql.context.MysqlProxyRuntimeContext;
 import com.meidusa.amoeba.mysql.jdbc.MysqlDefs;
+import com.meidusa.amoeba.mysql.net.MysqlClientConnection;
 import com.meidusa.amoeba.mysql.net.packet.BindValue;
 import com.meidusa.amoeba.mysql.net.packet.FieldPacket;
 import com.meidusa.amoeba.mysql.net.packet.MysqlPacketBuffer;
 import com.meidusa.amoeba.mysql.net.packet.PacketUtil;
 import com.meidusa.amoeba.mysql.net.packet.ResultSetHeaderPacket;
 import com.meidusa.amoeba.mysql.net.packet.RowDataPacket;
+import com.meidusa.amoeba.mysql.util.CharsetMapping;
 import com.meidusa.amoeba.net.Connection;
 import com.meidusa.amoeba.net.jdbc.ResultSetHandler;
 
@@ -53,7 +55,13 @@ public class ResultSetUtil {
 				packet.resulthead = new ResultSetHeaderPacket();
 				packet.resulthead.columns = colunmCount;
 			}
+			MysqlProxyRuntimeContext context = (MysqlProxyRuntimeContext)MysqlProxyRuntimeContext.getInstance();
+			String charset = ((MysqlClientConnection)source).getCharset();
+			if(charset ==null){
+				charset = context.getServerCharset();
+			}
 			
+			int charsetIndex = CharsetMapping.getCharsetIndex(charset);
 			if(colunmCount>0){
 				if(packet.fieldPackets == null){
 					packet.fieldPackets = new FieldPacket[colunmCount];
@@ -69,8 +77,10 @@ public class ResultSetUtil {
 						packet.fieldPackets[i].length = metaData.getColumnDisplaySize(j);
 						packet.fieldPackets[i].flags = toFlag(metaData,j);
 						packet.fieldPackets[i].decimals = (byte)metaData.getScale(j);
-						MysqlProxyRuntimeContext context = (MysqlProxyRuntimeContext)MysqlProxyRuntimeContext.getInstance();
-						packet.fieldPackets[i].character = context.getServerCharsetIndex();
+						
+						
+						packet.fieldPackets[i].charsetName = charset;
+						packet.fieldPackets[i].character =  charsetIndex;
 						packet.fieldPackets[i].javaType = metaData.getColumnType(j);
 						packet.fieldPackets[i].type = (byte)(MysqlDefs.javaTypeMysql(metaData.getColumnType(j)) & 0xff);
 					}
@@ -86,6 +96,7 @@ public class ResultSetUtil {
 					int j=i+1;
 					BindValue bindValue = new BindValue();
 					bindValue.bufferType = packet.fieldPackets[i].type;
+					bindValue.charset = packet.fieldPackets[i].charsetName;
 					PacketUtil.resultToBindValue(bindValue, j, rs);
 					row.columns.add(bindValue.isSet? bindValue: null);
 				}
