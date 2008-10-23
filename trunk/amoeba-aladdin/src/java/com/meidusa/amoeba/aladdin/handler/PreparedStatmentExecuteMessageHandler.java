@@ -149,8 +149,11 @@ public class PreparedStatmentExecuteMessageHandler extends CommandMessageHandler
 
 	@Override
 	protected ResultPacket newResultPacket(String query) {
+		
 		if(PreparedExecuteQueryRunnable.isSelect(query)){
-			return new MysqlResultSetPacket(query);
+			MysqlResultSetPacket packet = new MysqlResultSetPacket(query);
+			packet.setPrepared(true);
+			return packet;
 		}else{
 			return new MysqlSimpleResultPacket();
 		}
