@@ -45,10 +45,10 @@ public class BindValue {
 
 		public Object value; /* The value to store */
 
-		BindValue() {
+		public BindValue() {
 		}
 
-		BindValue(BindValue copyMe) {
+		public BindValue(BindValue copyMe) {
 			this.value = copyMe.value;
 			this.isSet = copyMe.isSet;
 			this.isLongData = copyMe.isLongData;

@@ -25,14 +25,17 @@ import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
  *
  */
 public class RowDataPacket extends AbstractPacket {
-	public List<String> columns;
-	
+	public List<Object> columns;
+	private boolean isBinaryEncoded;
+	public RowDataPacket(boolean isBinaryEncoded){
+		this.isBinaryEncoded = isBinaryEncoded;
+	}
 	@Override
 	public void init(AbstractPacketBuffer myBuffer){
 		super.init(myBuffer);
 		MysqlPacketBuffer buffer = (MysqlPacketBuffer)myBuffer;
 		if(columns == null){
-			columns = new ArrayList<String>();
+			columns = new ArrayList<Object>();
 		}
 		
 		while(buffer.getPosition()<this.packetLength + HEADER_SIZE){
@@ -45,10 +48,49 @@ public class RowDataPacket extends AbstractPacket {
 	public void write2Buffer(AbstractPacketBuffer myBuffer) throws UnsupportedEncodingException{
 		super.write2Buffer(myBuffer);
 		MysqlPacketBuffer buffer = (MysqlPacketBuffer)myBuffer;
-		if(columns == null)return;
-		Iterator<String> it = columns.iterator();
-		while(it.hasNext()){
-			buffer.writeLengthCodedString(it.next(), ProxyRuntimeContext.getInstance().getServerCharset());
+		if(!isBinaryEncoded){
+			
+			if(columns == null)return;
+			Iterator<Object> it = columns.iterator();
+			while(it.hasNext()){
+				Object obj = it.next();
+				buffer.writeLengthCodedString(obj != null?obj.toString():null, ProxyRuntimeContext.getInstance().getServerCharset());
+			}
+		}else{
+			myBuffer.writeByte((byte)0);
+			if(columns == null)return;
+			int numFields = columns.size();
+			/* Reserve place for null-marker bytes */
+	        int nullCount = (numFields + 9) / 8;
+	        byte[] nullBitMask = new byte[nullCount];
+	        
+	        int nullPosition = buffer.getPosition();
+	        buffer.writeBytes(nullBitMask);
+	        
+	        int nullMaskPos = 0;
+	        int bit = 4;
+	        int i=0;
+	        for(Object colum: columns){
+	        	if(colum == null){
+	        		nullBitMask[nullMaskPos] |= bit;
+	        	}else{
+	        		if(colum instanceof BindValue){
+	        			PacketUtil.storeBinding(buffer, (BindValue)colum, ProxyRuntimeContext.getInstance().getServerCharset());
+	        		}else{
+	        			
+	        		}
+	        	}
+	        	if (((bit <<= 1) & 255) == 0) {
+	        		bit = 1; /* To next byte */
+	        		nullMaskPos++;
+	        	}
+	        	i++;
+	        }
+	       
+	        int position = buffer.getPosition();
+	        buffer.setPosition(nullPosition);
+	        buffer.writeBytes(nullBitMask);
+	        buffer.setPosition(position);
 		}
 	}
 	
