@@ -372,6 +372,8 @@ public final class MysqlDefs {
 		case Types.BINARY: return MysqlDefs.FIELD_TYPE_GEOMETRY;
 
 		case Types.BIT: return  MysqlDefs.FIELD_TYPE_BIT;
+		case Types.CLOB: return  MysqlDefs.FIELD_TYPE_VAR_STRING;
+		case Types.BLOB: return  MysqlDefs.FIELD_TYPE_BLOB;
 		
 		default: return Types.VARCHAR;
 		}
