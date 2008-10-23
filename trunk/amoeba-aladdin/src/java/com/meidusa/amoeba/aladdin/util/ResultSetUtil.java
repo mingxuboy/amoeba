@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import org.apache.log4j.Logger;
 
 import com.meidusa.amoeba.aladdin.io.MysqlResultSetPacket;
+import com.meidusa.amoeba.mysql.context.MysqlProxyRuntimeContext;
 import com.meidusa.amoeba.mysql.jdbc.MysqlDefs;
 import com.meidusa.amoeba.mysql.net.packet.BindValue;
 import com.meidusa.amoeba.mysql.net.packet.FieldPacket;
@@ -68,7 +69,8 @@ public class ResultSetUtil {
 						packet.fieldPackets[i].length = metaData.getColumnDisplaySize(j);
 						packet.fieldPackets[i].flags = toFlag(metaData,j);
 						packet.fieldPackets[i].decimals = (byte)metaData.getScale(j);
-						packet.fieldPackets[i].character = 45;
+						MysqlProxyRuntimeContext context = (MysqlProxyRuntimeContext)MysqlProxyRuntimeContext.getInstance();
+						packet.fieldPackets[i].character = context.getServerCharsetIndex();
 						packet.fieldPackets[i].javaType = metaData.getColumnType(j);
 						packet.fieldPackets[i].type = (byte)(MysqlDefs.javaTypeMysql(metaData.getColumnType(j)) & 0xff);
 					}
