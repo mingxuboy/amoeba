@@ -41,18 +41,21 @@ public class PacketUtil {
 			return;
 		case MysqlDefs.FIELD_TYPE_TIME:
 			bindValue.value = rs.getTime(columnIndex);
+			if(bindValue.value == null) return;
 			bindValue.isSet =true;
 			return;
 		case MysqlDefs.FIELD_TYPE_DATE:
 		case MysqlDefs.FIELD_TYPE_DATETIME:
 		case MysqlDefs.FIELD_TYPE_TIMESTAMP:
 			bindValue.value = rs.getTimestamp(columnIndex);
+			if(bindValue.value == null) return;
 			bindValue.isSet =true;
 			return;
 		case MysqlDefs.FIELD_TYPE_VAR_STRING:
 		case MysqlDefs.FIELD_TYPE_STRING:
 		case MysqlDefs.FIELD_TYPE_VARCHAR:
 			bindValue.value = rs.getString(columnIndex);
+			if(bindValue.value == null) return;
 			bindValue.isSet =true;
 			return;
 		}
