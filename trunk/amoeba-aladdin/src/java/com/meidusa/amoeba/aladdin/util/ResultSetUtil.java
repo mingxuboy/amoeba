@@ -97,7 +97,7 @@ public class ResultSetUtil {
 					BindValue bindValue = new BindValue();
 					bindValue.bufferType = packet.fieldPackets[i].type;
 					bindValue.charset = packet.fieldPackets[i].charsetName;
-					PacketUtil.resultToBindValue(bindValue, j, rs);
+					PacketUtil.resultToBindValue(bindValue, j, rs,packet.fieldPackets[i]);
 					row.columns.add(bindValue.isSet? bindValue: null);
 				}
 			}else{
