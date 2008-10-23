@@ -48,6 +48,7 @@ public class RowDataPacket extends AbstractPacket {
 	public void write2Buffer(AbstractPacketBuffer myBuffer) throws UnsupportedEncodingException{
 		super.write2Buffer(myBuffer);
 		MysqlPacketBuffer buffer = (MysqlPacketBuffer)myBuffer;
+		
 		if(!isBinaryEncoded){
 			
 			if(columns == null)return;
@@ -75,7 +76,11 @@ public class RowDataPacket extends AbstractPacket {
 	        		nullBitMask[nullMaskPos] |= bit;
 	        	}else{
 	        		if(colum instanceof BindValue){
-	        			PacketUtil.storeBinding(buffer, (BindValue)colum, ProxyRuntimeContext.getInstance().getServerCharset());
+	        			if(((BindValue)colum).isSet){
+	        				PacketUtil.storeBinding(buffer, (BindValue)colum, ProxyRuntimeContext.getInstance().getServerCharset());
+	        			}else{
+	        				nullBitMask[nullMaskPos] |= bit;
+	        			}
 	        		}else{
 	        			
 	        		}
