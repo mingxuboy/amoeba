@@ -13,7 +13,7 @@ import com.meidusa.amoeba.util.ThreadLocalMap;
 
 public class PacketUtil {
 
-	public static void resultToBindValue(BindValue bindValue,int columnIndex,ResultSet rs) throws SQLException{
+	public static void resultToBindValue(BindValue bindValue,int columnIndex,ResultSet rs, FieldPacket fieldPacket) throws SQLException{
 		switch (bindValue.bufferType & 0xff) {
 		case MysqlDefs.FIELD_TYPE_TINY:
 			bindValue.byteBinding = rs.getByte(columnIndex);
@@ -47,8 +47,29 @@ public class PacketUtil {
 		case MysqlDefs.FIELD_TYPE_DATE:
 		case MysqlDefs.FIELD_TYPE_DATETIME:
 		case MysqlDefs.FIELD_TYPE_TIMESTAMP:
-			bindValue.value = rs.getTimestamp(columnIndex);
+			Timestamp time = rs.getTimestamp(columnIndex);
+			bindValue.value = time;
 			if(bindValue.value == null) return;
+			
+			/**
+			 * 
+			 */
+			if((bindValue.bufferType & 0xff) == MysqlDefs.FIELD_TYPE_DATE){
+				Calendar sessionCalendar = (Calendar)ThreadLocalMap.get(StaticString.CALENDAR);
+				if(sessionCalendar == null){
+					sessionCalendar = Calendar.getInstance();
+					ThreadLocalMap.put(StaticString.CALENDAR, sessionCalendar);
+				}
+				sessionCalendar.setTime(time);
+				byte hour =((byte) sessionCalendar.get(Calendar.HOUR_OF_DAY));
+				byte minute = ((byte) sessionCalendar
+						.get(Calendar.MINUTE));
+				byte second = ((byte) sessionCalendar.get(Calendar.SECOND));
+				
+				if(hour>0 || minute>0||second>0){
+					fieldPacket.type = MysqlDefs.FIELD_TYPE_TIMESTAMP;
+				}
+			}
 			bindValue.isSet =true;
 			return;
 		case MysqlDefs.FIELD_TYPE_VAR_STRING:
