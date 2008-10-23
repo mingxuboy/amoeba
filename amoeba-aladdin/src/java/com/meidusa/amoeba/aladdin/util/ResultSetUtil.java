@@ -9,8 +9,10 @@ import org.apache.log4j.Logger;
 
 import com.meidusa.amoeba.aladdin.io.MysqlResultSetPacket;
 import com.meidusa.amoeba.mysql.jdbc.MysqlDefs;
+import com.meidusa.amoeba.mysql.net.packet.BindValue;
 import com.meidusa.amoeba.mysql.net.packet.FieldPacket;
 import com.meidusa.amoeba.mysql.net.packet.MysqlPacketBuffer;
+import com.meidusa.amoeba.mysql.net.packet.PacketUtil;
 import com.meidusa.amoeba.mysql.net.packet.ResultSetHeaderPacket;
 import com.meidusa.amoeba.mysql.net.packet.RowDataPacket;
 import com.meidusa.amoeba.net.Connection;
@@ -75,11 +77,21 @@ public class ResultSetUtil {
 		}
 		
 		while(rs.next()){
-			RowDataPacket row = new RowDataPacket();
-			row.columns = new ArrayList<String>(colunmCount);
-			for(int i=0;i<colunmCount;i++){
-				int j=i+1;
-				row.columns.add(rs.getString(j));
+			RowDataPacket row = new RowDataPacket(packet.isPrepared());
+			row.columns = new ArrayList<Object>(colunmCount);
+			if(packet.isPrepared()){
+				for(int i=0;i<colunmCount;i++){
+					int j=i+1;
+					BindValue bindValue = new BindValue();
+					bindValue.bufferType = packet.fieldPackets[i].type;
+					PacketUtil.resultToBindValue(bindValue, j, rs);
+					row.columns.add(bindValue.isSet? bindValue: null);
+				}
+			}else{
+				for(int i=0;i<colunmCount;i++){
+					int j=i+1;
+					row.columns.add(rs.getString(j));
+				}
 			}
 			if(logger.isDebugEnabled()){
 				logger.debug("fetch result row:"+row);
@@ -88,6 +100,7 @@ public class ResultSetUtil {
 		}
 	}
 	
+
 	
 	public static void metaDataToPacket(MysqlResultSetPacket packet,ResultSetMetaData metaData) throws SQLException{
 			

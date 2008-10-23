@@ -21,7 +21,16 @@ public class MysqlResultSetPacket extends ErrorResultPacket {
 	public ResultSetHeaderPacket resulthead;
 	public FieldPacket[] fieldPackets;
 	private List<RowDataPacket> rowList;
+	private boolean isPrepared;
 	
+	public boolean isPrepared() {
+		return isPrepared;
+	}
+
+	public void setPrepared(boolean isPrepared) {
+		this.isPrepared = isPrepared;
+	}
+
 	private byte[] content;
 	
 	public void setContent(byte[] content) {

@@ -1,5 +1,6 @@
 package com.meidusa.amoeba.aladdin.io;
 
+import com.meidusa.amoeba.mysql.jdbc.MysqlDefs;
 import com.meidusa.amoeba.mysql.net.packet.EOFPacket;
 import com.meidusa.amoeba.mysql.net.packet.FieldPacket;
 import com.meidusa.amoeba.mysql.net.packet.OKforPreparedStatementPacket;
@@ -51,6 +52,7 @@ public class PreparedResultPacket extends ErrorResultPacket{
 			if(okPaket.columns>0){
 				for(int i=0;i<okPaket.columns;i++){
 					FieldPacket field = new  FieldPacket();
+					field.type = (byte)MysqlDefs.FIELD_TYPE_VAR_STRING;
 					field.packetId = (byte)(++packetId);
 					conn.postMessage(field.toByteBuffer(conn));
 				}

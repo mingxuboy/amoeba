@@ -121,8 +121,8 @@ public class MysqlMessageHandlerRunner implements MessageHandlerRunner,Initialis
 		buffer.writeBytes(fieldEof.toByteBuffer(null).array());
 		
 		for(XmlRow xmlRow :table.getRows()){
-			RowDataPacket row = new RowDataPacket();
-			row.columns = new ArrayList<String>();
+			RowDataPacket row = new RowDataPacket(false);
+			row.columns = new ArrayList<Object>();
 			for(int i=0;i<resultHeader.columns;i++){
 				XmlColumn column = xmlRow.getColumMap().get(table.getColumns().get(i));
 				if(column == null){
