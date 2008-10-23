@@ -31,7 +31,7 @@ public class MysqlMessageHandlerRunner implements MessageHandlerRunner,Initialis
 	private ResultPacket packet = null;
 	private String query;
 	private String xmlTable;
-	private Map<String,XmlTable> xmlTableMap;
+	private static Map<String,XmlTable> xmlTableMap;
 	private static Map<String,byte[]> resultContent = new HashMap<String,byte[]>();
 	
 	public String getXmlTable() {
@@ -144,13 +144,18 @@ public class MysqlMessageHandlerRunner implements MessageHandlerRunner,Initialis
 	}
 	
 	public void init() throws InitialisationException {
-		if(xmlTable != null){
-			XmlTableLoader loader = new XmlTableLoader();
-			loader.setDTD("/com/meidusa/amoeba/xml/table.dtd");
-			loader.setDTDSystemID("table.dtd");
-			xmlTableMap = loader.loadXmlTable(xmlTable);
-		}else{
-			xmlTableMap = new HashMap<String,XmlTable>();
+		if(xmlTableMap == null){
+			if(xmlTable != null){
+				synchronized (this) {
+					if(xmlTableMap != null) return;
+					XmlTableLoader loader = new XmlTableLoader();
+					loader.setDTD("/com/meidusa/amoeba/xml/table.dtd");
+					loader.setDTDSystemID("table.dtd");
+					xmlTableMap = loader.loadXmlTable(xmlTable);
+				}
+			}else{
+				xmlTableMap = new HashMap<String,XmlTable>();
+			}
 		}
 	}
 
