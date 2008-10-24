@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="GB2312"?>
 <project default="mysql" name="AmoebaBuilder" basedir="." xmlns:artifact="urn:maven-artifact-ant">
   	<property name="amoeba.mysql.version"     value="0.31"/>
-  	<property name="amoeba.aladdin.version"     value="0.2"/>
+  	<property name="amoeba.aladdin.version"     value="0.3"/>
   	<property name="app.name"     value="amoeba"/>
   	<property name="deploy.dir"   value="dist"/>
   	<property name="savedoc.dir"  value="docs"/>
@@ -25,6 +25,7 @@
     <file name="build/etc/lib/log4j-1.2.12.jar"/>
   	<file name="build/etc/lib/jdbc4_part.jar" />
   	<file name="build/etc/lib/commons-digester-1.8.jar" />
+  	<file name="build/etc/lib/jdbc-proxy-1.1.jar" />
   </filelist>
   
   <filelist dir="." id="bin.files">
