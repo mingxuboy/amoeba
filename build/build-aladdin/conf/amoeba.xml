@@ -44,8 +44,8 @@
 	
 	<dbServerList>
 		<!-- 
-			一台mysqlServer 需要配置一个pool，
-			如果多台 平等的mysql需要进行loadBalance， 
+			一台dbserver 需要配置一个pool，
+			如果多台 平等的dbserver需要进行loadBalance， 
 			平台已经提供一个具有负载均衡能力的objectPool：com.meidusa.amoeba.mysql.server.MultipleServerPool
 			简单的配置是属性加上 virtual="true",该Pool 不允许配置factoryConfig
 			或者自己写一个ObjectPool。
@@ -57,10 +57,22 @@
 				
 				
 				<!-- driver name, pls put mysql jdbc driver into lib folder -->
-				<property name="driverName">com.mysql.jdbc.Driver</property>
+				<property name="driver">
+					<bean class="com.mysql.jdbc.Driver"/>
+				</property>
 				
+				<!-- 
+				<property name="driver">
+					<bean class="com.meidusa.amoeba.aladdin.jdbc.DriverWrapper">
+						<property name="driver">
+							<bean class="oracle.jdbc.driver.OracleDriver"/>
+						</property>	
+					</bean>
+				</property>
+				 -->
+				 
 				<!-- jdbc url. -->
-				<property name="url">jdbc:mysql://127.0.0.1:3306/test</property>
+				<property name="url">jdbc:mysql://127.0.0.1:3306/test?</property>
 				
 				<!-- url -->
 				<property name="properties">
@@ -68,10 +80,17 @@
 						<!-- 用于登陆mysql的用户名 -->
 						<property name="user">root</property>
 						
+						<!-- for mysql driver -->
+						<property name="characterEncoding">utf8</property>
 						<!-- 用于登陆mysql的密码 -->
 						<!--
 						<property name="password">password</property>
 						-->
+						
+						<!-- for  com.meidusa.amoeba.aladdin.jdbc.DriverWrapper
+						<property name="clientEncoding">gbk</property>
+						<property name="serverEncoding">ISO_8859_1</property>
+						 -->
 					</bean>
 				</property>
 				
