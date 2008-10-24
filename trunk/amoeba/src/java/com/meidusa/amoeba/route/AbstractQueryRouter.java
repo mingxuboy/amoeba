@@ -460,33 +460,49 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable{
 				while(true){
 					try {
 						Thread.sleep(5000l);
-						
-						
-						if(AbstractQueryRouter.this.functionConfig != null){
-							if(funFile.lastModified() != lastFunFileModified){
-								AbstractQueryRouter.this.functionMap = loadFunctionMap(AbstractQueryRouter.this.functionConfig);
-								
+						Map<String,Function> funMap = null;
+						Map<String,PostfixCommand> ruleFunMap = null;
+						Map<Table,TableRule> tableRuleMap = null;
+						try{
+							if(AbstractQueryRouter.this.functionConfig != null){
+								if(funFile.lastModified() != lastFunFileModified){
+									try{
+										funMap = loadFunctionMap(AbstractQueryRouter.this.functionConfig);
+									}catch(ConfigurationException exception){
+									}
+									
+								}
+							}
+							if(AbstractQueryRouter.this.ruleFunctionConfig != null){
+								if(ruleFunctionFile.lastModified() != lastRuleFunctionFileModified){
+									ruleFunMap = loadRuleFunctionMap(AbstractQueryRouter.this.ruleFunctionConfig);
+								}
+							}
+							
+							if(AbstractQueryRouter.this.ruleConfig != null){
+								if(ruleFile.lastModified() != lastRuleModified || 
+										(AbstractQueryRouter.this.ruleFunctionConfig != null && ruleFunctionFile.lastModified() != lastRuleFunctionFileModified)){
+									tableRuleMap = loadConfig(AbstractQueryRouter.this.ruleConfig);
+								}
+							}
+							
+							AbstractQueryRouter.this.functionMap = funMap;
+							AbstractQueryRouter.this.ruleFunctionMap = ruleFunMap;
+							AbstractQueryRouter.this.tableRuleMap = tableRuleMap;
+							
+						}catch(ConfigurationException e){
+							
+						}finally{
+							if(funFile != null && funFile.exists()){
+								lastFunFileModified = funFile.lastModified();
+							}
+							if(ruleFunctionFile != null && ruleFunctionFile.exists()){
+								lastRuleFunctionFileModified = ruleFunctionFile.lastModified();
+							}
+							if(ruleFile != null && ruleFile.exists()){
+								lastRuleModified = ruleFile.lastModified();
 							}
 						}
-						if(AbstractQueryRouter.this.ruleFunctionConfig != null){
-							if(ruleFunctionFile.lastModified() != lastRuleFunctionFileModified){
-								AbstractQueryRouter.this.ruleFunctionMap = loadRuleFunctionMap(AbstractQueryRouter.this.ruleFunctionConfig);
-							}
-						}
-						
-						if(AbstractQueryRouter.this.ruleConfig != null){
-							if(ruleFile.lastModified() != lastRuleModified || 
-									(AbstractQueryRouter.this.ruleFunctionConfig != null && ruleFunctionFile.lastModified() != lastRuleFunctionFileModified)){
-								AbstractQueryRouter.this.tableRuleMap = loadConfig(AbstractQueryRouter.this.ruleConfig);
-								
-							}
-						}
-						
-						lastFunFileModified = funFile.lastModified();
-						if(AbstractQueryRouter.this.ruleFunctionConfig != null){
-							lastRuleFunctionFileModified = ruleFunctionFile.lastModified();
-						}
-						lastRuleModified = ruleFile.lastModified();
 					} catch (InterruptedException e) {
 					}
 				}
