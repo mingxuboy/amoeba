@@ -7,7 +7,6 @@ import com.meidusa.amoeba.aladdin.io.ResultPacket;
 import com.meidusa.amoeba.context.ProxyRuntimeContext;
 import com.meidusa.amoeba.mysql.handler.PreparedStatmentInfo;
 import com.meidusa.amoeba.mysql.net.MysqlClientConnection;
-import com.meidusa.amoeba.mysql.net.packet.OKforPreparedStatementPacket;
 import com.meidusa.amoeba.net.DatabaseConnection;
 import com.meidusa.amoeba.net.poolable.ObjectPool;
 import com.meidusa.amoeba.net.poolable.PoolableObject;
@@ -32,18 +31,6 @@ public class PreparedStatmentMessageHandler extends CommandMessageHandler {
 				int count = ProxyRuntimeContext.getInstance().getQueryRouter().parseParameterCount((DatabaseConnection)this.source, query);
 				PreparedResultPacket preparedPacket = (PreparedResultPacket)packet;
 				PreparedStatmentInfo preparedInfo = (PreparedStatmentInfo)parameter;
-				OKforPreparedStatementPacket ok = new OKforPreparedStatementPacket();
-				ok.columns = 0;
-				ok.parameters = count;
-				ok.packetId = 1;
-				ok.statementHandlerId = preparedInfo.getStatmentId();
-				//preparedInfo.setOkPrepared(ok);
-				/*preparedInfo.putPreparedStatmentBuffer(ok.toByteBuffer(null).array());
-				for(int i=0;i<count;i++){
-					FieldPacket field = new  FieldPacket();
-					field.packetId = (byte)(2+i);
-					preparedInfo.putPreparedStatmentBuffer(field.toByteBuffer(null).array());
-				}*/
 				preparedPacket.setStatementId(preparedInfo.getStatmentId());
 				preparedPacket.setParameterCount(count);
 			}finally{
