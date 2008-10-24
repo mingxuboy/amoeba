@@ -486,9 +486,17 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable{
 								}
 							}
 							
-							AbstractQueryRouter.this.functionMap = funMap;
-							AbstractQueryRouter.this.ruleFunctionMap = ruleFunMap;
-							AbstractQueryRouter.this.tableRuleMap = tableRuleMap;
+							if(funMap != null){
+								AbstractQueryRouter.this.functionMap = funMap;
+							}
+							
+							if(ruleFunMap != null){
+								AbstractQueryRouter.this.ruleFunctionMap = ruleFunMap;
+							}
+							
+							if(tableRuleMap != null){
+								AbstractQueryRouter.this.tableRuleMap = tableRuleMap;
+							}
 							
 						}catch(ConfigurationException e){
 							
