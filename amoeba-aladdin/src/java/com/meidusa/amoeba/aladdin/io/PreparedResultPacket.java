@@ -31,7 +31,7 @@ public class PreparedResultPacket extends ErrorResultPacket{
 			super.wirteToConnection(conn);
 		}else{
 			OKforPreparedStatementPacket okPaket = new OKforPreparedStatementPacket();
-			okPaket.columns = 0;
+			okPaket.columns = 1;
 			okPaket.packetId = 1;
 			byte packetId = 1;
 			okPaket.parameters = parameterCount;
@@ -52,6 +52,8 @@ public class PreparedResultPacket extends ErrorResultPacket{
 			if(okPaket.columns>0){
 				for(int i=0;i<okPaket.columns;i++){
 					FieldPacket field = new  FieldPacket();
+					field.name = "test";
+					field.length = 8;
 					field.type = (byte)MysqlDefs.FIELD_TYPE_VAR_STRING;
 					field.packetId = (byte)(++packetId);
 					conn.postMessage(field.toByteBuffer(conn));
