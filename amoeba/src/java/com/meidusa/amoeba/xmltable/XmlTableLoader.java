@@ -182,7 +182,7 @@ public class XmlTableLoader {
 	
 	            final String nodeName = child.getNodeName();
 	            if (nodeName.equals("field")) {
-	            	String name = child.getAttribute("name");
+	            	String name = child.getAttribute("name").toLowerCase();
 	            	if(!table.getColumns().contains(name)){
 	            		table.getColumns().add(name);
 	            	}

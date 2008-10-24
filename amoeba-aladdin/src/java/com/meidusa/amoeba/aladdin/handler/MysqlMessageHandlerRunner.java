@@ -3,6 +3,7 @@ package com.meidusa.amoeba.aladdin.handler;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.StringTokenizer;
 
 import com.meidusa.amoeba.aladdin.io.MysqlResultSetPacket;
 import com.meidusa.amoeba.aladdin.io.ResultPacket;
@@ -16,6 +17,7 @@ import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
 import com.meidusa.amoeba.net.packet.PacketBuffer;
 import com.meidusa.amoeba.util.Initialisable;
 import com.meidusa.amoeba.util.InitialisationException;
+import com.meidusa.amoeba.xmltable.Condition;
 import com.meidusa.amoeba.xmltable.XmlColumn;
 import com.meidusa.amoeba.xmltable.XmlRow;
 import com.meidusa.amoeba.xmltable.XmlTable;
@@ -56,39 +58,76 @@ public class MysqlMessageHandlerRunner implements MessageHandlerRunner,Initialis
 
 	public void run() {
 		query = query.toLowerCase();
-		String select = query.substring(0,"select".length());
-		boolean isSelect = select.indexOf("select") >=0 || select.indexOf("show")>=0;
-		if(isSelect){
-			
-			for(Map.Entry<String, XmlTable> entry:xmlTableMap.entrySet()){
-				if(query.indexOf(entry.getKey())>0){
-					byte[] content = resultContent.get(entry.getKey());
-					if(content == null){
-						synchronized (resultContent) {
-							content = resultContent.get(entry.getKey());
-							if(content == null){
-								content = xmlTableToBytes(entry.getValue());
-								resultContent.put(entry.getKey(), content);
-							}
+		byte[] content = resultContent.get(query);
+		if(content != null){
+			MysqlResultSetPacket resultPacket = (MysqlResultSetPacket)packet;
+			resultPacket.setContent(content);
+			return;
+		}
+		StringTokenizer tokenizer = new StringTokenizer(query," 	%'");
+		String[] tokens = new String[tokenizer.countTokens()]; 
+		int index=0;
+		
+		
+		while(tokenizer.hasMoreTokens()){
+			tokens[index++]=tokenizer.nextToken();
+		}
+		if(tokens.length >1){
+			boolean isSelect = tokens[0].equalsIgnoreCase("select") || tokens[0].equalsIgnoreCase("show");
+			if(isSelect){
+				String tableName = tokens[1];
+				Condition condition = null;
+				for(int i=2;i<tokens.length;i++){
+					if(tokens[i].equals("where")){
+						condition = new Condition();
+						condition.name = tokens[i+1];
+						if(tokens[i+1].equals("=")){
+							condition.type = Condition.TYPE.match;
+						}else if(tokens[i+1].equals("like")){
+							condition.type = Condition.TYPE.match;
+						}
+						condition.value = tokens[i+2];
+						break;
+					}else if(tokens[i].equals("like")){
+						condition = new Condition();
+						condition.name = tokens[i+1];
+						condition.type = Condition.TYPE.exist;
+					}else if(tokens[i].equals("from")){
+						tableName = tokens[i+1];
+					}
+				}
+		
+				XmlTable xmlTable = xmlTableMap.get(tableName);
+				if(xmlTable != null){
+					if(tableName.equals("variables") && condition != null){
+						condition.value = condition.name;
+						condition.type = Condition.TYPE.match;
+						condition.name = "variable_name";
+					}
+					synchronized (resultContent) {
+						content = resultContent.get(query);
+						if(content == null){
+							content = xmlTableToBytes(xmlTable.query(condition));
+							resultContent.put(query, content);
 						}
 					}
 					MysqlResultSetPacket resultPacket = (MysqlResultSetPacket)packet;
 					resultPacket.setContent(content);
 					return;
 				}
+			
+				MysqlResultSetPacket resultPacket = (MysqlResultSetPacket)packet;
+				ResultSetHeaderPacket resultHeader = new ResultSetHeaderPacket();
+				resultHeader.packetId = 1;
+				resultHeader.columns =1;
+				
+				resultPacket.resulthead = resultHeader;
+				FieldPacket field = new FieldPacket();
+				field.name = "test";
+				field.type = (byte)MysqlDefs.FIELD_TYPE_VAR_STRING;
+				field.length = 8;
+				resultPacket.fieldPackets = new FieldPacket[]{field};
 			}
-			
-			MysqlResultSetPacket resultPacket = (MysqlResultSetPacket)packet;
-			ResultSetHeaderPacket resultHeader = new ResultSetHeaderPacket();
-			resultHeader.packetId = 1;
-			resultHeader.columns =1;
-			
-			resultPacket.resulthead = resultHeader;
-			FieldPacket field = new FieldPacket();
-			field.name = "test";
-			field.type = (byte)MysqlDefs.FIELD_TYPE_VAR_STRING;
-			field.length = 8;
-			resultPacket.fieldPackets = new FieldPacket[]{field};
 
 		}else{
 			

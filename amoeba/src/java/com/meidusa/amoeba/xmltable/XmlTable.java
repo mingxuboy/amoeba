@@ -28,10 +28,25 @@ public class XmlTable {
 	public void setName(String name) {
 		this.name = name;
 	}
+	
 	public String getSchema() {
 		return schema;
 	}
+	
 	public void setSchema(String schema) {
 		this.schema = schema;
+	}
+	
+	public XmlTable query(Condition condition){
+		XmlTable table = new XmlTable();
+		for(String column:columns){
+			table.columns.add(column);
+		}
+		for(XmlRow row : rows){
+			if(row.isMatch(condition)){
+				table.rows.add(row);
+			}
+		}
+		return table;
 	}
 }
