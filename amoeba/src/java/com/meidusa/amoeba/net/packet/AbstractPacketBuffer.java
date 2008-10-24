@@ -103,8 +103,8 @@ public class AbstractPacketBuffer implements PacketBuffer {
             if ((position + i) < buffer.length) {
                 setPacketLength(buffer.length);
             } else {
-                int newLength = (int) (buffer.length * 1.5);
-
+                int newLength = (int) (position + i * 1.5);
+                
                 if (newLength <= (buffer.length + i)) {
                     newLength = (buffer.length + i+1) + (int) (i * 1.25);
                 }
