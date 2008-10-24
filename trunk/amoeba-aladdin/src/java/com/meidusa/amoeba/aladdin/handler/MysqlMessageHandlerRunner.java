@@ -81,12 +81,12 @@ public class MysqlMessageHandlerRunner implements MessageHandlerRunner,Initialis
 					if(tokens[i].equals("where")){
 						condition = new Condition();
 						condition.name = tokens[i+1];
-						if(tokens[i+1].equals("=")){
+						if(tokens[i+2].equals("=")){
 							condition.type = Condition.TYPE.match;
-						}else if(tokens[i+1].equals("like")){
+						}else if(tokens[i+2].equals("like")){
 							condition.type = Condition.TYPE.match;
 						}
-						condition.value = tokens[i+2];
+						condition.value = tokens[i+3];
 						break;
 					}else if(tokens[i].equals("like")){
 						condition = new Condition();
@@ -100,9 +100,11 @@ public class MysqlMessageHandlerRunner implements MessageHandlerRunner,Initialis
 				XmlTable xmlTable = xmlTableMap.get(tableName);
 				if(xmlTable != null){
 					if(tableName.equals("variables") && condition != null){
-						condition.value = condition.name;
-						condition.type = Condition.TYPE.match;
-						condition.name = "variable_name";
+						if(condition.value == null){
+							condition.value = condition.name;
+							condition.type = Condition.TYPE.match;
+							condition.name = "variable_name";
+						}
 					}
 					synchronized (resultContent) {
 						content = resultContent.get(query);
