@@ -53,7 +53,7 @@
 		<dbServer name="server1">
 			
 			<!-- PoolableObjectFactoryÊµÏÖÀà -->
-			<factoryConfig class="com.meidusa.amoeba.net.jdbc.JdbcConnectionFactory">
+			<factoryConfig class="com.meidusa.amoeba.jdbc.JdbcConnectionFactory">
 				
 				
 				<!-- driver name, pls put mysql jdbc driver into lib folder -->
@@ -63,10 +63,12 @@
 				
 				<!-- 
 				<property name="driver">
-					<bean class="com.meidusa.amoeba.aladdin.jdbc.DriverWrapper">
+					<bean class="com.meidusa.amoeba.jdbc.DriverWrapper">
 						<property name="driver">
 							<bean class="oracle.jdbc.driver.OracleDriver"/>
-						</property>	
+						</property>
+						<property name="clientEncoding">gbk</property>
+						<property name="serverEncoding">ISO_8859_1</property>	
 					</bean>
 				</property>
 				 -->
@@ -86,11 +88,6 @@
 						<!--
 						<property name="password">password</property>
 						-->
-						
-						<!-- for  com.meidusa.amoeba.aladdin.jdbc.DriverWrapper
-						<property name="clientEncoding">gbk</property>
-						<property name="serverEncoding">ISO_8859_1</property>
-						 -->
 					</bean>
 				</property>
 				

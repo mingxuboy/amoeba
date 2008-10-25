@@ -1,4 +1,4 @@
-package com.meidusa.amoeba.net.jdbc;
+package com.meidusa.amoeba.jdbc;
 
 import java.sql.Connection;
 import java.sql.Driver;

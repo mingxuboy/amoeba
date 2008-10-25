@@ -2,8 +2,8 @@ package com.meidusa.amoeba.aladdin.handler;
 
 import java.sql.Types;
 
+import com.meidusa.amoeba.jdbc.ResultSetHandler;
 import com.meidusa.amoeba.net.DatabaseConnection;
-import com.meidusa.amoeba.net.jdbc.ResultSetHandler;
 
 public class StringTypeHandler implements ResultSetHandler {
 	private String amoebaCharset;

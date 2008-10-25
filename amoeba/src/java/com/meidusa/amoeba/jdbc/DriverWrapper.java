@@ -1,4 +1,4 @@
-package com.meidusa.amoeba.aladdin.jdbc;
+package com.meidusa.amoeba.jdbc;
 
 import java.sql.Connection;
 import java.sql.Driver;
@@ -25,6 +25,29 @@ public class DriverWrapper implements Driver {
 
     private Driver driver;
 
+    private String clientEncoding;
+
+	private String serverEncoding;
+	
+    public String getClientEncoding() {
+		return clientEncoding;
+	}
+
+
+	public void setClientEncoding(String clientEncoding) {
+		this.clientEncoding = clientEncoding;
+	}
+
+
+	public String getServerEncoding() {
+		return serverEncoding;
+	}
+
+
+	public void setServerEncoding(String serverEncoding) {
+		this.serverEncoding = serverEncoding;
+	}
+	
     public ProxyFactory getFactory() {
 		return factory;
 	}
@@ -65,13 +88,11 @@ public class DriverWrapper implements Driver {
     public Connection connect(String url, Properties info) throws SQLException {
         Properties p = new Properties();
         p.putAll(info);
-        p.remove(CharsetParameter.CLIENTENCODINGKEY);
-        p.remove(CharsetParameter.SERVERENCODINGKEY);
         Connection conn = driver.connect(url, p);
 
         CharsetParameter param = new CharsetParameter();
-        param.setClientEncoding(info.getProperty(CharsetParameter.CLIENTENCODINGKEY));
-        param.setServerEncoding(info.getProperty(CharsetParameter.SERVERENCODINGKEY));
+        param.setClientEncoding(this.getClientEncoding());
+        param.setServerEncoding(this.getServerEncoding());
         return factory.getConnection(param, conn);
     }
 

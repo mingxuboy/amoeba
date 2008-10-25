@@ -24,29 +24,33 @@ import org.apache.log4j.Logger;
 public class ThreadLocalMap{
 	private static Logger logger = Logger.getLogger(ThreadLocalMap.class);
 	
-	protected final static ThreadLocal<Map<String,Object>> threadContext = new MapThreadLocal();
+	protected final static ThreadLocal<Map<Object,Object>> threadContext = new MapThreadLocal();
 	
 	private ThreadLocalMap(){};
 	
-	public static void put(String key,Object value){
+	public static void put(Object key,Object value){
 		getContextMap().put(key,value);
 	}
 	
-	public static Object remove(String key){
+	public static Object remove(Object key){
 		return getContextMap().remove(key);
 	}
 	
-	public static Object get(String key){
+	public static Object get(Object key){
 		return getContextMap().get(key);
 	}
 	
-	private static class MapThreadLocal extends ThreadLocal<Map<String,Object>> {
-        protected Map<String,Object> initialValue() {
-        	return new HashMap<String,Object>() {
+	public static boolean containsKey(Object key){
+		return getContextMap().containsKey(key);
+	}
+	
+	private static class MapThreadLocal extends ThreadLocal<Map<Object,Object>> {
+        protected Map<Object,Object> initialValue() {
+        	return new HashMap<Object,Object>() {
 				
         		private static final long serialVersionUID = 3637958959138295593L;
 				
-				public Object put(String key, Object value) {
+				public Object put(Object key, Object value) {
                     if (logger.isDebugEnabled()) {
                         if (containsKey(key)) {
                         	logger.debug("Overwritten attribute to thread context: " + key
@@ -68,8 +72,8 @@ public class ThreadLocalMap{
      *
      * @return thread context MapµÄÊµÀý
      */
-    protected static Map<String,Object> getContextMap() {
-        return (Map<String,Object>) threadContext.get();
+    protected static Map<Object,Object> getContextMap() {
+        return (Map<Object,Object>) threadContext.get();
     }
 	
     
