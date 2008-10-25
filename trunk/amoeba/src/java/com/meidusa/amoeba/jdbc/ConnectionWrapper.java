@@ -22,7 +22,7 @@ import java.util.Properties;
 import com.meidusa.amoeba.util.JVM;
 
 /**
- * in order to adapt jdbc4 and jdbc3 , copy some jdbc4 class and pack them into jdbc4_part.jar
+ * in order to adapt jdbc4 and jdbc3 , copy some jdbc4 classes and pack them into jdbc4_part.jar
  * @author struct
  *
  */
