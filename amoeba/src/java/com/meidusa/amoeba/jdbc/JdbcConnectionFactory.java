@@ -8,7 +8,6 @@ import java.util.Properties;
 import com.meidusa.amoeba.net.poolable.PoolableObjectFactory;
 import com.meidusa.amoeba.util.Initialisable;
 import com.meidusa.amoeba.util.InitialisationException;
-import com.meidusa.amoeba.util.StringUtil;
 
 /**
  * jdbc driver connection factory
@@ -16,7 +15,6 @@ import com.meidusa.amoeba.util.StringUtil;
  *
  */
 public class JdbcConnectionFactory implements PoolableObjectFactory,Initialisable {
-	private String driverName;
 	private String url;
 	private Driver driver;
 	private Properties properties;
@@ -28,14 +26,6 @@ public class JdbcConnectionFactory implements PoolableObjectFactory,Initialisabl
 
 	public void setDriver(Driver driver) {
 		this.driver = driver;
-	}
-
-	public String getDriverName() {
-		return driverName;
-	}
-
-	public void setDriverName(String driverName) {
-		this.driverName = driverName;
 	}
 
 	public Properties getProperties() {
@@ -92,13 +82,7 @@ public class JdbcConnectionFactory implements PoolableObjectFactory,Initialisabl
 	}
 
 	public void init() throws InitialisationException {
-		if(!StringUtil.isEmpty(driverName)){
-			try {
-				driver = (Driver)Class.forName(driverName).newInstance();
-			} catch (Exception e) {
-				throw new InitialisationException(e);
-			}
-		}
+
 	}
 
 }
