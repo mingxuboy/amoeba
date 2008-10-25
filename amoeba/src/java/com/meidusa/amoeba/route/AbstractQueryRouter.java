@@ -843,7 +843,10 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable{
 	
 	public Statment parseSql(DatabaseConnection connection,String sql){
 		Statment statment = null;
-		int sqlWithSchemaHashcode = connection.getSchema()!= null? connection.getSchema().hashCode()^sql.hashCode():sql.hashCode();
+		
+		String defaultSchema = (connection ==null || StringUtil.isEmpty(connection.getSchema())) ?null: connection.getSchema();
+		
+		int sqlWithSchemaHashcode = defaultSchema != null? (defaultSchema.hashCode()^sql.hashCode()):sql.hashCode();
 		mapLock.lock();
 		try{
 			statment = (Statment)map.get(sqlWithSchemaHashcode);
@@ -857,9 +860,9 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable{
 				
 				Parser parser = newParser(sql);
 				parser.setFunctionMap(this.functionMap);
-				if(!StringUtil.isEmpty(connection.getSchema())){
+				if(defaultSchema != null){
 					Schema schema = new Schema();
-					schema.setName(connection.getSchema());
+					schema.setName(defaultSchema);
 					parser.setDefaultSchema(schema);
 				}
 				try {

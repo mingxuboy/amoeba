@@ -3,7 +3,10 @@ package com.meidusa.amoeba.sqljep.function;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.log4j.Logger;
 
@@ -12,6 +15,8 @@ import com.meidusa.amoeba.net.poolable.ObjectPool;
 import com.meidusa.amoeba.sqljep.ASTFunNode;
 import com.meidusa.amoeba.sqljep.JepRuntime;
 import com.meidusa.amoeba.sqljep.ParseException;
+import com.meidusa.amoeba.util.Initialisable;
+import com.meidusa.amoeba.util.InitialisationException;
 import com.meidusa.amoeba.util.ThreadLocalMap;
 
 /**
@@ -19,7 +24,7 @@ import com.meidusa.amoeba.util.ThreadLocalMap;
  * @author struct
  *
  */
-public class SqlQueryCommand extends PostfixCommand{
+public class SqlQueryCommand extends PostfixCommand implements Initialisable{
 	private static Logger logger = Logger.getLogger(SqlQueryCommand.class);
 	private String sql;
 	public void setPoolName(String poolName) {
@@ -27,8 +32,7 @@ public class SqlQueryCommand extends PostfixCommand{
 	}
 
 	private String poolName;
-	private int parameterSize;
-	private String returnColumnName;
+	private int parameterSize=1;
 	
 	/**
 	 * enable threadlocal cache or not
@@ -42,35 +46,39 @@ public class SqlQueryCommand extends PostfixCommand{
 		this.threadLocalCache = threadLocalCache;
 	}
 
-	public void setReturnColumnName(String returnColumnName) {
-		this.returnColumnName = returnColumnName;
-	}
-
 	public void setSql(String sql) {
 		this.sql = sql;
 	}
 
-	public void setParameterSize(int parameterSize) {
-		this.parameterSize = parameterSize;
-	}
-
+	@SuppressWarnings("unchecked")
 	@Override
 	public void evaluate(ASTFunNode node, JepRuntime runtime)
 			throws ParseException {
 		
 		node.childrenAccept(runtime.ev, null);
 		
-		Comparable<?>[] parameters = new Comparable<?>[getNumberOfParameters()] ;
-		for(int i=0;i<parameters.length;i++){
-			parameters[i] = runtime.stack.pop();
+		Comparable<?>[] parameters = null;
+		if(parameterSize >1){
+			parameters = new Comparable<?>[parameterSize-1] ;
+			for(int i=0;i<parameters.length;i++){
+				parameters[i] = runtime.stack.pop();
+			}
 		}
 		
+		String returnColumnName = null;
+		Comparable<?> firstParameter = runtime.stack.pop();
+		if(firstParameter instanceof Comparative){
+			Comparable<?> value= ((Comparative)firstParameter).getValue();
+			returnColumnName = value!= null ? value.toString():null;
+		}else{
+			returnColumnName = firstParameter.toString();
+		}
 		
-		Comparable<?> result = null;
+		Map<String,Object> result = null;
 		if(isThreadLocalCache()){
 			
 			int threadLocalKey = this.hashCode();
-			if(getNumberOfParameters() != 0){
+			if(parameterSize>1){
 				int hash = this.hashCode();
 				for(int i=0;i<parameters.length;i++){
 					if(parameters[i] instanceof Comparative){
@@ -83,27 +91,33 @@ public class SqlQueryCommand extends PostfixCommand{
 				threadLocalKey = threadLocalKey ^ hash;
 			}
 			
-			result = (Comparable<?>)ThreadLocalMap.get(threadLocalKey);
+			result = (Map<String,Object>)ThreadLocalMap.get(threadLocalKey);
 			if(result == null){
 				if(!ThreadLocalMap.containsKey(threadLocalKey)){
-					result = query(parameters,returnColumnName);
+					result = query(parameters);
 					ThreadLocalMap.put(threadLocalKey,result);
 				}
 			}
 		}else{
-			result = query(parameters,returnColumnName);
+			result = query(parameters);
 		}
-		runtime.stack.push(result);	
+		if(result == null){
+			runtime.stack.push(null);	
+		}else{
+			runtime.stack.push((Comparable<?>)result.get(returnColumnName));
+		}
+		
 		
 	}
 
-	private Comparable<?> query(Comparable<?>[] parameters,String returnColumnName){
+	private Map<String,Object> query(Comparable<?>[] parameters){
 		ObjectPool pool =  ProxyRuntimeContext.getInstance().getPoolMap().get(poolName);
 		Connection conn = null;
 		PreparedStatement st = null;
 		ResultSet rs = null;
 		
 		try{
+			Map<String,Object> columnMap = null;
 			conn = (Connection)pool.borrowObject();
 			st = conn.prepareStatement(sql);
 			if(parameters != null){
@@ -117,10 +131,16 @@ public class SqlQueryCommand extends PostfixCommand{
 			}
 			
 			rs = st.executeQuery();
+			ResultSetMetaData metaData = rs.getMetaData();
 			if(rs.next()){
-				return (Comparable<?>)rs.getObject(returnColumnName);
+				columnMap= new HashMap<String,Object>();
+				for(int i=1;i<=metaData.getColumnCount();i++){
+					String columnName = metaData.getColumnName(i);
+					Object columnValue = rs.getObject(i);
+					columnMap.put(columnName, columnValue);
+				}
 			}
-			return null;
+			return columnMap;
 		}catch(Exception e){
 			logger.error("execute sql error :"+sql,e);
 			return null;
@@ -151,5 +171,9 @@ public class SqlQueryCommand extends PostfixCommand{
 	@Override
 	public int getNumberOfParameters() {
 		return parameterSize;
+	}
+
+	public void init() throws InitialisationException {
+		parameterSize = ProxyRuntimeContext.getInstance().getQueryRouter().parseParameterCount(null, sql)+1;
 	}
 }
