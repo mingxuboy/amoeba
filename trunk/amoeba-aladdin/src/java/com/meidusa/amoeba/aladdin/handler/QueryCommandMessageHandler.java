@@ -11,9 +11,9 @@ import com.meidusa.amoeba.aladdin.io.MysqlResultSetPacket;
 import com.meidusa.amoeba.aladdin.io.MysqlSimpleResultPacket;
 import com.meidusa.amoeba.aladdin.io.ResultPacket;
 import com.meidusa.amoeba.aladdin.util.ResultSetUtil;
+import com.meidusa.amoeba.jdbc.PoolableJdbcConnection;
 import com.meidusa.amoeba.mysql.net.MysqlClientConnection;
 import com.meidusa.amoeba.net.Connection;
-import com.meidusa.amoeba.net.jdbc.PoolableJdbcConnection;
 import com.meidusa.amoeba.net.poolable.ObjectPool;
 import com.meidusa.amoeba.net.poolable.PoolableObject;
 

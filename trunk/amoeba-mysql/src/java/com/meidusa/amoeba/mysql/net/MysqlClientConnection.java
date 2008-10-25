@@ -30,7 +30,7 @@ import com.meidusa.amoeba.mysql.filter.PacketIOFilter;
 import com.meidusa.amoeba.mysql.handler.PreparedStatmentInfo;
 import com.meidusa.amoeba.net.AuthingableConnectionManager;
 import com.meidusa.amoeba.net.Connection;
-import com.meidusa.amoeba.util.NameableRunner;
+import com.meidusa.amoeba.util.ThreadLocalMap;
 
 /**
  * 负责连接到 proxy server的客户端连接对象包装
@@ -133,16 +133,15 @@ public class MysqlClientConnection extends MysqlConnection{
 		final PacketFilterInvocation invocation = new PacketFilterInvocation(filterList,this,msg){
 			@Override
 			protected Result doProcess() {
-				ProxyRuntimeContext.getInstance().getClientSideExecutor().execute(new NameableRunner(){
+				ProxyRuntimeContext.getInstance().getClientSideExecutor().execute(new Runnable(){
 
 					public void run() {
-						MysqlClientConnection.this.getMessageHandler().handleMessage(MysqlClientConnection.this, msg);
+						try{
+							MysqlClientConnection.this.getMessageHandler().handleMessage(MysqlClientConnection.this, msg);
+						}finally{
+							ThreadLocalMap.reset();
+						}
 					}
-
-					public String getRunnerName() {
-						return "Thread-"+MysqlClientConnection.this;
-					}
-					
 				});
 				return null;
 			}

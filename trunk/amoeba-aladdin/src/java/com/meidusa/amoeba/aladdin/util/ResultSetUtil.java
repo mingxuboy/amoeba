@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import org.apache.log4j.Logger;
 
 import com.meidusa.amoeba.aladdin.io.MysqlResultSetPacket;
+import com.meidusa.amoeba.jdbc.ResultSetHandler;
 import com.meidusa.amoeba.mysql.context.MysqlProxyRuntimeContext;
 import com.meidusa.amoeba.mysql.jdbc.MysqlDefs;
 import com.meidusa.amoeba.mysql.net.MysqlClientConnection;
@@ -19,7 +20,6 @@ import com.meidusa.amoeba.mysql.net.packet.ResultSetHeaderPacket;
 import com.meidusa.amoeba.mysql.net.packet.RowDataPacket;
 import com.meidusa.amoeba.mysql.util.CharsetMapping;
 import com.meidusa.amoeba.net.Connection;
-import com.meidusa.amoeba.net.jdbc.ResultSetHandler;
 
 /**
  * 

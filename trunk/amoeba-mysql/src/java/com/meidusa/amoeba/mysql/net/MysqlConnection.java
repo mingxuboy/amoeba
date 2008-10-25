@@ -31,10 +31,6 @@ public abstract class MysqlConnection extends DatabaseConnection {
 		super(channel, createStamp);
 	}
 	
-	protected void messageProcess(byte[] msg){
-		super.messageProcess(msg);
-	}
-	
 	@Override
 	protected PacketInputStream createPacketInputStream() {
 		return new MysqlFramedInputStream(true);
