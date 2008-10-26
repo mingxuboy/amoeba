@@ -200,5 +200,21 @@ public class AbstractPacketBuffer implements PacketBuffer {
             }
         };
     }
+    
+    public static  boolean appendBufferToWrite(byte[] byts,PacketBuffer buffer,Connection conn,boolean writeNow){
+		if(writeNow || buffer.remaining() < byts.length){
+			if(buffer.getPosition()>0){
+				buffer.writeBytes(byts);
+				conn.postMessage(buffer.toByteBuffer());
+				buffer.reset();
+			}else{
+				conn.postMessage(byts);
+			}
+			return true;
+		}else{
+			buffer.writeBytes(byts);
+			return true;
+		}
+	}
 
 }

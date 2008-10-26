@@ -66,13 +66,13 @@ public class MysqlResultSetPacket extends ErrorResultPacket {
 		resulthead.packetId = paketId++;
 		
 		//write header bytes
-		appendBufferToWrite(resulthead.toByteBuffer(conn).array(),buffer,conn,false);
+		AbstractPacketBuffer.appendBufferToWrite(resulthead.toByteBuffer(conn).array(),buffer,conn,false);
 		
 		//write fields bytes
 		if(fieldPackets != null){
 			for(int i=0;i<fieldPackets.length;i++){
 				fieldPackets[i].packetId = paketId++;
-				appendBufferToWrite(fieldPackets[i].toByteBuffer(conn).array(),buffer,conn,false);
+				AbstractPacketBuffer.appendBufferToWrite(fieldPackets[i].toByteBuffer(conn).array(),buffer,conn,false);
 			}
 		}
 		
@@ -81,35 +81,20 @@ public class MysqlResultSetPacket extends ErrorResultPacket {
 		eof.serverStatus = 2;
 		eof.warningCount = 0;
 		eof.packetId = paketId++;
-		appendBufferToWrite(eof.toByteBuffer(conn).array(),buffer,conn,false);
+		AbstractPacketBuffer.appendBufferToWrite(eof.toByteBuffer(conn).array(),buffer,conn,false);
 		
 		if(rowList != null && rowList.size()>0){
 			//write rows bytes
 			for(RowDataPacket row : rowList){
 				row.packetId = paketId++;
-				appendBufferToWrite(row.toByteBuffer(conn).array(),buffer,conn,false);
+				AbstractPacketBuffer.appendBufferToWrite(row.toByteBuffer(conn).array(),buffer,conn,false);
 			}
 			
 		}
 		
 		//write eof bytes
 		eof.packetId = paketId++;
-		appendBufferToWrite(eof.toByteBuffer(conn).array(),buffer,conn,true);
+		AbstractPacketBuffer.appendBufferToWrite(eof.toByteBuffer(conn).array(),buffer,conn,true);
 	}
 	
-	private  boolean appendBufferToWrite(byte[] byts,PacketBuffer buffer,Connection conn,boolean writeNow){
-		if(writeNow || buffer.remaining() < byts.length){
-			if(buffer.getPosition()>0){
-				buffer.writeBytes(byts);
-				conn.postMessage(buffer.toByteBuffer());
-				buffer.reset();
-			}else{
-				conn.postMessage(byts);
-			}
-			return true;
-		}else{
-			buffer.writeBytes(byts);
-			return true;
-		}
-	}
 }

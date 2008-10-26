@@ -11,14 +11,14 @@
  */
 package com.meidusa.amoeba.mysql.handler;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.meidusa.amoeba.context.ProxyRuntimeContext;
+import com.meidusa.amoeba.mysql.jdbc.MysqlDefs;
 import com.meidusa.amoeba.mysql.net.packet.EOFPacket;
 import com.meidusa.amoeba.mysql.net.packet.FieldPacket;
 import com.meidusa.amoeba.mysql.net.packet.OKforPreparedStatementPacket;
 import com.meidusa.amoeba.net.DatabaseConnection;
+import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
+import com.meidusa.amoeba.net.packet.PacketBuffer;
 
 /**
  * 
@@ -30,16 +30,17 @@ public class PreparedStatmentInfo{
 	 * 客户端发送过来的 prepared statment sql语句
 	 */
 	private String preparedStatment;
-	//private OKforPreparedStatementPacket okPrepared;
+
 	private int parameterCount;
 	/**
 	 * 需要返回给客户端
 	 */
-	private List<byte[]> preparedStatmentPackets = new ArrayList<byte[]>();
+	private byte[] packetBuffer;
 	
 	private long statmentId;
 	
 	public PreparedStatmentInfo(DatabaseConnection conn,long id,String preparedSql){
+		PacketBuffer buffer = new AbstractPacketBuffer(2048);
 		statmentId = id;
 		this.preparedStatment = preparedSql;
 		OKforPreparedStatementPacket okPaket = new OKforPreparedStatementPacket();
@@ -49,52 +50,43 @@ public class PreparedStatmentInfo{
 		parameterCount = ProxyRuntimeContext.getInstance().getQueryRouter().parseParameterCount(conn, preparedSql);
 		okPaket.parameters = parameterCount;
 		okPaket.statementHandlerId = statmentId;
-		preparedStatmentPackets.add(okPaket.toByteBuffer(conn).array());
+		buffer.writeBytes(okPaket.toByteBuffer(conn).array());
 		if(parameterCount>0){
 			for(int i=0;i<parameterCount;i++){
 				FieldPacket field = new  FieldPacket();
 				field.packetId = (byte)(++packetId);
 				
-				preparedStatmentPackets.add(field.toByteBuffer(conn).array());
+				buffer.writeBytes(field.toByteBuffer(conn).array());
 			}
 			EOFPacket eof = new EOFPacket();
 			eof.packetId = ++packetId;
 			eof.serverStatus = 2;
 			
-			preparedStatmentPackets.add(eof.toByteBuffer(conn).array());
+			buffer.writeBytes(eof.toByteBuffer(conn).array());
 		}
 		
 		if(okPaket.columns>0){
 			for(int i=0;i<okPaket.columns;i++){
 				FieldPacket field = new  FieldPacket();
 				field.packetId = (byte)(++packetId);
-				preparedStatmentPackets.add(field.toByteBuffer(conn).array());
+				field.length = 8;
+				field.type = (byte)MysqlDefs.FIELD_TYPE_VAR_STRING;
+				buffer.writeBytes(field.toByteBuffer(conn).array());
 			}
 			EOFPacket eof = new EOFPacket();
 			eof.packetId = ++packetId;
 			eof.serverStatus = 2;
-			preparedStatmentPackets.add(eof.toByteBuffer(conn).array());
+			buffer.writeBytes(eof.toByteBuffer(conn).array());
 		}
+		packetBuffer = buffer.toByteBuffer().array();
 	}
 	
 	public int getParameterCount() {
 		return parameterCount;
 	}
 
-	/*public OKforPreparedStatementPacket getOkPrepared() {
-		return okPrepared;
-	}
-
-	public void setOkPrepared(OKforPreparedStatementPacket okPrepared) {
-		this.okPrepared = okPrepared;
-	}*/
-	
-	/**
-	 * @see {@link #buffersIsFull}
-	 * @return
-	 */
-	public List<byte[]> getPreparedStatmentBuffers(){
-		return preparedStatmentPackets;
+	public byte[] getByteBuffer(){
+		return packetBuffer;
 	}
 
 	public long getStatmentId() {

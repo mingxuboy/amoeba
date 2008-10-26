@@ -326,20 +326,42 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable{
 					}
 					
 					for(Rule rule:tableRule.ruleList){
+						
+						//如果参数比必须的参数小，则继续下一条规则
 						if(columnMap.size()<rule.parameterMap.size()){
 							continue;
 						}else{
-							Comparable[] comparables= new Comparable[rule.parameterMap.size()];
+							
 							boolean matched = true;
+
+							//如果查询语句中包含了该规则不需要的参数，则该规则将被忽略
+							for(Column exclude : rule.excludes){
+								
+								Comparable condition = columnMap.get(exclude);
+								if(condition != null){
+									matched = false;
+									break;
+								}
+							}
+							
+							//如果不匹配将继续下一条规则
+							if(!matched) continue;
+							
+							Comparable[] comparables= new Comparable[rule.parameterMap.size()];
+							//规则中的参数必须在dmlstatement中存在，否则这个规则将不启作用
 							for(Map.Entry<Column,Integer> parameter : rule.cloumnMap.entrySet()){
+								
 								Comparable condition = columnMap.get(parameter.getKey());
 								if(condition != null){
 									comparables[parameter.getValue()] = condition;
 								}else{
 									matched = false;
-									continue;
+									break;
 								}
 							}
+							
+							//如果不匹配将继续下一条规则
+							if(!matched) continue;
 							
 							try {
 								matched = (Boolean)rule.rowJep.getValue(comparables);
@@ -363,9 +385,12 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable{
 									}
 								}
 							} catch (com.meidusa.amoeba.sqljep.ParseException e) {
+								logger.error("parse rule error:"+rule.expression,e);
 							}
 						}
 					}
+					
+					//如果所有规则都无法匹配，则默认采用TableRule中的pool设置。 
 					if(poolNames.size() == 0){
 						if(logger.isDebugEnabled()){
 							logger.debug("no rule matched, using table default rules:"+Arrays.toString(tableRule.defaultPools));
@@ -384,6 +409,8 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable{
 				}
 			}
 		}else{
+			
+			//如果sql语句中没有包含table，则采用TableRule中没有name的配置,一般情况下只有一条该规则，而且只有defaultPool启作用
 			TableRule tableRule =  this.tableRuleMap.get(null);
 			if(tableRule != null && tableRule.defaultPools != null && tableRule.defaultPools.length >0){
 				for(String poolName : tableRule.defaultPools){
@@ -734,39 +761,49 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable{
 	private  Rule loadRule(Element current, TableRule tableRule) throws InitialisationException {
 		Rule rule = new Rule();
 		rule.name = current.getAttribute("name");
-		Node expression = DocumentUtil.getTheOnlyElement(current, "expression");
+		Element expression = DocumentUtil.getTheOnlyElement(current, "expression");
 		rule.expression = expression.getTextContent();
-		Node defaultPoolsNode = DocumentUtil.getTheOnlyElement(current, "defaultPools");
+		Element defaultPoolsNode = DocumentUtil.getTheOnlyElement(current, "defaultPools");
 		
 		if(defaultPoolsNode != null){
 			String defaultPools = defaultPoolsNode.getTextContent();
 			rule.defaultPools = readTokenizedString(defaultPools," ,");
 		}
 		
-		Node readPoolsNode = DocumentUtil.getTheOnlyElement(current, "readPools");
+		Element readPoolsNode = DocumentUtil.getTheOnlyElement(current, "readPools");
 		if(readPoolsNode != null){
 			rule.readPools = readTokenizedString(readPoolsNode.getTextContent()," ,");
 		}
 		
-		Node writePoolsNode = DocumentUtil.getTheOnlyElement(current, "writePools");
+		Element writePoolsNode = DocumentUtil.getTheOnlyElement(current, "writePools");
 		if(writePoolsNode != null){
 			rule.writePools = readTokenizedString(writePoolsNode.getTextContent()," ,");
 		}
-		
-		Node parametersNode = current.getElementsByTagName("parameters").item(0);
-		
-		String parameters = parametersNode.getTextContent();
-		StringTokenizer tokenizer = new StringTokenizer(parameters," ,");
-		int index = 0;
-		while(tokenizer.hasMoreTokens()){
-			String parameter = tokenizer.nextToken().trim();
-			rule.parameterMap.put(parameter, index);
-			Column column = new Column();
-			column.setName(parameter);
-			column.setTable(tableRule.table);
-			rule.cloumnMap.put(column, index);
-			index++;
+
+		Element parametersNode = DocumentUtil.getTheOnlyElement(current, "parameters");
+		if(parametersNode != null){
+			String[] tokens  = readTokenizedString(parametersNode.getTextContent()," ,");
+			int index = 0;
+			for(String parameter:tokens){
+				rule.parameterMap.put(parameter, index);
+				Column column = new Column();
+				column.setName(parameter);
+				column.setTable(tableRule.table);
+				rule.cloumnMap.put(column, index);
+				index++;
+			}
+			
+			tokens  = readTokenizedString(parametersNode.getAttribute("excludes")," ,");
+			if(tokens != null){
+				for(String parameter:tokens){
+					Column column = new Column();
+					column.setName(parameter);
+					column.setTable(tableRule.table);
+					rule.excludes.add(column);
+				}
+			}
 		}
+		
 		rule.rowJep = new RowJEP(rule.expression);
 		try {
 			rule.rowJep.parseExpression(rule.parameterMap,(Map<String,Variable>)null,this.ruleFunctionMap);
@@ -776,17 +813,17 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable{
 		return rule;
 	}
 
-	public static String[] readTokenizedString(String string,String tokens){
+	public static String[] readTokenizedString(String string,String delim){
 		if(string == null|| string.trim().length() == 0) return null;
-		StringTokenizer tokenizer = new StringTokenizer(string,tokens);
-		String[] pools = new String[tokenizer.countTokens()];
+		StringTokenizer tokenizer = new StringTokenizer(string,delim);
+		String[] tokens = new String[tokenizer.countTokens()];
 		int index = 0;
 		while(tokenizer.hasMoreTokens()){
-			String poolName = tokenizer.nextToken().trim();
-			pools[index++] = poolName;
+			String token = tokenizer.nextToken().trim();
+			tokens[index++] = token;
 		}
-		if(pools.length>0){
-			return pools;
+		if(tokens.length>0){
+			return tokens;
 		}
 		return null;
 	}

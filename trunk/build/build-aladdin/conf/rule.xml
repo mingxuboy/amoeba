@@ -6,8 +6,8 @@
 	<tableRule name="TestTable" schema="test" defaultPools="server1">
 		<!--
 		<rule name="rule1">
-			<parameters>ID</parameters>
-			<expression><![CDATA[ ID <= 1000000]]></expression>
+			<parameters excludes="NAME">ID,AGE</parameters>
+			<expression><![CDATA[ ID <= 1000000 and age > 12]]></expression>
 			<defaultPools>server1</defaultPools>
 			<readPools>server1</readPools>
 			<writePools>server1</writePools>

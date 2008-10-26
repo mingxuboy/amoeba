@@ -1,7 +1,6 @@
 package com.meidusa.amoeba.aladdin.handler;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
@@ -79,10 +78,8 @@ public class AladdinMessageDispatcher implements MessageHandler {
 			}else if(MysqlPacketBuffer.isPacketType(message, QueryCommandPacket.COM_STMT_PREPARE)){
 				
 				PreparedStatmentInfo preparedInf = conn.getPreparedStatmentInfo(command.arg);
-				List<byte[]> list = preparedInf.getPreparedStatmentBuffers();
-				for(byte[] buffer : list){
-					conn.postMessage(buffer);
-				}
+				byte[] buffer = preparedInf.getByteBuffer();
+				conn.postMessage(buffer);
 				return;
 				
 			}else if(MysqlPacketBuffer.isPacketType(message, QueryCommandPacket.COM_STMT_SEND_LONG_DATA)){
@@ -100,13 +97,17 @@ public class AladdinMessageDispatcher implements MessageHandler {
 					conn.postMessage(error.toByteBuffer(connection).array());
 					logger.warn("Unknown prepared statment id:"+statmentId);
 				}else{
-					Map<Integer,Object> longMap = new HashMap<Integer,Object>();
-					for(byte[] longdate:conn.getLongDataList()){
-						LongDataPacket packet = new LongDataPacket();
-						packet.init(longdate,connection);
-						longMap.put(packet.parameterIndex, packet.data);
-					}
+					Map<Integer,Object> longMap = null;
 					
+					if(conn.getLongDataList().size()>0){
+						longMap = new HashMap<Integer,Object>();
+						for(byte[] longdate:conn.getLongDataList()){
+							LongDataPacket packet = new LongDataPacket();
+							packet.init(longdate,connection);
+							longMap.put(packet.parameterIndex, packet.data);
+						}
+						conn.clearLongData();
+					}
 					ExecutePacket executePacket = new ExecutePacket(preparedInf.getParameterCount(),longMap);
 					executePacket.init(message,connection);
 
