@@ -17,6 +17,7 @@ import com.meidusa.amoeba.sqljep.JepRuntime;
 import com.meidusa.amoeba.sqljep.ParseException;
 import com.meidusa.amoeba.util.Initialisable;
 import com.meidusa.amoeba.util.InitialisationException;
+import com.meidusa.amoeba.util.StringUtil;
 import com.meidusa.amoeba.util.ThreadLocalMap;
 
 /**
@@ -69,9 +70,9 @@ public class SqlQueryCommand extends PostfixCommand implements Initialisable{
 		Comparable<?> firstParameter = runtime.stack.pop();
 		if(firstParameter instanceof Comparative){
 			Comparable<?> value= ((Comparative)firstParameter).getValue();
-			returnColumnName = value!= null ? value.toString():null;
+			returnColumnName = value!= null ? value.toString().toLowerCase():null;
 		}else{
-			returnColumnName = firstParameter.toString();
+			returnColumnName = firstParameter.toString().toLowerCase();
 		}
 		
 		Map<String,Object> result = null;
@@ -136,8 +137,12 @@ public class SqlQueryCommand extends PostfixCommand implements Initialisable{
 				columnMap= new HashMap<String,Object>();
 				for(int i=1;i<=metaData.getColumnCount();i++){
 					String columnName = metaData.getColumnName(i);
+					String label = metaData.getColumnLabel(i);
 					Object columnValue = rs.getObject(i);
-					columnMap.put(columnName, columnValue);
+					if(label!= null && !StringUtil.equalsIgnoreCase(label, columnName)){
+						columnMap.put(label.toLowerCase(), columnValue);
+					}
+					columnMap.put(columnName.toLowerCase(), columnValue);
 				}
 			}
 			return columnMap;
