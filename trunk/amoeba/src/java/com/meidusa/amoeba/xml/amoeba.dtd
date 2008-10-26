@@ -26,9 +26,9 @@
 
 <!ELEMENT property ( #PCDATA | bean)* >
 
-<!ELEMENT bean ( className?,property*) >
+<!ELEMENT bean (property*) >
 <!ATTLIST bean name NMTOKEN #IMPLIED >
-<!ATTLIST bean class NMTOKEN #IMPLIED >
+<!ATTLIST bean class NMTOKEN #REQUIRED >
 
 <!ATTLIST property name CDATA #REQUIRED >
 
