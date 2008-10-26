@@ -10,5 +10,11 @@
 <!ATTLIST amoeba:function
   xmlns:amoeba CDATA #FIXED "http://amoeba.meidusa.com/" 
 >
-<!ELEMENT property ( #PCDATA ) >
+
+<!ELEMENT property ( #PCDATA | bean)* >
+
+<!ELEMENT bean (property*) >
+<!ATTLIST bean name NMTOKEN #IMPLIED >
+<!ATTLIST bean class NMTOKEN #REQUIRED >
+
 <!ATTLIST property name NMTOKEN #REQUIRED >
