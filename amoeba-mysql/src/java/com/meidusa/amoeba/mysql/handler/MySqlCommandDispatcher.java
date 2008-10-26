@@ -13,7 +13,6 @@ package com.meidusa.amoeba.mysql.handler;
 
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
@@ -84,10 +83,8 @@ public class MySqlCommandDispatcher implements MessageHandler {
 			}else if(MysqlPacketBuffer.isPacketType(message, QueryCommandPacket.COM_STMT_PREPARE)){
 				
 				PreparedStatmentInfo preparedInf = conn.getPreparedStatmentInfo(command.arg);
-				List<byte[]> list = preparedInf.getPreparedStatmentBuffers();
-				for(byte[] buffer : list){
-					conn.postMessage(buffer);
-				}
+				byte[] buffer = preparedInf.getByteBuffer();
+				conn.postMessage(buffer);
 				return;
 			}else if(MysqlPacketBuffer.isPacketType(message, QueryCommandPacket.COM_STMT_SEND_LONG_DATA)){
 				conn.addLongData(message);
