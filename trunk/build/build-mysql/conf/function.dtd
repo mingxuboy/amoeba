@@ -1,20 +1,17 @@
 ﻿<?xml version="1.0" encoding="UTF-8" ?>
 
-<!ELEMENT className ( #PCDATA ) >
-
-<!ELEMENT function ( className?, property* ) >
+<!ELEMENT function (property* ) >
 <!ATTLIST function name CDATA #REQUIRED >
-<!ATTLIST function class CDATA #IMPLIED >
+<!ATTLIST function class CDATA #REQUIRED >
 
 <!ELEMENT amoeba:function ( function+ ) >
 <!ATTLIST amoeba:function
   xmlns:amoeba CDATA #FIXED "http://amoeba.meidusa.com/" 
 >
-
 <!ELEMENT property ( #PCDATA | bean)* >
 
 <!ELEMENT bean (property*) >
 <!ATTLIST bean name NMTOKEN #IMPLIED >
-<!ATTLIST bean class NMTOKEN #REQUIRED >
+<!ATTLIST bean class NMTOKEN #IMPLIED >
 
 <!ATTLIST property name NMTOKEN #REQUIRED >
