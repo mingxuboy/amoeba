@@ -10,5 +10,13 @@
 		规则函数的编写：必须继承com.meidusa.amoeba.sqljep.function.PostfixCommand 类
 	-->
 	<function name="hash" class="com.meidusa.amoeba.sqljep.function.Hash"/>
-
+	
+	<!-- 
+	jdbcserver's factoryConfig class must be com.meidusa.amoeba.jdbc.JdbcConnectionFactory
+	<function name="getMember" class="com.meidusa.amoeba.sqljep.function.SqlQueryCommand">
+		<property name="sql">select * from rule where user_id = ?</property>
+		<property name="poolName">jdbcserver</property>
+		<property name="threadLocalCache">true</property>
+	</function>
+ 	-->
 </amoeba:function>
