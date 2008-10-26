@@ -17,16 +17,13 @@
 
     <!--connectionManagerList-->
     <connectionManagerList>
-        <connectionManager name="defaultManager">
-            <className>com.meidusa.amoeba.net.AuthingableConnectionManager</className>
-        </connectionManager>
+        <connectionManager name="defaultManager" class="com.meidusa.amoeba.net.AuthingableConnectionManager"/>
     </connectionManagerList>
 
     <!--dbServerList-->
     <dbServerList>
         <dbServer name="default">
-            <factoryConfig>
-                <className>com.meidusa.amoeba.oracle.net.OracleServerConnectionFactory</className>
+            <factoryConfig class="com.meidusa.amoeba.oracle.net.OracleServerConnectionFactory">
                 <property name="manager">defaultManager</property>
                 <property name="port">1521</property>
                 <property name="ipAddress">[ipAddress]</property>
@@ -35,8 +32,7 @@
                 <property name="password">[password]</property>
             </factoryConfig>
             <!-- ObjectPool实现类 -->
-            <poolConfig>
-                <className>com.meidusa.amoeba.net.poolable.PoolableObjectPool</className>
+            <poolConfig class="com.meidusa.amoeba.net.poolable.PoolableObjectPool">
                 <property name="maxActive">200</property>
                 <property name="maxIdle">200</property>
                 <property name="minIdle">10</property>
@@ -47,8 +43,7 @@
             </poolConfig>
         </dbServer>
         <dbServer name="multiPool" virtual="true">
-            <poolConfig>
-                <className>com.meidusa.amoeba.server.MultipleServerPool</className>
+            <poolConfig class="com.meidusa.amoeba.server.MultipleServerPool">
                 <!--
                                                负载均衡参数 1=ROUNDROBIN , 2=WEIGHTBASED
                 -->
@@ -62,8 +57,7 @@
     </dbServerList>
 
     <!-- queryRouter -->
-    <queryRouter>
-        <className>com.meidusa.amoeba.oracle.parser.OracleQueryRouter</className>
+    <queryRouter class="com.meidusa.amoeba.oracle.parser.OracleQueryRouter">
         <property name="ruleConfig">${amoeba.home}/conf/rule.xml</property>
         <property name="functionConfig">${amoeba.home}/conf/functionMap.xml</property>
         <property name="ruleFunctionConfig">${amoeba.home}/conf/ruleFunctionMap.xml</property>
