@@ -324,8 +324,13 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable{
 						}
 						continue;
 					}
-					
+					List<String> groupMatched = new ArrayList(); 
 					for(Rule rule:tableRule.ruleList){
+						if(rule.group != null){
+							if(groupMatched.contains(rule.group)){
+								continue;
+							}
+						}
 						
 						//如果参数比必须的参数小，则继续下一条规则
 						if(columnMap.size()<rule.parameterMap.size()){
@@ -366,6 +371,9 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable{
 							try {
 								matched = (Boolean)rule.rowJep.getValue(comparables);
 								if(matched){
+									if(rule.group != null){
+										groupMatched.add(rule.group);
+									}
 									String[] pools = dmlStatment.isReadStatment()?rule.readPools:rule.writePools;
 									if(pools == null){
 										pools = rule.defaultPools;
@@ -761,6 +769,8 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable{
 	private  Rule loadRule(Element current, TableRule tableRule) throws InitialisationException {
 		Rule rule = new Rule();
 		rule.name = current.getAttribute("name");
+		String group = current.getAttribute("group");
+		rule.group = StringUtil.isEmpty(group)?null:group;
 		Element expression = DocumentUtil.getTheOnlyElement(current, "expression");
 		rule.expression = expression.getTextContent();
 		Element defaultPoolsNode = DocumentUtil.getTheOnlyElement(current, "defaultPools");

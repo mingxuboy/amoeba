@@ -13,6 +13,7 @@
 
 <!ELEMENT rule ( defaultPools | expression | parameters | readPools | writePools )* >
 <!ATTLIST rule name NMTOKEN #REQUIRED >
+<!ATTLIST rule group CDATA #IMPLIED >
 
 <!ELEMENT writePools ( #PCDATA ) >
 
