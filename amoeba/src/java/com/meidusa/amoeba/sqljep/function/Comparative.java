@@ -3,7 +3,7 @@ package com.meidusa.amoeba.sqljep.function;
 import java.util.Comparator;
 
 @SuppressWarnings("unchecked")
-public class Comparative implements Comparable{
+public class Comparative implements Comparable ,Cloneable{
 	
 	public static final int GreaterThan = 1;
 	public static final int GreaterThanOrEqual = 2;
@@ -51,7 +51,6 @@ public class Comparative implements Comparable{
 		this.value = value;
 	}
 	
-	@SuppressWarnings("unchecked")
 	public Comparable getValue(){
 		return value;
 	}
@@ -127,5 +126,9 @@ public class Comparative implements Comparable{
 	}
 	public String toString(){
 		return ""+this.value;
+	}
+	
+	public Object clone(){
+		return new Comparative(this.comparison,this.value);
 	}
 }
