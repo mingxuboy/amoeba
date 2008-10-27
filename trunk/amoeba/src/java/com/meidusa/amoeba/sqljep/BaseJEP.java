@@ -327,11 +327,10 @@ public abstract class BaseJEP implements ParserVisitor {
 		JepRuntime runtime = (JepRuntime)ThreadLocalMap.get(StaticString.JEP_RUNTIME);
 		if(runtime == null){
 			runtime = new JepRuntime(baseJep);
+			ThreadLocalMap.put(StaticString.JEP_RUNTIME, runtime);
 		}else{
 			runtime.ev = baseJep;
 		}
-		ThreadLocalMap.put(StaticString.JEP_RUNTIME, runtime);
-		
 		return runtime;
 	}
 }
