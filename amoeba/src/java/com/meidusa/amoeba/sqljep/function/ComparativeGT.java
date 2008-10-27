@@ -26,18 +26,23 @@ public final class ComparativeGT extends PostfixCommand {
 	
 	public void evaluate(ASTFunNode node, JepRuntime runtime) throws ParseException {
 		node.childrenAccept(runtime.ev, null);
-		Comparable<?>  param2 = runtime.stack.pop();
-		Comparable<?>  param1 = runtime.stack.pop();
-		if (param1 == null || param2 == null) {
-			runtime.stack.push(Boolean.FALSE);
-		} else {
-			if(param1 instanceof Comparative){
-				Comparative other = (Comparative) param1;
-				boolean result = other.intersect(Comparative.GreaterThan, param2, ComparativeComparator.comparator);
-				runtime.stack.push(result);
-			}else{
-				runtime.stack.push(ComparativeComparator.compareTo(param1, param2) > 0);
+		runtime.stack.setAutoBox(false);
+		try{
+			Comparable<?>  param2 = runtime.stack.pop();
+			Comparable<?>  param1 = runtime.stack.pop();
+			if (param1 == null || param2 == null) {
+				runtime.stack.push(Boolean.FALSE);
+			} else {
+				if(param1 instanceof Comparative){
+					Comparative other = (Comparative) param1;
+					boolean result = other.intersect(Comparative.GreaterThan, param2, ComparativeComparator.comparator);
+					runtime.stack.push(result);
+				}else{
+					runtime.stack.push(ComparativeComparator.compareTo(param1, param2) > 0);
+				}
 			}
+		}finally{
+			runtime.stack.setAutoBox(true);
 		}
 	}
 }

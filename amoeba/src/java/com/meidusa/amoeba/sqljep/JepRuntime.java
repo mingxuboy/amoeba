@@ -21,7 +21,7 @@ import com.meidusa.amoeba.util.ThreadLocalMap;
 
 final public class JepRuntime {
 	
-	public java.util.Stack<Comparable> stack = new java.util.Stack<Comparable>();
+	public ComparativeStack stack = new ComparativeStack();
 	
 	public Calendar calendar;
 	public DateFormatSymbols dateSymbols;

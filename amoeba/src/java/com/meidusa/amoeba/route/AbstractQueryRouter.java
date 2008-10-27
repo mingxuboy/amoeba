@@ -376,7 +376,13 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable{
 							if(!matched) continue;
 							
 							try {
-								matched = (Boolean)rule.rowJep.getValue(comparables);
+								Comparable<?> result = rule.rowJep.getValue(comparables);
+								if(result instanceof Comparative){
+									matched = (Boolean)((Comparative)result).getValue();
+								}else{
+									matched = (Boolean)result;
+								}
+								
 								if(matched){
 									if(rule.group != null){
 										groupMatched.add(rule.group);
