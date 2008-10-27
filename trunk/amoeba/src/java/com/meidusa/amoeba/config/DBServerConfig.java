@@ -11,10 +11,11 @@
  */
 package com.meidusa.amoeba.config;
 
-public class DBServerConfig extends ConfigEntity{
+public class DBServerConfig extends ConfigEntity implements Cloneable{
 	private static final long serialVersionUID = 1L;
 	private String name;
 	private boolean isVirtual;
+	private String parent;
 	private BeanObjectEntityConfig factoryConfig;
 	private BeanObjectEntityConfig poolConfig;
 	public String getName() {
@@ -24,7 +25,15 @@ public class DBServerConfig extends ConfigEntity{
 	public void setName(String name) {
 		this.name = name;
 	}
+	
+	public String getParent() {
+		return parent;
+	}
 
+	public void setParent(String parent) {
+		this.parent = parent;
+	}
+	
 	public boolean isVirtual() {
 		return isVirtual;
 	}
@@ -47,6 +56,22 @@ public class DBServerConfig extends ConfigEntity{
 
 	public void setPoolConfig(BeanObjectEntityConfig poolConfig) {
 		this.poolConfig = poolConfig;
+	}
+	
+	public Object clone(){
+		DBServerConfig config = new DBServerConfig();
+		config.isVirtual = isVirtual;
+		config.name = name;
+		config.parent = parent;
+		if(factoryConfig != null){
+			config.factoryConfig = (BeanObjectEntityConfig)factoryConfig.clone();
+		}
+		
+		if(poolConfig != null){
+			config.poolConfig = (BeanObjectEntityConfig)poolConfig.clone();
+		}
+		
+		return config;
 	}
 
 }

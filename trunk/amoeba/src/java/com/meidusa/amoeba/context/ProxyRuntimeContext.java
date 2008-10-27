@@ -404,12 +404,18 @@ public abstract class ProxyRuntimeContext implements Reporter{
 				map.put(attr.getName(),attr.getNodeValue());
 			}
 		}
+		
 		ParameterMapping.mappingObject(serverConfig, map);
 		
 		BeanObjectEntityConfig factory = DocumentUtil.loadBeanConfig(DocumentUtil.getTheOnlyElement(current,"factoryConfig"));
 		BeanObjectEntityConfig pool = DocumentUtil.loadBeanConfig(DocumentUtil.getTheOnlyElement(current,"poolConfig"));
-		serverConfig.setPoolConfig(pool);
-		serverConfig.setFactoryConfig(factory);
+		if(pool != null){
+			serverConfig.setPoolConfig(pool);
+		}
+		
+		if(factory != null){
+			serverConfig.setFactoryConfig(factory);
+		}
 		
 		return serverConfig;
 	}
