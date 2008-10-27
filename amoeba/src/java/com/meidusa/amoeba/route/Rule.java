@@ -15,6 +15,7 @@ import com.meidusa.amoeba.sqljep.RowJEP;
 public class Rule implements Serializable{
 	private static final long serialVersionUID = 1L;
 	public String name;
+	public String group;
 	public Map<String,Integer> parameterMap = new HashMap<String,Integer>();
 	public List<Column> excludes = new ArrayList<Column>();
 	public Map<Column,Integer> cloumnMap =  new HashMap<Column,Integer>();
