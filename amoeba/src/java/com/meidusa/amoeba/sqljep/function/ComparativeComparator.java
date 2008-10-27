@@ -20,6 +20,7 @@ class ComparativeComparator implements Comparator{
 	}
 	
 	public static int compareTo(Comparable s1, Comparable s2) throws ParseException {
+		if(s1 == null || s2 == null) return -1;
 		if (s1.getClass() == s2.getClass() 
 				|| s1.getClass().isAssignableFrom(s2.getClass()) 
 				|| s2.getClass().isAssignableFrom(s1.getClass())) {
