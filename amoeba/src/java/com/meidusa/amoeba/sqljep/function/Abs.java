@@ -30,7 +30,15 @@ public class Abs extends PostfixCommand {
 		runtime.stack.push(abs(param));
 	}
 
-	public static Comparable<?>  abs(Comparable<?>  param) throws ParseException {
+	public static Comparable<?>  abs(Comparable<?>  param1) throws ParseException {
+		
+		Comparable<?> param = param1;
+		Comparative returnValue =  (param instanceof Comparative)?((Comparative) param):null;
+		if(returnValue != null){
+			param = returnValue.getValue();
+		}
+		
+		Comparable<?> result = null;
 		if (param == null) {
 			return null;
 		}
@@ -38,13 +46,21 @@ public class Abs extends PostfixCommand {
 			param = parse((String)param);
 		}
 		if (param instanceof BigDecimal) {		// BigInteger is not supported
-			return ((BigDecimal)param).abs();
+			result = ((BigDecimal)param).abs();
 		}
 		if (param instanceof Double || param instanceof Float) {
-			return new Double(Math.abs(((Number)param).doubleValue()));
+			result = new Double(Math.abs(((Number)param).doubleValue()));
 		}
 		if (param instanceof Number) {		// Long, Integer, Short, Byte 
-			return new Long(Math.abs(((Number)param).longValue()));
+			result = new Long(Math.abs(((Number)param).longValue()));
+		}
+		if(result != null){
+			if(returnValue != null){
+				returnValue.setValue(result);
+				return returnValue;
+			}else{
+				return result;
+			}
 		}
 		throw new ParseException(WRONG_TYPE+" abs("+param.getClass()+")");
 	}
