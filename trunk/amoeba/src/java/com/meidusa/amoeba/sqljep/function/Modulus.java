@@ -31,10 +31,17 @@ public final class Modulus extends PostfixCommand {
 		runtime.stack.push(remainder(param1, param2)); //push the result on the inStack
 	}
 	
-	public static Comparable<?>  remainder(Comparable<?>  param1, Comparable<?>  param2) throws ParseException	{
+	public static Comparable<?>  remainder(Comparable<?>  param, Comparable<?>  param2) throws ParseException	{
+		Comparative returnValue =  (param instanceof Comparative)?((Comparative) param):null;
+		Comparable<?> param1 = param;
+		if(returnValue != null){
+			param1 = returnValue.getValue();
+		}
+		
 		if (param1 == null || param2 == null) {
 			return null;
 		}
+
 		if (param1 instanceof String) {
 			param1 = parse((String)param1);
 		}
@@ -46,14 +53,33 @@ public final class Modulus extends PostfixCommand {
 			if (param1 instanceof BigDecimal || param2 instanceof BigDecimal) {
 				BigDecimal b1 = getBigDecimal((Number)param1);
 				BigDecimal b2 = getBigDecimal((Number)param2);
-				return b1.remainder(b2);
+				Comparable<?> result = b1.remainder(b2);
+				if(returnValue != null){
+					returnValue.setValue(result);
+					return returnValue;
+				}else{
+					return result;
+				}
 			}
 			if (param1 instanceof Double || param2 instanceof Double || param1 instanceof Float || param2 instanceof Float) {
-				return ((Number)param1).doubleValue() % ((Number)param2).doubleValue();
+				Comparable<?> result = ((Number)param1).doubleValue() % ((Number)param2).doubleValue();
+				if(returnValue != null){
+					returnValue.setValue(result);
+					return returnValue;
+				}else{
+					return result;
+				}
 			} else {	// Long, Integer, Short, Byte 
 				long l1 = ((Number)param1).longValue();
 				long l2 = ((Number)param2).longValue();
-				return l1 % l2;
+				
+				Comparable<?> result = l1 % l2;
+				if(returnValue != null){
+					returnValue.setValue(result);
+					return returnValue;
+				}else{
+					return result;
+				}
 			}
 		} else {
 			throw new ParseException(WRONG_TYPE+"  ("+param1.getClass()+"%"+param2.getClass()+")");
