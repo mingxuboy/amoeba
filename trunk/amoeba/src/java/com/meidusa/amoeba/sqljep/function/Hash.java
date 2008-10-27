@@ -26,12 +26,6 @@ public class Hash extends PostfixCommand {
 			return null;
 		}
 		
-		if(param instanceof Comparative){
-			Comparable<?> value = ((Comparative) param).getValue();
-			((Comparative) param).setValue(value != null?value.hashCode():null);
-			return param;
-		}
-		
 		return param.hashCode();
 	}
 }
