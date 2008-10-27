@@ -68,12 +68,7 @@ public class SqlQueryCommand extends PostfixCommand implements Initialisable{
 		
 		String returnColumnName = null;
 		Comparable<?> firstParameter = runtime.stack.pop();
-		if(firstParameter instanceof Comparative){
-			Comparable<?> value= ((Comparative)firstParameter).getValue();
-			returnColumnName = value!= null ? value.toString().toLowerCase():null;
-		}else{
-			returnColumnName = firstParameter.toString().toLowerCase();
-		}
+		returnColumnName = firstParameter.toString().toLowerCase();
 		
 		Map<String,Object> result = null;
 		if(isThreadLocalCache()){
@@ -82,12 +77,7 @@ public class SqlQueryCommand extends PostfixCommand implements Initialisable{
 			if(parameterSize>1){
 				int hash = this.hashCode();
 				for(int i=0;i<parameters.length;i++){
-					if(parameters[i] instanceof Comparative){
-						Comparative comp = (Comparative)parameters[i];
-						if(comp != null && comp.getValue() != null){
-							hash ^= comp.getValue().hashCode() << i;
-						}
-					}
+					hash ^= parameters[i].hashCode() << i;
 				}
 				threadLocalKey = threadLocalKey ^ hash;
 			}
