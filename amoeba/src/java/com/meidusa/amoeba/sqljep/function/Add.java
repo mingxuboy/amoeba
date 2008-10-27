@@ -39,13 +39,7 @@ public final class Add extends PostfixCommand {
 		runtime.stack.push(add(param1, param2));
 	}
 
-	public static Comparable<?>  add(Comparable<?>  param, Comparable<?>  param2) throws ParseException {
-		Comparable<?> param1 = param;
-		Comparative returnValue =  (param instanceof Comparative)?((Comparative) param):null;
-		if(returnValue != null){
-			param1 = returnValue.getValue();
-		}
-		
+	public static Comparable<?>  add(Comparable<?>  param1, Comparable<?>  param2) throws ParseException {
 		if (param1 == null || param2 == null) {
 			return null;
 		}
@@ -62,40 +56,20 @@ public final class Add extends PostfixCommand {
 			if (n1 instanceof BigDecimal || n2 instanceof BigDecimal) {
 				BigDecimal b1 = getBigDecimal(n1);
 				BigDecimal b2 = getBigDecimal(n2);
-				Comparable<?> result = b1.add(b2);
-				if(returnValue != null){
-					returnValue.setValue(result);
-					return returnValue;
-				}else{
-					return result;
-				}
+				return b1.add(b2);
 			}
 			if (n1 instanceof Double || n2 instanceof Double || n1 instanceof Float || n2 instanceof Float) {
-				Comparable<?> result = n1.doubleValue() + n2.doubleValue();
-				if(returnValue != null){
-					returnValue.setValue(result);
-					return returnValue;
-				}else{
-					return result;
-				}
+				return n1.doubleValue() + n2.doubleValue();
 			} else {	// Long, Integer, Short, Byte 
 				long l1 = n1.longValue();
 				long l2 = n2.longValue();
 				long r = l1 + l2;
-				Comparable<?> result = null;
 				if (l1 <= r && l2 <= r) {		// overflow check
-					result= r;
+					return r;
 				} else {
 					BigDecimal b1 = new BigDecimal(l1);
 					BigDecimal b2 = new BigDecimal(l2);
-					result = b1.add(b2);
-				}
-				
-				if(returnValue != null){
-					returnValue.setValue(result);
-					return returnValue;
-				}else{
-					return result;
+					return b1.add(b2);
 				}
 			}
 		}
@@ -105,7 +79,6 @@ public final class Add extends PostfixCommand {
 			}
 			Timestamp d;
 			Number n;
-			Comparable<?> result = null;
 			if (param1 instanceof Timestamp) {
 				d = (Timestamp)param1;
 				if (param2 instanceof Number) {
@@ -113,23 +86,16 @@ public final class Add extends PostfixCommand {
 				} else {
 					throw new ParseException(DATE_ADDITION);
 				}
-				result = new Timestamp(d.getTime()+toDay(n));
-			}else if (param2 instanceof Timestamp) {
+				return new Timestamp(d.getTime()+toDay(n));
+			}
+			else if (param2 instanceof Timestamp) {
 				d = (Timestamp)param2;
 				if (param1 instanceof Number) {
 					n = (Number)param1;
 				} else {
 					throw new ParseException(DATE_ADDITION);
 				}
-				result = new Timestamp(d.getTime()+toDay(n));
-			}
-			if(result != null){
-				if(returnValue != null){
-					returnValue.setValue(result);
-					return returnValue;
-				}else{
-					return result;
-				}
+				return new Timestamp(d.getTime()+toDay(n));
 			}
 			throw new ParseException(INTERNAL_ERROR);
 		} else {
