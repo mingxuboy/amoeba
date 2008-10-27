@@ -357,9 +357,9 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable{
 							//规则中的参数必须在dmlstatement中存在，否则这个规则将不启作用
 							for(Map.Entry<Column,Integer> parameter : rule.cloumnMap.entrySet()){
 								
-								Comparable condition = columnMap.get(parameter.getKey());
+								Comparative condition = columnMap.get(parameter.getKey());
 								if(condition != null){
-									comparables[parameter.getValue()] = condition;
+									comparables[parameter.getValue()] = (Comparative)condition.clone();
 									
 									//如果规则忽略 数组的 参数，并且参数有array 参数，则忽略该规则
 									if(rule.ignoreArray && condition instanceof ComparativeBaseList){
