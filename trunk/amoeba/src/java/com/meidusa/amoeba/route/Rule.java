@@ -21,6 +21,7 @@ public class Rule implements Serializable{
 	public Map<Column,Integer> cloumnMap =  new HashMap<Column,Integer>();
 	public String expression;
 	public transient RowJEP rowJep;
+	public boolean ignoreArray;
 	public String[] defaultPools;
 	public String[] readPools;
 	public String[] writePools;
