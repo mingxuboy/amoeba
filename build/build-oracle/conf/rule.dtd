@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="UTF-8" ?>
-
+<!ENTITY % Boolean "(true|false)">
 <!ELEMENT amoeba:rule ( tableRule+ ) >
 <!ATTLIST amoeba:rule
   xmlns:amoeba CDATA #FIXED "http://amoeba.meidusa.com/" 
@@ -14,6 +14,7 @@
 <!ELEMENT rule ( defaultPools | expression | parameters | readPools | writePools )* >
 <!ATTLIST rule name NMTOKEN #REQUIRED >
 <!ATTLIST rule group CDATA #IMPLIED >
+<!ATTLIST rule ignoreArray  %Boolean; #IMPLIED >
 
 <!ELEMENT writePools ( #PCDATA ) >
 

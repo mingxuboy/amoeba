@@ -21,10 +21,17 @@ public class Hash extends PostfixCommand {
 		runtime.stack.push(hash(param));		//push the result on the inStack
 	}
 
-	public static Integer hash(Comparable<?>  param) throws ParseException {
+	public static Comparable<?> hash(Comparable<?>  param) throws ParseException {
 		if (param == null) {
 			return null;
 		}
+		
+		if(param instanceof Comparative){
+			Comparable<?> value = ((Comparative) param).getValue();
+			((Comparative) param).setValue(value != null?value.hashCode():null);
+			return param;
+		}
+		
 		return param.hashCode();
 	}
 }

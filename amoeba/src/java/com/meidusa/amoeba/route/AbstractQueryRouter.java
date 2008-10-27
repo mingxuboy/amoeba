@@ -59,6 +59,7 @@ import com.meidusa.amoeba.sqljep.function.AddTime;
 import com.meidusa.amoeba.sqljep.function.Case;
 import com.meidusa.amoeba.sqljep.function.Ceil;
 import com.meidusa.amoeba.sqljep.function.Comparative;
+import com.meidusa.amoeba.sqljep.function.ComparativeBaseList;
 import com.meidusa.amoeba.sqljep.function.Concat;
 import com.meidusa.amoeba.sqljep.function.Datediff;
 import com.meidusa.amoeba.sqljep.function.Day;
@@ -359,6 +360,12 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable{
 								Comparable condition = columnMap.get(parameter.getKey());
 								if(condition != null){
 									comparables[parameter.getValue()] = condition;
+									
+									//如果规则忽略 数组的 参数，并且参数有array 参数，则忽略该规则
+									if(rule.ignoreArray && condition instanceof ComparativeBaseList){
+										matched = false;
+										break;
+									}
 								}else{
 									matched = false;
 									break;
@@ -393,7 +400,7 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable{
 									}
 								}
 							} catch (com.meidusa.amoeba.sqljep.ParseException e) {
-								logger.error("parse rule error:"+rule.expression,e);
+								//logger.error("parse rule error:"+rule.expression,e);
 							}
 						}
 					}
@@ -770,7 +777,12 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable{
 		Rule rule = new Rule();
 		rule.name = current.getAttribute("name");
 		String group = current.getAttribute("group");
+		
 		rule.group = StringUtil.isEmpty(group)?null:group;
+		
+		String ignoreArray = current.getAttribute("ignoreArray");
+		rule.ignoreArray = Boolean.parseBoolean(ignoreArray);
+		
 		Element expression = DocumentUtil.getTheOnlyElement(current, "expression");
 		rule.expression = expression.getTextContent();
 		Element defaultPoolsNode = DocumentUtil.getTheOnlyElement(current, "defaultPools");
