@@ -20,7 +20,7 @@ public class Main {
 	 */
 	public static void main(String[] args) throws ParseException {
 		ComparativeBaseList idAnd =  new ComparativeAND(Comparative.LessThanOrEqual,8);
-		idAnd.addComparative(new Comparative(Comparative.GreaterThanOrEqual,3));
+		idAnd.addComparative(new Comparative(Comparative.Equivalent,4));
 		Comparable<?>[] row = {idAnd,new Comparative(Comparative.GreaterThanOrEqual,50),new Comparative(Comparative.GreaterThanOrEqual,new java.util.Date()),"wwe"};
 		HashMap<String,Integer> columnMapping = new HashMap<String,Integer>();
 		columnMapping.put("ID",0);
@@ -43,7 +43,7 @@ public class Main {
 		});
 		
 		System.out.println("wwe".hashCode()%500);
-		RowJEP sqljep = new RowJEP("ID in (1,2,3) and 1=1 and SUM =100 and  trunc(SALE_DATE) = to_date('2008-04-03','yyyy-mm-dd')  and abs(hash(name))%500<300 and abs(hash(name))%500>100  and age='223'" );
+		RowJEP sqljep = new RowJEP("ID in (1,2,4,3,8) and 1=1 and SUM =100 and  trunc(SALE_DATE) < to_date('2009-04-03','yyyy-mm-dd')  and abs(hash(name))%500<300" );
 		
 		sqljep.parseExpression(columnMapping,valMap,AbstractQueryRouter.ruleFunTab);
 		long start = System.currentTimeMillis();
@@ -51,8 +51,8 @@ public class Main {
 		
 		try {
 		   
-		   System.out.println(sqljep.getValue(row));
-		   //sqljep.getValue(row);
+		   //System.out.println(sqljep.getValue(row));
+		   sqljep.getValue(row);
 		}
 		catch (ParseException e) {
 		   e.printStackTrace();
