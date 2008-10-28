@@ -23,10 +23,10 @@ public class Lower extends PostfixCommand {
 		return 1;
 	}
 	
-	public void evaluate(ASTFunNode node, JepRuntime runtime) throws ParseException {
+	public Comparable<?>[] evaluate(ASTFunNode node, JepRuntime runtime) throws ParseException {
 		node.childrenAccept(runtime.ev, null);
 		Comparable<?>  param = runtime.stack.pop();
-		runtime.stack.push(lower(param));		//push the result on the inStack
+		return new Comparable<?>[]{param};
 	}
 
 	public static String lower(Comparable<?>  param) throws ParseException {
@@ -34,6 +34,11 @@ public class Lower extends PostfixCommand {
 			return null;
 		}
 		return param.toString().toLowerCase();
+	}
+
+	public Comparable<?> getResult(Comparable<?>... comparables)
+			throws ParseException {
+		return lower(comparables[0]);
 	}
 }
 

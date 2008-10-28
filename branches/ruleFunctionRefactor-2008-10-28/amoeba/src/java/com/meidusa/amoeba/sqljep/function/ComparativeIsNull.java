@@ -22,16 +22,21 @@ public class ComparativeIsNull extends PostfixCommand {
 		return 1;
 	}
 	
-	public void evaluate(ASTFunNode node, JepRuntime runtime) throws ParseException {
+	public Comparable<?>[] evaluate(ASTFunNode node, JepRuntime runtime) throws ParseException {
 		node.childrenAccept(runtime.ev, null);
 		
 		runtime.stack.setAutoBox(false);
 		try{
 			Comparable<?>  param = runtime.stack.pop();
-			runtime.stack.push(param == null);
+			return new Comparable<?>[]{param};
 		}finally{
 			runtime.stack.setAutoBox(true);
 		}
+	}
+
+	public Comparable<?> getResult(Comparable<?>... comparables)
+			throws ParseException {
+		return (comparables[0] == null);
 	}
 }
 

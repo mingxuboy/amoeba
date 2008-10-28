@@ -26,28 +26,16 @@ public class Instr extends PostfixCommand {
 		return -1;
 	}
 	
-	public void evaluate(ASTFunNode node, JepRuntime runtime) throws ParseException {
+	public Comparable<?>[] evaluate(ASTFunNode node, JepRuntime runtime) throws ParseException {
 		node.childrenAccept(runtime.ev, null);
 		int num = node.jjtGetNumChildren();
-		if (num == 2) {
-			Comparable<?>  param2 = runtime.stack.pop();
-			Comparable<?>  param1 = runtime.stack.pop();
-			runtime.stack.push(instr(param1, param2));
-		}
-		else if (num == 3) {
-			Comparable<?>  param3 = runtime.stack.pop();
-			Comparable<?>  param2 = runtime.stack.pop();
-			Comparable<?>  param1 = runtime.stack.pop();
-			runtime.stack.push(instr(param1, param2, param3));
-		}
-		else if (num == 4) {
-			Comparable<?>  param4 = runtime.stack.pop();
-			Comparable<?>  param3 = runtime.stack.pop();
-			Comparable<?>  param2 = runtime.stack.pop();
-			Comparable<?>  param1 = runtime.stack.pop();
-			runtime.stack.push(instr(param1, param2, param3, param4));
+		if (num == 2 || num ==3 || num ==4) {
+			Comparable<?>[] comparables= new Comparable<?>[num];
+			for(int i= num-1;i<=0;i--){
+				comparables[i] = runtime.stack.pop();
+			}
+			return comparables;
 		} else {
-			// remove all parameters from stack and push null
 			removeParams(runtime.stack, num);
 			throw new ParseException(PARAMS_NUMBER+" for instr");
 		}
@@ -109,6 +97,17 @@ public class Instr extends PostfixCommand {
 			}
 		}
 		return new Integer(i+1);
+	}
+
+	public Comparable<?> getResult(Comparable<?>... comparables)
+			throws ParseException {
+		if(comparables.length == 2){
+			return instr(comparables[0],comparables[1]);
+		}else if(comparables.length == 3){
+			return instr(comparables[0],comparables[1],comparables[2]);
+		}else{
+			return instr(comparables[0],comparables[1],comparables[2],comparables[3]);
+		}
 	}
 }
 

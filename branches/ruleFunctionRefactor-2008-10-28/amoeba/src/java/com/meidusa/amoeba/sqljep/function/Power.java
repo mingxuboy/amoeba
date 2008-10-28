@@ -25,11 +25,11 @@ public class Power extends PostfixCommand {
 		return 2;
 	}
 	
-	public void evaluate(ASTFunNode node, JepRuntime runtime) throws ParseException {
+	public Comparable<?>[] evaluate(ASTFunNode node, JepRuntime runtime) throws ParseException {
 		node.childrenAccept(runtime.ev, null);
 		Comparable<?>  param2 = runtime.stack.pop();
 		Comparable<?>  param1 = runtime.stack.pop();
-		runtime.stack.push(power(param1, param2));
+		return new Comparable<?>[]{param1,param2};
 	}
 	
 	public static Comparable<?>  power(Comparable<?>  param1, Comparable<?>  param2) throws ParseException {
@@ -75,5 +75,10 @@ public class Power extends PostfixCommand {
 		} else {
 			throw new ParseException(WRONG_TYPE+"  power("+param1.getClass()+","+param2.getClass()+")");
 		}
+	}
+
+	public Comparable<?> getResult(Comparable<?>... comparables)
+			throws ParseException {
+		return power(comparables[0],comparables[1]);
 	}
 }

@@ -24,30 +24,38 @@ public final class Between extends PostfixCommand {
 		return 3;
 	}
 	
-	public void evaluate(ASTFunNode node, JepRuntime runtime) throws ParseException {
+	public Comparable<?>[] evaluate(ASTFunNode node, JepRuntime runtime) throws ParseException {
 		node.childrenAccept(runtime.ev, null);
 		runtime.stack.setAutoBox(false);
 		try{
 			Comparable<?>  limit2 = runtime.stack.pop();
 			Comparable<?>  limit1 = runtime.stack.pop();
 			Comparable<?>  source = runtime.stack.pop();
-			if (source == null || limit1 == null || limit2 == null) {
-				runtime.stack.push(Boolean.FALSE);
-			} else {
-				if(source instanceof Comparative){
-					Comparative other = (Comparative) source;
-					boolean result = other.intersect(Comparative.GreaterThanOrEqual, limit1, ComparativeComparator.comparator);
-					result = result && other.intersect(Comparative.LessThanOrEqual, limit2, ComparativeComparator.comparator); 
-					runtime.stack.push(result);
-				}else{
-					runtime.stack.push(
-							ComparativeComparator.compareTo(source, limit1) >= 0 && 
-							ComparativeComparator.compareTo(source, limit2) <= 0
-					);
-				}
-			}
+			return new Comparable<?>[]{source,limit1,limit2};
 		}finally{
 			runtime.stack.setAutoBox(true);
+		}
+	}
+
+	public Comparable<?> getResult(Comparable<?>... comparables)
+			throws ParseException {
+		Comparable<?>  limit2 = comparables[2];
+		Comparable<?>  limit1 = comparables[1];
+		Comparable<?>  source = comparables[0];
+		if (source == null || limit1 == null || limit2 == null) {
+			return(Boolean.FALSE);
+		} else {
+			if(source instanceof Comparative){
+				Comparative other = (Comparative) source;
+				boolean result = other.intersect(Comparative.GreaterThanOrEqual, limit1, ComparativeComparator.comparator);
+				result = result && other.intersect(Comparative.LessThanOrEqual, limit2, ComparativeComparator.comparator); 
+				return(result);
+			}else{
+				return (
+						ComparativeComparator.compareTo(source, limit1) >= 0 && 
+						ComparativeComparator.compareTo(source, limit2) <= 0
+				);
+			}
 		}
 	}
 

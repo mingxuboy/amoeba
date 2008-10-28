@@ -27,12 +27,12 @@ public class MakeTime extends PostfixCommand {
 		return 3;
 	}
 	
-	public void evaluate(ASTFunNode node, JepRuntime runtime) throws ParseException {
+	public Comparable<?>[] evaluate(ASTFunNode node, JepRuntime runtime) throws ParseException {
 		node.childrenAccept(runtime.ev, null);
 		Comparable<?>  param3 = runtime.stack.pop();
 		Comparable<?>  param2 = runtime.stack.pop();
 		Comparable<?>  param1 = runtime.stack.pop();
-		runtime.stack.push(makeTime(param1, param2, param3, runtime.calendar));
+		return new Comparable<?>[]{param1,param2,param3};
 	}
 
 	public static Time makeTime(Comparable<?>  param1, Comparable<?>  param2, Comparable<?>  param3, Calendar cal) throws ParseException {
@@ -59,5 +59,10 @@ public class MakeTime extends PostfixCommand {
 			return new Time(cal.getTimeInMillis());
 		}
 		throw new ParseException(WRONG_TYPE+" maketime("+param1.getClass()+","+param2.getClass()+")");
+	}
+
+	public Comparable<?> getResult(Comparable<?>... comparables)
+			throws ParseException {
+		return makeTime(comparables[0], comparables[1], comparables[2], JepRuntime.getCalendar());
 	}
 }
