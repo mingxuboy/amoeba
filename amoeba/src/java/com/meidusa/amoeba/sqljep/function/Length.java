@@ -22,10 +22,10 @@ public class Length extends PostfixCommand {
 		return 1;
 	}
 	
-	public void evaluate(ASTFunNode node, JepRuntime runtime) throws ParseException {
+	public Comparable<?>[] evaluate(ASTFunNode node, JepRuntime runtime) throws ParseException {
 		node.childrenAccept(runtime.ev, null);
 		Comparable<?>  param = runtime.stack.pop();
-		runtime.stack.push(length(param));		//push the result on the inStack
+		return new Comparable<?>[]{param};
 	}
 
 	public static Integer length(Comparable<?>  param) throws ParseException {
@@ -33,6 +33,11 @@ public class Length extends PostfixCommand {
 			return null;
 		}
 		return param.toString().length();
+	}
+
+	public Comparable<?> getResult(Comparable<?>... comparables)
+			throws ParseException {
+		return length(comparables[0]);
 	}
 }
 

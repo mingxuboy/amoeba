@@ -24,12 +24,13 @@ public class Abs extends PostfixCommand {
 		return 1;
 	}
 	
-	public void evaluate(ASTFunNode node, JepRuntime runtime) throws ParseException {
+	public Comparable<?>[] evaluate(ASTFunNode node, JepRuntime runtime) throws ParseException {
 		node.childrenAccept(runtime.ev, null);
 		Comparable<?>  param = runtime.stack.pop();
-		runtime.stack.push(abs(param));
+		return new Comparable<?>[]{param};
 	}
 
+	
 	public static Comparable<?>  abs(Comparable<?>  param) throws ParseException {
 		if (param == null) {
 			return null;
@@ -47,6 +48,10 @@ public class Abs extends PostfixCommand {
 			return new Long(Math.abs(((Number)param).longValue()));
 		}
 		throw new ParseException(WRONG_TYPE+" abs("+param.getClass()+")");
+	}
+
+	public Comparable<?> getResult(Comparable<?>... comparables) throws ParseException {
+		return abs(comparables[0]);
 	}
 }
 

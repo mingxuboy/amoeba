@@ -27,10 +27,10 @@ public class Minute extends PostfixCommand {
 		return 1;
 	}
 	
-	public void evaluate(ASTFunNode node, JepRuntime runtime) throws ParseException {
+	public Comparable<?>[] evaluate(ASTFunNode node, JepRuntime runtime) throws ParseException {
 		node.childrenAccept(runtime.ev, null);
 		Comparable<?>  param = runtime.stack.pop();
-		runtime.stack.push(minute(param, runtime.calendar));
+		return new Comparable<?>[]{param};
 	}
 
 	public static Integer minute(Comparable<?>  param, Calendar cal) throws ParseException {
@@ -43,6 +43,11 @@ public class Minute extends PostfixCommand {
 			return new Integer(cal.get(MINUTE));
 		}
 		throw new ParseException(WRONG_TYPE+" minute("+param.getClass()+")");
+	}
+
+	public Comparable<?> getResult(Comparable<?>... comparables)
+			throws ParseException {
+		return minute(comparables[0],JepRuntime.getCalendar());
 	}
 }
 

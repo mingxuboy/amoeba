@@ -31,11 +31,11 @@ public class SubTime extends PostfixCommand {
 	 * Calculates the result of applying the "+" operator to the arguments from
 	 * the stack and pushes it back on the stack.
 	 */
-	public void evaluate(ASTFunNode node, JepRuntime runtime) throws ParseException {
+	public Comparable<?>[] evaluate(ASTFunNode node, JepRuntime runtime) throws ParseException {
 		node.childrenAccept(runtime.ev, null);
 		Comparable<?>  param2 = runtime.stack.pop();
 		Comparable<?>  param1 = runtime.stack.pop();
-		runtime.stack.push(subTime(param1, param2, runtime.calendar));
+		return new Comparable<?>[]{param1,param2};
 	}
 
 	public static java.util.Date subTime(Comparable<?>  param1, Comparable<?>  param2, Calendar cal) throws ParseException {
@@ -57,6 +57,11 @@ public class SubTime extends PostfixCommand {
 		} else {
 			throw new ParseException(WRONG_TYPE+"  subtime("+param1.getClass()+","+param2.getClass()+")");
 		}
+	}
+
+	public Comparable<?> getResult(Comparable<?>... comparables)
+			throws ParseException {
+		return subTime(comparables[0],comparables[1],JepRuntime.getCalendar());
 	}
 }
 

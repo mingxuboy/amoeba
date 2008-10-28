@@ -24,10 +24,10 @@ public class Ceil extends PostfixCommand {
 		return 1;
 	}
 	
-	public void evaluate(ASTFunNode node, JepRuntime runtime) throws ParseException {
+	public Comparable<?>[] evaluate(ASTFunNode node, JepRuntime runtime) throws ParseException {
 		node.childrenAccept(runtime.ev, null);
 		Comparable<?>  param = runtime.stack.pop();
-		runtime.stack.push(ceil(param));		//push the result on the inStack
+		return new Comparable<?>[]{param};
 	}
 
 	public static Comparable<?>  ceil(Comparable<?>  param) throws ParseException {
@@ -52,6 +52,11 @@ public class Ceil extends PostfixCommand {
 			return param;
 		}
 		throw new ParseException(WRONG_TYPE+" ceil("+param.getClass()+")");
+	}
+
+	public Comparable<?> getResult(Comparable<?>... comparables)
+			throws ParseException {
+		return ceil(comparables[0]);
 	}
 }
 

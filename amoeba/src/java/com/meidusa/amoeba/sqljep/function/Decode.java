@@ -18,12 +18,13 @@ import com.meidusa.amoeba.sqljep.ASTFunNode;
 import com.meidusa.amoeba.sqljep.JepRuntime;
 import com.meidusa.amoeba.sqljep.ParseException;
 
+@Deprecated
 public final class Decode extends PostfixCommand {
 	final public int getNumberOfParameters() {
 		return -1;
 	}
 	
-	public void evaluate(ASTFunNode node, JepRuntime runtime) throws ParseException {
+	public Comparable<?>[] evaluate(ASTFunNode node, JepRuntime runtime) throws ParseException {
 		int num = node.jjtGetNumChildren();
 		if (num > 2) {
 			boolean elseCase;
@@ -71,5 +72,12 @@ public final class Decode extends PostfixCommand {
 		} else {
 			throw new ParseException("Few arguments for decode");
 		}
+		return null;
+	}
+
+	public Comparable<?> getResult(Comparable<?>... comparables)
+			throws ParseException {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

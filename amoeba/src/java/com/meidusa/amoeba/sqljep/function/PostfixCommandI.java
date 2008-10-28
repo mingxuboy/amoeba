@@ -24,7 +24,11 @@ public interface PostfixCommandI {
 	 * Run the function on the stack. Pops the arguments from the stack, and
 	 * pushes the result on the top of the stack.
 	 */
-	public void evaluate(ASTFunNode node, JepRuntime runtime) throws ParseException;
+	public Comparable<?>[] evaluate(ASTFunNode node, JepRuntime runtime) throws ParseException;
+	
+	public boolean isAutoBox();
+	
+	public Comparable<?> getResult(Comparable<?> ...comparables) throws ParseException;
 	
 	/**
 	 * Returns the number of required parameters, or -1 if any number of

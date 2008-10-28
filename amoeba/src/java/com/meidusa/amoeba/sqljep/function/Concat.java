@@ -26,11 +26,11 @@ public class Concat extends PostfixCommand {
 	 * Calculates the result of applying the "||" operator to the arguments from
 	 * the stack and pushes it back on the stack.
 	 */
-	public void evaluate(ASTFunNode node, JepRuntime runtime) throws ParseException {
+	public Comparable<?>[] evaluate(ASTFunNode node, JepRuntime runtime) throws ParseException {
 		node.childrenAccept(runtime.ev, null);
 		Comparable<?>  param2 = runtime.stack.pop();
 		Comparable<?>  param1 = runtime.stack.pop();
-		runtime.stack.push(concat(param1, param2)); //push the result on the inStack
+		return new Comparable<?>[]{param1,param2};
 	}
 
 	public static String concat(Comparable<?>  param1, Comparable<?>  param2) throws ParseException {
@@ -56,6 +56,13 @@ public class Concat extends PostfixCommand {
 		}
 		
 		return concat(param1,param2).concat(param3.toString());
+	}
+
+	public Comparable<?> getResult(Comparable<?>... comparables)
+			throws ParseException {
+		Comparable<?>  param2 = comparables[1];
+		Comparable<?>  param1 = comparables[0];
+		return (concat(param1, param2));
 	}
 }
 

@@ -26,13 +26,14 @@ public final class In extends PostfixCommand {
 		return 2;
 	}
 	
-	public void evaluate(ASTFunNode node, JepRuntime runtime) throws ParseException {
+	public Comparable<?>[] evaluate(ASTFunNode node, JepRuntime runtime) throws ParseException {
 		node.jjtGetChild(0).jjtAccept(runtime.ev, null);
 		runtime.stack.setAutoBox(false);
 		try{
 			Comparable<?>  source = runtime.stack.pop();
+			
 			if (source == null) {
-				runtime.stack.push(Boolean.FALSE);
+				return new Comparable<?>[]{(Boolean.FALSE)};
 			} else {
 				Node arg = node.jjtGetChild(1);
 				if (arg instanceof ASTArray) {
@@ -43,17 +44,15 @@ public final class In extends PostfixCommand {
 							boolean result = other.intersect(Comparative.Equivalent, d, ComparativeComparator.comparator);
 							if(result){
 								runtime.stack.setSize(0);
-								runtime.stack.push(Boolean.TRUE);
-								return;
+								return new Comparable<?>[]{(Boolean.TRUE)};
 							}
 						}else if (d != null && ComparativeComparator.compareTo(source, d) == 0) {
 							runtime.stack.setSize(0);
-							runtime.stack.push(Boolean.TRUE);
-							return;
+							return new Comparable<?>[]{(Boolean.TRUE)};
 						}
 					}
 					runtime.stack.setSize(0);
-					runtime.stack.push(Boolean.FALSE);
+					return new Comparable<?>[]{(Boolean.FALSE)};
 				} else {
 					throw new ParseException("Internal error in function IN");
 				}
@@ -61,6 +60,11 @@ public final class In extends PostfixCommand {
 		}finally{
 			runtime.stack.setAutoBox(true);
 		}
+	}
+
+	public Comparable<?> getResult(Comparable<?>... comparables)
+			throws ParseException {
+		return comparables[0];
 	}
 }
 

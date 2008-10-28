@@ -16,6 +16,8 @@ import java.io.*;
 import java.util.*;
 
 
+import com.meidusa.amoeba.sqljep.function.Comparative;
+import com.meidusa.amoeba.sqljep.function.ComparativeBaseList;
 import com.meidusa.amoeba.sqljep.function.PostfixCommand;
 import com.meidusa.amoeba.sqljep.function.PostfixCommandI;
 import com.meidusa.amoeba.sqljep.variable.Variable;
@@ -287,7 +289,20 @@ public abstract class BaseJEP implements ParserVisitor {
 		if (debug) {
 			System.out.println("Stack size after childrenAccept: " + runtime.stack.size());
 		}
-		pfmc.evaluate(node, runtime);
+		
+		Comparable<?>[] parameters = pfmc.evaluate(node, runtime);
+		
+		if(pfmc.isAutoBox()){
+			boolean isList = false;
+			
+			for(Comparable<?> comparable: parameters){
+				if(comparable instanceof ComparativeBaseList){
+					isList = true;
+				}
+			}
+			
+		}
+		
 		if (debug) {
 			System.out.println("Stack size after run: " + runtime.stack.size());
 		}
@@ -323,7 +338,7 @@ public abstract class BaseJEP implements ParserVisitor {
 		return null;
 	}
 	
-	public JepRuntime getThreadJepRuntime(BaseJEP baseJep){
+	public static JepRuntime getThreadJepRuntime(BaseJEP baseJep){
 		JepRuntime runtime = (JepRuntime)ThreadLocalMap.get(StaticString.JEP_RUNTIME);
 		if(runtime == null){
 			runtime = new JepRuntime(baseJep);

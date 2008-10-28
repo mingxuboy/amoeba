@@ -19,17 +19,20 @@ import com.meidusa.amoeba.sqljep.function.PostfixCommand;
 import com.meidusa.amoeba.sqljep.ASTFunNode;
 import com.meidusa.amoeba.sqljep.JepRuntime;
 import com.meidusa.amoeba.sqljep.ParseException;
+import com.meidusa.amoeba.util.StaticString;
+import com.meidusa.amoeba.util.ThreadLocalMap;
 
 public class AddMonths extends PostfixCommand {
 	final public int getNumberOfParameters() {
 		return 2;
 	}
 	
-	public void evaluate(ASTFunNode node, JepRuntime runtime) throws ParseException {
+	public Comparable<?>[] evaluate(ASTFunNode node, JepRuntime runtime) throws ParseException {
 		node.childrenAccept(runtime.ev, null);
 		Comparable<?>  param2 = runtime.stack.pop();
 		Comparable<?>  param1 = runtime.stack.pop();
-		runtime.stack.push(addMonths(param1, param2, runtime.calendar)); // push the result on the inStack
+		return new Comparable<?>[]{param1,param2};
+		//runtime.stack.push(addMonths(param1, param2, runtime.calendar)); // push the result on the inStack
 	}
 
 	public static java.util.Date addMonths(Comparable<?>  param1, Comparable<?>  param2, Calendar cal) throws ParseException {
@@ -55,6 +58,16 @@ public class AddMonths extends PostfixCommand {
 		} catch (ParseException e) {
 			throw new ParseException(WRONG_TYPE+"  month_between("+param1.getClass()+","+param2.getClass()+")");
 		}
+	}
+
+	public Comparable<?> getResult(Comparable<?>... comparables)
+			throws ParseException {
+		Calendar calendar = (Calendar)ThreadLocalMap.get(StaticString.CALENDAR);
+		if (calendar == null) {
+			calendar = Calendar.getInstance();
+			ThreadLocalMap.put(StaticString.CALENDAR,calendar);
+		}
+		return addMonths(comparables[0], comparables[1], calendar);
 	}
 }
 

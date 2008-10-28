@@ -32,21 +32,17 @@ public class ToDate extends PostfixCommand {
 		return -1;
 	}
 	
-	public void evaluate(ASTFunNode node, JepRuntime runtime) throws ParseException {
+	public Comparable<?>[] evaluate(ASTFunNode node, JepRuntime runtime) throws ParseException {
 		node.childrenAccept(runtime.ev, null);
 		int num = node.jjtGetNumChildren();
 		if (num == 1) {
 			Comparable<?>  param1 = runtime.stack.pop();
-			if (param1 instanceof String) {
-				runtime.stack.push(Timestamp.valueOf((String)param1));
-			} else {
-				throw new ParseException(FORMAT_EXCEPTION);
-			}
+			return new  Comparable<?>[]{param1};
 		}
 		else if (num == 2) {
 			Comparable<?>  param2 = runtime.stack.pop();
 			Comparable<?>  param1 = runtime.stack.pop();
-			runtime.stack.push(to_date(param1, param2));
+			return new  Comparable<?>[]{param1,param2};
 		} else {
 			// remove all parameters from stack and push null
 			removeParams(runtime.stack, num);
@@ -106,5 +102,18 @@ public class ToDate extends PostfixCommand {
 		System.out.println(cal.getTime());
 		System.out.println(Date.valueOf("1999-11-21").getTime());
 		System.out.println(Time.valueOf("00:00:0000").getTime());
+	}
+
+	public Comparable<?> getResult(Comparable<?>... comparables)
+			throws ParseException {
+		if(comparables.length == 1){
+			if (comparables[0] instanceof String) {
+				return (Timestamp.valueOf((String)comparables[0]));
+			} else {
+				throw new ParseException(FORMAT_EXCEPTION);
+			}
+		}else{
+			return to_date(comparables[0],comparables[1]);
+		}
 	}
 }

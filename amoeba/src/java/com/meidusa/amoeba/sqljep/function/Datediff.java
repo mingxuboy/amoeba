@@ -28,11 +28,12 @@ public class Datediff extends PostfixCommand {
 	 * Calculates the result of applying the "+" operator to the arguments from
 	 * the stack and pushes it back on the stack.
 	 */
-	public void evaluate(ASTFunNode node, JepRuntime runtime) throws ParseException {
+	public Comparable<?>[] evaluate(ASTFunNode node, JepRuntime runtime) throws ParseException {
 		node.childrenAccept(runtime.ev, null);
 		Comparable<?>  param2 = runtime.stack.pop();
 		Comparable<?>  param1 = runtime.stack.pop();
-		runtime.stack.push(datediff(param1, param2)); //push the result on the inStack
+		return new Comparable<?>[]{param1,param2};
+		
 	}
 
 		public static Long datediff(Comparable<?>  param1, Comparable<?>  param2) throws ParseException {
@@ -54,4 +55,11 @@ public class Datediff extends PostfixCommand {
 			throw new ParseException(WRONG_TYPE+"  ("+param1.getClass()+"+"+param2.getClass()+")");
 		}
 	}
+
+		public Comparable<?> getResult(Comparable<?>... comparables)
+				throws ParseException {
+			Comparable<?>  param2 = comparables[1];
+			Comparable<?>  param1 = comparables[0];
+			return (datediff(param1, param2));
+		}
 }
