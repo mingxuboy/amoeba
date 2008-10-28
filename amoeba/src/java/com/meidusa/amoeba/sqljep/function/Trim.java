@@ -22,10 +22,10 @@ public class Trim extends PostfixCommand {
 		return 1;
 	}
 	
-	public void evaluate(ASTFunNode node, JepRuntime runtime) throws ParseException {
+	public Comparable<?>[] evaluate(ASTFunNode node, JepRuntime runtime) throws ParseException {
 		node.childrenAccept(runtime.ev, null);
 		Comparable<?>  param = runtime.stack.pop();
-		runtime.stack.push(trim(param));		//push the result on the inStack
+		return new Comparable<?>[]{param};
 	}
 
 	public static String trim(Comparable<?>  param) throws ParseException {
@@ -33,6 +33,11 @@ public class Trim extends PostfixCommand {
 			return null;
 		}
 		return param.toString().trim();
+	}
+
+	public Comparable<?> getResult(Comparable<?>... comparables)
+			throws ParseException {
+		return trim(comparables[0]);
 	}
 }
 

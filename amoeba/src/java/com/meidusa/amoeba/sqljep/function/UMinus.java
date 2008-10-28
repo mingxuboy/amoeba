@@ -24,10 +24,10 @@ public final class UMinus extends PostfixCommand {
 		return 1;
 	}
 	
-	public void evaluate(ASTFunNode node, JepRuntime runtime) throws ParseException {
+	public Comparable<?>[] evaluate(ASTFunNode node, JepRuntime runtime) throws ParseException {
 		node.childrenAccept(runtime.ev, null);
 		Comparable<?>  param = runtime.stack.pop();
-		runtime.stack.push(umin(param));
+		return new Comparable<?>[]{param};
 	}
 	
 	public static Comparable<?>  umin(Comparable<?>  param) throws ParseException {
@@ -47,6 +47,11 @@ public final class UMinus extends PostfixCommand {
 			return new Long(-((Number)param).longValue());
 		}
 		throw new ParseException(WRONG_TYPE+" "+param.getClass());
+	}
+
+	public Comparable<?> getResult(Comparable<?>... comparables)
+			throws ParseException {
+		return umin(comparables[0]);
 	}
 }
 
