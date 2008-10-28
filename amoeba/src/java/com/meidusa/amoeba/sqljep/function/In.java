@@ -22,6 +22,11 @@ import com.meidusa.amoeba.sqljep.Node;
 import com.meidusa.amoeba.sqljep.ParseException;
 
 public final class In extends PostfixCommand {
+	
+	public boolean isAutoBox(){
+		return false;
+	}
+	
 	final public int getNumberOfParameters() {
 		return 2;
 	}
