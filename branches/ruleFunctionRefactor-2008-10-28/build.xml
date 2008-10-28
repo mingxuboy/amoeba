@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="GB2312"?>
+<project default="mysql" name="AmoebaBuilder" basedir="." xmlns:artifact="urn:maven-artifact-ant">
+  	<property name="amoeba.mysql.version"     value="0.32"/>
+  	<property name="amoeba.aladdin.version"     value="0.4"/>
+  	<property name="app.name"     value="amoeba"/>
+  	<property name="deploy.dir"   value="dist"/>
+  	<property name="savedoc.dir"  value="docs"/>
+  	<property name="javadoc.home" value="${deploy.dir}/document"/>
+  	<property name="classes.dir"  value="${deploy.dir}/classes"/>
+  	
+  	<property file="${basedir}/build.properties" />
+  	
+  <property name="projects.dir"   value="."/>
+  <property name="projects" 	 value="amoeba,amoeba-mysql,amoeba-aladdin"/>
+  	
+  <import file="build/etc/build-support.xml"/>
+
+  <filelist dir="." id="dist.libs">
+    <file name="build/etc/lib/classworlds-1.0.jar"/>
+    <file name="build/etc/lib/commons-collections-3.1.jar"/>
+    <file name="build/etc/lib/commons-lang-2.1.jar"/>
+    <file name="build/etc/lib/commons-logging-1.1.jar"/>
+    <file name="build/etc/lib/commons-pool-1.4.jar"/>
+    <file name="build/etc/lib/junit-4.3.jar"/>
+    <file name="build/etc/lib/log4j-1.2.12.jar"/>
+  	<file name="build/etc/lib/jdbc4_part.jar" />
+  	<file name="build/etc/lib/commons-digester-1.8.jar" />
+  	<file name="build/etc/lib/jdbc-proxy-1.1.jar" />
+  </filelist>
+  
+  <filelist dir="." id="bin.files">
+    <file name="build/bin/amoeba"/>
+    <file name="build/bin/amoeba.bat"/>
+  </filelist>
+  
+  <filelist dir="." id="etc.files">
+    <file name="build/LICENSE.txt"/>
+    <file name="build/README.html"/>
+  </filelist>
+  
+  <filelist dir="." id="doc.files">
+    <file name="build/doc/amoeba-0.2.pdf"/>
+  </filelist>
+	
+  <path id="classpath">
+	<pathelement location="${classes.dir}"/>
+	<fileset dir="${libs.dir}" includes="**/*.jar"/>
+  </path>
+  	
+  <target name="distclean">
+	<delete dir="${deploy.dir}"/>
+  </target>
+  
+  <!-- prepares the build directories -->
+  <target name="prepare">
+    <mkdir dir="${deploy.dir}"/>
+    <mkdir dir="${deploy.dir}/classes"/>
+    <mkdir dir="${deploy.dir}/bin"/>
+    <mkdir dir="${deploy.dir}/lib"/>
+    <mkdir dir="${deploy.dir}/lib/classes"/>
+    <mkdir dir="${deploy.dir}/doc"/>
+
+    <!-- Copy all the libs we depend on. -->
+    <copyfilelist dest="${deploy.dir}/lib">
+      <filelist refid="dist.libs"/>
+    </copyfilelist>
+    <copyfilelist dest="${deploy.dir}/bin">
+      <filelist refid="bin.files"/>
+    </copyfilelist>
+    <copyfilelist dest="${deploy.dir}">
+      <filelist refid="etc.files"/>
+    </copyfilelist>
+    
+    <copyfilelist dest="${deploy.dir}/doc">
+      <filelist refid="doc.files"/>
+    </copyfilelist>
+  </target>
+  
+  <target name="compile" depends="prepare">
+    <javac srcdir="src/java" destdir="${classes.dir}" includeAntRuntime="false"
+           debug="on" optimize="{$build.optimize}" deprecation="on"
+           source="1.5" target="1.5">
+      <classpath refid="classpath"/>
+    <!--
+      <compilerarg value="-Xlint:unchecked"/>
+      -->
+    </javac>
+   </target>
+    
+   <target name="mysql" depends="distclean,prepare,distcleanprojects,distprojects">
+
+	    <tar longfile="gnu" destfile="amoeba-mysql-${amoeba.mysql.version}.tar.gz" compression="gzip">
+		    <tarfileset dir="${deploy.dir}" mode="755">
+		        <include name="bin/**"/>
+		    	<exclude name="*/.svn/*"/>
+		    </tarfileset>
+	    	
+		    <tarfileset dir="${deploy.dir}">
+		        <include name="lib/**"/>
+		    	<include name="doc/**"/>
+		    	<include name="conf/**"/>
+		    	<include name="src/**"/>
+		    	<exclude name="*/.svn/*"/>
+		    	<exclude name="bin/*"/>
+		    	<include name="*.*"/>
+		    </tarfileset>
+	        <tarfileset dir="amoeba">
+	        	<exclude name="*/.svn/*"/>
+	        	<include name="src/java/**"/>
+	        </tarfileset>
+			<tarfileset dir="amoeba-mysql">
+	        	<exclude name="*/.svn/*"/>
+	        	<include name="src/java/**"/>
+	        </tarfileset>
+	        <tarfileset dir="build/build-mysql">
+	        	<exclude name="*/.svn/*"/>
+	        </tarfileset>
+	    </tar>
+		
+		<zip destfile="amoeba-mysql-${amoeba.mysql.version}.zip">
+		    <zipfileset dir="${deploy.dir}">
+		        <include name="bin/**"/>
+		    	<exclude name="*/.svn/*"/>
+		    </zipfileset>
+	    	
+		    <zipfileset dir="${deploy.dir}">
+		        <include name="lib/**"/>
+		    	<include name="doc/**"/>
+		    	<include name="conf/**"/>
+		    	<include name="src/**"/>
+		    	<exclude name="*/.svn/*"/>
+		    	<exclude name="bin/*"/>
+		    	<include name="*.*"/>
+		    </zipfileset>
+		     <zipfileset dir="amoeba">
+	        	<exclude name="*/.svn/*"/>
+	        	<include name="src/java/**"/>
+	        </zipfileset>
+			<zipfileset dir="amoeba-mysql">
+	        	<exclude name="*/.svn/*"/>
+	        	<include name="src/java/**"/>
+	        </zipfileset>
+	        
+	        <zipfileset dir="build/build-mysql">
+	        	<exclude name="*/.svn/*"/>
+	        </zipfileset>
+		    
+	    </zip>
+   </target>
+   
+   <target name="aladdin" depends="distclean,prepare,distcleanprojects,distprojects">
+
+	    <tar longfile="gnu" destfile="amoeba-aladdin-${amoeba.aladdin.version}.tar.gz" compression="gzip">
+		    <tarfileset dir="${deploy.dir}" mode="755">
+		        <include name="bin/**"/>
+		    	<exclude name="*/.svn/*"/>
+		    </tarfileset>
+	    	
+		    <tarfileset dir="${deploy.dir}">
+		        <include name="lib/**"/>
+		    	<include name="doc/**"/>
+		    	<include name="conf/**"/>
+		    	<include name="src/**"/>
+		    	<exclude name="*/.svn/*"/>
+		    	<exclude name="bin/*"/>
+		    	<include name="*.*"/>
+		    </tarfileset>
+	        <tarfileset dir="amoeba">
+	        	<exclude name="*/.svn/*"/>
+	        	<include name="src/java/**"/>
+	        </tarfileset>
+	    	<tarfileset dir="amoeba-mysql">
+	        	<exclude name="*/.svn/*"/>
+	        	<include name="src/java/**"/>
+	        </tarfileset>
+			<tarfileset dir="amoeba-aladdin">
+	        	<exclude name="*/.svn/*"/>
+	        	<include name="src/java/**"/>
+	        </tarfileset>
+	        
+	        <tarfileset dir="build/build-aladdin">
+	        	<exclude name="*/.svn/*"/>
+	        </tarfileset>
+	    </tar>
+		
+		<zip destfile="amoeba-aladdin-${amoeba.aladdin.version}.zip">
+		    <zipfileset dir="${deploy.dir}">
+		        <include name="bin/**"/>
+		    	<exclude name="*/.svn/*"/>
+		    </zipfileset>
+	    	
+		    <zipfileset dir="${deploy.dir}">
+		        <include name="lib/**"/>
+		    	<include name="doc/**"/>
+		    	<include name="conf/**"/>
+		    	<include name="src/**"/>
+		    	<exclude name="*/.svn/*"/>
+		    	<exclude name="bin/*"/>
+		    	<include name="*.*"/>
+		    </zipfileset>
+			
+		    <zipfileset dir="amoeba">
+	        	<exclude name="*/.svn/*"/>
+	        	<include name="src/java/**"/>
+	        </zipfileset>
+			
+			<zipfileset dir="amoeba-mysql">
+	        	<exclude name="*/.svn/*"/>
+	        	<include name="src/java/**"/>
+	        </zipfileset>
+			
+			<zipfileset dir="amoeba-aladdin">
+	        	<exclude name="*/.svn/*"/>
+	        	<include name="src/java/**"/>
+	        </zipfileset>
+	       
+	        
+	        <zipfileset dir="build/build-aladdin">
+	        	<exclude name="*/.svn/*"/>
+	        </zipfileset>
+		    
+	    </zip>
+   </target>
+   
+</project>
