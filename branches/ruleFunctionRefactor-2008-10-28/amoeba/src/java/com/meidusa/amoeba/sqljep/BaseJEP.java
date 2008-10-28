@@ -294,16 +294,14 @@ public abstract class BaseJEP implements ParserVisitor {
 		
 		Comparable<?>[] parameters = pfmc.evaluate(node, runtime);
 		
-		/*if(pfmc.isAutoBox()){
+		if(pfmc.isAutoBox()){
 			boolean isList = false;
-			
 			for(Comparable<?> comparable: parameters){
 				if(comparable instanceof ComparativeBaseList){
 					isList = true;
 				}
 			}
-			
-		}*/
+		}
 		runtime.stack.push(pfmc.getResult(parameters));
 		
 		if (debug) {

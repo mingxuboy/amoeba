@@ -35,6 +35,8 @@ public abstract class ComparativeBaseList extends Comparative{
 			for(Comparative com : list){
 				compList.addComparative((Comparative)com.clone());
 			}
+			compList.setComparison(this.getComparison());
+			compList.setValue(this.getValue());
 			return compList;
 		} catch (Exception e) {
 			e.printStackTrace();
