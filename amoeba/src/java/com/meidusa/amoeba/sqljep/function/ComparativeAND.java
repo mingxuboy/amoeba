@@ -8,6 +8,9 @@ public class ComparativeAND extends ComparativeBaseList{
 		super(function, value);
 	}
 	
+	public ComparativeAND(){
+	}
+	
 	public ComparativeAND(Comparative item){
 		super(item);
 	}

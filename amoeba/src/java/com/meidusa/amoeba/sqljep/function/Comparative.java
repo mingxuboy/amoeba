@@ -45,7 +45,9 @@ public class Comparative implements Comparable ,Cloneable{
 	
 	private Comparable value;
 	private int comparison;
-	
+	protected Comparative(){
+	}
+
 	public Comparative(int function,Comparable value){
 		this.comparison = function;
 		this.value = value;

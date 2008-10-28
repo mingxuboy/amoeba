@@ -13,6 +13,9 @@ public abstract class ComparativeBaseList extends Comparative{
 		list.add(new Comparative(function,value));
 	}
 	
+	protected ComparativeBaseList(){
+		super();
+	}
 	public ComparativeBaseList(Comparative item){
 		super(item.getComparison(),item.getValue());
 		list.add(item);
@@ -27,13 +30,14 @@ public abstract class ComparativeBaseList extends Comparative{
 
 	public Object clone(){
 		try {
-			Constructor<? extends ComparativeBaseList> con =  this.getClass().getConstructor(new Class[]{int.class,Comparable.class});
-			ComparativeBaseList compList = con.newInstance(new Object[]{this.getComparison(),this.getValue()});
+			Constructor<? extends ComparativeBaseList> con =  this.getClass().getConstructor((Class[])null);
+			ComparativeBaseList compList = con.newInstance((Object[])null);
 			for(Comparative com : list){
 				compList.addComparative((Comparative)com.clone());
 			}
 			return compList;
 		} catch (Exception e) {
+			e.printStackTrace();
 			return null;
 		}
 		

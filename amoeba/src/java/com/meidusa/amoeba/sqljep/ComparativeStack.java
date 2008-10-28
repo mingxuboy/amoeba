@@ -31,7 +31,8 @@ public class ComparativeStack extends Stack<Comparable> {
 	public Comparable<?> push(Comparable<?> item) {
 		try{
 			if(autoBox && lastComparative != null && !(item instanceof Comparative) ){
-				return super.push(new Comparative(lastComparative.getComparison(),item));
+				lastComparative.setValue(item);
+				return super.push(lastComparative);
 			}else{
 				return super.push(item);
 			}

@@ -38,20 +38,24 @@ public final class In extends PostfixCommand {
 				Node arg = node.jjtGetChild(1);
 				if (arg instanceof ASTArray) {
 					arg.jjtAccept(runtime.ev, null);
-					for (Comparable<?>  d : runtime.stack) {
+					int childSize = arg.jjtGetNumChildren();
+					
+					for (int i=0;i<childSize;i++) {
+						Comparable<?> d = runtime.stack.pop();
 						if(source instanceof Comparative){
 							Comparative other = (Comparative) source;
 							boolean result = other.intersect(Comparative.Equivalent, d, ComparativeComparator.comparator);
 							if(result){
-								runtime.stack.setSize(0);
+								runtime.stack.setSize(runtime.stack.size()-(childSize-i-1));
 								return new Comparable<?>[]{(Boolean.TRUE)};
 							}
 						}else if (d != null && ComparativeComparator.compareTo(source, d) == 0) {
-							runtime.stack.setSize(0);
+							//runtime.stack.setSize(0);
+							runtime.stack.setSize(runtime.stack.size()-(childSize-i-1));
 							return new Comparable<?>[]{(Boolean.TRUE)};
 						}
 					}
-					runtime.stack.setSize(0);
+					//runtime.stack.setSize(0);
 					return new Comparable<?>[]{(Boolean.FALSE)};
 				} else {
 					throw new ParseException("Internal error in function IN");
