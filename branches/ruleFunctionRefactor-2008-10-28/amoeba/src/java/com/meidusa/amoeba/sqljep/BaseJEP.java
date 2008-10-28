@@ -13,6 +13,8 @@
 package com.meidusa.amoeba.sqljep;
 
 import java.io.*;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.*;
 
 
@@ -292,7 +294,7 @@ public abstract class BaseJEP implements ParserVisitor {
 		
 		Comparable<?>[] parameters = pfmc.evaluate(node, runtime);
 		
-		if(pfmc.isAutoBox()){
+		/*if(pfmc.isAutoBox()){
 			boolean isList = false;
 			
 			for(Comparable<?> comparable: parameters){
@@ -301,7 +303,8 @@ public abstract class BaseJEP implements ParserVisitor {
 				}
 			}
 			
-		}
+		}*/
+		runtime.stack.push(pfmc.getResult(parameters));
 		
 		if (debug) {
 			System.out.println("Stack size after run: " + runtime.stack.size());
@@ -313,10 +316,15 @@ public abstract class BaseJEP implements ParserVisitor {
 	 * Visit a variable node. The value of the variable is obtained from the
 	 * model and pushed onto the stack.
 	 */
+	@SuppressWarnings("unchecked")
 	final public Object visit(ASTVarNode node, Object data) throws ParseException {
 		JepRuntime runtime = getThreadJepRuntime(this);
 		if (node.index >= 0) {
-			runtime.stack.push(getColumnObject(node.index));
+			Comparable value = getColumnObject(node.index);
+			if(value instanceof Comparative){
+				value = (Comparable)((Comparative)value).clone();
+			}
+			runtime.stack.push(value);
 		} else {
 			runtime.stack.push((Comparable)node.variable.getValue());
 		}
