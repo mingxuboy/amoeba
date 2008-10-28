@@ -1,5 +1,6 @@
 package com.meidusa.amoeba.sqljep.function;
 
+import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -24,4 +25,17 @@ public abstract class ComparativeBaseList extends Comparative{
 	@SuppressWarnings("unchecked")
 	public abstract boolean intersect(int function,Comparable other,Comparator comparator);
 
+	public Object clone(){
+		try {
+			Constructor<? extends ComparativeBaseList> con =  this.getClass().getConstructor(new Class[]{int.class,Comparable.class});
+			ComparativeBaseList compList = con.newInstance(new Object[]{this.getComparison(),this.getValue()});
+			for(Comparative com : list){
+				compList.addComparative((Comparative)com.clone());
+			}
+			return compList;
+		} catch (Exception e) {
+			return null;
+		}
+		
+	}
 }

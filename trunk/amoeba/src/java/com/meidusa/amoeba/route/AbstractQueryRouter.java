@@ -359,13 +359,14 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable{
 								
 								Comparative condition = columnMap.get(parameter.getKey());
 								if(condition != null){
-									comparables[parameter.getValue()] = (Comparative)condition.clone();
 									
 									//如果规则忽略 数组的 参数，并且参数有array 参数，则忽略该规则
 									if(rule.ignoreArray && condition instanceof ComparativeBaseList){
 										matched = false;
 										break;
 									}
+									
+									comparables[parameter.getValue()] = (Comparative)condition.clone();
 								}else{
 									matched = false;
 									break;
