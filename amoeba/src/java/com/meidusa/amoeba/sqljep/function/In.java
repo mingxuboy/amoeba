@@ -28,33 +28,38 @@ public final class In extends PostfixCommand {
 	
 	public void evaluate(ASTFunNode node, JepRuntime runtime) throws ParseException {
 		node.jjtGetChild(0).jjtAccept(runtime.ev, null);
-		Comparable<?>  source = runtime.stack.pop();
-		if (source == null) {
-			runtime.stack.push(Boolean.FALSE);
-		} else {
-			Node arg = node.jjtGetChild(1);
-			if (arg instanceof ASTArray) {
-				arg.jjtAccept(runtime.ev, null);
-				for (Comparable<?>  d : runtime.stack) {
-					if(source instanceof Comparative){
-						Comparative other = (Comparative) source;
-						boolean result = other.intersect(Comparative.Equivalent, d, ComparativeComparator.comparator);
-						if(result){
+		runtime.stack.setAutoBox(false);
+		try{
+			Comparable<?>  source = runtime.stack.pop();
+			if (source == null) {
+				runtime.stack.push(Boolean.FALSE);
+			} else {
+				Node arg = node.jjtGetChild(1);
+				if (arg instanceof ASTArray) {
+					arg.jjtAccept(runtime.ev, null);
+					for (Comparable<?>  d : runtime.stack) {
+						if(source instanceof Comparative){
+							Comparative other = (Comparative) source;
+							boolean result = other.intersect(Comparative.Equivalent, d, ComparativeComparator.comparator);
+							if(result){
+								runtime.stack.setSize(0);
+								runtime.stack.push(Boolean.TRUE);
+								return;
+							}
+						}else if (d != null && ComparativeComparator.compareTo(source, d) == 0) {
 							runtime.stack.setSize(0);
 							runtime.stack.push(Boolean.TRUE);
 							return;
 						}
-					}else if (d != null && ComparativeComparator.compareTo(source, d) == 0) {
-						runtime.stack.setSize(0);
-						runtime.stack.push(Boolean.TRUE);
-						return;
 					}
+					runtime.stack.setSize(0);
+					runtime.stack.push(Boolean.FALSE);
+				} else {
+					throw new ParseException("Internal error in function IN");
 				}
-				runtime.stack.setSize(0);
-				runtime.stack.push(Boolean.FALSE);
-			} else {
-				throw new ParseException("Internal error in function IN");
 			}
+		}finally{
+			runtime.stack.setAutoBox(true);
 		}
 	}
 }
