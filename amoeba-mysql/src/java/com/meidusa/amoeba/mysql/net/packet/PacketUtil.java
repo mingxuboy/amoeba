@@ -284,6 +284,10 @@ public class PacketUtil {
 		if (length == 11) {
 			long nanos = intoBuf.readLong();
 			Calendar cal = (Calendar)ThreadLocalMap.get(StaticString.CALENDAR);
+			if (cal == null) {
+                cal = Calendar.getInstance();
+                ThreadLocalMap.put(StaticString.CALENDAR, cal);
+            }
 			cal.set(year, month, date, hour, minute, second);
 			Timestamp time = new Timestamp(cal.getTimeInMillis());
 			time.setNanos((int)nanos);

@@ -59,37 +59,45 @@ public class PreparedStatmentExecuteMessageHandler extends CommandMessageHandler
 					for(BindValue bindValue : executePacket.values){
 						if(!bindValue.isNull){
 							switch (bindValue.bufferType) {
-							case MysqlDefs.FIELD_TYPE_TINY:
-								pst.setByte(i++,bindValue.byteBinding);
-								break;
-							case MysqlDefs.FIELD_TYPE_SHORT:
-								pst.setShort(i++,bindValue.shortBinding);
-								break;
-							case MysqlDefs.FIELD_TYPE_LONG:
-								pst.setLong(i++,bindValue.longBinding);
-								break;
-							case MysqlDefs.FIELD_TYPE_LONGLONG:
-								pst.setLong(i++,bindValue.longBinding);
-								break;
-							case MysqlDefs.FIELD_TYPE_FLOAT:
-								pst.setFloat(i++,bindValue.floatBinding);
-								break;
-							case MysqlDefs.FIELD_TYPE_DOUBLE:
-								pst.setDouble(i++,bindValue.doubleBinding);
-								break;
-							case MysqlDefs.FIELD_TYPE_TIME:
-								pst.setTime(i++,(Time)bindValue.value);
-								break;
-							case MysqlDefs.FIELD_TYPE_DATE:
-							case MysqlDefs.FIELD_TYPE_DATETIME:
-							case MysqlDefs.FIELD_TYPE_TIMESTAMP:
-								java.util.Date date = (java.util.Date)bindValue.value;
-								pst.setDate(i++,new Date(date.getTime()));
-								break;
-							case MysqlDefs.FIELD_TYPE_VAR_STRING:
-							case MysqlDefs.FIELD_TYPE_STRING:
-							case MysqlDefs.FIELD_TYPE_VARCHAR:
-								pst.setString(i++,(String)bindValue.value);
+    							case MysqlDefs.FIELD_TYPE_TINY:
+    								pst.setByte(i++,bindValue.byteBinding);
+    								break;
+    							case MysqlDefs.FIELD_TYPE_SHORT:
+    								pst.setShort(i++,bindValue.shortBinding);
+    								break;
+    							case MysqlDefs.FIELD_TYPE_LONG:
+    								pst.setLong(i++,bindValue.longBinding);
+    								break;
+    							case MysqlDefs.FIELD_TYPE_LONGLONG:
+    								pst.setLong(i++,bindValue.longBinding);
+    								break;
+    							case MysqlDefs.FIELD_TYPE_FLOAT:
+    								pst.setFloat(i++,bindValue.floatBinding);
+    								break;
+    							case MysqlDefs.FIELD_TYPE_DOUBLE:
+    								pst.setDouble(i++,bindValue.doubleBinding);
+    								break;
+    							case MysqlDefs.FIELD_TYPE_TIME:
+    								pst.setTime(i++,(Time)bindValue.value);
+    								break;
+    							case MysqlDefs.FIELD_TYPE_DATE:
+    							case MysqlDefs.FIELD_TYPE_DATETIME:
+    							case MysqlDefs.FIELD_TYPE_TIMESTAMP:
+    								java.util.Date date = (java.util.Date)bindValue.value;
+    								pst.setDate(i++,new Date(date.getTime()));
+    								break;
+    							case MysqlDefs.FIELD_TYPE_VAR_STRING:
+    							case MysqlDefs.FIELD_TYPE_STRING:
+    							case MysqlDefs.FIELD_TYPE_VARCHAR:
+    								pst.setString(i++,(String)bindValue.value);
+    								break;
+    							case MysqlDefs.FIELD_TYPE_DECIMAL:
+    							case MysqlDefs.FIELD_TYPE_NEW_DECIMAL:
+    							    pst.setDouble(i++, bindValue.doubleBinding);
+    							    break;
+    							default:{							    
+    							    System.err.println("error type=" + bindValue.bufferType + " index=" + i);
+    							}
 							}
 						}else{
 							pst.setObject(i++,null);
