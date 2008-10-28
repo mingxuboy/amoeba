@@ -42,30 +42,17 @@ public class Trunc extends PostfixCommand {
 		return -1;
 	}
 	
-	public void evaluate(ASTFunNode node, JepRuntime runtime) throws ParseException {
+	public Comparable<?>[] evaluate(ASTFunNode node, JepRuntime runtime) throws ParseException {
 		node.childrenAccept(runtime.ev, null);
 		int num = node.jjtGetNumChildren();
 		if (num == 1) {
 			Comparable<?>  param1 = runtime.stack.pop();
-			if(param1 instanceof Comparative){
-				Comparable<?> param = ((Comparative)param1).getValue();
-				((Comparative)param1).setValue(trunc(param, runtime.calendar));
-			}else{
-				param1 = trunc(param1, runtime.calendar);
-			}
-			runtime.stack.push(param1);
+			return new Comparable<?>[]{param1};
 		}
 		else if (num == 2) {
 			Comparable<?>  param2 = runtime.stack.pop();
 			Comparable<?>  param1 = runtime.stack.pop();
-			
-			if(param1 instanceof Comparative){
-				Comparable<?> param = ((Comparative)param1).getValue();
-				((Comparative)param1).setValue(trunc(param,param2, runtime.calendar));
-			}else{
-				param1 = trunc(param1,param2, runtime.calendar);
-			}
-			runtime.stack.push(param1);
+			return new Comparable<?>[]{param1,param2};
 		} else {
 			// remove all parameters from stack and push null
 			removeParams(runtime.stack, num);
@@ -263,6 +250,15 @@ public class Trunc extends PostfixCommand {
 			}
 		}
 		throw new ParseException(WRONG_TYPE+" trunc("+param1.getClass()+","+param2.getClass()+")");
+	}
+
+	public Comparable<?> getResult(Comparable<?>... comparables)
+			throws ParseException {
+		if(comparables.length == 1){
+			return trunc(comparables[0],JepRuntime.getCalendar());
+		}else{
+			return trunc(comparables[0],comparables[1],JepRuntime.getCalendar());
+		}
 	}
 }
 

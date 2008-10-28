@@ -27,10 +27,11 @@ public class WeekOfYear extends PostfixCommand {
 		return 1;
 	}
 	
-	public void evaluate(ASTFunNode node, JepRuntime runtime) throws ParseException {
+	public Comparable<?>[] evaluate(ASTFunNode node, JepRuntime runtime) throws ParseException {
 		node.childrenAccept(runtime.ev, null);
 		Comparable<?>  param = runtime.stack.pop();
-		runtime.stack.push(weekOfYear(param, runtime.calendar));
+		return new Comparable<?>[]{param};
+		
 	}
 
 	public static Integer weekOfYear(Comparable<?>  param, Calendar cal) throws ParseException {
@@ -43,6 +44,11 @@ public class WeekOfYear extends PostfixCommand {
 			return new Integer(cal.get(WEEK_OF_YEAR));
 		}
 		throw new ParseException(WRONG_TYPE+" weekofyear("+param.getClass()+")");
+	}
+
+	public Comparable<?> getResult(Comparable<?>... comparables)
+			throws ParseException {
+		return weekOfYear(comparables[0],JepRuntime.getCalendar());
 	}
 }
 
