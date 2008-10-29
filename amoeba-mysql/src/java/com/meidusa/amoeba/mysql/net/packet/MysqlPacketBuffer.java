@@ -409,19 +409,19 @@ public class MysqlPacketBuffer extends AbstractPacketBuffer{
 	}
 	
 	final String readLengthCodedString(String encoding){
-		int length = (int)this.readFieldLength();
-		if(length ==0) return null;
+		int fieldLength = (int)this.readFieldLength();
+		if(fieldLength ==0) return null;
 		try {
 			if(encoding != null){
-				return new String(this.buffer, this.position, (int)length, encoding);
+				return new String(this.buffer, this.position, (int)fieldLength, encoding);
 			}else{
-				return new String(this.buffer, this.position, length);
+				return new String(this.buffer, this.position, fieldLength);
 			}
 		}catch(UnsupportedEncodingException e){
 			//TODO logger exception
-			return new String(this.buffer, this.position, length);
+			return new String(this.buffer, this.position, fieldLength);
 		} finally {
-			this.position += length; // update cursor
+			this.position += fieldLength; // update cursor
 		}
 	}
 	
