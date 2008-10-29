@@ -77,7 +77,7 @@ public class RowDataPacket extends AbstractPacket {
 	        	}else{
 	        		if(colum instanceof BindValue){
 	        			BindValue value = (BindValue)colum;
-	        			if(((BindValue)colum).isSet){
+	        			if(!((BindValue)colum).isNull){
 	        				PacketUtil.storeBinding(buffer, value, value.charset);
 	        			}else{
 	        				nullBitMask[nullMaskPos] |= bit;
