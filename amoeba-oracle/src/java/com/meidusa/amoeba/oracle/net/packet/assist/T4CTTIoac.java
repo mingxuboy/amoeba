@@ -41,7 +41,7 @@ public class T4CTTIoac {
     public short        oacdty;                  // dataType
     public short        oacflg;                  // flags
     public short        oacpre;                  // precision
-    public short        oacscl;                  // scale
+    public short        oacscl;                  // decimals
     public int          oacmxl;                  // describeType
     public int          oacmxlc;
     public int          oacmal;                  // total_elems
@@ -171,9 +171,9 @@ public class T4CTTIoac {
         meg.marshalUB1(oacpre);// precision
         if (oacdty == 2 || oacdty == 180 || oacdty == 181 || oacdty == 231 || oacdty == 183) {
             //int i = oacscl & 0xffff;
-            meg.marshalUB2(oacscl);// scale
+            meg.marshalUB2(oacscl);// decimals
         } else {
-            meg.marshalUB1(oacscl);// scale
+            meg.marshalUB1(oacscl);// decimals
         }
         meg.marshalUB4(oacmxl);// describeType
         meg.marshalSB4(oacmal);// total_elems
@@ -200,7 +200,7 @@ public class T4CTTIoac {
         s.append("[dataType:").append(oacdty);
         s.append(",flags:").append(oacflg);
         s.append(",precision:").append(oacpre);
-        s.append(",scale:").append(oacscl);
+        s.append(",decimals:").append(oacscl);
         s.append(",describeType:").append(oacmxl);
         s.append(",total_elems:").append(oacmal);
         s.append(",oacfl2:").append(oacfl2);

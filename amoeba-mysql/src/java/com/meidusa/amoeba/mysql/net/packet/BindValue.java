@@ -42,7 +42,9 @@ public class BindValue {
 		public long longBinding;
 
 		public short shortBinding;
-
+		
+		public byte scale;
+		
 		public Object value; /* The value to store */
 		
 		public String charset;

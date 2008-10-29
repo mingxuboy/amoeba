@@ -1,5 +1,6 @@
 package com.meidusa.amoeba.aladdin.handler;
 
+import java.math.BigDecimal;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -93,10 +94,10 @@ public class PreparedStatmentExecuteMessageHandler extends CommandMessageHandler
     								break;
     							case MysqlDefs.FIELD_TYPE_DECIMAL:
     							case MysqlDefs.FIELD_TYPE_NEW_DECIMAL:
-    							    pst.setDouble(i++, bindValue.doubleBinding);
+    							    pst.setBigDecimal(i++, (BigDecimal)bindValue.value);
     							    break;
-    							default:{							    
-    							    System.err.println("error type=" + bindValue.bufferType + " index=" + i);
+    							default:{
+    								logger.error("error type=" + bindValue.bufferType + " index=" + i);
     							}
 							}
 						}else{
