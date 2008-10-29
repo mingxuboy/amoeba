@@ -24,11 +24,11 @@ public class MakeDate extends PostfixCommand {
 		return 2;
 	}
 	
-	public void evaluate(ASTFunNode node, JepRuntime runtime) throws ParseException {
+	public Comparable<?>[] evaluate(ASTFunNode node, JepRuntime runtime) throws ParseException {
 		node.childrenAccept(runtime.ev, null);
 		Comparable<?>  param2 = runtime.stack.pop();
 		Comparable<?>  param1 = runtime.stack.pop();
-		runtime.stack.push(makeDate(param1, param2, runtime.calendar));
+		return new Comparable<?>[]{param1,param2};
 	}
 
 	public static java.sql.Date makeDate(Comparable<?>  param1, Comparable<?>  param2, Calendar cal) throws ParseException {
@@ -49,6 +49,11 @@ public class MakeDate extends PostfixCommand {
 			return new java.sql.Date(cal.getTimeInMillis());
 		}
 		throw new ParseException(WRONG_TYPE+" makedate("+param1.getClass()+","+param2.getClass()+")");
+	}
+
+	public Comparable<?> getResult(Comparable<?>... comparables)
+			throws ParseException {
+		return makeDate(comparables[0],comparables[1],JepRuntime.getCalendar());
 	}
 }
 

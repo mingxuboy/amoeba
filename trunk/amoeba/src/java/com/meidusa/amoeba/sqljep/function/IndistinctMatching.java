@@ -23,19 +23,19 @@ public class IndistinctMatching extends PostfixCommand {
 		return -1;
 	}
 
-	public void evaluate(ASTFunNode node, JepRuntime runtime) throws ParseException {
+	public Comparable<?>[] evaluate(ASTFunNode node, JepRuntime runtime) throws ParseException {
 		node.childrenAccept(runtime.ev, null);
 		int num = node.jjtGetNumChildren();
 		if (num == 2) {
 			Comparable<?>  param2 = runtime.stack.pop();
 			Comparable<?>  param1 = runtime.stack.pop();
-			runtime.stack.push(indistinctMatching(param1, param2, 3));
+			return new Comparable<?>[]{param1,param2,3};
 		}
 		else if (num == 3) {
 			Comparable<?>  param3 = runtime.stack.pop();
 			Comparable<?>  param2 = runtime.stack.pop();
 			Comparable<?>  param1 = runtime.stack.pop();
-			runtime.stack.push(indistinctMatching(param1, param2, param3));
+			return new Comparable<?>[]{param1,param2,param3};
 		} else {
 			// remove all parameters from stack and push null
 			removeParams(runtime.stack, num);
@@ -75,6 +75,14 @@ public class IndistinctMatching extends PostfixCommand {
 			}
 			res[1]++;
 		}
+	}
+
+	public Comparable<?> getResult(Comparable<?>... comparables)
+			throws ParseException {
+		Comparable<?>  param3 = comparables[2];
+		Comparable<?>  param2 = comparables[1];
+		Comparable<?>  param1 = comparables[0];
+		return indistinctMatching(param1, param2, param3);
 	}
 }
 

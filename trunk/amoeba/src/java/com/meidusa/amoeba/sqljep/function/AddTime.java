@@ -24,6 +24,8 @@ import com.meidusa.amoeba.sqljep.function.PostfixCommand;
 import com.meidusa.amoeba.sqljep.ASTFunNode;
 import com.meidusa.amoeba.sqljep.JepRuntime;
 import com.meidusa.amoeba.sqljep.ParseException;
+import com.meidusa.amoeba.util.StaticString;
+import com.meidusa.amoeba.util.ThreadLocalMap;
 
 public class AddTime extends PostfixCommand {
 	final public int getNumberOfParameters() {
@@ -34,11 +36,11 @@ public class AddTime extends PostfixCommand {
 	 * Calculates the result of applying the "+" operator to the arguments from
 	 * the stack and pushes it back on the stack.
 	 */
-	public void evaluate(ASTFunNode node, JepRuntime runtime) throws ParseException {
+	public Comparable<?>[] evaluate(ASTFunNode node, JepRuntime runtime) throws ParseException {
 		node.childrenAccept(runtime.ev, null);
 		Comparable<?>  param2 = runtime.stack.pop();
 		Comparable<?>  param1 = runtime.stack.pop();
-		runtime.stack.push(addTime(param1, param2, runtime.calendar)); //push the result on the inStack
+		return new Comparable<?>[]{param1,param2};
 	}
 
 	public static java.util.Date addTime(Comparable<?>  param1, Comparable<?>  param2, Calendar cal) throws ParseException {
@@ -60,5 +62,15 @@ public class AddTime extends PostfixCommand {
 		} else {
 			throw new ParseException(WRONG_TYPE+"  addtime("+param1.getClass()+","+param2.getClass()+")");
 		}
+	}
+
+	public Comparable<?> getResult(Comparable<?>... comparables)
+			throws ParseException {
+		Calendar calendar = (Calendar)ThreadLocalMap.get(StaticString.CALENDAR);
+		if (calendar == null) {
+			calendar = Calendar.getInstance();
+			ThreadLocalMap.put(StaticString.CALENDAR,calendar);
+		}
+		return addTime(comparables[0], comparables[1], calendar);
 	}
 }

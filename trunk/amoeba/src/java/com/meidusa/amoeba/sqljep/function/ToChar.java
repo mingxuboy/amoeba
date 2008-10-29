@@ -31,17 +31,17 @@ public class ToChar extends PostfixCommand {
 		return -1;
 	}
 	
-	public void evaluate(ASTFunNode node, JepRuntime runtime) throws ParseException {
+	public Comparable<?>[] evaluate(ASTFunNode node, JepRuntime runtime) throws ParseException {
 		node.childrenAccept(runtime.ev, null);
 		int num = node.jjtGetNumChildren();
 		if (num == 1) {
 			Comparable<?>  param1 = runtime.stack.pop();
-			runtime.stack.push(to_char(param1));
+			return new Comparable<?>[]{param1};
 		}
 		else if (num == 2) {
 			Comparable<?>  param2 = runtime.stack.pop();
 			Comparable<?>  param1 = runtime.stack.pop();
-			runtime.stack.push(to_char(param1, param2, runtime.calendar, runtime.dateSymbols));
+			return new Comparable<?>[]{param1,param2};
 		} else {
 			// remove all parameters from stack and push null
 			removeParams(runtime.stack, num);
@@ -92,6 +92,15 @@ public class ToChar extends PostfixCommand {
 			}
 		} else {
 			throw new ParseException(TYPE_EXCEPTION);
+		}
+	}
+
+	public Comparable<?> getResult(Comparable<?>... comparables)
+			throws ParseException {
+		if(comparables.length == 1){
+			return to_char(comparables[0]);
+		}else{
+			return to_char(comparables[0],comparables[1],JepRuntime.getCalendar(),JepRuntime.getDateFormatSymbols());
 		}
 	}
 }

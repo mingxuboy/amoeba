@@ -21,16 +21,18 @@ import com.meidusa.amoeba.sqljep.function.PostfixCommand;
 import com.meidusa.amoeba.sqljep.ASTFunNode;
 import com.meidusa.amoeba.sqljep.JepRuntime;
 import com.meidusa.amoeba.sqljep.ParseException;
+import com.meidusa.amoeba.util.StaticString;
+import com.meidusa.amoeba.util.ThreadLocalMap;
 
 public class Day extends PostfixCommand {
 	final public int getNumberOfParameters() {
 		return 1;
 	}
 	
-	public void evaluate(ASTFunNode node, JepRuntime runtime) throws ParseException {
+	public Comparable<?>[] evaluate(ASTFunNode node, JepRuntime runtime) throws ParseException {
 		node.childrenAccept(runtime.ev, null);
 		Comparable<?>  param = runtime.stack.pop();
-		runtime.stack.push(day(param, runtime.calendar));
+		return new Comparable<?>[]{param};
 	}
 
 	public static Integer day(Comparable<?>  param, Calendar cal) throws ParseException {
@@ -44,5 +46,11 @@ public class Day extends PostfixCommand {
 		}
 		throw new ParseException(WRONG_TYPE+" day("+param.getClass()+")");
 	}
+
+	public Comparable<?> getResult(Comparable<?>... comparables)
+			throws ParseException {
+		return (day(comparables[0], JepRuntime.getCalendar()));
+	}
+	
 }
 

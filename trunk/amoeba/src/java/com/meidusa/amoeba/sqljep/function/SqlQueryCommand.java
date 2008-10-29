@@ -51,54 +51,20 @@ public class SqlQueryCommand extends PostfixCommand implements Initialisable{
 		this.sql = sql;
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
-	public void evaluate(ASTFunNode node, JepRuntime runtime)
+	public Comparable<?>[] evaluate(ASTFunNode node, JepRuntime runtime)
 			throws ParseException {
 		
 		node.childrenAccept(runtime.ev, null);
 		
 		Comparable<?>[] parameters = null;
 		if(parameterSize >1){
-			parameters = new Comparable<?>[parameterSize-1] ;
-			for(int i=0;i<parameters.length;i++){
+			parameters = new Comparable<?>[parameterSize] ;
+			for(int i=parameterSize-1;i<=0;i--){
 				parameters[i] = runtime.stack.pop();
 			}
 		}
-		
-		String returnColumnName = null;
-		Comparable<?> firstParameter = runtime.stack.pop();
-		returnColumnName = firstParameter.toString().toLowerCase();
-		
-		Map<String,Object> result = null;
-		if(isThreadLocalCache()){
-			
-			int threadLocalKey = this.hashCode();
-			if(parameterSize>1){
-				int hash = this.hashCode();
-				for(int i=0;i<parameters.length;i++){
-					hash ^= parameters[i].hashCode() << i;
-				}
-				threadLocalKey = threadLocalKey ^ hash;
-			}
-			
-			result = (Map<String,Object>)ThreadLocalMap.get(threadLocalKey);
-			if(result == null){
-				if(!ThreadLocalMap.containsKey(threadLocalKey)){
-					result = query(parameters);
-					ThreadLocalMap.put(threadLocalKey,result);
-				}
-			}
-		}else{
-			result = query(parameters);
-		}
-		if(result == null){
-			runtime.stack.push(null);	
-		}else{
-			runtime.stack.push((Comparable<?>)result.get(returnColumnName));
-		}
-		
-		
+		return parameters;
 	}
 
 	private Map<String,Object> query(Comparable<?>[] parameters){
@@ -170,5 +136,42 @@ public class SqlQueryCommand extends PostfixCommand implements Initialisable{
 
 	public void init() throws InitialisationException {
 		parameterSize = ProxyRuntimeContext.getInstance().getQueryRouter().parseParameterCount(null, sql)+1;
+	}
+
+	@SuppressWarnings("unchecked")
+	public Comparable<?> getResult(Comparable<?>... comparables)
+			throws ParseException {
+		String returnColumnName = null;
+		returnColumnName = comparables[0].toString().toLowerCase();
+		
+		Map<String,Object> result = null;
+		Comparable<?>[] parameters = new Comparable<?>[comparables.length-1];
+		if(isThreadLocalCache()){
+			
+			int threadLocalKey = this.hashCode();
+			if(parameterSize>1){
+				int hash = this.hashCode();
+				for(int i=0;i<parameters.length;i++){
+					parameters[i] = comparables[i+1];
+					hash ^= parameters[i].hashCode() << (i+1);
+				}
+				threadLocalKey = threadLocalKey ^ hash;
+			}
+			
+			result = (Map<String,Object>)ThreadLocalMap.get(threadLocalKey);
+			if(result == null){
+				if(!ThreadLocalMap.containsKey(threadLocalKey)){
+					result = query(parameters);
+					ThreadLocalMap.put(threadLocalKey,result);
+				}
+			}
+		}else{
+			result = query(parameters);
+		}
+		if(result == null){
+			return (null);	
+		}else{
+			return ((Comparable<?>)result.get(returnColumnName));
+		}
 	}
 }

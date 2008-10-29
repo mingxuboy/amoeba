@@ -28,11 +28,11 @@ public class SubDate extends PostfixCommand {
 	 * Calculates the result of applying the "+" operator to the arguments from
 	 * the stack and pushes it back on the stack.
 	 */
-	public void evaluate(ASTFunNode node, JepRuntime runtime) throws ParseException {
+	public Comparable<?>[] evaluate(ASTFunNode node, JepRuntime runtime) throws ParseException {
 		node.childrenAccept(runtime.ev, null);
 		Comparable<?>  param2 = runtime.stack.pop();
 		Comparable<?>  param1 = runtime.stack.pop();
-		runtime.stack.push(subDate(param1, param2)); //push the result on the inStack
+		return new Comparable<?>[]{param1,param2};
 	}
 
 
@@ -55,6 +55,11 @@ public class SubDate extends PostfixCommand {
 		} catch (ParseException e) {
 			throw new ParseException(WRONG_TYPE+"  subDate("+param1.getClass()+","+param2.getClass()+")");
 		}
+	}
+
+	public Comparable<?> getResult(Comparable<?>... comparables)
+			throws ParseException {
+		return subDate(comparables[0],comparables[1]);
 	}
 }
 

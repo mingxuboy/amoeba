@@ -43,7 +43,7 @@ public class Main {
 		});
 		
 		System.out.println("wwe".hashCode()%500);
-		RowJEP sqljep = new RowJEP("ID in (1,2,4,3,8) and 1=1 and SUM =100 and  trunc(SALE_DATE) < to_date('2009-04-03','yyyy-mm-dd')  and abs(hash(name))%500<300" );
+		RowJEP sqljep = new RowJEP("ID in (1,2,4,3,8) and hash(ID)>=4 and 1=1 and SUM =100 and  trunc(SALE_DATE) < to_date('2009-04-03','yyyy-mm-dd')  and abs(hash(name))%500<300" );
 		
 		sqljep.parseExpression(columnMapping,valMap,AbstractQueryRouter.ruleFunTab);
 		long start = System.currentTimeMillis();
@@ -51,8 +51,8 @@ public class Main {
 		
 		try {
 		   
-		   //System.out.println(sqljep.getValue(row));
-		   sqljep.getValue(row);
+		   System.out.println(sqljep.getValue(row));
+		   //sqljep.getValue(row);
 		}
 		catch (ParseException e) {
 		   e.printStackTrace();
