@@ -13,6 +13,7 @@
 package com.meidusa.amoeba.sqljep;
 
 import java.util.Calendar;
+import java.util.Stack;
 import java.text.DateFormatSymbols;
 
 import com.meidusa.amoeba.util.StaticString;
@@ -21,7 +22,7 @@ import com.meidusa.amoeba.util.ThreadLocalMap;
 
 final public class JepRuntime {
 	
-	public ComparativeStack stack = new ComparativeStack();
+	public Stack<Comparable> stack = new Stack<Comparable>();
 	
 	public Calendar calendar = JepRuntime.getCalendar();
 	public DateFormatSymbols dateSymbols = JepRuntime.getDateFormatSymbols();

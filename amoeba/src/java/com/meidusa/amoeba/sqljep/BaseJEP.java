@@ -295,14 +295,59 @@ public abstract class BaseJEP implements ParserVisitor {
 		Comparable<?>[] parameters = pfmc.evaluate(node, runtime);
 		
 		if(pfmc.isAutoBox()){
-			boolean isList = false;
-			for(Comparable<?> comparable: parameters){
-				if(comparable instanceof ComparativeBaseList){
-					isList = true;
+			ComparativeBaseList list = null;
+			int index = -1;
+			for(int i=0;i<parameters.length;i++){
+				if(parameters[i] instanceof ComparativeBaseList){
+					index = i;
+					list = (ComparativeBaseList)parameters[i];
+					break;
+				}else{
+					
 				}
 			}
+			
+			if(index >=0){
+				for(int i=0;i<parameters.length;i++){
+					if(i != index){
+						if(parameters[i] instanceof Comparative){
+							parameters[i] =((Comparative) parameters[i]).getValue(); 
+						}
+					}
+				}
+				
+				for(Comparative comp:list.getList()){
+					parameters[index] = comp.getValue();
+					Comparable<?> value = pfmc.getResult(parameters);
+					if(value instanceof Comparative){
+						comp.setComparison(((Comparative) value).getComparison());
+						comp.setValue(((Comparative) value).getValue());
+					}else{
+						comp.setValue(value);
+					}
+					runtime.stack.push(list);
+				}
+			}else{
+				//分析每个参数是否是 Comparative 类型
+				Comparative lastComparative = null;
+				for(int i=0;i<parameters.length;i++){
+					if(parameters[i] instanceof Comparative){
+						lastComparative = ((Comparative) parameters[i]);
+						parameters[i] =((Comparative) parameters[i]).getValue(); 
+					}
+				}
+				
+				Comparable<?> result = pfmc.getResult(parameters);
+				if(lastComparative != null){
+					lastComparative.setValue(result);
+					result = lastComparative;
+				}
+				runtime.stack.push(result);
+			}
+		}else{
+			runtime.stack.push(pfmc.getResult(parameters));
 		}
-		runtime.stack.push(pfmc.getResult(parameters));
+		
 		
 		if (debug) {
 			System.out.println("Stack size after run: " + runtime.stack.size());
