@@ -59,7 +59,7 @@ public class SqlQueryCommand extends PostfixCommand implements Initialisable{
 		
 		Comparable<?>[] parameters = null;
 		parameters = new Comparable<?>[parameterSize] ;
-		for(int i=parameterSize-1;i<=0;i--){
+		for(int i=parameterSize-1;i>=0;i--){
 			parameters[i] = runtime.stack.pop();
 		}
 		return parameters;
