@@ -18,6 +18,8 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import com.meidusa.amoeba.util.StringUtil;
+
 
 
 public class DocumentUtil {
@@ -69,7 +71,7 @@ public class DocumentUtil {
 	            	NodeList propertyNodes = child.getElementsByTagName("bean");
 	            	if(propertyNodes.getLength() == 0){
 		            	String value = child.getTextContent();
-		            	map.put(key, value);
+		            	map.put(key, StringUtil.isEmpty(value)?null:value.trim());
 	            	}else{
 	            		BeanObjectEntityConfig beanconfig = loadBeanConfig((Element) propertyNodes.item(0));
 	            		map.put(key, beanconfig);
