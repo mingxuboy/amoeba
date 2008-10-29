@@ -1,5 +1,6 @@
 package com.meidusa.amoeba.mysql.net.packet;
 
+import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Time;
@@ -10,7 +11,6 @@ import java.util.Date;
 import org.apache.log4j.Logger;
 
 import com.meidusa.amoeba.mysql.jdbc.MysqlDefs;
-import com.meidusa.amoeba.mysql.util.MysqlStringUtil;
 import com.meidusa.amoeba.util.StaticString;
 import com.meidusa.amoeba.util.ThreadLocalMap;
 
@@ -44,7 +44,9 @@ public class PacketUtil {
 			return;
 		case MysqlDefs.FIELD_TYPE_TIME:
 			bindValue.value = rs.getTime(columnIndex);
-			if(bindValue.value == null) return;
+			if(bindValue.value == null) {
+				bindValue.isNull = true;
+			}
 			bindValue.isSet =true;
 			return;
 		case MysqlDefs.FIELD_TYPE_DATE:
@@ -52,12 +54,14 @@ public class PacketUtil {
 		case MysqlDefs.FIELD_TYPE_TIMESTAMP:
 			Timestamp time = rs.getTimestamp(columnIndex);
 			bindValue.value = time;
-			if(bindValue.value == null) return;
+			if(bindValue.value == null) {
+				bindValue.isNull = true;
+			}
 			
 			/**
 			 * 
 			 */
-			if((bindValue.bufferType & 0xff) == MysqlDefs.FIELD_TYPE_DATE){
+			if(time != null && (bindValue.bufferType & 0xff) == MysqlDefs.FIELD_TYPE_DATE){
 				Calendar sessionCalendar = (Calendar)ThreadLocalMap.get(StaticString.CALENDAR);
 				if(sessionCalendar == null){
 					sessionCalendar = Calendar.getInstance();
@@ -79,13 +83,17 @@ public class PacketUtil {
 		case MysqlDefs.FIELD_TYPE_STRING:
 		case MysqlDefs.FIELD_TYPE_VARCHAR:
 			bindValue.value = rs.getString(columnIndex);
-			if(bindValue.value == null) return;
+			if(bindValue.value == null){
+				bindValue.isNull= true; 
+			}
 			bindValue.isSet =true;
 			return;
 		case MysqlDefs.FIELD_TYPE_DECIMAL:
 		case MysqlDefs.FIELD_TYPE_NEW_DECIMAL:
 			bindValue.value = rs.getBigDecimal(columnIndex);
-			if(bindValue.value == null) return;
+			if(bindValue.value == null) {
+				bindValue.isNull = true;;
+			}
 			bindValue.isSet =true;
 			return;
 		default:{
@@ -150,11 +158,7 @@ public class PacketUtil {
 		case MysqlDefs.FIELD_TYPE_DECIMAL:
 		case MysqlDefs.FIELD_TYPE_NEW_DECIMAL:
 			charset = packet.getConnection().getCharset();
-			try {
-				bindValue.value = MysqlStringUtil.getBigDecimalFromString(packet.readLengthCodedString(charset),0);
-			} catch (SQLException e) {
-				logger.error("error type=" + bindValue.bufferType,e);
-			}
+			bindValue.value = new BigDecimal(packet.readLengthCodedString(charset));
 			bindValue.isSet =true;
 			return;
 		default:{
@@ -217,6 +221,18 @@ public class PacketUtil {
 					packet.writeLengthCodedString((String)value,encoding);
 				}
 				return;
+			}
+			case MysqlDefs.FIELD_TYPE_DECIMAL:
+			case MysqlDefs.FIELD_TYPE_NEW_DECIMAL:{
+				if (value instanceof byte[]) {
+					packet.writeLenBytes((byte[]) value);
+				}else{
+					packet.writeLengthCodedString(value != null?value.toString():null,encoding);
+				}
+				return;
+			}
+			default:{
+				logger.error("error type=" + bindValue.bufferType);
 			}
 		}
 	}
