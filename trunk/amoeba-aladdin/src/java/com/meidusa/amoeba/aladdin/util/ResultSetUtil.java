@@ -81,8 +81,8 @@ public class ResultSetUtil {
 						
 						packet.fieldPackets[i].charsetName = charset;
 						packet.fieldPackets[i].character =  charsetIndex;
-						packet.fieldPackets[i].javaType = metaData.getColumnType(j);
-						packet.fieldPackets[i].type = (byte)(MysqlDefs.javaTypeMysql(metaData.getColumnType(j)) & 0xff);
+						packet.fieldPackets[i].javaType = MysqlDefs.javaTypeDetect(metaData.getColumnType(j),packet.fieldPackets[i].decimals);
+						packet.fieldPackets[i].type = (byte)(MysqlDefs.javaTypeMysql(packet.fieldPackets[i].javaType) & 0xff);
 					}
 				}
 			}
@@ -135,7 +135,9 @@ public class ResultSetUtil {
 						packet.fieldPackets[i].orgName = metaData.getColumnName(j);
 						packet.fieldPackets[i].name = metaData.getColumnLabel(j);
 						packet.fieldPackets[i].catalog = "def".intern();
-						packet.fieldPackets[i].type = (byte)MysqlDefs.javaTypeMysql(metaData.getColumnType(j));
+						packet.fieldPackets[i].decimals = (byte)metaData.getScale(j);
+						packet.fieldPackets[i].javaType = MysqlDefs.javaTypeDetect(metaData.getColumnType(j),packet.fieldPackets[i].decimals);
+						packet.fieldPackets[i].type = (byte)MysqlDefs.javaTypeMysql(packet.fieldPackets[i].javaType);
 					}
 				}
 			}

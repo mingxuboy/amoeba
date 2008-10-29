@@ -41,9 +41,8 @@ import java.util.Iterator;
 import java.util.Map;
 
 /**
- * copy from mysql-connector-j
- * MysqlDefs contains many values that are needed for communication with the
- * MySQL server.
+ * copy from mysql-connector-j MysqlDefs contains many values that are needed
+ * for communication with the MySQL server.
  * 
  * @author Mark Matthews
  * @version $Id: MysqlDefs.java 4724 2005-12-20 23:27:01Z mmatthews $
@@ -333,49 +332,86 @@ public final class MysqlDefs {
 
 		return jdbcType;
 	}
-	
+
+	public static int javaTypeDetect(int javaType, int scale) {
+		switch (javaType) {
+		case Types.NUMERIC: {
+			if (scale > 0) {
+				return Types.DECIMAL;
+			}else{
+				return javaType;
+			}
+		}
+		default: {
+			return javaType;
+		}
+		}
+
+	}
+
 	public static int javaTypeMysql(int javaType) {
 
 		switch (javaType) {
-		case Types.NUMERIC: return MysqlDefs.FIELD_TYPE_LONG;
-		
-		case Types.DECIMAL: return MysqlDefs.FIELD_TYPE_DECIMAL;
-		
-		case Types.TINYINT : return MysqlDefs.FIELD_TYPE_TINY;
+		case Types.NUMERIC:
+			return MysqlDefs.FIELD_TYPE_LONG;
 
-		case Types.SMALLINT : return MysqlDefs.FIELD_TYPE_SHORT;
+		case Types.DECIMAL:
+			return MysqlDefs.FIELD_TYPE_NEW_DECIMAL;
 
-		case Types.INTEGER: return MysqlDefs.FIELD_TYPE_LONG;
+		case Types.TINYINT:
+			return MysqlDefs.FIELD_TYPE_TINY;
 
-		case Types.REAL: return MysqlDefs.FIELD_TYPE_FLOAT;
+		case Types.SMALLINT:
+			return MysqlDefs.FIELD_TYPE_SHORT;
 
-		case Types.DOUBLE: return MysqlDefs.FIELD_TYPE_DOUBLE;
+		case Types.INTEGER:
+			return MysqlDefs.FIELD_TYPE_LONG;
 
-		case Types.NULL : return MysqlDefs.FIELD_TYPE_NULL;
+		case Types.REAL:
+			return MysqlDefs.FIELD_TYPE_FLOAT;
 
-		case Types.TIMESTAMP : return MysqlDefs.FIELD_TYPE_TIMESTAMP;
+		case Types.DOUBLE:
+			return MysqlDefs.FIELD_TYPE_DOUBLE;
 
-		case Types.BIGINT: return MysqlDefs.FIELD_TYPE_LONGLONG;
+		case Types.NULL:
+			return MysqlDefs.FIELD_TYPE_NULL;
 
-		case Types.DATE: return MysqlDefs.FIELD_TYPE_DATE;
+		case Types.TIMESTAMP:
+			return MysqlDefs.FIELD_TYPE_TIMESTAMP;
 
-		case Types.TIME: return MysqlDefs.FIELD_TYPE_TIME;
+		case Types.BIGINT:
+			return MysqlDefs.FIELD_TYPE_LONGLONG;
 
-		case Types.VARBINARY: return MysqlDefs.FIELD_TYPE_TINY_BLOB;
+		case Types.DATE:
+			return MysqlDefs.FIELD_TYPE_DATE;
 
-		case Types.LONGVARBINARY: return MysqlDefs.FIELD_TYPE_BLOB;
-		
-		case Types.VARCHAR: return MysqlDefs.FIELD_TYPE_VAR_STRING;
+		case Types.TIME:
+			return MysqlDefs.FIELD_TYPE_TIME;
 
-		case Types.CHAR: return MysqlDefs.FIELD_TYPE_STRING;
-		
-		case Types.BINARY: return MysqlDefs.FIELD_TYPE_GEOMETRY;
+		case Types.VARBINARY:
+			return MysqlDefs.FIELD_TYPE_TINY_BLOB;
 
-		case Types.BIT: return  MysqlDefs.FIELD_TYPE_BIT;
-		case Types.CLOB: return  MysqlDefs.FIELD_TYPE_VAR_STRING;
-		case Types.BLOB: return  MysqlDefs.FIELD_TYPE_BLOB;
-		
-		default: return Types.VARCHAR;
+		case Types.LONGVARBINARY:
+			return MysqlDefs.FIELD_TYPE_BLOB;
+
+		case Types.VARCHAR:
+			return MysqlDefs.FIELD_TYPE_VAR_STRING;
+
+		case Types.CHAR:
+			return MysqlDefs.FIELD_TYPE_STRING;
+
+		case Types.BINARY:
+			return MysqlDefs.FIELD_TYPE_GEOMETRY;
+
+		case Types.BIT:
+			return MysqlDefs.FIELD_TYPE_BIT;
+		case Types.CLOB:
+			return MysqlDefs.FIELD_TYPE_VAR_STRING;
+		case Types.BLOB:
+			return MysqlDefs.FIELD_TYPE_BLOB;
+
+		default:
+			return Types.VARCHAR;
 		}
 
 	}
@@ -542,7 +578,7 @@ public final class MysqlDefs {
 		}
 	}
 
-	private static Map<String,Integer> mysqlToJdbcTypesMap = new HashMap<String,Integer>();
+	private static Map<String, Integer> mysqlToJdbcTypesMap = new HashMap<String, Integer>();
 
 	static {
 		mysqlToJdbcTypesMap.put("BIT", new Integer(
@@ -609,44 +645,45 @@ public final class MysqlDefs {
 				mysqlToJavaType(FIELD_TYPE_GEOMETRY)));
 	}
 
-	static final void appendJdbcTypeMappingQuery(StringBuffer buf, String mysqlTypeColumnName) {
+	static final void appendJdbcTypeMappingQuery(StringBuffer buf,
+			String mysqlTypeColumnName) {
 
 		buf.append("CASE ");
-		Map<String,Integer> typesMap = new HashMap<String,Integer>();
+		Map<String, Integer> typesMap = new HashMap<String, Integer>();
 		typesMap.putAll(mysqlToJdbcTypesMap);
 		typesMap.put("BINARY", new Integer(Types.BINARY));
 		typesMap.put("VARBINARY", new Integer(Types.VARBINARY));
-		
+
 		Iterator<String> mysqlTypes = typesMap.keySet().iterator();
-		
+
 		while (mysqlTypes.hasNext()) {
-			String mysqlTypeName = (String)mysqlTypes.next();
+			String mysqlTypeName = (String) mysqlTypes.next();
 			buf.append(" WHEN ");
 			buf.append(mysqlTypeColumnName);
 			buf.append("='");
 			buf.append(mysqlTypeName);
 			buf.append("' THEN ");
 			buf.append(typesMap.get(mysqlTypeName));
-			
-			if (mysqlTypeName.equalsIgnoreCase("DOUBLE") ||
-					mysqlTypeName.equalsIgnoreCase("FLOAT") ||
-					mysqlTypeName.equalsIgnoreCase("DECIMAL") ||
-					mysqlTypeName.equalsIgnoreCase("NUMERIC")) {
+
+			if (mysqlTypeName.equalsIgnoreCase("DOUBLE")
+					|| mysqlTypeName.equalsIgnoreCase("FLOAT")
+					|| mysqlTypeName.equalsIgnoreCase("DECIMAL")
+					|| mysqlTypeName.equalsIgnoreCase("NUMERIC")) {
 				buf.append(" WHEN ");
 				buf.append(mysqlTypeColumnName);
 				buf.append("='");
 				buf.append(mysqlTypeName);
 				buf.append(" unsigned' THEN ");
-				buf.append(typesMap.get(mysqlTypeName));	
-			}	
+				buf.append(typesMap.get(mysqlTypeName));
+			}
 		}
-		
+
 		buf.append(" ELSE ");
 		buf.append(Types.OTHER);
 		buf.append(" END ");
-		
+
 	}
-	
+
 	public static final String SQL_STATE_BASE_TABLE_NOT_FOUND = "S0002"; //$NON-NLS-1$
 
 	public static final String SQL_STATE_BASE_TABLE_OR_VIEW_ALREADY_EXISTS = "S0001"; //$NON-NLS-1$
@@ -693,7 +730,10 @@ public final class MysqlDefs {
 
 	public static final String SQL_STATE_INVALID_AUTH_SPEC = "28000"; //$NON-NLS-1$
 
-	public static final String SQL_STATE_INVALID_CHARACTER_VALUE_FOR_CAST = "22018"; // $NON_NLS-1$
+	public static final String SQL_STATE_INVALID_CHARACTER_VALUE_FOR_CAST = "22018"; // $NON_NLS
+																						// -
+																						// 1
+																						// $
 
 	public static final String SQL_STATE_INVALID_COLUMN_NUMBER = "S1002"; //$NON-NLS-1$
 
@@ -715,11 +755,17 @@ public final class MysqlDefs {
 
 	public static final String SQL_STATE_TIMEOUT_EXPIRED = "S1T00"; //$NON-NLS-1$
 
-	public static final String SQL_STATE_TRANSACTION_RESOLUTION_UNKNOWN = "08007"; // $NON_NLS-1$
+	public static final String SQL_STATE_TRANSACTION_RESOLUTION_UNKNOWN = "08007"; // $NON_NLS
+																					// -
+																					// 1
+																					// $
 
 	public static final String SQL_STATE_UNABLE_TO_CONNECT_TO_DATASOURCE = "08001"; //$NON-NLS-1$
 
 	public static final String SQL_STATE_WRONG_NO_OF_PARAMETERS = "07001"; //$NON-NLS-1$
-	
-	public static final String SQL_STATE_INVALID_TRANSACTION_TERMINATION = "2D000"; //$NON_NLS-1$
+
+	public static final String SQL_STATE_INVALID_TRANSACTION_TERMINATION = "2D000"; // $NON_NLS
+																					// -
+																					// 1
+																					// $
 }
