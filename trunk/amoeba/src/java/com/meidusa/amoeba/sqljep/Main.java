@@ -6,8 +6,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.meidusa.amoeba.route.AbstractQueryRouter;
-import com.meidusa.amoeba.sqljep.*;
-import com.meidusa.amoeba.sqljep.function.*;
+import com.meidusa.amoeba.sqljep.function.Comparative;
+import com.meidusa.amoeba.sqljep.function.ComparativeAND;
+import com.meidusa.amoeba.sqljep.function.ComparativeBaseList;
 import com.meidusa.amoeba.sqljep.variable.Variable;
 
 
