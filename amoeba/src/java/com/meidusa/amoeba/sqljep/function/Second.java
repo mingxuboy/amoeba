@@ -27,9 +27,9 @@ public class Second extends PostfixCommand {
 		return 1;
 	}
 	
-	public void evaluate(ASTFunNode node, JepRuntime runtime) throws ParseException {
+	public Comparable<?>[] evaluate(ASTFunNode node, JepRuntime runtime) throws ParseException {
 		Comparable<?>  param = runtime.stack.pop();
-		runtime.stack.push(second(param, runtime.calendar));
+		return new Comparable<?>[]{param};
 	}
 
 	public static Integer second(Comparable<?>  param, Calendar cal) throws ParseException {
@@ -42,6 +42,11 @@ public class Second extends PostfixCommand {
 			return new Integer(cal.get(SECOND));
 		}
 		throw new ParseException(WRONG_TYPE+" second("+param.getClass()+")");
+	}
+
+	public Comparable<?> getResult(Comparable<?>... comparables)
+			throws ParseException {
+		return second(comparables[0],JepRuntime.getCalendar());
 	}
 }
 

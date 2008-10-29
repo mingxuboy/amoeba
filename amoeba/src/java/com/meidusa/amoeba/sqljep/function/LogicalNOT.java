@@ -23,10 +23,10 @@ public final class LogicalNOT extends PostfixCommand {
 		return 1;
 	}
 	
-	public void evaluate(ASTFunNode node, JepRuntime runtime) throws ParseException {
+	public Comparable<?>[] evaluate(ASTFunNode node, JepRuntime runtime) throws ParseException {
 		node.childrenAccept(runtime.ev, null);
 		Comparable<?>  param = runtime.stack.pop();
-		runtime.stack.push(not(param));		//push the result on the inStack
+		return new Comparable<?>[]{param};
 	}
 
 	public static Boolean not(Comparable<?>  param) throws ParseException {
@@ -37,6 +37,11 @@ public final class LogicalNOT extends PostfixCommand {
 			return ((Boolean)param).booleanValue() ? Boolean.TRUE : Boolean.FALSE;
 		}
 		throw new ParseException(WRONG_TYPE+" not "+param.getClass());
+	}
+
+	public Comparable<?> getResult(Comparable<?>... comparables)
+			throws ParseException {
+		return not(comparables[0]);
 	}
 }
 

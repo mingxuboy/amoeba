@@ -27,10 +27,10 @@ public class Month extends PostfixCommand {
 		return 1;
 	}
 	
-	public void evaluate(ASTFunNode node, JepRuntime runtime) throws ParseException {
+	public Comparable<?>[] evaluate(ASTFunNode node, JepRuntime runtime) throws ParseException {
 		node.childrenAccept(runtime.ev, null);
 		Comparable<?>  param = runtime.stack.pop();
-		runtime.stack.push(month(param, runtime.calendar));
+		return new Comparable<?>[]{param};
 	}
 
 	public static Integer month(Comparable<?>  param, Calendar cal) throws ParseException {
@@ -43,6 +43,11 @@ public class Month extends PostfixCommand {
 			return new Integer(cal.get(MONTH));
 		}
 		throw new ParseException(WRONG_TYPE+" month("+param.getClass()+")");
+	}
+
+	public Comparable<?> getResult(Comparable<?>... comparables)
+			throws ParseException {
+		return month(comparables[0],JepRuntime.getCalendar());
 	}
 }
 

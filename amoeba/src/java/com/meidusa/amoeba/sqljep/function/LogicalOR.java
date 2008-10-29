@@ -23,11 +23,11 @@ public final class LogicalOR extends PostfixCommand {
 		return 2;
 	}
 	
-	public void evaluate(ASTFunNode node, JepRuntime runtime) throws ParseException {
+	public Comparable<?>[] evaluate(ASTFunNode node, JepRuntime runtime) throws ParseException {
 		node.childrenAccept(runtime.ev, null);
 		Comparable<?>  param2 = runtime.stack.pop();
 		Comparable<?>  param1 = runtime.stack.pop();
-		runtime.stack.push(or(param1, param2));		//push the result on the inStack
+		return new Comparable<?>[]{param1,param2};
 	}
 
 	public static Boolean or(Comparable<?>  param1, Comparable<?>  param2) throws ParseException {
@@ -38,6 +38,12 @@ public final class LogicalOR extends PostfixCommand {
 			return (((Boolean)param1).booleanValue()) || (((Boolean)param2).booleanValue());
 		}
 		throw new ParseException(WRONG_TYPE+ param1.getClass()+" or "+ param2.getClass());
+	}
+
+	public Comparable<?> getResult(Comparable<?>... comparables)
+			throws ParseException {
+		// TODO Auto-generated method stub
+		return or(comparables[0],comparables[1]);
 	}
 }
 

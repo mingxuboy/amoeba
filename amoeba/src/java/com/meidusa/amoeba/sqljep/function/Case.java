@@ -17,12 +17,18 @@ import com.meidusa.amoeba.sqljep.ASTFunNode;
 import com.meidusa.amoeba.sqljep.JepRuntime;
 import com.meidusa.amoeba.sqljep.ParseException;
 
+/**
+ * 
+ * @author struct
+ *
+ */
+@Deprecated 
 public final class Case extends PostfixCommand {
 	final public int getNumberOfParameters() {
 		return -1;
 	}
 	
-	public void evaluate(ASTFunNode node, JepRuntime runtime) throws ParseException {
+	public Comparable<?>[] evaluate(ASTFunNode node, JepRuntime runtime) throws ParseException {
 		int num = node.jjtGetNumChildren();
 		if (num > 1) {
 			boolean elseCase;
@@ -58,5 +64,12 @@ public final class Case extends PostfixCommand {
 		} else {
 			throw new ParseException("Few arguments for case");
 		}
+		return null;
+	}
+
+	public Comparable<?> getResult(Comparable<?>... comparables)
+			throws ParseException {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

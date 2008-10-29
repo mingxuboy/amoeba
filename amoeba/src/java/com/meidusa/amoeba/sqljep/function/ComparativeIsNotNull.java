@@ -8,7 +8,7 @@
            (c) Copyright 2002, Nathan Funk
  
       See LICENSE.txt for license information.
-*****************************************************************************/
+ *****************************************************************************/
 
 package com.meidusa.amoeba.sqljep.function;
 
@@ -21,17 +21,25 @@ public final class ComparativeIsNotNull extends PostfixCommand {
 	final public int getNumberOfParameters() {
 		return 1;
 	}
-	
-	public void evaluate(ASTFunNode node, JepRuntime runtime) throws ParseException {
+
+	public boolean isAutoBox() {
+		return false;
+	}
+
+	public Comparable<?>[] evaluate(ASTFunNode node, JepRuntime runtime)
+			throws ParseException {
 		node.childrenAccept(runtime.ev, null);
-		
-		runtime.stack.setAutoBox(false);
-		try{
-			Comparable<?>  param = runtime.stack.pop();
-			runtime.stack.push(param != null);
-		}finally{
-			runtime.stack.setAutoBox(true);
+
+		Comparable<?> param = runtime.stack.pop();
+		return new Comparable<?>[] { param };
+	}
+
+	public Comparable<?> getResult(Comparable<?>... comparables)
+			throws ParseException {
+		if (comparables[0] instanceof Comparative) {
+			return (((Comparative) comparables[0]).getValue() != null);
+		} else {
+			return (comparables[0] != null);
 		}
 	}
 }
-

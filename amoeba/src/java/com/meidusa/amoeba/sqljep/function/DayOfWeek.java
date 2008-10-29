@@ -27,10 +27,10 @@ public class DayOfWeek extends PostfixCommand {
 		return 1;
 	}
 	
-	public void evaluate(ASTFunNode node, JepRuntime runtime) throws ParseException {
+	public Comparable<?>[] evaluate(ASTFunNode node, JepRuntime runtime) throws ParseException {
 		node.childrenAccept(runtime.ev, null);
 		Comparable<?>  param = runtime.stack.pop();
-		runtime.stack.push(dayOfWeek(param, runtime.calendar));
+		return new Comparable<?>[]{param};
 	}
 
 	public static Integer dayOfWeek(Comparable<?>  param, Calendar cal) throws ParseException {
@@ -47,6 +47,11 @@ public class DayOfWeek extends PostfixCommand {
 			return new Integer(dayOfWeek);
 		}
 		throw new ParseException(WRONG_TYPE+" dayofweek("+param.getClass()+")");
+	}
+
+	public Comparable<?> getResult(Comparable<?>... comparables)
+			throws ParseException {
+		return (dayOfWeek(comparables[0], JepRuntime.getCalendar()));
 	}
 }
 

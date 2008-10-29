@@ -20,10 +20,10 @@ public class StringHash extends PostfixCommand {
     }
 
     @Override
-    public void evaluate(ASTFunNode node, JepRuntime runtime) throws ParseException {
+    public Comparable<?>[] evaluate(ASTFunNode node, JepRuntime runtime) throws ParseException {
         node.childrenAccept(runtime.ev, null);
         Comparable<?> param = runtime.stack.pop();
-        runtime.stack.push(hash(param));
+        return new Comparable<?>[]{param};
     }
 
     /**
@@ -44,6 +44,11 @@ public class StringHash extends PostfixCommand {
             return null;
         }
     }
+
+	public Comparable<?> getResult(Comparable<?>... comparables)
+			throws ParseException {
+		return hash(comparables[0]);
+	}
 
     /**
     public static void main(String[] args) {

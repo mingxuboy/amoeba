@@ -24,10 +24,10 @@ public class Microsecond extends PostfixCommand {
 		return 1;
 	}
 	
-	public void evaluate(ASTFunNode node, JepRuntime runtime) throws ParseException {
+	public Comparable<?>[] evaluate(ASTFunNode node, JepRuntime runtime) throws ParseException {
 		node.childrenAccept(runtime.ev, null);
 		Comparable<?>  param = runtime.stack.pop();
-		runtime.stack.push(microsecond(param));
+		return new Comparable<?>[]{param};
 	}
 
 
@@ -40,6 +40,11 @@ public class Microsecond extends PostfixCommand {
 			return new Long(ts.getTime());
 		}
 		throw new ParseException(WRONG_TYPE+" microsecond("+param.getClass()+")");
+	}
+
+	public Comparable<?> getResult(Comparable<?>... comparables)
+			throws ParseException {
+		return microsecond(comparables[0]);
 	}
 }
 

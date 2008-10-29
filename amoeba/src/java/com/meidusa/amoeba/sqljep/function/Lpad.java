@@ -25,19 +25,19 @@ public class Lpad extends PostfixCommand {
 		return -1;
 	}
 	
-	public void evaluate(ASTFunNode node, JepRuntime runtime) throws ParseException {
+	public Comparable<?>[] evaluate(ASTFunNode node, JepRuntime runtime) throws ParseException {
 		node.childrenAccept(runtime.ev, null);
 		int num = node.jjtGetNumChildren();
 		if (num == 2) {
 			Comparable<?>  param2 = runtime.stack.pop();
 			Comparable<?>  param1 = runtime.stack.pop();
-			runtime.stack.push(lpad(param1, param2, " "));
+			return new Comparable<?>[]{param1,param2," "};
 		}
 		else if (num == 3) {
 			Comparable<?>  param3 = runtime.stack.pop();
 			Comparable<?>  param2 = runtime.stack.pop();
 			Comparable<?>  param1 = runtime.stack.pop();
-			runtime.stack.push(lpad(param1, param2, param3));
+			return new Comparable<?>[]{param1,param2,param3};
 		} else {
 			// remove all parameters from stack and push null
 			removeParams(runtime.stack, num);
@@ -74,6 +74,11 @@ public class Lpad extends PostfixCommand {
 			output.append(inputStr);
 			return output.toString();
 		}
+	}
+
+	public Comparable<?> getResult(Comparable<?>... comparables)
+			throws ParseException {
+		return lpad(comparables[0],comparables[1],comparables[2]);
 	}
 }
 

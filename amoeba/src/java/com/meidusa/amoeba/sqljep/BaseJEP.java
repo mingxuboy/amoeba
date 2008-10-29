@@ -13,9 +13,13 @@
 package com.meidusa.amoeba.sqljep;
 
 import java.io.*;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.*;
 
 
+import com.meidusa.amoeba.sqljep.function.Comparative;
+import com.meidusa.amoeba.sqljep.function.ComparativeBaseList;
 import com.meidusa.amoeba.sqljep.function.PostfixCommand;
 import com.meidusa.amoeba.sqljep.function.PostfixCommandI;
 import com.meidusa.amoeba.sqljep.variable.Variable;
@@ -287,7 +291,64 @@ public abstract class BaseJEP implements ParserVisitor {
 		if (debug) {
 			System.out.println("Stack size after childrenAccept: " + runtime.stack.size());
 		}
-		pfmc.evaluate(node, runtime);
+		
+		Comparable<?>[] parameters = pfmc.evaluate(node, runtime);
+		
+		if(pfmc.isAutoBox()){
+			ComparativeBaseList list = null;
+			int index = -1;
+			for(int i=0;i<parameters.length;i++){
+				if(parameters[i] instanceof ComparativeBaseList){
+					index = i;
+					list = (ComparativeBaseList)parameters[i];
+					break;
+				}else{
+					
+				}
+			}
+			
+			if(index >=0){
+				for(int i=0;i<parameters.length;i++){
+					if(i != index){
+						if(parameters[i] instanceof Comparative){
+							parameters[i] =((Comparative) parameters[i]).getValue(); 
+						}
+					}
+				}
+				
+				for(Comparative comp:list.getList()){
+					parameters[index] = comp.getValue();
+					Comparable<?> value = pfmc.getResult(parameters);
+					if(value instanceof Comparative){
+						comp.setComparison(((Comparative) value).getComparison());
+						comp.setValue(((Comparative) value).getValue());
+					}else{
+						comp.setValue(value);
+					}
+				}
+				runtime.stack.push(list);
+			}else{
+				//分析每个参数是否是 Comparative 类型
+				Comparative lastComparative = null;
+				for(int i=0;i<parameters.length;i++){
+					if(parameters[i] instanceof Comparative){
+						lastComparative = ((Comparative) parameters[i]);
+						parameters[i] =((Comparative) parameters[i]).getValue(); 
+					}
+				}
+				
+				Comparable<?> result = pfmc.getResult(parameters);
+				if(lastComparative != null){
+					lastComparative.setValue(result);
+					result = lastComparative;
+				}
+				runtime.stack.push(result);
+			}
+		}else{
+			runtime.stack.push(pfmc.getResult(parameters));
+		}
+		
+		
 		if (debug) {
 			System.out.println("Stack size after run: " + runtime.stack.size());
 		}
@@ -298,10 +359,15 @@ public abstract class BaseJEP implements ParserVisitor {
 	 * Visit a variable node. The value of the variable is obtained from the
 	 * model and pushed onto the stack.
 	 */
+	@SuppressWarnings("unchecked")
 	final public Object visit(ASTVarNode node, Object data) throws ParseException {
 		JepRuntime runtime = getThreadJepRuntime(this);
 		if (node.index >= 0) {
-			runtime.stack.push(getColumnObject(node.index));
+			Comparable value = getColumnObject(node.index);
+			if(value instanceof Comparative){
+				value = (Comparable)((Comparative)value).clone();
+			}
+			runtime.stack.push(value);
 		} else {
 			runtime.stack.push((Comparable)node.variable.getValue());
 		}
@@ -323,7 +389,7 @@ public abstract class BaseJEP implements ParserVisitor {
 		return null;
 	}
 	
-	public JepRuntime getThreadJepRuntime(BaseJEP baseJep){
+	public static JepRuntime getThreadJepRuntime(BaseJEP baseJep){
 		JepRuntime runtime = (JepRuntime)ThreadLocalMap.get(StaticString.JEP_RUNTIME);
 		if(runtime == null){
 			runtime = new JepRuntime(baseJep);

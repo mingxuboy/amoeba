@@ -58,7 +58,11 @@ public abstract class PostfixCommand implements PostfixCommandI {
 	 * for evaluating the function. This includes popping off the parameters
 	 * from the stack, and pushing the result back on the stack.
 	 */
-	abstract public void evaluate(ASTFunNode node, JepRuntime runtime) throws ParseException;
+	abstract public Comparable<?>[] evaluate(ASTFunNode node, JepRuntime runtime) throws ParseException;
+	
+	public boolean isAutoBox(){
+		return true;
+	}
 	
 	protected final void removeParams(Stack<Comparable> s, int num) {
 		int i = 1;

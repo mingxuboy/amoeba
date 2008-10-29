@@ -8,6 +8,8 @@ public class ComparativeOR extends ComparativeBaseList{
 		super(function, value);
 	}
 	
+	public ComparativeOR(){};
+	
 	public ComparativeOR(Comparative item){
 		super(item);
 	}

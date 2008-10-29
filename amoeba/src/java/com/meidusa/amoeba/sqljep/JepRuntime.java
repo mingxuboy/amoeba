@@ -13,6 +13,7 @@
 package com.meidusa.amoeba.sqljep;
 
 import java.util.Calendar;
+import java.util.Stack;
 import java.text.DateFormatSymbols;
 
 import com.meidusa.amoeba.util.StaticString;
@@ -21,27 +22,31 @@ import com.meidusa.amoeba.util.ThreadLocalMap;
 
 final public class JepRuntime {
 	
-	public ComparativeStack stack = new ComparativeStack();
+	public Stack<Comparable> stack = new Stack<Comparable>();
 	
-	public Calendar calendar;
-	public DateFormatSymbols dateSymbols;
+	public Calendar calendar = JepRuntime.getCalendar();
+	public DateFormatSymbols dateSymbols = JepRuntime.getDateFormatSymbols();
 	public ParserVisitor ev;
 	public Comparable[] row;
 	public JepRuntime(ParserVisitor visitor) {
 		ev = visitor;
-		if (calendar == null) {
-			calendar = Calendar.getInstance();
-		}
-		dateSymbols = (DateFormatSymbols)ThreadLocalMap.get(StaticString.DATE_FORMAT_SYMBOLS);
-		if (dateSymbols == null) {
-			dateSymbols = new DateFormatSymbols();
-			ThreadLocalMap.put(StaticString.DATE_FORMAT_SYMBOLS,dateSymbols);
-		}
-		
-		calendar = (Calendar)ThreadLocalMap.get(StaticString.CALENDAR);
+	}
+	
+	public static Calendar getCalendar(){
+		Calendar calendar = (Calendar)ThreadLocalMap.get(StaticString.CALENDAR);
 		if (calendar == null) {
 			calendar = Calendar.getInstance();
 			ThreadLocalMap.put(StaticString.CALENDAR,calendar);
 		}
+		return calendar;
+	}
+	
+	public static DateFormatSymbols getDateFormatSymbols(){
+		DateFormatSymbols dateSymbols = (DateFormatSymbols)ThreadLocalMap.get(StaticString.DATE_FORMAT_SYMBOLS);
+		if (dateSymbols == null) {
+			dateSymbols = new DateFormatSymbols();
+			ThreadLocalMap.put(StaticString.DATE_FORMAT_SYMBOLS,dateSymbols);
+		}
+		return dateSymbols;
 	}
 }
