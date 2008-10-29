@@ -24,18 +24,17 @@ public final class ComparativeLT extends PostfixCommand {
 		return 2;
 	}
 	
+	public boolean isAutoBox(){
+		return false;
+	}
+	
 	public Comparable<?>[] evaluate(ASTFunNode node, JepRuntime runtime) throws ParseException {
 		node.childrenAccept(runtime.ev, null);
 		
-		runtime.stack.setAutoBox(false);
-		try{
-			Comparable<?>  param2 = runtime.stack.pop();
-			Comparable<?>  param1 = runtime.stack.pop();
-			return new Comparable<?>[]{param1,param2};
-			
-		}finally{
-			runtime.stack.setAutoBox(true);
-		}
+		Comparable<?> param2 = runtime.stack.pop();
+		Comparable<?> param1 = runtime.stack.pop();
+		return new Comparable<?>[] { param1, param2 };
+		
 	}
 
 	public Comparable<?> getResult(Comparable<?>... comparables)

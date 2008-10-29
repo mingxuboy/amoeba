@@ -21,6 +21,9 @@ public abstract class ComparativeBaseList extends Comparative{
 		list.add(item);
 	}
 	
+	public List<Comparative> getList(){
+		return list;
+	}
 	public void addComparative(Comparative item){
 		this.list.add(item);
 	}
