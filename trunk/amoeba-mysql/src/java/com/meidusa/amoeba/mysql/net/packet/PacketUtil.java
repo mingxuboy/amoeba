@@ -7,12 +7,15 @@ import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.Date;
 
+import org.apache.log4j.Logger;
+
 import com.meidusa.amoeba.mysql.jdbc.MysqlDefs;
+import com.meidusa.amoeba.mysql.util.MysqlStringUtil;
 import com.meidusa.amoeba.util.StaticString;
 import com.meidusa.amoeba.util.ThreadLocalMap;
 
 public class PacketUtil {
-
+	private static Logger logger = Logger.getLogger(PacketUtil.class);
 	public static void resultToBindValue(BindValue bindValue,int columnIndex,ResultSet rs, FieldPacket fieldPacket) throws SQLException{
 		switch (bindValue.bufferType & 0xff) {
 		case MysqlDefs.FIELD_TYPE_TINY:
@@ -79,8 +82,23 @@ public class PacketUtil {
 			if(bindValue.value == null) return;
 			bindValue.isSet =true;
 			return;
+		case MysqlDefs.FIELD_TYPE_DECIMAL:
+		case MysqlDefs.FIELD_TYPE_NEW_DECIMAL:
+			bindValue.value = rs.getBigDecimal(columnIndex);
+			if(bindValue.value == null) return;
+			bindValue.isSet =true;
+			return;
+		default:{
+			logger.error("error type=" + bindValue.bufferType);
+		}
 		}
 	}
+	
+	/**
+	 * read packetBuffer to stroe in BindValue
+	 * @param packet
+	 * @param bindValue
+	 */
 	public static void readBindValue(MysqlPacketBuffer packet, BindValue bindValue) {
 
 		//
@@ -90,35 +108,59 @@ public class PacketUtil {
 
 		case MysqlDefs.FIELD_TYPE_TINY:
 			bindValue.byteBinding = packet.readByte();
+			bindValue.isSet =true;
 			return;
 		case MysqlDefs.FIELD_TYPE_SHORT:
 			bindValue.shortBinding =  (short)packet.readInt();
+			bindValue.isSet =true;
 			return;
 		case MysqlDefs.FIELD_TYPE_LONG:
 			bindValue.longBinding = packet.readLong();
+			bindValue.isSet =true;
 			return;
 		case MysqlDefs.FIELD_TYPE_LONGLONG:
 			bindValue.longBinding = packet.readLongLong();
+			bindValue.isSet =true;
 			return;
 		case MysqlDefs.FIELD_TYPE_FLOAT:
 			bindValue.floatBinding = packet.readFloat();
+			bindValue.isSet =true;
 			return;
 		case MysqlDefs.FIELD_TYPE_DOUBLE:
 			bindValue.doubleBinding = packet.readDouble();
+			bindValue.isSet =true;
 			return;
 		case MysqlDefs.FIELD_TYPE_TIME:
 			bindValue.value = readTime(packet);
+			bindValue.isSet =true;
 			return;
 		case MysqlDefs.FIELD_TYPE_DATE:
 		case MysqlDefs.FIELD_TYPE_DATETIME:
 		case MysqlDefs.FIELD_TYPE_TIMESTAMP:
 			bindValue.value = readDate(packet);
+			bindValue.isSet =true;
 			return;
 		case MysqlDefs.FIELD_TYPE_VAR_STRING:
 		case MysqlDefs.FIELD_TYPE_STRING:
 		case MysqlDefs.FIELD_TYPE_VARCHAR:
 			String charset = packet.getConnection().getCharset();
 			bindValue.value = packet.readLengthCodedString(charset);
+			bindValue.isSet =true;
+			return;
+		case MysqlDefs.FIELD_TYPE_DECIMAL:
+		case MysqlDefs.FIELD_TYPE_NEW_DECIMAL:
+			charset = packet.getConnection().getCharset();
+			try {
+				bindValue.value = MysqlStringUtil.getBigDecimalFromString(packet.readLengthCodedString(charset),0);
+			} catch (SQLException e) {
+				logger.error("error type=" + bindValue.bufferType,e);
+			}
+			if(bindValue.value == null) return;
+			bindValue.isSet =true;
+			return;
+		default:{
+			logger.error("error type=" + bindValue.bufferType);
+		}
 		}
 	}
 	
