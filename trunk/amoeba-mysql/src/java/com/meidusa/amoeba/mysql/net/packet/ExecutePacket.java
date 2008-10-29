@@ -101,33 +101,32 @@ public class ExecutePacket extends CommandPacket {
 		for(int i=0;i<nullCount;i++){
 			nullBitsBuffer[i] = buffer.readByte();
 		}
-		
 		newParameterBoundFlag = buffer.readByte();
 		
-		for (int i = 0; i < this.parameterCount; i++) {
-			if(values[i] == null){
-				values[i] = new BindValue();
-			}
-		}
 		
-		if(newParameterBoundFlag == (byte)1){
 			for (int i = 0; i < this.parameterCount; i++) {
-				this.values[i].bufferType = buffer.readInt();
-			}
-		}
-
-		for (int i = 0; i < this.parameterCount; i++) {
-			if(longPrameters != null && longPrameters.get(i) != null){
-				values[i].isLongData = true;
-			}else{
-				if((nullBitsBuffer[i / 8] & (1 << (i & 7))) != 0){
-					values[i].isNull = true;
-				}else{
-					PacketUtil.readBindValue(buffer,values[i]);
+				if(values[i] == null){
+					values[i] = new BindValue();
 				}
 			}
-		}
-		
+			
+			if(newParameterBoundFlag == (byte)1){
+				for (int i = 0; i < this.parameterCount; i++) {
+					this.values[i].bufferType = buffer.readInt();
+				}
+			}
+	
+			for (int i = 0; i < this.parameterCount; i++) {
+				if(longPrameters != null && longPrameters.get(i) != null){
+					values[i].isLongData = true;
+				}else{
+					if((nullBitsBuffer[i / 8] & (1 << (i & 7))) != 0){
+						values[i].isNull = true;
+					}else{
+						PacketUtil.readBindValue(buffer,values[i]);
+					}
+				}
+			}
 	}
 	
 	@Override

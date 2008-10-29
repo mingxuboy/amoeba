@@ -155,7 +155,6 @@ public class PacketUtil {
 			} catch (SQLException e) {
 				logger.error("error type=" + bindValue.bufferType,e);
 			}
-			if(bindValue.value == null) return;
 			bindValue.isSet =true;
 			return;
 		default:{
