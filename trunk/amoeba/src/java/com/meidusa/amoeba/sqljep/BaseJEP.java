@@ -12,11 +12,11 @@
 
 package com.meidusa.amoeba.sqljep;
 
-import java.io.*;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.*;
-
+import java.io.Reader;
+import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 import com.meidusa.amoeba.sqljep.function.Comparative;
 import com.meidusa.amoeba.sqljep.function.ComparativeBaseList;
@@ -209,7 +209,7 @@ public abstract class BaseJEP implements ParserVisitor {
 	 * An exception is thrown, if an error occurs during evaluation.
 	 * @return The value of the expression as an object.
 	 */
-	public Comparable getValue(Comparable[] row) throws ParseException {
+	public Comparable<?> getValue(Comparable<?>[] row) throws ParseException {
 		JepRuntime runtime = getThreadJepRuntime(this);
 		runtime.stack.setSize(0);
 		runtime.row = row;
@@ -380,7 +380,7 @@ public abstract class BaseJEP implements ParserVisitor {
 	 */
 	final public Object visit(ASTConstant node, Object data) throws ParseException {
 		JepRuntime runtime = getThreadJepRuntime(this);
-		runtime.stack.push((Comparable)node.value);
+		runtime.stack.push((Comparable<?>)node.value);
 		return null;
 	}
 
