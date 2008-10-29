@@ -325,8 +325,8 @@ public abstract class BaseJEP implements ParserVisitor {
 					}else{
 						comp.setValue(value);
 					}
-					runtime.stack.push(list);
 				}
+				runtime.stack.push(list);
 			}else{
 				//分析每个参数是否是 Comparative 类型
 				Comparative lastComparative = null;
