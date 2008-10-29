@@ -140,12 +140,14 @@ public class PacketUtil {
 			return;
 		case MysqlDefs.FIELD_TYPE_TIME:
 			bindValue.value = readTime(packet);
+			if(bindValue.value == null)bindValue.isNull = true;
 			bindValue.isSet =true;
 			return;
 		case MysqlDefs.FIELD_TYPE_DATE:
 		case MysqlDefs.FIELD_TYPE_DATETIME:
 		case MysqlDefs.FIELD_TYPE_TIMESTAMP:
 			bindValue.value = readDate(packet);
+			if(bindValue.value == null)bindValue.isNull = true;
 			bindValue.isSet =true;
 			return;
 		case MysqlDefs.FIELD_TYPE_VAR_STRING:
@@ -153,12 +155,14 @@ public class PacketUtil {
 		case MysqlDefs.FIELD_TYPE_VARCHAR:
 			String charset = packet.getConnection().getCharset();
 			bindValue.value = packet.readLengthCodedString(charset);
+			if(bindValue.value == null)bindValue.isNull = true;
 			bindValue.isSet =true;
 			return;
 		case MysqlDefs.FIELD_TYPE_DECIMAL:
 		case MysqlDefs.FIELD_TYPE_NEW_DECIMAL:
 			charset = packet.getConnection().getCharset();
 			bindValue.value = new BigDecimal(packet.readLengthCodedString(charset));
+			if(bindValue.value == null)bindValue.isNull = true;
 			bindValue.isSet =true;
 			return;
 		default:{
