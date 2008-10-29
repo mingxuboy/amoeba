@@ -58,11 +58,9 @@ public class SqlQueryCommand extends PostfixCommand implements Initialisable{
 		node.childrenAccept(runtime.ev, null);
 		
 		Comparable<?>[] parameters = null;
-		if(parameterSize >1){
-			parameters = new Comparable<?>[parameterSize] ;
-			for(int i=parameterSize-1;i<=0;i--){
-				parameters[i] = runtime.stack.pop();
-			}
+		parameters = new Comparable<?>[parameterSize] ;
+		for(int i=parameterSize-1;i<=0;i--){
+			parameters[i] = runtime.stack.pop();
 		}
 		return parameters;
 	}
