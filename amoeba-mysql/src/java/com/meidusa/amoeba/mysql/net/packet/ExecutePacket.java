@@ -22,7 +22,7 @@ import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
 
 /**
  * <pre>
-  * Bytes                Name
+ * Bytes                Name
  *  -----                ----
  *  1                    code
  *  4                    statement_id
@@ -52,7 +52,7 @@ import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
  *                 the least significant bit in the first byte will be 1.
  *  
  *  new_parameter_bound_flag:   Contains 1 if this is the first time
- *                              that "execute" has been called, or if
+ *                              that &quot;execute&quot; has been called, or if
  *                              the parameters have been rebound.
  *  
  *  type:          Occurs once for each parameter that is not NULL.
@@ -65,7 +65,7 @@ import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
  * </pre>
  * 
  * @author <a href=mailto:piratebase@sina.com>Struct chen</a>
- *
+ * 
  */
 public class ExecutePacket extends CommandPacket {
 	private static Logger logger = Logger.getLogger(ExecutePacket.class);
@@ -75,14 +75,15 @@ public class ExecutePacket extends CommandPacket {
 	public byte newParameterBoundFlag;
 	protected transient int parameterCount;
 	public BindValue[] values;
-	private Map<Integer,Object> longPrameters;
-	public ExecutePacket(int parameterCount,Map<Integer,Object> longPrameters){
+	private Map<Integer, Object> longPrameters;
+
+	public ExecutePacket(int parameterCount, Map<Integer, Object> longPrameters) {
 		this.parameterCount = parameterCount;
 		values = new BindValue[parameterCount];
 		this.longPrameters = longPrameters;
 	}
-	
-	public static long readStatmentID(byte[] buffer){
+
+	public static long readStatmentID(byte[] buffer) {
 		byte[] b = buffer;
 		int position = 5;
 		return ((long) b[position++] & 0xff)
@@ -90,52 +91,51 @@ public class ExecutePacket extends CommandPacket {
 				| ((long) (b[position++] & 0xff) << 16)
 				| ((long) (b[position++] & 0xff) << 24);
 	}
-	
-	
+
 	@Override
-	public void init(AbstractPacketBuffer myBuffer){
+	public void init(AbstractPacketBuffer myBuffer) {
 		super.init(myBuffer);
-		MysqlPacketBuffer buffer = (MysqlPacketBuffer)myBuffer;
+		MysqlPacketBuffer buffer = (MysqlPacketBuffer) myBuffer;
 		statementId = buffer.readLong();
 		flags = buffer.readByte();
 		iterationCount = buffer.readLong();
 		int nullCount = (this.parameterCount + 7) / 8;
 		byte[] nullBitsBuffer = new byte[nullCount];
-		for(int i=0;i<nullCount;i++){
+		for (int i = 0; i < nullCount; i++) {
 			nullBitsBuffer[i] = buffer.readByte();
 		}
 		newParameterBoundFlag = buffer.readByte();
-		
-		
+
+		for (int i = 0; i < this.parameterCount; i++) {
+			if (values[i] == null) {
+				values[i] = new BindValue();
+			}
+		}
+
+		if (newParameterBoundFlag == (byte) 1) {
 			for (int i = 0; i < this.parameterCount; i++) {
-				if(values[i] == null){
-					values[i] = new BindValue();
+				this.values[i].bufferType = buffer.readInt();
+			}
+		}
+
+		for (int i = 0; i < this.parameterCount; i++) {
+			if (longPrameters != null && longPrameters.get(i) != null) {
+				values[i].isLongData = true;
+			} else {
+				if ((nullBitsBuffer[i / 8] & (1 << (i & 7))) != 0) {
+					values[i].isNull = true;
+				} else {
+					PacketUtil.readBindValue(buffer, values[i]);
 				}
 			}
-			
-			if(newParameterBoundFlag == (byte)1){
-				for (int i = 0; i < this.parameterCount; i++) {
-					this.values[i].bufferType = buffer.readInt();
-				}
-			}
-	
-			for (int i = 0; i < this.parameterCount; i++) {
-				if(longPrameters != null && longPrameters.get(i) != null){
-					values[i].isLongData = true;
-				}else{
-					if((nullBitsBuffer[i / 8] & (1 << (i & 7))) != 0){
-						values[i].isNull = true;
-					}else{
-						PacketUtil.readBindValue(buffer,values[i]);
-					}
-				}
-			}
+		}
 	}
-	
+
 	@Override
-	public void write2Buffer(AbstractPacketBuffer myBuffer) throws UnsupportedEncodingException {
+	public void write2Buffer(AbstractPacketBuffer myBuffer)
+			throws UnsupportedEncodingException {
 		super.write2Buffer(myBuffer);
-		MysqlPacketBuffer buffer = (MysqlPacketBuffer)myBuffer;
+		MysqlPacketBuffer buffer = (MysqlPacketBuffer) myBuffer;
 		buffer.writeLong(statementId);
 		buffer.writeByte(flags);
 		buffer.writeLong(iterationCount);
@@ -148,90 +148,97 @@ public class ExecutePacket extends CommandPacket {
 			buffer.writeByte((byte) 0);
 		}
 		byte[] nullBitsBuffer = new byte[nullCount];
-		
-		if(newParameterBoundFlag == (byte)1){
+
+		if (newParameterBoundFlag == (byte) 1) {
 			for (int i = 0; i < this.parameterCount; i++) {
 				buffer.writeInt(this.values[i].bufferType);
 			}
 		}
-		
+
 		for (int i = 0; i < this.parameterCount; i++) {
 			if (!this.values[i].isLongData) {
 				if (!this.values[i].isNull) {
-					PacketUtil.storeBinding(buffer, this.values[i],buffer.getConnection().getCharset());
+					PacketUtil.storeBinding(buffer, this.values[i], buffer
+							.getConnection().getCharset());
 				} else {
 					nullBitsBuffer[i / 8] |= (1 << (i & 7));
 				}
 			}
 		}
-		
+
 		int endPosition = buffer.getPosition();
 		buffer.setPosition(nullBitsPosition);
 		buffer.writeBytesNoNull(nullBitsBuffer);
 		buffer.setPosition(endPosition);
 	}
-	
-	
-	public Object[] getParameters(){
+
+	public Object[] getParameters() {
 		Object[] result = new Object[values.length];
 		int index = 0;
-		for(BindValue bindValue: values){
-			switch (bindValue.bufferType) {
+		for (BindValue bindValue : values) {
 
-			case MysqlDefs.FIELD_TYPE_TINY:
-				result[index++] = bindValue.byteBinding;
-				break;
-			case MysqlDefs.FIELD_TYPE_SHORT:
-				result[index++] =  bindValue.shortBinding;
-				break;
-			case MysqlDefs.FIELD_TYPE_LONG:
-				result[index++] =  bindValue.longBinding;
-				break;
-			case MysqlDefs.FIELD_TYPE_LONGLONG:
-				result[index++] = bindValue.longBinding;
-				break;
-			case MysqlDefs.FIELD_TYPE_FLOAT:
-				result[index++] = bindValue.floatBinding;
-				break;
-			case MysqlDefs.FIELD_TYPE_DOUBLE:
-				result[index++] = bindValue.doubleBinding;
-				break;
-			case MysqlDefs.FIELD_TYPE_TIME:
-				result[index++] = bindValue.value;
-				break;
-			case MysqlDefs.FIELD_TYPE_DATE:
-			case MysqlDefs.FIELD_TYPE_DATETIME:
-			case MysqlDefs.FIELD_TYPE_TIMESTAMP:
-				result[index++] = bindValue.value;
-				break;
-			case MysqlDefs.FIELD_TYPE_VAR_STRING:
-			case MysqlDefs.FIELD_TYPE_STRING:
-			case MysqlDefs.FIELD_TYPE_VARCHAR:
-			case MysqlDefs.FIELD_TYPE_DECIMAL:
-			case MysqlDefs.FIELD_TYPE_NEW_DECIMAL:
-				result[index++] = bindValue.value;
-				break;
-			default:{
+			if (bindValue.isNull) {
 				index++;
-				logger.error("error jdbc type:"+bindValue.bufferType);
-			}
+			} else {
+				switch (bindValue.bufferType) {
+
+				case MysqlDefs.FIELD_TYPE_TINY:
+					result[index++] = bindValue.byteBinding;
+					break;
+				case MysqlDefs.FIELD_TYPE_SHORT:
+					result[index++] = bindValue.shortBinding;
+					break;
+				case MysqlDefs.FIELD_TYPE_LONG:
+					result[index++] = bindValue.longBinding;
+					break;
+				case MysqlDefs.FIELD_TYPE_LONGLONG:
+					result[index++] = bindValue.longBinding;
+					break;
+				case MysqlDefs.FIELD_TYPE_FLOAT:
+					result[index++] = bindValue.floatBinding;
+					break;
+				case MysqlDefs.FIELD_TYPE_DOUBLE:
+					result[index++] = bindValue.doubleBinding;
+					break;
+				case MysqlDefs.FIELD_TYPE_TIME:
+					result[index++] = bindValue.value;
+					break;
+				case MysqlDefs.FIELD_TYPE_DATE:
+				case MysqlDefs.FIELD_TYPE_DATETIME:
+				case MysqlDefs.FIELD_TYPE_TIMESTAMP:
+					result[index++] = bindValue.value;
+					break;
+				case MysqlDefs.FIELD_TYPE_VAR_STRING:
+				case MysqlDefs.FIELD_TYPE_STRING:
+				case MysqlDefs.FIELD_TYPE_VARCHAR:
+				case MysqlDefs.FIELD_TYPE_DECIMAL:
+				case MysqlDefs.FIELD_TYPE_NEW_DECIMAL:
+				case MysqlDefs.FIELD_TYPE_TINY_BLOB:
+					result[index++] = bindValue.value;
+					break;
+				case MysqlDefs.FIELD_TYPE_NULL:
+					index++;
+				default: {
+					index++;
+					logger.error("error jdbc type:" + bindValue.bufferType);
+				}
+				}
 			}
 		}
 		return result;
 	}
-	
-	
-	protected int calculatePacketSize(){
+
+	protected int calculatePacketSize() {
 		int packLength = super.calculatePacketSize();
-		packLength += 4+1+4+1;
+		packLength += 4 + 1 + 4 + 1;
 		return packLength;
 	}
-	
-	public static void main(String[] args){
+
+	public static void main(String[] args) {
 		int parameterCount = 12;
 		int nullCount = (parameterCount + 7) / 8;
 		byte[] nullBitsBuffer = new byte[nullCount];
-		
+
 		for (int i = 0; i < parameterCount; i++) {
 			nullBitsBuffer[i / 8] |= (1 << (i & 7));
 		}
