@@ -337,7 +337,7 @@ public class PacketUtil {
 	public static Date readDate(MysqlPacketBuffer intoBuf){
 		byte length = intoBuf.readByte(); // length
 		int year = intoBuf.readInt();
-		byte month = intoBuf.readByte();
+		byte month = (byte)(intoBuf.readByte()-1); //数据包中月份范围是1-12，而 java对象中月份是0-11
 		byte date = intoBuf.readByte();
 		int hour = intoBuf.readByte();
 		int minute = intoBuf.readByte();
@@ -350,14 +350,12 @@ public class PacketUtil {
                 ThreadLocalMap.put(StaticString.CALENDAR, cal);
             }
 			cal.set(year, month, date, hour, minute, second);
-			cal.add(Calendar.MONTH, -1);
 			Timestamp time = new Timestamp(cal.getTimeInMillis());
 			time.setNanos((int)nanos);
 			return time;
 		}else{
 			Calendar cal = Calendar.getInstance();
 			cal.set(year, month, date, hour, minute, second);
-			cal.add(Calendar.MONTH, -1);
 			return cal.getTime();
 		}
 	}
