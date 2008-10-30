@@ -15,6 +15,8 @@ import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
+
 import com.meidusa.amoeba.mysql.jdbc.MysqlDefs;
 import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
 
@@ -66,6 +68,7 @@ import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
  *
  */
 public class ExecutePacket extends CommandPacket {
+	private static Logger logger = Logger.getLogger(ExecutePacket.class);
 	public long statementId;
 	public byte flags;
 	public long iterationCount;
@@ -204,8 +207,14 @@ public class ExecutePacket extends CommandPacket {
 			case MysqlDefs.FIELD_TYPE_VAR_STRING:
 			case MysqlDefs.FIELD_TYPE_STRING:
 			case MysqlDefs.FIELD_TYPE_VARCHAR:
+			case MysqlDefs.FIELD_TYPE_DECIMAL:
+			case MysqlDefs.FIELD_TYPE_NEW_DECIMAL:
 				result[index++] = bindValue.value;
 				break;
+			default:{
+				index++;
+				logger.error("error jdbc type:"+bindValue.bufferType);
+			}
 			}
 		}
 		return result;
