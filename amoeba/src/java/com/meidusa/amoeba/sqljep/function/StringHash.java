@@ -52,7 +52,7 @@ public class StringHash extends PostfixCommand {
         return hash(comparables[0]);
     }
 
-    // /**
+    /**
     public static void main(String[] args) {
         String s = "~~~~~~~~~~";
 
@@ -66,6 +66,6 @@ public class StringHash extends PostfixCommand {
 
         System.out.println("take time:" + (et - st) / times + " ns/times.");
     }
-    // */
+    */
 
 }
