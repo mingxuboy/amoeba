@@ -19,8 +19,7 @@
     <file name="build/etc/lib/classworlds-1.0.jar"/>
     <file name="build/etc/lib/commons-collections-3.1.jar"/>
     <file name="build/etc/lib/commons-lang-2.1.jar"/>
-    <file name="build/etc/lib/commons-logging-1.1.jar"/>
-    <file name="build/etc/lib/commons-pool-1.4.jar"/>
+    <file name="build/etc/lib/commons-logging-1.1.jar"/>    
     <file name="build/etc/lib/junit-4.3.jar"/>
     <file name="build/etc/lib/log4j-1.2.12.jar"/>
   	<file name="build/etc/lib/jdbc4_part.jar" />
