@@ -1667,7 +1667,7 @@ Expression SQLLikeClause() #void:
 	boolean not = false;
 }
 {
-	["NOT"{not = true;}] "LIKE" expression = SQLSimpleExpression(){
+	(["NOT"{not = true;}] "LIKE" expression = SQLSimpleExpression()["ESCAPE" <STRING_LITERAL>]){
 		ComparisonExpression comparisonExpression = new ComparisonExpression();
 		comparisonExpression.setExpression(expression);
 		comparisonExpression.setComparison(not?Comparative.NotLike:Comparative.Like);
