@@ -77,4 +77,6 @@
 	<function name="SUBSTRING" class="com.meidusa.amoeba.parser.function.Substring"/>
 	
 	<function name="UNKNOWFUNCTION" class="com.meidusa.amoeba.parser.function.UnknowableFunction"/>
+	
+	<function name="DATABASE" class="com.meidusa.amoeba.parser.function.UnknowableFunction"/>
 </amoeba:function>
