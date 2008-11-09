@@ -14,7 +14,7 @@ import com.meidusa.amoeba.route.AbstractQueryRouter;
 
 public class AladdinParserTest {
 
-    static String                file   = "./conf/functionMap.xml";                 // TODO 测试文件，修改为本地路径的文件。
+    static String                file   = "./build/build-aladdin/conf/functionMap.xml";                 // TODO 测试文件，修改为本地路径的文件。
     static Map<String, Function> funMap = AbstractQueryRouter.loadFunctionMap(file);
 
     public static void main(String[] args) {
