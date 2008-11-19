@@ -20,65 +20,68 @@ import java.util.List;
  *
  */
 public abstract class BaseExpressionList extends Expression {
-	
-	protected List<Expression> eList = new ArrayList<Expression>();
-	public BaseExpressionList() {
-		
-	}
-	public BaseExpressionList(Expression expression) {
-		if(expression != null){
-			addExpression(expression);
-		}
-	}
 
-	public List<Expression> getAllExpression(){
-		return eList;
-	}
-	
-	public boolean isRealtime(){
-		for(Expression e:eList){
-			if(e.isRealtime()){
-				return true;
-			}
-		}
-		return false;
-	}
-	
-	protected  abstract BaseExpressionList getReverseObject();
-	
-	@Override
-	public Expression reverse() {
-		BaseExpressionList list = getReverseObject();
-		for(Expression e: this.eList){
-			Expression reversedExpression = e.reverse();
-			list.addExpression(reversedExpression);
-		}
-		return list;
-	}
-	
-	public void addExpression(Expression expression){
-		eList.add(expression);
-	}
-	
-	public int getSize(){
-		if(eList == null) return 0;
-		return eList.size();
-	}
-	
-	protected void toString(StringBuilder builder,String concatString){
-		int current = 0;
-		if(eList.size()>=2){
-			builder.append("(");
-		}
-		for(Expression e:eList){
-			e.toString(builder);
-			current ++;
-			if(current != eList.size()){
-				builder.append(concatString);
-			}
-		}
-		if(eList.size()>=2){
-			builder.append(")");
-		}
-	}
+    protected List<Expression> eList = new ArrayList<Expression>();
+
+    public BaseExpressionList(){
+    }
+
+    public BaseExpressionList(Expression expression){
+        if (expression != null) {
+            addExpression(expression);
+        }
+    }
+
+    public List<Expression> getAllExpression() {
+        return eList;
+    }
+
+    public boolean isRealtime() {
+        for (Expression e : eList) {
+            if (e.isRealtime()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    protected abstract BaseExpressionList getReverseObject();
+
+    @Override
+    public Expression reverse() {
+        BaseExpressionList list = getReverseObject();
+        for (Expression e : this.eList) {
+            Expression reversedExpression = e.reverse();
+            list.addExpression(reversedExpression);
+        }
+        return list;
+    }
+
+    public void addExpression(Expression expression) {
+        eList.add(expression);
+    }
+
+    public int getSize() {
+        if (eList == null){
+            return 0;
+        }
+        return eList.size();
+    }
+
+    protected void toString(StringBuilder builder, String concatString) {
+        int current = 0;
+        if (eList.size() >= 2) {
+            builder.append("(");
+        }
+        for (Expression e : eList) {
+            e.toString(builder);
+            current++;
+            if (current != eList.size()) {
+                builder.append(concatString);
+            }
+        }
+        if (eList.size() >= 2) {
+            builder.append(")");
+        }
+    }
 }

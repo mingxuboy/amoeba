@@ -18,30 +18,29 @@ package com.meidusa.amoeba.parser.expression;
  */
 public class AndExpression extends BaseExpressionList {
 
-	public AndExpression(){
-		
-	}
-	public AndExpression(Expression node) {
-		super(node);
-	}
-	
-	@SuppressWarnings("unchecked")
-	public Comparable evaluate(Object[] parameters) {
-		for(Expression e :eList){
-			if(!(Boolean)e.evaluate(parameters)){
-				return Boolean.FALSE;
-			}
-		}
-		return Boolean.TRUE;
-	}
+    public AndExpression(){
+    }
 
-	protected  BaseExpressionList getReverseObject(){
-		return new OrExpression(null);
-	}
-	
-	protected void toString(StringBuilder builder){
-		this.toString(builder, " AND ");
-	}
-	
-	
+    public AndExpression(Expression node){
+        super(node);
+    }
+
+    @SuppressWarnings("unchecked")
+    public Comparable evaluate(Object[] parameters) {
+        for (Expression e : eList) {
+            if (!((Boolean) e.evaluate(parameters))) {
+                return Boolean.FALSE;
+            }
+        }
+        return Boolean.TRUE;
+    }
+
+    protected BaseExpressionList getReverseObject() {
+        return new OrExpression(null);
+    }
+
+    protected void toString(StringBuilder builder) {
+        this.toString(builder, " AND ");
+    }
+
 }

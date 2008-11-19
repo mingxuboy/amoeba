@@ -12,19 +12,26 @@ import com.meidusa.amoeba.sqljep.ParseException;
  */
 public class StringHash extends PostfixCommand {
 
-    private static final int _hash_len = 8;
-    private static final int _bit_len  = 5;
+    private static final int  _hash_len = 8;
+    private static final int  _bit_len  = 5;
 
-    @Override
+    private static final long _unknown  = -1L;
+
     public int getNumberOfParameters() {
         return 1;
     }
 
-    @Override
     public Comparable<?>[] evaluate(ASTFunNode node, JepRuntime runtime) throws ParseException {
         node.childrenAccept(runtime.ev, null);
         Comparable<?> param = runtime.stack.pop();
         return new Comparable<?>[] { param };
+    }
+
+    public Comparable<?> getResult(Comparable<?>... comparables) throws ParseException {
+        if (comparables[0] != null && comparables[0] instanceof String) {
+            return hash((String) comparables[0]);
+        }
+        return _unknown;
     }
 
     /**
@@ -35,37 +42,11 @@ public class StringHash extends PostfixCommand {
      * 注：对hash的字符串做了长度限定，保证其结果不会超出数据类型的范围。
      * </pre>
      */
-    public static Comparable<?> hash(Comparable<?> param) {
-        if (param != null && param instanceof String) {
-            String s = (String) param;
-            long h = 0;
-            for (int i = 0; (i < _hash_len && i < s.length()); i++) {
-                h = (h << _bit_len) - h + s.charAt(i);
-            }
-            return h;
-        } else {
-            return null;
+    private static long hash(String s) {
+        long h = 0;
+        for (int i = 0; (i < _hash_len && i < s.length()); i++) {
+            h = (h << _bit_len) - h + s.charAt(i);
         }
+        return h;
     }
-
-    public Comparable<?> getResult(Comparable<?>... comparables) throws ParseException {
-        return hash(comparables[0]);
-    }
-
-    /**
-    public static void main(String[] args) {
-        String s = "~~~~~~~~~~";
-
-        int times = 1000 * 10000;
-        long st = System.nanoTime();
-        for (int i = 0; i < 1; i++) {
-            // StringHash.hash(s);
-            System.out.println(StringHash.hash(s));
-        }
-        long et = System.nanoTime();
-
-        System.out.println("take time:" + (et - st) / times + " ns/times.");
-    }
-    */
-
 }

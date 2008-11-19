@@ -15,6 +15,9 @@
 <!ATTLIST rule name NMTOKEN #REQUIRED >
 <!ATTLIST rule group CDATA #IMPLIED >
 <!ATTLIST rule ignoreArray  %Boolean; #IMPLIED >
+<!ATTLIST rule isSwitch %Boolean; #IMPLIED >
+
+<!ELEMENT readPools ( #PCDATA ) >
 
 <!ELEMENT writePools ( #PCDATA ) >
 
@@ -24,4 +27,3 @@
 
 <!ELEMENT parameters ( #PCDATA ) >
 <!ATTLIST parameters excludes CDATA #IMPLIED >
-<!ELEMENT readPools ( #PCDATA ) >

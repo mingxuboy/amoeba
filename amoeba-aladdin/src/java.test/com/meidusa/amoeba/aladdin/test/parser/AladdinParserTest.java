@@ -31,7 +31,7 @@ public class AladdinParserTest {
         sb.append("WHERE member_id = 'jingjunye' ");
         sb.append("AND status = 'published' ");
         sb.append("AND gmt_expire > sysdate ");
-        sb.append("AND subject LIKE '%MP3\\%' ESCAPE '\' ");
+        sb.append("AND subject LIKE '%MP3\\\\%' ESCAPE '\\' ");
         sb.append("AND type = 'SALE' ");
         sb.append("ORDER BY MEMBER_ID, ");
         sb.append("STATUS , ");

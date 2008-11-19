@@ -40,115 +40,118 @@ public class AladdinMessageDispatcher implements MessageHandler {
 		STATIC_OK_BUFFER = ok.toByteBuffer(null).array();
 	}
 	
-	public void handleMessage(Connection connection,byte[] message) {
-		MysqlClientConnection conn = (MysqlClientConnection)connection;
-		
-		QueryCommandPacket command = new QueryCommandPacket();
-		command.init(message,connection);
-		
-		if(logger.isDebugEnabled()){
-			logger.debug(command);
-		}
-		
-		try {
-			if(MysqlPacketBuffer.isPacketType(message, QueryCommandPacket.COM_QUIT) || MysqlPacketBuffer.isPacketType(message, QueryCommandPacket.COM_STMT_CLOSE)){
-				
-			}else if(MysqlPacketBuffer.isPacketType(message, QueryCommandPacket.COM_PING)){
-				conn.postMessage(STATIC_OK_BUFFER);
-			}else if(MysqlPacketBuffer.isPacketType(message, QueryCommandPacket.COM_QUERY)){
-				
-				QueryRouter router = ProxyRuntimeContext.getInstance().getQueryRouter();
-				ObjectPool[] pools = router.doRoute(conn,command.arg,false,null);
-				if(pools == null){
-					conn.postMessage(STATIC_OK_BUFFER);
-					return;
-				}
-				MessageHandler handler = new QueryCommandMessageHandler(conn,command.arg,null,pools,timeout);
-				if(handler instanceof Sessionable){
-					Sessionable session = (Sessionable)handler;
-					try{
-						session.startSession();
-					}catch(Exception e){
-						logger.error("start Session error:",e);
-						throw e;
-					}finally{
-						session.endSession();
-					}
-				}
-			}else if(MysqlPacketBuffer.isPacketType(message, QueryCommandPacket.COM_STMT_PREPARE)){
-				
-				PreparedStatmentInfo preparedInf = conn.getPreparedStatmentInfo(command.arg);
-				byte[] buffer = preparedInf.getByteBuffer();
-				conn.postMessage(buffer);
-				return;
-				
-			}else if(MysqlPacketBuffer.isPacketType(message, QueryCommandPacket.COM_STMT_SEND_LONG_DATA)){
-				conn.addLongData(message);
-			}else if(MysqlPacketBuffer.isPacketType(message, QueryCommandPacket.COM_STMT_EXECUTE)){
-				long statmentId = ExecutePacket.readStatmentID(message);
-				PreparedStatmentInfo preparedInf = conn.getPreparedStatmentInfo(statmentId);
-				
-				if(preparedInf == null){
-					ErrorPacket error = new ErrorPacket();
-					error.errno = 1044;
-					error.packetId = 1;
-					error.sqlstate = "42000";
-					error.serverErrorMessage ="Unknown prepared statment id="+statmentId;
-					conn.postMessage(error.toByteBuffer(connection).array());
-					logger.warn("Unknown prepared statment id:"+statmentId);
-				}else{
-					Map<Integer,Object> longMap = null;
-					
-					if(conn.getLongDataList().size()>0){
-						longMap = new HashMap<Integer,Object>();
-						for(byte[] longdate:conn.getLongDataList()){
-							LongDataPacket packet = new LongDataPacket();
-							packet.init(longdate,connection);
-							longMap.put(packet.parameterIndex, packet.data);
-						}
-						conn.clearLongData();
-					}
-					ExecutePacket executePacket = new ExecutePacket(preparedInf.getParameterCount(),longMap);
-					executePacket.init(message,connection);
+	public void handleMessage(Connection connection, byte[] message) {
+        MysqlClientConnection conn = (MysqlClientConnection) connection;
 
-					QueryRouter router = ProxyRuntimeContext.getInstance().getQueryRouter();
-					ObjectPool[] pools = router.doRoute(conn,preparedInf.getPreparedStatment(),false,executePacket.getParameters());
-					
-					PreparedStatmentExecuteMessageHandler handler = new PreparedStatmentExecuteMessageHandler(conn,preparedInf,executePacket,pools,timeout);
-					if(handler instanceof Sessionable){
-						Sessionable session = (Sessionable)handler;
-						try{
-							session.startSession();
-						}catch(Exception e){
-							logger.error("start Session error:",e);
-							throw e;
-						}finally{
-							session.endSession();
-						}
-					}
-				}
-			}else if(MysqlPacketBuffer.isPacketType(message, QueryCommandPacket.COM_INIT_DB)){
-				conn.setSchema(command.arg);
-				conn.postMessage(STATIC_OK_BUFFER);
-				
-			}else{
-				ErrorPacket error = new ErrorPacket();
-				error.errno = 1044;
-				error.packetId = 1;
-				error.sqlstate = "42000";
-				error.serverErrorMessage ="can not use this command here!!";
-				conn.postMessage(error.toByteBuffer(connection).array());
-				logger.debug("unsupport packet:"+command);
-			}
-		} catch (Exception e) {
-			logger.error("messageDispate error", e);
-			ErrorPacket error = new ErrorPacket();
-			error.errno = 1044;
-			error.packetId = 1;
-			error.sqlstate = "42000";
-			error.serverErrorMessage =e.getMessage();
-			conn.postMessage(error.toByteBuffer(connection).array());
-		}
-		
-	}
+        QueryCommandPacket command = new QueryCommandPacket();
+        command.init(message, connection);
+
+        if (logger.isDebugEnabled()) {
+            logger.debug(command);
+        }
+
+        try {
+            if (MysqlPacketBuffer.isPacketType(message, QueryCommandPacket.COM_QUIT) || MysqlPacketBuffer.isPacketType(message, QueryCommandPacket.COM_STMT_CLOSE)) {
+
+            } else if (MysqlPacketBuffer.isPacketType(message, QueryCommandPacket.COM_PING)) {
+                conn.postMessage(STATIC_OK_BUFFER);
+            } else if (MysqlPacketBuffer.isPacketType(message, QueryCommandPacket.COM_QUERY)) {
+
+                QueryRouter router = ProxyRuntimeContext.getInstance().getQueryRouter();
+                ObjectPool[] pools = router.doRoute(conn, command.arg, false, null);
+                if (pools == null) {
+                    conn.postMessage(STATIC_OK_BUFFER);
+                    return;
+                }
+                MessageHandler handler = new QueryCommandMessageHandler(conn, command.arg, null, pools, timeout);
+                if (handler instanceof Sessionable) {
+                    Sessionable session = (Sessionable) handler;
+                    try {
+                        session.startSession();
+                    } catch (Exception e) {
+                        logger.error("start Session error:", e);
+                        throw e;
+                    } finally {
+                        session.endSession();
+                    }
+                }
+            } else if (MysqlPacketBuffer.isPacketType(message, QueryCommandPacket.COM_STMT_PREPARE)) {
+
+                PreparedStatmentInfo preparedInf = conn.getPreparedStatmentInfo(command.arg);
+                byte[] buffer = preparedInf.getByteBuffer();
+                conn.postMessage(buffer);
+                return;
+
+            } else if (MysqlPacketBuffer.isPacketType(message, QueryCommandPacket.COM_STMT_SEND_LONG_DATA)) {
+                conn.addLongData(message);
+            } else if (MysqlPacketBuffer.isPacketType(message, QueryCommandPacket.COM_STMT_EXECUTE)) {
+                long statmentId = ExecutePacket.readStatmentID(message);
+                PreparedStatmentInfo preparedInf = conn.getPreparedStatmentInfo(statmentId);
+
+                if (preparedInf == null) {
+                    ErrorPacket error = new ErrorPacket();
+                    error.errno = 1044;
+                    error.packetId = 1;
+                    error.sqlstate = "42000";
+                    error.serverErrorMessage = "Unknown prepared statment id=" + statmentId;
+                    conn.postMessage(error.toByteBuffer(connection).array());
+                    logger.warn("Unknown prepared statment id:" + statmentId);
+                } else {
+                    Map<Integer, Object> longMap = null;
+
+                    if (conn.getLongDataList().size() > 0) {
+                        longMap = new HashMap<Integer, Object>();
+                        for (byte[] longdate : conn.getLongDataList()) {
+                            LongDataPacket packet = new LongDataPacket();
+                            packet.init(longdate, connection);
+                            longMap.put(packet.parameterIndex, packet.data);
+                        }
+                        conn.clearLongData();
+                    }
+                    ExecutePacket executePacket = new ExecutePacket(preparedInf.getParameterCount(), longMap);
+                    executePacket.init(message, connection);
+
+                    QueryRouter router = ProxyRuntimeContext.getInstance().getQueryRouter();
+                    ObjectPool[] pools = router.doRoute(conn, preparedInf.getPreparedStatment(), false, executePacket.getParameters());
+
+                    PreparedStatmentExecuteMessageHandler handler = new PreparedStatmentExecuteMessageHandler(
+                                                                                                              conn,
+                                                                                                              preparedInf,
+                                                                                                              executePacket,
+                                                                                                              pools,
+                                                                                                              timeout);
+                    if (handler instanceof Sessionable) {
+                        Sessionable session = (Sessionable) handler;
+                        try {
+                            session.startSession();
+                        } catch (Exception e) {
+                            logger.error("start Session error:", e);
+                            throw e;
+                        } finally {
+                            session.endSession();
+                        }
+                    }
+                }
+            } else if (MysqlPacketBuffer.isPacketType(message, QueryCommandPacket.COM_INIT_DB)) {
+                conn.setSchema(command.arg);
+                conn.postMessage(STATIC_OK_BUFFER);
+            } else {
+                ErrorPacket error = new ErrorPacket();
+                error.errno = 1044;
+                error.packetId = 1;
+                error.sqlstate = "42000";
+                error.serverErrorMessage = "can not use this command here!!";
+                conn.postMessage(error.toByteBuffer(connection).array());
+                logger.debug("unsupport packet:" + command);
+            }
+        } catch (Exception e) {
+            logger.error("messageDispate error", e);
+            ErrorPacket error = new ErrorPacket();
+            error.errno = 1044;
+            error.packetId = 1;
+            error.sqlstate = "42000";
+            error.serverErrorMessage = e.getMessage();
+            conn.postMessage(error.toByteBuffer(connection).array());
+        }
+    }
 }
