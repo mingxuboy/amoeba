@@ -2,7 +2,12 @@
 /*@egen*/options {
 	JDK_VERSION = "1.5";
 	IGNORE_CASE=true ;
-	DEBUG_PARSER=false ;                                                                                                                                             
+	DEBUG_PARSER=false ;
+   	                               
+   	                      
+   	                      
+   	              
+	                         
    	STATIC = false;
 }
 
@@ -22,14 +27,9 @@ PARSER_BEGIN(AladdinParser)
  */
 package com.meidusa.amoeba.aladdin.parser.sql;
 
-import java.io.DataInputStream;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-
 import com.meidusa.amoeba.parser.dbobject.*;
 import com.meidusa.amoeba.parser.expression.*;
 import com.meidusa.amoeba.parser.function.*;
-import com.meidusa.amoeba.parser.Parser;
 import com.meidusa.amoeba.parser.statment.*;
 
 import java.math.BigDecimal;
@@ -43,20 +43,22 @@ import java.util.Calendar;
 import java.sql.Connection;
 import com.meidusa.amoeba.sqljep.function.Comparative;
 
-public class AladdinParser implements/*@bgen(jjtree)*/ AladdinParserTreeConstants, /*@egen*/ com.meidusa.amoeba.parser.Parser{/*@bgen(jjtree)*/
+public class AladdinParser implements/*@bgen(jjtree)*/ AladdinParserTreeConstants, /*@egen*/ com.meidusa.amoeba.parser.Parser {/*@bgen(jjtree)*/
   protected JJTAladdinParserState jjtree = new JJTAladdinParserState();
 
 /*@egen*/
 	private final static String metachars = "tnrbf\\\"";
 	private final static String chars = "\t\n\r\b\f\\\"";
 	
+	private static TimeConverter timeConverter = new TimeConverter();
+	
 	private int parameterIndex = 0;
 	private Map<String,Table> tableAliasMap = new HashMap<String,Table>();
 	private Stack<Table> tableStack = new Stack<Table>();
 	private Statment statment;
 	private Schema defaultSchema;
-	private Map<String,Function> functionMap;
-	private static TimeConverter timeConverter = new TimeConverter();
+	private Map<String,Function> functionMap;	
+	
 	public void setFunctionMap(Map<String,Function> map){
 		this.functionMap = map;
 	}
@@ -64,39 +66,6 @@ public class AladdinParser implements/*@bgen(jjtree)*/ AladdinParserTreeConstant
 	public void setDefaultSchema(Schema schema){
 		defaultSchema = schema;
 	}
-	
-	
-    /**
-     * main method to test parser
-     */
-    public static void main( String args[] )
-        throws com.meidusa.amoeba.parser.ParseException
-        {
-
-        Parser p = null ;
-        if ( args.length < 1  ) {
-            System.out.println("Reading from stdin") ;
-            p = new AladdinParser(System.in) ;
-        }
-        else {
-            try {
-                p = new AladdinParser(new DataInputStream(
-                                new FileInputStream(args[0]))) ;
-            }
-            catch (FileNotFoundException e) {
-                System.out.println("File " + args[0] +
-                                " not found. Reading from stdin") ;
-                p = new AladdinParser(System.in) ;
-            }
-        } // else ends here
-
-        if ( args.length > 0 ) {
-            System.out.println(args[0]) ;
-        }
-        Statment statment = p.doParse();
-        System.out.println(statment.getExpression());
-
-    } // main ends here
 
 	Function getFunction(String indent){
 		if(functionMap == null){
@@ -104,7 +73,6 @@ public class AladdinParser implements/*@bgen(jjtree)*/ AladdinParserTreeConstant
 		}else{
 			return functionMap.get(indent);	
 		}
-		//return funMap.get(indent);
 	}
 	
 	public Statment doParse() throws com.meidusa.amoeba.parser.ParseException{
@@ -118,6 +86,7 @@ public class AladdinParser implements/*@bgen(jjtree)*/ AladdinParserTreeConstant
 			throw new com.meidusa.amoeba.parser.ParseException(e);
 		}
 	}
+	
 	public Statment getParsedStatment(){
 		return statment;
 	}
@@ -646,6 +615,7 @@ Statment parse()          :
     }
 /*@egen*/
 }
+
 Statment SelectSchema() :{
 	Token t = null;
 	String schema = null;
@@ -1697,7 +1667,7 @@ Expression SQLLikeClause()      :
 	boolean not = false;
 }
 {
-	(["NOT"{not = true;}] "LIKE" expression = SQLSimpleExpression()["ESCAPE" <STRING_LITERAL>]){
+	(["NOT"{not = true;}] "LIKE" expression = SQLSimpleExpression()[<K_ESCAPE> <STRING_LITERAL>]){
 		ComparisonExpression comparisonExpression = new ComparisonExpression();
 		comparisonExpression.setExpression(expression);
 		comparisonExpression.setComparison(not?Comparative.NotLike:Comparative.Like);

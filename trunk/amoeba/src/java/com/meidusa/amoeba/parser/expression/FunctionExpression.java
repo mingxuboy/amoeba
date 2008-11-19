@@ -23,64 +23,65 @@ import com.meidusa.amoeba.sqljep.ParseException;
  * @author <a href=mailto:piratebase@sina.com>Struct chen</a>
  *
  */
-public class FunctionExpression extends Expression{
+public class FunctionExpression extends Expression {
 
-	private Function function;
-	private List<Expression> argList = new ArrayList<Expression>();
+    private Function         function;
+    private List<Expression> argList = new ArrayList<Expression>();
 
-	public List<Expression> getArgList() {
-		return argList;
-	}
+    public List<Expression> getArgList() {
+        return argList;
+    }
 
-	public void setArgList(List<Expression> argList) {
-		this.argList = argList;
-	}
-	
-	/**
-	 * 往函数表达式 增加 表达式参数
-	 * @param expression 
-	 */
-	public void addArgExpression(Expression expression){
-		argList.add(expression);
-	}
+    public void setArgList(List<Expression> argList) {
+        this.argList = argList;
+    }
 
-	public Function getFunction() {
-		return function;
-	}
+    /**
+     * 往函数表达式 增加 表达式参数
+     * 
+     * @param expression
+     */
+    public void addArgExpression(Expression expression) {
+        argList.add(expression);
+    }
 
-	public void setFunction(Function function) {
-		this.function = function;
-	}
+    public Function getFunction() {
+        return function;
+    }
 
-	public boolean isRealtime(){
-		boolean isRealTime = (function instanceof RealtimeCalculator) ;
-		if(isRealTime) return true;
-		for(Expression e:argList){
-			if(e.isRealtime()){
-				return true;
-			}
-		}
-		return false;
-	}
-	
-	@SuppressWarnings("unchecked")
-	@Override
-	public Comparable evaluate(Object[] parameters) {
-		try {
-			return function.evaluate(argList,parameters);
-		} catch (ParseException e) {
-			e.printStackTrace();
-			return null;
-		}
-	}
+    public void setFunction(Function function) {
+        this.function = function;
+    }
 
-	@Override
-	public Expression reverse() {
-		return this;
-	}
-	
-	@Override
-	protected void toString(StringBuilder builder) {
-		function.toString(argList,builder);
-	}
+    public boolean isRealtime() {
+        boolean isRealTime = (function instanceof RealtimeCalculator);
+        if (isRealTime) return true;
+        for (Expression e : argList) {
+            if (e.isRealtime()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public Comparable evaluate(Object[] parameters) {
+        try {
+            return function.evaluate(argList, parameters);
+        } catch (ParseException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    @Override
+    public Expression reverse() {
+        return this;
+    }
+
+    @Override
+    protected void toString(StringBuilder builder) {
+        function.toString(argList, builder);
+    }
 }

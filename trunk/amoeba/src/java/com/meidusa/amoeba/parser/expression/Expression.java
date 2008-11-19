@@ -1,5 +1,5 @@
 /*
- * 	This program is free software; you can redistribute it and/or modify it under the terms of 
+ *  This program is free software; you can redistribute it and/or modify it under the terms of 
  * the GNU General Public License as published by the Free Software Foundation; either version 3 of the License, 
  * or (at your option) any later version. 
  * 
@@ -19,36 +19,35 @@ package com.meidusa.amoeba.parser.expression;
  *
  */
 public abstract class Expression {
-	
-	public Expression(){
-	}
-	public boolean canEvaluate(){
-		return true;
-	}
-	
-	/**
-	 * 表达式取反
-	 * @return
-	 */
-	public abstract Expression reverse();
-	
-	protected abstract void toString(StringBuilder builder);
-	
-	/**
-	 * 表示该表达式是否需要实时计算
-	 * @return
-	 */
-	public abstract boolean isRealtime();
-	/**
-	 * 表达式计算
-	 * @return
-	 */
-	@SuppressWarnings("unchecked")
-	public abstract Comparable evaluate(Object[] parameters);
 
-	public String toString(){
-		StringBuilder builder = new StringBuilder();
-		this.toString(builder);
-		return builder.toString();
-	}
+    public Expression(){
+    }
+
+    public boolean canEvaluate() {
+        return true;
+    }
+
+    /**
+     * 表达式取反
+     */
+    public abstract Expression reverse();
+
+    protected abstract void toString(StringBuilder builder);
+
+    /**
+     * 表示该表达式是否需要实时计算
+     */
+    public abstract boolean isRealtime();
+
+    /**
+     * 表达式计算
+     */
+    @SuppressWarnings("unchecked")
+    public abstract Comparable evaluate(Object[] parameters);
+
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        this.toString(builder);
+        return builder.toString();
+    }
 }
