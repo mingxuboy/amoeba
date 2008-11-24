@@ -18,12 +18,9 @@ import java.sql.Timestamp;
 import java.text.DateFormatSymbols;
 import java.util.Calendar;
 
-import com.meidusa.amoeba.sqljep.function.PostfixCommand;
 import com.meidusa.amoeba.sqljep.ASTFunNode;
 import com.meidusa.amoeba.sqljep.JepRuntime;
 import com.meidusa.amoeba.sqljep.ParseException;
-import com.meidusa.amoeba.util.StaticString;
-import com.meidusa.amoeba.util.ThreadLocalMap;
 
 public class DayName extends PostfixCommand {
 	final public int getNumberOfParameters() {

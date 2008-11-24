@@ -1,4 +1,5 @@
-/*
+/**
+ * <pre>
  * 	This program is free software; you can redistribute it and/or modify it under the terms of 
  * the GNU General Public License as published by the Free Software Foundation; either version 3 of the License, 
  * or (at your option) any later version. 
@@ -8,6 +9,7 @@
  * See the GNU General Public License for more details. 
  * 	You should have received a copy of the GNU General Public License along with this program; 
  * if not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ * </pre>
  */
 package com.meidusa.amoeba.mysql.net.packet;
 
@@ -16,7 +18,8 @@ import java.io.UnsupportedEncodingException;
 import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
 
 /**
- * From server to client in response to command, if error. 
+ * From server to client in response to command, if error.
+ * 
  * <pre>
  *  VERSION 4.0
  *  Bytes                       Name
@@ -55,6 +58,7 @@ import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
  *                     Expect the message to be between 0 and 512 bytes long.
  * ===========================================================================
  * </pre>
+ * 
  * <pre>
  * Example of Error Packet
  *                     Hexadecimal                ASCII
@@ -68,55 +72,55 @@ import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
  *                     71 27                      q'
  * </pre>
  * 
- * 
  * @author <a href=mailto:piratebase@sina.com>Struct chen</a>
- *
  */
-public class ErrorPacket extends AbstractResultPacket{
-	public int errno;
-	
-	/**
-	 * 5个字节
-	 */
-	public String sqlstate;
-	
-	/**
-	 * 错误信息
-	 */
-	public String serverErrorMessage;
-	public ErrorPacket(){
-		resultPacketType = PACKET_TYPE_ERROR;
-	}
-	
-	@Override
-	public void init(AbstractPacketBuffer buffer) {
-		super.init(buffer);
-		MysqlPacketBuffer myBuffer = (MysqlPacketBuffer)buffer;
-		errno = myBuffer.readInt();
-		serverErrorMessage = myBuffer.readString(CODE_PAGE_1252);
-		
-		if (serverErrorMessage.charAt(0) == '#') { //$NON-NLS-1$
+public class ErrorPacket extends AbstractResultPacket {
+
+    public int    errno;
+
+    /**
+     * 5个字节
+     */
+    public String sqlstate;
+
+    /**
+     * 错误信息
+     */
+    public String serverErrorMessage;
+
+    public ErrorPacket(){
+        resultPacketType = PACKET_TYPE_ERROR;
+    }
+
+    @Override
+    public void init(AbstractPacketBuffer buffer) {
+        super.init(buffer);
+        MysqlPacketBuffer myBuffer = (MysqlPacketBuffer) buffer;
+        errno = myBuffer.readInt();
+        serverErrorMessage = myBuffer.readString(CODE_PAGE_1252);
+
+        if (serverErrorMessage.charAt(0) == '#') { //$NON-NLS-1$
             // we have an SQLState
             if (serverErrorMessage.length() > 6) {
-            	sqlstate = serverErrorMessage.substring(1, 6);
+                sqlstate = serverErrorMessage.substring(1, 6);
                 serverErrorMessage = serverErrorMessage.substring(6);
             }
         }
-	}
+    }
 
-	@Override
-	public void write2Buffer(AbstractPacketBuffer buffer) throws UnsupportedEncodingException {
-		super.write2Buffer(buffer);
-		MysqlPacketBuffer myBuffer = (MysqlPacketBuffer)buffer;
-		myBuffer.writeInt(errno);
-		myBuffer.writeString('#'+sqlstate+serverErrorMessage);
-	}
-	
-	@Override
-	protected int calculatePacketSize(){
-		int packLength = super.calculatePacketSize();
-        packLength += ((sqlstate == null?0:sqlstate.length()) + (serverErrorMessage == null?0:serverErrorMessage.length()))*2 +3;
-		return packLength;
-	}
+    @Override
+    public void write2Buffer(AbstractPacketBuffer buffer) throws UnsupportedEncodingException {
+        super.write2Buffer(buffer);
+        MysqlPacketBuffer myBuffer = (MysqlPacketBuffer) buffer;
+        myBuffer.writeInt(errno);
+        myBuffer.writeString('#' + sqlstate + serverErrorMessage);
+    }
+
+    @Override
+    protected int calculatePacketSize() {
+        int packLength = super.calculatePacketSize();
+        packLength += ((sqlstate == null ? 0 : sqlstate.length()) + (serverErrorMessage == null ? 0 : serverErrorMessage.length())) * 2 + 3;
+        return packLength;
+    }
 
 }

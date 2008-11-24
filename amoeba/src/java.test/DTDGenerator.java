@@ -1,7 +1,18 @@
-import org.xml.sax.*;
-import java.util.*;
 import java.io.File;
+import java.util.Enumeration;
+import java.util.Iterator;
+import java.util.Set;
+import java.util.Stack;
+import java.util.TreeMap;
+import java.util.TreeSet;
+import java.util.Vector;
+
 import javax.xml.parsers.SAXParserFactory;
+
+import org.xml.sax.Attributes;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+import org.xml.sax.XMLReader;
 
 /**
 * DTDGenerator<BR>
@@ -16,6 +27,7 @@ import javax.xml.parsers.SAXParserFactory;
 * @version 7.0: separated from Saxon source, now works with any JAXP 1.1 XML parser 
 */
 
+@SuppressWarnings("unchecked")
 public class DTDGenerator extends org.xml.sax.helpers.DefaultHandler {
                                 // DTDSAXGen is a ContentHandler, created for convenience
                                 // by extending the default handler that comes with SAX2
@@ -79,6 +91,7 @@ public class DTDGenerator extends org.xml.sax.helpers.DefaultHandler {
         elementStack = new Stack();
     }
 
+    @SuppressWarnings("deprecation")
     private void run(String filename)  {
         try {
             InputSource is = new InputSource(new File(filename).toURL().toString());

@@ -7,7 +7,8 @@ import com.meidusa.amoeba.sqljep.ParseException;
 
 public class Insert extends AbstractFunction {
 
-	public Comparable evaluate(List<Expression> list, Object[] parameters)
+	@SuppressWarnings("unchecked")
+    public Comparable evaluate(List<Expression> list, Object[] parameters)
 			throws ParseException {
 		if(list.size() != 4){
 			return null;

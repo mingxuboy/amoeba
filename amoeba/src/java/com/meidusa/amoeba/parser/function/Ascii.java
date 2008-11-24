@@ -8,7 +8,8 @@ import com.meidusa.amoeba.util.StringUtil;
 
 public class Ascii extends AbstractFunction {
 
-	public Comparable evaluate(List<Expression> list, Object[] parameters)
+	@SuppressWarnings("unchecked")
+    public Comparable evaluate(List<Expression> list, Object[] parameters)
 			throws ParseException {
 		if(list.size()==0){
 			return null;

@@ -1,4 +1,5 @@
-/*
+/**
+ * <pre>
  * 	This program is free software; you can redistribute it and/or modify it under the terms of 
  * the GNU General Public License as published by the Free Software Foundation; either version 3 of the License, 
  * or (at your option) any later version. 
@@ -8,14 +9,17 @@
  * See the GNU General Public License for more details. 
  * 	You should have received a copy of the GNU General Public License along with this program; 
  * if not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ * </pre>
  */
 package com.meidusa.amoeba.mysql.net.packet;
 
 import java.io.UnsupportedEncodingException;
 
 import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
+
 /**
- * From server to client during initial handshake. 
+ * From server to client during initial handshake.
+ * 
  * <pre>
  *  Bytes                        Name
  *  -----                        ----
@@ -34,13 +38,13 @@ import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
  *                       in /include/mysql_version.h. Example value = 10.
  *  
  *  server_version:      The server takes this from MYSQL_SERVER_VERSION
- *                       in /include/mysql_version.h. Example value = "4.1.1-alpha".
+ *                       in /include/mysql_version.h. Example value = &quot;4.1.1-alpha&quot;.
  *  
  *  thread_number:       ID of the server thread for this connection.
  *  
  *  scramble_buff:       The password mechanism uses this. The second part are the
  *                       last 13 bytes.
- *                       (See "Password functions" section elsewhere in this document.)
+ *                       (See &quot;Password functions&quot; section elsewhere in this document.)
  *  
  *  server_capabilities: CLIENT_XXX options. The possible flag values at time of
  *  writing (taken from  include/mysql_com.h):
@@ -66,42 +70,40 @@ import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
  *  server_language:     current server character set number
  *  
  *  server_status:       SERVER_STATUS_xxx flags: e.g. SERVER_STATUS_AUTOCOMMIT
- *  @see http://forge.mysql.com/wiki/MySQL_Internals_ClientServer_Protocol#Handshake_Initialization_Packet
- *  </pre>
- *  
+ *  &#064;see http://forge.mysql.com/wiki/MySQL_Internals_ClientServer_Protocol#Handshake_Initialization_Packet
+ * </pre>
+ * 
  * @author <a href=mailto:piratebase@sina.com>Struct chen</a>
- *
  */
-public class HandshakePacket extends AbstractPacket{
-	
+public class HandshakePacket extends AbstractPacket {
 
-	public byte protocolVersion;
-	
-	/** n个字节 */
-	public String serverVersion;
-	
-	public long threadId;
-	
-	/** 8个字节 */
-	public String seed;
-	
-	public int serverCapabilities;
-	
-	public byte serverCharsetIndex;
-	
-	public int serverStatus;
-	
-	/** 13个字节 */
-	public String restOfScrambleBuff;
+    public byte   protocolVersion;
 
-	@Override
-	public void init(AbstractPacketBuffer myBuffer) {
-		super.init(myBuffer);
-		MysqlPacketBuffer buffer =  (MysqlPacketBuffer)myBuffer;
-		this.protocolVersion = buffer.readByte();
-		this.serverVersion = buffer.readString();
-		threadId = buffer.readLong();
-		
+    /** n个字节 */
+    public String serverVersion;
+
+    public long   threadId;
+
+    /** 8个字节 */
+    public String seed;
+
+    public int    serverCapabilities;
+
+    public byte   serverCharsetIndex;
+
+    public int    serverStatus;
+
+    /** 13个字节 */
+    public String restOfScrambleBuff;
+
+    @Override
+    public void init(AbstractPacketBuffer myBuffer) {
+        super.init(myBuffer);
+        MysqlPacketBuffer buffer = (MysqlPacketBuffer) myBuffer;
+        this.protocolVersion = buffer.readByte();
+        this.serverVersion = buffer.readString();
+        threadId = buffer.readLong();
+
         this.seed = buffer.readString();
         this.serverCapabilities = 0;
 
@@ -113,56 +115,56 @@ public class HandshakePacket extends AbstractPacket{
         this.serverStatus = buffer.readInt();
         buffer.setPosition(buffer.getPosition() + 13);
         restOfScrambleBuff = buffer.readString();
-	}
+    }
 
-	@Override
-	public void write2Buffer(AbstractPacketBuffer mysqlpacketBuffer) throws UnsupportedEncodingException {
-		super.write2Buffer(mysqlpacketBuffer);
-		MysqlPacketBuffer buffer =  (MysqlPacketBuffer)mysqlpacketBuffer;
-		buffer.writeByte(protocolVersion);
-		buffer.writeString(serverVersion,CODE_PAGE_1252);
-		buffer.writeLong(threadId);
-		buffer.writeString(seed);
-		buffer.writeInt(serverCapabilities);
-		buffer.writeByte(serverCharsetIndex);
-		buffer.writeInt(serverStatus);
-		buffer.writeBytesNoNull(new byte[13]);
-		buffer.writeString(restOfScrambleBuff);
-	}
-	
-	protected int calculatePacketSize(){
-		int packLength = super.calculatePacketSize();
-		int serverVersionLength = (serverVersion != null) ? serverVersion.length() : 0;
-		packLength += 1 + (serverVersionLength + 8+13)*2+8+2+1+2;
-		return packLength;
-	}
-	
-	protected void showServerCapabilities(){
-		if(logger.isDebugEnabled()){
-			StringBuilder builder = new StringBuilder();
-			builder.append("\n");
-			builder.append("==============================Server Flag===============================\n");
-			builder.append("CLIENT_LONG_PASSWORD:"+(serverCapabilities & CLIENT_LONG_PASSWORD)+"\n");
-			builder.append("CLIENT_FOUND_ROWS:"+(serverCapabilities & CLIENT_FOUND_ROWS)+"\n");
-			builder.append("CLIENT_LONG_FLAG:"+(serverCapabilities & CLIENT_LONG_FLAG)+"\n");
-			builder.append("CLIENT_CONNECT_WITH_DB:"+(serverCapabilities & CLIENT_CONNECT_WITH_DB)+"\n");
-			builder.append("CLIENT_NO_SCHEMA:"+(serverCapabilities & CLIENT_NO_SCHEMA)+"\n");
-			builder.append("CLIENT_COMPRESS:"+(serverCapabilities & CLIENT_COMPRESS)+"\n");
-			builder.append("CLIENT_ODBC:"+(serverCapabilities & CLIENT_ODBC)+"\n");
-			builder.append("CLIENT_LOCAL_FILES:"+(serverCapabilities & CLIENT_LOCAL_FILES)+"\n");
-			builder.append("CLIENT_IGNORE_SPACE:"+(serverCapabilities & CLIENT_IGNORE_SPACE)+"\n");
-			builder.append("CLIENT_PROTOCOL_41:"+(serverCapabilities & CLIENT_PROTOCOL_41)+"\n");
-			builder.append("CLIENT_INTERACTIVE:"+(serverCapabilities & CLIENT_INTERACTIVE)+"\n");
-			builder.append("CLIENT_SSL:"+(serverCapabilities & CLIENT_SSL)+"\n");
-			builder.append("CLIENT_IGNORE_SIGPIPE:"+(serverCapabilities & CLIENT_IGNORE_SIGPIPE)+"\n");
-			builder.append("CLIENT_TRANSACTIONS:"+(serverCapabilities & CLIENT_TRANSACTIONS)+"\n");
-			builder.append("CLIENT_RESERVED:"+(serverCapabilities & CLIENT_RESERVED)+"\n");
-			builder.append("CLIENT_SECURE_CONNECTION:"+(serverCapabilities & CLIENT_SECURE_CONNECTION)+"\n");
-			builder.append("CLIENT_MULTI_STATEMENTS:"+(serverCapabilities & CLIENT_MULTI_STATEMENTS)+"\n");
-			builder.append("CLIENT_MULTI_RESULTS:"+(serverCapabilities & CLIENT_MULTI_RESULTS)+"\n");
-			builder.append("==========================END Server Flag===============================\n");
-			logger.debug(builder.toString());
-		}
-	}
+    @Override
+    public void write2Buffer(AbstractPacketBuffer mysqlpacketBuffer) throws UnsupportedEncodingException {
+        super.write2Buffer(mysqlpacketBuffer);
+        MysqlPacketBuffer buffer = (MysqlPacketBuffer) mysqlpacketBuffer;
+        buffer.writeByte(protocolVersion);
+        buffer.writeString(serverVersion, CODE_PAGE_1252);
+        buffer.writeLong(threadId);
+        buffer.writeString(seed);
+        buffer.writeInt(serverCapabilities);
+        buffer.writeByte(serverCharsetIndex);
+        buffer.writeInt(serverStatus);
+        buffer.writeBytesNoNull(new byte[13]);
+        buffer.writeString(restOfScrambleBuff);
+    }
+
+    protected int calculatePacketSize() {
+        int packLength = super.calculatePacketSize();
+        int serverVersionLength = (serverVersion != null) ? serverVersion.length() : 0;
+        packLength += 1 + (serverVersionLength + 8 + 13) * 2 + 8 + 2 + 1 + 2;
+        return packLength;
+    }
+
+    protected void showServerCapabilities() {
+        if (logger.isDebugEnabled()) {
+            StringBuilder builder = new StringBuilder();
+            builder.append("\n");
+            builder.append("==============================Server Flag===============================\n");
+            builder.append("CLIENT_LONG_PASSWORD:" + (serverCapabilities & CLIENT_LONG_PASSWORD) + "\n");
+            builder.append("CLIENT_FOUND_ROWS:" + (serverCapabilities & CLIENT_FOUND_ROWS) + "\n");
+            builder.append("CLIENT_LONG_FLAG:" + (serverCapabilities & CLIENT_LONG_FLAG) + "\n");
+            builder.append("CLIENT_CONNECT_WITH_DB:" + (serverCapabilities & CLIENT_CONNECT_WITH_DB) + "\n");
+            builder.append("CLIENT_NO_SCHEMA:" + (serverCapabilities & CLIENT_NO_SCHEMA) + "\n");
+            builder.append("CLIENT_COMPRESS:" + (serverCapabilities & CLIENT_COMPRESS) + "\n");
+            builder.append("CLIENT_ODBC:" + (serverCapabilities & CLIENT_ODBC) + "\n");
+            builder.append("CLIENT_LOCAL_FILES:" + (serverCapabilities & CLIENT_LOCAL_FILES) + "\n");
+            builder.append("CLIENT_IGNORE_SPACE:" + (serverCapabilities & CLIENT_IGNORE_SPACE) + "\n");
+            builder.append("CLIENT_PROTOCOL_41:" + (serverCapabilities & CLIENT_PROTOCOL_41) + "\n");
+            builder.append("CLIENT_INTERACTIVE:" + (serverCapabilities & CLIENT_INTERACTIVE) + "\n");
+            builder.append("CLIENT_SSL:" + (serverCapabilities & CLIENT_SSL) + "\n");
+            builder.append("CLIENT_IGNORE_SIGPIPE:" + (serverCapabilities & CLIENT_IGNORE_SIGPIPE) + "\n");
+            builder.append("CLIENT_TRANSACTIONS:" + (serverCapabilities & CLIENT_TRANSACTIONS) + "\n");
+            builder.append("CLIENT_RESERVED:" + (serverCapabilities & CLIENT_RESERVED) + "\n");
+            builder.append("CLIENT_SECURE_CONNECTION:" + (serverCapabilities & CLIENT_SECURE_CONNECTION) + "\n");
+            builder.append("CLIENT_MULTI_STATEMENTS:" + (serverCapabilities & CLIENT_MULTI_STATEMENTS) + "\n");
+            builder.append("CLIENT_MULTI_RESULTS:" + (serverCapabilities & CLIENT_MULTI_RESULTS) + "\n");
+            builder.append("==========================END Server Flag===============================\n");
+            logger.debug(builder.toString());
+        }
+    }
 
 }

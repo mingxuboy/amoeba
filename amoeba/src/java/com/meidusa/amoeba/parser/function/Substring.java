@@ -6,13 +6,12 @@ import com.meidusa.amoeba.parser.expression.Expression;
 import com.meidusa.amoeba.sqljep.ParseException;
 
 /**
- * 
  * @author struct
- *
  */
 public class Substring extends AbstractFunction {
 
-	public Comparable evaluate(List<Expression> list, Object[] parameters)
+	@SuppressWarnings("unchecked")
+    public Comparable evaluate(List<Expression> list, Object[] parameters)
 			throws ParseException {
 		int size = list.size();
 		if(size<2){

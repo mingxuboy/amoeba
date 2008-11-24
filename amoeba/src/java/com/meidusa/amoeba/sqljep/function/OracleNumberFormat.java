@@ -447,7 +447,7 @@ public final class OracleNumberFormat extends Format {
 					}
 					int j = 0;
 					int prec = len-d.scale();
-					boolean canGroup = false;
+//					boolean canGroup = false;
 					int i1 = 0;
 					final int n = format.numbers.length();
 					for (int i = 0; i < n; i++) {
@@ -457,7 +457,7 @@ public final class OracleNumberFormat extends Format {
 						else if (i1 < digits-prec) {
 							if (format.firstNine != 0) {
 								str.append('0');
-								canGroup = true;
+//								canGroup = true;
 							}
 							else if (!format.fm) {
 								str.append(' ');
@@ -465,7 +465,7 @@ public final class OracleNumberFormat extends Format {
 							i1++;
 						} else {
 							str.append(coeff[j++]);
-							canGroup = true;
+//							canGroup = true;
 							i1++;
 						}
 					}

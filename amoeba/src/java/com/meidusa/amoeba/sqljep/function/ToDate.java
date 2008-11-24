@@ -17,8 +17,6 @@ import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.Calendar;
 
-import com.meidusa.amoeba.sqljep.function.OracleTimestampFormat;
-import com.meidusa.amoeba.sqljep.function.PostfixCommand;
 import com.meidusa.amoeba.sqljep.ASTFunNode;
 import com.meidusa.amoeba.sqljep.BaseJEP;
 import com.meidusa.amoeba.sqljep.JepRuntime;
@@ -88,7 +86,7 @@ public class ToDate extends PostfixCommand {
 	public static void main(String[] args) throws ParseException{
 		System.out.println(to_date("99-00-00 00:00:0000"));
 		
-		long long1 = Date.valueOf("1999-11-21").getTime();
+		Date.valueOf("1999-11-21").getTime();
 		Calendar long2 = Calendar.getInstance();
 		long2.setTime(Time.valueOf("00:01:0000"));
 		Calendar cal = Calendar.getInstance();

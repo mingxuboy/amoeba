@@ -12,22 +12,23 @@
 
 package com.meidusa.amoeba.sqljep.function;
 
-import java.util.Stack;
 import java.math.BigDecimal;
+import java.util.Stack;
 
-import com.meidusa.amoeba.sqljep.function.PostfixCommandI;
 import com.meidusa.amoeba.sqljep.ASTFunNode;
 import com.meidusa.amoeba.sqljep.JepRuntime;
 import com.meidusa.amoeba.sqljep.ParseException;
 
 /**
+ * <pre>
  * Function classes extend this class. It is an implementation of the 
  * PostfixMathCommandI interface.
- * <p>
+ * 
  * It includes a numberOfParameters member, that is checked when parsing the
  * expression. This member should be initialized to an appropriate value for
  * all classes extending this class. If an arbitrary number of parameters
  * should be allowed, initialize this member to -1.
+ * </pre>
  */
 public abstract class PostfixCommand implements PostfixCommandI {
 	protected static final Integer ZERO = new Integer(0);
@@ -64,7 +65,8 @@ public abstract class PostfixCommand implements PostfixCommandI {
 		return true;
 	}
 	
-	protected final void removeParams(Stack<Comparable> s, int num) {
+	@SuppressWarnings("unchecked")
+    protected final void removeParams(Stack<Comparable> s, int num) {
 		int i = 1;
 		s.pop();
 		while (i < num) {

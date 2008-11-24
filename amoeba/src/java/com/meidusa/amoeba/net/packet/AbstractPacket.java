@@ -24,14 +24,13 @@ public abstract class AbstractPacket implements Packet {
      * 分析数据包(分析包头+数据区域,分析完包头以后应该将Buffer的postion设置到数据区)
      */
     protected abstract void init(AbstractPacketBuffer buffer);
-    
+
     /**
      * 做完初始化以后
-     * @param buffer
      */
-    protected void afterInit(AbstractPacketBuffer buffer){
+    protected void afterInit(AbstractPacketBuffer buffer) {
     }
-    
+
     public ByteBuffer toByteBuffer(Connection conn) {
         try {
             int bufferSize = calculatePacketSize();
