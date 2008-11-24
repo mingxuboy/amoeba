@@ -26,15 +26,11 @@ public class PreparedStatmentMessageHandler extends CommandMessageHandler {
 
         @Override
         protected void doRun(PoolableObject conn) {
-            // try {
             int count = ProxyRuntimeContext.getInstance().getQueryRouter().parseParameterCount((DatabaseConnection) this.source, query);
             PreparedResultPacket preparedPacket = (PreparedResultPacket) packet;
             PreparedStatmentInfo preparedInfo = (PreparedStatmentInfo) parameter;
             preparedPacket.setStatementId(preparedInfo.getStatmentId());
             preparedPacket.setParameterCount(count);
-            // } finally {
-            // latch.countDown();
-            // }
         }
     }
 

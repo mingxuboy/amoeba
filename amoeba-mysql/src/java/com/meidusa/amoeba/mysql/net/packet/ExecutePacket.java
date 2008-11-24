@@ -21,6 +21,7 @@ import org.apache.log4j.Logger;
 
 import com.meidusa.amoeba.mysql.jdbc.MysqlDefs;
 import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
+import com.meidusa.amoeba.util.StringFillFormat;
 
 /**
  * <pre>
@@ -67,16 +68,20 @@ import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
  * </pre>
  * 
  * @author <a href=mailto:piratebase@sina.com>Struct chen</a>
+ * @author hexianmao
  */
 public class ExecutePacket extends CommandPacket {
 
     private static Logger        logger = Logger.getLogger(ExecutePacket.class);
+
     public long                  statementId;
     public byte                  flags;
     public long                  iterationCount;
     public byte                  newParameterBoundFlag;
-    protected transient int      parameterCount;
     public BindValue[]           values;
+
+    protected transient int      parameterCount;
+
     private Map<Integer, Object> longPrameters;
 
     public ExecutePacket(int parameterCount, Map<Integer, Object> longPrameters){
@@ -173,12 +178,10 @@ public class ExecutePacket extends CommandPacket {
         Object[] result = new Object[values.length];
         int index = 0;
         for (BindValue bindValue : values) {
-
             if (bindValue.isNull) {
                 index++;
             } else {
                 switch (bindValue.bufferType) {
-
                     case MysqlDefs.FIELD_TYPE_TINY:
                         result[index++] = bindValue.byteBinding;
                         break;
@@ -227,8 +230,18 @@ public class ExecutePacket extends CommandPacket {
 
     protected int calculatePacketSize() {
         int packLength = super.calculatePacketSize();
-        packLength += 4 + 1 + 4 + 1;
+        packLength += 10;// 4 + 1 + 4 + 1;
         return packLength;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder s = new StringBuilder();
+        s.append("Length=").append(StringFillFormat.format(packetLength, 4));
+        s.append(", PacketId=").append(StringFillFormat.format(packetId, 2));
+        s.append(", Command=").append(StringFillFormat.format(command, 2));
+        s.append(", StatementId=").append(StringFillFormat.format(statementId, 2));
+        return s.toString();
     }
 
     public static void main(String[] args) {

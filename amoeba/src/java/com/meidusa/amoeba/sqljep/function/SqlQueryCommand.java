@@ -103,7 +103,7 @@ public class SqlQueryCommand extends PostfixCommand implements Initialisable {
                     }
                 }
             } else {
-                logger.error("no result![sql]:" + sql + " [args]:" + Arrays.toString(parameters));
+                logger.error("no result!sql:[" + sql + "], args:" + Arrays.toString(parameters));
             }
             return columnMap;
         } catch (Exception e) {

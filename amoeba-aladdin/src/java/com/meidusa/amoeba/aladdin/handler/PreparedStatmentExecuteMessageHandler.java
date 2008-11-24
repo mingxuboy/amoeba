@@ -31,11 +31,11 @@ import com.meidusa.amoeba.net.poolable.PoolableObject;
 
 public class PreparedStatmentExecuteMessageHandler extends CommandMessageHandler {
 
-    private static Logger logger = Logger.getLogger(PreparedStatmentExecuteMessageHandler.class);
-
-    private ExecutePacket executePacket;
+    private ExecutePacket packet;
 
     protected static class PreparedExecuteQueryRunnable extends QueryRunnable {
+
+        private static Logger logger = Logger.getLogger(PreparedExecuteQueryRunnable.class);
 
         private ExecutePacket executePacket;
 
@@ -47,12 +47,11 @@ public class PreparedStatmentExecuteMessageHandler extends CommandMessageHandler
         @Override
         public void init(MessageHandler handler) {
             super.init(handler);
-            executePacket = ((PreparedStatmentExecuteMessageHandler) handler).executePacket;
+            executePacket = ((PreparedStatmentExecuteMessageHandler) handler).packet;
         }
 
         @Override
         protected void doRun(PoolableObject conn) {
-            // try {
             PreparedStatement pst = null;
             ResultSet rs = null;
             try {
@@ -132,19 +131,13 @@ public class PreparedStatmentExecuteMessageHandler extends CommandMessageHandler
                     }
                 }
             }
-            // } finally {
-            // if (latch != null) {
-            // latch.countDown();
-            // }
-            // }
         }
     }
 
-    public PreparedStatmentExecuteMessageHandler(MysqlClientConnection conn, PreparedStatmentInfo preparedInf,
-                                                 ExecutePacket executePacket, ObjectPool[] pools, long timeout){
-        super(conn, preparedInf.getPreparedStatment(), preparedInf, pools, timeout);
-        this.executePacket = executePacket;
-        executePacket.getParameters();
+    public PreparedStatmentExecuteMessageHandler(MysqlClientConnection conn, PreparedStatmentInfo pInfo,
+                                                 ExecutePacket packet, ObjectPool[] pools, long timeout){
+        super(conn, pInfo.getPreparedStatment(), pInfo, pools, timeout);
+        this.packet = packet;
     }
 
     @Override
@@ -155,7 +148,6 @@ public class PreparedStatmentExecuteMessageHandler extends CommandMessageHandler
 
     @Override
     protected ResultPacket newResultPacket(String query) {
-
         if (PreparedExecuteQueryRunnable.isSelect(query)) {
             MysqlResultSetPacket packet = new MysqlResultSetPacket(query);
             packet.setPrepared(true);
