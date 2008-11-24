@@ -7,56 +7,49 @@ import com.meidusa.amoeba.net.packet.AbstractPacket;
 import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
 
 /**
- * 
  * @author struct
- *
  */
-public class ManagerAbstractPacket extends AbstractPacket implements ManagerConstant{
-	
-	public int lenght;
-	public byte funType;
-	
-	@Override
-	protected void init(AbstractPacketBuffer buffer) {
-		buffer.setPosition(0);
-		lenght = (buffer.readByte() & 0xff)	
-		+ ((buffer.readByte() & 0xff) << 8)	
-		+ ((buffer.readByte() & 0xff) << 16);
-		funType = buffer.readByte();
-	}
-	
-	
-	
-	@Override
-	protected void write2Buffer(AbstractPacketBuffer buffer)
-			throws UnsupportedEncodingException {
-		buffer.setPosition(HEADER_SIZE);
-	}
-	
-	@Override
-	protected void afterPacketWritten(AbstractPacketBuffer buffer) {
-		int position = buffer.getPosition();
-		lenght = position;
-		buffer.setPosition(0);
-		buffer.writeByte((byte)(lenght & 0xff));
-		buffer.writeByte((byte) (lenght >>> 8));
-		buffer.writeByte((byte) (lenght >>> 16));
-		buffer.writeByte((byte) funType);
-		buffer.setPosition(position);
-	}
+public class ManagerAbstractPacket extends AbstractPacket implements ManagerConstant {
 
-	@Override
-	protected int calculatePacketSize() {
-		return 12;
-	}
+    public int  lenght;
+    public byte funType;
 
-	@Override
-	protected Class<? extends AbstractPacketBuffer> getPacketBufferClass() {
-		return ManagerPacketBuffer.class;
-	}
+    @Override
+    protected void init(AbstractPacketBuffer buffer) {
+        buffer.setPosition(0);
+        lenght = (buffer.readByte() & 0xff) + ((buffer.readByte() & 0xff) << 8) + ((buffer.readByte() & 0xff) << 16);
+        funType = buffer.readByte();
+    }
 
-	@Override
-	protected void afterInit(AbstractPacketBuffer buffer) {
-		buffer.setPosition(HEADER_SIZE);
-	}
+    @Override
+    protected void write2Buffer(AbstractPacketBuffer buffer) throws UnsupportedEncodingException {
+        buffer.setPosition(HEADER_SIZE);
+    }
+
+    @Override
+    protected void afterPacketWritten(AbstractPacketBuffer buffer) {
+        int position = buffer.getPosition();
+        lenght = position;
+        buffer.setPosition(0);
+        buffer.writeByte((byte) (lenght & 0xff));
+        buffer.writeByte((byte) (lenght >>> 8));
+        buffer.writeByte((byte) (lenght >>> 16));
+        buffer.writeByte((byte) funType);
+        buffer.setPosition(position);
+    }
+
+    @Override
+    protected int calculatePacketSize() {
+        return 12;
+    }
+
+    @Override
+    protected Class<? extends AbstractPacketBuffer> getPacketBufferClass() {
+        return ManagerPacketBuffer.class;
+    }
+
+    @Override
+    protected void afterInit(AbstractPacketBuffer buffer) {
+        buffer.setPosition(HEADER_SIZE);
+    }
 }

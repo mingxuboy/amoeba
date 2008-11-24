@@ -17,9 +17,7 @@ public class HashParttion extends PostfixCommand {
     /**
      * 数据段分布定义，其中取模的数一定要是2^n，因为这里使用x % 2^n == x & (2^n - 1)等式，来优化性能。
      */
-    // private static final int[] parttion = new int[] { 0, 64, 128, 192, 256, 320, 384, 448, 512, 576, 640, 704, 768,
-    // 832, 896, 960, 1024 };
-    private static final int[] parttion = new int[] { 0, 256, 512, 768, 1024 };
+    private static final int[] parttion = new int[] { 0, 64, 128, 192, 256, 320, 384, 448, 512, 576, 640, 704, 768, 832, 896, 960, 1024 };
 
     /**
      * 每份数据映射的数据段

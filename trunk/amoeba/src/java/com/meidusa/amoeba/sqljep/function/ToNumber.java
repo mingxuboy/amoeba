@@ -12,9 +12,6 @@
 
 package com.meidusa.amoeba.sqljep.function;
 
-
-import com.meidusa.amoeba.sqljep.function.OracleNumberFormat;
-import com.meidusa.amoeba.sqljep.function.PostfixCommand;
 import com.meidusa.amoeba.sqljep.ASTFunNode;
 import com.meidusa.amoeba.sqljep.BaseJEP;
 import com.meidusa.amoeba.sqljep.JepRuntime;
@@ -22,7 +19,9 @@ import com.meidusa.amoeba.sqljep.ParseException;
 
 public class ToNumber extends PostfixCommand {
 	private static final String FORMAT_EXCEPTION = "Wrong number";
-	private static final String TYPE_EXCEPTION = "Wrong type";
+	
+	@SuppressWarnings("unused")
+    private static final String TYPE_EXCEPTION = "Wrong type";
 	
 	final public int getNumberOfParameters() {
 		return -1;
@@ -63,7 +62,8 @@ public class ToNumber extends PostfixCommand {
 		}
 	}
 	
-	public static Comparable<?>  to_number(Comparable<?>  param1, Comparable<?>  param2) throws ParseException {
+	@SuppressWarnings("unchecked")
+    public static Comparable<?>  to_number(Comparable<?>  param1, Comparable<?>  param2) throws ParseException {
 		if (param1 == null || param2 == null) {
 			return null;
 		}
@@ -76,7 +76,7 @@ public class ToNumber extends PostfixCommand {
 		if (!(param1 instanceof String) || !(param2 instanceof String)) {
 			throw new ParseException(WRONG_TYPE+"  to_number("+param1.getClass()+"+"+param2.getClass()+")");
 		}
-		StringBuilder d = new StringBuilder((String)param1);
+		//StringBuilder d = new StringBuilder((String)param1);
 		try {
 			OracleNumberFormat format = new OracleNumberFormat((String)param2);
 			return (Comparable)format.parseObject((String)param1);

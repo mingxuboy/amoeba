@@ -12,16 +12,33 @@
 
 package com.meidusa.amoeba.sqljep.function;
 
-import java.util.*;
-import java.text.*;
+import static java.util.Calendar.AM;
+import static java.util.Calendar.AM_PM;
+import static java.util.Calendar.DAY_OF_MONTH;
+import static java.util.Calendar.DAY_OF_WEEK;
+import static java.util.Calendar.DAY_OF_YEAR;
+import static java.util.Calendar.ERA;
+import static java.util.Calendar.HOUR;
+import static java.util.Calendar.HOUR_OF_DAY;
+import static java.util.Calendar.MINUTE;
+import static java.util.Calendar.MONTH;
+import static java.util.Calendar.PM;
+import static java.util.Calendar.SECOND;
+import static java.util.Calendar.WEEK_OF_YEAR;
+import static java.util.Calendar.YEAR;
 
-import static java.util.Calendar.*;
+import java.text.DateFormatSymbols;
+import java.text.FieldPosition;
+import java.text.Format;
+import java.text.ParsePosition;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+import java.util.Hashtable;
 
-import com.meidusa.amoeba.sqljep.function.OracleDateFormat;
-import com.meidusa.amoeba.sqljep.function.OracleTimeFormat;
-
-public class OracleTimestampFormat extends Format {
-	private static final String PATTERN_EXCEPTION = "Wrong pattern";
+public class OracleTimestampFormat extends Format {	
+    private static final long serialVersionUID = 1L;    
+    private static final String PATTERN_EXCEPTION = "Wrong pattern";
 	private static final String FORMAT_EXCEPTION = "Wrong pattern";
 	private static final String NOT_IMPLIMENTED_EXCEPTION = "Not implimented";
 	private static final String BAD_INPUT_PATTERN = "Format code cannot appear in date input format";
@@ -735,7 +752,7 @@ public class OracleTimestampFormat extends Format {
 			return str;
 		}
 		public void parse(Calendar cal, DateFormatSymbols symb, String source, ParsePosition pos) throws java.text.ParseException {
-			int day = getNumber(source, pos, 1);
+			getNumber(source, pos, 1);
 			return;
 		}
 		public String toString() {
@@ -1024,7 +1041,8 @@ public class OracleTimestampFormat extends Format {
 	protected OracleTimestampFormat() {
 	}
 	
-	public OracleTimestampFormat(String pattern) throws java.text.ParseException {
+	@SuppressWarnings("unchecked")
+    public OracleTimestampFormat(String pattern) throws java.text.ParseException {
 		cal = Calendar.getInstance();
 		symb = new DateFormatSymbols();
 		format = formatsCache.get(pattern);
@@ -1037,7 +1055,8 @@ public class OracleTimestampFormat extends Format {
 		}
 	}
 
-	public OracleTimestampFormat(String pattern, Calendar calendar, DateFormatSymbols dateSymb) throws java.text.ParseException {
+	@SuppressWarnings("unchecked")
+    public OracleTimestampFormat(String pattern, Calendar calendar, DateFormatSymbols dateSymb) throws java.text.ParseException {
 		cal = calendar;
 		symb = dateSymb;
 		format = formatsCache.get(pattern);

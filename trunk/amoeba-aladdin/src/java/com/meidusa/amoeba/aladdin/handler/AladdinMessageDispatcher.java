@@ -20,27 +20,27 @@ import com.meidusa.amoeba.net.Sessionable;
 import com.meidusa.amoeba.net.poolable.ObjectPool;
 import com.meidusa.amoeba.route.QueryRouter;
 
-
 /**
- * 
  * @author struct
- *
+ * @author hexianmao
  */
 public class AladdinMessageDispatcher implements MessageHandler {
 
-	private static long timeout = -1;
-	protected static Logger logger = Logger.getLogger(AladdinMessageDispatcher.class);
-	private static byte[] STATIC_OK_BUFFER;
-	static{
-		OkPacket ok = new OkPacket();
-		ok.affectedRows = 0;
-		ok.insertId = 0;
-		ok.packetId = 1;
-		ok.serverStatus = 2;
-		STATIC_OK_BUFFER = ok.toByteBuffer(null).array();
-	}
-	
-	public void handleMessage(Connection connection, byte[] message) {
+    private static Logger logger  = Logger.getLogger(AladdinMessageDispatcher.class);
+
+    private static long   timeout = -1;
+    private static byte[] STATIC_OK_BUFFER;
+
+    static {
+        OkPacket ok = new OkPacket();
+        ok.affectedRows = 0;
+        ok.insertId = 0;
+        ok.packetId = 1;
+        ok.serverStatus = 2;
+        STATIC_OK_BUFFER = ok.toByteBuffer(null).array();
+    }
+
+    public void handleMessage(Connection connection, byte[] message) {
         MysqlClientConnection conn = (MysqlClientConnection) connection;
 
         QueryCommandPacket command = new QueryCommandPacket();
@@ -52,11 +52,10 @@ public class AladdinMessageDispatcher implements MessageHandler {
 
         try {
             if (MysqlPacketBuffer.isPacketType(message, QueryCommandPacket.COM_QUIT) || MysqlPacketBuffer.isPacketType(message, QueryCommandPacket.COM_STMT_CLOSE)) {
-
+                return;
             } else if (MysqlPacketBuffer.isPacketType(message, QueryCommandPacket.COM_PING)) {
                 conn.postMessage(STATIC_OK_BUFFER);
             } else if (MysqlPacketBuffer.isPacketType(message, QueryCommandPacket.COM_QUERY)) {
-
                 QueryRouter router = ProxyRuntimeContext.getInstance().getQueryRouter();
                 ObjectPool[] pools = router.doRoute(conn, command.arg, false, null);
                 if (pools == null) {
@@ -76,18 +75,15 @@ public class AladdinMessageDispatcher implements MessageHandler {
                     }
                 }
             } else if (MysqlPacketBuffer.isPacketType(message, QueryCommandPacket.COM_STMT_PREPARE)) {
-
                 PreparedStatmentInfo preparedInf = conn.getPreparedStatmentInfo(command.arg);
                 byte[] buffer = preparedInf.getByteBuffer();
                 conn.postMessage(buffer);
                 return;
-
             } else if (MysqlPacketBuffer.isPacketType(message, QueryCommandPacket.COM_STMT_SEND_LONG_DATA)) {
                 conn.addLongData(message);
             } else if (MysqlPacketBuffer.isPacketType(message, QueryCommandPacket.COM_STMT_EXECUTE)) {
                 long statmentId = ExecutePacket.readStatmentID(message);
                 PreparedStatmentInfo preparedInf = conn.getPreparedStatmentInfo(statmentId);
-
                 if (preparedInf == null) {
                     ErrorPacket error = new ErrorPacket();
                     error.errno = 1044;
@@ -142,7 +138,7 @@ public class AladdinMessageDispatcher implements MessageHandler {
                 error.sqlstate = "42000";
                 error.serverErrorMessage = "can not use this command here!!";
                 conn.postMessage(error.toByteBuffer(connection).array());
-                logger.debug("unsupport packet:" + command);
+                logger.error("unsupport packet:" + command);
             }
         } catch (Exception e) {
             logger.error("messageDispate error", e);

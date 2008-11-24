@@ -12,15 +12,23 @@
 
 package com.meidusa.amoeba.sqljep.function;
 
-import java.lang.Math;
-import java.util.Calendar;
+import static com.meidusa.amoeba.sqljep.function.Trunc.DATE_EXCEPTION;
+import static com.meidusa.amoeba.sqljep.function.Trunc.FORMAT_EXCEPTION;
+import static com.meidusa.amoeba.sqljep.function.Trunc.TIME_EXCEPTION;
+import static java.util.Calendar.DATE;
+import static java.util.Calendar.DAY_OF_MONTH;
+import static java.util.Calendar.DAY_OF_WEEK;
+import static java.util.Calendar.HOUR_OF_DAY;
+import static java.util.Calendar.MILLISECOND;
+import static java.util.Calendar.MINUTE;
+import static java.util.Calendar.MONTH;
+import static java.util.Calendar.SECOND;
+import static java.util.Calendar.YEAR;
+
+import java.math.BigDecimal;
 import java.sql.Timestamp;
-import java.math.*;
+import java.util.Calendar;
 
-import static com.meidusa.amoeba.sqljep.function.Trunc.*;
-import static java.util.Calendar.*;
-
-import com.meidusa.amoeba.sqljep.function.PostfixCommand;
 import com.meidusa.amoeba.sqljep.ASTFunNode;
 import com.meidusa.amoeba.sqljep.JepRuntime;
 import com.meidusa.amoeba.sqljep.ParseException;
@@ -253,7 +261,7 @@ public class Round extends PostfixCommand {
 					}
 					int minute = cal.get(MINUTE);
 					if (minute >= 30) {
-						int hour = cal.get(HOUR_OF_DAY);
+						cal.get(HOUR_OF_DAY);
 						cal.add(HOUR_OF_DAY, 1);
 					}
 					cal.set(MINUTE, 0);
@@ -267,7 +275,7 @@ public class Round extends PostfixCommand {
 					}
 					int second = cal.get(SECOND);
 					if (second >= 30) {
-						int minute = cal.get(MINUTE);
+						cal.get(MINUTE);
 						cal.add(MINUTE, 1);
 					}
 					cal.set(SECOND, 0);

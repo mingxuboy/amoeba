@@ -12,12 +12,16 @@
 
 package com.meidusa.amoeba.sqljep.function;
 
-import java.util.*;
-import java.text.*;
+import java.text.DateFormatSymbols;
+import java.text.ParsePosition;
+import java.util.ArrayList;
+import java.util.Calendar;
 
-public final class OracleTimeFormat extends OracleTimestampFormat {
+public final class OracleTimeFormat extends OracleTimestampFormat {	
 	
-	protected OracleTimeFormat(ArrayList<Object> format, Calendar calendar, DateFormatSymbols dateSymb) {
+    private static final long serialVersionUID = 1L;
+
+    protected OracleTimeFormat(ArrayList<Object> format, Calendar calendar, DateFormatSymbols dateSymb) {
 		this.format = format;
 		this.cal = calendar;
 		this.symb = dateSymb;

@@ -23,7 +23,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.StringTokenizer;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -127,6 +126,7 @@ import com.meidusa.amoeba.util.StringUtil;
 
 /**
  * @author struct
+ * @author hexianmao
  */
 @SuppressWarnings("deprecation")
 public abstract class AbstractQueryRouter implements QueryRouter, Initialisable {
@@ -197,9 +197,9 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable 
     }
 
     /* 默认1000 */
+    private int                                     LRUMapSize      = 1000;
     private LRUMap                                  map;
     private Lock                                    mapLock         = new ReentrantLock(false);
-    private int                                     LRUMapSize      = 1000;
 
     private Map<Table, TableRule>                   tableRuleMap    = new HashMap<Table, TableRule>();
     private Map<String, Function>                   functionMap     = new HashMap<String, Function>();
@@ -208,6 +208,7 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable 
     protected ObjectPool[]                          defaultPools;
     protected ObjectPool[]                          readPools;
     protected ObjectPool[]                          writePools;
+
     private String                                  ruleConfig;
     private String                                  functionConfig;
     private String                                  ruleFunctionConfig;
@@ -215,6 +216,7 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable 
     private String                                  defaultPool;
     private String                                  readPool;
     private String                                  writePool;
+
     private boolean                                 needParse       = true;
     private boolean                                 needEvaluate    = true;
 
@@ -226,9 +228,6 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable 
         return ruleConfig;
     }
 
-    /**
-     * 创建一个新的sql parser
-     */
     public abstract Parser newParser(String sql);
 
     public void setRuleConfig(String ruleConfig) {
@@ -268,7 +267,6 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable 
      */
     protected ObjectPool[] selectPool(DatabaseConnection connection, String sql, boolean ispreparedStatment,
                                       Object[] parameters) {
-        long st = System.currentTimeMillis();
         List<String> poolNames = new ArrayList<String>();
 
         Statment statment = parseSql(connection, sql);
@@ -294,9 +292,10 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable 
 
                         // 如果存在table Rule 则需要看是否有Rule
                         if (tableRule != null) {
+                            //没有列的sql语句，使用默认的tableRule
                             if (columnMap == null || ispreparedStatment) {
                                 String[] pools = dmlStatment.isReadStatment() ? tableRule.readPools : tableRule.writePools;
-                                if (pools == null) {
+                                if (pools == null || pools.length == 0) {
                                     pools = tableRule.defaultPools;
                                 }
                                 for (String poolName : pools) {
@@ -323,10 +322,8 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable 
                                     continue;
                                 } else {
                                     boolean matched = true;
-
                                     // 如果查询语句中包含了该规则不需要的参数，则该规则将被忽略
                                     for (Column exclude : rule.excludes) {
-
                                         Comparable<?> condition = columnMap.get(exclude);
                                         if (condition != null) {
                                             matched = false;
@@ -344,7 +341,6 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable 
                                     for (Map.Entry<Column, Integer> parameter : rule.cloumnMap.entrySet()) {
                                         Comparative condition = columnMap.get(parameter.getKey());
                                         if (condition != null) {
-
                                             // 如果规则忽略 数组的 参数，并且参数有array 参数，则忽略该规则
                                             if (rule.ignoreArray && condition instanceof ComparativeBaseList) {
                                                 matched = false;
@@ -365,11 +361,11 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable 
 
                                     try {
                                         Comparable<?> result = rule.rowJep.getValue(comparables);
-                                        Integer index = 0;
+                                        Integer i = 0;
                                         if (result instanceof Comparative) {
                                             if (rule.isSwitch) {
-                                                index = (Integer) ((Comparative) result).getValue();
-                                                if (index < 0) {
+                                                i = (Integer) ((Comparative) result).getValue();
+                                                if (i < 0) {
                                                     continue;
                                                 }
                                                 matched = true;
@@ -385,13 +381,13 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable 
                                                 groupMatched.add(rule.group);
                                             }
                                             String[] pools = dmlStatment.isReadStatment() ? rule.readPools : rule.writePools;
-                                            if (pools == null) {
+                                            if (pools == null || pools.length == 0) {
                                                 pools = rule.defaultPools;
                                             }
-                                            if (pools != null) {
+                                            if (pools != null && pools.length > 0) {
                                                 if (rule.isSwitch) {
-                                                    if (!poolNames.contains(pools[index])) {
-                                                        poolNames.add(pools[index]);
+                                                    if (!poolNames.contains(pools[i])) {
+                                                        poolNames.add(pools[i]);
                                                     }
                                                 } else {
                                                     for (String poolName : pools) {
@@ -416,11 +412,11 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable 
 
                             // 如果所有规则都无法匹配，则默认采用TableRule中的pool设置。
                             if (poolNames.size() == 0) {
-                                logger.warn("no rule matched, using table default rules:" + Arrays.toString(tableRule.defaultPools));
                                 String[] pools = dmlStatment.isReadStatment() ? tableRule.readPools : tableRule.writePools;
-                                if (pools == null) {
+                                if (pools == null || pools.length == 0) {
                                     pools = tableRule.defaultPools;
                                 }
+                                logger.warn("no rule matched, using tableRule defaultPools:" + Arrays.toString(pools));
 
                                 for (String poolName : pools) {
                                     if (!poolNames.contains(poolName)) {
@@ -460,28 +456,28 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable 
             pools[i++] = ProxyRuntimeContext.getInstance().getPoolMap().get(name);
         }
 
-        if (logger.isDebugEnabled() && pools != null && pools.length > 0) {
-            logger.debug("Sql:[" + sql + "] route to pools:" + poolNames);
-        }
-
         if (pools == null || pools.length == 0) {
             if (dmlStatment != null) {
                 pools = dmlStatment.isReadStatment() ? this.readPools : this.writePools;
-                if (logger.isDebugEnabled() && pools != null && pools.length > 0 && pools[0] != null) {
-                    logger.debug("Sql:[" + sql + "] route to rule.readPools or rule.writePools");
+                if (logger.isDebugEnabled() && pools != null && pools.length > 0) {
+                    if (dmlStatment.isReadStatment()) {
+                        logger.debug("Sql:[" + sql + "] route to queryRouter pools:" + readPool + "\n");
+                    } else {
+                        logger.debug("Sql:[" + sql + "] route to queryRouter pools:" + writePool + "\n");
+                    }
                 }
             }
 
-            if (pools == null || pools.length == 0 || pools[0] == null) {
+            if (pools == null || pools.length == 0) {
                 pools = this.defaultPools;
-                if (logger.isDebugEnabled() && pools != null && pools.length > 0 && pools[0] != null) {
-                    logger.debug("Sql:[" + sql + "] route to rule.defaultPools");
+                if (logger.isDebugEnabled() && pools != null && pools.length > 0) {
+                    logger.debug("Sql:[" + sql + "] route to queryRouter pools:" + defaultPool + "\n");
                 }
             }
-        }
-
-        if (logger.isDebugEnabled()) {
-            logger.debug("Sql:[" + sql + "] parse and select pools take time:" + (System.currentTimeMillis() - st) + " ms.\n");
+        } else {
+            if (logger.isDebugEnabled() && pools != null && pools.length > 0) {
+                logger.debug("Sql:[" + sql + "] route to pools:" + poolNames + "\n");
+            }
         }
 
         return pools;
@@ -502,13 +498,13 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable 
         if (defaultPools == null || defaultPools[0] == null) {
             throw new InitialisationException("default pool required!");
         }
-        if (this.readPool != null && !StringUtil.isEmpty(readPool)) {
-            readPools = new ObjectPool[] { ProxyRuntimeContext.getInstance().getPoolMap().get(this.readPool) };
+        if (readPool != null && !StringUtil.isEmpty(readPool)) {
+            readPools = new ObjectPool[] { ProxyRuntimeContext.getInstance().getPoolMap().get(readPool) };
         }
-        if (this.writePool != null && !StringUtil.isEmpty(writePool)) {
+        if (writePool != null && !StringUtil.isEmpty(writePool)) {
             writePools = new ObjectPool[] { ProxyRuntimeContext.getInstance().getPoolMap().get(writePool) };
         }
-        map = new LRUMap(this.LRUMapSize);
+        map = new LRUMap(LRUMapSize);
 
         class ConfigCheckTread extends Thread {
 
@@ -573,9 +569,7 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable 
                             if (tableRuleMap != null) {
                                 AbstractQueryRouter.this.tableRuleMap = tableRuleMap;
                             }
-
                         } catch (ConfigurationException e) {
-
                         } finally {
                             if (funFile != null && funFile.exists()) {
                                 lastFunFileModified = funFile.lastModified();
@@ -875,20 +869,7 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable 
     }
 
     public static String[] readTokenizedString(String string, String delim) {
-        if (string == null || string.trim().length() == 0) {
-            return null;
-        }
-        StringTokenizer tokenizer = new StringTokenizer(string, delim);
-        String[] tokens = new String[tokenizer.countTokens()];
-        int index = 0;
-        while (tokenizer.hasMoreTokens()) {
-            String token = tokenizer.nextToken().trim();
-            tokens[index++] = token;
-        }
-        if (tokens.length > 0) {
-            return tokens;
-        }
-        return null;
+        return StringUtil.split(string, delim);
     }
 
     public int getLRUMapSize() {
