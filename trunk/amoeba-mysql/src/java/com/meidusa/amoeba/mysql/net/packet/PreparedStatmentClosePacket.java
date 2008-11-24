@@ -16,26 +16,28 @@ package com.meidusa.amoeba.mysql.net.packet;
 import java.io.UnsupportedEncodingException;
 
 import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
+import com.meidusa.amoeba.util.StringFillFormat;
 
 /**
  * @author <a href=mailto:piratebase@sina.com>Struct chen</a>
+ * @author hexianmao
  */
 public class PreparedStatmentClosePacket extends CommandPacket {
 
-    public long statmentId;
+    public long statementId;
 
     @Override
     public void init(AbstractPacketBuffer myBuffer) {
         super.init(myBuffer);
         MysqlPacketBuffer buffer = (MysqlPacketBuffer) myBuffer;
-        statmentId = buffer.readLong();
+        statementId = buffer.readLong();
     }
 
     @Override
     public void write2Buffer(AbstractPacketBuffer myBuffer) throws UnsupportedEncodingException {
         super.write2Buffer(myBuffer);
         MysqlPacketBuffer buffer = (MysqlPacketBuffer) myBuffer;
-        buffer.writeLong(statmentId);
+        buffer.writeLong(statementId);
     }
 
     @Override
@@ -43,5 +45,15 @@ public class PreparedStatmentClosePacket extends CommandPacket {
         int packLength = super.calculatePacketSize();
         packLength += 4;
         return packLength;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder s = new StringBuilder();
+        s.append("Length=").append(StringFillFormat.format(packetLength, 4));
+        s.append(", PacketId=").append(StringFillFormat.format(packetId, 2));
+        s.append(", Command=").append(StringFillFormat.format(command, 2));
+        s.append(", StatementId=").append(StringFillFormat.format(statementId, 2));
+        return s.toString();
     }
 }

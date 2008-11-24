@@ -132,9 +132,6 @@ public class MysqlMessageHandlerRunner implements MessageHandlerRunner, Initiali
                 field.length = 8;
                 resultPacket.fieldPackets = new FieldPacket[] { field };
             }
-
-        } else {
-
         }
     }
 

@@ -27,16 +27,19 @@ public abstract class CommandMessageHandler implements MessageHandler, Sessionab
     private static Logger           logger      = Logger.getLogger(CommandMessageHandler.class);
 
     protected MysqlClientConnection source;
-    private long                    createTime;
+    protected String                query;
+    protected ResultPacket          packet      = null;
+
+    private Object                  parameter;
+    private ObjectPool[]            pools;
     private long                    timeout;
+
+    private long                    createTime;
     private long                    endTime;
     private boolean                 ended       = false;
-    private ObjectPool[]            pools;
+
     private final Lock              lock        = new ReentrantLock(false);
     private Map<Object, ObjectPool> connPoolMap = new HashMap<Object, ObjectPool>();
-    protected String                query;
-    private Object                  parameter;
-    protected ResultPacket          packet      = null;
 
     public CommandMessageHandler(MysqlClientConnection source, String query, Object parameter, ObjectPool[] pools,
                                  long timeout){
@@ -45,11 +48,11 @@ public abstract class CommandMessageHandler implements MessageHandler, Sessionab
         this.pools = pools;
         this.timeout = timeout;
         this.parameter = parameter;
-        packet = newResultPacket(query);
+        this.packet = newResultPacket(query);
     }
 
     public void handleMessage(Connection conn, byte[] message) {
-        // TODO Auto-generated method stub
+        return;
     }
 
     public boolean checkIdle(long now) {
@@ -81,15 +84,11 @@ public abstract class CommandMessageHandler implements MessageHandler, Sessionab
             runnable.init(this);
             runnable.run();
         } else {
-            // TODO 多线程合并数据问题
             final CountDownLatch latch = new CountDownLatch(pools.length);
 
             for (ObjectPool pool : pools) {
                 final PoolableObject conn = (PoolableObject) pool.borrowObject();
                 connPoolMap.put(conn, pool);
-                if (logger.isDebugEnabled()) {
-                    logger.debug("query:" + query);
-                }
                 QueryRunnable runnable = newQueryRunnable(latch, conn, query, parameter, packet);
                 runnable.init(this);
                 ProxyRuntimeContext.getInstance().getClientSideExecutor().execute(runnable);

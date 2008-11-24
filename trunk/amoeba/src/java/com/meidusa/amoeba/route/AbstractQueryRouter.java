@@ -53,7 +53,6 @@ import com.meidusa.amoeba.parser.Parser;
 import com.meidusa.amoeba.parser.dbobject.Column;
 import com.meidusa.amoeba.parser.dbobject.Schema;
 import com.meidusa.amoeba.parser.dbobject.Table;
-import com.meidusa.amoeba.parser.expression.Expression;
 import com.meidusa.amoeba.parser.function.Function;
 import com.meidusa.amoeba.parser.statment.CommitStatment;
 import com.meidusa.amoeba.parser.statment.DMLStatment;
@@ -167,8 +166,8 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable 
         ruleFunTab.put("last_day", new LastDay());
         ruleFunTab.put("next_day", new NextDay());
         ruleFunTab.put("to_date", new ToDate());
-        ruleFunTab.put("case", new Case()); // replacement for CASE WHEN digit = 0 THEN ...;WHEN digit = 1 THEN
-        // ...;ELSE... END CASE
+        ruleFunTab.put("case", new Case()); // replacement for CASE WHEN digit = 0 THEN ...;WHEN digit = 1
+        // THEN...;ELSE... END CASE
         ruleFunTab.put("index", new Instr()); // maxdb
         ruleFunTab.put("num", new ToNumber()); // maxdb
         ruleFunTab.put("chr", new ToChar()); // maxdb
@@ -253,12 +252,12 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable 
     public ObjectPool[] doRoute(DatabaseConnection connection, String sql, boolean ispreparedStatment,
                                 Object[] parameters) {
         if (sql == null) {
-            return this.defaultPools;
+            return defaultPools;
         }
         if (needParse) {
             return selectPool(connection, sql, ispreparedStatment, parameters);
         } else {
-            return this.defaultPools;
+            return defaultPools;
         }
     }
 
@@ -272,14 +271,11 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable 
         Statment statment = parseSql(connection, sql);
         DMLStatment dmlStatment = null;
 
-        if (statment != null) {
-            if (logger.isDebugEnabled()) {
-                Expression expression = statment.getExpression();
-                logger.debug("Sql:[" + sql + "] Expression=[" + expression + "]");
-            }
-        }
-
         if (statment instanceof DMLStatment) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("DMLStatement:[" + sql + "] Expression=[" + statment.getExpression() + "]");
+            }
+
             dmlStatment = (DMLStatment) statment;
             Map<Table, Map<Column, Comparative>> tables = null;
             if (needEvaluate) {
@@ -292,7 +288,7 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable 
 
                         // 如果存在table Rule 则需要看是否有Rule
                         if (tableRule != null) {
-                            //没有列的sql语句，使用默认的tableRule
+                            // 没有列的sql语句，使用默认的tableRule
                             if (columnMap == null || ispreparedStatment) {
                                 String[] pools = dmlStatment.isReadStatment() ? tableRule.readPools : tableRule.writePools;
                                 if (pools == null || pools.length == 0) {
@@ -304,7 +300,7 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable 
                                     }
                                 }
                                 if (logger.isDebugEnabled()) {
-                                    logger.debug("Sql:[" + sql + "] no Column rule, using table:" + tableRule.table + " default rules:" + Arrays.toString(tableRule.defaultPools));
+                                    logger.debug("[" + sql + "] no Column rule, using table:" + tableRule.table + " default rules:" + Arrays.toString(tableRule.defaultPools));
                                 }
                                 continue;
                             }
@@ -397,11 +393,11 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable 
                                                     }
                                                 }
                                             } else {
-                                                logger.warn("rule:" + rule.name + " matched, but pools is null");
+                                                logger.error("rule:" + rule.name + " matched, but pools is null");
                                             }
 
                                             if (logger.isDebugEnabled()) {
-                                                logger.debug("Sql:[" + sql + "] matched rule:" + rule.name);
+                                                logger.debug("[" + sql + "] matched table:" + tableRule.table.getName() + ", rule:" + rule.name);
                                             }
                                         }
                                     } catch (com.meidusa.amoeba.sqljep.ParseException e) {
@@ -416,7 +412,7 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable 
                                 if (pools == null || pools.length == 0) {
                                     pools = tableRule.defaultPools;
                                 }
-                                logger.warn("no rule matched, using tableRule defaultPools:" + Arrays.toString(pools));
+                                logger.warn("no rule matched, using tableRule:[" + tableRule.table.getName() + "] defaultPools");
 
                                 for (String poolName : pools) {
                                     if (!poolNames.contains(poolName)) {
@@ -429,9 +425,15 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable 
                 }
             }
         } else if (statment instanceof PropertyStatment) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("PropertyStatment:[" + sql + "]");
+            }
             setProperty(connection, (PropertyStatment) statment, parameters);
             return null;
         } else if (statment instanceof ShowStatment) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("ShowStatment:[" + sql + "]");
+            }
             TableRule tableRule = this.tableRuleMap.get(null);
             if (tableRule != null && tableRule.defaultPools != null && tableRule.defaultPools.length > 0) {
                 for (String poolName : tableRule.defaultPools) {
@@ -441,13 +443,22 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable 
                 }
             }
         } else if (statment instanceof StartTansactionStatment) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("StartTansactionStatment:[" + sql + "]");
+            }
             return null;
         } else if (statment instanceof CommitStatment) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("CommitStatment:[" + sql + "]");
+            }
             return null;
         } else if (statment instanceof RollbackStatment) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("RollbackStatment:[" + sql + "]");
+            }
             return null;
         } else {
-            throw new RuntimeException("error,unknown sql statment:" + sql);
+            throw new RuntimeException("error,unknown statement:[" + sql + "]");
         }
 
         ObjectPool[] pools = new ObjectPool[poolNames.size()];
@@ -461,9 +472,9 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable 
                 pools = dmlStatment.isReadStatment() ? this.readPools : this.writePools;
                 if (logger.isDebugEnabled() && pools != null && pools.length > 0) {
                     if (dmlStatment.isReadStatment()) {
-                        logger.debug("Sql:[" + sql + "] route to queryRouter pools:" + readPool + "\n");
+                        logger.debug("[" + sql + "] route to queryRouter readPool:" + readPool + "\n");
                     } else {
-                        logger.debug("Sql:[" + sql + "] route to queryRouter pools:" + writePool + "\n");
+                        logger.debug("[" + sql + "] route to queryRouter writePool:" + writePool + "\n");
                     }
                 }
             }
@@ -471,12 +482,12 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable 
             if (pools == null || pools.length == 0) {
                 pools = this.defaultPools;
                 if (logger.isDebugEnabled() && pools != null && pools.length > 0) {
-                    logger.debug("Sql:[" + sql + "] route to queryRouter pools:" + defaultPool + "\n");
+                    logger.debug("[" + sql + "] route to queryRouter defaultPool:" + defaultPool + "\n");
                 }
             }
         } else {
             if (logger.isDebugEnabled() && pools != null && pools.length > 0) {
-                logger.debug("Sql:[" + sql + "] route to pools:" + poolNames + "\n");
+                logger.debug("[" + sql + "] route to pools:" + poolNames + "\n");
             }
         }
 

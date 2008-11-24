@@ -11,12 +11,14 @@ import com.meidusa.amoeba.net.Connection;
  */
 public class AbstractPacketBuffer implements PacketBuffer {
 
-    protected int    length   = 0;
+    protected int        length   = 0;
 
-    protected int    position = 0;
+    protected int        position = 0;
 
-    protected byte[] buffer   = null;
+    protected byte[]     buffer   = null;
+
     protected Connection conn;
+
     public AbstractPacketBuffer(byte[] buf){
         buffer = new byte[buf.length];
         System.arraycopy(buf, 0, buffer, 0, buf.length);
@@ -34,10 +36,6 @@ public class AbstractPacketBuffer implements PacketBuffer {
      * 将从0到当前位置的所有字节写入到ByteBuffer中,并且将ByteBuffer.position设置到0.
      */
     public ByteBuffer toByteBuffer() {
-        /*
-         * byte[] newbyte = new byte[getPosition()]; System.arraycopy(this.buffer, 0, newbyte, 0, this.getPosition());
-         * ByteBuffer buffer = ByteBuffer.wrap(newbyte); buffer.rewind(); return buffer;
-         */
         ByteBuffer buffer = ByteBuffer.allocate(getPosition());
         buffer.put(this.buffer, 0, getPosition());
         buffer.rewind();
@@ -104,9 +102,9 @@ public class AbstractPacketBuffer implements PacketBuffer {
                 setPacketLength(buffer.length);
             } else {
                 int newLength = (int) (position + i * 1.5);
-                
+
                 if (newLength <= (buffer.length + i)) {
-                    newLength = (buffer.length + i+1) + (int) (i * 1.25);
+                    newLength = (buffer.length + i + 1) + (int) (i * 1.25);
                 }
 
                 byte[] newBytes = new byte[newLength];
@@ -118,7 +116,7 @@ public class AbstractPacketBuffer implements PacketBuffer {
     }
 
     protected void init(Connection conn) {
-    	this.conn = conn;
+        this.conn = conn;
     }
 
     public synchronized void reset() {
@@ -200,21 +198,21 @@ public class AbstractPacketBuffer implements PacketBuffer {
             }
         };
     }
-    
-    public static  boolean appendBufferToWrite(byte[] byts,PacketBuffer buffer,Connection conn,boolean writeNow){
-		if(writeNow || buffer.remaining() < byts.length){
-			if(buffer.getPosition()>0){
-				buffer.writeBytes(byts);
-				conn.postMessage(buffer.toByteBuffer());
-				buffer.reset();
-			}else{
-				conn.postMessage(byts);
-			}
-			return true;
-		}else{
-			buffer.writeBytes(byts);
-			return true;
-		}
-	}
+
+    public static boolean appendBufferToWrite(byte[] byts, PacketBuffer buffer, Connection conn, boolean writeNow) {
+        if (writeNow || buffer.remaining() < byts.length) {
+            if (buffer.getPosition() > 0) {
+                buffer.writeBytes(byts);
+                conn.postMessage(buffer.toByteBuffer());
+                buffer.reset();
+            } else {
+                conn.postMessage(byts);
+            }
+            return true;
+        } else {
+            buffer.writeBytes(byts);
+            return true;
+        }
+    }
 
 }

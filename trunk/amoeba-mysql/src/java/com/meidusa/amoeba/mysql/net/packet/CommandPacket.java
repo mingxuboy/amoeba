@@ -16,15 +16,16 @@ package com.meidusa.amoeba.mysql.net.packet;
 import java.io.UnsupportedEncodingException;
 
 import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
+import com.meidusa.amoeba.util.StringFillFormat;
 
 /**
  * From client to server whenever the client wants the server to do something.
  * 
  * <pre>
- * Bytes                        Name
- *  -----                        ----
- *  1                            command
- *  n                            arg
+ * Bytes          Name
+ *  -----         ----
+ *  1             command
+ *  n             arg
  *  
  *  command:      The most common value is 03 COM_QUERY, because
  *                INSERT UPDATE DELETE SELECT etc. have this code.
@@ -32,7 +33,7 @@ import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
  *                from /include/mysql_com.h for enum_server_command) are:
  *  
  *                #      Name                Associated client function
- *                -      ----                -------------------------- *  
+ *                -      ----                --------------------------  
  *                0x00   COM_SLEEP           (none, this is an internal thread state)
  *                0x01   COM_QUIT            mysql_close
  *                0x02   COM_INIT_DB         mysql_select_db 
@@ -71,6 +72,7 @@ import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
  * </pre>
  * 
  * @author <a href=mailto:piratebase@sina.com>Struct chen</a>
+ * @author hexianmao
  */
 public abstract class CommandPacket extends AbstractPacket {
 
@@ -104,12 +106,13 @@ public abstract class CommandPacket extends AbstractPacket {
     public static final byte COM_SET_OPTION          = 0x1b;       // mysql_set_server_option
     public static final byte COM_STMT_FETCH          = 0x1c;       // mysql_stmt_fetch
     public static final byte COM_EOF                 = (byte) 0xfe; //  
+
     public byte              command;
 
     @Override
     public void init(AbstractPacketBuffer buffer) {
         super.init(buffer);
-        command = buffer.readByte();
+        this.command = buffer.readByte();
     }
 
     @Override
@@ -124,6 +127,15 @@ public abstract class CommandPacket extends AbstractPacket {
         int packLength = super.calculatePacketSize();
         packLength += 1;
         return packLength;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder s = new StringBuilder();
+        s.append("[Length=").append(StringFillFormat.format(packetLength, 4));
+        s.append(", PacketId=").append(StringFillFormat.format(packetId, 2));
+        s.append(", Command=").append(StringFillFormat.format(command, 2)).append("]");
+        return s.toString();
     }
 
 }

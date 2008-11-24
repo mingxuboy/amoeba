@@ -304,7 +304,7 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 			if(!StringUtil.equalsIgnoreCase(sourceMysql.getSchema(), destMysqlConn.getSchema())){
 				if(sourceMysql.getSchema() != null){
 					QueryCommandPacket selectDBCommand = new QueryCommandPacket();
-					selectDBCommand.arg = sourceMysql.getSchema();
+					selectDBCommand.query = sourceMysql.getSchema();
 					selectDBCommand.command = QueryCommandPacket.COM_INIT_DB;
 					
 					byte[] buffer = selectDBCommand.toByteBuffer(destMysqlConn).array();
@@ -326,7 +326,7 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 			if(sourceMysql.getCharset()!= null &&
 					!StringUtil.equalsIgnoreCase(sourceMysql.getCharset(),destMysqlConn.getCharset())){
 				QueryCommandPacket charsetCommand = new QueryCommandPacket();
-				charsetCommand.arg = "set names " + sourceMysql.getCharset();
+				charsetCommand.query = "set names " + sourceMysql.getCharset();
 				charsetCommand.command = QueryCommandPacket.COM_QUERY;
 				
 				byte[] buffer = charsetCommand.toByteBuffer(sourceMysql).array();
@@ -346,7 +346,7 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 			
 			if(sourceMysql.isAutoCommit() != destMysqlConn.isAutoCommit()){
 				QueryCommandPacket charsetCommand = new QueryCommandPacket();
-				charsetCommand.arg = "set autocommit = " + (sourceMysql.isAutoCommit()?1:0);
+				charsetCommand.query = "set autocommit = " + (sourceMysql.isAutoCommit()?1:0);
 				charsetCommand.command = QueryCommandPacket.COM_QUERY;
 				
 				byte[] buffer = charsetCommand.toByteBuffer(sourceMysql).array();

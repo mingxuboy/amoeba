@@ -16,6 +16,7 @@ package com.meidusa.amoeba.mysql.net.packet;
 import java.io.UnsupportedEncodingException;
 
 import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
+import com.meidusa.amoeba.util.StringFillFormat;
 
 /**
  * From client to server whenever the client wants the server to do something.
@@ -71,31 +72,42 @@ import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
  * </pre>
  * 
  * @author <a href=mailto:piratebase@sina.com>Struct chen</a>
+ * @author hexianmao
  */
 public class QueryCommandPacket extends CommandPacket {
 
-    public String arg;
+    public String query;
 
     @Override
     public void init(AbstractPacketBuffer myBuffer) {
         super.init(myBuffer);
         MysqlPacketBuffer buffer = (MysqlPacketBuffer) myBuffer;
         String charset = buffer.getConnection().getCharset();
-        arg = (charset == null ? buffer.readString() : buffer.readString(charset));
+        this.query = (charset == null ? buffer.readString() : buffer.readString(charset));
     }
 
     @Override
     public void write2Buffer(AbstractPacketBuffer myBuffer) throws UnsupportedEncodingException {
         super.write2Buffer(myBuffer);
         MysqlPacketBuffer buffer = (MysqlPacketBuffer) myBuffer;
-        buffer.writeString(arg);
+        buffer.writeString(query);
     }
 
     @Override
     protected int calculatePacketSize() {
         int packLength = super.calculatePacketSize();
-        packLength += (arg == null ? 0 : arg.length() * 2);
+        packLength += (query == null ? 0 : query.length() * 2);
         return packLength;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder s = new StringBuilder();
+        s.append("[Length=").append(StringFillFormat.format(packetLength, 4));
+        s.append(", PacketId=").append(StringFillFormat.format(packetId, 2));
+        s.append(", Command=").append(StringFillFormat.format(command, 2));
+        s.append(", Query=").append(query).append("]");
+        return s.toString();
     }
 
 }

@@ -13,7 +13,6 @@ import com.meidusa.amoeba.aladdin.io.ResultPacket;
 import com.meidusa.amoeba.aladdin.util.ResultSetUtil;
 import com.meidusa.amoeba.jdbc.PoolableJdbcConnection;
 import com.meidusa.amoeba.mysql.net.MysqlClientConnection;
-import com.meidusa.amoeba.net.Connection;
 import com.meidusa.amoeba.net.poolable.ObjectPool;
 import com.meidusa.amoeba.net.poolable.PoolableObject;
 
@@ -23,9 +22,9 @@ import com.meidusa.amoeba.net.poolable.PoolableObject;
  */
 public class QueryCommandMessageHandler extends CommandMessageHandler {
 
-    private static Logger logger = Logger.getLogger(QueryCommandMessageHandler.class);
-
     protected static class QueryCommandRunnable extends QueryRunnable {
+
+        private static Logger logger = Logger.getLogger(QueryCommandRunnable.class);
 
         public QueryCommandRunnable(CountDownLatch latch, PoolableObject conn, String query, Object parameter,
                                     ResultPacket packet){
@@ -92,10 +91,6 @@ public class QueryCommandMessageHandler extends CommandMessageHandler {
     public QueryCommandMessageHandler(MysqlClientConnection source, String query, Object parameter, ObjectPool[] pools,
                                       long timeout){
         super(source, query, parameter, pools, timeout);
-    }
-
-    public void handleMessage(Connection conn, byte[] message) {
-        return;
     }
 
     @Override
