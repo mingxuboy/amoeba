@@ -32,7 +32,11 @@ public class ProxyServerConfig {
     private int                                 serverSideThreadPoolSize = 16;
     private boolean                             tcpNoDelay               = false;
     private int                                 netBufferSize            = 16;
-    private String                              serverCharset            = "utf8";
+    
+    /**
+     * 默认是没有值的
+     */
+    private String                              serverCharset            = null;
 
     private Map<String, BeanObjectEntityConfig> managers                 = new HashMap<String, BeanObjectEntityConfig>();
     private Map<String, BeanObjectEntityConfig> unmodifiableManagers     = Collections.unmodifiableMap(managers);
