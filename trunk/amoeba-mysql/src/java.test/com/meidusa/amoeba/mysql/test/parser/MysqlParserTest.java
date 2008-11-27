@@ -23,7 +23,7 @@ public class MysqlParserTest {
 	
 	static Map<Column,Comparative> columnMap = new HashMap<Column,Comparative>();
 	public static void main(String[] args){
-		Map<String,Function> funMap = AbstractQueryRouter.loadFunctionMap("./conf/functionMap.xml");
+		Map<String,Function> funMap = AbstractQueryRouter.loadFunctionMap("./build/build-aladdin/conf/functionMap.xml");
 		String t = "`asdfasdfaf`";
 		System.out.println(t.substring(1,t.length()-1));
 		String sql1 = " SELECT * from account where time = DATE_ADD('1998-01-02', INTERVAL 31 DAY)";
@@ -67,7 +67,8 @@ public class MysqlParserTest {
 				"set CLIENT CHARSET gbk",
 				"select * from offer where id in(12,11) limit 1,2",
 				"SELECT d_tax, d_next_o_id FROM district WHERE d_w_id = 1  AND d_id = 1 FOR UPDATE",
-				"select @@sql_mode"
+				"select @@sql_mode",
+				"select * from aaa where id = 12 AND (upper(subject) like upper(?) OR upper(keywords) like upper(?))"
 		};
 		
 		for(String sql: sqls){

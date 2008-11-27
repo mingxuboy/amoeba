@@ -1291,8 +1291,10 @@ Expression SQLExpression() :
     }
     ("OR"
 		expression =  SQLAndExpression(){
-			count++;
-			orExpression.addExpression(expression);
+			if(expression != null){
+				count++;
+				orExpression.addExpression(expression);
+			}
 		}
     )*{
     	if(count >0){

@@ -11,13 +11,16 @@
  */
 package com.meidusa.amoeba.mysql.net.packet;
 
+import java.io.Serializable;
+
 import com.meidusa.amoeba.mysql.jdbc.MysqlDefs;
 
 /**
  * copy from mysql-connector-j
  *
  */
-public class BindValue {
+public class BindValue implements Serializable{
+	private static final long serialVersionUID = 1L;
 
 		public long boundBeforeExecutionNum = 0;
 		
