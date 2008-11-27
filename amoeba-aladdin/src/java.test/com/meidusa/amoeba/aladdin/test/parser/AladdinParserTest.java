@@ -19,30 +19,8 @@ public class AladdinParserTest {
 
     public static void main(String[] args) {
         StringBuilder sb = new StringBuilder();
-        sb.append("SELECT o.* ");
-        sb.append("FROM ");
-        sb.append("(SELECT row_id ");
-        sb.append("FROM ");
-        sb.append("(SELECT row_id,");
-        sb.append("rownum rn ");
-        sb.append("FROM ");
-        sb.append("(SELECT rowid row_id ");
-        sb.append("FROM offer ");
-        sb.append("WHERE member_id = 'jingjunye' ");
-        sb.append("AND status = 'published' ");
-        sb.append("AND gmt_expire > sysdate ");
-        sb.append("AND subject LIKE '%MP3\\\\%' ESCAPE '\\' ");
-        sb.append("AND type = 'SALE' ");
-        sb.append("ORDER BY MEMBER_ID, ");
-        sb.append("STATUS , ");
-        sb.append("GMT_EXPIRE DESC ");
-        sb.append(") ");
-        sb.append("WHERE rownum <= 60 ");
-        sb.append(") ");
-        sb.append("WHERE rn >= 1 ");
-        sb.append(") t, ");
-        sb.append("offer o ");
-        sb.append("WHERE t.row_id=o.rowid ");
+        sb.append("select * from aaa where id = 12 AND (upper(subject) like upper(?) OR upper(keywords) like upper(?))");
+
 
         String sql = sb.toString();
         Parser parser = new AladdinParser(new StringReader(sql));
