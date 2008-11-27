@@ -2,7 +2,13 @@
 /*@egen*/options {
 	JDK_VERSION = "1.5";
 	IGNORE_CASE=true ;
-	DEBUG_PARSER=false ;                                                                                                                                                                                                                                         
+	DEBUG_PARSER=false ;
+   	                               
+   	                    
+   	                     
+   	             
+	                 
+	                         
    	STATIC = false;
 }
 
@@ -1289,8 +1295,10 @@ Expression SQLExpression() :
     }
     ("OR"
 		expression =  SQLAndExpression(){
-			count++;
-			orExpression.addExpression(expression);
+			if(expression != null){
+				count++;
+				orExpression.addExpression(expression);
+			}
 		}
     )*{
     	if(count >0){
