@@ -1396,8 +1396,10 @@ Expression SQLExpression() :
     }
     ("OR"
 		expression =  SQLAndExpression(){
+			if(expression != null){
 			count++;
 			orExpression.addExpression(expression);
+			}
 		}
     )*{
     	if(count >0){
@@ -1539,12 +1541,20 @@ List<Expression> SQLExpressionList()       :
 }
 {
    expression = SQLSimpleExpression(){
+   	if(expression!= null){
    	list.add(expression);
+   	}
     	
     } ("," expression = SQLSimpleExpression(){
-    		list.add(expression);
+    	if(expression!= null){
+   			list.add(expression);
+   		}
     })*{
-    	return list;	
+    	if(list.size()==0){
+    		return null;	
+    	}else{
+    		return list;
+    	}	
     }
 }
 
