@@ -937,17 +937,19 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable 
 
         String defaultSchema = (connection == null || StringUtil.isEmpty(connection.getSchema())) ? null : connection.getSchema();
 
-        int sqlWithSchemaHashcode = defaultSchema != null ? (defaultSchema.hashCode() ^ sql.hashCode()) : sql.hashCode();
+        long sqlKey = ((long) sql.length() << 32) | (long) (defaultSchema != null ? (defaultSchema.hashCode() ^ sql.hashCode()) : sql.hashCode());
         mapLock.lock();
         try {
-            statment = (Statment) map.get(sqlWithSchemaHashcode);
+            statment = (Statment) map.get(sqlKey);
         } finally {
             mapLock.unlock();
         }
         if (statment == null) {
             synchronized (sql) {
-                statment = (Statment) map.get(sqlWithSchemaHashcode);
-                if (statment != null) return statment;
+                statment = (Statment) map.get(sqlKey);
+                if (statment != null) {
+                    return statment;
+                }
 
                 Parser parser = newParser(sql);
                 parser.setFunctionMap(this.functionMap);
@@ -962,7 +964,7 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable 
                         statment = parser.doParse();
                         mapLock.lock();
                         try {
-                            map.put(sqlWithSchemaHashcode, statment);
+                            map.put(sqlKey, statment);
                         } finally {
                             mapLock.unlock();
                         }
@@ -973,6 +975,7 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable 
 
                 } catch (ParseException e) {
                     logger.error(sql, e);
+                    return null;
                 }
             }
         }
