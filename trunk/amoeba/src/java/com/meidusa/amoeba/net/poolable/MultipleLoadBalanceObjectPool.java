@@ -30,8 +30,8 @@ import java.util.concurrent.locks.ReentrantLock;
  * 该Pool 提供负载均衡、failover、HA策略
  * 采用Load Balance ObjectPool，则object 必须实现{@link PoolableObject}
  * 默认提供2种负载均衡方案：
- * &lt;li&gt;轮询：请求将轮询分配到每个pool，每个pool的请求比较平均&lt;/li&gt;
- * &lt;li&gt;繁忙程度：将所有Pool的Active Num做一个排序，最小的Active Num将优先分配请求
+ * <li>轮询：请求将轮询分配到每个pool，每个pool的请求比较平均</li>
+ * <li>繁忙程度：将所有Pool的Active Num做一个排序，最小的Active Num将优先分配请求</li>
  * &#064;author &lt;a href=mailto:piratebase@sina.com&gt;Struct chen&lt;/a&gt;
  * </pre>
  */
