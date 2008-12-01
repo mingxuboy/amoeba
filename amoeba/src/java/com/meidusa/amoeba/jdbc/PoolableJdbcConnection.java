@@ -59,6 +59,12 @@ public class PoolableJdbcConnection extends ConnectionWrapper implements Poolabl
 			logger.error("when invoke isclosed error",e1);
 		}
 		
+		try {
+			super.close();
+		} catch (SQLException e) {
+			logger.error("when invoke close error",e);
+		}
+		
 		final ObjectPool tmpPool = objectPool;
 		objectPool = null;
 		try {
@@ -70,12 +76,6 @@ public class PoolableJdbcConnection extends ConnectionWrapper implements Poolabl
 				 */
 				if(isActive()){
 					tmpPool.invalidateObject(this);
-				}else{
-					try {
-						super.close();
-					} catch (SQLException e) {
-						logger.error("when invoke close error",e);
-					}
 				}
 			}
 		} catch (Exception e) {
