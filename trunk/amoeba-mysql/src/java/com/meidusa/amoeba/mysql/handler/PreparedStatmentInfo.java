@@ -13,6 +13,9 @@
  */
 package com.meidusa.amoeba.mysql.handler;
 
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
 import com.meidusa.amoeba.context.ProxyRuntimeContext;
 import com.meidusa.amoeba.mysql.jdbc.MysqlDefs;
 import com.meidusa.amoeba.mysql.net.packet.EOFPacket;
@@ -34,12 +37,17 @@ public class PreparedStatmentInfo {
 
     private int    parameterCount;
 
+    // cache parameterTypes
+    private int[]  parameterTypes;
+
     /**
      * 需要返回给客户端
      */
     private byte[] packetBuffer;
 
     private long   statmentId;
+
+    private Lock   typesLock = new ReentrantLock(false);
 
     public PreparedStatmentInfo(DatabaseConnection conn, long id, String preparedSql){
         PacketBuffer buffer = new AbstractPacketBuffer(2048);
@@ -81,6 +89,24 @@ public class PreparedStatmentInfo {
             buffer.writeBytes(eof.toByteBuffer(conn).array());
         }
         packetBuffer = buffer.toByteBuffer().array();
+    }
+
+    public void setParameterTypes(int[] parameterTypes) {
+        typesLock.lock();
+        try {
+            this.parameterTypes = parameterTypes;
+        } finally {
+            typesLock.unlock();
+        }
+    }
+
+    public int[] getParameterTypes() {
+        typesLock.lock();
+        try {
+            return parameterTypes;
+        } finally {
+            typesLock.unlock();
+        }
     }
 
     public int getParameterCount() {

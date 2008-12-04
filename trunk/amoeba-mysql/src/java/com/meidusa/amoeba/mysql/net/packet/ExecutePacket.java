@@ -19,6 +19,7 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 
+import com.meidusa.amoeba.mysql.handler.PreparedStatmentInfo;
 import com.meidusa.amoeba.mysql.jdbc.MysqlDefs;
 import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
 import com.meidusa.amoeba.util.StringFillFormat;
@@ -72,21 +73,23 @@ import com.meidusa.amoeba.util.StringFillFormat;
  */
 public class ExecutePacket extends CommandPacket {
 
-    private static Logger        logger = Logger.getLogger(ExecutePacket.class);
+    private static Logger                    logger = Logger.getLogger(ExecutePacket.class);
 
-    public long                  statementId;
-    public byte                  flags;
-    public long                  iterationCount;
-    public byte                  newParameterBoundFlag;
-    public BindValue[]           values;
+    public long                              statementId;
+    public byte                              flags;
+    public long                              iterationCount;
+    public byte                              newParameterBoundFlag;
+    public BindValue[]                       values;
 
-    protected transient int      parameterCount;
+    protected transient int                  parameterCount;
+    protected transient PreparedStatmentInfo pInfo;
 
-    private Map<Integer, Object> longPrameters;
+    private Map<Integer, Object>             longPrameters;
 
-    public ExecutePacket(int parameterCount, Map<Integer, Object> longPrameters){
-        this.parameterCount = parameterCount;
-        values = new BindValue[parameterCount];
+    public ExecutePacket(PreparedStatmentInfo pInfo, Map<Integer, Object> longPrameters){
+        this.pInfo = pInfo;
+        this.parameterCount = pInfo.getParameterCount();
+        this.values = new BindValue[parameterCount];
         this.longPrameters = longPrameters;
     }
 
@@ -116,9 +119,19 @@ public class ExecutePacket extends CommandPacket {
             }
         }
 
+        // 当newParameterBoundFlag=1时，更新pInfo.parameterTypes值
+        // 否则使用pInfo.parameterTypes作为values[i].bufferType的值
         if (newParameterBoundFlag == (byte) 1) {
-            for (int i = 0; i < this.parameterCount; i++) {
-                this.values[i].bufferType = buffer.readInt();
+            int[] bindTypes = new int[parameterCount];
+            for (int i = 0; i < parameterCount; i++) {
+                bindTypes[i] = buffer.readInt();
+                values[i].bufferType = bindTypes[i];
+            }
+            pInfo.setParameterTypes(bindTypes);
+        } else {
+            int[] bindTypes = pInfo.getParameterTypes();
+            for (int i = 0; i < parameterCount; i++) {
+                values[i].bufferType = bindTypes[i];
             }
         }
 
