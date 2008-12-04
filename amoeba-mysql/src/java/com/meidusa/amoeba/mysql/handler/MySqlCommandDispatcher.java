@@ -109,7 +109,7 @@ public class MySqlCommandDispatcher implements MessageHandler {
                         longMap.put(packet.parameterIndex, packet.data);
                     }
 
-                    ExecutePacket executePacket = new ExecutePacket(preparedInf.getParameterCount(), longMap);
+                    ExecutePacket executePacket = new ExecutePacket(preparedInf, longMap);
                     executePacket.init(message, connection);
 
                     QueryRouter router = ProxyRuntimeContext.getInstance().getQueryRouter();

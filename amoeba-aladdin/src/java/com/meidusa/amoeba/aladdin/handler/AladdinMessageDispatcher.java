@@ -19,6 +19,7 @@ import com.meidusa.amoeba.net.MessageHandler;
 import com.meidusa.amoeba.net.Sessionable;
 import com.meidusa.amoeba.net.poolable.ObjectPool;
 import com.meidusa.amoeba.route.QueryRouter;
+import com.meidusa.amoeba.util.ByteUtil;
 import com.meidusa.amoeba.util.StringFillFormat;
 
 /**
@@ -63,7 +64,7 @@ public class AladdinMessageDispatcher implements MessageHandler {
                 conn.postMessage(STATIC_OK_BUFFER);
             } else if (MysqlPacketBuffer.isPacketType(message, QueryCommandPacket.COM_QUERY)) {
                 QueryCommandPacket packet = new QueryCommandPacket();
-                packet.init(message, connection);                
+                packet.init(message, connection);
                 if (logger.isDebugEnabled()) {
                     logger.debug(StringFillFormat.format("COM_QUERY:", fillLength) + packet);
                 }
@@ -116,6 +117,12 @@ public class AladdinMessageDispatcher implements MessageHandler {
                     error.serverErrorMessage = "Unknown prepared statment id=" + statmentId;
                     conn.postMessage(error.toByteBuffer(connection).array());
                 } else {
+                    String sql = pInfo.getPreparedStatment();
+                    if (logger.isDebugEnabled()) {
+                        logger.debug(StringFillFormat.format("COM_STMT_EXECUTE:", fillLength) + "sql[" + sql.trim() + "]");
+                        logger.debug(StringFillFormat.format("COM_STMT_EXECUTE:", fillLength) + "params[" + pInfo.getParameterCount() + "]");
+                        logger.debug(StringFillFormat.format("COM_STMT_EXECUTE:", fillLength) + "dump bytes[" + ByteUtil.toHex(message, 0, message.length) + "]");
+                    }
                     Map<Integer, Object> longMap = null;
                     if (conn.getLongDataList().size() > 0) {
                         longMap = new HashMap<Integer, Object>();
@@ -126,13 +133,13 @@ public class AladdinMessageDispatcher implements MessageHandler {
                         }
                         conn.clearLongData();
                     }
-                    ExecutePacket packet = new ExecutePacket(pInfo.getParameterCount(), longMap);
+                    ExecutePacket packet = new ExecutePacket(pInfo, longMap);
                     packet.init(message, connection);
                     if (logger.isDebugEnabled()) {
-                        logger.debug(StringFillFormat.format("COM_STMT_EXECUTE:", fillLength) + "[" + packet + ", sql=" + pInfo.getPreparedStatment() + "]");
+                        logger.debug(StringFillFormat.format("COM_STMT_EXECUTE:", fillLength) + "[" + packet + "]");
                     }
                     QueryRouter router = ProxyRuntimeContext.getInstance().getQueryRouter();
-                    ObjectPool[] pools = router.doRoute(conn, pInfo.getPreparedStatment(), false, packet.getParameters());
+                    ObjectPool[] pools = router.doRoute(conn, sql, false, packet.getParameters());
 
                     PreparedStatmentExecuteMessageHandler handler = new PreparedStatmentExecuteMessageHandler(conn, pInfo, packet, pools, timeout);
                     if (handler instanceof Sessionable) {
