@@ -12,6 +12,7 @@
 package com.meidusa.amoeba.mysql.parser;
 
 import java.io.StringReader;
+import java.util.regex.Pattern;
 
 import com.meidusa.amoeba.mysql.net.MysqlConnection;
 import com.meidusa.amoeba.mysql.parser.sql.MysqlParser;
@@ -37,7 +38,15 @@ public class MysqlQueryRouter extends AbstractQueryRouter{
 	protected ObjectPool[] selectPool(DatabaseConnection connection,String sql,boolean ispreparedStatment,Object[] parameters){
 		if(sql != null){
 			sql = sql.trim();
-			
+			while(sql.startsWith("/*")){
+				int index = sql.indexOf("*/");
+				if(index >0){
+					sql = sql.substring(index+2);
+				}else{
+					break;
+				}
+				sql = sql.trim();
+			}
 			if(sql.subSequence(0, 4).toString().equalsIgnoreCase("show")){
 				return this.defaultPools;
 			}
@@ -64,5 +73,18 @@ public class MysqlQueryRouter extends AbstractQueryRouter{
 		}else if((value = statment.getValue("schema")) != null){
 			conn.setSchema((String)value.evaluate(parameters)); 
 		}
+	}
+	
+	public static void main(String[] args){
+		String sql = " /* sdfqwer */ /* asdfqer */ show asdf";
+		sql = sql.trim();
+		while(sql.startsWith("/*")){
+			int index = sql.indexOf("*/");
+			if(sql.startsWith("/*") && index >0){
+				sql = sql.substring(index+2);
+			}
+			sql = sql.trim();
+		}
+		System.out.println(sql);
 	}
 }
