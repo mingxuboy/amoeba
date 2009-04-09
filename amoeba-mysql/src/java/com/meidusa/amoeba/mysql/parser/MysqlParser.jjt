@@ -605,7 +605,7 @@ TOKEN:
 				"\uffda" - "\uffdc"
 			]>
 |   < #SPECIAL_CHARS: "$" | "_">
-|   < STRING_LITERAL: "'" (~["'"])* "'" ("'" (~["'"])* "'")*>
+|   < STRING_LITERAL: "'" ((~["'"])|("\\" "'"))* "'">
 |   < S_QUOTED_IDENTIFIER: "\"" (~["\n","\r","\""])* "\"" >
 |	< S_COMMA_IDENTIFIER: "`" ((["@"])*( <LETTER> )+ ( <DIGIT> | "-"|<LETTER> |<SPECIAL_CHARS>)*) "`">
 |   < S_PARAMETER_MARKER: "?">
@@ -698,7 +698,7 @@ Statment PropertySetQuery(PropertyStatment statment) :{
 			|
 			(<K_CLIENT_CHARSET>{propertyName = "charset";} 
 				(valueToken = <IDENTIFIER> {value = valueToken.image;}
-				| valueToken = <STRING_LITERAL>{value = valueToken.image;}
+				| valueToken = <STRING_LITERAL>{value = (valueToken.image).substring(1,valueToken.image.length()-1);}
 				|valueToken = <S_QUOTED_IDENTIFIER>{value = valueToken.image;}
 				))
 			|
@@ -708,7 +708,7 @@ Statment PropertySetQuery(PropertyStatment statment) :{
 			| valueToken= <K_FALSE> {value = Boolean.FALSE;}
 			| valueToken = <IDENTIFIER> {value = valueToken.image;}
 			| valueToken = <INTEGER_LITERAL>{value = Long.valueOf(valueToken.image);} 
-			| valueToken = <STRING_LITERAL>{value = valueToken.image;} //{value = valueToken.image.substring(1,token.image.length()-1);}
+			| valueToken = <STRING_LITERAL>{value = (valueToken.image).substring(1,valueToken.image.length()-1);} //{value = valueToken.image.substring(1,token.image.length()-1);}
 			| valueToken = <S_QUOTED_IDENTIFIER>{value = valueToken.image;}
 			))
 			))["," PropertySetQuery(statment)]{
@@ -1593,7 +1593,7 @@ Expression SQLAddSubtractExpression() #void:
 	FunctionExpression superExpression = null;
 }
 {
-       (expression = SQLMultiplicativeExpression() ((token = "+" | token = "-" | token = "||") otherExpression = SQLMultiplicativeExpression(){
+       (expression = SQLMultiplicativeExpression() ((token = "+" | token = "-" | token = "||" | token = "|") otherExpression = SQLMultiplicativeExpression(){
 		    function = getFunction(token.image.toUpperCase());
 		    if(function == null) return null;
 		    FunctionExpression functionExpression = new FunctionExpression();

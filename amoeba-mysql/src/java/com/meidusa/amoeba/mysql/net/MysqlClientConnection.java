@@ -41,155 +41,169 @@ import com.meidusa.amoeba.util.ThreadLocalMap;
  */
 public class MysqlClientConnection extends MysqlConnection {
 
-    private static Logger                         logger                   = Logger.getLogger(MysqlClientConnection.class);
+	private static Logger logger = Logger
+			.getLogger(MysqlClientConnection.class);
 
-    static List<IOFilter>                         filterList               = new ArrayList<IOFilter>();
-    static {
-        filterList.add(new PacketIOFilter());
-    }
+	static List<IOFilter> filterList = new ArrayList<IOFilter>();
+	static {
+		filterList.add(new PacketIOFilter());
+	}
 
-    // 保存服务端发送的随机用于客户端加密的字符串
-    protected String                              seed;
+	// 保存服务端发送的随机用于客户端加密的字符串
+	protected String seed;
 
-    // 保存客户端返回的加密过的字符串
-    protected byte[]                              authenticationMessage;
+	// 保存客户端返回的加密过的字符串
+	protected byte[] authenticationMessage;
 
-    private List<byte[]>                          longDataList             = new ArrayList<byte[]>();
+	private List<byte[]> longDataList = new ArrayList<byte[]>();
 
-    private List<byte[]>                          unmodifiableLongDataList = Collections.unmodifiableList(new ArrayList<byte[]>());
+	private List<byte[]> unmodifiableLongDataList = Collections
+			.unmodifiableList(new ArrayList<byte[]>());
 
-    /** 存储sql,statmentId对 */
-    private final Map<String, Long>               SQL_STATMENT_ID_MAP      = Collections.synchronizedMap(new HashMap<String, Long>(
-                                                                                                                                   256));
-    private AtomicLong                            atomicLong               = new AtomicLong(1);
+	/** 存储sql,statmentId对 */
+	private final Map<String, Long> SQL_STATMENT_ID_MAP = Collections
+			.synchronizedMap(new HashMap<String, Long>(256));
+	private AtomicLong atomicLong = new AtomicLong(1);
 
-    /**
-     * 采用LRU缓存这些preparedStatment信息 key=statmentId value=PreparedStatmentInfo object
-     */
-    @SuppressWarnings("unchecked")
-    private final Map<Long, PreparedStatmentInfo> PREPARED_STATMENT_MAP    = Collections.synchronizedMap(new LRUMap(256) {
+	/**
+	 * 采用LRU缓存这些preparedStatment信息 key=statmentId value=PreparedStatmentInfo
+	 * object
+	 */
+	@SuppressWarnings("unchecked")
+	private final Map<Long, PreparedStatmentInfo> PREPARED_STATMENT_MAP = Collections
+			.synchronizedMap(new LRUMap(256) {
 
-                                                                               private static final long serialVersionUID = 1L;
+				private static final long serialVersionUID = 1L;
 
-                                                                               protected boolean removeLRU(
-                                                                                                           LinkEntry entry) {
-                                                                                   PreparedStatmentInfo info = (PreparedStatmentInfo) entry.getValue();
-                                                                                   SQL_STATMENT_ID_MAP.remove(info.getPreparedStatment());
-                                                                                   return true;
-                                                                               }
+				protected boolean removeLRU(LinkEntry entry) {
+					PreparedStatmentInfo info = (PreparedStatmentInfo) entry
+							.getValue();
+					SQL_STATMENT_ID_MAP.remove(info.getPreparedStatment());
+					return true;
+				}
 
-                                                                               public PreparedStatmentInfo remove(
-                                                                                                                  Object key) {
-                                                                                   PreparedStatmentInfo info = (PreparedStatmentInfo) super.remove(key);
-                                                                                   SQL_STATMENT_ID_MAP.remove(info.getPreparedStatment());
-                                                                                   return info;
-                                                                               }
+				public PreparedStatmentInfo remove(Object key) {
+					PreparedStatmentInfo info = (PreparedStatmentInfo) super
+							.remove(key);
+					SQL_STATMENT_ID_MAP.remove(info.getPreparedStatment());
+					return info;
+				}
 
-                                                                               public Object put(Object key,
-                                                                                                 Object value) {
-                                                                                   PreparedStatmentInfo info = (PreparedStatmentInfo) value;
-                                                                                   SQL_STATMENT_ID_MAP.put(info.getPreparedStatment(), (Long) key);
-                                                                                   return super.put(key, value);
-                                                                               }
+				public Object put(Object key, Object value) {
+					PreparedStatmentInfo info = (PreparedStatmentInfo) value;
+					SQL_STATMENT_ID_MAP.put(info.getPreparedStatment(),
+							(Long) key);
+					return super.put(key, value);
+				}
 
-                                                                               public void putAll(Map map) {
-                                                                                   for (Iterator it = map.entrySet().iterator(); it.hasNext();) {
-                                                                                       Map.Entry<Long, PreparedStatmentInfo> entry = (Map.Entry<Long, PreparedStatmentInfo>) it.next();
-                                                                                       SQL_STATMENT_ID_MAP.put(entry.getValue().getPreparedStatment(), entry.getKey());
-                                                                                   }
-                                                                                   super.putAll(map);
-                                                                               }
-                                                                           });
+				public void putAll(Map map) {
+					for (Iterator it = map.entrySet().iterator(); it.hasNext();) {
+						Map.Entry<Long, PreparedStatmentInfo> entry = (Map.Entry<Long, PreparedStatmentInfo>) it
+								.next();
+						SQL_STATMENT_ID_MAP.put(entry.getValue()
+								.getPreparedStatment(), entry.getKey());
+					}
+					super.putAll(map);
+				}
+			});
 
-    public MysqlClientConnection(SocketChannel channel, long createStamp){
-        super(channel, createStamp);
-    }
+	public MysqlClientConnection(SocketChannel channel, long createStamp) {
+		super(channel, createStamp);
+	}
 
-    public PreparedStatmentInfo getPreparedStatmentInfo(long id) {
-        return PREPARED_STATMENT_MAP.get(id);
-    }
+	public PreparedStatmentInfo getPreparedStatmentInfo(long id) {
+		return PREPARED_STATMENT_MAP.get(id);
+	}
 
-    public PreparedStatmentInfo getPreparedStatmentInfo(String preparedSql) {
-        Long id = SQL_STATMENT_ID_MAP.get(preparedSql);
-        PreparedStatmentInfo info = null;
-        if (id == null) {
-            info = new PreparedStatmentInfo(this, atomicLong.getAndIncrement(), preparedSql);
-            PREPARED_STATMENT_MAP.put(info.getStatmentId(), info);
-        } else {
-            info = getPreparedStatmentInfo(id);
-        }
-        return info;
-    }
+	public PreparedStatmentInfo getPreparedStatmentInfo(String preparedSql) {
+		Long id = SQL_STATMENT_ID_MAP.get(preparedSql);
+		PreparedStatmentInfo info = null;
+		if (id == null) {
+			info = new PreparedStatmentInfo(this, atomicLong.getAndIncrement(),
+					preparedSql);
+			PREPARED_STATMENT_MAP.put(info.getStatmentId(), info);
+		} else {
+			info = getPreparedStatmentInfo(id);
+		}
+		return info;
+	}
 
-    public String getSeed() {
-        return seed;
-    }
+	public String getSeed() {
+		return seed;
+	}
 
-    public void setSeed(String seed) {
-        this.seed = seed;
-    }
+	public void setSeed(String seed) {
+		this.seed = seed;
+	}
 
-    public byte[] getAuthenticationMessage() {
-        return authenticationMessage;
-    }
+	public byte[] getAuthenticationMessage() {
+		return authenticationMessage;
+	}
 
-    public void handleMessage(Connection conn, byte[] message) {
-        // 在未验证通过的时候
-        /** 此时接收到的应该是认证数据，保存数据为认证提供数据 */
-        this.authenticationMessage = message;
-        ((AuthingableConnectionManager) _cmgr).getAuthenticator().authenticateConnection(this);
-    }
+	public void handleMessage(Connection conn, byte[] message) {
+		// 在未验证通过的时候
+		/** 此时接收到的应该是认证数据，保存数据为认证提供数据 */
+		this.authenticationMessage = message;
+		((AuthingableConnectionManager) _cmgr).getAuthenticator()
+				.authenticateConnection(this);
+	}
 
-    protected void messageProcess(final byte[] msg) {
-        final PacketFilterInvocation invocation = new PacketFilterInvocation(filterList, this, msg) {
+	protected void messageProcess(final byte[] msg) {
+		final PacketFilterInvocation invocation = new PacketFilterInvocation(
+				filterList, this, msg) {
 
-            @Override
-            protected Result doProcess() {
-                ProxyRuntimeContext.getInstance().getClientSideExecutor().execute(new Runnable() {
+			@Override
+			protected Result doProcess() {
+				ProxyRuntimeContext.getInstance().getClientSideExecutor()
+						.execute(new Runnable() {
 
-                    public void run() {
-                        try {
-                            MysqlClientConnection.this.getMessageHandler().handleMessage(MysqlClientConnection.this, msg);
-                        } finally {
-                            ThreadLocalMap.reset();
-                        }
-                    }
-                });
-                return null;
-            }
-        };
-        invocation.invoke();
-    }
+							public void run() {
+								try {
+									MysqlClientConnection.this
+											.getMessageHandler().handleMessage(
+													MysqlClientConnection.this,
+													msg);
+								} finally {
+									ThreadLocalMap.reset();
+								}
+							}
+						});
+				return null;
+			}
+		};
+		invocation.invoke();
+	}
 
-    public void addLongData(byte[] longData) {
-        longDataList.add(longData);
-    }
+	public void addLongData(byte[] longData) {
+		longDataList.add(longData);
+	}
 
-    public void clearLongData() {
-        longDataList.clear();
-    }
+	public void clearLongData() {
+		longDataList.clear();
+	}
 
-    public List<byte[]> getLongDataList() {
-        return unmodifiableLongDataList;
-    }
+	public List<byte[]> getLongDataList() {
+		return unmodifiableLongDataList;
+	}
 
-    /**
-     * 正在处于验证的Connection Idle时间可以设置相应的少一点。
-     */
-    public boolean checkIdle(long now) {
-        if (isAuthenticated()) {
-            return false;
-        } else {
-            long idleMillis = now - _lastEvent;
-            if (idleMillis < 5000) {
-                return false;
-            }
-            if (isClosed()) {
-                return true;
-            }
+	/**
+	 * 正在处于验证的Connection Idle时间可以设置相应的少一点。
+	 */
+	public boolean checkIdle(long now) {
+		if (isAuthenticated()) {
+			return false;
+		} else {
+			long idleMillis = now - _lastEvent;
+			if (idleMillis < 5000) {
+				return false;
+			}
+			if (isClosed()) {
+				return true;
+			}
 
-            logger.warn("Disconnecting non-communicative client [conn=" + this + ", idle=" + idleMillis + "ms].");
-            return true;
-        }
-    }
+			logger.warn("Disconnecting non-communicative client [conn=" + this
+					+ ", idle=" + idleMillis + "ms].");
+			return true;
+		}
+	}
 }
