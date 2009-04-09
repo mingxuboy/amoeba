@@ -30,6 +30,7 @@ public class MysqlParserTest {
 		String sql2 = "select * from account where 1<2 and not (id between 12+12 and 33) and id >12+3 or id not in (11,33,'23234') or  id  in (select test.ref_Id from test dd where dd.name='test')";
 		String[] sqls = {
 				sql1,sql2,
+				"SELECT * FROM AA WHERE ID = 'ASDF\\'ADF'",
 				"SELECT '1997-12-31 23:59:59' + INTERVAL 1 MICROSECOND",
 				"SELECT *,asdf from dd where id = hour('11:12:11.123451')",
 				"SELECT 2 mod 9",
@@ -69,6 +70,8 @@ public class MysqlParserTest {
 				"SELECT d_tax, d_next_o_id FROM district WHERE d_w_id = 1  AND d_id = 1 FOR UPDATE",
 				"select @@sql_mode",
 				"select * from aaa where id = 12 AND (upper(subject) like upper(?) OR upper(keywords) like upper(?))"
+				,"REPLACE INTO cdb_spacecaches (uid, variable, value, expiration) VALUES ('2980526', 'mythreads', 'a:3:{i:0;a:14:{s:3:\"tid\";s:7:\"1606800\";s:7:\"subject\";s:8:\"赤版請進\";s:7:\"special\";s:1:\"0\";s:5:\"price\";s:1:\"0\";s:3:\"fid\";s:3:\"129\";s:5:\"views\";s:2:\"20\";s:7:\"replies\";s:1:\"0\";s:6:\"author\";s:4:\"av8d\";s:8:\"authorid\";s:7:\"2980526\";s:8:\"lastpost\";s:10:\"1236516949\";s:10:\"lastposter\";s:4:\"av8d\";s:10:\"attachment\";s:1:\"0\";s:3:\"pid\";s:6:\"154418\";s:7:\"message\";s:191:\"刪我的帖, 我無所謂, 但是總不能把損我的帖子留在那吧?http://bbs.macd.cn/viewthread.php?tid=1585698&amp;extra=page%3D1&amp;authorid=0&amp;page=33656F, 657樓, 660F, 都Quote了損我的言論. 不該刪嗎?\";}i:1;a:14:{s:3:\"tid\";s:7:\"1594957\";s:7:\"subject\";s:25:\"Q&amp;A With Bob Prechter\";s:7:\"special\";s:1:\"0\";s:5:\"price\";s:1:\"0\";s:3:\"fid\";s:2:\"22\";s:5:\"views\";s:3:\"428\";s:7:\"replies\";s:2:\"10\";s:6:\"author\";s:4:\"av8d\";s:8:\"authorid\";s:7:\"2980526\";s:8:\"lastpost\";s:10:\"1234267824\";s:10:\"lastposter\";s:9:\"cixilarty\";s:10:\"attachment\";s:1:\"0\";s:3:\"pid\";s:4:\"8429\";s:7:\"message\";s:289:\"我不翻譯了, 繁體的翻譯可能大家不習慣,還是看原文的吧!沒多少單字的.:*29*:Q&amp;A With Bob PrechterThe following is a compilation of Bob Prechter\\'s best media interviews.In this Q&amp;A, Bob talks about the validity and practical applicationsof the Wave Principle and explains Socionomics,...\";}i:2;a:14:{s:3:\"tid\";s:7:\"1593908\";s:7:\"subject\";s:27:\"已超过规定多次 按版规该封IP\";s:7:\"special\";s:1:\"0\";s:5:\"price\";s:1:\"0\";s:3:\"fid\";s:3:\"129\";s:5:\"views\";s:2:\"44\";s:7:\"replies\";s:1:\"2\";s:6:\"author\";s:4:\"av8d\";s:8:\"authorid\";s:7:\"2980526\";s:8:\"lastpost\";s:10:\"1234077272\";s:10:\"lastposter\";s:5:\"嘘。0\";s:10:\"attachment\";s:1:\"0\";s:3:\"pid\";s:3:\"910\";s:7:\"message\";s:282:\"1. 依据 http://bbs.macd.cn/thread-615952-1-1.html 5楼 重阳版主规定, 应予以封IP段方式处理.要营造专业、和谐的交流环境，必须加强版面管理。在原有的版规下增加一些细节：（于2009年1月10日执行）5.使用恶毒语言诅咒他人的，即时禁止登陆（记录在案，禁止其马甲进入论坛）。6.使用马甲进行捣乱的 ...\";}}', '1238258538')"
+				//,"/* mysql-connector-java-5.1.6 ( Revision: ${svn.Revision} ) */SHOW VARIABLES WHERE Variable_name =’language’ OR Variable_name = ‘net_write_timeout’ OR Variable_name = ‘interactive_timeout’ OR Variable_name = ‘wait_timeout’ OR Variable_name = ‘character_set_client’ OR Variable_name = ‘character_set_connection’ OR Variable_name = ‘character_set’ OR Variable_name = ‘character_set_server’ OR Variable_name = ‘tx_isolation’ OR Variable_name = ‘transaction_isolation’ OR Variable_name = ‘character_set_results’ OR Variable_name = ‘timezone’ OR Variable_name = ‘time_zone’ OR Variable_name = ’system_time_zone’ OR Variable_name = ‘lower_case_table_names’ OR Variable_name = ‘max_allowed_packet’ OR Variable_name = ‘net_buffer_length’ OR Variable_name = ’sql_mode’ OR Variable_name = ‘query_cache_type’ OR Variable_name = ‘query_cache_size’ OR Variable_name = ‘init_connect’"
 		};
 		
 		for(String sql: sqls){
@@ -86,8 +89,10 @@ public class MysqlParserTest {
 				}
 				
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
+				System.out.println("---------------------------------");
+				System.out.println("error sql:"+ sql);
 				e.printStackTrace();
+				System.out.println("--------------------------");
 			}
 		}
 	}

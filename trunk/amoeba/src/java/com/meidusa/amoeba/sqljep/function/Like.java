@@ -139,7 +139,10 @@ public final class Like extends PostfixCommand {
 	}
 	
 	public static void main(String[] args){
-		System.out.println(like("%asdf","_asd_"));
+		System.out.println(like("%asdf","%asdf%"));
+		Comparative one = new Comparative(Comparative.Like,"%abc");
+		Comparative two = new Comparative(Comparative.Like,"%bc");
+		System.out.println(like(one,two));
 	}
 
 	public Comparable<?> getResult(Comparable<?>... comparables)

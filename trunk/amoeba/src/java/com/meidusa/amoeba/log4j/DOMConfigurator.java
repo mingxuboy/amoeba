@@ -7,6 +7,7 @@ import org.apache.log4j.helpers.OptionConverter;
 
 import org.w3c.dom.Element;
 
+import java.io.InputStream;
 import java.net.URL;
 
 import java.util.Properties;
@@ -42,6 +43,15 @@ public class DOMConfigurator extends org.apache.log4j.xml.DOMConfigurator {
         new DOMConfigurator().doConfigure(filename, LogManager.getLoggerRepository());
     }
 
+    /**
+     * 使用XML文件配置log4j。
+     *
+     * @param stream 配置文件输入流
+     */
+    public static void configure(InputStream stream) {
+        new DOMConfigurator().doConfigure(stream, LogManager.getLoggerRepository());
+    }
+    
     /**
      * 使用XML文件配置log4j。
      *

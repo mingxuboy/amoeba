@@ -39,6 +39,10 @@ public class ColumnExpression extends Expression {
 		return this;
 	}
 	
+	public Expression getExpression(){
+		return expression;
+	}
+	
 	public boolean isRealtime(){
 		return expression.isRealtime();
 	}
