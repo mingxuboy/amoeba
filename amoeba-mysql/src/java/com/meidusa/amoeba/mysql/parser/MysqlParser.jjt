@@ -1265,8 +1265,8 @@ void GroupByColumn():
 void OrderByClause():
 {}
 {
-    "ORDER" "BY" OrderByColumn() [(<IDENTIFIER>|<S_COMMA_IDENTIFIER>)]
-        ("," OrderByColumn() [(<IDENTIFIER>|<S_COMMA_IDENTIFIER>)])*
+    "ORDER" "BY" ("rand(" ")" |( OrderByColumn() [(<IDENTIFIER>|<S_COMMA_IDENTIFIER>)]
+        ("," OrderByColumn() [(<IDENTIFIER>|<S_COMMA_IDENTIFIER>)])*))
 }
 
 
