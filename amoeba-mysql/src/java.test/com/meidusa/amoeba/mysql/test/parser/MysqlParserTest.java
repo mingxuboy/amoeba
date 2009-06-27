@@ -77,30 +77,13 @@ public class MysqlParserTest {
 				,"REPLACE INTO cdb_spacecaches (uid, variable, value, expiration) VALUES ('2980526', 'mythreads', 'a:3:{i:0;a:14:{s:3:\"tid\";s:7:\"1606800\";s:7:\"subject\";s:8:\"赤版請進\";s:7:\"special\";s:1:\"0\";s:5:\"price\";s:1:\"0\";s:3:\"fid\";s:3:\"129\";s:5:\"views\";s:2:\"20\";s:7:\"replies\";s:1:\"0\";s:6:\"author\";s:4:\"av8d\";s:8:\"authorid\";s:7:\"2980526\";s:8:\"lastpost\";s:10:\"1236516949\";s:10:\"lastposter\";s:4:\"av8d\";s:10:\"attachment\";s:1:\"0\";s:3:\"pid\";s:6:\"154418\";s:7:\"message\";s:191:\"刪我的帖, 我無所謂, 但是總不能把損我的帖子留在那吧?http://bbs.macd.cn/viewthread.php?tid=1585698&amp;extra=page%3D1&amp;authorid=0&amp;page=33656F, 657樓, 660F, 都Quote了損我的言論. 不該刪嗎?\";}i:1;a:14:{s:3:\"tid\";s:7:\"1594957\";s:7:\"subject\";s:25:\"Q&amp;A With Bob Prechter\";s:7:\"special\";s:1:\"0\";s:5:\"price\";s:1:\"0\";s:3:\"fid\";s:2:\"22\";s:5:\"views\";s:3:\"428\";s:7:\"replies\";s:2:\"10\";s:6:\"author\";s:4:\"av8d\";s:8:\"authorid\";s:7:\"2980526\";s:8:\"lastpost\";s:10:\"1234267824\";s:10:\"lastposter\";s:9:\"cixilarty\";s:10:\"attachment\";s:1:\"0\";s:3:\"pid\";s:4:\"8429\";s:7:\"message\";s:289:\"我不翻譯了, 繁體的翻譯可能大家不習慣,還是看原文的吧!沒多少單字的.:*29*:Q&amp;A With Bob PrechterThe following is a compilation of Bob Prechter\\'s best media interviews.In this Q&amp;A, Bob talks about the validity and practical applicationsof the Wave Principle and explains Socionomics,...\";}i:2;a:14:{s:3:\"tid\";s:7:\"1593908\";s:7:\"subject\";s:27:\"已超过规定多次 按版规该封IP\";s:7:\"special\";s:1:\"0\";s:5:\"price\";s:1:\"0\";s:3:\"fid\";s:3:\"129\";s:5:\"views\";s:2:\"44\";s:7:\"replies\";s:1:\"2\";s:6:\"author\";s:4:\"av8d\";s:8:\"authorid\";s:7:\"2980526\";s:8:\"lastpost\";s:10:\"1234077272\";s:10:\"lastposter\";s:5:\"嘘。0\";s:10:\"attachment\";s:1:\"0\";s:3:\"pid\";s:3:\"910\";s:7:\"message\";s:282:\"1. 依据 http://bbs.macd.cn/thread-615952-1-1.html 5楼 重阳版主规定, 应予以封IP段方式处理.要营造专业、和谐的交流环境，必须加强版面管理。在原有的版规下增加一些细节：（于2009年1月10日执行）5.使用恶毒语言诅咒他人的，即时禁止登陆（记录在案，禁止其马甲进入论坛）。6.使用马甲进行捣乱的 ...\";}}', '1238258538')",
 				"select * from users where user like '%rain%';",
 				"SELECT magid, title FROM mag WHERE parentid = '72' ORDER BY rand() LIMIT 10",
-				"select distinct(a.id),a.InfoTitle,b.corpName,a.ProPrice,a.ShowTime,a.ExpTime,d.user as user_name,b.province,b.city,a.ProIntro from blogs c, users d,provide_info a ,corp_info b ,keyword e where a.blog_id=b.blog_id and a.blog_id!= '85653' and now() - INTERVAL a.InfoExp DAY  and a.blog_id=c.id and c.owner_id=d.id and a.id=e.host_id and e.ktype=4 and `e.kname`='气动行业' order by a.ShowTime desc,a.id desc"
+				"EXPLAIN  select distinct(a.id),a.InfoTitle,b.corpName,a.ProPrice,a.ShowTime,a.ExpTime,d.user as user_name,b.province,b.city,a.ProIntro from blogs c, users d,provide_info a ,corp_info b ,keyword e where a.blog_id=b.blog_id and a.blog_id!= '85653' and now() - INTERVAL a.InfoExp DAY  and a.blog_id=c.id and c.owner_id=d.id and a.id=e.host_id and e.ktype=4 and e.kname='气动行业' order by a.ShowTime desc,a.id desc",
+				"EXPLAIN SELECT * FROM xx where id= 12 FORCE INDEX (xx,yyy)"
 				//,"/* mysql-connector-java-5.1.6 ( Revision: ${svn.Revision} ) */SHOW VARIABLES WHERE Variable_name =’language’ OR Variable_name = ‘net_write_timeout’ OR Variable_name = ‘interactive_timeout’ OR Variable_name = ‘wait_timeout’ OR Variable_name = ‘character_set_client’ OR Variable_name = ‘character_set_connection’ OR Variable_name = ‘character_set’ OR Variable_name = ‘character_set_server’ OR Variable_name = ‘tx_isolation’ OR Variable_name = ‘transaction_isolation’ OR Variable_name = ‘character_set_results’ OR Variable_name = ‘timezone’ OR Variable_name = ‘time_zone’ OR Variable_name = ’system_time_zone’ OR Variable_name = ‘lower_case_table_names’ OR Variable_name = ‘max_allowed_packet’ OR Variable_name = ‘net_buffer_length’ OR Variable_name = ’sql_mode’ OR Variable_name = ‘query_cache_type’ OR Variable_name = ‘query_cache_size’ OR Variable_name = ‘init_connect’"
 		};
 		if(args.length == 0){
 			for(String sql: sqls){
-				Parser parser = new MysqlParser(new StringReader(sql));
-				parser.setFunctionMap(funMap);
-				try {
-					Statment statment = parser.doParse();
-					if(statment instanceof DMLStatment){
-						DMLStatment dmlStatment = (DMLStatment)statment;
-						Expression expression = dmlStatment.getExpression();
-						System.out.println(sql+" =[ "+ expression+"], evaluated = {"+dmlStatment.evaluate(null)+"}");
-					}else if(statment instanceof PropertyStatment ){
-						PropertyStatment proStatment = (PropertyStatment)statment;
-						System.out.println(proStatment.getProperties());
-					}
-					
-				} catch (Exception e) {
-					System.out.println("---------------------------------");
-					System.out.println("error sql:"+ sql);
-					e.printStackTrace();
-					System.out.println("--------------------------");
-				}
+				parser(funMap,sql);
 			}
 		}else{
 			BufferedReader reader = new BufferedReader(new FileReader(new File(args[0])));
@@ -114,27 +97,31 @@ public class MysqlParserTest {
 				}
 			}
 			String sql = buffer.toString();
+			parser(funMap,sql);
 			
-			Parser parser = new MysqlParser(new StringReader(sql));
-			parser.setFunctionMap(funMap);
-			try {
-				Statment statment = parser.doParse();
-				if(statment instanceof DMLStatment){
-					DMLStatment dmlStatment = (DMLStatment)statment;
-					Expression expression = dmlStatment.getExpression();
-					System.out.println(sql+" =[ "+ expression+"], evaluated = {"+dmlStatment.evaluate(null)+"}");
-				}else if(statment instanceof PropertyStatment ){
-					PropertyStatment proStatment = (PropertyStatment)statment;
-					System.out.println(proStatment.getProperties());
-				}
-				
-			} catch (Exception e) {
-				System.out.println("---------------------------------");
-				System.out.println("error sql:"+ sql);
-				e.printStackTrace();
-				System.out.println("--------------------------");
+			
+		}
+	}
+	
+	private static void parser(Map<String,Function> funMap,String sql){
+		Parser parser = new MysqlParser(new StringReader(sql));
+		parser.setFunctionMap(funMap);
+		try {
+			Statment statment = parser.doParse();
+			if(statment instanceof DMLStatment){
+				DMLStatment dmlStatment = (DMLStatment)statment;
+				Expression expression = dmlStatment.getExpression();
+				System.out.println(sql+" =[ "+ expression+"], evaluated = {"+dmlStatment.evaluate(null)+"}");
+			}else if(statment instanceof PropertyStatment ){
+				PropertyStatment proStatment = (PropertyStatment)statment;
+				System.out.println(proStatment.getProperties());
 			}
 			
+		} catch (Exception e) {
+			System.out.println("---------------------------------");
+			System.out.println("error sql:"+ sql);
+			e.printStackTrace();
+			System.out.println("--------------------------");
 		}
 	}
 	
