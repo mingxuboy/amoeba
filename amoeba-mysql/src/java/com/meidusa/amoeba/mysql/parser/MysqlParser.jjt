@@ -272,6 +272,7 @@ TOKEN: /* SQL Keywords. prefixed with K_ to avoid name clashes */
 |   <K_REAL:"REAL">
 |	<K_OPTION:"OPTION">
 
+|  <K_EXPLAIN:"EXPLAIN">
 |   <K_SELECT:"SELECT">
 |   <K_SET:"SET">
 |   <K_SOME:"SOME">
@@ -619,7 +620,7 @@ Statment parse() #void:
 	Statment statment = null;
 }
 {
-    (
+    ["EXPLAIN"] (
     statment = DeleteQuery()
     |
     statment = InsertQuery()
