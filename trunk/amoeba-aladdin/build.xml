@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="GB2312"?>
 <project default="dist" name="amoeba-aladdin" basedir=".">
-  	<property name="version"     value="0.6"/>
+  	<property name="version"     value="0.7.0-BETA"/>
   	<property name="app.name"     value="amoeba-aladdin"/>
   	<property name="deploy.dir"   value="dist"/>
   	<property name="savedoc.dir"  value="docs"/>
