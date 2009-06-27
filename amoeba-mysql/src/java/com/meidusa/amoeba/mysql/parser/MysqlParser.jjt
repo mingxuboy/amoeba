@@ -309,6 +309,8 @@ TOKEN: /* SQL Keywords. prefixed with K_ to avoid name clashes */
 |	<K_COMMIT:"COMMIT">
 |	<K_ROLLBACK:"ROLLBACK">
 
+| < K_IGNORE_INDEX:"IGNORE INDEX" >
+| < K_FORCE_INDEX:"FORCE INDEX" >
 |	<K_TRANSACTION_ISOLATION_LEVEL:"TRANSACTION ISOLATION LEVEL">
 //|	<K_TRANSACTION:"TRANSACTION">
 //|	<K_BEGIN:"BEGIN">
@@ -635,7 +637,7 @@ Statment parse() #void:
     |(<K_COMMIT> /*[<K_WORK>] [<K_AND> [<K_NO>] <K_CHAIN>] [[<K_NO>] <K_RELEASE>]*/){statment = new CommitStatment();}
     |(<K_ROLLBACK>/*[<K_WORK>] [<K_AND> [<K_NO>] <K_CHAIN>] [[<K_NO>] <K_RELEASE>]*/){statment = new RollbackStatment();}
     |(<K_START_TRANSACTION>){statment = new StartTansactionStatment();}
-    )(";"|<EOF>)
+    )[    ("FORCE INDEX" |"IGNORE INDEX") "(" <IDENTIFIER>      ( "," <IDENTIFIER>)* ")"] (";"|<EOF>)
     {
     	if(statment instanceof DMLStatment){
 	    	List<Table> list = new ArrayList<Table>();
