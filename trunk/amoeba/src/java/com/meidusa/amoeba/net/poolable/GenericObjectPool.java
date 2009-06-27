@@ -178,7 +178,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * or via a call to {@link #setFactory} before the pool is used.
  * 
  * <p>
- * 	<ul>some error fixed by Struct</ul>
+ * 	<ul>some bugs fixed by Struct</ul>
  * 	<li>fix numActive wrong with multiple threads when maked  invalid  object
  * 	<li>fix numIdle wrong with multiple threads when maked invalid object
  *  <li>performance tunning
