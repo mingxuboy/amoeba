@@ -3,6 +3,10 @@ package com.meidusa.amoeba.mysql.test.parser;
 
 
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.StringReader;
 import java.util.HashMap;
 import java.util.Map;
@@ -22,7 +26,7 @@ public class MysqlParserTest {
 	
 	
 	static Map<Column,Comparative> columnMap = new HashMap<Column,Comparative>();
-	public static void main(String[] args){
+	public static void main(String[] args) throws Exception{
 		Map<String,Function> funMap = AbstractQueryRouter.loadFunctionMap("./build/build-mysql/conf/functionMap.xml");
 		String t = "`asdfasdfaf`";
 		System.out.println(t.substring(1,t.length()-1));
@@ -76,8 +80,41 @@ public class MysqlParserTest {
 				"select distinct(a.id),a.InfoTitle,b.corpName,a.ProPrice,a.ShowTime,a.ExpTime,d.user as user_name,b.province,b.city,a.ProIntro from blogs c, users d,provide_info a ,corp_info b ,keyword e where a.blog_id=b.blog_id and a.blog_id!= '85653' and now() - INTERVAL a.InfoExp DAY  and a.blog_id=c.id and c.owner_id=d.id and a.id=e.host_id and e.ktype=4 and `e.kname`='气动行业' order by a.ShowTime desc,a.id desc"
 				//,"/* mysql-connector-java-5.1.6 ( Revision: ${svn.Revision} ) */SHOW VARIABLES WHERE Variable_name =’language’ OR Variable_name = ‘net_write_timeout’ OR Variable_name = ‘interactive_timeout’ OR Variable_name = ‘wait_timeout’ OR Variable_name = ‘character_set_client’ OR Variable_name = ‘character_set_connection’ OR Variable_name = ‘character_set’ OR Variable_name = ‘character_set_server’ OR Variable_name = ‘tx_isolation’ OR Variable_name = ‘transaction_isolation’ OR Variable_name = ‘character_set_results’ OR Variable_name = ‘timezone’ OR Variable_name = ‘time_zone’ OR Variable_name = ’system_time_zone’ OR Variable_name = ‘lower_case_table_names’ OR Variable_name = ‘max_allowed_packet’ OR Variable_name = ‘net_buffer_length’ OR Variable_name = ’sql_mode’ OR Variable_name = ‘query_cache_type’ OR Variable_name = ‘query_cache_size’ OR Variable_name = ‘init_connect’"
 		};
-		
-		for(String sql: sqls){
+		if(args.length == 0){
+			for(String sql: sqls){
+				Parser parser = new MysqlParser(new StringReader(sql));
+				parser.setFunctionMap(funMap);
+				try {
+					Statment statment = parser.doParse();
+					if(statment instanceof DMLStatment){
+						DMLStatment dmlStatment = (DMLStatment)statment;
+						Expression expression = dmlStatment.getExpression();
+						System.out.println(sql+" =[ "+ expression+"], evaluated = {"+dmlStatment.evaluate(null)+"}");
+					}else if(statment instanceof PropertyStatment ){
+						PropertyStatment proStatment = (PropertyStatment)statment;
+						System.out.println(proStatment.getProperties());
+					}
+					
+				} catch (Exception e) {
+					System.out.println("---------------------------------");
+					System.out.println("error sql:"+ sql);
+					e.printStackTrace();
+					System.out.println("--------------------------");
+				}
+			}
+		}else{
+			BufferedReader reader = new BufferedReader(new FileReader(new File(args[0])));
+			StringBuffer buffer = new StringBuffer();
+			String line = null;
+			while((line = reader.readLine()) != null){
+				if(line.trim().startsWith("#")){
+					continue;
+				}else{
+					buffer.append(line).append("\n");
+				}
+			}
+			String sql = buffer.toString();
+			
 			Parser parser = new MysqlParser(new StringReader(sql));
 			parser.setFunctionMap(funMap);
 			try {
@@ -97,6 +134,7 @@ public class MysqlParserTest {
 				e.printStackTrace();
 				System.out.println("--------------------------");
 			}
+			
 		}
 	}
 	
