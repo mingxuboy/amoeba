@@ -227,47 +227,53 @@ public interface AladdinParserConstants {
   /** RegularExpression Id. */
   int K_ROLLBACK = 106;
   /** RegularExpression Id. */
-  int K_TRANSACTION_ISOLATION_LEVEL = 107;
+  int K_EXPLAIN = 107;
   /** RegularExpression Id. */
-  int K_START_TRANSACTION = 108;
+  int K_IGNORE_INDEX = 108;
   /** RegularExpression Id. */
-  int K_SESSION = 109;
+  int K_FORCE_INDEX = 109;
   /** RegularExpression Id. */
-  int K_TRANSACTION_READ_COMMITTED = 110;
+  int K_TRANSACTION_ISOLATION_LEVEL = 110;
   /** RegularExpression Id. */
-  int K_TRANSACTION_READ_UNCOMMITTED = 111;
+  int K_START_TRANSACTION = 111;
   /** RegularExpression Id. */
-  int K_TRANSACTION_REPEATABLE_READ = 112;
+  int K_SESSION = 112;
   /** RegularExpression Id. */
-  int K_TRANSACTION_SERIALIZABLE = 113;
+  int K_TRANSACTION_READ_COMMITTED = 113;
   /** RegularExpression Id. */
-  int K_CLIENT_CHARSET = 114;
+  int K_TRANSACTION_READ_UNCOMMITTED = 114;
   /** RegularExpression Id. */
-  int INTEGER_LITERAL = 115;
+  int K_TRANSACTION_REPEATABLE_READ = 115;
   /** RegularExpression Id. */
-  int FLOATING_POINT_LITERAL = 116;
+  int K_TRANSACTION_SERIALIZABLE = 116;
   /** RegularExpression Id. */
-  int EXPONENT = 117;
+  int K_CLIENT_CHARSET = 117;
   /** RegularExpression Id. */
-  int DIGIT = 118;
+  int INTEGER_LITERAL = 118;
   /** RegularExpression Id. */
-  int LINE_COMMENT = 119;
+  int FLOATING_POINT_LITERAL = 119;
   /** RegularExpression Id. */
-  int MULTI_LINE_COMMENT = 120;
+  int EXPONENT = 120;
   /** RegularExpression Id. */
-  int IDENTIFIER = 121;
+  int DIGIT = 121;
   /** RegularExpression Id. */
-  int LETTER = 122;
+  int LINE_COMMENT = 122;
   /** RegularExpression Id. */
-  int SPECIAL_CHARS = 123;
+  int MULTI_LINE_COMMENT = 123;
   /** RegularExpression Id. */
-  int STRING_LITERAL = 124;
+  int IDENTIFIER = 124;
   /** RegularExpression Id. */
-  int S_QUOTED_IDENTIFIER = 125;
+  int LETTER = 125;
   /** RegularExpression Id. */
-  int S_COMMA_IDENTIFIER = 126;
+  int SPECIAL_CHARS = 126;
   /** RegularExpression Id. */
-  int S_PARAMETER_MARKER = 127;
+  int STRING_LITERAL = 127;
+  /** RegularExpression Id. */
+  int S_QUOTED_IDENTIFIER = 128;
+  /** RegularExpression Id. */
+  int S_COMMA_IDENTIFIER = 129;
+  /** RegularExpression Id. */
+  int S_PARAMETER_MARKER = 130;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -381,6 +387,9 @@ public interface AladdinParserConstants {
     "\"HOUR\"",
     "\"COMMIT\"",
     "\"ROLLBACK\"",
+    "\"EXPLAIN\"",
+    "\"IGNORE INDEX\"",
+    "\"FORCE INDEX\"",
     "\"TRANSACTION ISOLATION LEVEL\"",
     "\"START TRANSACTION\"",
     "\"SESSION\"",
@@ -402,12 +411,12 @@ public interface AladdinParserConstants {
     "<S_QUOTED_IDENTIFIER>",
     "<S_COMMA_IDENTIFIER>",
     "<S_PARAMETER_MARKER>",
+    "\"(\"",
+    "\",\"",
+    "\")\"",
     "\";\"",
     "\".\"",
     "\"=\"",
-    "\",\"",
-    "\"(\"",
-    "\")\"",
     "\"!=\"",
     "\"<>\"",
     "\">\"",
@@ -427,6 +436,7 @@ public interface AladdinParserConstants {
     "\".*\"",
     "\"NATURAL\"",
     "\"CROSS\"",
+    "\"rand(\"",
     "\"+\"",
     "\"-\"",
     "\"||\"",

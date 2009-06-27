@@ -39,6 +39,7 @@
   
   <filelist dir="." id="doc.files">
     <file name="build/doc/amoeba-0.3.pdf"/>
+    <file name="build/doc/changelogs.txt"/>
   </filelist>
 	
   <path id="classpath">

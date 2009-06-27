@@ -268,6 +268,9 @@ TOKEN: /* SQL Keywords. prefixed with K_ to avoid name clashes */
 |	<K_COMMIT:"COMMIT">
 |	<K_ROLLBACK:"ROLLBACK">
 
+|  <K_EXPLAIN:"EXPLAIN">
+| < K_IGNORE_INDEX:"IGNORE INDEX" >
+| < K_FORCE_INDEX:"FORCE INDEX" >
 |	<K_TRANSACTION_ISOLATION_LEVEL:"TRANSACTION ISOLATION LEVEL">
 |	<K_START_TRANSACTION:"START TRANSACTION">
 |	<K_SESSION:"SESSION">
@@ -536,7 +539,7 @@ TOKEN:
 				"\uffda" - "\uffdc"
 			]>
 |   < #SPECIAL_CHARS: "$" | "_">
-|   < STRING_LITERAL: "'" (~["'"])* "'" ("'" (~["'"])* "'")*>
+|   < STRING_LITERAL: "'" ((~["'"])|("\\" "'"))* "'">
 |   < S_QUOTED_IDENTIFIER: "\"" (~["\n","\r","\""])* "\"" >
 |	< S_COMMA_IDENTIFIER: "`" ((["@"])*( <LETTER> )+ ( <DIGIT> | "-"|<LETTER> |<SPECIAL_CHARS>)*) "`">
 |   < S_PARAMETER_MARKER: "?"|":"(<DIGIT>)*>
@@ -554,9 +557,9 @@ Statment parse()          :
 	Statment statment = null;
 }
 {/*@bgen(jjtree) Statment */
-    try {
+   try {
 /*@egen*/
-    (((
+   ["EXPLAIN"] (((
     statment = DeleteQuery()
     |
     statment = InsertQuery()
@@ -571,7 +574,9 @@ Statment parse()          :
     |(<K_COMMIT> /*[<K_WORK>] [<K_AND> [<K_NO>] <K_CHAIN>] [[<K_NO>] <K_RELEASE>]*/){statment = new CommitStatment();}
     |(<K_ROLLBACK>/*[<K_WORK>] [<K_AND> [<K_NO>] <K_CHAIN>] [[<K_NO>] <K_RELEASE>]*/){statment = new RollbackStatment();}
     |(<K_START_TRANSACTION>){statment = new StartTansactionStatment();}
-    )(";"|<EOF>))
+    )
+	[ ("FORCE INDEX" |"IGNORE INDEX") "(" <IDENTIFIER> ( "," <IDENTIFIER>)* ")"]
+    (";"|<EOF>))
     |
     (statment = ShowQuery()))/*@bgen(jjtree)*/
     {
@@ -594,25 +599,25 @@ Statment parse()          :
     	}
         return statment;
     }/*@bgen(jjtree)*/
-    } catch (Throwable jjte000) {
-      if (jjtc000) {
-        jjtree.clearNodeScope(jjtn000);
-        jjtc000 = false;
-      } else {
-        jjtree.popNode();
-      }
-      if (jjte000 instanceof RuntimeException) {
-        throw (RuntimeException)jjte000;
-      }
-      if (jjte000 instanceof ParseException) {
-        throw (ParseException)jjte000;
-      }
-      throw (Error)jjte000;
-    } finally {
-      if (jjtc000) {
-        jjtree.closeNodeScope(jjtn000, true);
-      }
-    }
+   } catch (Throwable jjte000) {
+     if (jjtc000) {
+       jjtree.clearNodeScope(jjtn000);
+       jjtc000 = false;
+     } else {
+       jjtree.popNode();
+     }
+     if (jjte000 instanceof RuntimeException) {
+       throw (RuntimeException)jjte000;
+     }
+     if (jjte000 instanceof ParseException) {
+       throw (ParseException)jjte000;
+     }
+     throw (Error)jjte000;
+   } finally {
+     if (jjtc000) {
+       jjtree.closeNodeScope(jjtn000, true);
+     }
+   }
 /*@egen*/
 }
 
@@ -1370,8 +1375,8 @@ void GroupByColumn():
 void OrderByClause():
 {}
 {
-    "ORDER" "BY" OrderByColumn() [(<IDENTIFIER>|<S_COMMA_IDENTIFIER>)]
-        ("," OrderByColumn() [(<IDENTIFIER>|<S_COMMA_IDENTIFIER>)])*
+    "ORDER" "BY" ("rand(" ")" |( OrderByColumn() [(<IDENTIFIER>|<S_COMMA_IDENTIFIER>)]
+        ("," OrderByColumn() [(<IDENTIFIER>|<S_COMMA_IDENTIFIER>)])*))
 }
 
 
