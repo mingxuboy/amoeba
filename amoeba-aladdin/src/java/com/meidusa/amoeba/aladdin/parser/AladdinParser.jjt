@@ -264,6 +264,9 @@ TOKEN: /* SQL Keywords. prefixed with K_ to avoid name clashes */
 |	<K_COMMIT:"COMMIT">
 |	<K_ROLLBACK:"ROLLBACK">
 
+|  <K_EXPLAIN:"EXPLAIN">
+| < K_IGNORE_INDEX:"IGNORE INDEX" >
+| < K_FORCE_INDEX:"FORCE INDEX" >
 |	<K_TRANSACTION_ISOLATION_LEVEL:"TRANSACTION ISOLATION LEVEL">
 |	<K_START_TRANSACTION:"START TRANSACTION">
 |	<K_SESSION:"SESSION">
@@ -532,7 +535,7 @@ TOKEN:
 				"\uffda" - "\uffdc"
 			]>
 |   < #SPECIAL_CHARS: "$" | "_">
-|   < STRING_LITERAL: "'" (~["'"])* "'" ("'" (~["'"])* "'")*>
+|   < STRING_LITERAL: "'" ((~["'"])|("\\" "'"))* "'">
 |   < S_QUOTED_IDENTIFIER: "\"" (~["\n","\r","\""])* "\"" >
 |	< S_COMMA_IDENTIFIER: "`" ((["@"])*( <LETTER> )+ ( <DIGIT> | "-"|<LETTER> |<SPECIAL_CHARS>)*) "`">
 |   < S_PARAMETER_MARKER: "?"|":"(<DIGIT>)*>
@@ -546,7 +549,7 @@ Statment parse() #Statment:
 	Statment statment = null;
 }
 {
-    (((
+   ["EXPLAIN"] (((
     statment = DeleteQuery()
     |
     statment = InsertQuery()
@@ -561,7 +564,9 @@ Statment parse() #Statment:
     |(<K_COMMIT> /*[<K_WORK>] [<K_AND> [<K_NO>] <K_CHAIN>] [[<K_NO>] <K_RELEASE>]*/){statment = new CommitStatment();}
     |(<K_ROLLBACK>/*[<K_WORK>] [<K_AND> [<K_NO>] <K_CHAIN>] [[<K_NO>] <K_RELEASE>]*/){statment = new RollbackStatment();}
     |(<K_START_TRANSACTION>){statment = new StartTansactionStatment();}
-    )(";"|<EOF>))
+    )
+	[ ("FORCE INDEX" |"IGNORE INDEX") "(" <IDENTIFIER> ( "," <IDENTIFIER>)* ")"]
+    (";"|<EOF>))
     |
     (statment = ShowQuery()))
     {
@@ -1335,8 +1340,8 @@ void GroupByColumn():
 void OrderByClause():
 {}
 {
-    "ORDER" "BY" OrderByColumn() [(<IDENTIFIER>|<S_COMMA_IDENTIFIER>)]
-        ("," OrderByColumn() [(<IDENTIFIER>|<S_COMMA_IDENTIFIER>)])*
+    "ORDER" "BY" ("rand(" ")" |( OrderByColumn() [(<IDENTIFIER>|<S_COMMA_IDENTIFIER>)]
+        ("," OrderByColumn() [(<IDENTIFIER>|<S_COMMA_IDENTIFIER>)])*))
 }
 
 
