@@ -637,7 +637,9 @@ Statment parse() #void:
     |(<K_COMMIT> /*[<K_WORK>] [<K_AND> [<K_NO>] <K_CHAIN>] [[<K_NO>] <K_RELEASE>]*/){statment = new CommitStatment();}
     |(<K_ROLLBACK>/*[<K_WORK>] [<K_AND> [<K_NO>] <K_CHAIN>] [[<K_NO>] <K_RELEASE>]*/){statment = new RollbackStatment();}
     |(<K_START_TRANSACTION>){statment = new StartTansactionStatment();}
-    )[    ("FORCE INDEX" |"IGNORE INDEX") "(" <IDENTIFIER>      ( "," <IDENTIFIER>)* ")"] (";"|<EOF>)
+    )
+    [ ("FORCE INDEX" |"IGNORE INDEX") "(" <IDENTIFIER> ( "," <IDENTIFIER>)* ")"]
+    (";"|<EOF>)
     {
     	if(statment instanceof DMLStatment){
 	    	List<Table> list = new ArrayList<Table>();
