@@ -1,0 +1,9 @@
+amoeba for mysql
+
+2009年06月28日 发布 1.0.0-BETA,主要修改以下内容:
+1、修复sql解析 explain 关键字开始的sql
+2、修复FORCE INDEX (xx) 之类的sql无法解析问题
+3、修复包含转义符合在内的sql 比如：insert into xx values('\'test\') 
+4、修复包含 Order by rand()的sql
+5、调整默认 网络接受发送缓冲区成128k
+ 
