@@ -1132,8 +1132,8 @@ Expression FullSelectStatement():
 	Expression unionedExpression = null;
 }
 {
-	((expression = SubSelectStatement() [ UnionClause() unionedExpression = FullSelectStatement()])
-	| "(" expression = FullSelectStatement() ")"){
+	((expression = SubSelectStatement() )
+	| "(" expression = FullSelectStatement()")" [ UnionClause() unionedExpression = FullSelectStatement()] ){
 		if(unionedExpression != null){
 			if(expression == null){
 				return unionedExpression;
