@@ -638,7 +638,7 @@ Statment parse() #void:
     |(<K_ROLLBACK>/*[<K_WORK>] [<K_AND> [<K_NO>] <K_CHAIN>] [[<K_NO>] <K_RELEASE>]*/){statment = new RollbackStatment();}
     |(<K_START_TRANSACTION>){statment = new StartTansactionStatment();}
     )
-    [ ("FORCE INDEX" |"IGNORE INDEX") "(" <IDENTIFIER> ( "," <IDENTIFIER>)* ")"]
+    [ INDEX() ]
     (";"|<EOF>)
     {
     	if(statment instanceof DMLStatment){
@@ -669,6 +669,7 @@ Statment SelectSchema() :{
 		return statment;
 	}
 }
+
 
 /*
 Statment ShowQuery() :{
@@ -1085,7 +1086,7 @@ Table TableReference():
     table = TableName() 
      [["AS"] token = <IDENTIFIER>{
     	table.setAlias(token.image);
-    }][ ("FORCE INDEX" |"IGNORE INDEX" | "USE INDEX") "(" <IDENTIFIER> ( "," <IDENTIFIER>)* ")"]{
+    }][ INDEX()]{
    	 if(table.getAlias() != null){
    	 	tableAliasMap.put(table.getAlias(),table);	
    	 }
@@ -1934,6 +1935,10 @@ void ReadOnlyClause() :
 {}
 {
 	"FOR" ("FETCH" | "READ") "ONLY"
+}
+
+void INDEX() :
+{}{ ("FORCE INDEX" |"IGNORE INDEX" | "USE INDEX") "(" <IDENTIFIER> ( "," <IDENTIFIER>)* ")"
 }
 
 void OptimizeForClause() :
