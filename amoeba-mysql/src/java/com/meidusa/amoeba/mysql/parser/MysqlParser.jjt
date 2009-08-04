@@ -1085,7 +1085,7 @@ Table TableReference():
     table = TableName() 
      [["AS"] token = <IDENTIFIER>{
     	table.setAlias(token.image);
-    }]{
+    }][ ("FORCE INDEX" |"IGNORE INDEX" | "USE INDEX") "(" <IDENTIFIER> ( "," <IDENTIFIER>)* ")"]{
    	 if(table.getAlias() != null){
    	 	tableAliasMap.put(table.getAlias(),table);	
    	 }
