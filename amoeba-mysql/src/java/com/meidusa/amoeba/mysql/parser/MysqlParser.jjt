@@ -255,6 +255,7 @@ TOKEN: /* SQL Keywords. prefixed with K_ to avoid name clashes */
 |   <K_LOOP:"LOOP">
 |   <K_CREATE:"CREATE">
 |   <K_NOT:"NOT">
+| 	<K_NOT2:"!" >
 |   <K_NULL:"NULL">
 |   <K_NULLS:"NULLS">
 |   <K_NUMBER:"NUMBER">
@@ -264,6 +265,7 @@ TOKEN: /* SQL Keywords. prefixed with K_ to avoid name clashes */
 |	<K_NOWAIT:"NOWAIT">
 |   <K_ONLY:"ONLY">
 |   <K_OR:"OR">
+|   <K_OR2:"||">
 |   <K_ORDER:"ORDER">
 |   <K_OUTER:"OUTER">
 |   <K_QUERYNO:"QUERYNO">
@@ -828,26 +830,42 @@ Statment InsertQuery():
 	DMLStatment statment = new InsertStatment();
 	Expression expression = null;
 	List<Column> insertColumns = null;
-	List<Expression> insertValues = null;
+	List<List<Expression> > insertValues = null;
 }
 {
     (<K_INSERT>|<K_REPLACE>) ["INTO"] table = TableName() ([LOOKAHEAD(4) "(" insertColumns = InsertColumns() ")"]
     ( insertValues = InsertValues() | expression = FullSelectStatement())
     {
-    	if(insertValues == null){
+    	if(insertValues == null || insertValues.size() == 0){
     		statment.setExpression(expression);
     	}else{
     		if(insertColumns != null){
 	    		AndExpression andExpression = new AndExpression();
 	    		int index = 0;
 	    		for(Column column:insertColumns){
-	    			ColumnExpression colExpression = new ColumnExpression();
-	    			colExpression.setColumn(column);
-	    			ComparisonExpression compExp = new ComparisonExpression();
-	    			compExp.setComparison(Comparative.Equivalent);
-	    			compExp.setExpression(insertValues.get(index));
-	    			colExpression.setExpression(compExp);
-	    			andExpression.addExpression(colExpression);
+	    			
+	    			
+	    			Expression insertExpression = null;
+					if(insertValues.size() >1)					{
+						insertExpression = new OrExpression();
+						for(List<Expression> rowExpression : insertValues )						{
+						  	ColumnExpression colExpression = new ColumnExpression();
+	    					colExpression.setColumn(column);
+						  	ComparisonExpression compExp = new ComparisonExpression();
+	    					compExp.setComparison(Comparative.Equivalent);
+	    					compExp.setExpression(rowExpression.get(index));
+	    					colExpression.setExpression(compExp);							((OrExpression)insertExpression).addExpression(colExpression);
+						}
+					}else					{
+					  	ColumnExpression colExpression = new ColumnExpression();
+	    				colExpression.setColumn(column);
+						ComparisonExpression compExp = new ComparisonExpression();
+    					compExp.setComparison(Comparative.Equivalent);
+    					compExp.setExpression(insertValues.get(0).get(index));
+    					colExpression.setExpression(compExp);
+    					insertExpression = colExpression;
+					}
+	    			andExpression.addExpression(insertExpression);
 	    			index ++;
 	    		}
 	    		statment.setExpression(andExpression);
@@ -882,17 +900,34 @@ Column InsertColumn():
    }
 }
 
-List<Expression> InsertValues():
+List<List<Expression>> InsertValues():
 {
-	List<Expression> insertValues = new ArrayList<Expression>();
+	List<List<Expression>> insertValues = new ArrayList<List<Expression > >();
+	List<Expression> singleExpressionList = null;
 	Expression expression = null;
 }
 {
-       ("VALUES" "("  expression = InsertValue(){insertValues.add(expression);} ("," expression = InsertValue(){insertValues.add(expression);})*  ")"){
+       ("VALUES" singleExpressionList = InsertSingleRowValues() {
+         	if(singleExpressionList != null)	       	{	         	insertValues.add(singleExpressionList);	       	}       }(["," ] singleExpressionList = InsertSingleRowValues() {
+         	if(singleExpressionList != null)
+	       	{
+	         	insertValues.add(singleExpressionList);
+	       	}
+	   })*
+	   ){
        	return insertValues;
        }
 }
 
+
+List<Expression> InsertSingleRowValues():
+{	List<Expression> insertValues = new ArrayList<Expression>();
+	Expression expression = null;
+}{	("("  expression = InsertValue(){insertValues.add(expression);} ("," expression = InsertValue(){insertValues.add(expression);})*  ")")
+	{		return insertValues;
+	}
+
+}
 //This is just a wrapper to provide different formatting in case of Insert
 Expression InsertValue():
 {
@@ -1265,7 +1300,7 @@ void GroupByClause() :
 void GroupByColumn():
 {}
 {
-      SQLSimpleExpression()
+      SQLRelationalExpression()
 }
 
 void OrderByClause():
@@ -1279,7 +1314,7 @@ void OrderByClause():
 void OrderByColumn():
 {}
 {
-      SQLSimpleExpression()
+      SQLRelationalExpression()
 }
 
 
@@ -1295,7 +1330,7 @@ Expression SQLExpression() :
     expression = SQLAndExpression(){
     	orExpression = new OrExpression(expression);
     }
-    ("OR"
+    (    ("OR" | "||")
 		expression =  SQLAndExpression(){
 			if(expression != null){
 				count++;
@@ -1599,7 +1634,7 @@ Expression SQLAddSubtractExpression() #void:
 	FunctionExpression superExpression = null;
 }
 {
-       (expression = SQLMultiplicativeExpression() ((token = "+" | token = "-" | token = "||" | token = "|") otherExpression = SQLMultiplicativeExpression(){
+       (expression = SQLMultiplicativeExpression() ((token = "+" | token = "-"  | token = "|") otherExpression = SQLMultiplicativeExpression(){
 		    function = getFunction(token.image.toUpperCase());
 		    if(function == null) return null;
 		    FunctionExpression functionExpression = new FunctionExpression();
@@ -1686,6 +1721,7 @@ Expression SQLPrimaryExpression()#void :
 	Column column = null;
 	Expression expression = null;
 	Comparable value = null;
+	boolean not = false;
 }
 {(
 t=<K_NULL>{
@@ -1764,7 +1800,9 @@ t=<K_NULL>{
 }
 |   CastFunctionCall()
 |   CaseStatement()
-|   LOOKAHEAD({ getFunction(getToken(1).image.toUpperCase())!= null }) expression = OverloadedFunctionCall()
+|   ["!"{not = true; }]LOOKAHEAD({ getFunction(getToken(1).image.toUpperCase())!= null }) expression = OverloadedFunctionCall()	{
+	  if(not && expression != null)	  {
+	   	 expression = reverseExpression(not,expression);	  }	}
 |   ("(" expression=SQLExpression() ")")
 |   LOOKAHEAD(EntityName() [ "." EntityName() ["." EntityName()]] "(" ) FunctionCall()
 |  column = ColumnName(){
@@ -1837,7 +1875,7 @@ Expression OverloadedFunctionCall() #void:
 	
 }
 {
-	functionName = FunctionName(){
+	 functionName = FunctionName(){
 		funExpression = new FunctionExpression();
 		function = getFunction(functionName);
 		funExpression.setFunction(function);
@@ -1860,48 +1898,9 @@ Expression OverloadedFunctionCall() #void:
 			if(nullExp){
 				return null;	
 			}else{
-				return funExpression;
+			  return funExpression;
 			}
 		}	
-	
-	/**
-        ("DATE"{functionName="DATE";} "(" SQLSimpleExpression() ")"
-        | "TIME"{functionName="TIME";} "(" SQLSimpleExpression() ")"
-        | "TIMESTAMP"{functionName="TIMESTAMP";} "(" SQLSimpleExpression() ["," SQLSimpleExpression() ] ")"
-        | "FLOAT"{functionName="FLOAT";} "(" SQLSimpleExpression() ")"
-        | "DOUBLE"{functionName="DOUBLE";} "(" SQLSimpleExpression() ")"
-        | "INTEGER"{functionName="INTEGER";} "(" SQLSimpleExpression() ")"
-        | "INT"{functionName="INT";} "(" SQLSimpleExpression() ")"
-        | "DECIMAL"{functionName="DECIMAL";} "(" SQLSimpleExpression() ["," <FLOATING_POINT_LITERAL> ["," <FLOATING_POINT_LITERAL> ["," <FLOATING_POINT_LITERAL>]]] ")"
-        | "DEC"{functionName="DEC";} "(" SQLSimpleExpression() ["," <FLOATING_POINT_LITERAL> ["," <FLOATING_POINT_LITERAL> ["," <FLOATING_POINT_LITERAL>]]]  ")"
-        | "LEFT"{functionName="LEFT";} "(" SQLSimpleExpression() "," <FLOATING_POINT_LITERAL> ")"
-        | "NOW"{functionName="NOW";} "(" [SQLSimpleExpression()] ")"
-        | "SYSDATE"{functionName="NOW";} "(" [SQLSimpleExpression()] ")"
-        | "RIGHT"{functionName="RIGHT";} "(" SQLSimpleExpression() "," <FLOATING_POINT_LITERAL> ")"
-        | "VARCHAR"{functionName="VARCHAR";} "(" SQLSimpleExpression() ["," <FLOATING_POINT_LITERAL>] ")"
-        | "CHAR"{functionName="CHAR";} "(" SQLSimpleExpression() ["," <FLOATING_POINT_LITERAL>] ")"
-        | "DAY"{functionName="DAY";} "(" SQLSimpleExpression() ")"
-        | "DAYS"{functionName="DAYS";} "(" SQLSimpleExpression() ")"
-        | "HOUR"{functionName="HOUR";} "(" SQLSimpleExpression() ")"
-        | "MICROSECOND"{functionName="MICROSECOND";} "(" SQLSimpleExpression() ")"
-        | "MINUTE"{functionName="MINUTE";} "(" SQLSimpleExpression() ")"
-        | "MONTH"{functionName="MONTH";} "(" SQLSimpleExpression() ")"
-        | "SECOND"{functionName="SECOND";} "(" SQLSimpleExpression() ")"
-        | "YEAR"{functionName="YEAR";} "(" SQLSimpleExpression() ")"
-        | "CURRENT_TIMESTAMP"{functionName="NOW";}
-		| "CURRENT_TIME"{functionName="CURRENT_TIME";}
-		| "CURRENT_DATE"{functionName="CURRENT_DATE";}
-        | "TO_DATE"{functionName="TO_DATE";} "("expression = SQLSimpleExpression() ")"){
-        	function = getFunction(functionName);
-        	if(function == null){return null;}
-        	FunctionExpression funExpression = new FunctionExpression();
-        	funExpression.setFunction(function);
-        	if(expression != null){
-        		funExpression.addArgExpression(expression);
-        	}
-        	return funExpression;
-        }
-        **/
 }
 
 void DataTypes() #void:

@@ -460,7 +460,7 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable 
         } else {
             //throw new RuntimeException("error,unknown statement:[" + sql + "]");
         	 logger.warn("error,unknown statement:[" + sql + "]");
-             return null;
+             return defaultPools;
         }
 
         ObjectPool[] pools = new ObjectPool[poolNames.size()];
