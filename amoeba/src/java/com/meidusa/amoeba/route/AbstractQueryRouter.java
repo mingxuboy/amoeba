@@ -458,7 +458,9 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable 
             }
             return null;
         } else {
-            throw new RuntimeException("error,unknown statement:[" + sql + "]");
+            //throw new RuntimeException("error,unknown statement:[" + sql + "]");
+        	 logger.warn("error,unknown statement:[" + sql + "]");
+             return null;
         }
 
         ObjectPool[] pools = new ObjectPool[poolNames.size()];
@@ -958,25 +960,23 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable 
                     schema.setName(defaultSchema);
                     parser.setDefaultSchema(schema);
                 }
+
                 try {
-
+                    statment = parser.doParse();
+                    mapLock.lock();
                     try {
-                        statment = parser.doParse();
-                        mapLock.lock();
-                        try {
-                            map.put(sqlKey, statment);
-                        } finally {
-                            mapLock.unlock();
-                        }
-                    } catch (Error e) {
-                        logger.error(sql, e);
-                        return null;
+                        map.put(sqlKey, statment);
+                    } finally {
+                        mapLock.unlock();
                     }
-
-                } catch (ParseException e) {
+                } catch (Error e) {
                     logger.error(sql, e);
                     return null;
+                }catch(Exception e){
+                	logger.error(sql, e);
+                    return null;
                 }
+               
             }
         }
         return statment;

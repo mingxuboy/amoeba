@@ -108,16 +108,18 @@ public class IPRule {
 			return m.matches();
 		}
 	}
-	/// <summary>
-	/// 判断指定的IP是否在指定的 规则下允许的(三个特殊符号 -?*）
-	/// rule[192.*.1.236-239:yes;192.*.1.226:no;218.85.*.*:no]最后一个不要加";"分号
-	/// 前面的规则优先级高
-	/// 注意，规则中的 * - ? 不能同时存在于同一个段内 如: 192.168.*?.123 会出错
-	/// *号在同一段内只能有一个, 如 192.16*.1.*,  192.1**.1.1 是错误的，可以用 ?号代替
-	/// </summary>
-	/// <param name="rule">(192.*.1.236-239:yes;192.*.1.226:no;218.85.*.*:no) 最后一个规则不要再多加";"分号</param>
-	/// <param name="ip">192.168.1.237(不正确的IP会出错)</param>
-	/// <returns></returns>
+	/**
+	 * <pre>
+	 * 判断指定的IP是否在指定的 规则下允许的(三个特殊符号 -?*）
+	 * rule[192.*.1.236-239:yes;192.*.1.226:no;218.85.*.*:no]最后一个不要加";"分号
+	 * 前面的规则优先级高
+	 * 注意，规则中的 * - ? 不能同时存在于同一个段内 如: 192.168.*?.123 会出错
+	 * 号在同一段内只能有一个, 如 192.16*.1.*,  192.1**.1.1 是错误的，可以用 ?号代替
+	 *	<param name="rule">(192.*.1.236-239:yes;192.*.1.226:no;218.85.*.*:no) 最后一个规则不要再多加";"分号</param>
+	 *	<param name="ip">192.168.1.237(不正确的IP会出错)</param>
+	 * </pre>
+	 */
+
 	public static boolean IsAllowIP(String rule, String ip) throws Exception
 	{
         String[] ruleArray = StringUtil.split(rule,";");
@@ -295,7 +297,7 @@ public class IPRule {
 			start = System.currentTimeMillis();
 			IPRegex regex = new IPRegex("192.1*.1.236-239");
 			for(int i=0;i<1000000;i++){
-				System.out.println(regex.isMatch("192.181.1.236"));
+				regex.isMatch("192.181.1.236");
 				//regex.isMatch("192.181.1.236");
 			}
 			System.out.println(System.currentTimeMillis()-start);
