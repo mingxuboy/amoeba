@@ -50,6 +50,12 @@ SKIP :
 | "\r"
 }
 
+SPECIAL_TOKEN:
+{
+   <LINE_COMMENT: "--"(~["\r","\n"])*>
+|  <MULTI_LINE_COMMENT: "/*" (~["*"])* "*" ("*" | (~["*","/"] (~["*"])* "*"))* "/">
+}
+
 TOKEN :
 {
 	
@@ -88,10 +94,11 @@ int MatchedBraces() :
 void dispaly():
 {
 	Token value;
+	Token comment;
 	Token name;
 }
 {
-	(name = <IDENT> <ASSIGN> token = <STRING>){
+(name = <IDENT> <ASSIGN> token = <STRING>){
 		String str1 = token.image.substring(1,token.image.length()-1);
   		System.out.println(name.image +"="+str1); 
 	}		

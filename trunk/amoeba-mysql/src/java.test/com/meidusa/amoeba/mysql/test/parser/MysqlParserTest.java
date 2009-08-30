@@ -79,6 +79,9 @@ public class MysqlParserTest {
 				"SELECT magid, title FROM mag WHERE parentid = '72' ORDER BY rand() LIMIT 10",
 				"EXPLAIN  select distinct(a.id),a.InfoTitle,b.corpName,a.ProPrice,a.ShowTime,a.ExpTime,d.user as user_name,b.province,b.city,a.ProIntro from blogs c, users d,provide_info a ,corp_info b ,keyword e where a.blog_id=b.blog_id and a.blog_id!= '85653' and now() - INTERVAL a.InfoExp DAY  and a.blog_id=c.id and c.owner_id=d.id and a.id=e.host_id and e.ktype=4 and e.kname='气动行业' order by a.ShowTime desc,a.id desc",
 				"EXPLAIN SELECT * FROM xx where id= 12 FORCE INDEX (xx,yyy)",
+				"INSERT INTO cdb_threadsmod (tid, uid, username, dateline, action, expiration, status) VALUES ('1679374', '193262', '椋炶垷', '1248835442', 'MOV', '0', '1'), ('1679382', '193262', '椋炶垷', '1248835442', 'MOV', '0', '1'); ",
+				"SELECT groupid, type, grouptitle FROM cdb_usergroups ORDER BY (creditshigher<>'0' || creditslower<>'0'), creditslower;",
+				"SELECT uid, COUNT(*) AS count FROM cdb_sessions GROUP BY uid='0';",
 				"(select help_topic_id ,name from mysql.help_topic where help_topic_id=53 order by help_category_id desc limit 2) union all (select help_topic_id ,name from mysql.help_topic where help_topic_id=47 order by help_category_id desc limit 2) union all (select help_topic_id ,name from mysql.help_topic where help_topic_id=53 order by help_category_id desc limit 2) union all (select help_topic_id ,name from mysql.help_topic where help_topic_id=47 order by help_category_id desc limit 2)",
 				"select version();",
 				"SELECT * FROM bbs_doing USE INDEX(dateline) WHERE 1 ORDER BY dateline DESC LIMIT 0,20;"
