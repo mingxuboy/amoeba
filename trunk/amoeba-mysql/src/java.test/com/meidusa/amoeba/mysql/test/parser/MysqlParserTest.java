@@ -84,7 +84,9 @@ public class MysqlParserTest {
 				"SELECT uid, COUNT(*) AS count FROM cdb_sessions GROUP BY uid='0';",
 				"(select help_topic_id ,name from mysql.help_topic where help_topic_id=53 order by help_category_id desc limit 2) union all (select help_topic_id ,name from mysql.help_topic where help_topic_id=47 order by help_category_id desc limit 2) union all (select help_topic_id ,name from mysql.help_topic where help_topic_id=53 order by help_category_id desc limit 2) union all (select help_topic_id ,name from mysql.help_topic where help_topic_id=47 order by help_category_id desc limit 2)",
 				"select version();",
-				"SELECT * FROM bbs_doing USE INDEX(dateline) WHERE 1 ORDER BY dateline DESC LIMIT 0,20;"
+				"SELECT * FROM bbs_doing USE INDEX(dateline) WHERE 1 ORDER BY dateline DESC LIMIT 0,20;",
+				"SELECT * FROM TABLE1 force INDEX (FIELD1, FIELD2)",
+				"SELECT FOUND_ROWS()"
 				//,"/* mysql-connector-java-5.1.6 ( Revision: ${svn.Revision} ) */SHOW VARIABLES WHERE Variable_name =¡¯language¡¯ OR Variable_name = ¡®net_write_timeout¡¯ OR Variable_name = ¡®interactive_timeout¡¯ OR Variable_name = ¡®wait_timeout¡¯ OR Variable_name = ¡®character_set_client¡¯ OR Variable_name = ¡®character_set_connection¡¯ OR Variable_name = ¡®character_set¡¯ OR Variable_name = ¡®character_set_server¡¯ OR Variable_name = ¡®tx_isolation¡¯ OR Variable_name = ¡®transaction_isolation¡¯ OR Variable_name = ¡®character_set_results¡¯ OR Variable_name = ¡®timezone¡¯ OR Variable_name = ¡®time_zone¡¯ OR Variable_name = ¡¯system_time_zone¡¯ OR Variable_name = ¡®lower_case_table_names¡¯ OR Variable_name = ¡®max_allowed_packet¡¯ OR Variable_name = ¡®net_buffer_length¡¯ OR Variable_name = ¡¯sql_mode¡¯ OR Variable_name = ¡®query_cache_type¡¯ OR Variable_name = ¡®query_cache_size¡¯ OR Variable_name = ¡®init_connect¡¯"
 		};
 		if(args.length == 0){
