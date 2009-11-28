@@ -155,123 +155,125 @@ public interface MysqlParserConstants {
   /** RegularExpression Id. */
   int K_OPTION = 70;
   /** RegularExpression Id. */
-  int K_EXPLAIN = 71;
+  int K_OFFSET = 71;
   /** RegularExpression Id. */
-  int K_SELECT = 72;
+  int K_EXPLAIN = 72;
   /** RegularExpression Id. */
-  int K_SET = 73;
+  int K_SELECT = 73;
   /** RegularExpression Id. */
-  int K_SOME = 74;
+  int K_SET = 74;
   /** RegularExpression Id. */
-  int K_TABLE = 75;
+  int K_SOME = 75;
   /** RegularExpression Id. */
-  int K_SHOW = 76;
+  int K_TABLE = 76;
   /** RegularExpression Id. */
-  int K_MOD = 77;
+  int K_SHOW = 77;
   /** RegularExpression Id. */
-  int K_DIV = 78;
+  int K_MOD = 78;
   /** RegularExpression Id. */
-  int K_THEN = 79;
+  int K_DIV = 79;
   /** RegularExpression Id. */
-  int K_TO = 80;
+  int K_THEN = 80;
   /** RegularExpression Id. */
-  int K_UNION = 81;
+  int K_TO = 81;
   /** RegularExpression Id. */
-  int K_UNIQUE = 82;
+  int K_UNION = 82;
   /** RegularExpression Id. */
-  int K_UPDATE = 83;
+  int K_UNIQUE = 83;
   /** RegularExpression Id. */
-  int K_USE = 84;
+  int K_UPDATE = 84;
   /** RegularExpression Id. */
-  int K_USING = 85;
+  int K_USE = 85;
   /** RegularExpression Id. */
-  int K_VALUES = 86;
+  int K_USING = 86;
   /** RegularExpression Id. */
-  int K_VARCHAR2 = 87;
+  int K_VALUES = 87;
   /** RegularExpression Id. */
-  int K_VARCHAR = 88;
+  int K_VARCHAR2 = 88;
   /** RegularExpression Id. */
-  int K_WHEN = 89;
+  int K_VARCHAR = 89;
   /** RegularExpression Id. */
-  int K_WHERE = 90;
+  int K_WHEN = 90;
   /** RegularExpression Id. */
-  int K_WHILE = 91;
+  int K_WHERE = 91;
   /** RegularExpression Id. */
-  int K_WITH = 92;
+  int K_WHILE = 92;
   /** RegularExpression Id. */
-  int K_TRUE = 93;
+  int K_WITH = 93;
   /** RegularExpression Id. */
-  int K_FALSE = 94;
+  int K_TRUE = 94;
   /** RegularExpression Id. */
-  int K_LIMIT = 95;
+  int K_FALSE = 95;
   /** RegularExpression Id. */
-  int K_RIGHT = 96;
+  int K_LIMIT = 96;
   /** RegularExpression Id. */
-  int K_INTERVAL = 97;
+  int K_RIGHT = 97;
   /** RegularExpression Id. */
-  int K_YEAR = 98;
+  int K_INTERVAL = 98;
   /** RegularExpression Id. */
-  int K_MICROSECOND = 99;
+  int K_YEAR = 99;
   /** RegularExpression Id. */
-  int K_SECOND = 100;
+  int K_MICROSECOND = 100;
   /** RegularExpression Id. */
-  int K_DAY = 101;
+  int K_SECOND = 101;
   /** RegularExpression Id. */
-  int K_MINUTE = 102;
+  int K_DAY = 102;
   /** RegularExpression Id. */
-  int K_MONTH = 103;
+  int K_MINUTE = 103;
   /** RegularExpression Id. */
-  int K_HOUR = 104;
+  int K_MONTH = 104;
   /** RegularExpression Id. */
-  int K_COMMIT = 105;
+  int K_HOUR = 105;
   /** RegularExpression Id. */
-  int K_ROLLBACK = 106;
+  int K_COMMIT = 106;
   /** RegularExpression Id. */
-  int K_IGNORE_INDEX = 107;
+  int K_ROLLBACK = 107;
   /** RegularExpression Id. */
-  int K_FORCE_INDEX = 108;
+  int K_IGNORE_INDEX = 108;
   /** RegularExpression Id. */
-  int K_TRANSACTION_ISOLATION_LEVEL = 109;
+  int K_FORCE_INDEX = 109;
   /** RegularExpression Id. */
-  int K_START_TRANSACTION = 110;
+  int K_TRANSACTION_ISOLATION_LEVEL = 110;
   /** RegularExpression Id. */
-  int K_SESSION = 111;
+  int K_START_TRANSACTION = 111;
   /** RegularExpression Id. */
-  int K_TRANSACTION_READ_COMMITTED = 112;
+  int K_SESSION = 112;
   /** RegularExpression Id. */
-  int K_TRANSACTION_READ_UNCOMMITTED = 113;
+  int K_TRANSACTION_READ_COMMITTED = 113;
   /** RegularExpression Id. */
-  int K_TRANSACTION_REPEATABLE_READ = 114;
+  int K_TRANSACTION_READ_UNCOMMITTED = 114;
   /** RegularExpression Id. */
-  int K_TRANSACTION_SERIALIZABLE = 115;
+  int K_TRANSACTION_REPEATABLE_READ = 115;
   /** RegularExpression Id. */
-  int K_CLIENT_CHARSET = 116;
+  int K_TRANSACTION_SERIALIZABLE = 116;
   /** RegularExpression Id. */
-  int INTEGER_LITERAL = 117;
+  int K_CLIENT_CHARSET = 117;
   /** RegularExpression Id. */
-  int FLOATING_POINT_LITERAL = 118;
+  int INTEGER_LITERAL = 118;
   /** RegularExpression Id. */
-  int EXPONENT = 119;
+  int FLOATING_POINT_LITERAL = 119;
   /** RegularExpression Id. */
-  int DIGIT = 120;
+  int EXPONENT = 120;
   /** RegularExpression Id. */
-  int LINE_COMMENT = 121;
+  int DIGIT = 121;
   /** RegularExpression Id. */
-  int MULTI_LINE_COMMENT = 122;
+  int LINE_COMMENT = 122;
   /** RegularExpression Id. */
-  int IDENTIFIER = 123;
+  int MULTI_LINE_COMMENT = 123;
   /** RegularExpression Id. */
-  int LETTER = 124;
+  int IDENTIFIER = 124;
   /** RegularExpression Id. */
-  int SPECIAL_CHARS = 125;
+  int LETTER = 125;
   /** RegularExpression Id. */
-  int STRING_LITERAL = 126;
+  int SPECIAL_CHARS = 126;
   /** RegularExpression Id. */
-  int S_QUOTED_IDENTIFIER = 127;
+  int STRING_LITERAL = 127;
   /** RegularExpression Id. */
-  int S_COMMA_IDENTIFIER = 128;
+  int S_QUOTED_IDENTIFIER = 128;
   /** RegularExpression Id. */
-  int S_PARAMETER_MARKER = 129;
+  int S_COMMA_IDENTIFIER = 129;
+  /** RegularExpression Id. */
+  int S_PARAMETER_MARKER = 130;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -349,6 +351,7 @@ public interface MysqlParserConstants {
     "\"READ\"",
     "\"REAL\"",
     "\"OPTION\"",
+    "\"OFFSET\"",
     "\"EXPLAIN\"",
     "\"SELECT\"",
     "\"SET\"",
