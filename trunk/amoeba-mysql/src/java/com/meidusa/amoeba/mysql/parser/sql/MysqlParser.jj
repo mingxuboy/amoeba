@@ -277,7 +277,7 @@ TOKEN: /* SQL Keywords. prefixed with K_ to avoid name clashes */
 |   <K_READ:"READ">
 |   <K_REAL:"REAL">
 |	<K_OPTION:"OPTION">
-
+|   <K_OFFSET:"OFFSET">
 |  <K_EXPLAIN:"EXPLAIN">
 |   <K_SELECT:"SELECT">
 |   <K_SET:"SET">
@@ -1204,7 +1204,7 @@ Expression SubSelectStatement():
     [ expression = WhereClause()]
     [ GroupByClause() ]
     [ OrderByClause() ]
-    [<K_LIMIT> <INTEGER_LITERAL>["," <INTEGER_LITERAL>]])
+    [<K_LIMIT> <INTEGER_LITERAL>[("," | <K_OFFSET> ) <INTEGER_LITERAL>]])
     {
     	return expression;	
     }
