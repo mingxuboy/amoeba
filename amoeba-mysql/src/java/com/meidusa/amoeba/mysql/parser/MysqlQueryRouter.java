@@ -47,7 +47,7 @@ public class MysqlQueryRouter extends AbstractQueryRouter{
 				}
 				sql = sql.trim();
 			}
-			if(sql.subSequence(0, 4).toString().equalsIgnoreCase("show")){
+			if(sql.length()>4 && sql.subSequence(0, 4).toString().equalsIgnoreCase("show")){
 				return this.defaultPools;
 			}
 		}
