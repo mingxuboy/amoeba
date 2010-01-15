@@ -23,8 +23,6 @@ import java.nio.channels.spi.SelectorProvider;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.Executor;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
@@ -34,7 +32,6 @@ import com.meidusa.amoeba.data.ConMgrStats;
 import com.meidusa.amoeba.util.Initialisable;
 import com.meidusa.amoeba.util.InitialisationException;
 import com.meidusa.amoeba.util.LoopingThread;
-import com.meidusa.amoeba.util.NameableRunner;
 import com.meidusa.amoeba.util.Queue;
 import com.meidusa.amoeba.util.Reporter;
 import com.meidusa.amoeba.util.Tuple;
@@ -56,8 +53,6 @@ public class ConnectionManager extends LoopingThread implements Reporter, Initia
     protected static final int                       CONNECTION_AUTHENTICATE_FAILD   = 4;
 
     protected Selector                               _selector;
-
-    private Executor                                 executor;
 
     private List<NetEventHandler>                    _handlers                       = new ArrayList<NetEventHandler>();
     protected ArrayList<ConnectionObserver>          _observers                      = new ArrayList<ConnectionObserver>();
@@ -180,13 +175,11 @@ public class ConnectionManager extends LoopingThread implements Reporter, Initia
         // clear the runtime error count
         _runtimeExceptionCount = 0;
 
-        final CountDownLatch latch = new CountDownLatch(ready.size());
         // 处理事件（网络数据流交互等）
         for (SelectionKey selkey : ready) {
             NetEventHandler handler = null;
             handler = (NetEventHandler) selkey.attachment();
             if (handler == null) {
-                latch.countDown();
                 logger.warn("Received network event but have no registered handler " + "[selkey=" + selkey + "].");
                 selkey.cancel();
                 continue;
@@ -203,37 +196,15 @@ public class ConnectionManager extends LoopingThread implements Reporter, Initia
                     if (handler != null && handler instanceof Connection) {
                         closeConnection((Connection) handler, e);
                     }
-                } finally {
-                    latch.countDown();
                 }
             } else if (selkey.isReadable() || selkey.isAcceptable()) {
-                final NetEventHandler tmpHandler = handler;
-
-                executor.execute(new NameableRunner() {
-
-                    public void run() {
-                        try {
-                            tmpHandler.handleEvent(iterStamp);
-                        } finally {
-                            latch.countDown();
-                        }
-                    }
-
-                    public String getRunnerName() {
-                        return ConnectionManager.this.getName() + "-Reading";
-                    }
-                });
+            	handler.handleEvent(iterStamp);
             } else {
-                latch.countDown();
                 logger.error(selkey.attachment() + ", isAcceptable=" + selkey.isAcceptable() + ",isConnectable=" + selkey.isConnectable() + ",isReadable=" + selkey.isReadable() + ",isWritable=" + selkey.isWritable());
             }
         }
 
         ready.clear();
-        try {
-            latch.await();
-        } catch (InterruptedException e) {
-        }
     }
 
     /**
@@ -310,7 +281,7 @@ public class ConnectionManager extends LoopingThread implements Reporter, Initia
     /**
      * 往ConnectionManager 增加一个SocketChannel
      */
-    public void registerConnection(Connection connection, int key) {
+    protected void registerConnection(Connection connection, int key) {
         SocketChannel channel = connection.getChannel();
         if (logger.isDebugEnabled()) {
             logger.debug("[" + this.getName() + "] registed Connection[" + channel.socket().getInetAddress().getHostAddress() + ":" + channel.socket().getPort() + "] connected!");
@@ -391,36 +362,6 @@ public class ConnectionManager extends LoopingThread implements Reporter, Initia
          * 当发生连接异常时，通知所有Observers
          */
         notifyObservers(CONNECTION_FAILED, conn, ioe);
-    }
-
-    public void invokeConnectionWriteMessage(Connection connection) {
-        if (connection.isClosed()) {
-            return;
-        }
-        try {
-            SelectionKey key = connection.getSelectionKey();
-            if (!key.isValid()) {
-                connection.handleFailure(new java.nio.channels.CancelledKeyException());
-                return;
-            }
-            synchronized (key) {
-                if (key != null && (key.interestOps() & SelectionKey.OP_WRITE) == 0) {
-                    /**
-                     * 发送数据，如果返回false，则表示socket send buffer 已经满了。则Selector 需要监听 Writeable event
-                     */
-                    boolean finished = connection.doWrite();
-                    if (!finished) {
-                        key.interestOps(key.interestOps() | SelectionKey.OP_WRITE);
-                    }
-                }
-            }
-        } catch (IOException ioe) {
-            connection.handleFailure(ioe);
-        }
-    }
-
-    public void setExecutor(Executor executor) {
-        this.executor = executor;
     }
 
     public void init() throws InitialisationException {

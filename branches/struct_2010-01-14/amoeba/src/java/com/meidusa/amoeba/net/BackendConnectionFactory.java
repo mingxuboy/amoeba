@@ -2,6 +2,7 @@ package com.meidusa.amoeba.net;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 
 import org.apache.log4j.Logger;
@@ -107,8 +108,6 @@ public abstract class BackendConnectionFactory extends AuthingableConnectionFact
 		if(conMgr == null){
 			throw new InitialisationException("can not found connectionManager by name="+manager);
 		}
-		this.setConnectionManager(conMgr);
-		
 	}
 	
 	protected void initConnection(Connection connection){
@@ -124,6 +123,7 @@ public abstract class BackendConnectionFactory extends AuthingableConnectionFact
 				conn.setPassword(ProxyRuntimeContext.getInstance().getConfig().getPassword());
 			}
 		}
+		ProxyRuntimeContext.getInstance().getConnectionManagerList().get(manager).postRegisterNetEventHandler(connection, SelectionKey.OP_READ);
 	}
 	
 }

@@ -39,7 +39,10 @@
 		manager¸ºÔðConnection IO¶ÁÐ´/ËÀÍö¼ì²â
 	-->
 	<connectionManagerList>
-		<connectionManager name="defaultManager" class="com.meidusa.amoeba.net.AuthingableConnectionManager"/>
+		<connectionManager name="defaultManager" class="com.meidusa.amoeba.net.MultiConnectionManagerWrapper">
+			<property name="subManagerClassName">com.meidusa.amoeba.net.AuthingableConnectionManager</property>
+			<property name="processors">5</property>
+		</connectionManager>
 	</connectionManagerList>
 	
 	<dbServerList>

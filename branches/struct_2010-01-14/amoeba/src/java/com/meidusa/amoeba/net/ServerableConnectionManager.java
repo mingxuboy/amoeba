@@ -25,10 +25,11 @@ import org.apache.log4j.Logger;
 
 /**
  * 指定一个端口,创建一个serverSocket. 将该ServerSocket所创建的Connection加入管理
+ * 该manager只负责socket accept netEvent,socket的 IO netEvent 由 {@link ServerableConnectionManager#connMgr} 负责
  * 
  * @author <a href=mailto:piratebase@sina.com>Struct chen</a>
  */
-public class ServerableConnectionManager extends AuthingableConnectionManager {
+public class ServerableConnectionManager extends ConnectionManager {
 
     protected static Logger       log = Logger.getLogger(ServerableConnectionManager.class);
 
@@ -36,29 +37,30 @@ public class ServerableConnectionManager extends AuthingableConnectionManager {
     protected ServerSocketChannel ssocket;
     protected String              ipAddress;
     protected ConnectionFactory   connFactory;
+    private ConnectionManager connMgr;
 
-    public ServerableConnectionManager() throws IOException{
+    public ServerableConnectionManager(ConnectionManager connMgr) throws IOException{
+    	this.connMgr = connMgr;
+    	this.setDaemon(false);
     }
 
-    public ServerableConnectionManager(String name, int port) throws IOException{
-        super(name);
-        this.port = port;
+    public ServerableConnectionManager(String name, int port,ConnectionManager connMgr) throws IOException{
+    	super(name);
+    	this.port = port;
+    	this.connMgr = connMgr;
+    	this.setDaemon(false);
     }
 
-    public ServerableConnectionManager(String name, String ipAddress, int port) throws IOException{
+    public ServerableConnectionManager(String name, String ipAddress, int port,ConnectionManager connMgr) throws IOException{
         super(name);
         this.port = port;
         this.ipAddress = ipAddress;
+        this.connMgr = connMgr;
+        this.setDaemon(false);
     }
 
     public void setConnectionFactory(ConnectionFactory connFactory) {
         this.connFactory = connFactory;
-        if (connFactory instanceof AbstractConnectionFactory) {
-            AbstractConnectionFactory afactory = (AbstractConnectionFactory) connFactory;
-            if (afactory.getConnectionManager() == null) {
-                afactory.setConnectionManager(this);
-            }
-        }
     }
 
     // documentation inherited
@@ -144,8 +146,8 @@ public class ServerableConnectionManager extends AuthingableConnectionManager {
                 channel.socket().close();
                 return;
             }
-            connFactory.createConnection(channel, System.currentTimeMillis());
-            // this.postRegisterNetEventHandler(connection,SelectionKey.OP_READ);
+            Connection connection = connFactory.createConnection(channel, System.currentTimeMillis());
+            connMgr.postRegisterNetEventHandler(connection,SelectionKey.OP_READ);
         } catch (Exception e) {
             if (channel != null) {
                 try {
