@@ -236,7 +236,6 @@ public abstract class ProxyRuntimeContext implements Reporter {
         initAllInitialisableBeans();
         initialisableList.clear();
         for (ConnectionManager cm : getConnectionManagerList().values()) {
-            cm.setExecutor(this.getReadExecutor());
             cm.start();
         }
         initPools();

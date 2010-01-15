@@ -27,6 +27,8 @@ import com.meidusa.amoeba.log4j.DOMConfigurator;
 import com.meidusa.amoeba.mysql.context.MysqlProxyRuntimeContext;
 import com.meidusa.amoeba.mysql.server.MysqlAuthenticator;
 import com.meidusa.amoeba.net.ConnectionManager;
+import com.meidusa.amoeba.net.MultiConnectionManagerWrapper;
+import com.meidusa.amoeba.net.ServerableConnectionManager;
 import com.meidusa.amoeba.server.IPAccessController;
 import com.meidusa.amoeba.util.InitialisationException;
 import com.meidusa.amoeba.util.Reporter;
@@ -130,6 +132,7 @@ public class AladdinProxyServer {
      * @throws IOException
      */
     public static void main(String[] args) throws IOException {
+    	
         String log4jConf = System.getProperty("log4j.conf", "${amoeba.home}/conf/log4j.xml");
         log4jConf = ConfigUtil.filter(log4jConf);
         File logconf = new File(log4jConf);
@@ -152,17 +155,7 @@ public class AladdinProxyServer {
         for (ConnectionManager connMgr : context.getConnectionManagerList().values()) {
             registerReporter(connMgr);
         }
-
-        AladdinClientConnectionManager aladdin = new AladdinClientConnectionManager(name,
-                                                                                    context.getConfig().getIpAddress(),
-                                                                                    context.getConfig().getPort());
-        registerReporter(aladdin);
-        AladdinClientConnectionFactory factory = new AladdinClientConnectionFactory();
-        factory.setPassword(context.getConfig().getPassword());
-        factory.setUser(context.getConfig().getUser());
-        aladdin.setConnectionFactory(factory);
-        factory.setConnectionManager(aladdin);
-
+        
         MysqlAuthenticator auth = new MysqlAuthenticator();
         String accessConf = System.getProperty("access.conf", "${amoeba.home}/conf/access_list.conf");
         accessConf = ConfigUtil.filter(accessConf);
@@ -175,11 +168,28 @@ public class AladdinProxyServer {
             System.exit(-1);
         }
         auth.setFilter(ipfilter);
-
-        aladdin.setAuthenticator(auth);
-        aladdin.setExecutor(context.getReadExecutor());
-        aladdin.start();
-
+        
+        int maxsubManager = Integer.valueOf(System.getProperty("maxSubManager","32"));
+        int processors = Runtime.getRuntime().availableProcessors();
+        ConnectionManager[] managers = new ConnectionManager[processors>=maxsubManager?maxsubManager:processors+1];
+        for(int i=0;i<managers.length;i++){
+	        AladdinClientConnectionManager aladdin = new AladdinClientConnectionManager("sub ConnMgr");
+	        registerReporter(aladdin);
+	        aladdin.setAuthenticator(auth);
+	        aladdin.start();
+	        managers[i] = aladdin;
+        }
+        MultiConnectionManagerWrapper wrapper = new MultiConnectionManagerWrapper(managers);
+        wrapper.start();
+        ServerableConnectionManager serverManager = new ServerableConnectionManager(name,context.getConfig().getIpAddress(),context.getConfig().getPort(),wrapper);
+		registerReporter(serverManager);
+        
+        AladdinClientConnectionFactory factory = new AladdinClientConnectionFactory();
+        factory.setPassword(context.getConfig().getPassword());
+        factory.setUser(context.getConfig().getUser());
+        serverManager.setConnectionFactory(factory);
+        serverManager.start();
+        
         logReport();
     }
 

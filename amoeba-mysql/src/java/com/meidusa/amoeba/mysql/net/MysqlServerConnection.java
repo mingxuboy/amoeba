@@ -12,14 +12,12 @@
 package com.meidusa.amoeba.mysql.net;
 
 import java.nio.channels.SocketChannel;
-import java.util.concurrent.locks.Lock;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
 import com.meidusa.amoeba.net.poolable.ObjectPool;
 import com.meidusa.amoeba.net.poolable.PoolableObject;
-import com.meidusa.amoeba.context.ProxyRuntimeContext;
 import com.meidusa.amoeba.mysql.context.MysqlProxyRuntimeContext;
 import com.meidusa.amoeba.mysql.io.MySqlPacketConstant;
 import com.meidusa.amoeba.mysql.net.packet.AuthenticationPacket;
@@ -49,8 +47,6 @@ public class MysqlServerConnection extends MysqlConnection implements MySqlPacke
 	
 	public static enum Status{WAITE_HANDSHAKE,AUTHING,COMPLETED};
 	private Status status = Status.WAITE_HANDSHAKE;
-	private CommandInfo commandInfo = null;
-	private CommandMessageQueueRunner commandRunner;
 	private ObjectPool objectPool;
 	private long createTime = System.currentTimeMillis();
 	private boolean active;
@@ -66,7 +62,6 @@ public class MysqlServerConnection extends MysqlConnection implements MySqlPacke
 	private String seed;
 	public MysqlServerConnection(SocketChannel channel, long createStamp) {
 		super(channel, createStamp);
-		//commandRunner = new CommandMessageQueueRunner(this);
 	}
 	
 	public void handleMessage(Connection conn,byte[] message) {
@@ -330,41 +325,9 @@ public class MysqlServerConnection extends MysqlConnection implements MySqlPacke
 		}
 	}
 	
-	/**
-	 * commandInfo 存在，并且runner没启动，则需要执行runner。
-	 * runner没结束，并且command已经结束，则需要被blocked住
-	 * runner running and command not end：runner handle those messages
-	 */
-	protected void messageProcess(byte[] msg){
-		if(commandInfo != null){
-			if(commandRunner != null){
-				if(commandRunner.getRunnerStatus() != CommandMessageQueueRunner.RunnerStatus.RUNNING){
-					final Lock lock = commandRunner.getLock();
-					lock.lock();
-					try{
-						commandRunner.setRunnerStatus(CommandMessageQueueRunner.RunnerStatus.RUNNING);
-						ProxyRuntimeContext.getInstance().getServerSideExecutor().execute(commandRunner);
-					}finally{
-			        	lock.unlock();
-			        }
-				}
-				commandRunner.handleMessage(this, msg);
-			}else{
-				super.messageProcess(msg);
-			}
-		}else{
-			super.messageProcess(msg);
-		}
-	}
-
 	
 	public void appendReport(StringBuilder buffer, long now, long sinceLast,
 			boolean reset,Level level) {
-		
-		if(commandRunner != null){
-			buffer.append("    -- Command: messageQueueSize:").append(commandRunner.getQueueSize());
-			buffer.append(",runner.Status:").append(commandRunner.getRunnerStatus()).append("\n");
-		}
 		
 		if(this._handler instanceof Reporter.SubReporter && this._handler != this){
 			Reporter.SubReporter reporter = (Reporter.SubReporter)(this._handler);
@@ -374,20 +337,9 @@ public class MysqlServerConnection extends MysqlConnection implements MySqlPacke
 
 	
 	public void finishedCommand(CommandInfo command) {
-		if(commandRunner != null){
-			final Lock lock = commandRunner.getLock();
-		    lock.lock();
-			try{
-		    	commandRunner.setRunnerStatus(CommandMessageQueueRunner.RunnerStatus.WAITTOEND);
-				this.commandInfo = null;
-		    }finally{
-		    	lock.unlock();
-		    }
-		}
 	}
 
 	public void startCommand(CommandInfo command) {
-	    this.commandInfo = command;
 	}
 
 	public ObjectPool getObjectPool() {
@@ -431,10 +383,6 @@ public class MysqlServerConnection extends MysqlConnection implements MySqlPacke
 				}
 			}
 		} catch (Exception e) {
-		}
-		
-		if(commandRunner != null && commandRunner.getRunnerStatus() == CommandMessageQueueRunner.RunnerStatus.RUNNING){
-			commandRunner.interrupt();
 		}
 	}
 	

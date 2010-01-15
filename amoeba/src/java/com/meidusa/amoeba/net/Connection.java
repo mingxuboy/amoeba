@@ -299,7 +299,7 @@ public abstract class Connection implements NetEventHandler {
              * ByteBuffer out= ByteBuffer.allocate(buffer.limit()); out.put(buffer); out.flip();
              */
             _outQueue.append(buffer);
-            _cmgr.invokeConnectionWriteMessage(this);
+            writeMessage();
         } catch (IOException e) {
             this._cmgr.connectionFailed(this, e);
         }
@@ -307,9 +307,35 @@ public abstract class Connection implements NetEventHandler {
 
     public void postMessage(ByteBuffer msg) {
         _outQueue.append(msg);
-        _cmgr.invokeConnectionWriteMessage(this);
+        writeMessage();
     }
 
+    protected void writeMessage() {
+        if (isClosed()) {
+            return;
+        }
+        try {
+            SelectionKey key = getSelectionKey();
+            if (!key.isValid()) {
+                handleFailure(new java.nio.channels.CancelledKeyException());
+                return;
+            }
+            synchronized (key) {
+                if (key != null && (key.interestOps() & SelectionKey.OP_WRITE) == 0) {
+                    /**
+                     * 发送数据，如果返回false，则表示socket send buffer 已经满了。则Selector 需要监听 Writeable event
+                     */
+                    boolean finished = doWrite();
+                    if (!finished) {
+                        key.interestOps(key.interestOps() | SelectionKey.OP_WRITE);
+                    }
+                }
+            }
+        } catch (IOException ioe) {
+            handleFailure(ioe);
+        }
+    }
+    
     public boolean checkIdle(long now) {
         long idleMillis = now - _lastEvent;
         if (idleMillis < PING_INTERVAL + LATENCY_GRACE) {

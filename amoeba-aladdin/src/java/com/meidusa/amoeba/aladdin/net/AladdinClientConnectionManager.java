@@ -10,18 +10,14 @@ import com.meidusa.amoeba.net.Connection;
 
 public class AladdinClientConnectionManager extends MysqlClientConnectionManager {
 
-    private static byte[] authenticateOkPacketData;
-
     public AladdinClientConnectionManager() throws IOException{
     }
+    
+    public AladdinClientConnectionManager(String name) throws IOException {
+		super(name);
+	}
 
-    public AladdinClientConnectionManager(String name, int port) throws IOException{
-        super(name, port);
-    }
-
-    public AladdinClientConnectionManager(String name, String ipAddress, int port) throws IOException{
-        super(name, ipAddress, port);
-    }
+	private static byte[] authenticateOkPacketData;
 
     public void connectionAuthenticateSuccess(Connection conn, AuthResponseData data) {
         if (logger.isInfoEnabled()) {

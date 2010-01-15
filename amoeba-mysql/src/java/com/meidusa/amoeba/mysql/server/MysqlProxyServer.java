@@ -24,6 +24,8 @@ import com.meidusa.amoeba.mysql.context.MysqlProxyRuntimeContext;
 import com.meidusa.amoeba.mysql.net.MysqlClientConnectionFactory;
 import com.meidusa.amoeba.mysql.net.MysqlClientConnectionManager;
 import com.meidusa.amoeba.net.ConnectionManager;
+import com.meidusa.amoeba.net.MultiConnectionManagerWrapper;
+import com.meidusa.amoeba.net.ServerableConnectionManager;
 import com.meidusa.amoeba.server.IPAccessController;
 import com.meidusa.amoeba.util.InitialisationException;
 import com.meidusa.amoeba.util.Reporter;
@@ -129,16 +131,6 @@ public class MysqlProxyServer {
 			registerReporter(connMgr);
 		}
 		
-		MysqlClientConnectionManager mysqlProxyServerconMger = new MysqlClientConnectionManager("Mysql proxy Server"
-				,context.getConfig().getIpAddress(),context.getConfig().getPort());
-		registerReporter(mysqlProxyServerconMger);
-		MysqlClientConnectionFactory factory = new MysqlClientConnectionFactory();
-		factory.setPassword(context.getConfig().getPassword());
-		factory.setUser(context.getConfig().getUser());
-		mysqlProxyServerconMger.setConnectionFactory(factory);
-		factory.setConnectionManager(mysqlProxyServerconMger);
-		
-		MysqlAuthenticator authen = new MysqlAuthenticator();
 		
 		String accessConf = System.getProperty("access.conf","${amoeba.home}/conf/access_list.conf");
 		accessConf = ConfigUtil.filter(accessConf);
@@ -151,12 +143,31 @@ public class MysqlProxyServer {
 			System.exit(-1);
 		}
 		
-		authen.setFilter(ipfilter);
 		
-		mysqlProxyServerconMger.setAuthenticator(authen);
-		mysqlProxyServerconMger.setExecutor(context.getReadExecutor());
 		
-		mysqlProxyServerconMger.start();
+        int maxsubManager = Integer.valueOf(System.getProperty("maxSubManager","32"));
+        int processors = Runtime.getRuntime().availableProcessors();
+        ConnectionManager[] managers = new ConnectionManager[processors>=maxsubManager?maxsubManager:processors+1];
+        for(int i=0;i<managers.length;i++){
+        	MysqlClientConnectionManager mysqlProxyServerconMger = new MysqlClientConnectionManager("sub manager-"+i);
+        	MysqlAuthenticator authen = new MysqlAuthenticator();
+        	authen.setFilter(ipfilter);
+    		mysqlProxyServerconMger.setAuthenticator(authen);
+    		registerReporter(mysqlProxyServerconMger);
+    		mysqlProxyServerconMger.start();
+	        managers[i] = mysqlProxyServerconMger;
+        }
+        MultiConnectionManagerWrapper wrapper = new MultiConnectionManagerWrapper(managers);
+        wrapper.start();
+		ServerableConnectionManager serverManager = new ServerableConnectionManager("Mysql proxy Server",context.getConfig().getIpAddress(),context.getConfig().getPort(),wrapper);
+		
+		registerReporter(serverManager);
+		MysqlClientConnectionFactory factory = new MysqlClientConnectionFactory();
+		factory.setPassword(context.getConfig().getPassword());
+		factory.setUser(context.getConfig().getUser());
+		serverManager.setConnectionFactory(factory);
+		
+		serverManager.start();
 		new Thread(){
 			{
 				this.setDaemon(true);

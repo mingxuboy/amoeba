@@ -13,6 +13,7 @@
  */
 package com.meidusa.amoeba.util;
 
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
 /**
@@ -50,9 +51,12 @@ public class LoopingThread extends Thread {
      * Ñ­»·
      */
     public void run() {
-        if (log.isDebugEnabled()) {
-            log.debug(this.getName() + " LoopingThread willStart....");
-        }
+    	
+    	Level level = log.getLevel();
+        log.setLevel(Level.INFO);
+        log.info(this.getName() + " LoopingThread willStart....");
+        log.setLevel(level);
+        
         try {
             willStart();
 
