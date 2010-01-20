@@ -8,8 +8,9 @@
 		<property name="port">8066</property>
 		
 		<!-- proxy server°ó¶¨µÄIP -->
+		<!-- 
 		<property name="ipAddress">127.0.0.1</property>
-		
+		 -->
 		<!-- proxy server net IO Read thread size -->
 		<property name="readThreadPoolSize">20</property>
 		
@@ -41,7 +42,11 @@
 	<connectionManagerList>
 		<connectionManager name="defaultManager" class="com.meidusa.amoeba.net.MultiConnectionManagerWrapper">
 			<property name="subManagerClassName">com.meidusa.amoeba.net.AuthingableConnectionManager</property>
+			
+			<!-- 
+			  default value is avaliable Processors 
 			<property name="processors">5</property>
+			 -->
 		</connectionManager>
 	</connectionManagerList>
 	
