@@ -6,7 +6,6 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
-import com.meidusa.amoeba.util.Initialisable;
 import com.meidusa.amoeba.util.InitialisationException;
 
 public class MultiConnectionManagerWrapper extends ConnectionManager{
