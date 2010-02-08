@@ -1,5 +1,11 @@
 amoeba for mysql
 
+2010年01月18日发布1.1.0-BETA，主要修改内容：
+1、解决amoeba运行一段时间以后可能出现阻塞
+2、修复个别sql解析问题
+3、重构了ConnectionManager，去除之前读取数据包采用线池的方式，改成目前采用MultiConnectionManagerWrapper，采用多个（具体多少默认由可用的cpu 核数量决定）ConnectionManager进行负责网络IO， 而每个ConnectionManager都是一个单线程
+注意：与之前的amoeba.xml在配置上有点出入（defaultManager 的配置与之前不一样了）
+
 2009年06月28日 发布 1.0.0-BETA,主要修改以下内容:
 1、修复sql解析 explain 关键字开始的sql
 2、修复FORCE INDEX (xx) 之类的sql无法解析问题
