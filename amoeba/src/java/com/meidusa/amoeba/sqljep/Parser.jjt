@@ -226,6 +226,8 @@ TOKEN:
 |	< BETWEEN:  "between"  >
 |	< LIKE:  "like"  >
 |	< NOT_LIKE:  "not like"  >
+|   < var: "var" >
+|  < comm:";" >
 }
 
 
@@ -320,9 +322,16 @@ ASTStart Start() #Start :
 
 void Expression() : {}
 {
+  [      VarExpression()  ]
   OrExpression()
 }
-
+void VarExpression() :
+{
+	String identString = "";
+}
+{
+  < var >  identString = Identifier() < EQ > OrExpression()< comm >
+}
 void OrExpression() :
 {
 }
