@@ -313,7 +313,7 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable 
                                     }
                                 }
 
-                                // 如果参数比必须的参数小，则继续下一条规则
+                                // 如果参数比必须的参数个数少，则继续下一条规则
                                 if (columnMap.size() < rule.parameterMap.size()) {
                                     continue;
                                 } else {
@@ -753,8 +753,10 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable 
 
                 final String nodeName = child.getNodeName();
                 if (nodeName.equals("tableRule")) {
-                    TableRule rule = loadTableRule(child);
-                    tableRuleMap.put(rule.table.getName() == null ? null : rule.table, rule);
+                    List <TableRule> list = loadTableRule(child);
+                    for(TableRule rule:list){
+                    	tableRuleMap.put(rule.table.getName() == null ? null : rule.table, rule);
+                    }
                 }
             }
         }
@@ -765,33 +767,56 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable 
         return tableRuleMap;
     }
 
-    private TableRule loadTableRule(Element current) throws InitialisationException {
-        TableRule tableRule = new TableRule();
+    private List<TableRule> loadTableRule(Element current) throws InitialisationException {
+        
         String name = current.getAttribute("name");
         String schemaName = current.getAttribute("schema");
-        Table table = new Table();
-        table.setName(name);
-        if (!StringUtil.isEmpty(schemaName)) {
-            Schema schema = new Schema();
-
-            schema.setName(schemaName);
-            table.setSchema(schema);
+        List<TableRule> list = new ArrayList<TableRule>();
+        
+        String[] names = new String[]{name};
+        if(name != null){
+        	names = name.split(",");
         }
-
-        tableRule.table = table;
+        
+        for(String tableName : names){
+        	TableRule tableRule = new TableRule();
+	        Table table = new Table();
+	        String[] tableSchema = tableName.split(".");
+	        if(tableSchema.length==2){
+	        	table.setName(tableSchema[1]);
+	            Schema schema = new Schema();
+	            schema.setName(tableSchema[1]);
+	            table.setSchema(schema);
+	        }else{
+	        	table.setName(tableSchema[0]);
+	        	 if (!StringUtil.isEmpty(schemaName)) {
+		            Schema schema = new Schema();
+		            schema.setName(tableName);
+		            table.setSchema(schema);
+			     }
+	        }
+	        tableRule.table = table;
+	        list.add(tableRule);
+	        
+        }
+       
         String defaultPools = current.getAttribute("defaultPools");
+        String[] arrayDefaultPools = null;
+        
         if (defaultPools != null) {
-            tableRule.defaultPools = readTokenizedString(defaultPools, " ,");
+        	arrayDefaultPools = readTokenizedString(defaultPools, " ,");
         }
-
+        
         String readPools = current.getAttribute("readPools");
+        String[] arrayReadPools = null;
         if (readPools != null) {
-            tableRule.readPools = readTokenizedString(readPools, " ,");
+        	arrayReadPools = readTokenizedString(readPools, " ,");
         }
-
+       
         String writePools = current.getAttribute("writePools");
+        String[] arrayWritePools = null;
         if (writePools != null) {
-            tableRule.writePools = readTokenizedString(writePools, " ,");
+        	arrayWritePools = readTokenizedString(writePools, " ,");
         }
 
         NodeList children = current.getChildNodes();
@@ -805,14 +830,19 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable 
 
                 final String nodeName = child.getNodeName();
                 if (nodeName.equals("rule")) {
-                    tableRule.ruleList.add(loadRule(child, tableRule));
-                }
+                	for(TableRule tableRule :list){
+                		tableRule.defaultPools = arrayDefaultPools;
+                        tableRule.readPools = arrayReadPools;
+                        tableRule.writePools = arrayWritePools;
+                        tableRule.ruleList.add(loadRule(child, tableRule.table));
+                    }
+            	}
             }
         }
-        return tableRule;
+        return list;
     }
 
-    private Rule loadRule(Element current, TableRule tableRule) throws InitialisationException {
+    private Rule loadRule(Element current, Table table) throws InitialisationException {
         Rule rule = new Rule();
 
         // root
@@ -833,7 +863,7 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable 
                 rule.parameterMap.put(parameter, index);
                 Column column = new Column();
                 column.setName(parameter);
-                column.setTable(tableRule.table);
+                column.setTable(table);
                 rule.cloumnMap.put(column, index);
                 index++;
             }
@@ -843,7 +873,7 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable 
                 for (String parameter : tokens) {
                     Column column = new Column();
                     column.setName(parameter);
-                    column.setTable(tableRule.table);
+                    column.setTable(table);
                     rule.excludes.add(column);
                 }
             }
