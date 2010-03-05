@@ -227,7 +227,12 @@ TOKEN:
 |	< LIKE:  "like"  >
 |	< NOT_LIKE:  "not like"  >
 |   < var: "var" >
-|  < comm:";" >
+|   < CASE: "case" >
+| 	< WHEN: "when" >
+|   < THEN: "then" >
+| 	< ELSE:  "else" >
+| 	< ENDCASE: "end case" >
+| < COMM :";" >
 }
 
 
@@ -330,7 +335,7 @@ void VarExpression() :
 	String identString = "";
 }
 {
-  < var >  identString = Identifier() < EQ > OrExpression()< comm >
+  < var >  identString = Identifier() < EQ > OrExpression()< COMM >
 }
 void OrExpression() :
 {
@@ -538,7 +543,18 @@ void UnaryExpression() :
 	  jjtThis.setFunction(tokenImage[NOT], new LogicalNOT());
     }
   ) #FunNode(1)
-|
+  |
+	  ( <CASE> [Expression()] (
+		  (
+		    <WHEN> Expression() <THEN> Expression()";"
+		  )*
+		  <ELSE> Expression() <ENDCASE> ";"
+		  )
+		{
+	   	  jjtThis.setFunction(tokenImage[CASE], new Case());
+	  	}
+	  )#FunNode(2)
+  |
   UnaryExpressionNotPlusMinus()
 }
 
