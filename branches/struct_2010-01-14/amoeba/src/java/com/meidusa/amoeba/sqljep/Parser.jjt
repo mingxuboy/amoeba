@@ -553,7 +553,7 @@ void UnaryExpression() :
 		{
 	   	  jjtThis.setFunction(tokenImage[CASE], new Case());
 	  	}
-	  )#FunNode(2)
+	  )#FunNode
   |
   UnaryExpressionNotPlusMinus()
 }

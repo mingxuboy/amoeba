@@ -9,6 +9,7 @@ import com.meidusa.amoeba.route.AbstractQueryRouter;
 import com.meidusa.amoeba.sqljep.function.Comparative;
 import com.meidusa.amoeba.sqljep.function.ComparativeAND;
 import com.meidusa.amoeba.sqljep.function.ComparativeBaseList;
+import com.meidusa.amoeba.sqljep.function.ComparativeOR;
 import com.meidusa.amoeba.sqljep.variable.Variable;
 
 
@@ -20,8 +21,8 @@ public class Main {
 	 * @throws ParseException 
 	 */
 	public static void main(String[] args) throws ParseException {
-		ComparativeBaseList ID =  new ComparativeAND(Comparative.LessThanOrEqual,8);
-		ID.addComparative(new Comparative(Comparative.Equivalent,4));
+		ComparativeBaseList ID =  new ComparativeOR(Comparative.GreaterThanOrEqual,8);
+		ID.addComparative(new Comparative(Comparative.Equivalent,6));
 		final Comparable<?>[] row = {ID,new Comparative(Comparative.GreaterThanOrEqual,50),new Comparative(Comparative.GreaterThanOrEqual,new java.util.Date()),"wwe"};
 		HashMap<String,Integer> columnMapping = new HashMap<String,Integer>();
 		columnMapping.put("ID",0);
@@ -70,8 +71,19 @@ public class Main {
 		
 		}*/
 		
-		final RowJEP sqljep = new RowJEP("var aa=1+2; 1=2");
-		
+		//final RowJEP sqljep = new RowJEP("var aa=1+2; 1=2");
+		RowJEP sqljep = new RowJEP("(case " +
+	  			"	WHEN (ID >= 0 and ID<1) THEN 'aadf0' ;" +
+	  			"	WHEN (ID >=1 and ID <2) THEN 'aadf1' ;" +
+	  			"	WHEN (ID >=2 and ID <3) THEN 'aadf2' ;" +
+	  			"	WHEN (ID >=3 and ID <4) THEN 'aadf3' ;" +
+	  			"	WHEN (ID >=4 and ID <5) THEN 'aadf4' ;" +
+	  			"	WHEN (ID >=5 and ID <6) THEN 'aadf5' ;" +
+	  			"	WHEN (ID >=6 and ID <7) THEN 'aadf6' ;" +
+	  			"	WHEN (ID >=7 and ID <8) THEN 'aadf7' ;" +
+	  			"	WHEN (ID >=8 and ID <9) THEN 'aadf8' ;" +
+	  			"	ELSE 'aadf9...' " +
+	  			"END CASE;)|| 'qwerqer' || (12+12)");
 		
 		sqljep.parseExpression(columnMapping,valMap,AbstractQueryRouter.ruleFunTab);
 		Object result = sqljep.getValue(row);
