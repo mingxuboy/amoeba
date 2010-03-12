@@ -2,7 +2,7 @@
 <!DOCTYPE amoeba:rule SYSTEM "rule.dtd">
 
 <amoeba:rule xmlns:amoeba="http://amoeba.meidusa.com/">
-	<tableRule name="TestTable" schema="test" defaultPools="server1">
+	<tableRule name="TestTable,user,message" schema="test" defaultPools="server1">
 		<!--
 		<rule name="rule1">
 			<parameters>ID</parameters>

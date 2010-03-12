@@ -57,19 +57,19 @@ public final class Case extends PostfixCommand {
 			if (result >= 0) {
 				node.jjtGetChild(result+1).jjtAccept(runtime.ev, null);
 				Comparable<?>  variant = runtime.stack.pop();
-				runtime.stack.push(variant);
+				//runtime.stack.push(variant);
+				return new Comparable[]{variant};
 			} else {
-				runtime.stack.push(null);
+				//runtime.stack.push(null);
+				return null;
 			}
 		} else {
 			throw new ParseException("Few arguments for case");
 		}
-		return null;
 	}
 
 	public Comparable<?> getResult(Comparable<?>... comparables)
 			throws ParseException {
-		// TODO Auto-generated method stub
-		return null;
+		return comparables[0];
 	}
 }
