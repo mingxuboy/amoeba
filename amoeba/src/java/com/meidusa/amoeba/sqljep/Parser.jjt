@@ -80,11 +80,15 @@ public abstract class Parser {
 	private final static String metachars = "tnrbf\\\"";
 	private final static String chars = "\t\n\r\b\f\\\"";
 
-	public Node parseStream(java.io.Reader stream)
+	public Node[] parseStream(java.io.Reader stream)
 							throws ParseException {
 		ReInit(stream);
-		// Parse the expression, and return the 
-		return Start().jjtGetChild(0);
+		// Parse the expression, and return the
+		Node start = Start();
+		Node[] nodes = new Node[start.jjtGetNumChildren()];
+		for(int i=0;i<start.jjtGetNumChildren();i++)		{			nodes[i] = start.jjtGetChild(i);
+		}
+		return nodes;
 	}
 	
 	public abstract PostfixCommandI getFunction(String name);
@@ -95,7 +99,7 @@ public abstract class Parser {
 	
 	private Map<String,Integer> columnMapping;
 	private Map<String,Variable> variableMapping;
-	
+	private List<String> declareList = new ArrayList<String>();
 	public List<String> getErrorList(){
 		return errorList;
 	}
@@ -114,6 +118,13 @@ public abstract class Parser {
 	}
 	public void setColumnMapping(Map<String,Integer> columnMapping){
 		this.columnMapping = columnMapping;
+	}
+
+	public void addDeclareVar(String declare)	{		this.declareList.add(declare);
+	}
+
+	public boolean containsDeclareVar(String declare)	{		
+		return declareList.contains(declare);
 	}
 	
 	public int findColumn(String name){
@@ -226,7 +237,7 @@ TOKEN:
 |	< BETWEEN:  "between"  >
 |	< LIKE:  "like"  >
 |	< NOT_LIKE:  "not like"  >
-|   < var: "var" >
+|   < VAR: "var" >
 |   < CASE: "case" >
 | 	< WHEN: "when" >
 |   < THEN: "then" >
@@ -335,8 +346,9 @@ void VarExpression() :
 	String identString = "";
 }
 {
-  (    (      < var >  identString = Identifier() < EQ > OrExpression()< COMM >    )    {		
-    }
+  (    (      (      < VAR >  identString = Identifier() < EQ > OrExpression()< COMM >    	)	    {
+	      	jjtThis.setFunction(tokenImage[VAR], new Var(identString));			addDeclareVar(identString);
+	    }  )#FunNode()
   )*
 }
 void OrExpression() :
@@ -590,6 +602,7 @@ void Variable() :
 		if (c != null) {
 			jjtThis.index = -1;
 			jjtThis.variable = c;
+			jjtThis.ident = identString;
 		}
 		else {
 			int i = findColumn(identString);
@@ -597,8 +610,11 @@ void Variable() :
 				jjtThis.index = i;
 				jjtThis.variable = null;
 			} 
-			else {
-				addToErrorList("Unrecognized symbol \"" + identString +"\"");
+			else if(this.containsDeclareVar(identString)){
+				jjtThis.index = -1;
+				jjtThis.variable = c;
+				jjtThis.ident = identString;
+			}else			{				addToErrorList("Unrecognized symbol \"" + identString +"\"");
 			}
 		}
 	}

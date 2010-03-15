@@ -35,5 +35,7 @@ public interface PostfixCommandI {
 	 * parameters is allowed.
 	 */
 	public int getNumberOfParameters();
+	
+	public boolean isDeclare();
 }
 

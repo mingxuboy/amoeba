@@ -15,6 +15,7 @@ import com.meidusa.amoeba.sqljep.variable.Variable;
 public class ASTVarNode extends SimpleNode {
 	public int index;			// index of column in a Row
 	public Variable variable;
+	public String ident;
 	
 	public ASTVarNode(int id) {
 		super(id);
