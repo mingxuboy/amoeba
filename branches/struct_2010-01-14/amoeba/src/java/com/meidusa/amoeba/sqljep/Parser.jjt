@@ -542,6 +542,7 @@ void MultiplicativeExpression() :
 
 void UnaryExpression() :
 {
+  boolean caseHead = false;
 }
 {
   ( <PLUS> UnaryExpression())
@@ -558,14 +559,14 @@ void UnaryExpression() :
     }
   ) #FunNode(1)
   |
-	  ( <CASE> [Expression()] (
+	  ( <CASE> [Expression(){caseHead = true; }] (
 		  (
 		    <WHEN> Expression() <THEN> Expression()";"
 		  )*
 		  <ELSE> Expression() <ENDCASE> ";"
 		  )
 		{
-	   	  jjtThis.setFunction(tokenImage[CASE], new Case());
+	   	  jjtThis.setFunction(tokenImage[CASE], new Case(caseHead));
 	  	}
 	  )#FunNode
   |

@@ -52,4 +52,14 @@ public final class ComparativeEQ extends PostfixCommand {
 		}
 	}
 
+	public static Comparable<?> compareTo(Comparable<?> param1,Comparable<?> param2) throws ParseException{
+		if (param1 instanceof Comparative) {
+			Comparative other = (Comparative) param1;
+			boolean result = other.intersect(Comparative.Equivalent,
+					param2, ComparativeComparator.comparator);
+			return (result);
+		} else {
+			return (ComparativeComparator.compareTo(param1, param2) == 0);
+		}
+	}
 }

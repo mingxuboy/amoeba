@@ -26,6 +26,10 @@ import com.meidusa.amoeba.sqljep.ParseException;
  *
  */
 public final class Case extends PostfixCommand {
+	private boolean caseHead = false;
+	public Case(boolean caseHead){
+		this.caseHead = caseHead; 
+	}
 	final public int getNumberOfParameters() {
 		return -1;
 	}
@@ -34,17 +38,29 @@ public final class Case extends PostfixCommand {
 		int num = node.jjtGetNumChildren();
 		int count = 0;
 		List<Integer> result = new ArrayList<Integer>();
-		if (num > 1) {
+		int startCondition = 0;
+		Comparable<?>  headValue = null;
+		if(caseHead){
+			startCondition = 1;
+			node.jjtGetChild(0).jjtAccept(runtime.ev, null);
+			headValue = runtime.stack.pop();
+		}
+		if (num > (caseHead ? 2 :1)) {
 			boolean elseCase;
+			
 			if (num % 2 != 0) {
-				elseCase = true;
+				elseCase = caseHead?false:true;
 				num--;
 			} else {
-				elseCase = false;
+				elseCase = caseHead?true:false;
 			}
-			for (int i = 0; i < num; i += 2) {
+			
+			for (int i = startCondition; i < (caseHead?num-1:num); i += 2) {
 				node.jjtGetChild(i).jjtAccept(runtime.ev, null);
 				Comparable<?>  cond = runtime.stack.pop();
+				if(caseHead){
+					cond = ComparativeEQ.compareTo(headValue, cond);
+				}
 				if (cond instanceof Boolean) {
 					if (((Boolean)cond).booleanValue()) {
 						result.add(i);
