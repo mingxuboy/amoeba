@@ -46,7 +46,7 @@ public class Main {
 		});
 		Object result = null;
 		System.out.println("wwe".hashCode()%500);
-		final RowJEP sqljep = new RowJEP("var hello=abs(hash(ID)) % 32;" +
+		final RowJEP sqljep = new RowJEP("var hello=abs(hash(ID)) % 1024 % 32;" +
 				"(case " +
 	  			"	WHEN (hello >= 0 and hello<1) THEN 'aadf0' ;" +
 	  			"	WHEN (hello >=1 and hello <2) THEN 'aadf1' ;" +

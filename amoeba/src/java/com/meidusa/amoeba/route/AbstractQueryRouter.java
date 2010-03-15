@@ -166,7 +166,7 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable 
         ruleFunTab.put("last_day", new LastDay());
         ruleFunTab.put("next_day", new NextDay());
         ruleFunTab.put("to_date", new ToDate());
-        ruleFunTab.put("case", new Case()); // replacement for CASE WHEN digit = 0 THEN ...;WHEN digit = 1
+        //ruleFunTab.put("case", new Case()); // replacement for CASE WHEN digit = 0 THEN ...;WHEN digit = 1
         // THEN...;ELSE... END CASE
         ruleFunTab.put("index", new Instr()); // maxdb
         ruleFunTab.put("num", new ToNumber()); // maxdb
