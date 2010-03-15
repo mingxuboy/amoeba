@@ -46,7 +46,7 @@ public final class ComparativeGE extends PostfixCommand {
 			if (param1 instanceof Comparative) {
 				Comparative other = (Comparative) param1;
 				boolean result = other.intersect(
-						Comparative.GreaterThanOrEqual, param2,
+						Comparative.Equivalent, param2,
 						ComparativeComparator.comparator);
 				return (result);
 			} else {
