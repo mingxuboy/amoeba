@@ -12,6 +12,9 @@
 
 package com.meidusa.amoeba.sqljep.function;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.meidusa.amoeba.sqljep.function.PostfixCommand;
 import com.meidusa.amoeba.sqljep.ASTFunNode;
 import com.meidusa.amoeba.sqljep.JepRuntime;
@@ -30,6 +33,8 @@ public final class Case extends PostfixCommand {
 	
 	public Comparable<?>[] evaluate(ASTFunNode node, JepRuntime runtime) throws ParseException {
 		int num = node.jjtGetNumChildren();
+		int count = 0;
+		List<Integer> result = new ArrayList<Integer>();
 		if (num > 1) {
 			boolean elseCase;
 			if (num % 2 != 0) {
@@ -38,27 +43,33 @@ public final class Case extends PostfixCommand {
 			} else {
 				elseCase = false;
 			}
-			int result = -1;
 			for (int i = 0; i < num; i += 2) {
 				node.jjtGetChild(i).jjtAccept(runtime.ev, null);
 				Comparable<?>  cond = runtime.stack.pop();
 				if (cond instanceof Boolean) {
 					if (((Boolean)cond).booleanValue()) {
-						result = i;
-						break;
+						result.add(i);
+						count ++;
+						//break;
 					}
 				} else {
 					throw new ParseException("In case only boolean is possible as condition. Found: "+(cond != null ? cond.getClass() : "NULL"));
 				}
 			}
-			if (result < 0 && elseCase) {
-				result = num-1;
+			if (count <= 0 && elseCase) {
+				result.add(num-1);
 			}
-			if (result >= 0) {
-				node.jjtGetChild(result+1).jjtAccept(runtime.ev, null);
-				Comparable<?>  variant = runtime.stack.pop();
+			if (result.size() > 0) {
+				Comparable<?>[] comparables = new Comparable[result.size()];
+				int j=0;
+				for(int i:result){
+					node.jjtGetChild(i+1).jjtAccept(runtime.ev, null);
+					Comparable<?>  variant = runtime.stack.pop();
+					comparables[j] = variant;
+					j++;
+				}
 				//runtime.stack.push(variant);
-				return new Comparable[]{variant};
+				return comparables;
 			} else {
 				//runtime.stack.push(null);
 				return null;
@@ -70,6 +81,10 @@ public final class Case extends PostfixCommand {
 
 	public Comparable<?> getResult(Comparable<?>... comparables)
 			throws ParseException {
-		return comparables[0];
+		StringBuffer buffer = new StringBuffer();
+		for(Comparable<?> comp : comparables){
+			buffer.append(comp).append(";");
+		}
+		return buffer.toString();
 	}
 }
