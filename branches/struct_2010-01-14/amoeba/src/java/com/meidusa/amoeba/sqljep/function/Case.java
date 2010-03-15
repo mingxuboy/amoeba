@@ -25,7 +25,6 @@ import com.meidusa.amoeba.sqljep.ParseException;
  * @author struct
  *
  */
-@Deprecated 
 public final class Case extends PostfixCommand {
 	final public int getNumberOfParameters() {
 		return -1;
@@ -50,7 +49,9 @@ public final class Case extends PostfixCommand {
 					if (((Boolean)cond).booleanValue()) {
 						result.add(i);
 						count ++;
-						//break;
+						if(!runtime.isMultValue){
+							break;
+						}
 					}
 				} else {
 					throw new ParseException("In case only boolean is possible as condition. Found: "+(cond != null ? cond.getClass() : "NULL"));

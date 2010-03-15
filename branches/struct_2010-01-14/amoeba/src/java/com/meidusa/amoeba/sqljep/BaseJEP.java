@@ -20,6 +20,7 @@ import java.util.Map;
 
 import com.meidusa.amoeba.sqljep.function.Comparative;
 import com.meidusa.amoeba.sqljep.function.ComparativeBaseList;
+import com.meidusa.amoeba.sqljep.function.Declare;
 import com.meidusa.amoeba.sqljep.function.PostfixCommand;
 import com.meidusa.amoeba.sqljep.function.PostfixCommandI;
 import com.meidusa.amoeba.sqljep.variable.Variable;
@@ -52,7 +53,7 @@ public abstract class BaseJEP implements ParserVisitor {
 	final protected List<String> errorList = new ArrayList<String>();
 
 	/** Node at the top of the parse tree */
-	protected Node topNode;
+	protected Node[] nodes;
 
 	protected String expression;
 	
@@ -67,7 +68,7 @@ public abstract class BaseJEP implements ParserVisitor {
 			throw new IllegalArgumentException("expression can be null");
 		}
 		expression = exp;
-		topNode = null;
+		nodes = null;
 	}
 
 	/**
@@ -75,7 +76,7 @@ public abstract class BaseJEP implements ParserVisitor {
 	* 
 	*/
 	public void clear() {
-		topNode = null;
+		nodes = null;
 		errorList.clear();
 	}
 	
@@ -83,7 +84,7 @@ public abstract class BaseJEP implements ParserVisitor {
 	* @return true if expresson is in compiled state otherwise false
 	*/
 	public boolean isValid() {
-		return (topNode != null);
+		return (nodes != null);
 	}
 
 	/**
@@ -106,7 +107,7 @@ public abstract class BaseJEP implements ParserVisitor {
 	 * @return The top node of the expression tree
 	 */
 	public Node getTopNode() {
-		return topNode;
+		return nodes[nodes.length-1];
 	}
 	
 	/**
@@ -173,12 +174,12 @@ public abstract class BaseJEP implements ParserVisitor {
 		parser.setVariableMapping(variableMapping);
 		try {
 			// try parsing
-			topNode = parser.parseStream(reader);
+			nodes = parser.parseStream(reader);
 			errorList.clear();
 			errorList.addAll(parser.getErrorList());
 		} catch (ParseException e) {
 			// an exception was thrown, so there is no parse tree
-			topNode = null;
+			nodes = null;
 			errorList.add(e.getMessage());
 		} catch (Throwable e) {
 			throw new com.meidusa.amoeba.sqljep.ParseException(toString(), e);
@@ -193,7 +194,9 @@ public abstract class BaseJEP implements ParserVisitor {
 		if (debug) {
 			ParserVisitor v = new ParserDumpVisitor();
 			try {
-				topNode.jjtAccept(v, null);
+				for(Node node : nodes){
+					node.jjtAccept(v, null);
+				}
 			} catch (ParseException e) {
 				errorList.add(e.getMessage());
 				e.printStackTrace();
@@ -211,27 +214,37 @@ public abstract class BaseJEP implements ParserVisitor {
 	 */
 	public Comparable<?> getValue(Comparable<?>[] row) throws ParseException {
 		JepRuntime runtime = getThreadJepRuntime(this);
-		runtime.stack.setSize(0);
 		runtime.row = row;
-		
-		if (!isValid()) {
-			throw new ParseException("Parser is not prepared");
-		}
-		if (!hasError()) {
-			runtime.stack.setSize(0);
-			// evaluate by letting the top node accept the visitor
-			topNode.jjtAccept(this, null);
-			
-			// something is wrong if not exactly one item remains on the stack
-			// or if the error flag has been set
-			if (runtime.stack.size() != 1) {
-				throw new ParseException("Wrong stack state. Stack size: "+runtime.stack.size());
+		for(Comparable<?> comparable :runtime.row){
+			if(comparable instanceof ComparativeBaseList){
+				runtime.isMultValue = true;
 			}
-	
-			// return the value of the expression
-			return runtime.stack.pop();
-		} else {
-			throw new ParseException(getErrorInfo());
+		}
+		try{
+			if (!isValid()) {
+				throw new ParseException("Parser is not prepared");
+			}
+			if (!hasError()) {
+				runtime.stack.setSize(0);
+				// evaluate by letting the top node accept the visitor
+				for(Node node : nodes){
+					node.jjtAccept(this, null);
+				}
+				// something is wrong if not exactly one item remains on the stack
+				// or if the error flag has been set
+				if (runtime.stack.size() != 1) {
+					throw new ParseException("Wrong stack state. Stack size: "+runtime.stack.size());
+				}
+		
+				// return the value of the expression
+				return runtime.stack.pop();
+			} else {
+				throw new ParseException(getErrorInfo());
+			}
+		}finally{
+			runtime.vars.clear();
+			runtime.stack.setSize(0);
+			runtime.isMultValue = false;
 		}
 	}
 
@@ -326,7 +339,12 @@ public abstract class BaseJEP implements ParserVisitor {
 						comp.setValue(value);
 					}
 				}
-				runtime.stack.push(list);
+				if(pfmc instanceof Declare){
+					Declare declare = (Declare) pfmc;
+					declare.declare(runtime, list);
+				}else{
+					runtime.stack.push(list);
+				}
 			}else{
 				//分析每个参数是否是 Comparative 类型
 				Comparative lastComparative = null;
@@ -336,16 +354,26 @@ public abstract class BaseJEP implements ParserVisitor {
 						parameters[i] =((Comparative) parameters[i]).getValue(); 
 					}
 				}
-				
+
 				Comparable<?> result = pfmc.getResult(parameters);
 				if(lastComparative != null){
 					lastComparative.setValue(result);
 					result = lastComparative;
 				}
-				runtime.stack.push(result);
+				if(pfmc instanceof Declare){
+					Declare declare = (Declare) pfmc;
+					declare.declare(runtime, result);
+				}else{
+					runtime.stack.push(result);
+				}
 			}
 		}else{
-			runtime.stack.push(pfmc.getResult(parameters));
+			if(pfmc instanceof Declare){
+				Declare declare = (Declare) pfmc;
+				declare.declare(runtime, pfmc.getResult(parameters));
+			}else{
+				runtime.stack.push(pfmc.getResult(parameters));
+			}
 		}
 		
 		
@@ -369,7 +397,12 @@ public abstract class BaseJEP implements ParserVisitor {
 			}
 			runtime.stack.push(value);
 		} else {
-			runtime.stack.push((Comparable)node.variable.getValue());
+			if((Comparable)node.variable == null){
+				Comparable comparable = runtime.vars.get(node.ident);
+				runtime.stack.push(comparable);
+			}else{
+				runtime.stack.push((Comparable)node.variable.getValue());
+			}
 		}
 		return null;
 	}

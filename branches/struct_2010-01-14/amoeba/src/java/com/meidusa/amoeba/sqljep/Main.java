@@ -21,8 +21,8 @@ public class Main {
 	 * @throws ParseException 
 	 */
 	public static void main(String[] args) throws ParseException {
-		ComparativeBaseList ID =  new ComparativeOR(Comparative.GreaterThanOrEqual,8);
-		//Comparable ID = 6;
+		ComparativeBaseList ID =  new ComparativeOR(Comparative.Equivalent,22);
+		//Comparable<?> ID = 29;
 		ID.addComparative(new Comparative(Comparative.Equivalent,6));
 		final Comparable<?>[] row = {ID,new Comparative(Comparative.GreaterThanOrEqual,50),new Comparative(Comparative.GreaterThanOrEqual,new java.util.Date()),"wwe"};
 		HashMap<String,Integer> columnMapping = new HashMap<String,Integer>();
@@ -44,12 +44,40 @@ public class Main {
 			}
 			
 		});
-		
+		Object result = null;
 		System.out.println("wwe".hashCode()%500);
-		/*final RowJEP sqljep = new RowJEP("ID in (1,2,4,3,8) and hash(ID)>=4 and 1=1 and SUM =100 and  trunc(SALE_DATE) < to_date('2009-04-03','yyyy-mm-dd')  and abs(hash(name))%500<300" );
-		
+		final RowJEP sqljep = new RowJEP("var hello=abs(hash(ID)) % 32;" +
+				"(case " +
+	  			"	WHEN (hello >= 0 and hello<1) THEN 'aadf0' ;" +
+	  			"	WHEN (hello >=1 and hello <2) THEN 'aadf1' ;" +
+	  			"	WHEN (hello >=2 and hello <3) THEN 'aadf2' ;" +
+	  			"	WHEN (hello >=3 and hello <4) THEN 'aadf3' ;" +
+	  			"	WHEN (hello >=4 and hello <5) THEN 'aadf4' ;" +
+	  			"	WHEN (hello >=5 and hello <6) THEN 'aadf5' ;" +
+	  			"	WHEN (hello >=6 and hello <7) THEN 'aadf6' ;" +
+	  			"	WHEN (hello >=7 and hello <8) THEN 'aadf7' ;" +
+	  			"	WHEN (hello >=8 and hello <9) THEN 'aadf8' ;" +
+	  			"	WHEN (hello >=9 and hello <10) THEN 'aadf9' ;" +
+	  			"	WHEN (hello >=10 and hello <11) THEN 'aadf10' ;" +
+	  			"	WHEN (hello >=11 and hello <12) THEN 'aadf11' ;" +
+	  			"	WHEN (hello >=12 and hello <13) THEN 'aadf12' ;" +
+	  			"	WHEN (hello >=13 and hello <14) THEN 'aadf13' ;" +
+	  			"	WHEN (hello >=14 and hello <15) THEN 'aadf14' ;" +
+	  			"	WHEN (hello >=15 and hello <16) THEN 'aadf15' ;" +
+	  			"	WHEN (hello >=16 and hello <17) THEN 'aadf16' ;" +
+	  			"	WHEN (hello >=17 and hello <18) THEN 'aadf17' ;" +
+	  			"	WHEN (hello >=18 and hello <19) THEN 'aadf18' ;" +
+	  			"	WHEN (hello >=19 and hello <20) THEN 'aadf19' ;" +
+	  			"	WHEN (hello >=20 and hello <21) THEN 'aadf20' ;" +
+	  			"	WHEN (hello >=21 and hello <22) THEN 'aadf21' ;" +
+	  			"	WHEN (hello >=22 and hello <23) THEN 'aadf22' ;" +
+	  			"	WHEN (hello >=23 and hello <24) THEN 'aadf23' ;" +
+	  			"	WHEN (hello >=24 and hello <25) THEN 'aadf24' ;" +
+	  			
+	  			"	ELSE 'aadf25...' " +
+	  			"END CASE;)|| 'qwerqer' || (12+12)");	
 		sqljep.parseExpression(columnMapping,valMap,AbstractQueryRouter.ruleFunTab);
-		
+		result = sqljep.getValue(row);
 		for(int j=0;j<100;j++){
 		new Thread(){
 			public void run(){
@@ -70,25 +98,46 @@ public class Main {
 			}
 		}.start();
 		
-		}*/
+		}
 		
 		//final RowJEP sqljep = new RowJEP("var aa=1+2; 1=2");
-		RowJEP sqljep = new RowJEP("(case " +
-	  			"	WHEN (ID >= 0 and ID<1) THEN 'aadf0' ;" +
-	  			"	WHEN (ID >=1 and ID <2) THEN 'aadf1' ;" +
-	  			"	WHEN (ID >=2 and ID <3) THEN 'aadf2' ;" +
-	  			"	WHEN (ID >=3 and ID <4) THEN 'aadf3' ;" +
-	  			"	WHEN (ID >=4 and ID <5) THEN 'aadf4' ;" +
-	  			"	WHEN (ID >=5 and ID <6) THEN 'aadf5' ;" +
-	  			"	WHEN (ID >=6 and ID <7) THEN 'aadf6' ;" +
-	  			"	WHEN (ID >=7 and ID <8) THEN 'aadf7' ;" +
-	  			"	WHEN (ID >=8 and ID <9) THEN 'aadf8' ;" +
-	  			"	ELSE 'aadf9...' " +
-	  			"END CASE;)|| 'qwerqer' || (12+12)");
+		final RowJEP sqljep1 = new RowJEP("var hello=abs(hash(ID)) % 32;" +
+				"(CASE " +
+	  			"	WHEN (hello >= 0 and hello<1) THEN 'aadf0' ;" +
+	  			"	WHEN (hello >=1 and hello <2) THEN 'aadf1' ;" +
+	  			"	WHEN (hello >=2 and hello <3) THEN 'aadf2' ;" +
+	  			"	WHEN (hello >=3 and hello <4) THEN 'aadf3' ;" +
+	  			"	WHEN (hello >=4 and hello <5) THEN 'aadf4' ;" +
+	  			"	WHEN (hello >=5 and hello <6) THEN 'aadf5' ;" +
+	  			"	WHEN (hello >=6 and hello <7) THEN 'aadf6' ;" +
+	  			"	WHEN (hello >=7 and hello <8) THEN 'aadf7' ;" +
+	  			"	WHEN (hello >=8 and hello <9) THEN 'aadf8' ;" +
+	  			"	WHEN (hello >=9 and hello <10) THEN 'aadf9' ;" +
+	  			"	WHEN (hello >=10 and hello <11) THEN 'aadf10' ;" +
+	  			"	WHEN (hello >=11 and hello <12) THEN 'aadf11' ;" +
+	  			"	WHEN (hello >=12 and hello <13) THEN 'aadf12' ;" +
+	  			"	WHEN (hello >=13 and hello <14) THEN 'aadf13' ;" +
+	  			"	WHEN (hello >=14 and hello <15) THEN 'aadf14' ;" +
+	  			"	WHEN (hello >=15 and hello <16) THEN 'aadf15' ;" +
+	  			"	WHEN (hello >=16 and hello <17) THEN 'aadf16' ;" +
+	  			"	WHEN (hello >=17 and hello <18) THEN 'aadf17' ;" +
+	  			"	WHEN (hello >=18 and hello <19) THEN 'aadf18' ;" +
+	  			"	WHEN (hello >=19 and hello <20) THEN 'aadf19' ;" +
+	  			"	WHEN (hello >=20 and hello <21) THEN 'aadf20' ;" +
+	  			"	WHEN (hello >=21 and hello <22) THEN 'aadf21' ;" +
+	  			"	WHEN (hello >=22 and hello <23) THEN 'aadf22' ;" +
+	  			"	WHEN (hello >=23 and hello <24) THEN 'aadf23' ;" +
+	  			"	WHEN (hello >=24 and hello <25) THEN 'aadf24' ;" +
+	  			
+	  			"	ELSE 'aadf25...' " +
+	  			"END CASE;)|| 'qwerqer' || (12+12)");	
 		
-		sqljep.parseExpression(columnMapping,valMap,AbstractQueryRouter.ruleFunTab);
-		Object result = sqljep.getValue(row);
-		System.out.println(result);
+		sqljep1.parseExpression(columnMapping,valMap,AbstractQueryRouter.ruleFunTab);
+		result = sqljep1.getValue(row);
+		final long start = System.currentTimeMillis();
+		for(int i=0;i<10000;i++)
+		result = sqljep1.getValue(row);
+		System.out.println(result+"\n"+"totle:"+(System.currentTimeMillis() -start));
 		
 	}
 }

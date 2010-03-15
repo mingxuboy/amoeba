@@ -13,6 +13,8 @@
 package com.meidusa.amoeba.sqljep;
 
 import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Stack;
 import java.text.DateFormatSymbols;
 
@@ -27,6 +29,8 @@ final public class JepRuntime {
 	public Calendar calendar = JepRuntime.getCalendar();
 	public DateFormatSymbols dateSymbols = JepRuntime.getDateFormatSymbols();
 	public ParserVisitor ev;
+	public boolean isMultValue = false;
+	public Map<String,Comparable<?>> vars = new HashMap<String,Comparable<?>>();
 	public Comparable[] row;
 	public JepRuntime(ParserVisitor visitor) {
 		ev = visitor;

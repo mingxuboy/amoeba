@@ -132,5 +132,9 @@ public abstract class PostfixCommand implements PostfixCommandI {
 		}
 		throw new ParseException("Not Double: "+(param != null ? param.getClass() : "null"));
 	}
+	
+	public boolean isDeclare(){
+		return false;
+	}
 }
 
