@@ -312,6 +312,7 @@ ASTStart Start() #Start :
 {
 }
 {
+  	VarExpression()
 	Expression() <EOF> { return jjtThis; }
 	|  <EOF>
 	{
@@ -327,7 +328,6 @@ ASTStart Start() #Start :
 
 void Expression() : {}
 {
-  [      VarExpression()  ]
   OrExpression()
 }
 void VarExpression() :
@@ -335,7 +335,9 @@ void VarExpression() :
 	String identString = "";
 }
 {
-  < var >  identString = Identifier() < EQ > OrExpression()< COMM >
+  (    (      < var >  identString = Identifier() < EQ > OrExpression()< COMM >    )    {		
+    }
+  )*
 }
 void OrExpression() :
 {

@@ -22,6 +22,7 @@ public class Main {
 	 */
 	public static void main(String[] args) throws ParseException {
 		ComparativeBaseList ID =  new ComparativeOR(Comparative.GreaterThanOrEqual,8);
+		//Comparable ID = 6;
 		ID.addComparative(new Comparative(Comparative.Equivalent,6));
 		final Comparable<?>[] row = {ID,new Comparative(Comparative.GreaterThanOrEqual,50),new Comparative(Comparative.GreaterThanOrEqual,new java.util.Date()),"wwe"};
 		HashMap<String,Integer> columnMapping = new HashMap<String,Integer>();
