@@ -788,7 +788,7 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable 
 	            schema.setName(tableSchema[1]);
 	            table.setSchema(schema);
 	        }else{
-	        	table.setName(tableSchema[0]);
+	        	table.setName(tableName);
 	        	 if (!StringUtil.isEmpty(schemaName)) {
 		            Schema schema = new Schema();
 		            schema.setName(tableName);

@@ -24,6 +24,30 @@ public class Main {
 		ComparativeBaseList ID =  new ComparativeOR(Comparative.Equivalent,22);
 		//Comparable<?> ID = 29;
 		ID.addComparative(new Comparative(Comparative.Equivalent,6));
+		ID.addComparative(new Comparative(Comparative.Equivalent,6));
+		ID.addComparative(new Comparative(Comparative.Equivalent,2456));
+		ID.addComparative(new Comparative(Comparative.Equivalent,6));
+		ID.addComparative(new Comparative(Comparative.Equivalent,12323));
+		ID.addComparative(new Comparative(Comparative.Equivalent,6));
+		ID.addComparative(new Comparative(Comparative.Equivalent,6));
+		ID.addComparative(new Comparative(Comparative.Equivalent,1212345));
+		ID.addComparative(new Comparative(Comparative.Equivalent,6));
+		ID.addComparative(new Comparative(Comparative.Equivalent,456));
+		ID.addComparative(new Comparative(Comparative.Equivalent,6));
+		ID.addComparative(new Comparative(Comparative.Equivalent,6));
+		ID.addComparative(new Comparative(Comparative.Equivalent,6));
+		ID.addComparative(new Comparative(Comparative.Equivalent,12));
+		
+		ID.addComparative(new Comparative(Comparative.Equivalent,6));
+		ID.addComparative(new Comparative(Comparative.Equivalent,6));
+		ID.addComparative(new Comparative(Comparative.Equivalent,6));
+		ID.addComparative(new Comparative(Comparative.Equivalent,12333));
+		
+		ID.addComparative(new Comparative(Comparative.Equivalent,6));
+		ID.addComparative(new Comparative(Comparative.Equivalent,27894));
+		ID.addComparative(new Comparative(Comparative.Equivalent,6));
+		ID.addComparative(new Comparative(Comparative.Equivalent,6));
+		
 		final Comparable<?>[] row = {ID,new Comparative(Comparative.GreaterThanOrEqual,50),new Comparative(Comparative.GreaterThanOrEqual,new java.util.Date()),"wwe"};
 		HashMap<String,Integer> columnMapping = new HashMap<String,Integer>();
 		columnMapping.put("ID",0);
