@@ -14,7 +14,6 @@ import com.meidusa.amoeba.sqljep.ParseException;
  */
 public class Range extends PostfixCommand{
 
-	@Override
 	public Comparable<?>[] evaluate(ASTFunNode node, JepRuntime runtime)
 			throws ParseException {
 		node.jjtGetChild(0).jjtAccept(runtime.ev, null);
@@ -38,12 +37,10 @@ public class Range extends PostfixCommand{
 		return new Comparable[]{and};
 	}
 
-	@Override
 	public int getNumberOfParameters() {
 		return 4;
 	}
 
-	@Override
 	public Comparable<?> getResult(Comparable<?>... comparables)
 			throws ParseException {
 		return comparables[0];
