@@ -84,7 +84,7 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 		}
 		int statusCode;
 		int packetIndex;
-		List<byte[]> buffers;
+		List<byte[]> buffers = new ArrayList<byte[]>();
 		protected  byte commandType;
 		
 		public void clearBuffer(){
@@ -172,7 +172,7 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 		 * @param buffer
 		 * @return
 		 */
-		protected  CommandStatus checkResponseCompleted(Connection conn,byte[] buffer){
+		protected  synchronized CommandStatus checkResponseCompleted(Connection conn,byte[] buffer){
 			boolean isCompleted = false;
 			ConnectionStatuts connStatus = connStatusMap.get(conn);
 			if(connStatus == null){
@@ -184,12 +184,8 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 			 * 如果是多个连接的，需要将数据缓存起来，等待命令全部完成以后，将数据进行组装，然后发送到客户端
 			 * {@link #CommandMessageHandler.mergeMessageToClient}
 			 */
-			if(connStatus.buffers == null){
-				connStatus.buffers = new ArrayList<byte[]>();
-			}
 			connStatus.buffers.add(buffer);
 			if(isCompleted){
-				lock.lock();
 				try{
 					if(currentCommand.getCompletedCount().incrementAndGet() == connStatusMap.size()){
 						if(logger.isDebugEnabled()){
@@ -210,7 +206,6 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 						return CommandStatus.ConnectionCompleted;
 					}
 				}finally{
-					lock.unlock();
 				}
 			}else{
 				return CommandStatus.ConnectionNotComplete;
@@ -392,7 +387,7 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 		}
 	}
 	
-	public void handleMessage(Connection fromConn, byte[] message) {
+	public synchronized void handleMessage(Connection fromConn, byte[] message) {
 		/*if(ended){
 			logger.error("ended session handler handle message:\n"+StringUtil.dumpAsHex(message, message.length));
 			return;
@@ -686,6 +681,18 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 		List<byte[]> returnList = new ArrayList<byte[]>();
 		for(ConnectionStatuts connStatus : connectionStatutsSet){
 			//看是否每个服务器返回的数据包都没有异常信息。
+			if(connStatus.buffers.size() ==0){
+				for(ConnectionStatuts connStatus1 : connectionStatutsSet){
+					logger.error("connection="+connStatus1.conn.toString()+"\n");
+					StringBuffer buffer = new StringBuffer();
+					for(byte[] buf : connStatus1.buffers){
+						buffer.append(StringUtil.dumpAsHex(buf,buf.length)+"\n");
+						buffer.append("------------\n");
+					}
+					buffer.append("\n error Packet:\n");
+					logger.error(buffer.toString());
+				}
+			}
 			byte[] buffer = connStatus.buffers.get(connStatus.buffers.size()-1);
 			buffers = connStatus.buffers;
 			if((connStatus.statusCode & SessionStatus.ERROR) >0){

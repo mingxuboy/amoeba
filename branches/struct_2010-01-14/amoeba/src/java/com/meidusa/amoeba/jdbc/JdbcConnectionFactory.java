@@ -5,7 +5,8 @@ import java.sql.Driver;
 import java.sql.SQLException;
 import java.util.Properties;
 
-import com.meidusa.amoeba.net.poolable.PoolableObjectFactory;
+import org.apache.commons.pool.PoolableObjectFactory;
+
 import com.meidusa.amoeba.util.Initialisable;
 import com.meidusa.amoeba.util.InitialisationException;
 

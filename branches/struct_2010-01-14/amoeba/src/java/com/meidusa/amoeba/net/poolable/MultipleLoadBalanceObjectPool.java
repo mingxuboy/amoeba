@@ -25,6 +25,8 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import org.apache.commons.pool.PoolableObjectFactory;
+
 /**
  * <pre>
  * 该Pool 提供负载均衡、failover、HA策略

@@ -3,9 +3,10 @@ package com.meidusa.amoeba.aladdin.poolable;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.pool.PoolableObjectFactory;
+
 import com.meidusa.amoeba.aladdin.handler.MessageHandlerRunner;
 import com.meidusa.amoeba.config.ParameterMapping;
-import com.meidusa.amoeba.net.poolable.PoolableObjectFactory;
 import com.meidusa.amoeba.util.Initialisable;
 import com.meidusa.amoeba.util.InitialisationException;
 

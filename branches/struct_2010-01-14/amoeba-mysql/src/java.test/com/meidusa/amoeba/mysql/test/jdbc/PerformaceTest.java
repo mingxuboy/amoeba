@@ -30,9 +30,10 @@ public class PerformaceTest {
 				count = Integer.parseInt(args[2]);
 			}
 		}
-		final String ip = System.getProperty("ip");
-		final String port = System.getProperty("port","3306");
-		String sql = System.getProperty("sql");
+		final String ip = System.getProperty("ip","127.0.0.1");
+		final String port = System.getProperty("port","8066");
+		final String password = System.getProperty("password","hello");
+		String sql = System.getProperty("sql","SELECT * FROM sd_relation.LIST_FRIEND_GROUP L; ");
 		if(sql.startsWith("\"")){
 			sql = sql.substring(1, sql.length() -1);
 		}
@@ -65,7 +66,7 @@ public class PerformaceTest {
 					PreparedStatement statment = null;
 					ResultSet result = null;
 					try{
-						conn = DriverManager.getConnection("jdbc:mysql://"+ip+":"+port+"/test","root","hello");
+						conn = DriverManager.getConnection("jdbc:mysql://"+ip+":"+port+"/test","root",password);
 						for(int i=0;i<runcount;i++){
 							try{
 							statment = conn.prepareStatement(sqlext);

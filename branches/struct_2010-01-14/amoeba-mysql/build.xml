@@ -57,7 +57,7 @@
 	        </jar>
 	        <jar destfile="${deploy.dir}/${app.name}-test-${version}.jar" index="true">
 	            <fileset dir="${classes.dir}" casesensitive="yes">
-	            	<include name="**/test/*"/>
+	            	<include name="**/test/**/*"/>
 	            </fileset>
 	        </jar>
 	    </target>

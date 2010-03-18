@@ -11,7 +11,7 @@
  */
 package com.meidusa.amoeba.net;
 
-import com.meidusa.amoeba.net.poolable.PoolableObjectFactory;
+import org.apache.commons.pool.PoolableObjectFactory;
 
 
 /**

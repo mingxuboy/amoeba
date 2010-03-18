@@ -119,8 +119,14 @@ public class ConnectionManager extends LoopingThread implements Reporter, Initia
             // 关闭空闲时间过长的连接
             for (NetEventHandler handler : _handlers) {
                 if (handler.checkIdle(iterStamp)) {
+                	
                     // this will queue the connection for closure on our next tick
                     if (handler instanceof Connection) {
+                    	Connection conn = (Connection) handler;
+                    	long idlesecond = (iterStamp - conn._lastEvent)/1000;
+                    	logger.warn("Disconnecting non-communicative server [conn=" + this
+            					+ (conn.getChannel() != null?","+conn.getChannel().socket():", socket closed!") +", idle=" + idlesecond + " s]. life="+((System.currentTimeMillis()-conn._createTime)/1000) +" s");
+
                         closeConnection((Connection) handler, null);
                     }
                 }

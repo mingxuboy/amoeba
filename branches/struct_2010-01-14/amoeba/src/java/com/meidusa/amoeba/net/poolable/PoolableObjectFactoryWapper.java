@@ -11,6 +11,8 @@
  */
 package com.meidusa.amoeba.net.poolable;
 
+import org.apache.commons.pool.PoolableObjectFactory;
+
 /**
  * 采用该factory Wrapper，则object 必须实现{@link PoolableObject}
  * @author <a href=mailto:piratebase@sina.com>Struct chen</a>
