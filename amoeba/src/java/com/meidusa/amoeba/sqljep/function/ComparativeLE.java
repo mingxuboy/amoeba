@@ -45,13 +45,27 @@ public final class ComparativeLE extends PostfixCommand {
 		if (param1 == null || param2 == null) {
 			return (Boolean.FALSE);
 		} else {
-			if (param1 instanceof Comparative) {
+			/*if (param1 instanceof Comparative) {
 				Comparative other = (Comparative) param1;
 				boolean result = other.intersect(Comparative.LessThanOrEqual,
 						param2, ComparativeComparator.comparator);
 				return (result);
 			} else {
 				return (ComparativeComparator.compareTo(param1, param2) <= 0);
+			}*/
+			
+			/*boolean intersect = ComparativeComparator.intersect(param1, param2);
+			if(intersect){
+				return Boolean.FALSE;
+			}else{
+				return (ComparativeComparator.compareTo(param1, param2) <= 0);
+			}*/
+			//return ComparativeComparator.intersect(param1, param2);
+			
+			if((param1 instanceof Comparative)){
+				return ComparativeComparator.intersect((Comparative)param1, Comparative.LessThanOrEqual,param2);
+			}else{
+				return ComparativeComparator.intersect(Comparative.Equivalent,param1, Comparative.LessThanOrEqual,param2);
 			}
 		}
 	}

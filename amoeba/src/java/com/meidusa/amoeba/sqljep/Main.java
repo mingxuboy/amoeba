@@ -21,32 +21,25 @@ public class Main {
 	 * @throws ParseException 
 	 */
 	public static void main(String[] args) throws ParseException {
-		ComparativeBaseList ID =  new ComparativeOR(Comparative.Equivalent,22);
-		//Comparable<?> ID = 29;
-		ID.addComparative(new Comparative(Comparative.Equivalent,6));
-		ID.addComparative(new Comparative(Comparative.Equivalent,6));
-		ID.addComparative(new Comparative(Comparative.Equivalent,2456));
-		ID.addComparative(new Comparative(Comparative.Equivalent,6));
-		ID.addComparative(new Comparative(Comparative.Equivalent,12323));
-		ID.addComparative(new Comparative(Comparative.Equivalent,6));
-		ID.addComparative(new Comparative(Comparative.Equivalent,6));
-		ID.addComparative(new Comparative(Comparative.Equivalent,1212345));
-		ID.addComparative(new Comparative(Comparative.Equivalent,6));
-		ID.addComparative(new Comparative(Comparative.Equivalent,456));
+		//ComparativeBaseList ID =  new ComparativeOR(Comparative.Equivalent,22);
+		Comparable<?> ID = 12;
+		/*ID.addComparative(new Comparative(Comparative.Equivalent,6));
 		ID.addComparative(new Comparative(Comparative.Equivalent,6));
 		ID.addComparative(new Comparative(Comparative.Equivalent,6));
 		ID.addComparative(new Comparative(Comparative.Equivalent,6));
-		ID.addComparative(new Comparative(Comparative.Equivalent,12));
+		ID.addComparative(new Comparative(Comparative.Equivalent,6));
+		ID.addComparative(new Comparative(Comparative.Equivalent,6));
+		ID.addComparative(new Comparative(Comparative.Equivalent,6));
+		ID.addComparative(new Comparative(Comparative.Equivalent,6));
+		ID.addComparative(new Comparative(Comparative.Equivalent,6));
 		
 		ID.addComparative(new Comparative(Comparative.Equivalent,6));
 		ID.addComparative(new Comparative(Comparative.Equivalent,6));
 		ID.addComparative(new Comparative(Comparative.Equivalent,6));
-		ID.addComparative(new Comparative(Comparative.Equivalent,12333));
 		
 		ID.addComparative(new Comparative(Comparative.Equivalent,6));
-		ID.addComparative(new Comparative(Comparative.Equivalent,27894));
 		ID.addComparative(new Comparative(Comparative.Equivalent,6));
-		ID.addComparative(new Comparative(Comparative.Equivalent,6));
+		ID.addComparative(new Comparative(Comparative.Equivalent,6));*/
 		
 		final Comparable<?>[] row = {ID,new Comparative(Comparative.GreaterThanOrEqual,50),new Comparative(Comparative.GreaterThanOrEqual,new java.util.Date()),"wwe"};
 		HashMap<String,Integer> columnMapping = new HashMap<String,Integer>();
@@ -70,33 +63,33 @@ public class Main {
 		});
 		Object result = null;
 		System.out.println("wwe".hashCode()%500);
-		final RowJEP sqljep = new RowJEP("var hello=abs(hash(ID)) % 1024 % 32;" +
-				"(case " +
-	  			"	WHEN (hello >= 0 and hello<1) THEN 'aadf0' ;" +
-	  			"	WHEN (hello >=1 and hello <2) THEN 'aadf1' ;" +
-	  			"	WHEN (hello >=2 and hello <3) THEN 'aadf2' ;" +
-	  			"	WHEN (hello >=3 and hello <4) THEN 'aadf3' ;" +
-	  			"	WHEN (hello >=4 and hello <5) THEN 'aadf4' ;" +
-	  			"	WHEN (hello >=5 and hello <6) THEN 'aadf5' ;" +
-	  			"	WHEN (hello >=6 and hello <7) THEN 'aadf6' ;" +
-	  			"	WHEN (hello >=7 and hello <8) THEN 'aadf7' ;" +
-	  			"	WHEN (hello >=8 and hello <9) THEN 'aadf8' ;" +
-	  			"	WHEN (hello >=9 and hello <10) THEN 'aadf9' ;" +
-	  			"	WHEN (hello >=10 and hello <11) THEN 'aadf10' ;" +
-	  			"	WHEN (hello >=11 and hello <12) THEN 'aadf11' ;" +
-	  			"	WHEN (hello >=12 and hello <13) THEN 'aadf12' ;" +
-	  			"	WHEN (hello >=13 and hello <14) THEN 'aadf13' ;" +
-	  			"	WHEN (hello >=14 and hello <15) THEN 'aadf14' ;" +
-	  			"	WHEN (hello >=15 and hello <16) THEN 'aadf15' ;" +
-	  			"	WHEN (hello >=16 and hello <17) THEN 'aadf16' ;" +
-	  			"	WHEN (hello >=17 and hello <18) THEN 'aadf17' ;" +
-	  			"	WHEN (hello >=18 and hello <19) THEN 'aadf18' ;" +
-	  			"	WHEN (hello >=19 and hello <20) THEN 'aadf19' ;" +
-	  			"	WHEN (hello >=20 and hello <21) THEN 'aadf20' ;" +
-	  			"	WHEN (hello >=21 and hello <22) THEN 'aadf21' ;" +
-	  			"	WHEN (hello >=22 and hello <23) THEN 'aadf22' ;" +
-	  			"	WHEN (hello >=23 and hello <24) THEN 'aadf23' ;" +
-	  			"	WHEN (hello >=24 and hello <25) THEN 'aadf24' ;" +
+		final RowJEP sqljep = new RowJEP("var hello=abs(hash(ID)) % 32;" +
+				"(case hello " +
+	  			"	WHEN range(0,1,1,0) THEN 'aadf0' ;" +
+	  			"	WHEN range(1,2,1,0) THEN 'aadf1' ;" +
+	  			"	WHEN range(2,3,1,0) THEN 'aadf2' ;" +
+	  			"	WHEN range(3,4,1,0) THEN 'aadf3' ;" +
+	  			"	WHEN range(4,5,1,0) THEN 'aadf4' ;" +
+	  			"	WHEN range(5,6,1,0) THEN 'aadf5' ;" +
+	  			"	WHEN range(6,7,1,0) THEN 'aadf6' ;" +
+	  			"	WHEN range(7,8,1,0) THEN 'aadf7' ;" +
+	  			"	WHEN range(8,9,1,0) THEN 'aadf8' ;" +
+	  			"	WHEN range(9,10,1,0) THEN 'aadf9' ;" +
+	  			"	WHEN range(10,11,1,0) THEN 'aadf10' ;" +
+	  			"	WHEN range(11,12,1,0) THEN 'aadf11' ;" +
+	  			"	WHEN range(12,13,1,0) THEN 'aadf12' ;" +
+	  			"	WHEN range(13,14,1,0) THEN 'aadf13' ;" +
+	  			"	WHEN range(14,15,1,0) THEN 'aadf14' ;" +
+	  			"	WHEN range(15,16,1,0) THEN 'aadf15' ;" +
+	  			"	WHEN range(16,17,1,0) THEN 'aadf16' ;" +
+	  			"	WHEN range(17,18,1,0) THEN 'aadf17' ;" +
+	  			"	WHEN range(18,19,1,0) THEN 'aadf18' ;" +
+	  			"	WHEN range(19,20,1,0) THEN 'aadf19' ;" +
+	  			"	WHEN range(20,21,1,0) THEN 'aadf20' ;" +
+	  			"	WHEN range(21,22,1,0) THEN 'aadf21' ;" +
+	  			"	WHEN range(22,23,1,0) THEN 'aadf22' ;" +
+	  			"	WHEN range(23,24,1,0) THEN 'aadf23' ;" +
+	  			"	WHEN range(24,25,1,0) THEN 'aadf24' ;" +
 	  			
 	  			"	ELSE 'aadf25...' " +
 	  			"END CASE;)|| 'qwerqer' || (12+12)");	
@@ -123,45 +116,11 @@ public class Main {
 		}.start();
 		
 		}
-		
-		//final RowJEP sqljep = new RowJEP("var aa=1+2; 1=2");
-		final RowJEP sqljep1 = new RowJEP("var hello=abs(hash(ID)) % 32;" +
-				"(CASE " +
-	  			"	WHEN (hello >= 0 and hello<1) THEN 'aadf0' ;" +
-	  			"	WHEN (hello >=1 and hello <2) THEN 'aadf1' ;" +
-	  			"	WHEN (hello >=2 and hello <3) THEN 'aadf2' ;" +
-	  			"	WHEN (hello >=3 and hello <4) THEN 'aadf3' ;" +
-	  			"	WHEN (hello >=4 and hello <5) THEN 'aadf4' ;" +
-	  			"	WHEN (hello >=5 and hello <6) THEN 'aadf5' ;" +
-	  			"	WHEN (hello >=6 and hello <7) THEN 'aadf6' ;" +
-	  			"	WHEN (hello >=7 and hello <8) THEN 'aadf7' ;" +
-	  			"	WHEN (hello >=8 and hello <9) THEN 'aadf8' ;" +
-	  			"	WHEN (hello >=9 and hello <10) THEN 'aadf9' ;" +
-	  			"	WHEN (hello >=10 and hello <11) THEN 'aadf10' ;" +
-	  			"	WHEN (hello >=11 and hello <12) THEN 'aadf11' ;" +
-	  			"	WHEN (hello >=12 and hello <13) THEN 'aadf12' ;" +
-	  			"	WHEN (hello >=13 and hello <14) THEN 'aadf13' ;" +
-	  			"	WHEN (hello >=14 and hello <15) THEN 'aadf14' ;" +
-	  			"	WHEN (hello >=15 and hello <16) THEN 'aadf15' ;" +
-	  			"	WHEN (hello >=16 and hello <17) THEN 'aadf16' ;" +
-	  			"	WHEN (hello >=17 and hello <18) THEN 'aadf17' ;" +
-	  			"	WHEN (hello >=18 and hello <19) THEN 'aadf18' ;" +
-	  			"	WHEN (hello >=19 and hello <20) THEN 'aadf19' ;" +
-	  			"	WHEN (hello >=20 and hello <21) THEN 'aadf20' ;" +
-	  			"	WHEN (hello >=21 and hello <22) THEN 'aadf21' ;" +
-	  			"	WHEN (hello >=22 and hello <23) THEN 'aadf22' ;" +
-	  			"	WHEN (hello >=23 and hello <24) THEN 'aadf23' ;" +
-	  			"	WHEN (hello >=24 and hello <25) THEN 'aadf24' ;" +
-	  			
-	  			"	ELSE 'aadf25...' " +
-	  			"END CASE;)|| 'qwerqer' || (12+12)");	
-		
-		sqljep1.parseExpression(columnMapping,valMap,AbstractQueryRouter.ruleFunTab);
-		result = sqljep1.getValue(row);
+		result = sqljep.getValue(row);
 		final long start = System.currentTimeMillis();
-		for(int i=0;i<10000;i++)
-		result = sqljep1.getValue(row);
-		System.out.println(result+"\n"+"totle:"+(System.currentTimeMillis() -start));
+		for(int i=0;i<1000;i++)
+		result = sqljep.getValue(row);
+		System.out.println(result+"\n"+"...totle:"+(System.currentTimeMillis() -start));
 		
 	}
 }

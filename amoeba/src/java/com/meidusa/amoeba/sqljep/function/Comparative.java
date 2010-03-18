@@ -126,6 +126,11 @@ public class Comparative implements Comparable ,Cloneable{
 	public boolean intersect(int function,Comparable other,Comparator comparator){
 		return Intersector.intersect(function,other,this.comparison,this.getValue(),comparator);
 	}
+	
+	public boolean intersect(Comparative other,Comparator comparator){
+		return other.intersect(this.comparison, this.getValue(), comparator);
+	}
+	
 	public String toString(){
 		return ""+this.value;
 	}

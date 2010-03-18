@@ -100,6 +100,7 @@ import com.meidusa.amoeba.sqljep.function.NextDay;
 import com.meidusa.amoeba.sqljep.function.Nvl;
 import com.meidusa.amoeba.sqljep.function.PostfixCommand;
 import com.meidusa.amoeba.sqljep.function.Power;
+import com.meidusa.amoeba.sqljep.function.Range;
 import com.meidusa.amoeba.sqljep.function.Replace;
 import com.meidusa.amoeba.sqljep.function.Round;
 import com.meidusa.amoeba.sqljep.function.Rpad;
@@ -193,6 +194,7 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable 
         ruleFunTab.put("makedate", new MakeDate()); // maxdb
         ruleFunTab.put("maketime", new MakeTime()); // maxdb
         ruleFunTab.put("hash", new Hash()); //
+        ruleFunTab.put("range", new Range()); //
     }
 
     /* д╛хо1000 */
@@ -359,17 +361,44 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable 
                                         Comparable<?> result = rule.rowJep.getValue(comparables);
                                         Integer i = 0;
                                         if (result instanceof Comparative) {
-                                            if (rule.isSwitch) {
+                                            if (rule.result == RuleResult.INDEX) {
                                                 i = (Integer) ((Comparative) result).getValue();
                                                 if (i < 0) {
                                                     continue;
                                                 }
                                                 matched = true;
-                                            } else {
+                                            } else if(rule.result == RuleResult.POOLNAME){
+                                            	String matchedPoolsString = ((Comparative) result).getValue().toString();
+                                            	String[] poolNamesMatched = matchedPoolsString.split(",");
+                                            	for(String poolName : poolNamesMatched){
+	                                            	if (!poolNames.contains(poolName)) {
+	                                                    poolNames.add(poolName);
+	                                                }
+                                            	}
+                                            	continue;
+                                            }else{
                                                 matched = (Boolean) ((Comparative) result).getValue();
                                             }
                                         } else {
-                                            matched = (Boolean) result;
+                                        	
+                                        	if (rule.result == RuleResult.INDEX) {
+                                                i = (Integer) Integer.valueOf(result.toString());
+                                                if (i < 0) {
+                                                    continue;
+                                                }
+                                                matched = true;
+                                            } else if(rule.result == RuleResult.POOLNAME){
+                                            	String matchedPoolsString = result.toString();
+                                            	String[] poolNamesMatched = StringUtil.split(matchedPoolsString,";");
+                                            	for(String poolName : poolNamesMatched){
+	                                            	if (!poolNames.contains(poolName)) {
+	                                                    poolNames.add(poolName);
+	                                                }
+                                            	}
+                                            	continue;
+                                            }else{
+                                            	matched = (Boolean) result;
+                                            }
                                         }
 
                                         if (matched) {
@@ -781,11 +810,11 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable 
         for(String tableName : names){
         	TableRule tableRule = new TableRule();
 	        Table table = new Table();
-	        String[] tableSchema = tableName.split(".");
+	        String[] tableSchema = StringUtil.split(tableName,".");
 	        if(tableSchema.length==2){
 	        	table.setName(tableSchema[1]);
 	            Schema schema = new Schema();
-	            schema.setName(tableSchema[1]);
+	            schema.setName(tableSchema[0]);
 	            table.setSchema(schema);
 	        }else{
 	        	table.setName(tableName);
@@ -853,7 +882,11 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable 
         rule.ignoreArray = Boolean.parseBoolean(ignoreArray);
         String isSwitch = current.getAttribute("isSwitch");
         rule.isSwitch = Boolean.parseBoolean(isSwitch);
-
+        String result = current.getAttribute("ruleResult");
+        if(!StringUtil.isEmpty(result)){
+        	result = result.toUpperCase();
+        	rule.result = Enum.valueOf(RuleResult.class, result);
+        }
         // parameters
         Element parametersNode = DocumentUtil.getTheOnlyElement(current, "parameters");
         if (parametersNode != null) {

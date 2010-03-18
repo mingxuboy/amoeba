@@ -34,6 +34,8 @@ public abstract class ComparativeBaseList extends Comparative {
     @SuppressWarnings("unchecked")
     public abstract boolean intersect(int function, Comparable other, Comparator comparator);
 
+	public abstract boolean intersect(Comparative other,Comparator comparator);
+	
     public Object clone() {
         try {
             Constructor<? extends ComparativeBaseList> con = this.getClass().getConstructor((Class[]) null);

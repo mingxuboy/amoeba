@@ -43,13 +43,26 @@ public final class ComparativeGT extends PostfixCommand {
 		if (param1 == null || param2 == null) {
 			return (Boolean.FALSE);
 		} else {
-			if (param1 instanceof Comparative) {
+			/*if (param1 instanceof Comparative) {
 				Comparative other = (Comparative) param1;
 				boolean result = other.intersect(Comparative.GreaterThan,
 						param2, ComparativeComparator.comparator);
 				return (result);
 			} else {
 				return (ComparativeComparator.compareTo(param1, param2) > 0);
+			}*/
+			
+			/*boolean intersect = ComparativeComparator.intersect(param1, param2);
+			if(intersect){
+				return Boolean.TRUE;
+			}else{
+				return (ComparativeComparator.compareTo(param1, param2) > 0);
+			}*/
+			
+			if((param1 instanceof Comparative)){
+				return ComparativeComparator.intersect((Comparative)param1, Comparative.GreaterThan,param2);
+			}else{
+				return ComparativeComparator.intersect(Comparative.Equivalent,param1, Comparative.GreaterThan,param2);
 			}
 		}
 	}

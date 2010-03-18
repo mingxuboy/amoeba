@@ -25,4 +25,14 @@ public class ComparativeAND extends ComparativeBaseList{
 		return true;
 	}
 
+	@Override
+	public boolean intersect(Comparative other, Comparator comparator) {
+		for(Comparative source :list){
+			if(!source.intersect(other, comparator)){
+				return false;
+			}
+		}
+		return true;
+	}
+
 }
