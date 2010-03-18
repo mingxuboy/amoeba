@@ -20,6 +20,16 @@ class ComparativeComparator implements Comparator{
 	}
 	
 	public static int compareTo(Comparable s1, Comparable s2) throws ParseException {
+		if (s1 instanceof Comparative) {
+			Comparative comparative = (Comparative) s1;
+			s1 = comparative.getValue();
+		}
+		
+		if (s2 instanceof Comparative) {
+			Comparative comparative = (Comparative) s2;
+			s2 = comparative.getValue();
+		}
+		
 		if(s1 == null || s2 == null) return -1;
 		if (s1.getClass() == s2.getClass() 
 				|| s1.getClass().isAssignableFrom(s2.getClass()) 
@@ -52,5 +62,29 @@ class ComparativeComparator implements Comparator{
 			throw new ParseException("Not comparable");
 		}
 	}
+	
+	/**
+	 * 判断是否存在交集
+	 * @param param1
+	 * @param param2
+	 * @return
+	 */
+	public static boolean intersect(Comparative param1,Comparative param2){
+		return param1.intersect(param2, comparator);
+	}
 
+	public static boolean intersect(Comparative param1,int function2,Comparable<?> comparable2){
+		return param1.intersect(function2,comparable2, comparator);
+	}
+	
+	public static boolean intersect(int function1,Comparable<?> param1,int function2,Comparable<?> param2){
+		return Intersector.intersect(function1,param1,function2,param2,ComparativeComparator.comparator);
+	}
+	
+	public static boolean intersect(Comparable<?> param1,Comparable<?> param2){
+		int function1 = Comparative.Equivalent;
+		int function2 = Comparative.Equivalent;
+		return Intersector.intersect(function1,param1,function2,param2,ComparativeComparator.comparator);
+	}
+	
 }

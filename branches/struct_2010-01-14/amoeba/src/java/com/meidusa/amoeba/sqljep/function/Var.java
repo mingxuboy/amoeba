@@ -10,7 +10,6 @@ public class Var extends PostfixCommand implements Declare{
 		this.identity = identity;
 	}
 	
-	@Override
 	public Comparable<?>[] evaluate(ASTFunNode node, JepRuntime runtime)
 			throws ParseException {
 		node.childrenAccept(runtime.ev, null);
@@ -18,12 +17,10 @@ public class Var extends PostfixCommand implements Declare{
 		return new Comparable<?>[]{param};
 	}
 
-	@Override
 	public int getNumberOfParameters() {
 		return 1;
 	}
 
-	@Override
 	public Comparable<?> getResult(Comparable<?>... comparables)
 			throws ParseException {
 		return comparables[0];
@@ -33,7 +30,6 @@ public class Var extends PostfixCommand implements Declare{
 		return true;
 	}
 
-	@Override
 	public void declare(JepRuntime runtime,Comparable<?> comparable) {
 		runtime.vars.put(identity, comparable);
 	}

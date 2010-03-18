@@ -12,12 +12,13 @@ import com.meidusa.amoeba.sqljep.RowJEP;
 public class Rule implements Serializable {
 
     private static final long   serialVersionUID = 1L;
-
+    
     public String               name;
     public String               group;
     public boolean              ignoreArray;
     public boolean              isSwitch;
-
+    public RuleResult result = RuleResult.BOOLEAN;
+    
     public Map<String, Integer> parameterMap     = new HashMap<String, Integer>();
     public List<Column>         excludes         = new ArrayList<Column>();
     public Map<Column, Integer> cloumnMap        = new HashMap<Column, Integer>();
