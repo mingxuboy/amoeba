@@ -63,7 +63,7 @@ public final class Case extends PostfixCommand {
 				}
 				if (cond instanceof Boolean) {
 					if (((Boolean)cond).booleanValue()) {
-						result.add(i);
+						result.add(i+1);
 						count ++;
 						if(!runtime.isMultValue){
 							break;
@@ -80,7 +80,7 @@ public final class Case extends PostfixCommand {
 				Comparable<?>[] comparables = new Comparable[result.size()];
 				int j=0;
 				for(int i:result){
-					node.jjtGetChild(i+1).jjtAccept(runtime.ev, null);
+					node.jjtGetChild(i).jjtAccept(runtime.ev, null);
 					Comparable<?>  variant = runtime.stack.pop();
 					comparables[j] = variant;
 					j++;
