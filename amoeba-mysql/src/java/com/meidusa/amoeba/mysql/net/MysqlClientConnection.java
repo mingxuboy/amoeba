@@ -200,9 +200,6 @@ public class MysqlClientConnection extends MysqlConnection {
 			if (isClosed()) {
 				return true;
 			}
-
-			logger.warn("Disconnecting non-communicative client [conn=" + this
-					+ ", idle=" + idleMillis + "ms].");
 			return true;
 		}
 	}

@@ -25,6 +25,7 @@
   	<file name="build/etc/lib/jdbc4_part.jar" />
   	<file name="build/etc/lib/commons-digester-1.8.jar" />
   	<file name="build/etc/lib/jdbc-proxy-1.1.jar" />
+  	<file name="build/etc/lib/commons-pool-1.5.4.jar" />
   </filelist>
   
   <filelist dir="." id="bin.files">

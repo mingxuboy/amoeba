@@ -11,6 +11,8 @@
  */
 package com.meidusa.amoeba.net.poolable;
 
+import org.apache.commons.pool.PoolableObjectFactory;
+
 
 /**
  * 采用该Poolable ObjectPool，则object 必须实现{@link PoolableObject}
@@ -118,6 +120,7 @@ public class PoolableObjectPool extends GenericObjectPool{
     }
     
     public PoolableObjectPool(PoolableObjectFactory factory, int maxActive, byte whenExhaustedAction, long maxWait, int maxIdle, int minIdle, boolean testOnBorrow, boolean testOnReturn, long timeBetweenEvictionRunsMillis, int numTestsPerEvictionRun, long minEvictableIdleTimeMillis, boolean testWhileIdle) {
+    	
     	super(factory, maxActive, whenExhaustedAction, maxWait, maxIdle, DEFAULT_MIN_IDLE, testOnBorrow, testOnReturn, timeBetweenEvictionRunsMillis, numTestsPerEvictionRun, minEvictableIdleTimeMillis, testWhileIdle);
     	this.setFactory(factory);
     }

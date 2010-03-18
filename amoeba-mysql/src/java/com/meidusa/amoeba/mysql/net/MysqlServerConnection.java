@@ -48,7 +48,7 @@ public class MysqlServerConnection extends MysqlConnection implements MySqlPacke
 	public static enum Status{WAITE_HANDSHAKE,AUTHING,COMPLETED};
 	private Status status = Status.WAITE_HANDSHAKE;
 	private ObjectPool objectPool;
-	private long createTime = System.currentTimeMillis();
+	
 	private boolean active;
 	private long serverCapabilities;
 
@@ -175,7 +175,7 @@ public class MysqlServerConnection extends MysqlConnection implements MySqlPacke
 						this.postMessage(packet.toByteBuffer(conn).array());
 						logger.debug("server request scrambled password in old format");
 					}else{
-						logger.warn("server response packet from :"+this._channel.socket().getRemoteSocketAddress()+" :\n"+StringUtil.dumpAsHex(message, message.length));
+						logger.warn("server response packet from :"+this._channel.socket().getRemoteSocketAddress()+" :\n"+StringUtil.dumpAsHex(message, message.length),new Exception());
 					}
 				}
 			}
@@ -319,8 +319,6 @@ public class MysqlServerConnection extends MysqlConnection implements MySqlPacke
 			if (idleMillis < 15000) {
 				return false;
 			}
-			logger.warn("Disconnecting non-communicative server [conn=" + this
-					+ (this.getChannel() != null?","+this.getChannel().socket():", socket closed!") +", idle=" + idleMillis + "ms]. life="+(System.currentTimeMillis()-createTime));
 			return true;
 		}
 	}
