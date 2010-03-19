@@ -301,7 +301,17 @@ public class MysqlServerConnection extends MysqlConnection implements MySqlPacke
 	 * 正在处于验证的Connection Idle时间可以设置相应的少一点。
 	 */
 	public boolean checkIdle(long now) {
+		if (isClosed()) {
+            return true;
+        }
 		if(isAuthenticated()){
+			//处于使用中的链接， 如果超过5分钟没有发生网络IO，则需要关闭该链接 
+			if(isActive()){
+				long idleMillis = now - _lastEvent;
+				if (idleMillis > 5 * 60 * 1000) {
+					return true;
+				}
+			}
 			if(_handler instanceof Sessionable){
 				/**
 				 * 该处在高并发的情况下可能会发生ClassCastException 异常,为了提升性能,这儿将忽略这种异常.
