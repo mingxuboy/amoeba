@@ -241,7 +241,8 @@ TOKEN:
 |   < CASE: "case" >
 | 	< WHEN: "when" >
 |   < THEN: "then" >
-| 	< ELSE:  "else" >
+| 	< ELSE:  "else"|":" >
+| 	< IF :"?"|"if" >
 | 	< ENDCASE: "end case" >
 | < COMM :";" >
 }
@@ -476,6 +477,9 @@ void PostfixExpression() :
 		  jjtThis.setFunction(tokenImage[NOT_LIKE], new NotLike());
 		}
 	  ) #FunNode(2)
+	|
+		( <IF> AdditiveExpression() < ELSE > AdditiveExpression()		{
+	  		jjtThis.setFunction(tokenImage[IF], new IfElse());		}		)#FunNode(3)		 
   ]
 }
 

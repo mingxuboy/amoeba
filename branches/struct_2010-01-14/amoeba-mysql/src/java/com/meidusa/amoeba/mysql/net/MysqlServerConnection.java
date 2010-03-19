@@ -389,6 +389,15 @@ public class MysqlServerConnection extends MysqlConnection implements MySqlPacke
 				if(isActive()){
 					tmpPool.invalidateObject(this);
 				}
+				if(_handler instanceof Sessionable){
+					/**
+					 * 该处在高并发的情况下可能会发生ClassCastException 异常,为了提升性能,这儿将忽略这种异常.
+					 */
+					Sessionable session = (Sessionable)_handler;
+					if(!session.isEnded()){
+						session.endSession();
+					}
+				}
 			}
 		} catch (Exception e) {
 		}
