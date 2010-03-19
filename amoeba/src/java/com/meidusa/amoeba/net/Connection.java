@@ -17,6 +17,7 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.nio.ByteBuffer;
+import java.nio.channels.CancelledKeyException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
@@ -333,6 +334,8 @@ public abstract class Connection implements NetEventHandler {
             }
         } catch (IOException ioe) {
             handleFailure(ioe);
+        }catch(CancelledKeyException ce){
+        	handleFailure(ce);
         }
     }
     

@@ -63,7 +63,7 @@ public class Main {
 		});
 		Object result = null;
 		System.out.println("wwe".hashCode()%500);
-		final RowJEP sqljep = new RowJEP("var hello=abs(hash(ID)) % 32;" +
+		final RowJEP sqljep = new RowJEP("var hello=abs(hash(ID)) % 32; var isBool = false; " +
 				"(case hello " +
 	  			"	WHEN range(0,1,1,0) THEN 'aadf0' ;" +
 	  			"	WHEN range(1,2,1,0) THEN 'aadf1' ;" +
@@ -77,7 +77,7 @@ public class Main {
 	  			"	WHEN range(9,10,1,0) THEN 'aadf9' ;" +
 	  			"	WHEN range(10,11,1,0) THEN 'aadf10' ;" +
 	  			"	WHEN range(11,12,1,0) THEN 'aadf11' ;" +
-	  			"	WHEN range(12,13,1,0) THEN 'aadf12' ;" +
+	  			"	WHEN range(12,13,1,0) THEN isBool?'hell12':'aadf12' ;" +
 	  			"	WHEN range(13,14,1,0) THEN 'aadf13' ;" +
 	  			"	WHEN range(14,15,1,0) THEN 'aadf14' ;" +
 	  			"	WHEN range(15,16,1,0) THEN 'aadf15' ;" +
