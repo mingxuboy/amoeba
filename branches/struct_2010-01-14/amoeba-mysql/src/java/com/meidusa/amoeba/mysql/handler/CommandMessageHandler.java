@@ -172,7 +172,7 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 		 * @param buffer
 		 * @return
 		 */
-		protected  synchronized CommandStatus checkResponseCompleted(Connection conn,byte[] buffer){
+		protected  CommandStatus checkResponseCompleted(Connection conn,byte[] buffer){
 			boolean isCompleted = false;
 			ConnectionStatuts connStatus = connStatusMap.get(conn);
 			if(connStatus == null){
@@ -390,7 +390,7 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 		}
 	}
 	
-	public void handleMessage(Connection fromConn) {
+	public synchronized void handleMessage(Connection fromConn) {
 		/*if(ended){
 			logger.error("ended session handler handle message:\n"+StringUtil.dumpAsHex(message, message.length));
 			return;
