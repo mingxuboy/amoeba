@@ -34,10 +34,10 @@ import com.meidusa.amoeba.util.StringUtil;
  * @author <a href=mailto:piratebase@sina.com>Struct chen</a>
  */
 @SuppressWarnings("unchecked")
-public class MysqlAuthenticator extends DummyAuthenticator implements MySqlPacketConstant{
-	protected static Logger logger = Logger.getLogger(MysqlAuthenticator.class);
+public class MysqlClientAuthenticator extends DummyAuthenticator implements MySqlPacketConstant{
+	protected static Logger logger = Logger.getLogger(MysqlClientAuthenticator.class);
 	private Map map = new LRUMap(100);
-	public MysqlAuthenticator() {
+	public MysqlClientAuthenticator() {
 		
 	}
 

@@ -150,7 +150,7 @@ public class MysqlProxyServer {
         ConnectionManager[] managers = new ConnectionManager[processors>=maxsubManager?maxsubManager:processors+1];
         for(int i=0;i<managers.length;i++){
         	MysqlClientConnectionManager mysqlProxyServerconMger = new MysqlClientConnectionManager("sub manager-"+i);
-        	MysqlAuthenticator authen = new MysqlAuthenticator();
+        	MysqlClientAuthenticator authen = new MysqlClientAuthenticator();
         	authen.setFilter(ipfilter);
     		mysqlProxyServerconMger.setAuthenticator(authen);
     		registerReporter(mysqlProxyServerconMger);

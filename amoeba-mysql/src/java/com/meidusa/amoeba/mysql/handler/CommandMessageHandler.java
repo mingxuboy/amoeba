@@ -273,6 +273,9 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 		this.timeout = timeout;
 	}
 	
+	public boolean isMultiplayer(){
+		return commandQueue.isMultiple();
+	}
 	/**
 	 * 判断被handled的Connection 消息传送是否都完成
 	 * @return
@@ -387,101 +390,104 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 		}
 	}
 	
-	public synchronized void handleMessage(Connection fromConn, byte[] message) {
+	public void handleMessage(Connection fromConn) {
 		/*if(ended){
 			logger.error("ended session handler handle message:\n"+StringUtil.dumpAsHex(message, message.length));
 			return;
 		}*/
-
-		if(fromConn == source){
-			CommandInfo info = new CommandInfo();
-			info.setBuffer(message);
-			info.setMain(true);
+		byte[] message = null;
+		while((message = fromConn.getInQueue().getNonBlocking()) != null){
 			
-			if(!commandQueue.appendCommand(info,false)){
-				dispatchMessageFrom(source,message);
-			}
-		}else{
-			
-			if(logger.isDebugEnabled()){
-				if(MysqlPacketBuffer.isErrorPacket(message)){
-					logger.error("connection="+fromConn.hashCode()+",error packet:\n"+StringUtil.dumpAsHex(message, message.length));
-				}
-			}
-			//判断命令是否完成了
-			CommandStatus commStatus = commandQueue.checkResponseCompleted(fromConn, message);
-			
-			if(CommandStatus.AllCompleted == commStatus || CommandStatus.ConnectionCompleted == commStatus){
-				finishedConnectionCommand(fromConn,commandQueue.currentCommand);
-				lock.lock();
-				try{
-					if(this.ended){
-						releaseConnection(fromConn);
-					}
-				}finally{
-					lock.unlock();
-				}
-			}
-			
-			if(CommandStatus.AllCompleted == commStatus){
-				try{
-					if(commandQueue.currentCommand.isMain()){
-						commandQueue.mainCommandExecuted = true;
-						releaseConnection(source);
-					}
-
-					/**
-					 * 如果是客户端请求的命令则:
-					 * 1、请求是多台server的，需要进行合并数据
-					 * 2、单台server直接写出到客户端
-					 */
-					
-					if(commandQueue.currentCommand.isMain()){
-						if(commandQueue.isMultiple()){
-							List<byte[]> list = this.mergeMessages();
-							if(list != null){
-								for(byte[] buffer : list){
-									dispatchMessageFrom(fromConn,buffer);
-								}
-							}
-						}else{
-							dispatchMessageFrom(fromConn,message);
-						}
-					}else{
-						//非主命令发送以后返回出错信息，则结束当前的session
-						Collection<ConnectionStatuts> connectionStatutsSet = commandQueue.connStatusMap.values();
-						for(ConnectionStatuts connStatus : connectionStatutsSet){
-							//看是否每个服务器返回的数据包都没有异常信息。
-							if((connStatus.statusCode & SessionStatus.ERROR) >0){
-								this.commandQueue.currentCommand.setStatusCode(connStatus.statusCode);
-								byte[] errorBuffer = connStatus.buffers.get(connStatus.buffers.size()-1);
-								if(!commandQueue.mainCommandExecuted){
-									dispatchMessageFrom(connStatus.conn,errorBuffer);
-									if(source.isAutoCommit()){
-										this.endSession();
-									}
-								}else{
-									if(logger.isDebugEnabled()){
-										byte[] commandBuffer = commandQueue.currentCommand.getBuffer();
-										StringBuffer buffer = new StringBuffer();
-										buffer.append("Current Command Execute Error:\n");
-										buffer.append(StringUtil.dumpAsHex(commandBuffer,commandBuffer.length));
-										buffer.append("\n error Packet:\n");
-										buffer.append(StringUtil.dumpAsHex(errorBuffer,errorBuffer.length));
-										logger.debug(buffer.toString());
-									}
-								}
-								return;
-							}
-						}
-					}
-				}finally{
-					afterCommandCompleted(commandQueue.currentCommand);
+			if(fromConn == source){
+				CommandInfo info = new CommandInfo();
+				info.setBuffer(message);
+				info.setMain(true);
+				
+				if(!commandQueue.appendCommand(info,false)){
+					dispatchMessageFrom(source,message);
 				}
 			}else{
-				if(commandQueue.currentCommand.isMain()){
-					if(!commandQueue.isMultiple()){
-						dispatchMessageFrom(fromConn,message);
+				
+				if(logger.isDebugEnabled()){
+					if(MysqlPacketBuffer.isErrorPacket(message)){
+						logger.error("connection="+fromConn.hashCode()+",error packet:\n"+StringUtil.dumpAsHex(message, message.length));
+					}
+				}
+				//判断命令是否完成了
+				CommandStatus commStatus = commandQueue.checkResponseCompleted(fromConn, message);
+				
+				if(CommandStatus.AllCompleted == commStatus || CommandStatus.ConnectionCompleted == commStatus){
+					finishedConnectionCommand(fromConn,commandQueue.currentCommand);
+					lock.lock();
+					try{
+						if(this.ended){
+							releaseConnection(fromConn);
+						}
+					}finally{
+						lock.unlock();
+					}
+				}
+				
+				if(CommandStatus.AllCompleted == commStatus){
+					try{
+						if(commandQueue.currentCommand.isMain()){
+							commandQueue.mainCommandExecuted = true;
+							releaseConnection(source);
+						}
+	
+						/**
+						 * 如果是客户端请求的命令则:
+						 * 1、请求是多台server的，需要进行合并数据
+						 * 2、单台server直接写出到客户端
+						 */
+						
+						if(commandQueue.currentCommand.isMain()){
+							if(commandQueue.isMultiple()){
+								List<byte[]> list = this.mergeMessages();
+								if(list != null){
+									for(byte[] buffer : list){
+										dispatchMessageFrom(fromConn,buffer);
+									}
+								}
+							}else{
+								dispatchMessageFrom(fromConn,message);
+							}
+						}else{
+							//非主命令发送以后返回出错信息，则结束当前的session
+							Collection<ConnectionStatuts> connectionStatutsSet = commandQueue.connStatusMap.values();
+							for(ConnectionStatuts connStatus : connectionStatutsSet){
+								//看是否每个服务器返回的数据包都没有异常信息。
+								if((connStatus.statusCode & SessionStatus.ERROR) >0){
+									this.commandQueue.currentCommand.setStatusCode(connStatus.statusCode);
+									byte[] errorBuffer = connStatus.buffers.get(connStatus.buffers.size()-1);
+									if(!commandQueue.mainCommandExecuted){
+										dispatchMessageFrom(connStatus.conn,errorBuffer);
+										if(source.isAutoCommit()){
+											this.endSession();
+										}
+									}else{
+										if(logger.isDebugEnabled()){
+											byte[] commandBuffer = commandQueue.currentCommand.getBuffer();
+											StringBuffer buffer = new StringBuffer();
+											buffer.append("Current Command Execute Error:\n");
+											buffer.append(StringUtil.dumpAsHex(commandBuffer,commandBuffer.length));
+											buffer.append("\n error Packet:\n");
+											buffer.append(StringUtil.dumpAsHex(errorBuffer,errorBuffer.length));
+											logger.debug(buffer.toString());
+										}
+									}
+									return;
+								}
+							}
+						}
+					}finally{
+						afterCommandCompleted(commandQueue.currentCommand);
+					}
+				}else{
+					if(commandQueue.currentCommand.isMain()){
+						if(!commandQueue.isMultiple()){
+							dispatchMessageFrom(fromConn,message);
+						}
 					}
 				}
 			}

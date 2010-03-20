@@ -6,7 +6,6 @@ import com.meidusa.amoeba.sqljep.ParseException;
 
 public class IfElse extends PostfixCommand {
 
-	@Override
 	public Comparable<?>[] evaluate(ASTFunNode node, JepRuntime runtime)
 			throws ParseException {
 		node.childrenAccept(runtime.ev, null);
@@ -16,7 +15,6 @@ public class IfElse extends PostfixCommand {
 		return new Comparable<?>[] { source, limit1, limit2 };
 	}
 
-	@Override
 	public int getNumberOfParameters() {
 		return 3;
 	}
@@ -25,7 +23,6 @@ public class IfElse extends PostfixCommand {
 		return false;
 	}
 	
-	@Override
 	public Comparable<?> getResult(Comparable<?>... comparables)
 			throws ParseException {
 		Comparable<?> limit2 = comparables[2];

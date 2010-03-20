@@ -31,8 +31,16 @@ import com.meidusa.amoeba.util.StringUtil;
 public class MysqlClientConnectionManager extends AuthingableConnectionManager {
 
     private final static String SERVER_VERSION = "5.1.22-mysql-amoeba-proxy";
-
-    private static byte[]       authenticateOkPacketData;
+    private static byte[] AUTHENTICATEOKPACKETDATA;
+    static {
+            OkPacket ok = new OkPacket();
+            ok.packetId = 2;
+            ok.affectedRows = 0;
+            ok.insertId = 0;
+            ok.serverStatus = 2;
+            ok.warningCount = 0;
+            AUTHENTICATEOKPACKETDATA = ok.toByteBuffer(null).array();
+    }
 
     public MysqlClientConnectionManager() throws IOException{
     }
@@ -64,17 +72,9 @@ public class MysqlClientConnectionManager extends AuthingableConnectionManager {
 
     public void connectionAuthenticateSuccess(Connection conn, AuthResponseData data) {
         super.connectionAuthenticateSuccess(conn, data);
-        if (authenticateOkPacketData == null) {
-            OkPacket ok = new OkPacket();
-            ok.packetId = 2;
-            ok.affectedRows = 0;
-            ok.insertId = 0;
-            ok.serverStatus = 2;
-            ok.warningCount = 0;
-            authenticateOkPacketData = ok.toByteBuffer(conn).array();
-        }
+        
         conn.setMessageHandler(new MySqlCommandDispatcher());
-        conn.postMessage(authenticateOkPacketData);
+        conn.postMessage(AUTHENTICATEOKPACKETDATA);
     }
 
     protected void connectionAuthenticateFaild(final Connection conn, AuthResponseData data) {

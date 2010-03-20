@@ -61,6 +61,8 @@ import com.meidusa.amoeba.parser.statment.RollbackStatment;
 import com.meidusa.amoeba.parser.statment.ShowStatment;
 import com.meidusa.amoeba.parser.statment.StartTansactionStatment;
 import com.meidusa.amoeba.parser.statment.Statment;
+import com.meidusa.amoeba.sqljep.BaseJEP;
+import com.meidusa.amoeba.sqljep.JepRuntime;
 import com.meidusa.amoeba.sqljep.RowJEP;
 import com.meidusa.amoeba.sqljep.function.Abs;
 import com.meidusa.amoeba.sqljep.function.AddDate;
@@ -356,8 +358,10 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable 
                                     if (!matched) {
                                         continue;
                                     }
-
+                                    
                                     try {
+                                    	JepRuntime jep = BaseJEP.getThreadJepRuntime(rule.rowJep);
+                                    	jep.vars.put("isReadStatment", dmlStatment.isReadStatment());
                                         Comparable<?> result = rule.rowJep.getValue(comparables);
                                         Integer i = 0;
                                         if (result instanceof Comparative) {
@@ -370,9 +374,16 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable 
                                             } else if(rule.result == RuleResult.POOLNAME){
                                             	String matchedPoolsString = ((Comparative) result).getValue().toString();
                                             	String[] poolNamesMatched = matchedPoolsString.split(",");
-                                            	for(String poolName : poolNamesMatched){
-	                                            	if (!poolNames.contains(poolName)) {
-	                                                    poolNames.add(poolName);
+                                            	
+                                            	if(poolNamesMatched != null && poolNamesMatched.length >0){
+	                                            	for(String poolName : poolNamesMatched){
+		                                            	if (!poolNames.contains(poolName)) {
+		                                                    poolNames.add(poolName);
+		                                                }
+	                                            	}
+	                                            	
+	                                            	if (logger.isDebugEnabled()) {
+	                                                    logger.debug("[" + sql + "] matched table:" + tableRule.table.getName() + ", rule:" + rule.name);
 	                                                }
                                             	}
                                             	continue;
@@ -390,9 +401,15 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable 
                                             } else if(rule.result == RuleResult.POOLNAME){
                                             	String matchedPoolsString = result.toString();
                                             	String[] poolNamesMatched = StringUtil.split(matchedPoolsString,";");
-                                            	for(String poolName : poolNamesMatched){
-	                                            	if (!poolNames.contains(poolName)) {
-	                                                    poolNames.add(poolName);
+                                            	if(poolNamesMatched != null && poolNamesMatched.length >0){
+	                                            	for(String poolName : poolNamesMatched){
+		                                            	if (!poolNames.contains(poolName)) {
+		                                                    poolNames.add(poolName);
+		                                                }
+	                                            	}
+	                                            	
+	                                            	if (logger.isDebugEnabled()) {
+	                                                    logger.debug("[" + sql + "] matched table:" + tableRule.table.getName() + ", rule:" + rule.name);
 	                                                }
                                             	}
                                             	continue;
@@ -820,7 +837,7 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable 
 	        	table.setName(tableName);
 	        	 if (!StringUtil.isEmpty(schemaName)) {
 		            Schema schema = new Schema();
-		            schema.setName(tableName);
+		            schema.setName(schemaName);
 		            table.setSchema(schema);
 			     }
 	        }

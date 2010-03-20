@@ -14,6 +14,7 @@ package com.meidusa.amoeba.net;
 public interface Sessionable {
 	
 	public void startSession() throws Exception;
+	public boolean isMultiplayer();
 	public boolean checkIdle(long now);
 	public void endSession();
 	public boolean isEnded();

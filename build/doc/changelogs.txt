@@ -1,5 +1,36 @@
 amoeba for mysql
 
+2010-03-16 amoeba-mysql-1.2.0-BETA
+1、添加规则函数case、range、增加表达式   （boolean表达式 ? 表达式1: 表达式2）
+2、增加bool 类型的规则内置变量 isReadStatment
+	用户可以在规则的表达式中使用比如 :  isReadStatment? 'pool1' : 'pool2'
+3、稳定性增强，解决了在大并发下需要多个数据库聚合结果集的时候出现数据异常而无法返回给客户端的问题
+4、规则属性新增加ruleResult属性，有3种类型（BOOLEAN、POOLNAME、INDEX）
+	BOOLEAN -- 默认值、结果一定是布尔值，表示执行的sql是否匹配当前的规则
+	POOLNAME -- 结果是字符串，是由dbpool名字组成的字符串，多个pool以分号间隔（rule中的defaultPools、readPools、writePools无效）
+	INDEX -- 结果是数字 ，如果>=0 则表示当前规则匹配，并且将相关index的pool返回
+	
+    <tableRule name="sd_relation.LIST_FRIEND_GROUP,sd_relation.RELATION_FOLLOW" schema="sd_relation" 
+    		defaultPools="server1,server2,server3,server4">
+
+   		<rule name="rule1" ruleResult="POOLNAME">
+                   <parameters>SDID</parameters>
+                   <expression><![CDATA[
+                           var hashid = abs(hash(SDID)) % 32; 
+                           case    when hashid >=0 and hashid <8 then (isReadStatment ? 'server1' : 'server1_write');
+                                   when hashid >=8 and hashid <16 then (isReadStatment ? 'server2' : 'server2_write');
+                                   when hashid >=16 and hashid <24 then '(isReadStatment ? 'server3' : 'server3_write')';
+                                   else 'server4'
+                           END CASE;
+
+                   ]]></expression>
+                   <defaultPools>server1</defaultPools>
+                   <readPools>server1</readPools>
+                   <writePools>server1</writePools>
+           </rule>
+    </tableRule>
+
+
 2010年01月18日发布1.1.0-BETA，主要修改内容：
 1、解决amoeba运行一段时间以后可能出现阻塞
 2、修复个别sql解析问题
