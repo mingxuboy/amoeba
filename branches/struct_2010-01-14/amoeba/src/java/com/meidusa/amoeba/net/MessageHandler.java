@@ -29,6 +29,6 @@ public interface MessageHandler {
 	 * 
 	 * @param message 当前handle 的消息数据
 	 */
-	public void handleMessage(Connection conn, byte[] message);
+	public void handleMessage(Connection conn);
 	
 }

@@ -30,6 +30,9 @@ import com.meidusa.amoeba.mysql.filter.IOFilter;
 import com.meidusa.amoeba.mysql.filter.PacketFilterInvocation;
 import com.meidusa.amoeba.mysql.filter.PacketIOFilter;
 import com.meidusa.amoeba.mysql.handler.PreparedStatmentInfo;
+import com.meidusa.amoeba.mysql.net.packet.MysqlPacketBuffer;
+import com.meidusa.amoeba.mysql.net.packet.OkPacket;
+import com.meidusa.amoeba.mysql.net.packet.QueryCommandPacket;
 import com.meidusa.amoeba.net.AuthingableConnectionManager;
 import com.meidusa.amoeba.net.Connection;
 import com.meidusa.amoeba.util.ThreadLocalMap;
@@ -140,7 +143,9 @@ public class MysqlClientConnection extends MysqlConnection {
 		return authenticationMessage;
 	}
 
-	public void handleMessage(Connection conn, byte[] message) {
+	public void handleMessage(Connection conn) {
+		
+		byte[] message = this.getInQueue().getNonBlocking();
 		// 在未验证通过的时候
 		/** 此时接收到的应该是认证数据，保存数据为认证提供数据 */
 		this.authenticationMessage = message;
@@ -148,8 +153,27 @@ public class MysqlClientConnection extends MysqlConnection {
 				.authenticateConnection(this);
 	}
 
-	protected void messageProcess(final byte[] msg) {
-		final PacketFilterInvocation invocation = new PacketFilterInvocation(
+    protected void doReceiveMessage(byte[] message){
+    	if(MysqlPacketBuffer.isPacketType(message, QueryCommandPacket.COM_QUIT)){
+    		postClose(null);
+    		return;
+		}else if(MysqlPacketBuffer.isPacketType(message, QueryCommandPacket.COM_STMT_CLOSE)){
+			//
+			return;
+		}else if(MysqlPacketBuffer.isPacketType(message, QueryCommandPacket.COM_PING)){
+			OkPacket ok = new OkPacket();
+			ok.affectedRows = 0;
+			ok.insertId = 0;
+			ok.packetId = 1;
+			ok.serverStatus = 2;
+			this.postMessage(ok.toByteBuffer(null).array());
+			return;
+		}
+    	_inQueue.appendSilent(message);
+    }
+    
+	protected void messageProcess() {
+		/*final PacketFilterInvocation invocation = new PacketFilterInvocation(
 				filterList, this, msg) {
 
 			@Override
@@ -171,7 +195,18 @@ public class MysqlClientConnection extends MysqlConnection {
 				return null;
 			}
 		};
-		invocation.invoke();
+		invocation.invoke();*/
+		
+		ProxyRuntimeContext.getInstance().getClientSideExecutor()
+		.execute(new Runnable() {
+			public void run() {
+				try {
+					MysqlClientConnection.this.getMessageHandler().handleMessage(MysqlClientConnection.this);
+				} finally {
+					ThreadLocalMap.reset();
+				}
+			}
+		});
 	}
 
 	public void addLongData(byte[] longData) {

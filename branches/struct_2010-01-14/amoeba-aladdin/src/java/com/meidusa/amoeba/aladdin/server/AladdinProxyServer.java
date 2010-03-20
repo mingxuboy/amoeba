@@ -25,7 +25,7 @@ import com.meidusa.amoeba.config.ConfigUtil;
 import com.meidusa.amoeba.context.ProxyRuntimeContext;
 import com.meidusa.amoeba.log4j.DOMConfigurator;
 import com.meidusa.amoeba.mysql.context.MysqlProxyRuntimeContext;
-import com.meidusa.amoeba.mysql.server.MysqlAuthenticator;
+import com.meidusa.amoeba.mysql.server.MysqlClientAuthenticator;
 import com.meidusa.amoeba.net.ConnectionManager;
 import com.meidusa.amoeba.net.MultiConnectionManagerWrapper;
 import com.meidusa.amoeba.net.ServerableConnectionManager;
@@ -156,7 +156,7 @@ public class AladdinProxyServer {
             registerReporter(connMgr);
         }
         
-        MysqlAuthenticator auth = new MysqlAuthenticator();
+        MysqlClientAuthenticator auth = new MysqlClientAuthenticator();
         String accessConf = System.getProperty("access.conf", "${amoeba.home}/conf/access_list.conf");
         accessConf = ConfigUtil.filter(accessConf);
         IPAccessController ipfilter = new IPAccessController();

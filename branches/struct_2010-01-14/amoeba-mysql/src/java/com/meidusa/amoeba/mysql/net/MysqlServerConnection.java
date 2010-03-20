@@ -64,124 +64,126 @@ public class MysqlServerConnection extends MysqlConnection implements MySqlPacke
 		super(channel, createStamp);
 	}
 	
-	public void handleMessage(Connection conn,byte[] message) {
-		
-		if(!isAuthenticated()){
-			/**
-			 * 第一次数据为 handshake packet
-			 * 第二次数据为 OkPacket packet or ErrorPacket 
-			 * 
-			 */
-			MysqlPacketBuffer buffer = new MysqlPacketBuffer(message);
-			if(MysqlPacketBuffer.isErrorPacket(message)){
-				setAuthenticated(false);
-				ErrorPacket error = new ErrorPacket();
-				error.init(message,conn);
-				logger.error("handShake with "+this._channel.socket().getRemoteSocketAddress()+" error:"+error.serverErrorMessage);
-				return;
-			}
-			
-			if(status == Status.WAITE_HANDSHAKE){
-				HandshakePacket handpacket = new HandshakePacket();
-				handpacket.init(buffer);
-				this.serverCapabilities = handpacket.serverCapabilities;
-		        this.serverVersion = handpacket.serverVersion;
-		        splitVersion();
-		        if (!versionMeetsMinimum(4, 1, 1) || handpacket.protocolVersion != 10){
-		        	logger.error("amoeba support version minimum 4.1.1  and protocol version 10");
-		        	System.exit(-1);
-		        }
-		        
-				if(logger.isDebugEnabled()){
-					logger.debug("receive HandshakePacket packet from server:"+this.host +":"+this.port);
-				}
-				MysqlProxyRuntimeContext context = ((MysqlProxyRuntimeContext)MysqlProxyRuntimeContext.getInstance());
-				if(context.getServerCharset() == null && handpacket.serverCharsetIndex > 0){
-					context.setServerCharsetIndex(handpacket.serverCharsetIndex);
-					logger.info("mysql server Handshake= "+handpacket.toString());
-				}
-				
-				
-				AuthenticationPacket authing = new AuthenticationPacket();
-				authing.password = this.getPassword();
-				this.seed = authing.seed = handpacket.seed+handpacket.restOfScrambleBuff;
-				authing.clientParam = CLIENT_FOUND_ROWS;
-				authing.charsetNumber = (byte)(DEFAULT_CHARSET_INDEX & 0xff);
-				this.setCharset(CharsetMapping.INDEX_TO_CHARSET[DEFAULT_CHARSET_INDEX]);
-				
-				if (versionMeetsMinimum(4, 1, 0)) {
-		            if (versionMeetsMinimum(4, 1, 1)) {
-		            	authing.clientParam |= CLIENT_PROTOCOL_41;
-		                // Need this to get server status values
-		            	authing.clientParam |= CLIENT_TRANSACTIONS;
-
-		                // We always allow multiple result sets
-		            	authing.clientParam |= CLIENT_MULTI_RESULTS;
-
-		                // We allow the user to configure whether
-		                // or not they want to support multiple queries
-		                // (by default, this is disabled).
-		                /*if (this.connection.getAllowMultiQueries()) {
-		                    this.clientParam |= CLIENT_MULTI_QUERIES;
-		                }*/
-		            } else {
-		            	authing.clientParam |= CLIENT_RESERVED;
-		            }
-		        }
-				
-				if (handpacket.protocolVersion > 9) {
-					authing.clientParam |= CLIENT_LONG_PASSWORD; // for long passwords
-		        } else {
-		        	authing.clientParam &= ~CLIENT_LONG_PASSWORD;
-		        }
-				
-				if ((this.serverCapabilities & CLIENT_LONG_FLAG) != 0) {
-					authing.clientParam |= CLIENT_LONG_FLAG;
-		        }
-				
-				if ((this.serverCapabilities & CLIENT_SECURE_CONNECTION) != 0) {
-					authing.clientParam |= CLIENT_SECURE_CONNECTION;
-				}
-				
-				authing.user = this.getUser();
-				authing.packetId = 1;
-				
-				if(this.getSchema() != null){
-					authing.database = this.getSchema();
-					authing.clientParam |= CLIENT_CONNECT_WITH_DB;
-				}
-				
-				authing.maxThreeBytes = 1073741824;
-				
-				status = Status.AUTHING;
-				if(logger.isDebugEnabled()){
-					logger.debug("authing packet sent to server:"+this.host +":"+this.port);
-				}
-				this.postMessage(authing.toByteBuffer(conn).array());
-			}else if(status == Status.AUTHING){
-				if(logger.isDebugEnabled()){
-					logger.debug("authing result packet from server:"+this.host +":"+this.port);
-				}
-				
-				if(MysqlPacketBuffer.isOkPacket(message)){
-					setAuthenticated(true);
+	public void handleMessage(Connection conn) {
+		byte[] message = null;
+		while((message = this.getInQueue().getNonBlocking()) != null){
+			if(!isAuthenticated()){
+				/**
+				 * 第一次数据为 handshake packet
+				 * 第二次数据为 OkPacket packet or ErrorPacket 
+				 * 
+				 */
+				MysqlPacketBuffer buffer = new MysqlPacketBuffer(message);
+				if(MysqlPacketBuffer.isErrorPacket(message)){
+					setAuthenticated(false);
+					ErrorPacket error = new ErrorPacket();
+					error.init(message,conn);
+					logger.error("handShake with "+this._channel.socket().getRemoteSocketAddress()+" error:"+error.serverErrorMessage);
 					return;
-				}else{
-					if(message.length<9 && MysqlPacketBuffer.isEofPacket(message)){
-						Scramble323Packet packet = new Scramble323Packet();
-						packet.packetId = 3;
-						packet.seed323 = this.seed.substring(0, 8);
-						packet.password = this.getPassword();
-						this.postMessage(packet.toByteBuffer(conn).array());
-						logger.debug("server request scrambled password in old format");
+				}
+				
+				if(status == Status.WAITE_HANDSHAKE){
+					HandshakePacket handpacket = new HandshakePacket();
+					handpacket.init(buffer);
+					this.serverCapabilities = handpacket.serverCapabilities;
+			        this.serverVersion = handpacket.serverVersion;
+			        splitVersion();
+			        if (!versionMeetsMinimum(4, 1, 1) || handpacket.protocolVersion != 10){
+			        	logger.error("amoeba support version minimum 4.1.1  and protocol version 10");
+			        	System.exit(-1);
+			        }
+			        
+					if(logger.isDebugEnabled()){
+						logger.debug("receive HandshakePacket packet from server:"+this.host +":"+this.port);
+					}
+					MysqlProxyRuntimeContext context = ((MysqlProxyRuntimeContext)MysqlProxyRuntimeContext.getInstance());
+					if(context.getServerCharset() == null && handpacket.serverCharsetIndex > 0){
+						context.setServerCharsetIndex(handpacket.serverCharsetIndex);
+						logger.info("mysql server Handshake= "+handpacket.toString());
+					}
+					
+					
+					AuthenticationPacket authing = new AuthenticationPacket();
+					authing.password = this.getPassword();
+					this.seed = authing.seed = handpacket.seed+handpacket.restOfScrambleBuff;
+					authing.clientParam = CLIENT_FOUND_ROWS;
+					authing.charsetNumber = (byte)(DEFAULT_CHARSET_INDEX & 0xff);
+					this.setCharset(CharsetMapping.INDEX_TO_CHARSET[DEFAULT_CHARSET_INDEX]);
+					
+					if (versionMeetsMinimum(4, 1, 0)) {
+			            if (versionMeetsMinimum(4, 1, 1)) {
+			            	authing.clientParam |= CLIENT_PROTOCOL_41;
+			                // Need this to get server status values
+			            	authing.clientParam |= CLIENT_TRANSACTIONS;
+	
+			                // We always allow multiple result sets
+			            	authing.clientParam |= CLIENT_MULTI_RESULTS;
+	
+			                // We allow the user to configure whether
+			                // or not they want to support multiple queries
+			                // (by default, this is disabled).
+			                /*if (this.connection.getAllowMultiQueries()) {
+			                    this.clientParam |= CLIENT_MULTI_QUERIES;
+			                }*/
+			            } else {
+			            	authing.clientParam |= CLIENT_RESERVED;
+			            }
+			        }
+					
+					if (handpacket.protocolVersion > 9) {
+						authing.clientParam |= CLIENT_LONG_PASSWORD; // for long passwords
+			        } else {
+			        	authing.clientParam &= ~CLIENT_LONG_PASSWORD;
+			        }
+					
+					if ((this.serverCapabilities & CLIENT_LONG_FLAG) != 0) {
+						authing.clientParam |= CLIENT_LONG_FLAG;
+			        }
+					
+					if ((this.serverCapabilities & CLIENT_SECURE_CONNECTION) != 0) {
+						authing.clientParam |= CLIENT_SECURE_CONNECTION;
+					}
+					
+					authing.user = this.getUser();
+					authing.packetId = 1;
+					
+					if(this.getSchema() != null){
+						authing.database = this.getSchema();
+						authing.clientParam |= CLIENT_CONNECT_WITH_DB;
+					}
+					
+					authing.maxThreeBytes = 1073741824;
+					
+					status = Status.AUTHING;
+					if(logger.isDebugEnabled()){
+						logger.debug("authing packet sent to server:"+this.host +":"+this.port);
+					}
+					this.postMessage(authing.toByteBuffer(conn).array());
+				}else if(status == Status.AUTHING){
+					if(logger.isDebugEnabled()){
+						logger.debug("authing result packet from server:"+this.host +":"+this.port);
+					}
+					
+					if(MysqlPacketBuffer.isOkPacket(message)){
+						setAuthenticated(true);
+						return;
 					}else{
-						logger.warn("server response packet from :"+this._channel.socket().getRemoteSocketAddress()+" :\n"+StringUtil.dumpAsHex(message, message.length),new Exception());
+						if(message.length<9 && MysqlPacketBuffer.isEofPacket(message)){
+							Scramble323Packet packet = new Scramble323Packet();
+							packet.packetId = 3;
+							packet.seed323 = this.seed.substring(0, 8);
+							packet.password = this.getPassword();
+							this.postMessage(packet.toByteBuffer(conn).array());
+							logger.debug("server request scrambled password in old format");
+						}else{
+							logger.warn("server response packet from :"+this._channel.socket().getRemoteSocketAddress()+" :\n"+StringUtil.dumpAsHex(message, message.length),new Exception());
+						}
 					}
 				}
+	
+			}else{
+				logger.warn("server "+this._channel.socket().getRemoteSocketAddress()+" raw handler message:"+StringUtil.dumpAsHex(message, message.length));
 			}
-
-		}else{
-			logger.warn("server "+this._channel.socket().getRemoteSocketAddress()+" raw handler message:"+StringUtil.dumpAsHex(message, message.length));
 		}
 		
 	}

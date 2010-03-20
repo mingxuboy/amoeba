@@ -50,8 +50,10 @@ public abstract class CommandMessageHandler implements MessageHandler, Sessionab
         this.parameter = parameter;
         this.packet = newResultPacket(query);
     }
-
-    public void handleMessage(Connection conn, byte[] message) {
+	public boolean isMultiplayer(){
+		return pools.length>1;
+	}
+    public void handleMessage(Connection conn) {
         return;
     }
 

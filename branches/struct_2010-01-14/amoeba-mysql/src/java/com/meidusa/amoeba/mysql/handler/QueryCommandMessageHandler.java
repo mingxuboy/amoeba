@@ -81,17 +81,8 @@ public class QueryCommandMessageHandler extends CommandMessageHandler {
         super(source, query, pools, timeout);
     }
 
-    public void handleMessage(Connection conn, byte[] message) {
-        if (logger.isDebugEnabled()) {
-            if (conn == source) {
-                QueryCommandPacket command = new QueryCommandPacket();
-                command.init(message, conn);
-                if (command.query != null) {
-                    logger.debug(command.query);
-                }
-            }
-        }
-        super.handleMessage(conn, message);
+    public void handleMessage(Connection conn) {
+        super.handleMessage(conn);
     }
 
     @Override

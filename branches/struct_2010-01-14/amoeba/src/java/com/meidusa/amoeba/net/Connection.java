@@ -54,7 +54,7 @@ public abstract class Connection implements NetEventHandler {
     private PacketInputStream   _fin;
 
     private PacketOutputStream  _fout;
-
+    protected Queue<byte[]> _inQueue     = new Queue<byte[]>();
     protected Queue<ByteBuffer> _outQueue     = new Queue<ByteBuffer>();
     private boolean             socketClosed  = false;
     protected String            host;
@@ -64,6 +64,9 @@ public abstract class Connection implements NetEventHandler {
         return packetFactory;
     }
 
+    public Queue<byte[]> getInQueue(){
+    	return _inQueue;
+    }
     public void setPacketFactory(PacketFactory<? extends Packet> packetFactory) {
         this.packetFactory = packetFactory;
     }
@@ -246,7 +249,11 @@ public abstract class Connection implements NetEventHandler {
                 bytesInTotle += bytesIn;
                 byte[] msg = new byte[bytesIn];
                 _fin.read(msg);
-                messageProcess(msg);
+                doReceiveMessage(msg);
+                //messageProcess(msg);
+            }
+            if(_inQueue.size()>0){
+            	messageProcess();
             }
         } catch (EOFException eofe) {
             // close down the socket gracefully
@@ -266,8 +273,13 @@ public abstract class Connection implements NetEventHandler {
         return bytesInTotle;
     }
 
-    protected void messageProcess(byte[] msg) {
-        _handler.handleMessage(this, msg);
+    
+    protected void doReceiveMessage(byte[] message){
+    	_inQueue.appendSilent(message);
+    }
+    
+    protected void messageProcess() {
+        _handler.handleMessage(this);
     }
 
     public boolean doWrite() throws IOException {
