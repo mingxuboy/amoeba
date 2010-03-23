@@ -34,23 +34,24 @@ public abstract class Authenticator {
 
     public void authenticateConnection(final AuthingableConnection conn) {
         final AuthResponseData rdata = createResponseData();
-        ProxyRuntimeContext.getInstance().getServerSideExecutor().execute(new Runnable() {
+        try {
+            if (doFilte(conn, rdata)) {
+                processAuthentication(conn, rdata);
+            }
+        } catch (Exception e) {
+            log.warn("Error authenticating", e);
+            rdata.code = AuthCodes.SERVER_ERROR;
+            rdata.message = e.getMessage();
+        } finally {
+            _conmgr.afterAuthing(conn, rdata);
+        }
+        /*ProxyRuntimeContext.getInstance().getServerSideExecutor().execute(new Runnable() {
 
             public void run() {
-                try {
-                    if (doFilte(conn, rdata)) {
-                        processAuthentication(conn, rdata);
-                    }
-                } catch (Exception e) {
-                    log.warn("Error authenticating", e);
-                    rdata.code = AuthCodes.SERVER_ERROR;
-                    rdata.message = e.getMessage();
-                } finally {
-                    _conmgr.afterAuthing(conn, rdata);
-                }
+                
             }
 
-        });
+        });*/
     }
 
     public AuthenticateFilter getFilter() {

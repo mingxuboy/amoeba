@@ -71,8 +71,6 @@ public class PerformaceTest {
 							try{
 							statment = conn.prepareStatement(sqlext);
 							result = statment.executeQuery();
-							}catch(Exception e){
-								e.printStackTrace();
 							}finally{
 								if(result != null){
 									try{

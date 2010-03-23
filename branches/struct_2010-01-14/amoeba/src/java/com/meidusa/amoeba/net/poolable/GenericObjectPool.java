@@ -31,10 +31,13 @@ package com.meidusa.amoeba.net.poolable;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.TimerTask;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.commons.pool.PoolableObjectFactory;
+
+import com.meidusa.amoeba.net.poolable.ObjectPool.HeartbeatDelayed;
 
 /**
  * A configurable {@link ObjectPool} implementation.
@@ -351,6 +354,7 @@ public class GenericObjectPool extends org.apache.commons.pool.impl.GenericObjec
     
 
     
+    private boolean isValid = true;
     private boolean enable;
     
 	public boolean isEnable() {
@@ -359,6 +363,31 @@ public class GenericObjectPool extends org.apache.commons.pool.impl.GenericObjec
 
 	public void setEnable(boolean isEnabled) {
 		this.enable = isEnabled;
+	}
+
+	public Object borrowObject() throws Exception{
+		if(!isValid){
+			throw new NoSuchElementException("pool is invalid");
+		}
+		try {
+			return super.borrowObject();
+		} catch (Exception e) {
+			isValid = false;
+			HeartbeatManager.addPooltoHeartbeat(new HeartbeatDelayed(5, TimeUnit.SECONDS, this));
+			throw e;
+		}
+	}
+	
+	public boolean isValid() {
+		return isValid;
+	}
+
+	public void afterChecked(ObjectPool objectPool) {
+		
+	}
+
+	public void setValid(boolean valid) {
+		this.isValid = true;
 	}
 
 }
