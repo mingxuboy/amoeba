@@ -17,5 +17,6 @@ public interface Sessionable {
 	public boolean isMultiplayer();
 	public boolean checkIdle(long now);
 	public void endSession();
+	public boolean isStarted();
 	public boolean isEnded();
 }
