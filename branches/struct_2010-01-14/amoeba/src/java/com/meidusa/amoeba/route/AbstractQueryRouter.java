@@ -555,7 +555,7 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable 
         defaultPools = new ObjectPool[] { ProxyRuntimeContext.getInstance().getPoolMap().get(defaultPool) };
 
         if (defaultPools == null || defaultPools[0] == null) {
-            throw new InitialisationException("default pool required!");
+            throw new InitialisationException("default pool required!,defaultPool="+defaultPool +" invalid");
         }
         if (readPool != null && !StringUtil.isEmpty(readPool)) {
             readPools = new ObjectPool[] { ProxyRuntimeContext.getInstance().getPoolMap().get(readPool) };
