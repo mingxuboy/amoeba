@@ -1,7 +1,21 @@
 amoeba for mysql
 
-2010-03-16 amoeba-mysql-1.2.0-GA
+2010-03-26 amoeba-mysql-1.2.0-GA
 1、添加规则函数case、range、增加表达式   （boolean表达式 ? 表达式1: 表达式2）
+
+range函数：
+  id in range(12,16,0,1) 表示 id>12 and id<=16 
+  id in range(12,16,0,0) 表示 id>12 and id<16 
+  id in range(12,16,1,0) 表示 id>=12 and id<16 
+  id in range(12,16,1,1) 表示 id>=12 and id<=16 
+
+case 函数
+   case  (abs(hash(SDID)) % 32)  when range(0,8,1,0) then (isReadStatment ? 'server1' : 'server1_write');
+           when range(8,16,1,0) then (isReadStatment ? 'server2' : 'server2_write');
+           when range(16,24,1,0) then '(isReadStatment ? 'server3' : 'server3_write')';
+           else 'server4'
+   END CASE;
+                           
 2、增加bool 类型的规则内置变量 isReadStatment
 	用户可以在规则的表达式中使用比如 :  isReadStatment? 'pool1' : 'pool2'
 3、稳定性增强，解决了在大并发下需要多个数据库聚合结果集的时候出现数据异常而无法返回给客户端的问题
@@ -17,9 +31,9 @@ amoeba for mysql
                    <parameters>SDID</parameters>
                    <expression><![CDATA[
                            var hashid = abs(hash(SDID)) % 32; 
-                           case    when hashid >=0 and hashid <8 then (isReadStatment ? 'server1' : 'server1_write');
-                                   when hashid >=8 and hashid <16 then (isReadStatment ? 'server2' : 'server2_write');
-                                   when hashid >=16 and hashid <24 then '(isReadStatment ? 'server3' : 'server3_write')';
+                           case  hashid  when range(0,8,1,0) then (isReadStatment ? 'server1' : 'server1_write');
+                                   when range(8,16,1,0) then (isReadStatment ? 'server2' : 'server2_write');
+                                   when range(16,24,1,0) then '(isReadStatment ? 'server3' : 'server3_write')';
                                    else 'server4'
                            END CASE;
 
