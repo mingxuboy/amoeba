@@ -129,14 +129,30 @@ public abstract class DMLStatment extends AbstractStatment {
                 Comparative col = columnMap.get(colExpression.getColumn());
                 Comparative newComparative = (Comparative) colExpression.evaluate(parameters);
                 if (col != null) {
-                    ComparativeBaseList comparativeBaseList = null;
-                    if (and) {
-                        comparativeBaseList = new ComparativeAND(col);
-                    } else {
-                        comparativeBaseList = new ComparativeOR(col);
-                    }
-                    comparativeBaseList.addComparative(newComparative);
-                    columnMap.put(colExpression.getColumn(), comparativeBaseList);
+                	if(col instanceof ComparativeBaseList){
+                		ComparativeBaseList source = (ComparativeBaseList)col;
+                		if((source instanceof ComparativeAND && and) || (source instanceof ComparativeOR && !and)){
+                			source.addComparative(newComparative);
+                		}else{
+                			ComparativeBaseList comparativeBaseList = null;
+    	                    if (and) {
+    	                        comparativeBaseList = new ComparativeAND(col);
+    	                    } else {
+    	                        comparativeBaseList = new ComparativeOR(col);
+    	                    }
+    	                    comparativeBaseList.addComparative(newComparative);
+    	                    columnMap.put(colExpression.getColumn(), comparativeBaseList);
+                		}
+                	}else{
+	                    ComparativeBaseList comparativeBaseList = null;
+	                    if (and) {
+	                        comparativeBaseList = new ComparativeAND(col);
+	                    } else {
+	                        comparativeBaseList = new ComparativeOR(col);
+	                    }
+	                    comparativeBaseList.addComparative(newComparative);
+	                    columnMap.put(colExpression.getColumn(), comparativeBaseList);
+                	}
                 } else {
                     columnMap.put(colExpression.getColumn(), newComparative);
                 }

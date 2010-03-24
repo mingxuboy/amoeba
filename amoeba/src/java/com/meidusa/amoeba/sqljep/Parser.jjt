@@ -567,7 +567,9 @@ void UnaryExpression() :
 		  (
 		    <WHEN> Expression() <THEN> Expression()";"
 		  )*
-		  <ELSE> Expression() <ENDCASE> ";"
+		  [<ELSE> Expression()]
+
+		   <ENDCASE> ";"
 		  )
 		{
 	   	  jjtThis.setFunction(tokenImage[CASE], new Case(caseHead));

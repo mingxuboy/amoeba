@@ -55,11 +55,20 @@ public final class Case extends PostfixCommand {
 				elseCase = caseHead?true:false;
 			}
 			
-			for (int i = startCondition; i < (caseHead?num-1:num); i += 2) {
+			for (int i = startCondition; i < num; i += 2) {
 				node.jjtGetChild(i).jjtAccept(runtime.ev, null);
 				Comparable<?>  cond = runtime.stack.pop();
 				if(caseHead){
-					cond = ComparativeEQ.compareTo(headValue, cond);
+					if(cond instanceof ComparativeBaseList){
+						ComparativeBaseList cpl = (ComparativeBaseList)cond;
+						if(headValue instanceof Comparative){
+							cond = cpl.intersect((Comparative)headValue, ComparativeComparator.comparator);
+						}else{
+							cond = cpl.intersect(Comparative.Equivalent,headValue, ComparativeComparator.comparator);
+						}
+					}else{
+						cond = ComparativeEQ.compareTo(headValue, cond);
+					}
 				}
 				if (cond instanceof Boolean) {
 					if (((Boolean)cond).booleanValue()) {

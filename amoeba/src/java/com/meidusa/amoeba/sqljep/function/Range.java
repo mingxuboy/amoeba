@@ -33,7 +33,7 @@ public class Range extends PostfixCommand{
 		
 		
 		ComparativeAND and = new ComparativeAND(leftEquals==0?Comparative.GreaterThan:Comparative.GreaterThanOrEqual,param0);
-		and.addComparative(new Comparative(rightEquals ==0?Comparative.LessThan:Comparative.GreaterThanOrEqual,param1));
+		and.addComparative(new Comparative(rightEquals ==0?Comparative.LessThan:Comparative.LessThanOrEqual,param1));
 		return new Comparable[]{and};
 	}
 
