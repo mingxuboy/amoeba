@@ -23,7 +23,8 @@ import java.io.IOException;
 public class AuthingableConnectionManager extends ConnectionManager {
 
     protected Authenticator _author;
-
+    
+    protected boolean authenticated = false;
     public AuthingableConnectionManager() throws IOException{
     }
 
@@ -59,6 +60,8 @@ public class AuthingableConnectionManager extends ConnectionManager {
             auconn.setAuthenticated(false);
             connectionAuthenticateFaild(conn, data);
         }
+        
+        authenticated = true;
     }
 
     protected void connectionAuthenticateSuccess(Connection conn, AuthResponseData data) {
