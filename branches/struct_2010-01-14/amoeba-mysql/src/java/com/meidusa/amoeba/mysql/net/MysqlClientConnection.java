@@ -169,7 +169,7 @@ public class MysqlClientConnection extends MysqlConnection {
 			this.postMessage(ok.toByteBuffer(null).array());
 			return;
 		}
-    	_inQueue.appendSilent(message);
+    	super.doReceiveMessage(message);
     }
     
 	protected void messageProcess() {
@@ -196,17 +196,29 @@ public class MysqlClientConnection extends MysqlConnection {
 			}
 		};
 		invocation.invoke();*/
-		
-		ProxyRuntimeContext.getInstance().getClientSideExecutor()
-		.execute(new Runnable() {
-			public void run() {
-				try {
-					MysqlClientConnection.this.getMessageHandler().handleMessage(MysqlClientConnection.this);
-				} finally {
-					ThreadLocalMap.reset();
+		if(isAuthenticatedSeted()){
+			ProxyRuntimeContext.getInstance().getClientSideExecutor()
+			.execute(new Runnable() {
+				public void run() {
+					try {
+						MysqlClientConnection.this.getMessageHandler().handleMessage(MysqlClientConnection.this);
+					} finally {
+						ThreadLocalMap.reset();
+					}
 				}
-			}
-		});
+			});
+		}else{
+			ProxyRuntimeContext.getInstance().getServerSideExecutor()
+			.execute(new Runnable() {
+				public void run() {
+					try {
+						MysqlClientConnection.this.getMessageHandler().handleMessage(MysqlClientConnection.this);
+					} finally {
+						ThreadLocalMap.reset();
+					}
+				}
+			});
+		}
 	}
 
 	public void addLongData(byte[] longData) {

@@ -174,18 +174,24 @@ public abstract class Connection implements NetEventHandler {
             logger.error(this + ",closeSocket,and endSession,handler=" + session);
             session.endSession();
         }
-
-        if (_selkey != null) {
-            _selkey.attach(null);
-            Selector selector = _selkey.selector();
-            _selkey.cancel();
-            // wake up again to trigger thread death
-            selector.wakeup();
-
-            _selkey = null;
+        
+        try{
+	        if (_selkey != null) {
+	            _selkey.attach(null);
+	            Selector selector = _selkey.selector();
+	            _selkey.cancel();
+	            // wake up again to trigger thread death
+	            selector.wakeup();
+	
+	            _selkey = null;
+	        }
+        }catch(Exception e){
+        	logger.warn("Error cancel connection selectkey [conn=" + this + ", error=" + e + "].");
         }
-
-        logger.debug("Closing channel " + this + ".");
+        
+        if(logger.isDebugEnabled()){
+        	logger.debug("Closing channel " + this + ".");
+        }
         try {
             _channel.close();
         } catch (IOException ioe) {
