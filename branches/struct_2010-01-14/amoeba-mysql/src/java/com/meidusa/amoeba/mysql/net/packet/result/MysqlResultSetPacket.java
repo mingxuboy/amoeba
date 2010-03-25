@@ -1,4 +1,4 @@
-package com.meidusa.amoeba.aladdin.io;
+package com.meidusa.amoeba.mysql.net.packet.result;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,6 +39,10 @@ public class MysqlResultSetPacket extends ErrorResultPacket {
 
 	public MysqlResultSetPacket(String query){
 		
+	}
+	
+	public void setRowList(List<RowDataPacket> rows){
+		this.rowList = rows;
 	}
 	
 	public synchronized void addRowDataPacket(RowDataPacket row){

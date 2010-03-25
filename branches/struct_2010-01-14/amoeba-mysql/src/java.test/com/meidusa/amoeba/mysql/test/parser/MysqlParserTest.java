@@ -28,6 +28,7 @@ public class MysqlParserTest {
 	static Map<Column,Comparative> columnMap = new HashMap<Column,Comparative>();
 	public static void main(String[] args) throws Exception{
 		Map<String,Function> funMap = AbstractQueryRouter.loadFunctionMap("./build/build-mysql/conf/functionMap.xml");
+		parser(funMap,"select @@identity");
 		String t = "`asdfasdfaf`";
 		System.out.println(t.substring(1,t.length()-1));
 		String sql1 = " SELECT * from account where time = DATE_ADD('1998-01-02', INTERVAL 31 DAY)";

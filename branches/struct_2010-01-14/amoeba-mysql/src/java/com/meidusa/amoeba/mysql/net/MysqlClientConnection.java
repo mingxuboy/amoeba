@@ -30,9 +30,14 @@ import com.meidusa.amoeba.mysql.filter.IOFilter;
 import com.meidusa.amoeba.mysql.filter.PacketFilterInvocation;
 import com.meidusa.amoeba.mysql.filter.PacketIOFilter;
 import com.meidusa.amoeba.mysql.handler.PreparedStatmentInfo;
+import com.meidusa.amoeba.mysql.jdbc.MysqlDefs;
+import com.meidusa.amoeba.mysql.net.packet.FieldPacket;
 import com.meidusa.amoeba.mysql.net.packet.MysqlPacketBuffer;
 import com.meidusa.amoeba.mysql.net.packet.OkPacket;
 import com.meidusa.amoeba.mysql.net.packet.QueryCommandPacket;
+import com.meidusa.amoeba.mysql.net.packet.ResultSetHeaderPacket;
+import com.meidusa.amoeba.mysql.net.packet.RowDataPacket;
+import com.meidusa.amoeba.mysql.net.packet.result.MysqlResultSetPacket;
 import com.meidusa.amoeba.net.AuthingableConnectionManager;
 import com.meidusa.amoeba.net.Connection;
 import com.meidusa.amoeba.util.ThreadLocalMap;
@@ -43,7 +48,7 @@ import com.meidusa.amoeba.util.ThreadLocalMap;
  * @author <a href=mailto:piratebase@sina.com>Struct chen</a>
  */
 public class MysqlClientConnection extends MysqlConnection {
-
+	
 	private static Logger logger = Logger
 			.getLogger(MysqlClientConnection.class);
 
@@ -54,10 +59,24 @@ public class MysqlClientConnection extends MysqlConnection {
 
 	// 保存服务端发送的随机用于客户端加密的字符串
 	protected String seed;
-
+	
+	private long lastInsertId;
+	
 	// 保存客户端返回的加密过的字符串
 	protected byte[] authenticationMessage;
-
+	public MysqlResultSetPacket lastPacketResult = new MysqlResultSetPacket(null);
+	{
+		lastPacketResult.resulthead = new ResultSetHeaderPacket();
+		lastPacketResult.resulthead.columns = 1;
+		lastPacketResult.fieldPackets = new FieldPacket[1];
+		FieldPacket field = new FieldPacket();
+		field.type = MysqlDefs.FIELD_TYPE_LONGLONG;
+		field.name = "last_insert_id";
+		field.catalog = "def";
+		field.length = 8;
+		lastPacketResult.fieldPackets[0] = field; 
+		
+	}
 	private List<byte[]> longDataList = new ArrayList<byte[]>();
 
 	private List<byte[]> unmodifiableLongDataList = Collections
@@ -231,6 +250,14 @@ public class MysqlClientConnection extends MysqlConnection {
 
 	public List<byte[]> getLongDataList() {
 		return unmodifiableLongDataList;
+	}
+	
+	public long getLastInsertId() {
+		return lastInsertId;
+	}
+
+	public void setLastInsertId(long lastInsertId) {
+		this.lastInsertId = lastInsertId;
 	}
 
 	/**

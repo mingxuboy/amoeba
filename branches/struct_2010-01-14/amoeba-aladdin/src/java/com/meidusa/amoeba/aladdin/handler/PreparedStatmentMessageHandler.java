@@ -2,11 +2,11 @@ package com.meidusa.amoeba.aladdin.handler;
 
 import java.util.concurrent.CountDownLatch;
 
-import com.meidusa.amoeba.aladdin.io.PreparedResultPacket;
-import com.meidusa.amoeba.aladdin.io.ResultPacket;
 import com.meidusa.amoeba.context.ProxyRuntimeContext;
 import com.meidusa.amoeba.mysql.handler.PreparedStatmentInfo;
 import com.meidusa.amoeba.mysql.net.MysqlClientConnection;
+import com.meidusa.amoeba.mysql.net.packet.result.PreparedResultPacket;
+import com.meidusa.amoeba.mysql.net.packet.result.ResultPacket;
 import com.meidusa.amoeba.net.DatabaseConnection;
 import com.meidusa.amoeba.net.poolable.ObjectPool;
 import com.meidusa.amoeba.net.poolable.PoolableObject;
