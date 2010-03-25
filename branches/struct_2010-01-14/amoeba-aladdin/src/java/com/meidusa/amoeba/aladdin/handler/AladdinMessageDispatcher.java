@@ -1,6 +1,8 @@
 package com.meidusa.amoeba.aladdin.handler;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
@@ -14,15 +16,17 @@ import com.meidusa.amoeba.mysql.net.packet.LongDataPacket;
 import com.meidusa.amoeba.mysql.net.packet.MysqlPacketBuffer;
 import com.meidusa.amoeba.mysql.net.packet.OkPacket;
 import com.meidusa.amoeba.mysql.net.packet.QueryCommandPacket;
+import com.meidusa.amoeba.mysql.net.packet.RowDataPacket;
 import com.meidusa.amoeba.net.Connection;
 import com.meidusa.amoeba.net.MessageHandler;
 import com.meidusa.amoeba.net.Sessionable;
 import com.meidusa.amoeba.net.poolable.ObjectPool;
-import com.meidusa.amoeba.parser.function.LastInsertId;
+import com.meidusa.amoeba.parser.statment.SelectStatment;
+import com.meidusa.amoeba.parser.statment.Statment;
 import com.meidusa.amoeba.route.QueryRouter;
 import com.meidusa.amoeba.util.ByteUtil;
 import com.meidusa.amoeba.util.StringFillFormat;
-import com.meidusa.amoeba.util.ThreadLocalMap;
+import com.meidusa.amoeba.util.Tuple;
 
 /**
  * @author struct
@@ -74,22 +78,26 @@ public class AladdinMessageDispatcher implements MessageHandler {
 	                }
 	
 	                QueryRouter router = ProxyRuntimeContext.getInstance().getQueryRouter();
-	                ObjectPool[] pools = router.doRoute(conn, packet.query, false, null);
-	                if (pools == null) {
-	                	Boolean queryInsertId = (Boolean)ThreadLocalMap.get(LastInsertId.class.getName());
-                		if(queryInsertId != null && queryInsertId.booleanValue()){
-                			OkPacket ok = new OkPacket();
-                	        ok.affectedRows = 0;
-                	        ok.insertId = conn.getLastInsertId();
-                	        ok.packetId = 1;
-                	        ok.serverStatus = 2;
-                	        conn.postMessage(ok.toByteBuffer(conn));
-                		}else{
-                			conn.postMessage(STATIC_OK_BUFFER);
-                		}
-	                    return;
+	                Tuple<Statment,ObjectPool[]> tuple = router.doRoute(conn, packet.query, false, null);
+	                Statment statment = tuple.left;
+	                ObjectPool[] pools = tuple.right;
+	                if (statment != null && statment instanceof SelectStatment && ((SelectStatment)tuple.left).isQueryLastInsertId()) {
+            			List<RowDataPacket> list = new ArrayList<RowDataPacket>();
+            			RowDataPacket row = new RowDataPacket(false);
+            			row.columns = new ArrayList<Object>();
+            			row.columns.add(conn.getLastInsertId());
+            			list.add(row);
+            			conn.lastPacketResult.setRowList(list);
+            			conn.lastPacketResult.wirteToConnection(conn);
+            			return;
 	                }
-	                MessageHandler handler = new QueryCommandMessageHandler(conn, packet.query, null, pools, timeout);
+	                
+	                if(pools == null){
+	                	conn.postMessage(STATIC_OK_BUFFER);
+	                	return;
+	                }
+	                
+	                MessageHandler handler = new QueryCommandMessageHandler(conn, packet.query, null, tuple.right, timeout);
 	                if (handler instanceof Sessionable) {
 	                    Sessionable session = (Sessionable) handler;
 	                    try {
@@ -153,9 +161,9 @@ public class AladdinMessageDispatcher implements MessageHandler {
 	                        logger.debug(StringFillFormat.format("COM_STMT_EXECUTE:", fillLength) + "[" + packet + "]");
 	                    }
 	                    QueryRouter router = ProxyRuntimeContext.getInstance().getQueryRouter();
-	                    ObjectPool[] pools = router.doRoute(conn, sql, false, packet.getParameters());
+	                    Tuple<Statment,ObjectPool[]> tuple = router.doRoute(conn, sql, false, packet.getParameters());
 	
-	                    PreparedStatmentExecuteMessageHandler handler = new PreparedStatmentExecuteMessageHandler(conn, pInfo, packet, pools, timeout);
+	                    PreparedStatmentExecuteMessageHandler handler = new PreparedStatmentExecuteMessageHandler(conn, pInfo, packet, tuple.right, timeout);
 	                    if (handler instanceof Sessionable) {
 	                        Sessionable session = (Sessionable) handler;
 	                        try {

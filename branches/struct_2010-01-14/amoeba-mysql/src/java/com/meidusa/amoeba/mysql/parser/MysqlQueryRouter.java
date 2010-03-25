@@ -21,7 +21,9 @@ import com.meidusa.amoeba.net.poolable.ObjectPool;
 import com.meidusa.amoeba.parser.Parser;
 import com.meidusa.amoeba.parser.expression.Expression;
 import com.meidusa.amoeba.parser.statment.PropertyStatment;
+import com.meidusa.amoeba.parser.statment.Statment;
 import com.meidusa.amoeba.route.AbstractQueryRouter;
+import com.meidusa.amoeba.util.Tuple;
 
 /**
  * 
@@ -35,7 +37,7 @@ public class MysqlQueryRouter extends AbstractQueryRouter{
 		return new MysqlParser(new StringReader(sql));
 	}
 
-	protected ObjectPool[] selectPool(DatabaseConnection connection,String sql,boolean ispreparedStatment,Object[] parameters){
+	protected Tuple<Statment,ObjectPool[]> selectPool(DatabaseConnection connection,String sql,boolean ispreparedStatment,Object[] parameters){
 		if(sql != null){
 			sql = sql.trim();
 			while(sql.startsWith("/*")){
@@ -48,7 +50,7 @@ public class MysqlQueryRouter extends AbstractQueryRouter{
 				sql = sql.trim();
 			}
 			if(sql.length()>4 && sql.subSequence(0, 4).toString().equalsIgnoreCase("show")){
-				return this.defaultPools;
+				return tuple;
 			}
 		}
 		return super.selectPool(connection, sql, ispreparedStatment, parameters);
