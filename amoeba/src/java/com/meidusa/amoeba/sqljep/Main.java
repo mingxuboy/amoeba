@@ -21,10 +21,10 @@ public class Main {
 	 * @throws ParseException 
 	 */
 	public static void main(String[] args) throws ParseException {
-		//ComparativeBaseList ID =  new ComparativeOR(Comparative.Equivalent,22);
-		Comparable<?> ID = 12;
-		/*ID.addComparative(new Comparative(Comparative.Equivalent,6));
+		ComparativeBaseList ID =  new ComparativeOR(Comparative.Equivalent,22);
+		//Comparable<?> ID = 12;
 		ID.addComparative(new Comparative(Comparative.Equivalent,6));
+		/*ID.addComparative(new Comparative(Comparative.Equivalent,6));
 		ID.addComparative(new Comparative(Comparative.Equivalent,6));
 		ID.addComparative(new Comparative(Comparative.Equivalent,6));
 		ID.addComparative(new Comparative(Comparative.Equivalent,6));
@@ -99,7 +99,7 @@ public class Main {
 		new Thread(){
 			public void run(){
 				final long start = System.currentTimeMillis();
-				for(int i=0;i<1000;i++){
+				for(int i=0;i<1;i++){
 				try {
 					
 					Object result = sqljep.getValue(row);

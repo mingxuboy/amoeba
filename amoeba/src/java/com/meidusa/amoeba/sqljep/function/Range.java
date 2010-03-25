@@ -31,10 +31,12 @@ public class Range extends PostfixCommand{
 		
 		int rightEquals = Integer.valueOf(param3.toString());
 		
-		
-		ComparativeAND and = new ComparativeAND(leftEquals==0?Comparative.GreaterThan:Comparative.GreaterThanOrEqual,param0);
+		ComparativeRange range = new ComparativeRange();
+		range.addComparative(new Comparative(leftEquals==0?Comparative.GreaterThan:Comparative.GreaterThanOrEqual,param0));
+		range.addComparative(new Comparative(rightEquals ==0?Comparative.LessThan:Comparative.LessThanOrEqual,param1));
+		/*ComparativeAND and = new ComparativeAND(leftEquals==0?Comparative.GreaterThan:Comparative.GreaterThanOrEqual,param0);
 		and.addComparative(new Comparative(rightEquals ==0?Comparative.LessThan:Comparative.LessThanOrEqual,param1));
-		return new Comparable[]{and};
+*/		return new Comparable[]{range};
 	}
 
 	public int getNumberOfParameters() {
