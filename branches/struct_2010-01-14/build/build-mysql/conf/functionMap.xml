@@ -70,6 +70,8 @@
 	
 	<function name="ASCII" class="com.meidusa.amoeba.parser.function.Ascii"/>
 	
+	<function name="UNIX_TIMESTAMP" class="com.meidusa.amoeba.parser.function.UnixTimestamp"/>
+	
 	<function name="INSERT" class="com.meidusa.amoeba.parser.function.Insert"/>
 	
 	<function name="INSTR" class="com.meidusa.amoeba.parser.function.Instr"/>
