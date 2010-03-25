@@ -1,4 +1,4 @@
-package com.meidusa.amoeba.aladdin.io;
+package com.meidusa.amoeba.mysql.net.packet.result;
 
 import java.util.concurrent.atomic.AtomicLong;
 

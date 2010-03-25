@@ -187,6 +187,14 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 			 */
 			
 			if(isCompleted){
+				//set last insert id to client connection;
+				if(conn != source){
+					if(MysqlPacketBuffer.isOkPacket(buffer)){
+						OkPacket packet = new OkPacket();
+						packet.init(buffer,conn);
+						source.setLastInsertId(packet.insertId);
+					}
+				}
 				if(currentCommand.getCompletedCount().incrementAndGet() == connStatusMap.size()){
 					if(logger.isDebugEnabled()){
 						Packet packet = null;
@@ -254,7 +262,6 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 	private CommandInfo info = new CommandInfo();
 	protected byte commandType;
 	protected Map<Connection,MessageHandler> handlerMap = new HashMap<Connection,MessageHandler>();
-	private final Lock lock = new ReentrantLock(false);
 	private PacketBuffer buffer = new AbstractPacketBuffer(1400);
 	private boolean started;
 	public CommandMessageHandler(final MysqlClientConnection source,byte[] query,ObjectPool[] pools,long timeout){

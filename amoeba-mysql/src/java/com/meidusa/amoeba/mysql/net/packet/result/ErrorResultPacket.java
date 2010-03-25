@@ -1,4 +1,4 @@
-package com.meidusa.amoeba.aladdin.io;
+package com.meidusa.amoeba.mysql.net.packet.result;
 
 import com.meidusa.amoeba.mysql.net.packet.ErrorPacket;
 import com.meidusa.amoeba.net.Connection;

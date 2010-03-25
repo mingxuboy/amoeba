@@ -5,13 +5,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.StringTokenizer;
 
-import com.meidusa.amoeba.aladdin.io.MysqlResultSetPacket;
-import com.meidusa.amoeba.aladdin.io.ResultPacket;
 import com.meidusa.amoeba.mysql.jdbc.MysqlDefs;
 import com.meidusa.amoeba.mysql.net.packet.EOFPacket;
 import com.meidusa.amoeba.mysql.net.packet.FieldPacket;
 import com.meidusa.amoeba.mysql.net.packet.ResultSetHeaderPacket;
 import com.meidusa.amoeba.mysql.net.packet.RowDataPacket;
+import com.meidusa.amoeba.mysql.net.packet.result.MysqlResultSetPacket;
+import com.meidusa.amoeba.mysql.net.packet.result.ResultPacket;
 import com.meidusa.amoeba.net.MessageHandler;
 import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
 import com.meidusa.amoeba.net.packet.PacketBuffer;

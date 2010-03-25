@@ -18,9 +18,11 @@ import com.meidusa.amoeba.net.Connection;
 import com.meidusa.amoeba.net.MessageHandler;
 import com.meidusa.amoeba.net.Sessionable;
 import com.meidusa.amoeba.net.poolable.ObjectPool;
+import com.meidusa.amoeba.parser.function.LastInsertId;
 import com.meidusa.amoeba.route.QueryRouter;
 import com.meidusa.amoeba.util.ByteUtil;
 import com.meidusa.amoeba.util.StringFillFormat;
+import com.meidusa.amoeba.util.ThreadLocalMap;
 
 /**
  * @author struct
@@ -74,7 +76,17 @@ public class AladdinMessageDispatcher implements MessageHandler {
 	                QueryRouter router = ProxyRuntimeContext.getInstance().getQueryRouter();
 	                ObjectPool[] pools = router.doRoute(conn, packet.query, false, null);
 	                if (pools == null) {
-	                    conn.postMessage(STATIC_OK_BUFFER);
+	                	Boolean queryInsertId = (Boolean)ThreadLocalMap.get(LastInsertId.class.getName());
+                		if(queryInsertId != null && queryInsertId.booleanValue()){
+                			OkPacket ok = new OkPacket();
+                	        ok.affectedRows = 0;
+                	        ok.insertId = conn.getLastInsertId();
+                	        ok.packetId = 1;
+                	        ok.serverStatus = 2;
+                	        conn.postMessage(ok.toByteBuffer(conn));
+                		}else{
+                			conn.postMessage(STATIC_OK_BUFFER);
+                		}
 	                    return;
 	                }
 	                MessageHandler handler = new QueryCommandMessageHandler(conn, packet.query, null, pools, timeout);

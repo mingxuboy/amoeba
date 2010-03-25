@@ -54,10 +54,12 @@ import com.meidusa.amoeba.parser.dbobject.Column;
 import com.meidusa.amoeba.parser.dbobject.Schema;
 import com.meidusa.amoeba.parser.dbobject.Table;
 import com.meidusa.amoeba.parser.function.Function;
+import com.meidusa.amoeba.parser.function.LastInsertId;
 import com.meidusa.amoeba.parser.statment.CommitStatment;
 import com.meidusa.amoeba.parser.statment.DMLStatment;
 import com.meidusa.amoeba.parser.statment.PropertyStatment;
 import com.meidusa.amoeba.parser.statment.RollbackStatment;
+import com.meidusa.amoeba.parser.statment.SelectStatment;
 import com.meidusa.amoeba.parser.statment.ShowStatment;
 import com.meidusa.amoeba.parser.statment.StartTansactionStatment;
 import com.meidusa.amoeba.parser.statment.Statment;
@@ -125,6 +127,7 @@ import com.meidusa.amoeba.sqljep.variable.Variable;
 import com.meidusa.amoeba.util.Initialisable;
 import com.meidusa.amoeba.util.InitialisationException;
 import com.meidusa.amoeba.util.StringUtil;
+import com.meidusa.amoeba.util.ThreadLocalMap;
 
 /**
  * @author struct
@@ -279,7 +282,11 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable 
             if (logger.isDebugEnabled()) {
                 logger.debug("DMLStatement:[" + sql + "] Expression=[" + statment.getExpression() + "]");
             }
-
+            
+            if(statment instanceof SelectStatment && ((SelectStatment)statment).isQueryLastInsertId()){
+            	ThreadLocalMap.put(LastInsertId.class.getName(), Boolean.TRUE);
+            	return null;
+            }
             dmlStatment = (DMLStatment) statment;
             Map<Table, Map<Column, Comparative>> tables = null;
             if (needEvaluate) {
@@ -1043,6 +1050,16 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable 
 
                 try {
                     statment = parser.doParse();
+                    if(statment instanceof SelectStatment){
+                    	SelectStatment st = (SelectStatment)statment;
+                    	if(st.getTables() == null || st.getTables().length == 0){
+                    		Boolean queryInsertId = (Boolean)ThreadLocalMap.get(LastInsertId.class.getName());
+                    		if(queryInsertId != null && queryInsertId.booleanValue()){
+                    			st.setQueryLastInsertId(true);
+                    		}else{
+                    		}
+                    	}
+                    }
                     mapLock.lock();
                     try {
                         map.put(sqlKey, statment);

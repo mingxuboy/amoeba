@@ -37,11 +37,15 @@ public class Add extends AbstractFunction {
 	}
 
 	public void toString(List<Expression> list,StringBuilder builder) {
-		builder.append(list.get(0).toString());
-		builder.append(" ");
-		builder.append(getName());
-		builder.append(" ");
-		builder.append(list.get(1).toString());
+		if(list != null && list.size()>=2){
+			builder.append(list.get(0).toString());
+			builder.append(" ");
+			builder.append(getName());
+			builder.append(" ");
+			builder.append(list.get(1).toString());
+		}else{
+			builder.append(getName());
+		}
 	}
 
 	public String getName() {

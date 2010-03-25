@@ -32,9 +32,14 @@ public class Sub extends AbstractFunction{
 	}
 
 	public void toString(List<Expression> list,StringBuilder builder) {
-		builder.append(list.get(0));
-		builder.append(" - ");
-		builder.append(list.get(1));
+		if(list != null && list.size()>=2){
+			builder.append(list.get(0));
+			builder.append(" - ");
+			builder.append(list.get(1));
+		}else{
+			builder.append(getName());
+		}
+		
 	}
 
 	public String getName() {

@@ -83,5 +83,6 @@
 	<function name="FIND_IN_SET" class="com.meidusa.amoeba.parser.function.UnknowableFunction"/>
 	<function name="FOUND_ROWS" class="com.meidusa.amoeba.parser.function.UnknowableFunction"/>
 	<function name="DATABASE" class="com.meidusa.amoeba.parser.function.UnknowableFunction"/>
-	<function name="LAST_INSERT_ID" class="com.meidusa.amoeba.parser.function.UnknowableFunction"/>
+	<function name="LAST_INSERT_ID" class="com.meidusa.amoeba.parser.function.LastInsertId"/>
+	<function name="@@IDENTITY" class="com.meidusa.amoeba.parser.function.LastInsertId"/>
 </amoeba:function>
