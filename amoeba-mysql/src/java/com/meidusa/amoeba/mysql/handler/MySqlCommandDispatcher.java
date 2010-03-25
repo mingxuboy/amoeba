@@ -33,9 +33,10 @@ import com.meidusa.amoeba.net.Connection;
 import com.meidusa.amoeba.net.MessageHandler;
 import com.meidusa.amoeba.net.Sessionable;
 import com.meidusa.amoeba.net.poolable.ObjectPool;
-import com.meidusa.amoeba.parser.function.LastInsertId;
+import com.meidusa.amoeba.parser.statment.SelectStatment;
+import com.meidusa.amoeba.parser.statment.Statment;
 import com.meidusa.amoeba.route.QueryRouter;
-import com.meidusa.amoeba.util.ThreadLocalMap;
+import com.meidusa.amoeba.util.Tuple;
 
 /**
  * handler
@@ -78,24 +79,26 @@ public class MySqlCommandDispatcher implements MessageHandler {
 	                conn.postMessage(STATIC_OK_BUFFER);
 	            } else if (MysqlPacketBuffer.isPacketType(message, QueryCommandPacket.COM_QUERY)) {
 	                QueryRouter router = ProxyRuntimeContext.getInstance().getQueryRouter();
-	                ObjectPool[] pools = router.doRoute(conn, command.query, false, null);
-	                
-	                if (pools == null) {
-	                	Boolean queryInsertId = (Boolean)ThreadLocalMap.get(LastInsertId.class.getName());
-                		if(queryInsertId != null && queryInsertId.booleanValue()){
-                			List<RowDataPacket> list = new ArrayList<RowDataPacket>();
-                			RowDataPacket row = new RowDataPacket(false);
-                			row.columns = new ArrayList<Object>();
-                			row.columns.add(conn.getLastInsertId());
-                			list.add(row);
-                			conn.lastPacketResult.setRowList(list);
-                			conn.lastPacketResult.wirteToConnection(conn);
-                		}else{
-                			conn.postMessage(STATIC_OK_BUFFER);
-                		}
-	                    return;
+	                Tuple<Statment,ObjectPool[]> tuple = router.doRoute(conn, command.query, false, null);
+	                Statment statment = tuple.left;
+	                ObjectPool[] pools = tuple.right;
+	                if (statment != null && statment instanceof SelectStatment && ((SelectStatment)tuple.left).isQueryLastInsertId()) {
+            			List<RowDataPacket> list = new ArrayList<RowDataPacket>();
+            			RowDataPacket row = new RowDataPacket(false);
+            			row.columns = new ArrayList<Object>();
+            			row.columns.add(conn.getLastInsertId());
+            			list.add(row);
+            			conn.lastPacketResult.setRowList(list);
+            			conn.lastPacketResult.wirteToConnection(conn);
+            			return;
 	                }
-	                MessageHandler handler = new QueryCommandMessageHandler(conn, message, pools, timeout);
+	                
+	                if(pools == null){
+	                	conn.postMessage(STATIC_OK_BUFFER);
+	                	return;
+	                }
+	                
+	                MessageHandler handler = new QueryCommandMessageHandler(conn, message, tuple.right, timeout);
 	                if (handler instanceof Sessionable) {
 	                    Sessionable session = (Sessionable) handler;
 	                    try {
@@ -136,13 +139,13 @@ public class MySqlCommandDispatcher implements MessageHandler {
 	                    executePacket.init(message, connection);
 	
 	                    QueryRouter router = ProxyRuntimeContext.getInstance().getQueryRouter();
-	                    ObjectPool[] pools = router.doRoute(conn, preparedInf.getPreparedStatment(), false, executePacket.getParameters());
+	                    Tuple<Statment,ObjectPool[]> tuple = router.doRoute(conn, preparedInf.getPreparedStatment(), false, executePacket.getParameters());
 	
 	                    PreparedStatmentExecuteMessageHandler handler = new PreparedStatmentExecuteMessageHandler(
 	                                                                                                              conn,
 	                                                                                                              preparedInf,
 	                                                                                                              message,
-	                                                                                                              pools,
+	                                                                                                              tuple.right,
 	                                                                                                              timeout);
 	                    if (handler instanceof Sessionable) {
 	                        Sessionable session = (Sessionable) handler;

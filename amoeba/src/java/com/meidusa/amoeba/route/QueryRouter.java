@@ -16,13 +16,14 @@ package com.meidusa.amoeba.route;
 import com.meidusa.amoeba.net.DatabaseConnection;
 import com.meidusa.amoeba.net.poolable.ObjectPool;
 import com.meidusa.amoeba.parser.statment.Statment;
+import com.meidusa.amoeba.util.Tuple;
 
 /**
  * @author struct
  */
 public interface QueryRouter {
 
-    public ObjectPool[] doRoute(DatabaseConnection connection, String sql, boolean ispreparedStatment,
+    public Tuple<Statment,ObjectPool[]> doRoute(DatabaseConnection connection, String sql, boolean ispreparedStatment,
                                 Object[] parameters);
 
     public String getDefaultPool();

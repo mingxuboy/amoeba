@@ -128,6 +128,7 @@ import com.meidusa.amoeba.util.Initialisable;
 import com.meidusa.amoeba.util.InitialisationException;
 import com.meidusa.amoeba.util.StringUtil;
 import com.meidusa.amoeba.util.ThreadLocalMap;
+import com.meidusa.amoeba.util.Tuple;
 
 /**
  * @author struct
@@ -214,7 +215,7 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable 
     protected ObjectPool[]                          defaultPools;
     protected ObjectPool[]                          readPools;
     protected ObjectPool[]                          writePools;
-
+    protected Tuple<Statment,ObjectPool[]> tuple;
     private String                                  ruleConfig;
     private String                                  functionConfig;
     private String                                  ruleFunctionConfig;
@@ -256,37 +257,34 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable 
         this.writePool = writePool;
     }
 
-    public ObjectPool[] doRoute(DatabaseConnection connection, String sql, boolean ispreparedStatment,
+    public Tuple<Statment,ObjectPool[]> doRoute(DatabaseConnection connection, String sql, boolean ispreparedStatment,
                                 Object[] parameters) {
         if (sql == null) {
-            return defaultPools;
+            return tuple;
         }
         if (needParse) {
             return selectPool(connection, sql, ispreparedStatment, parameters);
         } else {
-            return defaultPools;
+            return tuple;
         }
     }
 
     /**
      * 返回Query 被route到目标地址 ObjectPool集合 如果返回null，则是属于DatabaseConnection 自身属性设置的请求。
      */
-    protected ObjectPool[] selectPool(DatabaseConnection connection, String sql, boolean ispreparedStatment,
+    protected Tuple<Statment,ObjectPool[]> selectPool(DatabaseConnection connection, String sql, boolean ispreparedStatment,
                                       Object[] parameters) {
         List<String> poolNames = new ArrayList<String>();
-
+        Tuple<Statment,ObjectPool[]> resultTuple = new Tuple<Statment,ObjectPool[]>();
         Statment statment = parseSql(connection, sql);
+        resultTuple.left = statment;
         DMLStatment dmlStatment = null;
 
         if (statment instanceof DMLStatment) {
             if (logger.isDebugEnabled()) {
                 logger.debug("DMLStatement:[" + sql + "] Expression=[" + statment.getExpression() + "]");
             }
-            
-            if(statment instanceof SelectStatment && ((SelectStatment)statment).isQueryLastInsertId()){
-            	ThreadLocalMap.put(LastInsertId.class.getName(), Boolean.TRUE);
-            	return null;
-            }
+
             dmlStatment = (DMLStatment) statment;
             Map<Table, Map<Column, Comparative>> tables = null;
             if (needEvaluate) {
@@ -482,7 +480,7 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable 
                 logger.debug("PropertyStatment:[" + sql + "]");
             }
             setProperty(connection, (PropertyStatment) statment, parameters);
-            return null;
+            return this.tuple;
         } else if (statment instanceof ShowStatment) {
             if (logger.isDebugEnabled()) {
                 logger.debug("ShowStatment:[" + sql + "]");
@@ -499,21 +497,22 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable 
             if (logger.isDebugEnabled()) {
                 logger.debug("StartTansactionStatment:[" + sql + "]");
             }
-            return null;
+            return this.tuple;
         } else if (statment instanceof CommitStatment) {
             if (logger.isDebugEnabled()) {
                 logger.debug("CommitStatment:[" + sql + "]");
             }
-            return null;
+            return this.tuple;
         } else if (statment instanceof RollbackStatment) {
             if (logger.isDebugEnabled()) {
                 logger.debug("RollbackStatment:[" + sql + "]");
             }
-            return null;
+            return this.tuple;
         } else {
             //throw new RuntimeException("error,unknown statement:[" + sql + "]");
         	 logger.warn("error,unknown statement:[" + sql + "]");
-             return defaultPools;
+        	 resultTuple.right = defaultPools;
+             return resultTuple;
         }
 
         ObjectPool[] pools = new ObjectPool[poolNames.size()];
@@ -545,8 +544,8 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable 
                 logger.debug("[" + sql + "] route to pools:" + poolNames + "\n");
             }
         }
-
-        return pools;
+        resultTuple.right = pools;
+        return resultTuple;
     }
 
     /**
@@ -570,6 +569,7 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable 
         if (writePool != null && !StringUtil.isEmpty(writePool)) {
             writePools = new ObjectPool[] { ProxyRuntimeContext.getInstance().getPoolMap().get(writePool) };
         }
+        tuple= new Tuple<Statment,ObjectPool[]>(null,defaultPools);
         map = new LRUMap(LRUMapSize);
 
         class ConfigCheckTread extends Thread {
@@ -1056,7 +1056,6 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable 
                     		Boolean queryInsertId = (Boolean)ThreadLocalMap.get(LastInsertId.class.getName());
                     		if(queryInsertId != null && queryInsertId.booleanValue()){
                     			st.setQueryLastInsertId(true);
-                    		}else{
                     		}
                     	}
                     }
