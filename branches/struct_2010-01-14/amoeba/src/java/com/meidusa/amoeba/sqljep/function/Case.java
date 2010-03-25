@@ -55,7 +55,7 @@ public final class Case extends PostfixCommand {
 				elseCase = caseHead?true:false;
 			}
 			
-			for (int i = startCondition; i < num; i += 2) {
+			for (int i = startCondition; i < (elseCase?num-1:num); i += 2) {
 				node.jjtGetChild(i).jjtAccept(runtime.ev, null);
 				Comparable<?>  cond = runtime.stack.pop();
 				if(caseHead){
