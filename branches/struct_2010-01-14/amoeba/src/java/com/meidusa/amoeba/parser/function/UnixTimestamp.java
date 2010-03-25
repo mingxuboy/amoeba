@@ -7,7 +7,6 @@ import com.meidusa.amoeba.sqljep.ParseException;
 
 public class UnixTimestamp extends AbstractFunction {
 
-	@Override
 	public Comparable evaluate(List<Expression> list, Object[] parameters)
 			throws ParseException {
 		return System.currentTimeMillis() /1000;
