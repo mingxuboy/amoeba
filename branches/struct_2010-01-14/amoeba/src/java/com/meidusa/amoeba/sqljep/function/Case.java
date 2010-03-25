@@ -98,7 +98,7 @@ public final class Case extends PostfixCommand {
 				return comparables;
 			} else {
 				//runtime.stack.push(null);
-				return null;
+				return new Comparable<?>[]{""};
 			}
 		} else {
 			throw new ParseException("Few arguments for case");
