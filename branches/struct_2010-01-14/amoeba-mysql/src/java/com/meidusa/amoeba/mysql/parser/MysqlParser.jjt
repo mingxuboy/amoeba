@@ -1130,6 +1130,7 @@ Table TableReference():
    	 if(table.getAlias() != null){
    	 	tableAliasMap.put(table.getAlias(),table);	
    	 }
+   	 tableAliasMap.put(table.toString(),table);	
    	 return table;
    	 }
 }
@@ -1198,16 +1199,27 @@ void UnionClause():
 Expression SubSelectStatement():
 {
 	Expression expression = null;
+	Expression fromExpression = null;
+	AndExpression andExpression = null;
 }
 {
     (SelectClause()
-    [FromClause()]
+    [fromExpression = FromClause()]
     [ expression = WhereClause()]
     [ GroupByClause() ]
     [ OrderByClause() ]
     [<K_LIMIT> <INTEGER_LITERAL>[("," | <K_OFFSET> ) <INTEGER_LITERAL>]])
     {
-    	return expression;	
+      if(fromExpression != null)
+      {
+    	if(expression != null){
+    		andExpression = new AndExpression(expression);
+    		andExpression.addExpression(fromExpression);
+			return andExpression;
+    	}else    	{			return fromExpression;
+    	}
+   	  }else{    	return expression;
+   	   }	
     }
 }
 
@@ -1235,35 +1247,79 @@ void SelectItem():
 }
 
 
-void FromClause() :
-{}
+Expression FromClause() :
 {
-    "FROM" FromItem() ( "," FromItem())*
+Expression expression = null;
+AndExpression andExpression = null;
+Expression currentExpression = null;
+}
+{
+    "FROM" currentExpression = FromItem()    {
+      expression = currentExpression;    } ( "," currentExpression = FromItem()    {
+      if(currentExpression != null)      {    	if(andExpression == null){
+    		andExpression = new AndExpression();
+    	}
+		andExpression.addExpression(currentExpression);
+   	  }
+    })*    {		if(andExpression != null && expression != null)		{			andExpression.addExpression(expression);
+			return andExpression;
+		}else		{
+		  return expression == null?andExpression:expression;		}
+
+    }
 }
 
 
-void FromItem() :
-{}
+Expression FromItem() :
 {
-  TableSpec() (JoinedTable())*
+Expression expression = null;
+AndExpression andExpression = null;
+Expression currentExpression = null;
+}
+{
+  expression = TableSpec() (currentExpression = JoinedTable()  {	if(currentExpression != null)
+      {
+    	if(andExpression == null){
+    		andExpression = new AndExpression();
+    	}
+		andExpression.addExpression(currentExpression);
+   	  }
+  })*  {		if(andExpression != null && expression != null)
+		{
+			andExpression.addExpression(expression);
+			return andExpression;
+		}else
+		{
+		  return expression == null?andExpression:expression;
+		}
+  }
 }
 
 
-void JoinedTable() :
-{}
+Expression JoinedTable() :
+{
+
+Expression expression = null;
+AndExpression andExpression = null;
+Expression currentExpression = null;
+
+}
 {
 	((["NATURAL"] (("LEFT"|"RIGHT") ["OUTER"])) | (["INNER" | "CROSS"])) "JOIN"
-	(LOOKAHEAD(2) TableSpec() (JoinedTable())* | "(" TableSpec() (JoinedTable())* ")") JoinCondition()
+	(LOOKAHEAD(2) expression = TableSpec() (JoinedTable())* | "(" expression = TableSpec() (JoinedTable())* ")") JoinCondition()
+	{		return expression;
+	}
 }
 
-void TableSpec():
+Expression TableSpec():
 {
 	Table table = null;
+	Expression expression = null;
 }
 {
-	table = TableReference()
-	| (["TABLE"] "(" FullSelectStatement() ")" [CorrelationClause()])
-
+	(	  table = TableReference()
+	| (["TABLE"] "(" expression= FullSelectStatement() ")" [CorrelationClause()])	)	{		return expression;
+	}
 }
 
 void JoinCondition():
