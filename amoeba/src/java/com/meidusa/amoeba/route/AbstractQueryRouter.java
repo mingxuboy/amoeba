@@ -526,9 +526,9 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable 
                 pools = dmlStatment.isReadStatment() ? this.readPools : this.writePools;
                 if (logger.isDebugEnabled() && pools != null && pools.length > 0) {
                     if (dmlStatment.isReadStatment()) {
-                        logger.debug("[" + sql + "] route to queryRouter readPool:" + readPool + "\n");
+                        logger.debug("[" + sql + "] parameter:"+ StringUtil.toString(parameters)+" route to queryRouter readPool:" + readPool + "\n");
                     } else {
-                        logger.debug("[" + sql + "] route to queryRouter writePool:" + writePool + "\n");
+                        logger.debug("[" + sql + "] parameter:"+ StringUtil.toString(parameters)+" route to queryRouter writePool:" + writePool + "\n");
                     }
                 }
             }
@@ -536,12 +536,12 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable 
             if (pools == null || pools.length == 0) {
                 pools = this.defaultPools;
                 if (logger.isDebugEnabled() && pools != null && pools.length > 0) {
-                    logger.debug("[" + sql + "] route to queryRouter defaultPool:" + defaultPool + "\n");
+                    logger.debug("[" + sql + "] parameter:"+ StringUtil.toString(parameters)+" route to queryRouter defaultPool:" + defaultPool + "\n");
                 }
             }
         } else {
             if (logger.isDebugEnabled() && pools != null && pools.length > 0) {
-                logger.debug("[" + sql + "] route to pools:" + poolNames + "\n");
+                logger.debug("[" + sql + "] parameter:"+ StringUtil.toString(parameters)+" route to pools:" + poolNames + "\n");
             }
         }
         resultTuple.right = pools;
