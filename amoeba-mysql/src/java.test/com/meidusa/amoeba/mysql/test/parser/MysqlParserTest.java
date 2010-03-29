@@ -91,7 +91,8 @@ public class MysqlParserTest {
 				"SELECT FOUND_ROWS()",
 				"insert into SD_MESSAGE.TOPIC_CONTENT(TOPIC_ID , CREATE_TIME , TOPIC_CONTENT) values ('c10795a20c3242299e669c29b4486958' ,UNIX_TIMESTAMP()*1000 ,'testInertTopic')",
 				"SELECT `user_base`.`user_id`, `user_base`.`email`, `user_base`.`fullname`, `user_base`.`gender`, `user_base`.`status_content`, `user_base`.`status_update_time`, `user_base`.`tower_id`, `user_base`.`city_domain` FROM `user_base` where `user_base` = 1000 ORDER BY `user_base`.`user_id` DESC LIMIT 100 OFFSET 100"
-				,"/* mysql-connector-java-5.1.6 ( Revision: ${svn.Revision} ) */ SHOW VARIABLES WHERE Variable_name ='language' OR Variable_name = 'net_write_timeout' OR Variable_name = 'interactive_timeout' OR Variable_name = 'wait_timeout' OR Variable_name = 'character_set_client' "
+				,"/* mysql-connector-java-5.1.6 ( Revision: ${svn.Revision} ) */ SHOW VARIABLES WHERE Variable_name ='language' OR Variable_name = 'net_write_timeout' OR Variable_name = 'interactive_timeout' OR Variable_name = 'wait_timeout' OR Variable_name = 'character_set_client' ",
+				"  SELECT RF.F_SDID FROM SD_RELATION.RELATION_FOLLOW AS RF LEFT JOIN SD_RELATION.RELATION_REVERSE AS RR USING (SDID,F_SDID) WHERE RF.SDID=322 AND RF.DEL_FLAG = 0 AND (RR.DEL_FLAG = 1 OR RR.F_SDID IS NULL) GROUP BY (F_SDID);"
 		};
 		if(args.length == 0){
 			for(String sql: sqls){
