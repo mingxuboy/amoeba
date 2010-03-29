@@ -1337,7 +1337,7 @@ Expression TableSpec():
 void JoinCondition():
 {}
 {
-     ("ON" SQLExpression())|("USING" "(" SQLExpression() ")")
+     ("ON" SQLExpression())|("USING" "(" SQLExpression() ("," SQLExpression())* ")")
 }
 
 Expression WhereClause():
