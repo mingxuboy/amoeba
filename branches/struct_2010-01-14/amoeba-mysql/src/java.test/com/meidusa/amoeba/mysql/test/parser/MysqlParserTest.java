@@ -15,6 +15,7 @@ import com.meidusa.amoeba.parser.Parser;
 import com.meidusa.amoeba.parser.dbobject.Column;
 import com.meidusa.amoeba.parser.statment.DMLStatment;
 import com.meidusa.amoeba.parser.statment.PropertyStatment;
+import com.meidusa.amoeba.parser.statment.ShowStatment;
 import com.meidusa.amoeba.parser.statment.Statment;
 import com.meidusa.amoeba.parser.expression.Expression;
 import com.meidusa.amoeba.parser.function.*;
@@ -33,7 +34,7 @@ public class MysqlParserTest {
 		System.out.println(t.substring(1,t.length()-1));
 		String sql1 = " SELECT * from account where time = DATE_ADD('1998-01-02', INTERVAL 31 DAY)";
 		String sql2 = "select * from account where 1<2 and not (id between 12+12 and 33) and id >12+3 or id not in (11,33,'23234') or  id  in (select test.ref_Id from test dd where dd.name='test')";
-		String[] sqls = {
+		String[] sqls = {"SELECT COUNT(*) FROM (   SELECT F_SDID   FROM SD_RELATION.RELATION_FOLLOW   WHERE SDID=12 AND DEL_FLAG = 0   GROUP BY (F_SDID)) A",
 				sql1,sql2,
 				"SELECT /*  #pool */ * FROM AA WHERE ID = 'ASDF\\'ADF'",
 				"SELECT '1997-12-31 23:59:59' + INTERVAL 1 MICROSECOND",
@@ -90,7 +91,7 @@ public class MysqlParserTest {
 				"SELECT FOUND_ROWS()",
 				"insert into SD_MESSAGE.TOPIC_CONTENT(TOPIC_ID , CREATE_TIME , TOPIC_CONTENT) values ('c10795a20c3242299e669c29b4486958' ,UNIX_TIMESTAMP()*1000 ,'testInertTopic')",
 				"SELECT `user_base`.`user_id`, `user_base`.`email`, `user_base`.`fullname`, `user_base`.`gender`, `user_base`.`status_content`, `user_base`.`status_update_time`, `user_base`.`tower_id`, `user_base`.`city_domain` FROM `user_base` where `user_base` = 1000 ORDER BY `user_base`.`user_id` DESC LIMIT 100 OFFSET 100"
-				//,"/* mysql-connector-java-5.1.6 ( Revision: ${svn.Revision} ) */SHOW VARIABLES WHERE Variable_name =¡¯language¡¯ OR Variable_name = ¡®net_write_timeout¡¯ OR Variable_name = ¡®interactive_timeout¡¯ OR Variable_name = ¡®wait_timeout¡¯ OR Variable_name = ¡®character_set_client¡¯ OR Variable_name = ¡®character_set_connection¡¯ OR Variable_name = ¡®character_set¡¯ OR Variable_name = ¡®character_set_server¡¯ OR Variable_name = ¡®tx_isolation¡¯ OR Variable_name = ¡®transaction_isolation¡¯ OR Variable_name = ¡®character_set_results¡¯ OR Variable_name = ¡®timezone¡¯ OR Variable_name = ¡®time_zone¡¯ OR Variable_name = ¡¯system_time_zone¡¯ OR Variable_name = ¡®lower_case_table_names¡¯ OR Variable_name = ¡®max_allowed_packet¡¯ OR Variable_name = ¡®net_buffer_length¡¯ OR Variable_name = ¡¯sql_mode¡¯ OR Variable_name = ¡®query_cache_type¡¯ OR Variable_name = ¡®query_cache_size¡¯ OR Variable_name = ¡®init_connect¡¯"
+				,"/* mysql-connector-java-5.1.6 ( Revision: ${svn.Revision} ) */ SHOW VARIABLES WHERE Variable_name ='language' OR Variable_name = 'net_write_timeout' OR Variable_name = 'interactive_timeout' OR Variable_name = 'wait_timeout' OR Variable_name = 'character_set_client' "
 		};
 		if(args.length == 0){
 			for(String sql: sqls){
@@ -126,6 +127,9 @@ public class MysqlParserTest {
 			}else if(statment instanceof PropertyStatment ){
 				PropertyStatment proStatment = (PropertyStatment)statment;
 				System.out.println(proStatment.getProperties());
+			}else if(statment instanceof ShowStatment){
+				ShowStatment proStatment = (ShowStatment)statment;
+				System.out.println(proStatment.getExpression());
 			}
 			
 		} catch (Exception e) {
