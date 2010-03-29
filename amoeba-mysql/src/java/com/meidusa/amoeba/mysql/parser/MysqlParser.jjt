@@ -637,6 +637,8 @@ Statment parse() #void:
     statment= SelectQuery()
     |
     statment = UpdateQuery()
+  	|
+  	statment = ShowQuery() 
     |
     "SET" statment = PropertySetQuery(new PropertyStatment())
     |
@@ -746,6 +748,16 @@ Statment UpdateQuery():
     	statment.setExpression(expression);
     	return statment;	
     }
+}
+
+Statment ShowQuery():
+{	ShowStatment statment;
+	Expression expression = null;
+}{
+	"SHOW" FromItem() [expression = WhereClause()]	{	 statment = new ShowStatment();
+	 statment.setExpression(expression);
+	 return statment;
+	}
 }
 
 Table UpdateStatement():
@@ -1226,7 +1238,7 @@ Expression SubSelectStatement():
 void SelectClause():
 {}
 {
-	 "SELECT" [< POOL >] [ "ALL" | "DISTINCT"|"DISTINCTROW" ]["HIGH_PRIORITY"]["STRAIGHT_JOIN"] ["SQL_SMALL_RESULT"] ["SQL_BIG_RESULT"] ["SQL_BUFFER_RESULT"] ["SQL_CACHE" | "SQL_NO_CACHE"] ["SQL_CALC_FOUND_ROWS"] SelectList()
+	  "SELECT" [< POOL >] [ "ALL" | "DISTINCT"|"DISTINCTROW" ]["HIGH_PRIORITY"]["STRAIGHT_JOIN"] ["SQL_SMALL_RESULT"] ["SQL_BIG_RESULT"] ["SQL_BUFFER_RESULT"] ["SQL_CACHE" | "SQL_NO_CACHE"] ["SQL_CALC_FOUND_ROWS"] SelectList()
 }
 
 /* Checks for whatever follows  SELECT */

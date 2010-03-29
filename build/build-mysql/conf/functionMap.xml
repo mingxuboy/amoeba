@@ -85,4 +85,6 @@
 	<function name="DATABASE" class="com.meidusa.amoeba.parser.function.UnknowableFunction"/>
 	<function name="LAST_INSERT_ID" class="com.meidusa.amoeba.parser.function.LastInsertId"/>
 	<function name="@@IDENTITY" class="com.meidusa.amoeba.parser.function.LastInsertId"/>
+	<function name="USER" class="com.meidusa.amoeba.parser.function.UnknowableFunction"/>
+	<function name="UUID" class="com.meidusa.amoeba.parser.function.UnknowableFunction"/>
 </amoeba:function>
