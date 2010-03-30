@@ -279,9 +279,13 @@ public class StringUtil {
     public static String toString(Object[] objs) {
         if (objs == null || objs.length == 0) return "[]";
         StringBuffer buffer = new StringBuffer("[");
-        for (Object byt : objs) {
-            buffer.append(byt);
+        for(int i=0;i<objs.length;i++){
+        	buffer.append(String.valueOf(objs[i]));
+        	if(i!=objs.length-1){
+        		buffer.append(",");
+        	}
         }
+        
         buffer.append("]");
         return buffer.toString();
     }

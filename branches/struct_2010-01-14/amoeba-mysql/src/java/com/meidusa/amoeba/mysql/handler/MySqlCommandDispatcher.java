@@ -98,7 +98,7 @@ public class MySqlCommandDispatcher implements MessageHandler {
 	                	return;
 	                }
 	                
-	                MessageHandler handler = new QueryCommandMessageHandler(conn, message, tuple.right, timeout);
+	                MessageHandler handler = new QueryCommandMessageHandler(conn, message,statment, tuple.right, timeout);
 	                if (handler instanceof Sessionable) {
 	                    Sessionable session = (Sessionable) handler;
 	                    try {
@@ -143,7 +143,7 @@ public class MySqlCommandDispatcher implements MessageHandler {
 	
 	                    PreparedStatmentExecuteMessageHandler handler = new PreparedStatmentExecuteMessageHandler(
 	                                                                                                              conn,
-	                                                                                                              preparedInf,
+	                                                                                                              preparedInf,tuple.left,
 	                                                                                                              message,
 	                                                                                                              tuple.right,
 	                                                                                                              timeout);
