@@ -18,6 +18,7 @@ import com.meidusa.amoeba.mysql.net.packet.MysqlPacketBuffer;
 import com.meidusa.amoeba.mysql.net.packet.QueryCommandPacket;
 import com.meidusa.amoeba.net.Connection;
 import com.meidusa.amoeba.net.poolable.ObjectPool;
+import com.meidusa.amoeba.parser.statment.Statment;
 
 /**
  * 
@@ -63,8 +64,8 @@ public class PreparedStatmentExecuteMessageHandler extends PreparedStatmentMessa
 	
 	/** 当前的请求数据包 */
 	
-	public PreparedStatmentExecuteMessageHandler(MysqlClientConnection source,PreparedStatmentInfo preparedStatmentInfo,byte[] query,ObjectPool[] pools,long timeout){
-		super(source,preparedStatmentInfo,query,pools,timeout);
+	public PreparedStatmentExecuteMessageHandler(MysqlClientConnection source,PreparedStatmentInfo preparedStatmentInfo,Statment statment,byte[] query,ObjectPool[] pools,long timeout){
+		super(source,preparedStatmentInfo,statment,query,pools,timeout);
 	}
 
 	protected void appendPreMainCommand(){

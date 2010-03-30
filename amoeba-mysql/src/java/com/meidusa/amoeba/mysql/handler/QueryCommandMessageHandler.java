@@ -20,6 +20,7 @@ import com.meidusa.amoeba.mysql.net.packet.MysqlPacketBuffer;
 import com.meidusa.amoeba.mysql.net.packet.QueryCommandPacket;
 import com.meidusa.amoeba.net.Connection;
 import com.meidusa.amoeba.net.poolable.ObjectPool;
+import com.meidusa.amoeba.parser.statment.Statment;
 
 /**
  * Command Query 多连接消息处理
@@ -77,8 +78,8 @@ public class QueryCommandMessageHandler extends CommandMessageHandler {
         }
     }
 
-    public QueryCommandMessageHandler(MysqlClientConnection source, byte[] query, ObjectPool[] pools, long timeout){
-        super(source, query, pools, timeout);
+    public QueryCommandMessageHandler(MysqlClientConnection source, byte[] query,Statment statment, ObjectPool[] pools, long timeout){
+        super(source, query,statment, pools, timeout);
     }
 
     public void handleMessage(Connection conn) {
