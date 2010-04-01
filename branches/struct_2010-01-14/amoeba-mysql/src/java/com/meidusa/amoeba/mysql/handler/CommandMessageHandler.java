@@ -198,7 +198,10 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 						OkPacket packet = new OkPacket();
 						packet.init(buffer,conn);
 						if(statment instanceof InsertStatment && currentCommand.isMain()){
-							source.setLastInsertId(packet.insertId);
+							if(packet.insertId>0){
+								source.setLastInsertId(packet.insertId);
+								logger.debug("laster insert id="+packet.insertId);
+							}
 						}
 					}
 				}
