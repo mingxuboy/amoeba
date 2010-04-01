@@ -40,8 +40,23 @@ public abstract class DMLStatment extends AbstractStatment {
     protected Table[]                            tables;
     protected Expression                         expression;
     private Map<Table, Map<Column, Comparative>> evaluatedTableMap;
-
-    public abstract boolean isReadStatment();
+    private Map<String,Column> selectColumnMap = new HashMap<String,Column>();
+    protected String sql;
+    public void setSql(String sql) {
+		this.sql = sql;
+	}
+	public String getSql(){
+		return sql;
+	}
+	
+	public void addSelectColumn(String key,Column value){
+		selectColumnMap.put(key, value);
+	}
+	
+    public Map<String, Column> getSelectColumnMap() {
+		return selectColumnMap;
+	}
+	public abstract boolean isReadStatment();
 
     public void setExpression(Expression expression) {
         this.expression = expression;

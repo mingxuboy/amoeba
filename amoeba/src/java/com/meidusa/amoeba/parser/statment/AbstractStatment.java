@@ -9,6 +9,9 @@ public abstract class AbstractStatment implements Statment {
 		return parameterCount;
 	}
 
+	public String getSql(){
+		return null;
+	}
 	public void setParameterCount(int count){
 		this.parameterCount = count;
 	}
