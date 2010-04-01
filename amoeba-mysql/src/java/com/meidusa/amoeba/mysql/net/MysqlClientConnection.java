@@ -73,7 +73,7 @@ public class MysqlClientConnection extends MysqlConnection {
 		field.type = MysqlDefs.FIELD_TYPE_LONGLONG;
 		field.name = "last_insert_id";
 		field.catalog = "def";
-		field.length = 8;
+		field.length = 20;
 		lastPacketResult.fieldPackets[0] = field; 
 		
 	}
