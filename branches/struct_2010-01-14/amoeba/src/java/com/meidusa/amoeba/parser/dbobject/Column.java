@@ -20,7 +20,15 @@ public class Column implements DBObjectBase {
 	
 	private Table table;
 	private String name;
-	
+	private String alias;
+	public String getAlias() {
+		return alias;
+	}
+
+	public void setAlias(String alias) {
+		this.alias = alias;
+	}
+
 	public Table getTable() {
 		return table;
 	}

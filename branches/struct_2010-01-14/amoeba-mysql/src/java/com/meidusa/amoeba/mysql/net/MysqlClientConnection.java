@@ -218,11 +218,14 @@ public class MysqlClientConnection extends MysqlConnection {
 		if(isAuthenticatedSeted()){
 			ProxyRuntimeContext.getInstance().getClientSideExecutor()
 			.execute(new Runnable() {
+				
 				public void run() {
-					try {
-						MysqlClientConnection.this.getMessageHandler().handleMessage(MysqlClientConnection.this);
-					} finally {
-						ThreadLocalMap.reset();
+					synchronized(MysqlClientConnection.this.getMessageHandler()){
+						try {
+							MysqlClientConnection.this.getMessageHandler().handleMessage(MysqlClientConnection.this);
+						} finally {
+							ThreadLocalMap.reset();
+						}
 					}
 				}
 			});

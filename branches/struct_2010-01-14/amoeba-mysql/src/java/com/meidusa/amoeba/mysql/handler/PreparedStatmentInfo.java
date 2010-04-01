@@ -24,6 +24,7 @@ import com.meidusa.amoeba.mysql.net.packet.OKforPreparedStatementPacket;
 import com.meidusa.amoeba.net.DatabaseConnection;
 import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
 import com.meidusa.amoeba.net.packet.PacketBuffer;
+import com.meidusa.amoeba.parser.statment.Statment;
 
 /**
  * @author <a href=mailto:piratebase@sina.com>Struct chen</a>
@@ -34,6 +35,7 @@ public class PreparedStatmentInfo {
      * 客户端发送过来的 prepared statment sql语句
      */
     private String preparedStatment;
+    private Statment statment;
 
     private int    parameterCount;
 
@@ -50,6 +52,7 @@ public class PreparedStatmentInfo {
     private Lock   typesLock = new ReentrantLock(false);
 
     public PreparedStatmentInfo(DatabaseConnection conn, long id, String preparedSql){
+    	statment = ProxyRuntimeContext.getInstance().getQueryRouter().parseSql(conn, preparedSql);
         PacketBuffer buffer = new AbstractPacketBuffer(2048);
         statmentId = id;
         this.preparedStatment = preparedSql;
@@ -121,6 +124,9 @@ public class PreparedStatmentInfo {
         return statmentId;
     }
 
+    public Statment getStatment(){
+    	return statment;
+    }
     public String getPreparedStatment() {
         return preparedStatment;
     }

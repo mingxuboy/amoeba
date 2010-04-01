@@ -17,22 +17,28 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.StringTokenizer;
 
 import org.apache.log4j.Logger;
 
 import com.meidusa.amoeba.context.ProxyRuntimeContext;
+import com.meidusa.amoeba.mysql.jdbc.MysqlDefs;
 import com.meidusa.amoeba.mysql.net.MysqlClientConnection;
 import com.meidusa.amoeba.mysql.net.packet.ErrorPacket;
 import com.meidusa.amoeba.mysql.net.packet.ExecutePacket;
+import com.meidusa.amoeba.mysql.net.packet.FieldPacket;
 import com.meidusa.amoeba.mysql.net.packet.LongDataPacket;
 import com.meidusa.amoeba.mysql.net.packet.MysqlPacketBuffer;
 import com.meidusa.amoeba.mysql.net.packet.OkPacket;
 import com.meidusa.amoeba.mysql.net.packet.QueryCommandPacket;
+import com.meidusa.amoeba.mysql.net.packet.ResultSetHeaderPacket;
 import com.meidusa.amoeba.mysql.net.packet.RowDataPacket;
+import com.meidusa.amoeba.mysql.net.packet.result.MysqlResultSetPacket;
 import com.meidusa.amoeba.net.Connection;
 import com.meidusa.amoeba.net.MessageHandler;
 import com.meidusa.amoeba.net.Sessionable;
 import com.meidusa.amoeba.net.poolable.ObjectPool;
+import com.meidusa.amoeba.parser.dbobject.Column;
 import com.meidusa.amoeba.parser.statment.SelectStatment;
 import com.meidusa.amoeba.parser.statment.Statment;
 import com.meidusa.amoeba.route.QueryRouter;
@@ -128,6 +134,40 @@ public class MySqlCommandDispatcher implements MessageHandler {
 	                    conn.postMessage(error.toByteBuffer(connection).array());
 	                    logger.warn("Unknown prepared statment id:" + statmentId);
 	                } else {
+	                	Statment statment = preparedInf.getStatment();
+	                	if (statment != null && statment instanceof SelectStatment && ((SelectStatment)statment).isQueryLastInsertId()) {
+	                		String sql = statment.getSql();
+	                		Map<String,Column> selectedMap = ((SelectStatment)statment).getSelectColumnMap();
+	                		MysqlResultSetPacket lastPacketResult = new MysqlResultSetPacket(null);
+                			lastPacketResult.resulthead = new ResultSetHeaderPacket();
+                			lastPacketResult.resulthead.columns = selectedMap.size();
+                			RowDataPacket row = new RowDataPacket(false);
+	            			row.columns = new ArrayList<Object>();
+                			int index =0; 
+                			for(Map.Entry<String, Column> entry : selectedMap.entrySet()){
+                				String alias = entry.getValue().getAlias();
+                				if("LASTER_INSERT_ID".equalsIgnoreCase(entry.getValue().getName()) || "@@IDENTITY".equalsIgnoreCase(entry.getValue().getName())){
+                					row.columns.add(conn.getLastInsertId());
+                				}else{
+                					row.columns.add(0);
+                				}
+	                			lastPacketResult.fieldPackets = new FieldPacket[selectedMap.size()];
+	                			FieldPacket field = new FieldPacket();
+	                			field.type = MysqlDefs.FIELD_TYPE_LONGLONG;
+	                			field.name = (alias == null?entry.getValue().getName():alias);
+	                			field.catalog = "def";
+	                			field.length = 20;
+	                			lastPacketResult.fieldPackets[index] = field; 
+	                			index++;
+                			}
+	                			
+	            			List<RowDataPacket> list = new ArrayList<RowDataPacket>();
+	            			list.add(row);
+	            			lastPacketResult.setRowList(list);
+	            			lastPacketResult.wirteToConnection(conn);
+	            			return;
+		                }
+	                	
 	                    Map<Integer, Object> longMap = new HashMap<Integer, Object>();
 	                    for (byte[] longdate : conn.getLongDataList()) {
 	                        LongDataPacket packet = new LongDataPacket();

@@ -23,4 +23,5 @@ public interface Statment {
 	public Expression getExpression();
 	public void setParameterCount(int count);
 	public int getParameterCount();
+	public String getSql();
 }

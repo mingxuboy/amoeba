@@ -1060,6 +1060,9 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable 
                     	}
                     }
                     mapLock.lock();
+                    if(statment instanceof DMLStatment){
+                    	((DMLStatment)statment).setSql(sql);
+                    }
                     try {
                         map.put(sqlKey, statment);
                     } finally {
