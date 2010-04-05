@@ -89,13 +89,8 @@ public class MySqlCommandDispatcher implements MessageHandler {
 	                Statment statment = tuple.left;
 	                ObjectPool[] pools = tuple.right;
 	                if (statment != null && statment instanceof SelectStatment && ((SelectStatment)tuple.left).isQueryLastInsertId()) {
-            			List<RowDataPacket> list = new ArrayList<RowDataPacket>();
-            			RowDataPacket row = new RowDataPacket(false);
-            			row.columns = new ArrayList<Object>();
-            			row.columns.add(conn.getLastInsertId());
-            			list.add(row);
-            			conn.lastPacketResult.setRowList(list);
-            			conn.lastPacketResult.wirteToConnection(conn);
+	                	MysqlResultSetPacket lastPacketResult = createLastInsertIdPacket(conn,(SelectStatment)statment);
+            			lastPacketResult.wirteToConnection(conn);
             			return;
 	                }
 	                
@@ -136,34 +131,7 @@ public class MySqlCommandDispatcher implements MessageHandler {
 	                } else {
 	                	Statment statment = preparedInf.getStatment();
 	                	if (statment != null && statment instanceof SelectStatment && ((SelectStatment)statment).isQueryLastInsertId()) {
-	                		String sql = statment.getSql();
-	                		Map<String,Column> selectedMap = ((SelectStatment)statment).getSelectColumnMap();
-	                		MysqlResultSetPacket lastPacketResult = new MysqlResultSetPacket(null);
-                			lastPacketResult.resulthead = new ResultSetHeaderPacket();
-                			lastPacketResult.resulthead.columns = selectedMap.size();
-                			RowDataPacket row = new RowDataPacket(false);
-	            			row.columns = new ArrayList<Object>();
-                			int index =0; 
-                			for(Map.Entry<String, Column> entry : selectedMap.entrySet()){
-                				String alias = entry.getValue().getAlias();
-                				if("LASTER_INSERT_ID".equalsIgnoreCase(entry.getValue().getName()) || "@@IDENTITY".equalsIgnoreCase(entry.getValue().getName())){
-                					row.columns.add(conn.getLastInsertId());
-                				}else{
-                					row.columns.add(0);
-                				}
-	                			lastPacketResult.fieldPackets = new FieldPacket[selectedMap.size()];
-	                			FieldPacket field = new FieldPacket();
-	                			field.type = MysqlDefs.FIELD_TYPE_LONGLONG;
-	                			field.name = (alias == null?entry.getValue().getName():alias);
-	                			field.catalog = "def";
-	                			field.length = 20;
-	                			lastPacketResult.fieldPackets[index] = field; 
-	                			index++;
-                			}
-	                			
-	            			List<RowDataPacket> list = new ArrayList<RowDataPacket>();
-	            			list.add(row);
-	            			lastPacketResult.setRowList(list);
+	                		MysqlResultSetPacket lastPacketResult = createLastInsertIdPacket(conn,(SelectStatment)statment);
 	            			lastPacketResult.wirteToConnection(conn);
 	            			return;
 		                }
@@ -220,5 +188,36 @@ public class MySqlCommandDispatcher implements MessageHandler {
 	            logger.error("messageDispate error", e);
 	        }
 		}
+    }
+    
+    private MysqlResultSetPacket createLastInsertIdPacket(MysqlClientConnection conn,SelectStatment statment){
+    	Map<String,Column> selectedMap = ((SelectStatment)statment).getSelectColumnMap();
+		MysqlResultSetPacket lastPacketResult = new MysqlResultSetPacket(null);
+		lastPacketResult.resulthead = new ResultSetHeaderPacket();
+		lastPacketResult.resulthead.columns = selectedMap.size();
+		RowDataPacket row = new RowDataPacket(false);
+		row.columns = new ArrayList<Object>();
+		int index =0; 
+		for(Map.Entry<String, Column> entry : selectedMap.entrySet()){
+			String alias = entry.getValue().getAlias();
+			if("LAST_INSERT_ID".equalsIgnoreCase(entry.getValue().getName()) || "@@IDENTITY".equalsIgnoreCase(entry.getValue().getName())){
+				row.columns.add(conn.getLastInsertId());
+			}else{
+				row.columns.add(0);
+			}
+			lastPacketResult.fieldPackets = new FieldPacket[selectedMap.size()];
+			FieldPacket field = new FieldPacket();
+			field.type = MysqlDefs.FIELD_TYPE_LONGLONG;
+			field.name = (alias == null?entry.getValue().getName():alias);
+			field.catalog = "def";
+			field.length = 20;
+			lastPacketResult.fieldPackets[index] = field; 
+			index++;
+		}
+			
+		List<RowDataPacket> list = new ArrayList<RowDataPacket>();
+		list.add(row);
+		lastPacketResult.setRowList(list);
+		return lastPacketResult;
     }
 }

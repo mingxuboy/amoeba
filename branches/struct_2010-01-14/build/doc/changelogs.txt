@@ -1,6 +1,6 @@
 amoeba for mysql
 
-2010-03-26 amoeba-mysql-1.2.0-GA
+2010-04-05 amoeba-mysql-1.2.0-RC1
 1、添加规则函数case、range、增加表达式   （boolean表达式 ? 表达式1: 表达式2）
 
 range函数：
@@ -34,13 +34,14 @@ case 函数
                            case  hashid  when range(0,8,1,0) then (isReadStatment ? 'server1' : 'server1_write');
                                    when range(8,16,1,0) then (isReadStatment ? 'server2' : 'server2_write');
                                    when range(16,24,1,0) then '(isReadStatment ? 'server3' : 'server3_write')';
-                                   else 'server4'
+                                   when range(24,32,1,0) then '(isReadStatment ? 'server4' : 'server4_write')';'
                            END CASE;
 
                    ]]></expression>
            </rule>
     </tableRule>
-
+5、支持select last_insert_id()/ @@Identity －－最后一次自增长的ID
+6、规则函数中，增加自定义变量（格式 var 变量名称= 变量值 ;） 比如： var hashid = abs(hash(SDID)) % 32;
 
 2010年01月18日发布1.1.0-BETA，主要修改内容：
 1、解决amoeba运行一段时间以后可能出现阻塞
