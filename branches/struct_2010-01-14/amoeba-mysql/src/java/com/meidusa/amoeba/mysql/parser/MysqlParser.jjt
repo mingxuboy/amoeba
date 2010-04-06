@@ -1209,26 +1209,29 @@ Expression SubSelectStatement(Statment statment):
 {
 	Expression expression = null;
 	Expression fromExpression = null;
-	AndExpression andExpression = null;
+	AndExpression andExpression = new AndExpression();
 }
 {
     (SelectClause(statment)
-    [fromExpression = FromClause(statment)]
-    [ expression = WhereClause(statment)]
+    [fromExpression = FromClause(statment){
+      if(fromExpression != null)	  {
+	   	andExpression.addExpression(fromExpression);	  }    }]
+    [ expression = WhereClause(statment)    {
+      if(expression != null)
+	  {
+	   	andExpression.addExpression(expression);
+	  }    }]
     [ GroupByClause(statment) ]
     [ OrderByClause(statment) ]
-    [<K_LIMIT> <INTEGER_LITERAL>[("," | <K_OFFSET> ) <INTEGER_LITERAL>]])
+    [<K_LIMIT>    (<S_PARAMETER_MARKER>{
+	   	andExpression.addExpression(new ParameterExpression(parameterIndex++));
+	} | <INTEGER_LITERAL>)[("," | <K_OFFSET> ) (<S_PARAMETER_MARKER>	{
+	   	andExpression.addExpression(new ParameterExpression(parameterIndex++));	} |<INTEGER_LITERAL> )
+    ]])
     {
-      if(fromExpression != null)
-      {
-    	if(expression != null){
-    		andExpression = new AndExpression(expression);
-    		andExpression.addExpression(fromExpression);
-			return andExpression;
-    	}else    	{			return fromExpression;
-    	}
-   	  }else{    	return expression;
-   	   }	
+      if(andExpression.getSize() >0)      {		return andExpression;
+      }else      {		return null;
+      }
     }
 }
 

@@ -45,13 +45,6 @@ public abstract class Authenticator {
         } finally {
             _conmgr.afterAuthing(conn, rdata);
         }
-        /*ProxyRuntimeContext.getInstance().getServerSideExecutor().execute(new Runnable() {
-
-            public void run() {
-                
-            }
-
-        });*/
     }
 
     public AuthenticateFilter getFilter() {
