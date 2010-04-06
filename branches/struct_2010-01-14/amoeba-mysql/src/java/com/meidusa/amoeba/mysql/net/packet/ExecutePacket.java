@@ -138,6 +138,7 @@ public class ExecutePacket extends CommandPacket {
         for (int i = 0; i < this.parameterCount; i++) {
             if (longPrameters != null && longPrameters.get(i) != null) {
                 values[i].isLongData = true;
+                values[i].value = longPrameters.get(i);
             } else {
                 if ((nullBitsBuffer[i / 8] & (1 << (i & 7))) != 0) {
                     values[i].isNull = true;
