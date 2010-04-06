@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.commons.collections.map.LRUMap;
@@ -27,7 +28,6 @@ import org.apache.log4j.Logger;
 
 import com.meidusa.amoeba.context.ProxyRuntimeContext;
 import com.meidusa.amoeba.mysql.filter.IOFilter;
-import com.meidusa.amoeba.mysql.filter.PacketFilterInvocation;
 import com.meidusa.amoeba.mysql.filter.PacketIOFilter;
 import com.meidusa.amoeba.mysql.handler.PreparedStatmentInfo;
 import com.meidusa.amoeba.mysql.jdbc.MysqlDefs;
@@ -36,7 +36,6 @@ import com.meidusa.amoeba.mysql.net.packet.MysqlPacketBuffer;
 import com.meidusa.amoeba.mysql.net.packet.OkPacket;
 import com.meidusa.amoeba.mysql.net.packet.QueryCommandPacket;
 import com.meidusa.amoeba.mysql.net.packet.ResultSetHeaderPacket;
-import com.meidusa.amoeba.mysql.net.packet.RowDataPacket;
 import com.meidusa.amoeba.mysql.net.packet.result.MysqlResultSetPacket;
 import com.meidusa.amoeba.net.AuthingableConnectionManager;
 import com.meidusa.amoeba.net.Connection;
@@ -51,12 +50,18 @@ public class MysqlClientConnection extends MysqlConnection {
 	
 	private static Logger logger = Logger
 			.getLogger(MysqlClientConnection.class);
-
+	private static Logger authLogger = Logger.getLogger("auth");
 	static List<IOFilter> filterList = new ArrayList<IOFilter>();
 	static {
 		filterList.add(new PacketIOFilter());
 	}
-
+	
+	private long createTime = System.currentTimeMillis();
+	public void afterAuth(){
+		if(authLogger.isDebugEnabled()){
+			authLogger.debug("authentication time:"+(System.currentTimeMillis()-createTime) +"   Id="+this.getInetAddress());
+		}
+	}
 	// 保存服务端发送的随机用于客户端加密的字符串
 	protected String seed;
 	
@@ -80,7 +85,7 @@ public class MysqlClientConnection extends MysqlConnection {
 	private List<byte[]> longDataList = new ArrayList<byte[]>();
 
 	private List<byte[]> unmodifiableLongDataList = Collections
-			.unmodifiableList(new ArrayList<byte[]>());
+			.unmodifiableList(longDataList);
 
 	/** 存储sql,statmentId对 */
 	private final Map<String, Long> SQL_STATMENT_ID_MAP = Collections
@@ -192,55 +197,25 @@ public class MysqlClientConnection extends MysqlConnection {
     }
     
 	protected void messageProcess() {
-		/*final PacketFilterInvocation invocation = new PacketFilterInvocation(
-				filterList, this, msg) {
-
-			@Override
-			protected Result doProcess() {
-				ProxyRuntimeContext.getInstance().getClientSideExecutor()
-						.execute(new Runnable() {
-
-							public void run() {
-								try {
-									MysqlClientConnection.this
-											.getMessageHandler().handleMessage(
-													MysqlClientConnection.this,
-													msg);
-								} finally {
-									ThreadLocalMap.reset();
-								}
-							}
-						});
-				return null;
-			}
-		};
-		invocation.invoke();*/
+		
+		Executor executor = null;
 		if(isAuthenticatedSeted()){
-			ProxyRuntimeContext.getInstance().getClientSideExecutor()
-			.execute(new Runnable() {
-				
-				public void run() {
-					synchronized(MysqlClientConnection.this.getMessageHandler()){
-						try {
-							MysqlClientConnection.this.getMessageHandler().handleMessage(MysqlClientConnection.this);
-						} finally {
-							ThreadLocalMap.reset();
-						}
-					}
-				}
-			});
+			executor = ProxyRuntimeContext.getInstance().getClientSideExecutor();
 		}else{
-			ProxyRuntimeContext.getInstance().getServerSideExecutor()
-			.execute(new Runnable() {
-				public void run() {
+			executor = ProxyRuntimeContext.getInstance().getServerSideExecutor();
+		}
+		
+		executor.execute(new Runnable() {
+			public void run() {
+				synchronized(MysqlClientConnection.this.getMessageHandler()){
 					try {
 						MysqlClientConnection.this.getMessageHandler().handleMessage(MysqlClientConnection.this);
 					} finally {
 						ThreadLocalMap.reset();
 					}
 				}
-			});
-		}
+			}
+		});
 	}
 
 	public void addLongData(byte[] longData) {

@@ -33,6 +33,7 @@ public class PerformaceTest {
 		final String ip = System.getProperty("ip","127.0.0.1");
 		final String port = System.getProperty("port","8066");
 		final String password = System.getProperty("password","hello");
+		final String user = System.getProperty("user","root");
 		String sql = System.getProperty("sql","SELECT * FROM sd_relation.LIST_FRIEND_GROUP L; ");
 		if(sql.startsWith("\"")){
 			sql = sql.substring(1, sql.length() -1);
@@ -66,7 +67,7 @@ public class PerformaceTest {
 					PreparedStatement statment = null;
 					ResultSet result = null;
 					try{
-						conn = DriverManager.getConnection("jdbc:mysql://"+ip+":"+port+"/test","root",password);
+						conn = DriverManager.getConnection("jdbc:mysql://"+ip+":"+port+"/test",user,password);
 						for(int i=0;i<runcount;i++){
 							try{
 							statment = conn.prepareStatement(sqlext);

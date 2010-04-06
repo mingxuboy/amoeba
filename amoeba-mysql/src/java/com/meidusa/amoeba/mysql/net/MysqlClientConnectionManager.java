@@ -29,7 +29,7 @@ import com.meidusa.amoeba.util.StringUtil;
  * @author <a href=mailto:piratebase@sina.com>Struct chen</a>
  */
 public class MysqlClientConnectionManager extends AuthingableConnectionManager {
-
+	
     private final static String SERVER_VERSION = "5.1.22-mysql-amoeba-proxy";
     private static byte[] AUTHENTICATEOKPACKETDATA;
     static {
@@ -75,6 +75,8 @@ public class MysqlClientConnectionManager extends AuthingableConnectionManager {
         
         conn.setMessageHandler(new MySqlCommandDispatcher());
         conn.postMessage(AUTHENTICATEOKPACKETDATA);
+        MysqlClientConnection aconn = (MysqlClientConnection) conn;
+        aconn.afterAuth();
     }
 
     protected void connectionAuthenticateFaild(final Connection conn, AuthResponseData data) {
@@ -86,6 +88,8 @@ public class MysqlClientConnectionManager extends AuthingableConnectionManager {
         error.sqlstate = "42S02";
         error.errno = 1000;
         conn.postMessage(error.toByteBuffer(conn).array());
+        MysqlClientConnection aconn = (MysqlClientConnection) conn;
+        aconn.afterAuth();
     }
 
 }

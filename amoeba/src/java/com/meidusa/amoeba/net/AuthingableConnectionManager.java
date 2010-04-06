@@ -15,13 +15,14 @@ package com.meidusa.amoeba.net;
 
 import java.io.IOException;
 
+import org.apache.log4j.Logger;
+
 /**
  * 支持Connection 身份验证流程的 ConnectionManager
  * 
  * @author <a href=mailto:piratebase@sina.com>Struct chen</a>
  */
 public class AuthingableConnectionManager extends ConnectionManager {
-
     protected Authenticator _author;
     
     protected boolean authenticated = false;
@@ -43,6 +44,7 @@ public class AuthingableConnectionManager extends ConnectionManager {
 
     public void registerConnection(Connection connection, int key) {
         super.registerConnection(connection, key);
+        
         beforeAuthing(connection);
     }
 
