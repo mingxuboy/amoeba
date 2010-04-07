@@ -22,6 +22,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.commons.collections.map.LRUMap;
 import org.apache.log4j.Logger;
@@ -56,6 +58,7 @@ public class MysqlClientConnection extends MysqlConnection {
 		filterList.add(new PacketIOFilter());
 	}
 	
+	private Lock lock = new ReentrantLock(true);
 	private long createTime = System.currentTimeMillis();
 	public void afterAuth(){
 		if(authLogger.isDebugEnabled()){
@@ -192,7 +195,10 @@ public class MysqlClientConnection extends MysqlConnection {
 			ok.serverStatus = 2;
 			this.postMessage(ok.toByteBuffer(null).array());
 			return;
-		}
+		} else if (MysqlPacketBuffer.isPacketType(message, QueryCommandPacket.COM_STMT_SEND_LONG_DATA)) {
+            this.addLongData(message);
+            return;
+        }
     	super.doReceiveMessage(message);
     }
     

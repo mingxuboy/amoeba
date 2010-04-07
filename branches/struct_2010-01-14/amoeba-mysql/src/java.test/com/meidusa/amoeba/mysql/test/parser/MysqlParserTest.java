@@ -30,6 +30,7 @@ public class MysqlParserTest {
 	public static void main(String[] args) throws Exception{
 		Map<String,Function> funMap = AbstractQueryRouter.loadFunctionMap("./build/build-mysql/conf/functionMap.xml");
 		parser(funMap,"select last_insert_id() as id");
+		parser(funMap,"select last_insert_id();");
 		String t = "select ID from SD_MESSAGE.MESSAGE_NOTIFICATION  where  SDID=11 and name=? order by CREATE_TIME limit ?,?";
 		String sql1 = " SELECT * from account where time = DATE_ADD('1998-01-02', INTERVAL 31 DAY)";
 		String sql2 = "select * from account where 1<2 and not (id between 12+12 and 33) and id >12+3 or id not in (11,33,'23234') or  id  in (select test.ref_Id from test dd where dd.name='test')";
