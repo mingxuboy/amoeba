@@ -24,6 +24,7 @@ import org.apache.log4j.Logger;
 import com.meidusa.amoeba.context.ProxyRuntimeContext;
 import com.meidusa.amoeba.mysql.jdbc.MysqlDefs;
 import com.meidusa.amoeba.mysql.net.MysqlClientConnection;
+import com.meidusa.amoeba.mysql.net.packet.BindValue;
 import com.meidusa.amoeba.mysql.net.packet.ErrorPacket;
 import com.meidusa.amoeba.mysql.net.packet.ExecutePacket;
 import com.meidusa.amoeba.mysql.net.packet.FieldPacket;
@@ -205,7 +206,8 @@ public class MySqlCommandDispatcher implements MessageHandler {
 		MysqlResultSetPacket lastPacketResult = new MysqlResultSetPacket(null);
 		lastPacketResult.resulthead = new ResultSetHeaderPacket();
 		lastPacketResult.resulthead.columns = selectedMap.size();
-		RowDataPacket row = new RowDataPacket(false);
+		lastPacketResult.resulthead.extra = 1;
+		RowDataPacket row = new RowDataPacket(true);
 		row.columns = new ArrayList<Object>();
 		int index =0; 
 		lastPacketResult.fieldPackets = new FieldPacket[selectedMap.size()];
@@ -213,21 +215,34 @@ public class MySqlCommandDispatcher implements MessageHandler {
 			FieldPacket field = new FieldPacket();
 			String alias = entry.getValue().getAlias();
 			
+			
 			if("LAST_INSERT_ID".equalsIgnoreCase(entry.getValue().getName())){
-				row.columns.add(conn.getLastInsertId());
+				BindValue value = new BindValue();
+				value.bufferType = MysqlDefs.FIELD_TYPE_LONG;
+				value.longBinding = conn.getLastInsertId();
+				value.scale = 20;
+				value.isSet = true;
+				row.columns.add(value);
 				field.name = (alias == null?entry.getValue().getName()+"()":alias);
 				
 			}else if("@@IDENTITY".equalsIgnoreCase(entry.getValue().getName())){
 
-				row.columns.add(conn.getLastInsertId());
+				BindValue value = new BindValue();
+				value.bufferType = MysqlDefs.FIELD_TYPE_LONG;
+				value.longBinding = conn.getLastInsertId();
+				value.scale = 20;
+				value.isSet = true;
+				row.columns.add(value);
+				
+				row.columns.add(value);
 				field.name = (alias == null?entry.getValue().getName():alias);
 				
 			}else{
 				row.columns.add(0);
 				field.name = (alias == null?entry.getValue().getName():alias);
 			}
-			field.type = MysqlDefs.FIELD_TYPE_LONGLONG;
 			
+			field.type = MysqlDefs.FIELD_TYPE_LONG;
 			field.catalog = "def";
 			field.length = 20;
 			lastPacketResult.fieldPackets[index] = field; 
