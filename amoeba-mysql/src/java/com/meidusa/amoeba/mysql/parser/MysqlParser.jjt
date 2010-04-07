@@ -1252,26 +1252,32 @@ void SelectItem(Statment statment):
 {
 	Token token = null;
 	Expression expression = null;
+	Column column = null;
 }
 {
     (
         LOOKAHEAD(2) EntityName()".*" /* table.* */
         |   LOOKAHEAD(4) EntityName()"." EntityName() ".*" /* schema.table.* */
-        |  expression = SQLSimpleExpression(statment)    // Column or Expression
+        |  expression = SQLSimpleExpression(statment)
+        {			if(expression instanceof ColumnExpression)
+		      {
+					column = ((ColumnExpression)expression).getColumn();
+					((DMLStatment)statment).addSelectColumn(column.getName(),column);
+		      }else if(expression instanceof FunctionExpression)
+		      {
+				 	String columnName = ((FunctionExpression)expression).getFunction().getName();
+				 	column = new Column();
+		          	column.setName(columnName);
+					((DMLStatment)statment).addSelectColumn(columnName,column);
+		      }
+		
+        }    // Column or Expression
     )[("=" SQLSimpleExpression(statment))] [["AS"] token = <IDENTIFIER>    {
-      if(expression instanceof ColumnExpression)      {			Column column = ((ColumnExpression)expression).getColumn();
-			if(token != null)			{				column.setAlias(token.image.toUpperCase());
-			}
-			((DMLStatment)statment).addSelectColumn(column.getName(),column);
-      }else if(expression instanceof FunctionExpression)      {		 	String columnName = ((FunctionExpression)expression).getFunction().getName();
-		 	Column column = new Column();
-          	column.setName(columnName);
-          	if(token != null)
-			{
-				column.setAlias(token.image.toUpperCase());
-			}
-			((DMLStatment)statment).addSelectColumn(columnName,column);
-      }    }] // Column Alias
+      if(token != null)
+		{
+		  if(column != null)		  {			column.setAlias(token.image.toUpperCase());
+		  }
+		}    }] // Column Alias
 }
 
 

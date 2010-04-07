@@ -65,6 +65,9 @@ public class MySqlCommandDispatcher implements MessageHandler {
         STATIC_OK_BUFFER = ok.toByteBuffer(null).array();
     }
 
+    /**
+     * Ping ¡¢COM_STMT_SEND_LONG_DATA command remove to @MysqlClientConnection #doReceiveMessage()
+     */
     public void handleMessage(Connection connection) {
     	
     	byte[] message = null;
@@ -77,13 +80,7 @@ public class MySqlCommandDispatcher implements MessageHandler {
 	            logger.debug(command.query);
 	        }
 	        try {
-	            if (MysqlPacketBuffer.isPacketType(message, QueryCommandPacket.COM_QUIT) || MysqlPacketBuffer.isPacketType(message, QueryCommandPacket.COM_STMT_CLOSE)) {
-	                if (logger.isDebugEnabled()) {
-	                    logger.debug(command);
-	                }
-	            } else if (MysqlPacketBuffer.isPacketType(message, QueryCommandPacket.COM_PING)) {
-	                conn.postMessage(STATIC_OK_BUFFER);
-	            } else if (MysqlPacketBuffer.isPacketType(message, QueryCommandPacket.COM_QUERY)) {
+	            if (MysqlPacketBuffer.isPacketType(message, QueryCommandPacket.COM_QUERY)) {
 	                QueryRouter router = ProxyRuntimeContext.getInstance().getQueryRouter();
 	                Tuple<Statment,ObjectPool[]> tuple = router.doRoute(conn, command.query, false, null);
 	                Statment statment = tuple.left;
@@ -115,8 +112,6 @@ public class MySqlCommandDispatcher implements MessageHandler {
 	                byte[] buffer = preparedInf.getByteBuffer();
 	                conn.postMessage(buffer);
 	                return;
-	            } else if (MysqlPacketBuffer.isPacketType(message, QueryCommandPacket.COM_STMT_SEND_LONG_DATA)) {
-	                conn.addLongData(message);
 	            } else if (MysqlPacketBuffer.isPacketType(message, QueryCommandPacket.COM_STMT_EXECUTE)) {
 	            	
 	            	try{
