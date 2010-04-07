@@ -53,6 +53,7 @@ public class MysqlClientConnection extends MysqlConnection {
 	private static Logger logger = Logger
 			.getLogger(MysqlClientConnection.class);
 	private static Logger authLogger = Logger.getLogger("auth");
+	private static Logger lastInsertID = Logger.getLogger("lastInsertId");
 	static List<IOFilter> filterList = new ArrayList<IOFilter>();
 	static {
 		filterList.add(new PacketIOFilter());
@@ -237,10 +238,16 @@ public class MysqlClientConnection extends MysqlConnection {
 	}
 	
 	public long getLastInsertId() {
+		if(lastInsertID.isDebugEnabled()){
+			lastInsertID.debug("get last_insert_Id="+lastInsertId);
+		}
 		return lastInsertId;
 	}
 
 	public void setLastInsertId(long lastInsertId) {
+		if(lastInsertID.isDebugEnabled()){
+			lastInsertID.debug("set last_insert_Id="+lastInsertId);
+		}
 		this.lastInsertId = lastInsertId;
 	}
 

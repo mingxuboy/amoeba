@@ -29,12 +29,55 @@ public class PreparedStatmentTest {
         Connection conn = null;
         PreparedStatement statment = null;
         ResultSet result = null;
-        conn = DriverManager.getConnection("jdbc:mysql://114.80.135.7:8066/test?useUnicode=true&characterEncoding=gbk", "sdfriend", "sdfriend");
+        
+        conn = DriverManager.getConnection("jdbc:mysql://114.80.135.7:8066/test?useUnicode=true&characterEncoding=utf8", "sdfriend", "sdfriend");
         try {
-            statment = conn.prepareStatement("insert into aaaa(name) values('asdfasdf')");
-
+        	for(int i=1300;i<1400;i++){
+            statment = conn.prepareStatement("insert into SD_RELATION.RELATION_ORIGIN(sdid,f_sdid,app_id,reserve1,reserve2,reserve3) values(?,?,24,'','','')");
+            statment.setLong(1, 35676);
+            statment.setLong(2, 129+i);
            int id = statment.executeUpdate();
-           System.out.println(id);
+           if (statment != null) {
+               try {
+                   statment.close();
+               } catch (Exception e) {
+               }
+           }
+           statment = conn.prepareStatement("select LAST_INSERT_ID() as id");
+           result = statment.executeQuery();
+           result.next();
+           Object lastInsertId = result.getLong("id");
+           System.out.println(lastInsertId);
+           if (result != null) {
+               try {
+                   result.close();
+               } catch (Exception e) {
+               }
+           }
+           if (statment != null) {
+               try {
+                   statment.close();
+               } catch (Exception e) {
+               }
+           }
+           
+           statment = conn.prepareStatement("select * from SD_RELATION.RELATION_ORIGIN where sdid=35676 and f_sdid=129"+i);
+           result = statment.executeQuery();
+          if( result.next())
+           lastInsertId = result.getLong("id");
+           if (result != null) {
+               try {
+                   result.close();
+               } catch (Exception e) {
+               }
+           }
+           if (statment != null) {
+               try {
+                   statment.close();
+               } catch (Exception e) {
+               }
+           }
+        }
         } catch (Exception e) {
             e.printStackTrace();
         } finally {

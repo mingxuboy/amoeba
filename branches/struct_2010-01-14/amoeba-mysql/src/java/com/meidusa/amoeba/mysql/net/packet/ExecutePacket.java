@@ -228,10 +228,12 @@ public class ExecutePacket extends CommandPacket {
                     case MysqlDefs.FIELD_TYPE_DECIMAL:
                     case MysqlDefs.FIELD_TYPE_NEW_DECIMAL:
                     case MysqlDefs.FIELD_TYPE_TINY_BLOB:
+                    case MysqlDefs.FIELD_TYPE_BLOB:
                         result[index++] = bindValue.value;
                         break;
                     case MysqlDefs.FIELD_TYPE_NULL:
                         index++;
+                        break;
                     default: {
                         index++;
                         logger.error("error jdbc type:" + bindValue.bufferType);
