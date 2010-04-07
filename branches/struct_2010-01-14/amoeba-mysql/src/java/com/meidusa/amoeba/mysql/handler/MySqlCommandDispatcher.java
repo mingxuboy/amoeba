@@ -238,7 +238,11 @@ public class MySqlCommandDispatcher implements MessageHandler {
 				field.name = (alias == null?entry.getValue().getName():alias);
 				
 			}else{
-				row.columns.add(0);
+				BindValue value = new BindValue();
+				value.bufferType = MysqlDefs.FIELD_TYPE_STRING;
+				value.scale = 20;
+				value.isNull = true;
+				row.columns.add(value);
 				field.name = (alias == null?entry.getValue().getName():alias);
 			}
 			
