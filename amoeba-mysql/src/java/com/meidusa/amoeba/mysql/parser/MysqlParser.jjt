@@ -1266,7 +1266,7 @@ void SelectItem(Statment statment):
 		      }else if(expression instanceof FunctionExpression)
 		      {
 				 	String columnName = ((FunctionExpression)expression).getFunction().getName();
-				 	column = new Column();
+					column = new Column();
 		          	column.setName(columnName);
 					((DMLStatment)statment).addSelectColumn(columnName,column);
 		      }
@@ -1275,7 +1275,7 @@ void SelectItem(Statment statment):
     )[("=" SQLSimpleExpression(statment))] [["AS"] token = <IDENTIFIER>    {
       if(token != null)
 		{
-		  if(column != null)		  {			column.setAlias(token.image.toUpperCase());
+		  if(column != null)		  {			column.setAlias(token.image);
 		  }
 		}    }] // Column Alias
 }
