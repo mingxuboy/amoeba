@@ -29,7 +29,13 @@ public class ParameterExpression extends Expression {
 		if(parameters == null){
 			return null;
 		}
-		return (Comparable)parameters[index];
+		if(parameters[index] instanceof Comparable){
+			return (Comparable)parameters[index];
+		}else if(parameters[index] instanceof byte[]){
+			return new String((byte[])parameters[index]);
+		}else{
+			return parameters[index].toString();
+		}
 	}
 
 	public boolean isRealtime(){
