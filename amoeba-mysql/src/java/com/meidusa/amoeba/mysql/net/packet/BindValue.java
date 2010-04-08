@@ -97,8 +97,10 @@ public class BindValue implements Serializable{
 				return String.valueOf(byteBinding);
 			case MysqlDefs.FIELD_TYPE_SHORT:
 				return String.valueOf(shortBinding);
-			case MysqlDefs.FIELD_TYPE_LONG:
+			case MysqlDefs.FIELD_TYPE_INT24:
 				return String.valueOf(intBinding);
+			case MysqlDefs.FIELD_TYPE_LONG:
+				return String.valueOf(longBinding);
 			case MysqlDefs.FIELD_TYPE_LONGLONG:
 				return String.valueOf(longBinding);
 			case MysqlDefs.FIELD_TYPE_FLOAT:
