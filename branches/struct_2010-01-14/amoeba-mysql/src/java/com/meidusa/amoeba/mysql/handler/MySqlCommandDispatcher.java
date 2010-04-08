@@ -88,7 +88,7 @@ public class MySqlCommandDispatcher implements MessageHandler {
 	                Statment statment = tuple.left;
 	                ObjectPool[] pools = tuple.right;
 	                if (statment != null && statment instanceof SelectStatment && ((SelectStatment)tuple.left).isQueryLastInsertId()) {
-	                	MysqlResultSetPacket lastPacketResult = createLastInsertIdPacket(conn,(SelectStatment)statment);
+	                	MysqlResultSetPacket lastPacketResult = createLastInsertIdPacket(conn,(SelectStatment)statment,false);
             			lastPacketResult.wirteToConnection(conn);
             			return;
 	                }
@@ -133,7 +133,7 @@ public class MySqlCommandDispatcher implements MessageHandler {
 		                		if(lastInsertID.isDebugEnabled()){
 		                			lastInsertID.debug("SQL="+statment.getSql());
 		                		}
-		                		MysqlResultSetPacket lastPacketResult = createLastInsertIdPacket(conn,(SelectStatment)statment);
+		                		MysqlResultSetPacket lastPacketResult = createLastInsertIdPacket(conn,(SelectStatment)statment,true);
 		            			lastPacketResult.wirteToConnection(conn);
 		            			return;
 			                }
@@ -201,13 +201,13 @@ public class MySqlCommandDispatcher implements MessageHandler {
 		}
     }
     
-    private MysqlResultSetPacket createLastInsertIdPacket(MysqlClientConnection conn,SelectStatment statment){
+    private MysqlResultSetPacket createLastInsertIdPacket(MysqlClientConnection conn,SelectStatment statment,boolean isPrepared){
     	Map<String,Column> selectedMap = ((SelectStatment)statment).getSelectColumnMap();
 		MysqlResultSetPacket lastPacketResult = new MysqlResultSetPacket(null);
 		lastPacketResult.resulthead = new ResultSetHeaderPacket();
 		lastPacketResult.resulthead.columns = selectedMap.size();
 		lastPacketResult.resulthead.extra = 1;
-		RowDataPacket row = new RowDataPacket(true);
+		RowDataPacket row = new RowDataPacket(isPrepared);
 		row.columns = new ArrayList<Object>();
 		int index =0; 
 		lastPacketResult.fieldPackets = new FieldPacket[selectedMap.size()];
