@@ -938,8 +938,12 @@ List<List<Expression>> InsertValues(Statment statment):
 List<Expression> InsertSingleRowValues(Statment statment):
 {	List<Expression> insertValues = new ArrayList<Expression>();
 	Expression expression = null;
-}{	("("  expression = InsertValue(statment){insertValues.add(expression);} ("," expression = InsertValue(statment){insertValues.add(expression);})*  ")")
-	{		return insertValues;
+}{	("("  expression = InsertValue(statment){
+		if(expression != null)insertValues.add(expression);	} ("," expression = InsertValue(statment){if(expression != null)insertValues.add(expression);})*  ")")
+	{
+	  if(insertValues.size() >0)	  	{		return insertValues;
+		}else		{			return null;
+		}
 	}
 
 }
