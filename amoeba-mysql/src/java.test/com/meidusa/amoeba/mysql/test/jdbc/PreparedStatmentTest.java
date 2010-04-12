@@ -30,9 +30,9 @@ public class PreparedStatmentTest {
         PreparedStatement statment = null;
         ResultSet result = null;
         
-        conn = DriverManager.getConnection("jdbc:mysql://127.0.0.1:8066/test?useUnicode=true&characterEncoding=utf-8&useServerPrepStmts=false", "sdfriend", "sdfriend");
+        conn = DriverManager.getConnection("jdbc:mysql://127.0.0.1:8066/test?useUnicode=true&characterEncoding=utf-8&useServerPrepStmts=true", "sdfriend", "sdfriend");
         try {
-        	for(int i=2600;i<2700;i++){
+        	for(int i=2800;i<2900;i++){
             statment = conn.prepareStatement("insert into SD_RELATION.RELATION_ORIGIN(sdid,f_sdid,app_id,reserve1,reserve2,reserve3) values(?,?,24,'','','')");
             statment.setLong(1, 35676);
             statment.setLong(2, 129+i);
