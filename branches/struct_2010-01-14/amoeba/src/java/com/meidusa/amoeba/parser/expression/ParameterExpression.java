@@ -34,7 +34,7 @@ public class ParameterExpression extends Expression {
 		}else if(parameters[index] instanceof byte[]){
 			return new String((byte[])parameters[index]);
 		}else{
-			return parameters[index].toString();
+			return parameters[index]==null?null:parameters[index].toString();
 		}
 	}
 
