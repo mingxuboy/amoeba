@@ -235,48 +235,54 @@ public interface MysqlParserConstants {
   /** RegularExpression Id. */
   int K_TRANSACTION_ISOLATION_LEVEL = 110;
   /** RegularExpression Id. */
-  int K_START_TRANSACTION = 111;
+  int K_ON_DUPLICATE_UPDATE = 111;
   /** RegularExpression Id. */
-  int K_SESSION = 112;
+  int K_START_TRANSACTION = 112;
   /** RegularExpression Id. */
-  int K_TRANSACTION_READ_COMMITTED = 113;
+  int K_SESSION = 113;
   /** RegularExpression Id. */
-  int K_TRANSACTION_READ_UNCOMMITTED = 114;
+  int K_TRANSACTION_READ_COMMITTED = 114;
   /** RegularExpression Id. */
-  int K_TRANSACTION_REPEATABLE_READ = 115;
+  int K_TRANSACTION_READ_UNCOMMITTED = 115;
   /** RegularExpression Id. */
-  int K_TRANSACTION_SERIALIZABLE = 116;
+  int K_TRANSACTION_REPEATABLE_READ = 116;
   /** RegularExpression Id. */
-  int K_CLIENT_CHARSET = 117;
+  int K_TRANSACTION_SERIALIZABLE = 117;
   /** RegularExpression Id. */
-  int INTEGER_LITERAL = 118;
+  int K_CLIENT_CHARSET = 118;
   /** RegularExpression Id. */
-  int FLOATING_POINT_LITERAL = 119;
+  int INTEGER_LITERAL = 119;
   /** RegularExpression Id. */
-  int EXPONENT = 120;
+  int FLOATING_POINT_LITERAL = 120;
   /** RegularExpression Id. */
-  int DIGIT = 121;
+  int EXPONENT = 121;
   /** RegularExpression Id. */
-  int LINE_COMMENT = 122;
+  int DIGIT = 122;
   /** RegularExpression Id. */
-  int MULTI_LINE_COMMENT = 123;
+  int POOL = 123;
   /** RegularExpression Id. */
-  int IDENTIFIER = 124;
+  int LINE_COMMENT = 124;
   /** RegularExpression Id. */
-  int LETTER = 125;
+  int MULTI_LINE_COMMENT = 125;
   /** RegularExpression Id. */
-  int SPECIAL_CHARS = 126;
+  int IDENTIFIER = 126;
   /** RegularExpression Id. */
-  int STRING_LITERAL = 127;
+  int LETTER = 127;
   /** RegularExpression Id. */
-  int S_QUOTED_IDENTIFIER = 128;
+  int SPECIAL_CHARS = 128;
   /** RegularExpression Id. */
-  int S_COMMA_IDENTIFIER = 129;
+  int STRING_LITERAL = 129;
   /** RegularExpression Id. */
-  int S_PARAMETER_MARKER = 130;
+  int S_QUOTED_IDENTIFIER = 130;
+  /** RegularExpression Id. */
+  int S_COMMA_IDENTIFIER = 131;
+  /** RegularExpression Id. */
+  int S_PARAMETER_MARKER = 132;
 
   /** Lexical state. */
   int DEFAULT = 0;
+  /** Lexical state. */
+  int POOL_AND_RULE = 1;
 
   /** Literal token values. */
   String[] tokenImage = {
@@ -391,6 +397,7 @@ public interface MysqlParserConstants {
     "\"IGNORE INDEX\"",
     "\"FORCE INDEX\"",
     "\"TRANSACTION ISOLATION LEVEL\"",
+    "\"ON DUPLICATE KEY UPDATE\"",
     "\"START TRANSACTION\"",
     "\"SESSION\"",
     "\"READ COMMITTED\"",
@@ -402,6 +409,7 @@ public interface MysqlParserConstants {
     "<FLOATING_POINT_LITERAL>",
     "<EXPONENT>",
     "<DIGIT>",
+    "\"#pool\"",
     "<LINE_COMMENT>",
     "<MULTI_LINE_COMMENT>",
     "<IDENTIFIER>",
