@@ -50,7 +50,7 @@ public abstract class QueryRunnable implements MessageHandlerRunner {
     /**
      * PoolableObject 将在end session 中返回到pool中
      */
-    protected abstract void doRun(PoolableObject conn);
+    protected abstract void doRun(PoolableObject conn) throws Exception;
 
     public void run() {
         try {
