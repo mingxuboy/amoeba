@@ -139,7 +139,11 @@ public class SqlQueryCommand extends PostfixCommand implements Initialisable {
     }
 
     public void init() throws InitialisationException {
-        parameterSize = ProxyRuntimeContext.getInstance().getQueryRouter().parseParameterCount(null, sql) + 1;
+        try {
+			parameterSize = ProxyRuntimeContext.getInstance().getQueryRouter().parseParameterCount(null, sql) + 1;
+		} catch (com.meidusa.amoeba.parser.ParseException e) {
+			
+		}
     }
 
     @SuppressWarnings("unchecked")
