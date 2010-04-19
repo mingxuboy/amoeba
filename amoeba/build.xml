@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="GB2312"?>
 <project default="dist" name="amoeba" basedir=".">
-  	<property name="version"     value="1.2.0-RC1"/>
+  	<property name="version"     value="1.2.0-RC2"/>
   	<property name="app.name"     value="amoeba"/>
   	<property name="deploy.dir"   value="dist"/>
   	<property name="savedoc.dir"  value="docs"/>
