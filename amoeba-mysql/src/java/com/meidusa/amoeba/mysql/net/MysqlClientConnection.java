@@ -41,6 +41,7 @@ import com.meidusa.amoeba.mysql.net.packet.ResultSetHeaderPacket;
 import com.meidusa.amoeba.mysql.net.packet.result.MysqlResultSetPacket;
 import com.meidusa.amoeba.net.AuthingableConnectionManager;
 import com.meidusa.amoeba.net.Connection;
+import com.meidusa.amoeba.parser.ParseException;
 import com.meidusa.amoeba.util.ThreadLocalMap;
 
 /**
@@ -92,7 +93,7 @@ public class MysqlClientConnection extends MysqlConnection {
 			.unmodifiableList(longDataList);
 
 	/** ´æ´¢sql,statmentId¶Ô */
-	private final Map<String, Long> SQL_STATMENT_ID_MAP = Collections
+	private final Map<String, Long> sql_statment_id_map = Collections
 			.synchronizedMap(new HashMap<String, Long>(256));
 	private AtomicLong atomicLong = new AtomicLong(1);
 
@@ -101,7 +102,7 @@ public class MysqlClientConnection extends MysqlConnection {
 	 * object
 	 */
 	@SuppressWarnings("unchecked")
-	private final Map<Long, PreparedStatmentInfo> PREPARED_STATMENT_MAP = Collections
+	private final Map<Long, PreparedStatmentInfo> prepared_statment_map = Collections
 			.synchronizedMap(new LRUMap(256) {
 
 				private static final long serialVersionUID = 1L;
@@ -109,20 +110,20 @@ public class MysqlClientConnection extends MysqlConnection {
 				protected boolean removeLRU(LinkEntry entry) {
 					PreparedStatmentInfo info = (PreparedStatmentInfo) entry
 							.getValue();
-					SQL_STATMENT_ID_MAP.remove(info.getPreparedStatment());
+					sql_statment_id_map.remove(info.getPreparedStatment());
 					return true;
 				}
 
 				public PreparedStatmentInfo remove(Object key) {
 					PreparedStatmentInfo info = (PreparedStatmentInfo) super
 							.remove(key);
-					SQL_STATMENT_ID_MAP.remove(info.getPreparedStatment());
+					sql_statment_id_map.remove(info.getPreparedStatment());
 					return info;
 				}
 
 				public Object put(Object key, Object value) {
 					PreparedStatmentInfo info = (PreparedStatmentInfo) value;
-					SQL_STATMENT_ID_MAP.put(info.getPreparedStatment(),
+					sql_statment_id_map.put(info.getPreparedStatment(),
 							(Long) key);
 					return super.put(key, value);
 				}
@@ -131,7 +132,7 @@ public class MysqlClientConnection extends MysqlConnection {
 					for (Iterator it = map.entrySet().iterator(); it.hasNext();) {
 						Map.Entry<Long, PreparedStatmentInfo> entry = (Map.Entry<Long, PreparedStatmentInfo>) it
 								.next();
-						SQL_STATMENT_ID_MAP.put(entry.getValue()
+						sql_statment_id_map.put(entry.getValue()
 								.getPreparedStatment(), entry.getKey());
 					}
 					super.putAll(map);
@@ -143,16 +144,16 @@ public class MysqlClientConnection extends MysqlConnection {
 	}
 
 	public PreparedStatmentInfo getPreparedStatmentInfo(long id) {
-		return PREPARED_STATMENT_MAP.get(id);
+		return prepared_statment_map.get(id);
 	}
 
-	public PreparedStatmentInfo getPreparedStatmentInfo(String preparedSql) {
-		Long id = SQL_STATMENT_ID_MAP.get(preparedSql);
+	public PreparedStatmentInfo getPreparedStatmentInfo(String preparedSql) throws ParseException{
+		Long id = sql_statment_id_map.get(preparedSql);
 		PreparedStatmentInfo info = null;
 		if (id == null) {
 			info = new PreparedStatmentInfo(this, atomicLong.getAndIncrement(),
 					preparedSql);
-			PREPARED_STATMENT_MAP.put(info.getStatmentId(), info);
+			prepared_statment_map.put(info.getStatmentId(), info);
 		} else {
 			info = getPreparedStatmentInfo(id);
 		}
