@@ -24,6 +24,7 @@ import com.meidusa.amoeba.mysql.net.packet.OKforPreparedStatementPacket;
 import com.meidusa.amoeba.net.DatabaseConnection;
 import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
 import com.meidusa.amoeba.net.packet.PacketBuffer;
+import com.meidusa.amoeba.parser.ParseException;
 import com.meidusa.amoeba.parser.statment.Statment;
 
 /**
@@ -51,7 +52,7 @@ public class PreparedStatmentInfo {
 
     private Lock   typesLock = new ReentrantLock(false);
 
-    public PreparedStatmentInfo(DatabaseConnection conn, long id, String preparedSql){
+    public PreparedStatmentInfo(DatabaseConnection conn, long id, String preparedSql)throws ParseException{
     	statment = ProxyRuntimeContext.getInstance().getQueryRouter().parseSql(conn, preparedSql);
         PacketBuffer buffer = new AbstractPacketBuffer(2048);
         statmentId = id;

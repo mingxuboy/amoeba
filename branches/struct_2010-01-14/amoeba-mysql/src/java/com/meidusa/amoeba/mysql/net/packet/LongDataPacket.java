@@ -20,34 +20,35 @@ import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
 /**
  * @author <a href=mailto:piratebase@sina.com>Struct chen</a>
  */
-public class LongDataPacket extends AbstractPacket {
+public class LongDataPacket extends CommandPacket {
 
-    public byte   code;
     public long   statementId;
     public int    parameterIndex;
-    public int    type;
+    //public int    type;
     public byte[] data;
 
     @Override
     public void init(AbstractPacketBuffer myBuffer) {
         super.init(myBuffer);
         MysqlPacketBuffer buffer = (MysqlPacketBuffer) myBuffer;
-        code = buffer.readByte();
         statementId = buffer.readLong();
         parameterIndex = buffer.readInt();
-        type = buffer.readInt();
-        data = buffer.getBytes(buffer.getPosition(), buffer.getBufLength() - buffer.getPosition());
+        //type = buffer.readInt();
+        if(buffer.hasRemaining()){
+        	data = buffer.getBytes(buffer.getPosition(), buffer.getBufLength() - buffer.getPosition());
+        }
     }
 
     @Override
-    protected void write2Buffer(AbstractPacketBuffer myBuffer) throws UnsupportedEncodingException {
+	public void write2Buffer(AbstractPacketBuffer myBuffer) throws UnsupportedEncodingException {
         super.write2Buffer(myBuffer);
         MysqlPacketBuffer buffer = (MysqlPacketBuffer) myBuffer;
-        buffer.writeByte(code);
         buffer.writeLong(statementId);
         buffer.writeInt(parameterIndex);
-        buffer.writeInt(type);
-        buffer.writeBytesNoNull(data);
+        //buffer.writeInt(type);
+        if(data != null){
+        	buffer.writeBytesNoNull(data);
+        }
     }
 
 }
