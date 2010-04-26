@@ -159,6 +159,19 @@ public class MysqlClientConnection extends MysqlConnection {
 		}
 		return info;
 	}
+	
+	public PreparedStatmentInfo getPreparedStatmentInfo(String preparedSql,List<byte[]> byts) throws ParseException{
+		Long id = sql_statment_id_map.get(preparedSql);
+		PreparedStatmentInfo info = null;
+		if (id == null) {
+			info = new PreparedStatmentInfo(this, atomicLong.getAndIncrement(),
+					preparedSql,byts);
+			prepared_statment_map.put(info.getStatmentId(), info);
+		} else {
+			info = getPreparedStatmentInfo(id);
+		}
+		return info;
+	}
 
 	public String getSeed() {
 		return seed;
