@@ -13,6 +13,7 @@
  */
 package com.meidusa.amoeba.mysql.handler;
 
+import java.util.List;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -94,9 +95,25 @@ public class PreparedStatmentInfo {
         }
         packetBuffer = buffer.toByteBuffer().array();
     }
+    
+    public PreparedStatmentInfo (DatabaseConnection conn,long id, String preparedSql,List<byte[]> messageList) throws ParseException{
+    	statment = ProxyRuntimeContext.getInstance().getQueryRouter().parseSql(conn, preparedSql);
+    	PacketBuffer buffer = new AbstractPacketBuffer(2048);
+        statmentId = id;
+        this.preparedStatment = preparedSql;
+        OKforPreparedStatementPacket okPaket = new OKforPreparedStatementPacket();
+        okPaket.init(messageList.get(0),conn);
+        okPaket.statementHandlerId = id;
+        parameterCount = ProxyRuntimeContext.getInstance().getQueryRouter().parseParameterCount(conn, preparedSql);
+        messageList.remove(0);
+        messageList.add(0, okPaket.toByteBuffer(conn).array());
+        for(byte[] message : messageList){
+        	buffer.writeBytes(message);
+        }
+        packetBuffer = buffer.toByteBuffer().array();
+    }
 
-    public void setParameterTypes(int[] parameterTypes) {
-        typesLock.lock();
+    public void setParameterTypes(int[] parameterTypes) { typesLock.lock();
         try {
             this.parameterTypes = parameterTypes;
         } finally {

@@ -17,7 +17,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.StringTokenizer;
 
 import org.apache.log4j.Logger;
 
@@ -110,7 +109,21 @@ public class MySqlCommandDispatcher implements MessageHandler {
 	                    }
 	                }
 	            } else if (MysqlPacketBuffer.isPacketType(message, QueryCommandPacket.COM_STMT_PREPARE)) {
-	                PreparedStatmentInfo preparedInf = conn.getPreparedStatmentInfo(command.query);
+	            	QueryRouter router = ProxyRuntimeContext.getInstance().getQueryRouter();
+	                Tuple<Statment,ObjectPool[]> tuple = router.doRoute(conn, command.query, false, null);
+	            	PreparedStatmentMessageHandler handler = new PreparedStatmentMessageHandler(conn,null,tuple.left, message , new ObjectPool[]{tuple.right[0]}, timeout);
+	            	if (handler instanceof Sessionable) {
+	                    Sessionable session = (Sessionable) handler;
+	                    try {
+	                        session.startSession();
+	                    } catch (Exception e) {
+	                        logger.error("start Session error:", e);
+	                        session.endSession();
+	                        throw e;
+	                    }
+	                }
+	            	List<byte[]> byts = handler.getPreparedStatmentBytes();
+	                PreparedStatmentInfo preparedInf = conn.getPreparedStatmentInfo(command.query,byts);
 	                byte[] buffer = preparedInf.getByteBuffer();
 	                conn.postMessage(buffer);
 	                return;

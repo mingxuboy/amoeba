@@ -30,7 +30,7 @@ public class PreparedStatmentTest {
         PreparedStatement statment = null;
         ResultSet result = null;
         
-        conn = DriverManager.getConnection("jdbc:mysql://114.80.135.7:8066/test?useUnicode=true&characterEncoding=utf-8&useServerPrepStmts=true", "sdfriend", "sdfriend");
+        conn = DriverManager.getConnection("jdbc:mysql://127.0.0.1:8066/test?useUnicode=true&characterEncoding=utf-8&useServerPrepStmts=true", "sdfriend", "sdfriend");
         try {
         	for(int i=2800;i<2900;i++){
             statment = conn.prepareStatement("select ID, TOPIC_ID, CREATE_TIME, TOPIC_CONTENT,LAST_MESSAGE_TIME,MESSAGE_COUNT  from SD_MESSAGE.TOPIC_CONTENT   where TOPIC_ID = ?");

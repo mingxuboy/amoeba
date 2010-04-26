@@ -106,46 +106,50 @@ public class ExecutePacket extends CommandPacket {
         statementId = buffer.readLong();
         flags = buffer.readByte();
         iterationCount = buffer.readLong();
-        int nullCount = (this.parameterCount + 7) / 8;
-        byte[] nullBitsBuffer = new byte[nullCount];
-        for (int i = 0; i < nullCount; i++) {
-            nullBitsBuffer[i] = buffer.readByte();
-        }
-        newParameterBoundFlag = buffer.readByte();
-
-        for (int i = 0; i < this.parameterCount; i++) {
-            if (values[i] == null) {
-                values[i] = new BindValue();
-            }
-        }
-
-        // 当newParameterBoundFlag=1时，更新pInfo.parameterTypes值
-        // 否则使用pInfo.parameterTypes作为values[i].bufferType的值
-        if (newParameterBoundFlag == (byte) 1) {
-            int[] bindTypes = new int[parameterCount];
-            for (int i = 0; i < parameterCount; i++) {
-                bindTypes[i] = buffer.readInt();
-                values[i].bufferType = bindTypes[i];
-            }
-            pInfo.setParameterTypes(bindTypes);
-        } else {
-            int[] bindTypes = pInfo.getParameterTypes();
-            for (int i = 0; i < parameterCount; i++) {
-                values[i].bufferType = bindTypes[i];
-            }
-        }
-
-        for (int i = 0; i < this.parameterCount; i++) {
-            if (longPrameters != null && longPrameters.get(i) != null) {
-                values[i].isLongData = true;
-                values[i].value = longPrameters.get(i);
-            } else {
-                if ((nullBitsBuffer[i / 8] & (1 << (i & 7))) != 0) {
-                    values[i].isNull = true;
-                } else {
-                    PacketUtil.readBindValue(buffer, values[i]);
-                }
-            }
+        
+        if(parameterCount >0){
+	        int nullCount = (this.parameterCount + 7) / 8;
+	        byte[] nullBitsBuffer = new byte[nullCount];
+	        for (int i = 0; i < nullCount; i++) {
+	            nullBitsBuffer[i] = buffer.readByte();
+	        }
+        
+	        newParameterBoundFlag = buffer.readByte();
+	
+	        for (int i = 0; i < this.parameterCount; i++) {
+	            if (values[i] == null) {
+	                values[i] = new BindValue();
+	            }
+	        }
+	
+	        // 当newParameterBoundFlag=1时，更新pInfo.parameterTypes值
+	        // 否则使用pInfo.parameterTypes作为values[i].bufferType的值
+	        if (newParameterBoundFlag == (byte) 1) {
+	            int[] bindTypes = new int[parameterCount];
+	            for (int i = 0; i < parameterCount; i++) {
+	                bindTypes[i] = buffer.readInt();
+	                values[i].bufferType = bindTypes[i];
+	            }
+	            pInfo.setParameterTypes(bindTypes);
+	        } else {
+	            int[] bindTypes = pInfo.getParameterTypes();
+	            for (int i = 0; i < parameterCount; i++) {
+	                values[i].bufferType = bindTypes[i];
+	            }
+	        }
+	
+	        for (int i = 0; i < this.parameterCount; i++) {
+	            if (longPrameters != null && longPrameters.get(i) != null) {
+	                values[i].isLongData = true;
+	                values[i].value = longPrameters.get(i);
+	            } else {
+	                if ((nullBitsBuffer[i / 8] & (1 << (i & 7))) != 0) {
+	                    values[i].isNull = true;
+	                } else {
+	                    PacketUtil.readBindValue(buffer, values[i]);
+	                }
+	            }
+	        }
         }
     }
 

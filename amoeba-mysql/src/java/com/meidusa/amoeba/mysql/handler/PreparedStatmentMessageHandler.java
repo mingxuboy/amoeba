@@ -37,7 +37,8 @@ import com.meidusa.amoeba.parser.statment.Statment;
  * @author <a href=mailto:piratebase@sina.com>Struct chen</a>
  */
 public class PreparedStatmentMessageHandler extends QueryCommandMessageHandler {
-
+	
+	private List<byte[]> preparedStatmentBytes = new ArrayList<byte[]>();
     static class PreparedStatmentSessionStatus extends SessionStatus {
 
         public static final int PREPAED_PARAMETER_EOF = 2048;
@@ -170,6 +171,8 @@ public class PreparedStatmentMessageHandler extends QueryCommandMessageHandler {
                  * ok.statementHandlerId = preparedStatmentInfo.getStatmentId(); preparedStatmentInfo.setOkPrepared(ok);
                  * message = ok.toByteBuffer(toConn).array(); }
                  */
+            	//source.get
+            	preparedStatmentBytes.add(message);
                 return;
             }
         } else {
@@ -210,4 +213,7 @@ public class PreparedStatmentMessageHandler extends QueryCommandMessageHandler {
         return new PreparedStatmentConnectionStatuts(conn, this.preparedStatmentInfo);
     }
 
+    public List<byte[]> getPreparedStatmentBytes(){
+    	return this.preparedStatmentBytes;
+    }
 }
