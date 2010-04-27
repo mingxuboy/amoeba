@@ -256,7 +256,6 @@ public abstract class Connection implements NetEventHandler {
                 byte[] msg = new byte[bytesIn];
                 _fin.read(msg);
                 doReceiveMessage(msg);
-                //messageProcess(msg);
             }
             if(_inQueue.size()>0){
             	messageProcess();
@@ -275,6 +274,7 @@ public abstract class Connection implements NetEventHandler {
             // deal with the failure
             handleFailure(ioe);
         } catch (Exception exception) {
+        	logger.error("Error reading message from socket [channel=" + StringUtil.safeToString(_channel) + ", error=" + exception + "].", exception);
             handleFailure(exception);
         }
 
