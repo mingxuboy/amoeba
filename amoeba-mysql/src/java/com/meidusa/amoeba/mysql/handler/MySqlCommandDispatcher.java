@@ -109,9 +109,17 @@ public class MySqlCommandDispatcher implements MessageHandler {
 	                    }
 	                }
 	            } else if (MysqlPacketBuffer.isPacketType(message, QueryCommandPacket.COM_STMT_PREPARE)) {
-	            	QueryRouter router = ProxyRuntimeContext.getInstance().getQueryRouter();
+	            	
+	                PreparedStatmentInfo preparedInf = conn.getPreparedStatmentInfo(command.query);
+	                if(preparedInf.getByteBuffer() != null && preparedInf.getByteBuffer().length >0){
+	                	conn.postMessage(preparedInf.getByteBuffer());
+	                	return;
+	                }
+	                
+	                QueryRouter router = ProxyRuntimeContext.getInstance().getQueryRouter();
 	                Tuple<Statment,ObjectPool[]> tuple = router.doRoute(conn, command.query, false, null);
-	            	PreparedStatmentMessageHandler handler = new PreparedStatmentMessageHandler(conn,null,tuple.left, message , new ObjectPool[]{tuple.right[0]}, timeout);
+	                
+	            	PreparedStatmentMessageHandler handler = new PreparedStatmentMessageHandler(conn,preparedInf,tuple.left, message , new ObjectPool[]{tuple.right[0]}, timeout,false);
 	            	if (handler instanceof Sessionable) {
 	                    Sessionable session = (Sessionable) handler;
 	                    try {
@@ -122,10 +130,10 @@ public class MySqlCommandDispatcher implements MessageHandler {
 	                        throw e;
 	                    }
 	                }
-	            	List<byte[]> byts = handler.getPreparedStatmentBytes();
+	            	/*List<byte[]> byts = handler.getPreparedStatmentBytes();
 	                PreparedStatmentInfo preparedInf = conn.getPreparedStatmentInfo(command.query,byts);
 	                byte[] buffer = preparedInf.getByteBuffer();
-	                conn.postMessage(buffer);
+	                conn.postMessage(buffer);*/
 	                return;
 	            } else if (MysqlPacketBuffer.isPacketType(message, QueryCommandPacket.COM_STMT_EXECUTE)) {
 	            	
@@ -208,6 +216,7 @@ public class MySqlCommandDispatcher implements MessageHandler {
 	            error.packetId = 1;
 	            error.sqlstate = "42000";
 	            error.serverErrorMessage = e.getMessage();
+	            e.printStackTrace();
 	            conn.postMessage(error.toByteBuffer(connection).array());
 	            logger.error("messageDispate error", e);
 	        }
@@ -231,7 +240,7 @@ public class MySqlCommandDispatcher implements MessageHandler {
 			
 			if("LAST_INSERT_ID".equalsIgnoreCase(entry.getValue().getName())){
 				BindValue value = new BindValue();
-				value.bufferType = MysqlDefs.FIELD_TYPE_LONG;
+				value.bufferType = MysqlDefs.FIELD_TYPE_LONGLONG;
 				value.longBinding = conn.getLastInsertId();
 				value.scale = 20;
 				value.isSet = true;
@@ -241,7 +250,7 @@ public class MySqlCommandDispatcher implements MessageHandler {
 			}else if("@@IDENTITY".equalsIgnoreCase(entry.getValue().getName())){
 
 				BindValue value = new BindValue();
-				value.bufferType = MysqlDefs.FIELD_TYPE_LONG;
+				value.bufferType = MysqlDefs.FIELD_TYPE_LONGLONG;
 				value.longBinding = conn.getLastInsertId();
 				value.scale = 20;
 				value.isSet = true;
@@ -259,7 +268,7 @@ public class MySqlCommandDispatcher implements MessageHandler {
 				field.name = (alias == null?entry.getValue().getName():alias);
 			}
 			
-			field.type = MysqlDefs.FIELD_TYPE_LONG;
+			field.type = MysqlDefs.FIELD_TYPE_LONGLONG;
 			field.catalog = "def";
 			field.length = 20;
 			lastPacketResult.fieldPackets[index] = field; 

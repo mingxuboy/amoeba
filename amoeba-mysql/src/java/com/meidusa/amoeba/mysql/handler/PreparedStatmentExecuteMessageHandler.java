@@ -65,7 +65,7 @@ public class PreparedStatmentExecuteMessageHandler extends PreparedStatmentMessa
 	/** 当前的请求数据包 */
 	
 	public PreparedStatmentExecuteMessageHandler(MysqlClientConnection source,PreparedStatmentInfo preparedStatmentInfo,Statment statment,byte[] query,ObjectPool[] pools,long timeout){
-		super(source,preparedStatmentInfo,statment,query,pools,timeout);
+		super(source,preparedStatmentInfo,statment,query,pools,timeout,true);
 	}
 
 	protected void appendPreMainCommand(){

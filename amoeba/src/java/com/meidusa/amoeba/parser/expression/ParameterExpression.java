@@ -26,7 +26,7 @@ public class ParameterExpression extends Expression {
 	@SuppressWarnings("unchecked")
 	@Override
 	public Comparable evaluate(Object[] parameters) {
-		if(parameters == null){
+		if(parameters == null || parameters.length ==0){
 			return null;
 		}
 		if(parameters[index] instanceof Comparable){
