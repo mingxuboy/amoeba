@@ -13,6 +13,7 @@
  */
 package com.meidusa.amoeba.mysql.handler;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -51,13 +52,14 @@ public class PreparedStatmentInfo {
 
     private long   statmentId;
 
+    public List<byte[]> preparedPackets = new ArrayList<byte[]>();
     private Lock   typesLock = new ReentrantLock(false);
 
     public PreparedStatmentInfo(DatabaseConnection conn, long id, String preparedSql)throws ParseException{
     	statment = ProxyRuntimeContext.getInstance().getQueryRouter().parseSql(conn, preparedSql);
-        PacketBuffer buffer = new AbstractPacketBuffer(2048);
         statmentId = id;
         this.preparedStatment = preparedSql;
+        /* PacketBuffer buffer = new AbstractPacketBuffer(2048);
         OKforPreparedStatementPacket okPaket = new OKforPreparedStatementPacket();
         okPaket.columns = 1;
         okPaket.packetId = 1;
@@ -93,7 +95,7 @@ public class PreparedStatmentInfo {
             eof.serverStatus = 2;
             buffer.writeBytes(eof.toByteBuffer(conn).array());
         }
-        packetBuffer = buffer.toByteBuffer().array();
+        packetBuffer = buffer.toByteBuffer().array();*/
     }
     
     public PreparedStatmentInfo (DatabaseConnection conn,long id, String preparedSql,List<byte[]> messageList) throws ParseException{
@@ -135,6 +137,15 @@ public class PreparedStatmentInfo {
     }
 
     public byte[] getByteBuffer() {
+    	if(packetBuffer == null){
+    		if(preparedPackets.size() >0){
+	    		PacketBuffer buffer = new AbstractPacketBuffer(2048);
+	    		for(byte[] message : preparedPackets){
+	            	buffer.writeBytes(message);
+	            }
+	            packetBuffer = buffer.toByteBuffer().array();
+    		}
+    	}
         return packetBuffer;
     }
 
@@ -149,6 +160,9 @@ public class PreparedStatmentInfo {
         return preparedStatment;
     }
 
+    public void addPacket(byte[] packet){
+    	preparedPackets.add(packet);
+    }
     public void setPreparedStatment(String preparedStatment) {
         this.preparedStatment = preparedStatment;
     }

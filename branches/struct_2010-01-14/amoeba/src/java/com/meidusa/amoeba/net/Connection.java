@@ -274,6 +274,8 @@ public abstract class Connection implements NetEventHandler {
             }
             // deal with the failure
             handleFailure(ioe);
+        } catch (Exception exception) {
+            handleFailure(exception);
         }
 
         return bytesInTotle;
