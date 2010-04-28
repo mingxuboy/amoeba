@@ -102,7 +102,7 @@ public class MysqlClientAuthenticator extends DummyAuthenticator implements MySq
 				}
 			}else{
 				rdata.code = AuthResponseData.ERROR;
-				rdata.message = "Access denied for user '"+autheticationPacket.user+"'@'"+ conn.getChannel().socket().getLocalAddress().getHostName() +"'"
+				rdata.message = "Access denied for user '"+autheticationPacket.user+"'@'"+ conn.getSocketId() +"'"
 				+(autheticationPacket.encryptedPassword !=null?"(using password: YES)":"");
 			}
 			

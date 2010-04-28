@@ -124,8 +124,7 @@ public class ConnectionManager extends LoopingThread implements Reporter, Initia
                     if (handler instanceof Connection) {
                     	Connection conn = (Connection) handler;
                     	long idlesecond = (iterStamp - conn._lastEvent)/1000;
-                    	logger.warn("Disconnecting non-communicative server [conn=" + this
-            					+ (conn.getChannel() != null?","+conn.getChannel().socket():", socket closed!") +", idle=" + idlesecond + " s]. life="+((System.currentTimeMillis()-conn._createTime)/1000) +" s");
+                    	logger.warn("Disconnecting non-communicative server [manager=[" + this + "] conn=["+conn.toString()+"], socket closed!" +", idle=" + idlesecond + " s]. life="+((System.currentTimeMillis()-conn._createTime)/1000) +" s");
 
                         closeConnection((Connection) handler, null);
                     }
@@ -290,7 +289,7 @@ public class ConnectionManager extends LoopingThread implements Reporter, Initia
     protected void registerConnection(Connection connection, int key) {
         SocketChannel channel = connection.getChannel();
         if (logger.isDebugEnabled()) {
-            logger.debug("[" + this.getName() + "] registed Connection[" + channel.socket().getInetAddress().getHostAddress() + ":" + channel.socket().getPort() + "] connected!");
+            logger.debug("[" + this.getName() + "] registed Connection[" + connection.toString() + "] connected!");
         }
         SelectionKey selkey = null;
         try {
