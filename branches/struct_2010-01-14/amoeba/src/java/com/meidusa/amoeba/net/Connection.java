@@ -160,7 +160,7 @@ public abstract class Connection implements NetEventHandler {
         try {
             // we shouldn't be closed twice
             if (isClosed()) {
-                logger.warn("Attempted to re-close connection " + this + ".");
+                logger.warn("Attempted to re-close connection ["+ toString() + "]");
                 Thread.dumpStack();
                 return;
             }
@@ -186,7 +186,7 @@ public abstract class Connection implements NetEventHandler {
 	            _selkey = null;
 	        }
         }catch(Exception e){
-        	logger.warn("Error cancel connection selectkey [conn=" + this + ", error=" + e + "].");
+        	logger.warn("Error cancel connection selectkey [conn=" + toString() + "] error=" + e + "].");
         }
         
         if(logger.isDebugEnabled()){
@@ -195,7 +195,7 @@ public abstract class Connection implements NetEventHandler {
         try {
             _channel.close();
         } catch (IOException ioe) {
-            logger.warn("Error closing connection [conn=" + this + ", error=" + ioe + "].");
+            logger.warn("Error closing connection ["+ toString() + "], error=" + ioe + "].");
         }
 
         if (exception != null) {
@@ -269,12 +269,12 @@ public abstract class Connection implements NetEventHandler {
             String msg = ioe.getMessage();
 
             if (msg == null || msg.indexOf("reset by peer") == -1) {
-                logger.info("Error reading message from socket [channel=" + StringUtil.safeToString(_channel) + ", error=" + ioe + "].", ioe);
+                logger.info("Error reading message from connection ["+ toString() + "], error=" + ioe + "].", ioe);
             }
             // deal with the failure
             handleFailure(ioe);
         } catch (Exception exception) {
-        	logger.error("Error reading message from socket [channel=" + StringUtil.safeToString(_channel) + ", error=" + exception + "].", exception);
+        	logger.error("Error reading message from connection ["+ toString() + "], error=" + exception + "].", exception);
             handleFailure(exception);
         }
 
@@ -390,4 +390,16 @@ public abstract class Connection implements NetEventHandler {
 
     }
 
+    public String getSocketId(){
+    	return this.host+":"+this.port;
+    }
+    public String toString(){
+    	StringBuffer buffer = new StringBuffer();
+    	buffer.append(this.getClass().getCanonicalName());
+    	buffer.append("@").append(this.host).append(":").append(this.port);
+    	buffer.append(",hashcode=").append(this.hashCode());
+    	
+    	return buffer.toString();
+    	
+    }
 }

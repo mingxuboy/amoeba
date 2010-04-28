@@ -59,6 +59,7 @@ public class PreparedStatmentInfo {
     	statment = ProxyRuntimeContext.getInstance().getQueryRouter().parseSql(conn, preparedSql);
         statmentId = id;
         this.preparedStatment = preparedSql;
+        parameterCount = ProxyRuntimeContext.getInstance().getQueryRouter().parseParameterCount(conn, preparedSql);
         /* PacketBuffer buffer = new AbstractPacketBuffer(2048);
         OKforPreparedStatementPacket okPaket = new OKforPreparedStatementPacket();
         okPaket.columns = 1;

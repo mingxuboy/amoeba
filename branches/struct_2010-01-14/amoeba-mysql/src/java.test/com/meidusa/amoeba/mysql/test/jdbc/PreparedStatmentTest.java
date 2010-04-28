@@ -32,12 +32,14 @@ public class PreparedStatmentTest {
         
         conn = DriverManager.getConnection("jdbc:mysql://127.0.0.1:8066/test?useUnicode=true&characterEncoding=utf-8&useServerPrepStmts=true", "sdfriend", "sdfriend");
         try {
-        	for(int i=2800;i<2900;i++){
-            statment = conn.prepareStatement("select ID, TOPIC_ID, CREATE_TIME, TOPIC_CONTENT,LAST_MESSAGE_TIME,MESSAGE_COUNT  from SD_MESSAGE.TOPIC_CONTENT   where TOPIC_ID = ?");
-            statment.setString(1, "bf016b7153444c228b8b0bdc3096f67e");
+        	for(int i=0;i<1;i++){
+            statment = conn.prepareStatement("SELECT ID, SDID, F_SDID, APP_ID, RESERVE1, RESERVE2, RESERVE3 FROM SD_RELATION.RELATION_ORIGIN WHERE SDID =? AND F_SDID=? AND APP_ID = ?");
+            statment.setLong(1, 111111);
+            statment.setLong(2, 123);
+            statment.setLong(3, 112);
             ResultSet rs = statment.executeQuery();
             while(rs.next()){
-            	System.out.println(rs.getString("TOPIC_CONTENT"));
+            	System.out.println(rs.getString("ID"));
             }
            if (statment != null) {
                try {
@@ -45,7 +47,7 @@ public class PreparedStatmentTest {
                } catch (Exception e) {
                }
            }
-           statment = conn.prepareStatement("select LAST_INSERT_ID() as id");
+          /* statment = conn.prepareStatement("select LAST_INSERT_ID() as id");
            result = statment.executeQuery();
            result.next();
            Object lastInsertId = result.getLong("id");
@@ -78,7 +80,7 @@ public class PreparedStatmentTest {
                    statment.close();
                } catch (Exception e) {
                }
-           }
+           }*/
         }
         } catch (Exception e) {
             e.printStackTrace();

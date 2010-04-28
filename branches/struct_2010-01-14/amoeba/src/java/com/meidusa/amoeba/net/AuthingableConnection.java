@@ -47,7 +47,7 @@ public abstract class AuthingableConnection extends Connection implements Messag
 			this.notifyAll();
 			if(logger.isDebugEnabled()){
 				try{
-				logger.debug(this.toString()+" , authenticated: "+ authenticated +" (" + (this.getChannel()!= null?this.getChannel().socket().getInetAddress().toString():"")+")");
+				logger.debug(this.toString()+" , authenticated: "+ authenticated +" (" + toString()+")");
 				}catch(Exception e){};
 			}
 		}
@@ -64,7 +64,7 @@ public abstract class AuthingableConnection extends Connection implements Messag
 		}
 		
 		if(!authenticatedSeted){
-			logger.warn("authenticate to server:"+(this._channel!= null?this._channel.socket():"") +" time out");
+			logger.warn("authenticate to server:"+toString() +" time out");
 		}
 		return authenticated;
 	}
