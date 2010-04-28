@@ -274,6 +274,7 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 	protected Map<Connection,MessageHandler> handlerMap = new HashMap<Connection,MessageHandler>();
 	private PacketBuffer buffer = new AbstractPacketBuffer(1400);
 	private boolean started;
+	private long lastTimeMillis = System.currentTimeMillis();
 	public CommandMessageHandler(final MysqlClientConnection source,byte[] query,Statment statment, ObjectPool[] pools,long timeout){
 		handlerMap.put(source, source.getMessageHandler());
 		source.setMessageHandler(this);
@@ -408,8 +409,8 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 	
 	public synchronized void handleMessage(Connection fromConn) {
 		byte[] message = null;
+		lastTimeMillis = System.currentTimeMillis();
 		while((message = fromConn.getInQueue().getNonBlocking()) != null){
-			
 			if(fromConn == source){
 				CommandInfo info = new CommandInfo();
 				info.setBuffer(message);
@@ -806,8 +807,9 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 				 * 避免由于各种原因造成服务器端没有发送数据或者已经结束的会话而ServerConnection无法返回Pool中。
 				 */
 				return (now - endTime)>15000;
+			}else{
+				return (now - lastTimeMillis) > 60 * 1000;
 			}
-			return false;
 		}
 	}
 
