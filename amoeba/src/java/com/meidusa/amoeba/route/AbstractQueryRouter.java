@@ -463,7 +463,7 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable 
                                 if (pools == null || pools.length == 0) {
                                     pools = tableRule.defaultPools;
                                 }
-                                logger.warn("no rule matched, using tableRule:[" + tableRule.table.getName() + "] defaultPools");
+                                logger.warn("sql=["+sql+"]no rule matched, using tableRule:[" + tableRule.table.getName() + "] defaultPools");
 
                                 for (String poolName : pools) {
                                     if (!poolNames.contains(poolName)) {
