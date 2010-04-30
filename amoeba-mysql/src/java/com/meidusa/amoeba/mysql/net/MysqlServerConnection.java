@@ -85,6 +85,9 @@ public class MysqlServerConnection extends MysqlConnection implements MySqlPacke
 				if(status == Status.WAITE_HANDSHAKE){
 					HandshakePacket handpacket = new HandshakePacket();
 					handpacket.init(buffer);
+					if(logger.isDebugEnabled()){
+						
+					}
 					this.serverCapabilities = handpacket.serverCapabilities;
 			        this.serverVersion = handpacket.serverVersion;
 			        splitVersion();
@@ -308,8 +311,8 @@ public class MysqlServerConnection extends MysqlConnection implements MySqlPacke
         }
 		if(isAuthenticated()){
 			//处于使用中的链接， 如果超过5分钟没有发生网络IO，则需要关闭该链接 
+			long idleMillis = now - _lastEvent;
 			if(isActive()){
-				long idleMillis = now - _lastEvent;
 				if (idleMillis > 5 * 60 * 1000) {
 					return true;
 				}
@@ -320,7 +323,12 @@ public class MysqlServerConnection extends MysqlConnection implements MySqlPacke
 				 */
 				try{
 					Sessionable session = (Sessionable)_handler;
-					return session.checkIdle(now);
+					boolean sessionIdle = session.checkIdle(now);
+					if(sessionIdle){
+						logger.error("Session timeout. conn="+this.toString()+" ,idleMillis="+idleMillis);
+					}
+					
+					return sessionIdle;
 				}catch(ClassCastException castException){
 					return false;
 				}
