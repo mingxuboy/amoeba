@@ -88,4 +88,5 @@
 	<function name="USER" class="com.meidusa.amoeba.parser.function.UnknowableFunction"/>
 	<function name="UUID" class="com.meidusa.amoeba.parser.function.UnknowableFunction"/>
 	<function name="INET_ATON" class="com.meidusa.amoeba.parser.function.UnknowableFunction"/>
+	<function name="REPLACE" class="com.meidusa.amoeba.parser.function.UnknowableFunction"/>
 </amoeba:function>
