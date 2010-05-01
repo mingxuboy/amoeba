@@ -161,7 +161,6 @@ public class MultipleLoadBalanceObjectPool implements ObjectPool,Initialisable {
         ObjectPool pool = null;
         ObjectPool[] poolsTemp = runtimeObjectPools;
         if (poolsTemp.length == 0) {
-        	//HeartbeatManager.addPooltoHeartbeat(new MultipleHeartbeatDelayed(2, TimeUnit.SECONDS, this));
             throw new Exception("no valid pools");
         }
 
