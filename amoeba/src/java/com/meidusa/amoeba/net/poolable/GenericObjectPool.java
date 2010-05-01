@@ -391,7 +391,7 @@ public class GenericObjectPool extends org.apache.commons.pool.impl.GenericObjec
 
 	@Override
 	public void init() throws InitialisationException {
-		HeartbeatManager.addHeartbeat(new GenericHeartbeatDelayed(2, TimeUnit.SECONDS, this));
+		HeartbeatManager.addHeartbeat(new GenericHeartbeatDelayed(3, TimeUnit.SECONDS, this));
 	}
 
 	public static class GenericHeartbeatDelayed extends HeartbeatDelayed{
