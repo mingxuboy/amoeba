@@ -97,7 +97,7 @@
 		
 		<dbServer name="multiPool" virtual="true">
 			<poolConfig class="com.meidusa.amoeba.server.MultipleServerPool">
-				<!-- 负载均衡参数 1=ROUNDROBIN , 2=WEIGHTBASED -->
+				<!-- 负载均衡参数 1=ROUNDROBIN , 2=WEIGHTBASED , 3=HA-->
 				<property name="loadbalance">1</property>
 				
 				<!-- 参与该pool负载均衡的poolName列表以逗号分割 -->
