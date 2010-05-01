@@ -88,6 +88,19 @@ public interface ObjectPool extends org.apache.commons.pool.ObjectPool {
             this.sequenceNumber = sequencer.getAndIncrement();
         }
 
+	    public boolean equals(Object obj) {
+	    	if(obj instanceof HeartbeatDelayed){
+	    		HeartbeatDelayed other = (HeartbeatDelayed)obj;
+	    		return other.pool == this.pool && this.getClass() == obj.getClass();
+	    	}else{
+	    		return false;
+	    	}
+        }
+	    
+	    public int hashCode(){
+	    	return pool == null?this.getClass().hashCode():this.getClass().hashCode() + pool.hashCode();
+	    }
+	    
         public void setDelayedTime(long time, TimeUnit timeUnit) {
             NANO_ORIGIN = System.nanoTime();
             this.time = TimeUnit.NANOSECONDS.convert(time, timeUnit);
