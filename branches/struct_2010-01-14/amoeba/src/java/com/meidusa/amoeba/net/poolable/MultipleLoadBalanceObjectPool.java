@@ -18,10 +18,13 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.concurrent.Delayed;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.commons.pool.PoolableObjectFactory;
+
+import com.meidusa.amoeba.net.poolable.ObjectPool.STATUS;
 
 /**
  * <pre>
@@ -157,6 +160,7 @@ public class MultipleLoadBalanceObjectPool implements ObjectPool {
         ObjectPool pool = null;
         ObjectPool[] poolsTemp = runtimeObjectPools;
         if (poolsTemp.length == 0) {
+        	HeartbeatManager.addPooltoHeartbeat(new MultipleHeartbeatDelayed(2, TimeUnit.SECONDS, this));
             throw new Exception("no valid pools");
         }
 
@@ -181,6 +185,7 @@ public class MultipleLoadBalanceObjectPool implements ObjectPool {
         try {
             return pool.borrowObject();
         } catch (Exception e) {
+        	afterChecked(pool);
         	HeartbeatManager.addPooltoHeartbeat(new HeartbeatDelayed(2, TimeUnit.SECONDS, pool));
             throw e;
         }
@@ -263,4 +268,23 @@ public class MultipleLoadBalanceObjectPool implements ObjectPool {
         runtimeObjectPools = poolList.toArray(new ObjectPool[poolList.size()]);
 	}
 
+	public static class MultipleHeartbeatDelayed extends HeartbeatDelayed {
+
+		public MultipleHeartbeatDelayed(long nsTime, TimeUnit timeUnit,
+				MultipleLoadBalanceObjectPool pool) {
+			super(nsTime, timeUnit, pool);
+		}
+		
+		public STATUS doCheck() {
+			MultipleLoadBalanceObjectPool mult = (MultipleLoadBalanceObjectPool)this.getPool();
+			mult.afterChecked(mult);
+			if(mult.runtimeObjectPools!= null && mult.runtimeObjectPools.length >0){
+				mult.setValid(true);
+				return STATUS.VALID;
+			}else{
+				mult.setValid(false);
+				return STATUS.INVALID;
+			}
+		}
+	}
 }
