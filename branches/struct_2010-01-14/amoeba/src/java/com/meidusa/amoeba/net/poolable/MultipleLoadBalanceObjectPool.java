@@ -302,7 +302,7 @@ public class MultipleLoadBalanceObjectPool implements ObjectPool,Initialisable {
 
 	@Override
 	public void init() throws InitialisationException {
-		HeartbeatManager.addHeartbeat(new MultipleHeartbeatDelayed(1, TimeUnit.SECONDS, this));
+		HeartbeatManager.addHeartbeat(new MultipleHeartbeatDelayed(3, TimeUnit.SECONDS, this));
 	}
 
 	@Override
