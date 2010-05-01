@@ -28,16 +28,13 @@
  */
 package com.meidusa.amoeba.net.poolable;
 
-import java.util.Iterator;
 import java.util.NoSuchElementException;
-import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.commons.pool.PoolableObjectFactory;
 
-import com.meidusa.amoeba.net.poolable.ObjectPool.HeartbeatDelayed;
+import com.meidusa.amoeba.util.Initialisable;
+import com.meidusa.amoeba.util.InitialisationException;
 
 /**
  * A configurable {@link ObjectPool} implementation.
@@ -196,8 +193,7 @@ import com.meidusa.amoeba.net.poolable.ObjectPool.HeartbeatDelayed;
  * @version $Revision: 609487 $ $Date: 2008-01-06 19:36:42 -0700 (Sun, 06 Jan 2008) $
  * @since Pool 1.0
  */
-@SuppressWarnings("unchecked")
-public class GenericObjectPool extends org.apache.commons.pool.impl.GenericObjectPool implements ObjectPool {
+public class GenericObjectPool extends org.apache.commons.pool.impl.GenericObjectPool implements ObjectPool,Initialisable {
    
     //--- constructors -----------------------------------------------
 
@@ -356,13 +352,21 @@ public class GenericObjectPool extends org.apache.commons.pool.impl.GenericObjec
     
     private boolean isValid = true;
     private boolean enable;
-    
+    private String name;
 	public boolean isEnable() {
 		return enable;
 	}
 
 	public void setEnable(boolean isEnabled) {
 		this.enable = isEnabled;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
 	}
 
 	public Object borrowObject() throws Exception{
@@ -373,7 +377,6 @@ public class GenericObjectPool extends org.apache.commons.pool.impl.GenericObjec
 			return super.borrowObject();
 		} catch (Exception e) {
 			isValid = false;
-			HeartbeatManager.addPooltoHeartbeat(new HeartbeatDelayed(5, TimeUnit.SECONDS, this));
 			throw e;
 		}
 	}
@@ -382,12 +385,47 @@ public class GenericObjectPool extends org.apache.commons.pool.impl.GenericObjec
 		return isValid;
 	}
 
-	public void afterChecked(ObjectPool objectPool) {
-		
-	}
-
 	public void setValid(boolean valid) {
-		this.isValid = true;
+		this.isValid = valid;
 	}
 
+	@Override
+	public void init() throws InitialisationException {
+		HeartbeatManager.addHeartbeat(new GenericHeartbeatDelayed(2, TimeUnit.SECONDS, this));
+	}
+
+	public static class GenericHeartbeatDelayed extends HeartbeatDelayed{
+		public GenericHeartbeatDelayed(long nsTime, TimeUnit timeUnit,
+				ObjectPool pool) {
+			super(nsTime, timeUnit, pool);
+		}
+
+		 public STATUS doCheck() {
+			return super.doCheck();
+		 }
+		
+		public boolean isCycle(){
+			return true;
+		}
+	}
+
+	@Override
+	public boolean validate() {
+		Object object = null;
+		try {
+			object = super.borrowObject();
+			this.setValid(true);
+			return true;
+		} catch (Exception e) {
+			this.setValid(false);
+			return false;
+		}finally{
+			if(object != null){
+				try {
+					this.returnObject(object);
+				} catch (Exception e) {
+				}
+			}
+		}
+	}
 }

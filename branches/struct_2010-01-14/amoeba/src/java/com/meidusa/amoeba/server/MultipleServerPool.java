@@ -46,5 +46,6 @@ public class MultipleServerPool extends MultipleLoadBalanceObjectPool implements
 			}
 			this.setObjectPools(objectPools);
 		}
+		super.init();
 	}
 }
