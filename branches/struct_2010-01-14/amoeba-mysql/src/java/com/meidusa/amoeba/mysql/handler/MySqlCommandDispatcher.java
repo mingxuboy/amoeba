@@ -117,7 +117,7 @@ public class MySqlCommandDispatcher implements MessageHandler {
 	                }
 	                
 	                QueryRouter router = ProxyRuntimeContext.getInstance().getQueryRouter();
-	                Tuple<Statment,ObjectPool[]> tuple = router.doRoute(conn, command.query, false, null);
+	                Tuple<Statment,ObjectPool[]> tuple = router.doRoute(conn, command.query, true, null);
 	                
 	            	PreparedStatmentMessageHandler handler = new PreparedStatmentMessageHandler(conn,preparedInf,tuple.left, message , new ObjectPool[]{tuple.right[0]}, timeout,false);
 	            	if (handler instanceof Sessionable) {
