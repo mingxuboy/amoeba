@@ -308,8 +308,11 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable 
                                         poolNames.add(poolName);
                                     }
                                 }
-                                if (logger.isDebugEnabled()) {
-                                    logger.debug("[" + sql + "] no Column rule, using table:" + tableRule.table + " default rules:" + Arrays.toString(tableRule.defaultPools));
+                                
+                                if(!ispreparedStatment){
+	                                if (logger.isDebugEnabled()) {
+	                                    logger.debug("[" + sql + "] no Column rule, using table:" + tableRule.table + " default rules:" + Arrays.toString(tableRule.defaultPools));
+	                                }
                                 }
                                 continue;
                             }
@@ -463,8 +466,10 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable 
                                 if (pools == null || pools.length == 0) {
                                     pools = tableRule.defaultPools;
                                 }
-                                logger.warn("sql=["+sql+"]no rule matched, using tableRule:[" + tableRule.table.getName() + "] defaultPools");
-
+                                
+                                if(!ispreparedStatment){
+                                	logger.warn("sql=["+sql+"]no rule matched, using tableRule:[" + tableRule.table.getName() + "] defaultPools");
+                                }
                                 for (String poolName : pools) {
                                     if (!poolNames.contains(poolName)) {
                                         poolNames.add(poolName);
