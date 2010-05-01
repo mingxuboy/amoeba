@@ -5,6 +5,8 @@ amoeba for mysql
 2、支持PHP的PDO，个人不是PHP程序员，希望有更多关于PDO连接amoeba的反馈
 3、增强了amoeba与mysql的连接池心跳检测机制
 4、另外提醒使用amoeba的同仁，建议采用prepared statement来访问amoeba，这样amoeba就不需要重复解析sql语句。会节约不少的资源
+5、amoeba的日志输出，默认级别是info甚至更高。需要看到更详细的日志信息，请修改amoeba下面的conf/log4j.xml
+6、稳定性增强
 
 2010-04-05 amoeba-mysql-1.2.0-RC1
 1、添加规则函数case、range、增加表达式   （boolean表达式 ? 表达式1: 表达式2）
