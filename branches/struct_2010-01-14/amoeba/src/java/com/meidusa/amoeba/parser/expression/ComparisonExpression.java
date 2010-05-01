@@ -29,7 +29,7 @@ public class ComparisonExpression extends Expression {
 		if(expression != null){
 			return new Comparative(comparison,expression.evaluate(parameters));
 		}else{
-			new Exception().printStackTrace();
+			//new Exception().printStackTrace();
 			return null;
 		}
 	}
