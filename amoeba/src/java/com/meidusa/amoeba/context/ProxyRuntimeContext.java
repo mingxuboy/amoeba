@@ -205,6 +205,7 @@ public abstract class ProxyRuntimeContext implements Reporter {
             try {
                 BeanObjectEntityConfig poolConfig = dbServerConfig.getPoolConfig();
                 ObjectPool pool = (ObjectPool) poolConfig.createBeanObject(false);
+                pool.setName(poolConfig.getName());
                 if (pool instanceof Initialisable) {
                     initialisableList.add((Initialisable) pool);
                 }

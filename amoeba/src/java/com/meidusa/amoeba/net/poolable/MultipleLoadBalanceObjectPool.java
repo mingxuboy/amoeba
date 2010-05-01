@@ -43,18 +43,14 @@ public class MultipleLoadBalanceObjectPool implements ObjectPool,Initialisable {
     public static final int LOADBALANCING_WEIGHTBASED = 2;
     public static final int LOADBALANCING_HA          = 3;
     private boolean         enable;
-
+    private String name;
     public class ObjectPoolWrapper implements ObjectPool{
     	ObjectPool source;
     	public ObjectPoolWrapper(ObjectPool objectPool){
     		this.source = objectPool;
     	}
-		public void afterChecked(ObjectPool pool) {
-			this.source.afterChecked(pool);
-			MultipleLoadBalanceObjectPool.this.afterChecked(pool);
-		}
 
-		public boolean isEnable() {
+    	public boolean isEnable() {
 			return this.source.isEnable();
 		}
 
@@ -107,6 +103,20 @@ public class MultipleLoadBalanceObjectPool implements ObjectPool,Initialisable {
 		public void setFactory(PoolableObjectFactory factory)
 				throws IllegalStateException, UnsupportedOperationException {
 			this.source.setFactory(factory);
+		}
+		@Override
+		public boolean validate() {
+			return source.validate();
+		}
+
+		@Override
+		public String getName() {
+			return source.getName();
+		}
+
+		@Override
+		public void setName(String name) {
+			source.setName(name);
 		}
     	
     }
@@ -182,19 +192,15 @@ public class MultipleLoadBalanceObjectPool implements ObjectPool,Initialisable {
             throw new Exception("loadbalance parameter error,parameter loadbalance in [1,2,3]");
         }
 
-        try {
-            return pool.borrowObject();
-        } catch (Exception e) {
-        	afterChecked(pool);
-        	HeartbeatManager.addPooltoHeartbeat(new HeartbeatDelayed(2, TimeUnit.SECONDS, pool));
-            throw e;
-        }
+        return pool.borrowObject();
+        
+
     }
 
     public void initAllPools() {
-        for (ObjectPool pool : this.objectPools) {
+        /*for (ObjectPool pool : this.objectPools) {
         	HeartbeatManager.addPooltoHeartbeat(new HeartbeatDelayed(2, TimeUnit.SECONDS, pool));
-        }
+        }*/
     }
 
     public void clear() throws Exception, UnsupportedOperationException {
@@ -258,7 +264,7 @@ public class MultipleLoadBalanceObjectPool implements ObjectPool,Initialisable {
 		this.valid = valid;
 	}
 
-	public synchronized void afterChecked(ObjectPool pool) {
+/*	public synchronized void afterChecked(ObjectPool pool) {
 		List<ObjectPool> poolList = new ArrayList<ObjectPool>();
 		for(ObjectPool object :this.objectPools){
 			if(object.isValid()){
@@ -266,7 +272,7 @@ public class MultipleLoadBalanceObjectPool implements ObjectPool,Initialisable {
 			}
 		}
         runtimeObjectPools = poolList.toArray(new ObjectPool[poolList.size()]);
-	}
+	}*/
 
 	public static class MultipleHeartbeatDelayed extends HeartbeatDelayed {
 
@@ -280,20 +286,48 @@ public class MultipleLoadBalanceObjectPool implements ObjectPool,Initialisable {
 		}
 		
 		public STATUS doCheck() {
+			return super.doCheck();
+		}
+		/*public STATUS doCheck() {
 			MultipleLoadBalanceObjectPool mult = (MultipleLoadBalanceObjectPool)this.getPool();
-			mult.afterChecked(mult);
-			if(mult.runtimeObjectPools!= null && mult.runtimeObjectPools.length >0){
+			if(mult.validate()){
 				mult.setValid(true);
 				return STATUS.VALID;
 			}else{
 				mult.setValid(false);
 				return STATUS.INVALID;
 			}
-		}
+		}*/
 	}
 
 	@Override
 	public void init() throws InitialisationException {
-		HeartbeatManager.addPooltoHeartbeat(new MultipleHeartbeatDelayed(2, TimeUnit.SECONDS, this));
+		HeartbeatManager.addHeartbeat(new MultipleHeartbeatDelayed(1, TimeUnit.SECONDS, this));
+	}
+
+	@Override
+	public boolean validate() {
+		List<ObjectPool> poolList = new ArrayList<ObjectPool>();
+		for(ObjectPool object :this.objectPools){
+			if(object.isValid()){
+				poolList.add(object);
+			}
+		}
+		ObjectPool[] poolsTemp = runtimeObjectPools = poolList.toArray(new ObjectPool[poolList.size()]);
+        if (poolsTemp.length == 0) {
+            return false;
+        }else{
+        	return true;
+        }
+	}
+
+	@Override
+	public String getName() {
+		return name;
+	}
+
+	@Override
+	public void setName(String name) {
+		this.name = name;;
 	}
 }

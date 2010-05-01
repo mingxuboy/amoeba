@@ -23,7 +23,11 @@ import java.util.concurrent.Delayed;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
+import org.apache.log4j.Logger;
+
+
 public interface ObjectPool extends org.apache.commons.pool.ObjectPool {
+	static Logger logger = Logger.getLogger(ObjectPool.class); 
 	static enum STATUS {
 		INVALID, VALID
 	};
@@ -38,31 +42,34 @@ public interface ObjectPool extends org.apache.commons.pool.ObjectPool {
 
             public void run() {
                 HeartbeatDelayed delayed = null;
-                try {
-                    while (true) {
+                while (true) {
+                	try{
                         delayed = HEART_BEAT_QUEUE.take();
                         STATUS status = delayed.doCheck();
+                        if(logger.isDebugEnabled()){
+                        	logger.debug("checked Pool poolName="+delayed.getPool().getName()+" ,Status="+status);
+                        }
                         if (status == STATUS.INVALID) {
                             //delayed.setDelayedTime(5, TimeUnit.SECONDS);
-                        	delayed.reset();
-                            HeartbeatManager.addPooltoHeartbeat(delayed);
-                            continue;
-                        }else{
-                        	delayed.pool.afterChecked(delayed.pool);
+                        	if(!delayed.isCycle()){
+                        		delayed.reset();
+                        		HeartbeatManager.addHeartbeat(delayed);
+                        	}
                         }
                         
                         if(delayed.isCycle()){
                         	delayed.reset();
-                        	HeartbeatManager.addPooltoHeartbeat(delayed);
+                        	HeartbeatManager.addHeartbeat(delayed);
                         }
-                    }
-                } catch (InterruptedException e) {
+                	}catch(Exception e){
+                		logger.error("check pool error",e);
+                	}
                 }
             }
         }.start();
     	}
     	
-    	public static void addPooltoHeartbeat(HeartbeatDelayed delay){
+    	public static void addHeartbeat(HeartbeatDelayed delay){
     		if(!HEART_BEAT_QUEUE.contains(delay)){
     			HEART_BEAT_QUEUE.offer(delay);
     		}
@@ -84,6 +91,7 @@ public interface ObjectPool extends org.apache.commons.pool.ObjectPool {
         private long                          nano_origin = System.nanoTime();
         private static final AtomicLong       sequencer   = new AtomicLong(0);
         private ObjectPool                    pool;
+        private long nextFireTime = nano_origin;
         
         public boolean isCycle(){
         	return false;
@@ -97,6 +105,7 @@ public interface ObjectPool extends org.apache.commons.pool.ObjectPool {
             this.time = TimeUnit.NANOSECONDS.convert(nsTime, timeUnit);
             this.pool = pool;
             this.sequenceNumber = sequencer.getAndIncrement();
+            nextFireTime = time + nano_origin;
         }
 
 	    public boolean equals(Object obj) {
@@ -115,72 +124,26 @@ public interface ObjectPool extends org.apache.commons.pool.ObjectPool {
         public void setDelayedTime(long time, TimeUnit timeUnit) {
             nano_origin = System.nanoTime();
             this.time = TimeUnit.NANOSECONDS.convert(time, timeUnit);
+            nextFireTime = time + nano_origin;
         }
         
         public void reset(){
         	nano_origin = System.nanoTime();
+        	nextFireTime = time + nano_origin;
         }
 
         public long getDelay(TimeUnit unit) {
             long d = unit.convert(time - now(), TimeUnit.NANOSECONDS);
             return d;
         }
-
-/*        protected synchronized ObjectPoolStatus statusCheck(ObjectPool pool) {
-            ObjectPoolStatus status = HearbeatManager.poolStatusMap.get(pool);
-            try {
-                Object object = pool.borrowObject();
-                pool.returnObject(object);
-                // 当前获得对象正常，如果前一状态是不可用的，则需要改变runtimeObjectPools成员。
-
-                if (status.status == ObjectPoolStatus.STATUS.INVALID) {
-                    status.status = ObjectPoolStatus.STATUS.VALID;
-                    ObjectPool[] pools = new ObjectPool[runtimeObjectPools.length + 1];
-                    int index = 0;
-                    for (Map.Entry<ObjectPool, ObjectPoolStatus> entry : HearbeatManager.poolStatusMap.entrySet()) {
-                        if (entry.getValue().status == ObjectPoolStatus.STATUS.VALID) {
-                            pools[index++] = entry.getKey();
-                        }
-                    }
-                    runtimeObjectPools = pools;
-                }
-            } catch (Exception e) {
-
-                // 如果无法获得对象，并且当前状态是可用的，则需要将该pool从 runtimeObjectPools中移出。
-                if (status.status == ObjectPoolStatus.STATUS.VALID) {
-                    status.status = ObjectPoolStatus.STATUS.INVALID;
-
-                    ObjectPool[] pools = new ObjectPool[runtimeObjectPools.length - 1];
-                    int index = 0;
-                    for (Map.Entry<ObjectPool, ObjectPoolStatus> entry : poolStatusMap.entrySet()) {
-                        if (entry.getValue().status == ObjectPoolStatus.STATUS.VALID) {
-                            pools[index++] = entry.getKey();
-                        }
-                    }
-                    runtimeObjectPools = pools;
-                }
-
-            }
-            status.lastCheckTime = System.currentTimeMillis();
-            return status;
-        }*/
         
         public STATUS doCheck() {
-        	Object object = null;
-			try {
-				object = pool.borrowObject();
+			if(pool.validate()){
 				pool.setValid(true);
 				return STATUS.VALID;
-			} catch (Exception e) {
+			}else{
 				pool.setValid(false);
 				return STATUS.INVALID;
-			}finally{
-				if(object != null){
-					try {
-						pool.returnObject(object);
-					} catch (Exception e) {
-					}
-				}
 			}
         }
 
@@ -188,7 +151,7 @@ public interface ObjectPool extends org.apache.commons.pool.ObjectPool {
             if (other == this) // compare zero ONLY if same object
             return 0;
             HeartbeatDelayed x = (HeartbeatDelayed) other;
-            long diff = time - x.time;
+            long diff = nextFireTime - x.nextFireTime;
             if (diff < 0) return -1;
             else if (diff > 0) return 1;
             else if (sequenceNumber < x.sequenceNumber) return -1;
@@ -217,5 +180,9 @@ public interface ObjectPool extends org.apache.commons.pool.ObjectPool {
 	
 	void setValid(boolean valid);
 	
-	public void afterChecked(ObjectPool pool);
+	public boolean validate();
+	
+	public String getName();
+	
+	public void setName(String name);
 }
