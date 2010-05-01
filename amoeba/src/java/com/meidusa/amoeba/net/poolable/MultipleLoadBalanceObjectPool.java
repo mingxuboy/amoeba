@@ -18,13 +18,11 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.concurrent.Delayed;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.commons.pool.PoolableObjectFactory;
 
-import com.meidusa.amoeba.net.poolable.ObjectPool.STATUS;
 
 /**
  * <pre>
