@@ -43,10 +43,17 @@ public interface ObjectPool extends org.apache.commons.pool.ObjectPool {
                         delayed = HEART_BEAT_QUEUE.take();
                         STATUS status = delayed.doCheck();
                         if (status == STATUS.INVALID) {
-                            delayed.setDelayedTime(5, TimeUnit.SECONDS);
+                            //delayed.setDelayedTime(5, TimeUnit.SECONDS);
+                        	delayed.reset();
                             HeartbeatManager.addPooltoHeartbeat(delayed);
+                            continue;
                         }else{
                         	delayed.pool.afterChecked(delayed.pool);
+                        }
+                        
+                        if(delayed.isCycle()){
+                        	delayed.reset();
+                        	HeartbeatManager.addPooltoHeartbeat(delayed);
                         }
                     }
                 } catch (InterruptedException e) {
@@ -74,10 +81,14 @@ public interface ObjectPool extends org.apache.commons.pool.ObjectPool {
         private long                          time;
         /** Sequence number to break ties FIFO */
         private final long                    sequenceNumber;
-        private long                          NANO_ORIGIN = System.nanoTime();
+        private long                          nano_origin = System.nanoTime();
         private static final AtomicLong       sequencer   = new AtomicLong(0);
         private ObjectPool                    pool;
-
+        
+        public boolean isCycle(){
+        	return false;
+        }
+        
         public ObjectPool getPool() {
 			return pool;
 		}
@@ -102,8 +113,12 @@ public interface ObjectPool extends org.apache.commons.pool.ObjectPool {
 	    }
 	    
         public void setDelayedTime(long time, TimeUnit timeUnit) {
-            NANO_ORIGIN = System.nanoTime();
+            nano_origin = System.nanoTime();
             this.time = TimeUnit.NANOSECONDS.convert(time, timeUnit);
+        }
+        
+        public void reset(){
+        	nano_origin = System.nanoTime();
         }
 
         public long getDelay(TimeUnit unit) {
@@ -184,7 +199,7 @@ public interface ObjectPool extends org.apache.commons.pool.ObjectPool {
          * Returns nanosecond time offset by origin
          */
         final long now() {
-            return System.nanoTime() - NANO_ORIGIN;
+            return System.nanoTime() - nano_origin;
         }
 
 	}

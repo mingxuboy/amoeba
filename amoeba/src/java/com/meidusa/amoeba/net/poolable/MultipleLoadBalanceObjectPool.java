@@ -23,6 +23,9 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.commons.pool.PoolableObjectFactory;
 
+import com.meidusa.amoeba.util.Initialisable;
+import com.meidusa.amoeba.util.InitialisationException;
+
 
 /**
  * <pre>
@@ -34,7 +37,7 @@ import org.apache.commons.pool.PoolableObjectFactory;
  * &#064;author &lt;a href=mailto:piratebase@sina.com&gt;Struct chen&lt;/a&gt;
  * </pre>
  */
-public class MultipleLoadBalanceObjectPool implements ObjectPool {
+public class MultipleLoadBalanceObjectPool implements ObjectPool,Initialisable {
 
     public static final int LOADBALANCING_ROUNDROBIN  = 1;
     public static final int LOADBALANCING_WEIGHTBASED = 2;
@@ -158,7 +161,7 @@ public class MultipleLoadBalanceObjectPool implements ObjectPool {
         ObjectPool pool = null;
         ObjectPool[] poolsTemp = runtimeObjectPools;
         if (poolsTemp.length == 0) {
-        	HeartbeatManager.addPooltoHeartbeat(new MultipleHeartbeatDelayed(2, TimeUnit.SECONDS, this));
+        	//HeartbeatManager.addPooltoHeartbeat(new MultipleHeartbeatDelayed(2, TimeUnit.SECONDS, this));
             throw new Exception("no valid pools");
         }
 
@@ -273,6 +276,10 @@ public class MultipleLoadBalanceObjectPool implements ObjectPool {
 			super(nsTime, timeUnit, pool);
 		}
 		
+		public boolean isCycle(){
+			return true;
+		}
+		
 		public STATUS doCheck() {
 			MultipleLoadBalanceObjectPool mult = (MultipleLoadBalanceObjectPool)this.getPool();
 			mult.afterChecked(mult);
@@ -284,5 +291,10 @@ public class MultipleLoadBalanceObjectPool implements ObjectPool {
 				return STATUS.INVALID;
 			}
 		}
+	}
+
+	@Override
+	public void init() throws InitialisationException {
+		HeartbeatManager.addPooltoHeartbeat(new MultipleHeartbeatDelayed(2, TimeUnit.SECONDS, this));
 	}
 }
