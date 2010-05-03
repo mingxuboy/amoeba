@@ -9,15 +9,36 @@
  * 	You should have received a copy of the GNU General Public License along with this program; 
  * if not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-package com.meidusa.amoeba.parser.statment;
+package com.meidusa.amoeba.parser.statement;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import com.meidusa.amoeba.parser.expression.Expression;
 
-public class StartTansactionStatment extends AbstractStatment  {
-
+/**
+ * 用于设置连接属性的query语句（比如：mysql的“set names utf8”之类的语句）
+ * @author <a href=mailto:piratebase@sina.com>Struct chen</a>
+ *
+ */
+public class PropertyStatement extends AbstractStatement  {
+	private Map<String,Expression> properties = new HashMap<String,Expression>();
+	
+	public void addProperty(String key,Expression value){
+		
+		this.properties.put(key==null?null:key.toLowerCase(), value);
+	}
+	
 	public Expression getExpression() {
-		// TODO Auto-generated method stub
 		return null;
+	}
+	
+	public Expression getValue(String key){
+		return this.properties.get(key==null?null:key.toLowerCase());
+	}
+
+	public Map<String, Expression> getProperties() {
+		return properties;
 	}
 
 }

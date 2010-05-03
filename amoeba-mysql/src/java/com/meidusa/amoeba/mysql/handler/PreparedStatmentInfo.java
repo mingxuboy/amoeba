@@ -27,7 +27,7 @@ import com.meidusa.amoeba.net.DatabaseConnection;
 import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
 import com.meidusa.amoeba.net.packet.PacketBuffer;
 import com.meidusa.amoeba.parser.ParseException;
-import com.meidusa.amoeba.parser.statment.Statment;
+import com.meidusa.amoeba.parser.statement.Statement;
 
 /**
  * @author <a href=mailto:piratebase@sina.com>Struct chen</a>
@@ -38,7 +38,7 @@ public class PreparedStatmentInfo {
      * 客户端发送过来的 prepared statment sql语句
      */
     private String preparedStatment;
-    private Statment statment;
+    private Statement statment;
 
     private int    parameterCount;
 
@@ -154,7 +154,7 @@ public class PreparedStatmentInfo {
         return statmentId;
     }
 
-    public Statment getStatment(){
+    public Statement getStatment(){
     	return statment;
     }
     public String getPreparedStatment() {

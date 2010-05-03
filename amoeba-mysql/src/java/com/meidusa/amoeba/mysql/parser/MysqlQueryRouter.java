@@ -20,8 +20,8 @@ import com.meidusa.amoeba.net.DatabaseConnection;
 import com.meidusa.amoeba.net.poolable.ObjectPool;
 import com.meidusa.amoeba.parser.Parser;
 import com.meidusa.amoeba.parser.expression.Expression;
-import com.meidusa.amoeba.parser.statment.PropertyStatment;
-import com.meidusa.amoeba.parser.statment.Statment;
+import com.meidusa.amoeba.parser.statement.PropertyStatement;
+import com.meidusa.amoeba.parser.statement.Statement;
 import com.meidusa.amoeba.route.AbstractQueryRouter;
 import com.meidusa.amoeba.util.Tuple;
 
@@ -37,7 +37,7 @@ public class MysqlQueryRouter extends AbstractQueryRouter{
 		return new MysqlParser(new StringReader(sql));
 	}
 
-	protected Tuple<Statment,ObjectPool[]> selectPool(DatabaseConnection connection,String sql,boolean ispreparedStatment,Object[] parameters){
+	protected Tuple<Statement,ObjectPool[]> selectPool(DatabaseConnection connection,String sql,boolean ispreparedStatment,Object[] parameters){
 		if(sql != null){
 			sql = sql.trim();
 			while(sql.startsWith("/*")){
@@ -56,7 +56,7 @@ public class MysqlQueryRouter extends AbstractQueryRouter{
 		return super.selectPool(connection, sql, ispreparedStatment, parameters);
 	}
 	@Override
-	protected void setProperty(DatabaseConnection conn, PropertyStatment statment,Object[] parameters) {
+	protected void setProperty(DatabaseConnection conn, PropertyStatement statment,Object[] parameters) {
 		Expression value = null;
 		if((value = statment.getValue("autocommit")) != null){
 			

@@ -55,14 +55,14 @@ import com.meidusa.amoeba.parser.dbobject.Schema;
 import com.meidusa.amoeba.parser.dbobject.Table;
 import com.meidusa.amoeba.parser.function.Function;
 import com.meidusa.amoeba.parser.function.LastInsertId;
-import com.meidusa.amoeba.parser.statment.CommitStatment;
-import com.meidusa.amoeba.parser.statment.DMLStatment;
-import com.meidusa.amoeba.parser.statment.PropertyStatment;
-import com.meidusa.amoeba.parser.statment.RollbackStatment;
-import com.meidusa.amoeba.parser.statment.SelectStatment;
-import com.meidusa.amoeba.parser.statment.ShowStatment;
-import com.meidusa.amoeba.parser.statment.StartTansactionStatment;
-import com.meidusa.amoeba.parser.statment.Statment;
+import com.meidusa.amoeba.parser.statement.CommitStatement;
+import com.meidusa.amoeba.parser.statement.DMLStatement;
+import com.meidusa.amoeba.parser.statement.PropertyStatement;
+import com.meidusa.amoeba.parser.statement.RollbackStatement;
+import com.meidusa.amoeba.parser.statement.SelectStatement;
+import com.meidusa.amoeba.parser.statement.ShowStatement;
+import com.meidusa.amoeba.parser.statement.StartTansactionStatement;
+import com.meidusa.amoeba.parser.statement.Statement;
 import com.meidusa.amoeba.sqljep.BaseJEP;
 import com.meidusa.amoeba.sqljep.JepRuntime;
 import com.meidusa.amoeba.sqljep.RowJEP;
@@ -215,7 +215,7 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable 
     protected ObjectPool[]                          defaultPools;
     protected ObjectPool[]                          readPools;
     protected ObjectPool[]                          writePools;
-    protected Tuple<Statment,ObjectPool[]> tuple;
+    protected Tuple<Statement,ObjectPool[]> tuple;
     private String                                  ruleConfig;
     private String                                  functionConfig;
     private String                                  ruleFunctionConfig;
@@ -257,7 +257,7 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable 
         this.writePool = writePool;
     }
 
-    public Tuple<Statment,ObjectPool[]> doRoute(DatabaseConnection connection, String sql, boolean ispreparedStatment,
+    public Tuple<Statement,ObjectPool[]> doRoute(DatabaseConnection connection, String sql, boolean ispreparedStatment,
                                 Object[] parameters) {
         if (sql == null) {
             return tuple;
@@ -272,20 +272,20 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable 
     /**
      * 返回Query 被route到目标地址 ObjectPool集合 如果返回null，则是属于DatabaseConnection 自身属性设置的请求。
      */
-    protected Tuple<Statment,ObjectPool[]> selectPool(DatabaseConnection connection, String sql, boolean ispreparedStatment,
+    protected Tuple<Statement,ObjectPool[]> selectPool(DatabaseConnection connection, String sql, boolean ispreparedStatment,
                                       Object[] parameters) {
         List<String> poolNames = new ArrayList<String>();
-        Tuple<Statment,ObjectPool[]> resultTuple = new Tuple<Statment,ObjectPool[]>();
-        Statment statment = parseSql(connection, sql);
+        Tuple<Statement,ObjectPool[]> resultTuple = new Tuple<Statement,ObjectPool[]>();
+        Statement statment = parseSql(connection, sql);
         resultTuple.left = statment;
-        DMLStatment dmlStatment = null;
+        DMLStatement dmlStatment = null;
 
-        if (statment instanceof DMLStatment) {
+        if (statment instanceof DMLStatement) {
             if (logger.isDebugEnabled()) {
                 logger.debug("DMLStatement:[" + sql + "] Expression=[" + statment.getExpression() + "]");
             }
 
-            dmlStatment = (DMLStatment) statment;
+            dmlStatment = (DMLStatement) statment;
             Map<Table, Map<Column, Comparative>> tables = null;
             if (needEvaluate) {
                 tables = dmlStatment.evaluate(parameters);
@@ -299,7 +299,7 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable 
                         if (tableRule != null) {
                             // 没有列的sql语句，使用默认的tableRule
                             if (columnMap == null || ispreparedStatment) {
-                                String[] pools = dmlStatment.isReadStatment() ? tableRule.readPools : tableRule.writePools;
+                                String[] pools = dmlStatment.isReadStatement() ? tableRule.readPools : tableRule.writePools;
                                 if (pools == null || pools.length == 0) {
                                     pools = tableRule.defaultPools;
                                 }
@@ -369,7 +369,7 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable 
                                     
                                     try {
                                     	JepRuntime jep = BaseJEP.getThreadJepRuntime(rule.rowJep);
-                                    	jep.vars.put("isReadStatment", dmlStatment.isReadStatment());
+                                    	jep.vars.put("isReadStatment", dmlStatment.isReadStatement());
                                         Comparable<?> result = rule.rowJep.getValue(comparables);
                                         Integer i = 0;
                                         if (result instanceof Comparative) {
@@ -430,7 +430,7 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable 
                                             if (rule.group != null) {
                                                 groupMatched.add(rule.group);
                                             }
-                                            String[] pools = dmlStatment.isReadStatment() ? rule.readPools : rule.writePools;
+                                            String[] pools = dmlStatment.isReadStatement() ? rule.readPools : rule.writePools;
                                             if (pools == null || pools.length == 0) {
                                                 pools = rule.defaultPools;
                                             }
@@ -462,7 +462,7 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable 
 
                             // 如果所有规则都无法匹配，则默认采用TableRule中的pool设置。
                             if (poolNames.size() == 0) {
-                                String[] pools = dmlStatment.isReadStatment() ? tableRule.readPools : tableRule.writePools;
+                                String[] pools = dmlStatment.isReadStatement() ? tableRule.readPools : tableRule.writePools;
                                 if (pools == null || pools.length == 0) {
                                     pools = tableRule.defaultPools;
                                 }
@@ -480,13 +480,13 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable 
                     }
                 }
             }
-        } else if (statment instanceof PropertyStatment) {
+        } else if (statment instanceof PropertyStatement) {
             if (logger.isDebugEnabled()) {
                 logger.debug("PropertyStatment:[" + sql + "]");
             }
-            setProperty(connection, (PropertyStatment) statment, parameters);
+            setProperty(connection, (PropertyStatement) statment, parameters);
             return this.tuple;
-        } else if (statment instanceof ShowStatment) {
+        } else if (statment instanceof ShowStatement) {
             if (logger.isDebugEnabled()) {
                 logger.debug("ShowStatment:[" + sql + "]");
             }
@@ -498,17 +498,17 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable 
                     }
                 }
             }
-        } else if (statment instanceof StartTansactionStatment) {
+        } else if (statment instanceof StartTansactionStatement) {
             if (logger.isDebugEnabled()) {
                 logger.debug("StartTansactionStatment:[" + sql + "]");
             }
             return this.tuple;
-        } else if (statment instanceof CommitStatment) {
+        } else if (statment instanceof CommitStatement) {
             if (logger.isDebugEnabled()) {
                 logger.debug("CommitStatment:[" + sql + "]");
             }
             return this.tuple;
-        } else if (statment instanceof RollbackStatment) {
+        } else if (statment instanceof RollbackStatement) {
             if (logger.isDebugEnabled()) {
                 logger.debug("RollbackStatment:[" + sql + "]");
             }
@@ -528,9 +528,9 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable 
 
         if (pools == null || pools.length == 0) {
             if (dmlStatment != null) {
-                pools = dmlStatment.isReadStatment() ? this.readPools : this.writePools;
+                pools = dmlStatment.isReadStatement() ? this.readPools : this.writePools;
                 if (logger.isDebugEnabled() && pools != null && pools.length > 0) {
-                    if (dmlStatment.isReadStatment()) {
+                    if (dmlStatment.isReadStatement()) {
                         logger.debug("[" + sql + "] parameter:"+ StringUtil.toString(parameters)+" route to queryRouter readPool:" + readPool + "\n");
                     } else {
                         logger.debug("[" + sql + "] parameter:"+ StringUtil.toString(parameters)+" route to queryRouter writePool:" + writePool + "\n");
@@ -560,7 +560,7 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable 
      * @param statment 当前请求的Statment
      * @param parameters
      */
-    protected abstract void setProperty(DatabaseConnection conn, PropertyStatment statment, Object[] parameters);
+    protected abstract void setProperty(DatabaseConnection conn, PropertyStatement statment, Object[] parameters);
 
     public void init() throws InitialisationException {
         defaultPools = new ObjectPool[] { ProxyRuntimeContext.getInstance().getPoolMap().get(defaultPool) };
@@ -574,7 +574,7 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable 
         if (writePool != null && !StringUtil.isEmpty(writePool)) {
             writePools = new ObjectPool[] { ProxyRuntimeContext.getInstance().getPoolMap().get(writePool) };
         }
-        tuple= new Tuple<Statment,ObjectPool[]>(null,defaultPools);
+        tuple= new Tuple<Statement,ObjectPool[]>(null,defaultPools);
         map = new LRUMap(LRUMapSize);
 
         class ConfigCheckTread extends Thread {
@@ -1026,21 +1026,21 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable 
         return null;
     }
 
-    public Statment parseSql(DatabaseConnection connection, String sql) {
-        Statment statment = null;
+    public Statement parseSql(DatabaseConnection connection, String sql) {
+        Statement statment = null;
 
         String defaultSchema = (connection == null || StringUtil.isEmpty(connection.getSchema())) ? null : connection.getSchema();
 
         long sqlKey = ((long) sql.length() << 32) | (long) (defaultSchema != null ? (defaultSchema.hashCode() ^ sql.hashCode()) : sql.hashCode());
         mapLock.lock();
         try {
-            statment = (Statment) map.get(sqlKey);
+            statment = (Statement) map.get(sqlKey);
         } finally {
             mapLock.unlock();
         }
         if (statment == null) {
             synchronized (sql) {
-                statment = (Statment) map.get(sqlKey);
+                statment = (Statement) map.get(sqlKey);
                 if (statment != null) {
                     return statment;
                 }
@@ -1055,8 +1055,8 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable 
 
                 try {
                     statment = parser.doParse();
-                    if(statment instanceof SelectStatment){
-                    	SelectStatment st = (SelectStatment)statment;
+                    if(statment instanceof SelectStatement){
+                    	SelectStatement st = (SelectStatement)statment;
                     	if(st.getTables() == null || st.getTables().length == 0){
                     		Boolean queryInsertId = (Boolean)ThreadLocalMap.get(LastInsertId.class.getName());
                     		if(queryInsertId != null && queryInsertId.booleanValue()){
@@ -1065,8 +1065,8 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable 
                     	}
                     }
                     mapLock.lock();
-                    if(statment instanceof DMLStatment){
-                    	((DMLStatment)statment).setSql(sql);
+                    if(statment instanceof DMLStatement){
+                    	((DMLStatement)statment).setSql(sql);
                     }
                     try {
                         map.put(sqlKey, statment);
@@ -1087,7 +1087,7 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable 
     }
 
     public int parseParameterCount(DatabaseConnection connection, String sql) {
-        Statment statment = parseSql(connection, sql);
+        Statement statment = parseSql(connection, sql);
         return statment.getParameterCount();
     }
 

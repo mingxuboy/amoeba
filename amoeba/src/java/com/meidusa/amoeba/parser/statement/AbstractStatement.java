@@ -1,7 +1,7 @@
-package com.meidusa.amoeba.parser.statment;
+package com.meidusa.amoeba.parser.statement;
 
 
-public abstract class AbstractStatment implements Statment {
+public abstract class AbstractStatement implements Statement {
 
 	private int parameterCount;
 	
