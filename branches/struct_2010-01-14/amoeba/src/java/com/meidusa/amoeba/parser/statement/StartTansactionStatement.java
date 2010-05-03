@@ -9,18 +9,15 @@
  * 	You should have received a copy of the GNU General Public License along with this program; 
  * if not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-package com.meidusa.amoeba.parser.statment;
+package com.meidusa.amoeba.parser.statement;
 
 import com.meidusa.amoeba.parser.expression.Expression;
 
-public class ShowStatment extends AbstractStatment  {
-	public static ShowStatment  STATMENT = new ShowStatment();
-	private Expression expression;
+public class StartTansactionStatement extends AbstractStatement  {
+
 	public Expression getExpression() {
-		return expression;
-	}
-	public void setExpression(Expression expression) {
-		this.expression = expression;
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

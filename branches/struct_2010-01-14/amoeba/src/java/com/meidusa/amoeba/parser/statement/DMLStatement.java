@@ -11,7 +11,7 @@
  * if not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  * </pre>
  */
-package com.meidusa.amoeba.parser.statment;
+package com.meidusa.amoeba.parser.statement;
 
 import java.util.HashMap;
 import java.util.List;
@@ -33,9 +33,9 @@ import com.meidusa.amoeba.sqljep.function.ComparativeOR;
 /**
  * @author <a href=mailto:piratebase@sina.com>Struct chen</a>
  */
-public abstract class DMLStatment extends AbstractStatment {
+public abstract class DMLStatement extends AbstractStatement {
 
-    private static Logger                        logger = Logger.getLogger(DMLStatment.class);
+    private static Logger                        logger = Logger.getLogger(DMLStatement.class);
     protected boolean                            preparedStatment;
     protected Table[]                            tables;
     protected Expression                         expression;
@@ -56,7 +56,7 @@ public abstract class DMLStatment extends AbstractStatment {
     public Map<String, Column> getSelectColumnMap() {
 		return selectColumnMap;
 	}
-	public abstract boolean isReadStatment();
+	public abstract boolean isReadStatement();
 
     public void setExpression(Expression expression) {
         this.expression = expression;

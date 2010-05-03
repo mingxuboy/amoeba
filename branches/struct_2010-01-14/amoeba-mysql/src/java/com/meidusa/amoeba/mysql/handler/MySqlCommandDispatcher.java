@@ -39,9 +39,9 @@ import com.meidusa.amoeba.net.MessageHandler;
 import com.meidusa.amoeba.net.Sessionable;
 import com.meidusa.amoeba.net.poolable.ObjectPool;
 import com.meidusa.amoeba.parser.dbobject.Column;
-import com.meidusa.amoeba.parser.statment.InsertStatment;
-import com.meidusa.amoeba.parser.statment.SelectStatment;
-import com.meidusa.amoeba.parser.statment.Statment;
+import com.meidusa.amoeba.parser.statement.InsertStatement;
+import com.meidusa.amoeba.parser.statement.SelectStatement;
+import com.meidusa.amoeba.parser.statement.Statement;
 import com.meidusa.amoeba.route.QueryRouter;
 import com.meidusa.amoeba.util.Tuple;
 
@@ -83,11 +83,11 @@ public class MySqlCommandDispatcher implements MessageHandler {
 	        try {
 	            if (MysqlPacketBuffer.isPacketType(message, QueryCommandPacket.COM_QUERY)) {
 	                QueryRouter router = ProxyRuntimeContext.getInstance().getQueryRouter();
-	                Tuple<Statment,ObjectPool[]> tuple = router.doRoute(conn, command.query, false, null);
-	                Statment statment = tuple.left;
+	                Tuple<Statement,ObjectPool[]> tuple = router.doRoute(conn, command.query, false, null);
+	                Statement statment = tuple.left;
 	                ObjectPool[] pools = tuple.right;
-	                if (statment != null && statment instanceof SelectStatment && ((SelectStatment)tuple.left).isQueryLastInsertId()) {
-	                	MysqlResultSetPacket lastPacketResult = createLastInsertIdPacket(conn,(SelectStatment)statment,false);
+	                if (statment != null && statment instanceof SelectStatement && ((SelectStatement)tuple.left).isQueryLastInsertId()) {
+	                	MysqlResultSetPacket lastPacketResult = createLastInsertIdPacket(conn,(SelectStatement)statment,false);
             			lastPacketResult.wirteToConnection(conn);
             			return;
 	                }
@@ -117,7 +117,7 @@ public class MySqlCommandDispatcher implements MessageHandler {
 	                }
 	                
 	                QueryRouter router = ProxyRuntimeContext.getInstance().getQueryRouter();
-	                Tuple<Statment,ObjectPool[]> tuple = router.doRoute(conn, command.query, true, null);
+	                Tuple<Statement,ObjectPool[]> tuple = router.doRoute(conn, command.query, true, null);
 	                
 	            	PreparedStatmentMessageHandler handler = new PreparedStatmentMessageHandler(conn,preparedInf,tuple.left, message , new ObjectPool[]{tuple.right[0]}, timeout,false);
 	            	if (handler instanceof Sessionable) {
@@ -149,17 +149,17 @@ public class MySqlCommandDispatcher implements MessageHandler {
 		                    conn.postMessage(error.toByteBuffer(connection).array());
 		                    logger.warn("Unknown prepared statment id:" + statmentId);
 		                } else {
-		                	Statment statment = preparedInf.getStatment();
-		                	if (statment != null && statment instanceof SelectStatment && ((SelectStatment)statment).isQueryLastInsertId()) {
+		                	Statement statment = preparedInf.getStatment();
+		                	if (statment != null && statment instanceof SelectStatement && ((SelectStatement)statment).isQueryLastInsertId()) {
 		                		if(lastInsertID.isDebugEnabled()){
 		                			lastInsertID.debug("SQL="+statment.getSql());
 		                		}
-		                		MysqlResultSetPacket lastPacketResult = createLastInsertIdPacket(conn,(SelectStatment)statment,true);
+		                		MysqlResultSetPacket lastPacketResult = createLastInsertIdPacket(conn,(SelectStatement)statment,true);
 		            			lastPacketResult.wirteToConnection(conn);
 		            			return;
 			                }
 		                	
-		                	if(statment instanceof InsertStatment){
+		                	if(statment instanceof InsertStatement){
 		                		if(lastInsertID.isDebugEnabled()){
 		                			lastInsertID.debug("SQL="+statment.getSql());
 		                		}
@@ -176,7 +176,7 @@ public class MySqlCommandDispatcher implements MessageHandler {
 		                    executePacket.init(message, connection);
 		
 		                    QueryRouter router = ProxyRuntimeContext.getInstance().getQueryRouter();
-		                    Tuple<Statment,ObjectPool[]> tuple = router.doRoute(conn, preparedInf.getPreparedStatment(), false, executePacket.getParameters());
+		                    Tuple<Statement,ObjectPool[]> tuple = router.doRoute(conn, preparedInf.getPreparedStatment(), false, executePacket.getParameters());
 		
 		                    PreparedStatmentExecuteMessageHandler handler = new PreparedStatmentExecuteMessageHandler(
 		                                                                                                              conn,
@@ -223,8 +223,8 @@ public class MySqlCommandDispatcher implements MessageHandler {
 		}
     }
     
-    private MysqlResultSetPacket createLastInsertIdPacket(MysqlClientConnection conn,SelectStatment statment,boolean isPrepared){
-    	Map<String,Column> selectedMap = ((SelectStatment)statment).getSelectColumnMap();
+    private MysqlResultSetPacket createLastInsertIdPacket(MysqlClientConnection conn,SelectStatement statment,boolean isPrepared){
+    	Map<String,Column> selectedMap = ((SelectStatement)statment).getSelectColumnMap();
 		MysqlResultSetPacket lastPacketResult = new MysqlResultSetPacket(null);
 		lastPacketResult.resulthead = new ResultSetHeaderPacket();
 		lastPacketResult.resulthead.columns = selectedMap.size();

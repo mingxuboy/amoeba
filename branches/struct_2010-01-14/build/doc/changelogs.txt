@@ -18,14 +18,14 @@ range函数：
   id in range(12,16,1,1) 表示 id>=12 and id<=16 
 
 case 函数
-   case  (abs(hash(SDID)) % 32)  when range(0,8,1,0) then (isReadStatment ? 'server1' : 'server1_write');
-           when range(8,16,1,0) then (isReadStatment ? 'server2' : 'server2_write');
-           when range(16,24,1,0) then '(isReadStatment ? 'server3' : 'server3_write')';
+   case  (abs(hash(SDID)) % 32)  when range(0,8,1,0) then (isReadStatement ? 'server1' : 'server1_write');
+           when range(8,16,1,0) then (isReadStatement ? 'server2' : 'server2_write');
+           when range(16,24,1,0) then '(isReadStatement ? 'server3' : 'server3_write')';
            else 'server4'
    END CASE;
                            
-2、增加bool 类型的规则内置变量 isReadStatment
-	用户可以在规则的表达式中使用比如 :  isReadStatment? 'pool1' : 'pool2'
+2、增加bool 类型的规则内置变量 isReadStatement
+	用户可以在规则的表达式中使用比如 :  isReadStatement? 'pool1' : 'pool2'
 3、稳定性增强，解决了在大并发下需要多个数据库聚合结果集的时候出现数据异常而无法返回给客户端的问题
 4、规则属性新增加ruleResult属性，有3种类型（BOOLEAN、POOLNAME、INDEX）
 	BOOLEAN -- 默认值、结果一定是布尔值，表示执行的sql是否匹配当前的规则
@@ -39,10 +39,10 @@ case 函数
                    <parameters>SDID</parameters>
                    <expression><![CDATA[
                            var hashid = abs(hash(SDID)) % 32; 
-                           case  hashid  when range(0,8,1,0) then (isReadStatment ? 'server1' : 'server1_write');
-                                   when range(8,16,1,0) then (isReadStatment ? 'server2' : 'server2_write');
-                                   when range(16,24,1,0) then '(isReadStatment ? 'server3' : 'server3_write')';
-                                   when range(24,32,1,0) then '(isReadStatment ? 'server4' : 'server4_write')';'
+                           case  hashid  when range(0,8,1,0) then (isReadStatement ? 'server1' : 'server1_write');
+                                   when range(8,16,1,0) then (isReadStatement ? 'server2' : 'server2_write');
+                                   when range(16,24,1,0) then '(isReadStatement ? 'server3' : 'server3_write')';
+                                   when range(24,32,1,0) then '(isReadStatement ? 'server4' : 'server4_write')';'
                            END CASE;
 
                    ]]></expression>

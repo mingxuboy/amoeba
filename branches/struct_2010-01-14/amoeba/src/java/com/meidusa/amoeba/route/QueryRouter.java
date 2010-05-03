@@ -16,7 +16,7 @@ package com.meidusa.amoeba.route;
 import com.meidusa.amoeba.net.DatabaseConnection;
 import com.meidusa.amoeba.net.poolable.ObjectPool;
 import com.meidusa.amoeba.parser.ParseException;
-import com.meidusa.amoeba.parser.statment.Statment;
+import com.meidusa.amoeba.parser.statement.Statement;
 import com.meidusa.amoeba.util.Tuple;
 
 /**
@@ -24,12 +24,12 @@ import com.meidusa.amoeba.util.Tuple;
  */
 public interface QueryRouter {
 
-    public Tuple<Statment,ObjectPool[]> doRoute(DatabaseConnection connection, String sql, boolean ispreparedStatment,
+    public Tuple<Statement,ObjectPool[]> doRoute(DatabaseConnection connection, String sql, boolean ispreparedStatment,
                                 Object[] parameters) throws ParseException;
 
     public String getDefaultPool();
 
-    public Statment parseSql(DatabaseConnection connection, String sql) throws ParseException;
+    public Statement parseSql(DatabaseConnection connection, String sql) throws ParseException;
 
     public int parseParameterCount(DatabaseConnection connection, String sql) throws ParseException;
 

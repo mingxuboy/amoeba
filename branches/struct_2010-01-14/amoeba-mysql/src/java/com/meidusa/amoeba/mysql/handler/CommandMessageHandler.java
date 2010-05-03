@@ -42,8 +42,8 @@ import com.meidusa.amoeba.net.packet.Packet;
 import com.meidusa.amoeba.net.packet.PacketBuffer;
 import com.meidusa.amoeba.net.poolable.ObjectPool;
 import com.meidusa.amoeba.net.poolable.PoolableObject;
-import com.meidusa.amoeba.parser.statment.InsertStatment;
-import com.meidusa.amoeba.parser.statment.Statment;
+import com.meidusa.amoeba.parser.statement.InsertStatement;
+import com.meidusa.amoeba.parser.statement.Statement;
 import com.meidusa.amoeba.util.Reporter;
 import com.meidusa.amoeba.util.StringUtil;
 
@@ -131,8 +131,8 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 		protected Map<MysqlServerConnection,ConnectionStatuts> connStatusMap = new HashMap<MysqlServerConnection,ConnectionStatuts>();
 		private boolean mainCommandExecuted;
 		private MysqlClientConnection source;
-		private Statment statment;
-		public CommandQueue(MysqlClientConnection source,Statment statment){
+		private Statement statment;
+		public CommandQueue(MysqlClientConnection source,Statement statment){
 			this.source = source;
 			this.statment = statment;
 		}
@@ -197,7 +197,7 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 					if(MysqlPacketBuffer.isOkPacket(buffer)){
 						OkPacket packet = new OkPacket();
 						packet.init(buffer,conn);
-						if(statment instanceof InsertStatment && currentCommand.isMain()){
+						if(statment instanceof InsertStatement && currentCommand.isMain()){
 							if(packet.insertId>0){
 								source.setLastInsertId(packet.insertId);
 								logger.debug("laster insert id="+packet.insertId);
@@ -275,7 +275,7 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 	private PacketBuffer buffer = new AbstractPacketBuffer(1400);
 	private boolean started;
 	private long lastTimeMillis = System.currentTimeMillis();
-	public CommandMessageHandler(final MysqlClientConnection source,byte[] query,Statment statment, ObjectPool[] pools,long timeout){
+	public CommandMessageHandler(final MysqlClientConnection source,byte[] query,Statement statment, ObjectPool[] pools,long timeout){
 		handlerMap.put(source, source.getMessageHandler());
 		source.setMessageHandler(this);
 		commandQueue = new CommandQueue(source,statment);

@@ -9,25 +9,13 @@
  * 	You should have received a copy of the GNU General Public License along with this program; 
  * if not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-package com.meidusa.amoeba.parser.statment;
+package com.meidusa.amoeba.parser.statement;
 
-/**
- * 
- * @author <a href=mailto:piratebase@sina.com>Struct chen</a>
- *
- */
-public class SelectStatment extends DMLStatment {
-	private boolean queryLastInsertId;
+import com.meidusa.amoeba.parser.expression.Expression;
+
+public class CommitStatement extends AbstractStatement {
 	
-	public void setQueryLastInsertId(boolean queryLastInsertId) {
-		this.queryLastInsertId = queryLastInsertId;
+	public Expression getExpression() {
+		return null;
 	}
-	public boolean isQueryLastInsertId(){
-		return queryLastInsertId;
-	}
-	@Override
-	public boolean isReadStatment() {
-		return true;
-	}
-
 }

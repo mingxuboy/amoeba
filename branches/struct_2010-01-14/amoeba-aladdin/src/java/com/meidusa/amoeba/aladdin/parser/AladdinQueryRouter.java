@@ -7,7 +7,7 @@ import com.meidusa.amoeba.mysql.net.MysqlConnection;
 import com.meidusa.amoeba.net.DatabaseConnection;
 import com.meidusa.amoeba.parser.Parser;
 import com.meidusa.amoeba.parser.expression.Expression;
-import com.meidusa.amoeba.parser.statment.PropertyStatment;
+import com.meidusa.amoeba.parser.statement.PropertyStatement;
 import com.meidusa.amoeba.route.AbstractQueryRouter;
 
 /**
@@ -21,7 +21,7 @@ public class AladdinQueryRouter extends AbstractQueryRouter {
     }
 
 	@Override
-	protected void setProperty(DatabaseConnection conn, PropertyStatment statment,Object[] parameters) {
+	protected void setProperty(DatabaseConnection conn, PropertyStatement statment,Object[] parameters) {
 		Expression value = null;
 		if((value = statment.getValue("autocommit")) != null){
 			

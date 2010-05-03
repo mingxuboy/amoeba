@@ -15,7 +15,7 @@ import java.util.Map;
 
 import com.meidusa.amoeba.parser.function.Function;
 import com.meidusa.amoeba.parser.dbobject.Schema;
-import com.meidusa.amoeba.parser.statment.Statment;
+import com.meidusa.amoeba.parser.statement.Statement;
 
 /**
  * 
@@ -23,7 +23,7 @@ import com.meidusa.amoeba.parser.statment.Statment;
  *
  */
 public interface Parser {
-	public Statment doParse() throws ParseException;
+	public Statement doParse() throws ParseException;
 	public void setDefaultSchema(Schema schema);
 	public void setFunctionMap(Map<String,Function> funMap);
 }

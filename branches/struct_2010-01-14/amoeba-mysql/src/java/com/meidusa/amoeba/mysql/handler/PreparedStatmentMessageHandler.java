@@ -31,7 +31,7 @@ import com.meidusa.amoeba.mysql.net.packet.PreparedStatmentClosePacket;
 import com.meidusa.amoeba.mysql.net.packet.QueryCommandPacket;
 import com.meidusa.amoeba.net.Connection;
 import com.meidusa.amoeba.net.poolable.ObjectPool;
-import com.meidusa.amoeba.parser.statment.Statment;
+import com.meidusa.amoeba.parser.statement.Statement;
 
 /**
  * @author <a href=mailto:piratebase@sina.com>Struct chen</a>
@@ -129,7 +129,7 @@ public class PreparedStatmentMessageHandler extends QueryCommandMessageHandler {
     private Map<Connection, Long>  statmentIdMap        = Collections.synchronizedMap(new HashMap<Connection, Long>());
 	private boolean isExecute;
 
-    public PreparedStatmentMessageHandler(MysqlClientConnection source, PreparedStatmentInfo preparedStatmentInfo,Statment statment,
+    public PreparedStatmentMessageHandler(MysqlClientConnection source, PreparedStatmentInfo preparedStatmentInfo,Statement statment,
                                           byte[] query, ObjectPool[] pools, long timeout,boolean isExecute){
         super(source, query,statment, pools, timeout);
         this.preparedStatmentInfo = preparedStatmentInfo;

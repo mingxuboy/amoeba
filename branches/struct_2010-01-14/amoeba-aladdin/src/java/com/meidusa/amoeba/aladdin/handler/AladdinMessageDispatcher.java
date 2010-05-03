@@ -21,8 +21,8 @@ import com.meidusa.amoeba.net.Connection;
 import com.meidusa.amoeba.net.MessageHandler;
 import com.meidusa.amoeba.net.Sessionable;
 import com.meidusa.amoeba.net.poolable.ObjectPool;
-import com.meidusa.amoeba.parser.statment.SelectStatment;
-import com.meidusa.amoeba.parser.statment.Statment;
+import com.meidusa.amoeba.parser.statement.SelectStatement;
+import com.meidusa.amoeba.parser.statement.Statement;
 import com.meidusa.amoeba.route.QueryRouter;
 import com.meidusa.amoeba.util.ByteUtil;
 import com.meidusa.amoeba.util.StringFillFormat;
@@ -78,10 +78,10 @@ public class AladdinMessageDispatcher implements MessageHandler {
 	                }
 	
 	                QueryRouter router = ProxyRuntimeContext.getInstance().getQueryRouter();
-	                Tuple<Statment,ObjectPool[]> tuple = router.doRoute(conn, packet.query, false, null);
-	                Statment statment = tuple.left;
+	                Tuple<Statement,ObjectPool[]> tuple = router.doRoute(conn, packet.query, false, null);
+	                Statement statment = tuple.left;
 	                ObjectPool[] pools = tuple.right;
-	                if (statment != null && statment instanceof SelectStatment && ((SelectStatment)tuple.left).isQueryLastInsertId()) {
+	                if (statment != null && statment instanceof SelectStatement && ((SelectStatement)tuple.left).isQueryLastInsertId()) {
             			List<RowDataPacket> list = new ArrayList<RowDataPacket>();
             			RowDataPacket row = new RowDataPacket(false);
             			row.columns = new ArrayList<Object>();
@@ -161,7 +161,7 @@ public class AladdinMessageDispatcher implements MessageHandler {
 	                        logger.debug(StringFillFormat.format("COM_STMT_EXECUTE:", fillLength) + "[" + packet + "]");
 	                    }
 	                    QueryRouter router = ProxyRuntimeContext.getInstance().getQueryRouter();
-	                    Tuple<Statment,ObjectPool[]> tuple = router.doRoute(conn, sql, false, packet.getParameters());
+	                    Tuple<Statement,ObjectPool[]> tuple = router.doRoute(conn, sql, false, packet.getParameters());
 	
 	                    PreparedStatmentExecuteMessageHandler handler = new PreparedStatmentExecuteMessageHandler(conn, pInfo, packet, tuple.right, timeout);
 	                    if (handler instanceof Sessionable) {

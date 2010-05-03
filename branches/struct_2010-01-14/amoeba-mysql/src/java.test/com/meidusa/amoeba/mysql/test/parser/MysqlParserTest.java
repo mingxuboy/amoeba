@@ -13,10 +13,10 @@ import java.util.Map;
 
 import com.meidusa.amoeba.parser.Parser;
 import com.meidusa.amoeba.parser.dbobject.Column;
-import com.meidusa.amoeba.parser.statment.DMLStatment;
-import com.meidusa.amoeba.parser.statment.PropertyStatment;
-import com.meidusa.amoeba.parser.statment.ShowStatment;
-import com.meidusa.amoeba.parser.statment.Statment;
+import com.meidusa.amoeba.parser.statement.DMLStatement;
+import com.meidusa.amoeba.parser.statement.PropertyStatement;
+import com.meidusa.amoeba.parser.statement.ShowStatement;
+import com.meidusa.amoeba.parser.statement.Statement;
 import com.meidusa.amoeba.parser.expression.Expression;
 import com.meidusa.amoeba.parser.function.*;
 import com.meidusa.amoeba.mysql.parser.sql.MysqlParser;
@@ -124,16 +124,16 @@ public class MysqlParserTest {
 		Parser parser = new MysqlParser(new StringReader(sql));
 		parser.setFunctionMap(funMap);
 		try {
-			Statment statment = parser.doParse();
-			if(statment instanceof DMLStatment){
-				DMLStatment dmlStatment = (DMLStatment)statment;
+			Statement statment = parser.doParse();
+			if(statment instanceof DMLStatement){
+				DMLStatement dmlStatment = (DMLStatement)statment;
 				Expression expression = dmlStatment.getExpression();
 				System.out.println(sql+" =[ "+ expression+"], evaluated = {"+dmlStatment.evaluate(null)+"} ,parameterCount="+dmlStatment.getParameterCount());
-			}else if(statment instanceof PropertyStatment ){
-				PropertyStatment proStatment = (PropertyStatment)statment;
+			}else if(statment instanceof PropertyStatement ){
+				PropertyStatement proStatment = (PropertyStatement)statment;
 				System.out.println(proStatment.getProperties());
-			}else if(statment instanceof ShowStatment){
-				ShowStatment proStatment = (ShowStatment)statment;
+			}else if(statment instanceof ShowStatement){
+				ShowStatement proStatment = (ShowStatement)statment;
 				System.out.println(proStatment.getExpression());
 			}
 			
