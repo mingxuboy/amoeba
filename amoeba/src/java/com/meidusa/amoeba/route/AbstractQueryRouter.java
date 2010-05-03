@@ -369,7 +369,7 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable 
                                     
                                     try {
                                     	JepRuntime jep = BaseJEP.getThreadJepRuntime(rule.rowJep);
-                                    	jep.vars.put("isReadStatment", dmlStatment.isReadStatement());
+                                    	jep.vars.put("isReadStatement", dmlStatment.isReadStatement());
                                         Comparable<?> result = rule.rowJep.getValue(comparables);
                                         Integer i = 0;
                                         if (result instanceof Comparative) {
