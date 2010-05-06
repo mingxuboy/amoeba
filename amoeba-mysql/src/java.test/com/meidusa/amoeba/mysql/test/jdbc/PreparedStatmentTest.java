@@ -1,20 +1,18 @@
 package com.meidusa.amoeba.mysql.test.jdbc;
 
 import java.sql.Connection;
-import java.sql.Date;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.Properties;
 
 public class PreparedStatmentTest {
-
     /**
      * @param args
      * @throws Exception
      */
     public static void main(String[] args) throws Exception {
-
+    	
         Properties props = new Properties();
 
         // ∆Ù”√failover π ’œª÷∏¥π¶ƒ‹
