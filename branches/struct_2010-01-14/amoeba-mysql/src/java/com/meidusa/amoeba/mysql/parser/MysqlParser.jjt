@@ -1551,7 +1551,7 @@ Expression SQLRelationalExpression(Statement statement)  #void:
         	return otherExpression;
         })
         |  LOOKAHEAD(2) (otherExpression = SQLLikeClause(statement)){
-        	if(expression instanceof ColumnExpression){
+        	if(expression instanceof ColumnExpression && otherExpression != null){
     			ColumnExpression colExp = (ColumnExpression)expression;
     			colExp.setExpression((ComparisonExpression)otherExpression);
     			return colExp;
@@ -1560,7 +1560,7 @@ Expression SQLRelationalExpression(Statement statement)  #void:
     		}
         }
         |  LOOKAHEAD(2)(otherExpression = IsNullClause(statement){
-    		if(expression instanceof ColumnExpression){
+    		if(expression instanceof ColumnExpression && otherExpression != null){
     			ColumnExpression colExp = (ColumnExpression)expression;
     			colExp.setExpression((ComparisonExpression)otherExpression);
     			return colExp;
