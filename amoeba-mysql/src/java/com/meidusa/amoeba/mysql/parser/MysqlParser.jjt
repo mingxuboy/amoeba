@@ -1737,7 +1737,8 @@ Expression SQLAddSubtractExpression(Statement statement) #void:
 	FunctionExpression superExpression = null;
 }
 {
-       (expression = SQLMultiplicativeExpression(statement) ((token = "+" | token = "-"  | token = "|") otherExpression = SQLMultiplicativeExpression(statement){
+       (expression = SQLMultiplicativeExpression(statement) ((token = "+" | token = "-"  | token = "|")
+       otherExpression = SQLMultiplicativeExpression(statement){
 		    function = getFunction(token.image.toUpperCase());
 		    if(function == null) return null;
 		    FunctionExpression functionExpression = new FunctionExpression();
@@ -1955,6 +1956,7 @@ String FunctionName() :
 	| t=<K_MONTH>
 	| t=<K_HOUR>
 	| t=<K_SECOND>
+	| t=<K_REPLACE>
 	|t=<IDENTIFIER>
 	)
 	{
