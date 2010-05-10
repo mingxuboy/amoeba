@@ -209,9 +209,9 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable 
 		variableMap.put("isReadStatement",new Variable(){
 		@Override
 		public Comparable<?> getValue() {
-			DMLStatement st = (DMLStatement)ThreadLocalMap.get(_CURRENT_STATEMENT_);
-			if(st != null){
-				return st.isReadStatement();
+			Object st = (Object)ThreadLocalMap.get(_CURRENT_STATEMENT_);
+			if(st != null && st instanceof DMLStatement){
+				return ((DMLStatement)st).isReadStatement();
 			}else{
 				return null;
 			}
