@@ -136,7 +136,7 @@ import com.meidusa.amoeba.util.Tuple;
  */
 @SuppressWarnings("deprecation")
 public abstract class AbstractQueryRouter implements QueryRouter, Initialisable {
-
+	private static final String _CURRENT_STATEMENT_ = "_CURRENT_STATEMENT_";
     private static Logger                           logger          = Logger.getLogger(AbstractQueryRouter.class);
 
     public final static Map<String, PostfixCommand> ruleFunTab      = new HashMap<String, PostfixCommand>();
@@ -201,6 +201,18 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable 
         ruleFunTab.put("maketime", new MakeTime()); // maxdb
         ruleFunTab.put("hash", new Hash()); //
         ruleFunTab.put("range", new Range()); //
+    }
+    
+    
+	Map<String,Variable> variableMap = new HashMap<String,Variable>();
+	{
+		variableMap.put("isReadStatement",new Variable(){
+		@Override
+		public Comparable<?> getValue() {
+			DMLStatement st = (DMLStatement)ThreadLocalMap.get(_CURRENT_STATEMENT_);
+			return st.isReadStatement();
+		}
+	});
     }
 
     /* д╛хо1000 */
@@ -279,7 +291,7 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable 
         Statement statment = parseSql(connection, sql);
         resultTuple.left = statment;
         DMLStatement dmlStatment = null;
-
+        ThreadLocalMap.put(_CURRENT_STATEMENT_, statment);
         if (statment instanceof DMLStatement) {
             if (logger.isDebugEnabled()) {
                 logger.debug("DMLStatement:[" + sql + "] Expression=[" + statment.getExpression() + "]");
@@ -369,7 +381,6 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable 
                                     
                                     try {
                                     	JepRuntime jep = BaseJEP.getThreadJepRuntime(rule.rowJep);
-                                    	jep.vars.put("isReadStatement", dmlStatment.isReadStatement());
                                         Comparable<?> result = rule.rowJep.getValue(comparables);
                                         Integer i = 0;
                                         if (result instanceof Comparative) {
@@ -948,7 +959,7 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable 
         rule.expression = expression.getTextContent();
         rule.rowJep = new RowJEP(rule.expression);
         try {
-            rule.rowJep.parseExpression(rule.parameterMap, (Map<String, Variable>) null, this.ruleFunctionMap);
+            rule.rowJep.parseExpression(rule.parameterMap, variableMap, this.ruleFunctionMap);
         } catch (com.meidusa.amoeba.sqljep.ParseException e) {
             throw new InitialisationException("parser expression:" + rule.expression + " error", e);
         }

@@ -50,7 +50,7 @@ public class Main {
 		final Map<String,Variable> valMap = new HashMap<String,Variable>();
 		valMap.put("age", new Variable(){
 			public Comparable<?> getValue() {
-				return "223";
+				return "true";
 			}
 			
 		});
@@ -77,7 +77,7 @@ public class Main {
 	  			"	WHEN range(9,10,1,0) THEN 'aadf9' ;" +
 	  			"	WHEN range(10,11,1,0) THEN 'aadf10' ;" +
 	  			"	WHEN range(11,12,1,0) THEN 'aadf11' ;" +
-	  			"	WHEN range(12,13,1,0) THEN isBool?'hell12':'aadf12' ;" +
+	  			"	WHEN range(12,13,1,0) THEN age1?'hell12':'aadf12' ;" +
 	  			"	WHEN range(13,14,1,0) THEN 'aadf13' ;" +
 	  			"	WHEN range(14,15,1,0) THEN 'aadf14' ;" +
 	  			"	WHEN range(15,16,1,0) THEN 'aadf15' ;" +
