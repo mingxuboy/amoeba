@@ -5,7 +5,6 @@ package com.meidusa.amoeba.mysql.test.parser;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.StringReader;
 import java.util.HashMap;
@@ -29,7 +28,8 @@ public class MysqlParserTest {
 	static Map<Column,Comparative> columnMap = new HashMap<Column,Comparative>();
 	public static void main(String[] args) throws Exception{
 		Map<String,Function> funMap = AbstractQueryRouter.loadFunctionMap("./build/build-mysql/conf/functionMap.xml");
-		parser(funMap,"select last_insert_id() as id");
+		parser(funMap,"EXPLAIN select last_insert_id('asdf') as aa;");
+		parser(funMap,"EXPLAIN SELECT REPLACE(UUID(), '-', '')");
 		parser(funMap,"select last_insert_id();");
 		String t = "select ID from SD_MESSAGE.MESSAGE_NOTIFICATION  where  SDID=11 and name=? order by CREATE_TIME limit ?,?";
 		String sql1 = " SELECT * from account where time = DATE_ADD('1998-01-02', INTERVAL 31 DAY)";
