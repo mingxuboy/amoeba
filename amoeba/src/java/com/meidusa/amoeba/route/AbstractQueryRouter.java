@@ -48,7 +48,6 @@ import com.meidusa.amoeba.config.DocumentUtil;
 import com.meidusa.amoeba.context.ProxyRuntimeContext;
 import com.meidusa.amoeba.net.DatabaseConnection;
 import com.meidusa.amoeba.net.poolable.ObjectPool;
-import com.meidusa.amoeba.parser.ParseException;
 import com.meidusa.amoeba.parser.Parser;
 import com.meidusa.amoeba.parser.dbobject.Column;
 import com.meidusa.amoeba.parser.dbobject.Schema;
@@ -63,14 +62,11 @@ import com.meidusa.amoeba.parser.statement.SelectStatement;
 import com.meidusa.amoeba.parser.statement.ShowStatement;
 import com.meidusa.amoeba.parser.statement.StartTansactionStatement;
 import com.meidusa.amoeba.parser.statement.Statement;
-import com.meidusa.amoeba.sqljep.BaseJEP;
-import com.meidusa.amoeba.sqljep.JepRuntime;
 import com.meidusa.amoeba.sqljep.RowJEP;
 import com.meidusa.amoeba.sqljep.function.Abs;
 import com.meidusa.amoeba.sqljep.function.AddDate;
 import com.meidusa.amoeba.sqljep.function.AddMonths;
 import com.meidusa.amoeba.sqljep.function.AddTime;
-import com.meidusa.amoeba.sqljep.function.Case;
 import com.meidusa.amoeba.sqljep.function.Ceil;
 import com.meidusa.amoeba.sqljep.function.Comparative;
 import com.meidusa.amoeba.sqljep.function.ComparativeBaseList;
@@ -384,7 +380,6 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable 
                                     }
                                     
                                     try {
-                                    	JepRuntime jep = BaseJEP.getThreadJepRuntime(rule.rowJep);
                                         Comparable<?> result = rule.rowJep.getValue(comparables);
                                         Integer i = 0;
                                         if (result instanceof Comparative) {
@@ -538,7 +533,12 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable 
         ObjectPool[] pools = new ObjectPool[poolNames.size()];
         int i = 0;
         for (String name : poolNames) {
-            pools[i++] = ProxyRuntimeContext.getInstance().getPoolMap().get(name);
+        	ObjectPool pool = ProxyRuntimeContext.getInstance().getPoolMap().get(name);
+        	if(pool == null){
+        		logger.error("cannot found Pool="+name);
+        		throw new RuntimeException("cannot found Pool="+name);
+        	}
+        	pools[i++] = pool;
         }
 
         if (pools == null || pools.length == 0) {
