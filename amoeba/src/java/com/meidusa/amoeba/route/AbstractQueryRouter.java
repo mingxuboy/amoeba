@@ -703,6 +703,7 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable 
 
         loader.setDTD("/com/meidusa/amoeba/xml/function.dtd");
         loader.setDTDSystemID("function.dtd");
+        logger.info("loading FunctionMap from File="+configFileName);
         return loader.loadFunctionMap(configFileName);
     }
 
@@ -725,6 +726,7 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable 
         loader.setDTDSystemID("function.dtd");
 
         Map<String, PostfixCommand> tempRuleFunMap = new HashMap<String, PostfixCommand>();
+        logger.info("loading RuleFunctionMap from File="+configFileName);
         Map<String, PostfixCommand> defindMap = loader.loadFunctionMap(configFileName);
         tempRuleFunMap.putAll(ruleFunTab);
         tempRuleFunMap.putAll(defindMap);
@@ -733,7 +735,7 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable 
 
     private Map<Table, TableRule> loadConfig(String configFileName) {
         DocumentBuilder db;
-
+        logger.info("loading tableRule from File="+configFileName);
         try {
             DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
             dbf.setValidating(true);
