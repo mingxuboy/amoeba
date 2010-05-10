@@ -397,11 +397,11 @@ public abstract class BaseJEP implements ParserVisitor {
 			}
 			runtime.stack.push(value);
 		} else {
-			if((Comparable)node.variable == null){
+			if(node.variable == null){
 				Comparable comparable = runtime.vars.get(node.ident);
 				runtime.stack.push(comparable);
 			}else{
-				runtime.stack.push((Comparable)node.variable.getValue());
+				runtime.stack.push(node.variable.getValue());
 			}
 		}
 		return null;
