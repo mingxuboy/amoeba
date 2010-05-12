@@ -37,7 +37,7 @@ public abstract class DMLStatement extends AbstractStatement {
 
     private static Logger                        logger = Logger.getLogger(DMLStatement.class);
     protected boolean                            preparedStatment;
-    protected Table[]                            tables;
+    
     protected Expression                         expression;
     private Map<Table, Map<Column, Comparative>> evaluatedTableMap;
     private Map<String,Column> selectColumnMap = new HashMap<String,Column>();
@@ -64,14 +64,6 @@ public abstract class DMLStatement extends AbstractStatement {
 
     public Expression getExpression() {
         return expression;
-    }
-
-    public Table[] getTables() {
-        return tables;
-    }
-
-    public void setTables(Table[] tables) {
-        this.tables = tables;
     }
 
     public boolean isPreparedStatment() {
