@@ -54,6 +54,7 @@ import com.meidusa.amoeba.parser.dbobject.Schema;
 import com.meidusa.amoeba.parser.dbobject.Table;
 import com.meidusa.amoeba.parser.function.Function;
 import com.meidusa.amoeba.parser.function.LastInsertId;
+import com.meidusa.amoeba.parser.statement.AbstractStatement;
 import com.meidusa.amoeba.parser.statement.CommitStatement;
 import com.meidusa.amoeba.parser.statement.DMLStatement;
 import com.meidusa.amoeba.parser.statement.PropertyStatement;
@@ -500,13 +501,37 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable 
             if (logger.isDebugEnabled()) {
                 logger.debug("ShowStatment:[" + sql + "]");
             }
-            TableRule tableRule = this.tableRuleMap.get(null);
-            if (tableRule != null && tableRule.defaultPools != null && tableRule.defaultPools.length > 0) {
-                for (String poolName : tableRule.defaultPools) {
-                    if (!poolNames.contains(poolName)) {
-                        poolNames.add(poolName);
-                    }
-                }
+            AbstractStatement ast = (ShowStatement)statment;
+            if(ast.getTables() != null){
+	            for(Table table:ast.getTables()){
+	            	TableRule tableRule = this.tableRuleMap.get(table);
+	            	if(tableRule != null && tableRule.defaultPools != null && tableRule.defaultPools.length > 0) {
+		            	for (String poolName : tableRule.defaultPools) {
+		                    if (!poolNames.contains(poolName)) {
+		                        poolNames.add(poolName);
+		                    }
+		                    
+		                    //only route to single pool
+		                    if(poolNames.size()>0){
+		                    	break;
+		                    }
+		                }
+	            	}
+	            }
+            }else{
+	            TableRule tableRule = this.tableRuleMap.get(null);
+	            if (tableRule != null && tableRule.defaultPools != null && tableRule.defaultPools.length > 0) {
+	                for (String poolName : tableRule.defaultPools) {
+	                    if (!poolNames.contains(poolName)) {
+	                        poolNames.add(poolName);
+	                    }
+	                    
+	                    //only route to single pool
+	                    if(poolNames.size()>0){
+	                    	break;
+	                    }
+	                }
+	            }
             }
         } else if (statment instanceof StartTansactionStatement) {
             if (logger.isDebugEnabled()) {

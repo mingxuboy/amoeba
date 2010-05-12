@@ -1,8 +1,10 @@
 package com.meidusa.amoeba.parser.statement;
 
+import com.meidusa.amoeba.parser.dbobject.Table;
+
 
 public abstract class AbstractStatement implements Statement {
-
+	protected Table[]                            tables;
 	private int parameterCount;
 	
 	public int getParameterCount() {
@@ -16,4 +18,11 @@ public abstract class AbstractStatement implements Statement {
 		this.parameterCount = count;
 	}
 
+	public Table[] getTables() {
+        return tables;
+    }
+
+    public void setTables(Table[] tables) {
+        this.tables = tables;
+    }
 }
