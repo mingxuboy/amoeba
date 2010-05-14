@@ -55,8 +55,8 @@ if $cygwin ; then
 fi
 
 
-DEFAULT_OPTS="-server -Xms128m -Xmx128m -Xss128k"
-# DEFAULT_OPTS="$DEFAULT_OPTS -XX:+AggressiveOpts -XX:+UseParallelGC -XX:+UseBiasedLocking -XX:NewSize=64m"
+DEFAULT_OPTS="-server -Xms256m -Xmx256m -Xss128k"
+# DEFAULT_OPTS="$DEFAULT_OPTS -XX:+HeapDumpOnOutOfMemoryError -XX:+AggressiveOpts -XX:+UseParallelGC -XX:+UseBiasedLocking -XX:NewSize=64m"
 DEFAULT_OPTS="$DEFAULT_OPTS -Damoeba.home=\"$AMOEBA_HOME\""
 DEFAULT_OPTS="$DEFAULT_OPTS -Dclassworlds.conf=\"$AMOEBA_HOME/bin/amoeba.classworlds\""
 
