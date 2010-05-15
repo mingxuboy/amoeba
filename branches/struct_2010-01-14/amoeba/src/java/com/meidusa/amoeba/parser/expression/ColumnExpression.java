@@ -50,6 +50,9 @@ public class ColumnExpression extends Expression {
 	@SuppressWarnings("unchecked")
 	@Override
 	public Comparable evaluate(Object[] parameters) {
+		if(expression == null){
+			return null;
+		}
 		return expression.evaluate(parameters);
 	}
 	

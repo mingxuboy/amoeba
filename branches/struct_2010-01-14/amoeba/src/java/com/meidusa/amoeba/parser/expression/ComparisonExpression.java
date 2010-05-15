@@ -27,9 +27,13 @@ public class ComparisonExpression extends Expression {
 	@Override
 	public Comparable evaluate(Object[] parameters) {
 		if(expression != null){
-			return new Comparative(comparison,expression.evaluate(parameters));
+			Comparable<?> comparable = expression.evaluate(parameters);
+			if(comparable != null){
+				return new Comparative(comparison,comparable);
+			}else{
+				return null;
+			}
 		}else{
-			//new Exception().printStackTrace();
 			return null;
 		}
 	}

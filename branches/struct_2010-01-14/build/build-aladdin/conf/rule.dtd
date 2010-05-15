@@ -5,7 +5,7 @@
   xmlns:amoeba CDATA #FIXED "http://amoeba.meidusa.com/" 
 >
 <!ELEMENT tableRule ( rule )* >
-<!ATTLIST tableRule defaultPools CDATA #REQUIRED >
+<!ATTLIST tableRule defaultPools CDATA #IMPLIED >
 <!ATTLIST tableRule name NMTOKEN #IMPLIED >
 <!ATTLIST tableRule readPools CDATA #IMPLIED >
 <!ATTLIST tableRule schema NMTOKEN #IMPLIED >
@@ -27,3 +27,4 @@
 
 <!ELEMENT parameters ( #PCDATA ) >
 <!ATTLIST parameters excludes CDATA #IMPLIED >
+com.snda.ums.propagator.pipeline.Matchercom.snda.ums.propagator.pipeline.Matchercom.snda.ums.propagator.pipeline.Matcher
