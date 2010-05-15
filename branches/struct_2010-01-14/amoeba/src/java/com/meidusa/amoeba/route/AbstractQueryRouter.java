@@ -878,28 +878,6 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable 
         	names = name.split(",");
         }
         
-        for(String tableName : names){
-        	TableRule tableRule = new TableRule();
-	        Table table = new Table();
-	        String[] tableSchema = StringUtil.split(tableName,".");
-	        if(tableSchema.length==2){
-	        	table.setName(tableSchema[1]);
-	            Schema schema = new Schema();
-	            schema.setName(tableSchema[0]);
-	            table.setSchema(schema);
-	        }else{
-	        	table.setName(tableName);
-	        	 if (!StringUtil.isEmpty(schemaName)) {
-		            Schema schema = new Schema();
-		            schema.setName(schemaName);
-		            table.setSchema(schema);
-			     }
-	        }
-	        tableRule.table = table;
-	        list.add(tableRule);
-	        
-        }
-       
         String defaultPools = current.getAttribute("defaultPools");
         String[] arrayDefaultPools = null;
         
@@ -918,7 +896,30 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable 
         if (writePools != null) {
         	arrayWritePools = readTokenizedString(writePools, " ,");
         }
-
+        for(String tableName : names){
+        	TableRule tableRule = new TableRule();
+	        Table table = new Table();
+	        String[] tableSchema = StringUtil.split(tableName,".");
+	        if(tableSchema.length==2){
+	        	table.setName(tableSchema[1]);
+	            Schema schema = new Schema();
+	            schema.setName(tableSchema[0]);
+	            table.setSchema(schema);
+	        }else{
+	        	table.setName(tableName);
+	        	 if (!StringUtil.isEmpty(schemaName)) {
+		            Schema schema = new Schema();
+		            schema.setName(schemaName);
+		            table.setSchema(schema);
+			     }
+	        }
+	        tableRule.defaultPools = arrayDefaultPools;
+            tableRule.readPools = arrayReadPools;
+            tableRule.writePools = arrayWritePools;
+	        tableRule.table = table;
+	        list.add(tableRule);
+        }
+       
         NodeList children = current.getChildNodes();
         int childSize = children.getLength();
 
@@ -931,9 +932,6 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable 
                 final String nodeName = child.getNodeName();
                 if (nodeName.equals("rule")) {
                 	for(TableRule tableRule :list){
-                		tableRule.defaultPools = arrayDefaultPools;
-                        tableRule.readPools = arrayReadPools;
-                        tableRule.writePools = arrayWritePools;
                         tableRule.ruleList.add(loadRule(child, tableRule.table));
                     }
             	}
@@ -1130,7 +1128,11 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable 
 
     public int parseParameterCount(DatabaseConnection connection, String sql) {
         Statement statment = parseSql(connection, sql);
-        return statment.getParameterCount();
+        if(statment != null){
+        	return statment.getParameterCount();
+        }else{
+        	return 0;
+        }
     }
 
 }

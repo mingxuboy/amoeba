@@ -42,7 +42,11 @@ public class MultipleServerPool extends MultipleLoadBalanceObjectPool implements
 			int index = 0;
 			while(tokenizer.hasMoreTokens()){
 				String poolName = tokenizer.nextToken().trim();
-				objectPools[index++] = ProxyRuntimeContext.getInstance().getPoolMap().get(poolName);
+				ObjectPool pool = ProxyRuntimeContext.getInstance().getPoolMap().get(poolName);
+				if(pool == null){
+					throw new InitialisationException("cannot found dbserver="+poolName);
+				}
+				objectPools[index++] = pool;
 			}
 			this.setObjectPools(objectPools);
 		}
