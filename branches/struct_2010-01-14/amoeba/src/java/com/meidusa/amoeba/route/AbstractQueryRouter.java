@@ -301,7 +301,7 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable 
             dmlStatment = (DMLStatement) statment;
             Map<Table, Map<Column, Comparative>> tables = null;
             if (needEvaluate) {
-                tables = dmlStatment.evaluate(parameters);
+                tables = dmlStatment.evaluate(parameters,(AbstractStatement)statment);
                 if (tables != null && tables.size() > 0) {
                     Set<Map.Entry<Table, Map<Column, Comparative>>> entrySet = tables.entrySet();
                     for (Map.Entry<Table, Map<Column, Comparative>> entry : entrySet) {
@@ -479,7 +479,19 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable 
                                 }
                                 
                                 if(!ispreparedStatment){
-                                	logger.warn("sql=["+sql+"]no rule matched, using tableRule:[" + tableRule.table.getName() + "] defaultPools");
+                                	if(tableRule.ruleList != null && tableRule.ruleList.size()>0){
+                                		logger.warn("sql=["+sql+"]no rule matched, using tableRule:[" + tableRule.table.getName() + "] defaultPools");
+                                	}else{
+                                		if(logger.isDebugEnabled()){
+                                			if(pools != null){
+                                				StringBuffer buffer = new StringBuffer();
+	                                			for(String pool : pools){
+	                                				buffer.append(pool).append(",");
+	                                			}
+                                				logger.debug("sql=["+sql+"] , using tableRule:[" + tableRule.table.getName() + "] defaultPools="+buffer.toString());
+                                			}
+                                		}
+                                	}
                                 }
                                 for (String poolName : pools) {
                                     if (!poolNames.contains(poolName)) {

@@ -7,6 +7,7 @@ import com.meidusa.amoeba.aladdin.parser.sql.AladdinParser;
 import com.meidusa.amoeba.parser.Parser;
 import com.meidusa.amoeba.parser.expression.Expression;
 import com.meidusa.amoeba.parser.function.Function;
+import com.meidusa.amoeba.parser.statement.AbstractStatement;
 import com.meidusa.amoeba.parser.statement.DMLStatement;
 import com.meidusa.amoeba.parser.statement.PropertyStatement;
 import com.meidusa.amoeba.parser.statement.Statement;
@@ -32,7 +33,7 @@ public class AladdinParserTest {
                 DMLStatement dmlStatment = (DMLStatement) statment;
                 Expression expression = dmlStatment.getExpression();
 
-                System.out.println(sql + " =[ " + expression + "], evaluated = {" + dmlStatment.evaluate(null) + "}");
+                System.out.println(sql + " =[ " + expression + "], evaluated = {" + dmlStatment.evaluate(null,(AbstractStatement)statment) + "}");
             } else if (statment instanceof PropertyStatement) {
                 PropertyStatement proStatment = (PropertyStatement) statment;
 
