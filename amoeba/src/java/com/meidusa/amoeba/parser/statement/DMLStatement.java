@@ -74,7 +74,7 @@ public abstract class DMLStatement extends AbstractStatement {
         this.preparedStatment = preparedStatment;
     }
 
-    public Map<Table, Map<Column, Comparative>> evaluate(Object[] parameters) {
+    public Map<Table, Map<Column, Comparative>> evaluate(Object[] parameters,AbstractStatement statment) {
         Map<Table, Map<Column, Comparative>> currentEvaluatedTableMap = null;
         if (this.evaluatedTableMap == null) {
             currentEvaluatedTableMap = new HashMap<Table, Map<Column, Comparative>>();
@@ -83,10 +83,12 @@ public abstract class DMLStatement extends AbstractStatement {
                 if (logger.isDebugEnabled()) {
                     logger.debug("expression:[" + expression + "] evaluated");
                 }
-            } else {
-                for (Table table : getTables()) {
-                    currentEvaluatedTableMap.put(table, null);
-                }
+            } 
+            
+            for (Table table : getTables()) {
+            	if(currentEvaluatedTableMap.get(table) == null){
+            		currentEvaluatedTableMap.put(table, null);
+            	}
             }
 
             if (expression == null || !expression.isRealtime()) {
@@ -112,6 +114,8 @@ public abstract class DMLStatement extends AbstractStatement {
             }
             columnMap.put(colExpression.getColumn(), (Comparative) colExpression.evaluate(parameters));
         }
+        
+        
     }
 
     protected static void evaluateExpression(BaseExpressionList elist, Map<Table, Map<Column, Comparative>> tablesMap,

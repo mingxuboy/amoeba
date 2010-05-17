@@ -12,6 +12,7 @@ import java.util.Map;
 
 import com.meidusa.amoeba.parser.Parser;
 import com.meidusa.amoeba.parser.dbobject.Column;
+import com.meidusa.amoeba.parser.statement.AbstractStatement;
 import com.meidusa.amoeba.parser.statement.DMLStatement;
 import com.meidusa.amoeba.parser.statement.PropertyStatement;
 import com.meidusa.amoeba.parser.statement.ShowStatement;
@@ -30,7 +31,7 @@ public class MysqlParserTest {
 		Map<String,Function> funMap = AbstractQueryRouter.loadFunctionMap("./build/build-mysql/conf/functionMap.xml");
 		parser(funMap,"insert into TEST_SD_RELATION.RELATION_REVERSE ( SDID, F_SDID, STATE,   CREATE_TIME,   LAST_MODIFY_TIME, DEL_FLAG)   values (772152974,   1115596664,   1,   UNIX_TIMESTAMP()*1000,   UNIX_TIMESTAMP()*1000,0)  ON DUPLICATE KEY   UPDATE DEL_FLAG=0,   LAST_MODIFY_TIME=UNIX_TIMESTAMP()*1000;");
 		parser(funMap,"EXPLAIN SELECT REPLACE(UUID(), '-', '')");
-		parser(funMap,"select last_insert_id();");
+		parser(funMap," select * from moodrecord.t_twitter_hot order by add_time desc limit ?,?");
 		String t = "select ID from SD_MESSAGE.MESSAGE_NOTIFICATION  where  SDID=11 and name=? order by CREATE_TIME limit ?,?";
 		String sql1 = " SELECT * from account where time = DATE_ADD('1998-01-02', INTERVAL 31 DAY)";
 		String sql2 = "select * from account where 1<2 and not (id between 12+12 and 33) and id >12+3 or id not in (11,33,'23234') or  id  in (select test.ref_Id from test dd where dd.name='test')";
@@ -128,7 +129,7 @@ public class MysqlParserTest {
 			if(statment instanceof DMLStatement){
 				DMLStatement dmlStatment = (DMLStatement)statment;
 				Expression expression = dmlStatment.getExpression();
-				System.out.println(sql+" =[ "+ expression+"], evaluated = {"+dmlStatment.evaluate(null)+"} ,parameterCount="+dmlStatment.getParameterCount());
+				System.out.println(sql+" =[ "+ expression+"], evaluated = {"+dmlStatment.evaluate(null,(AbstractStatement)statment)+"} ,parameterCount="+dmlStatment.getParameterCount());
 			}else if(statment instanceof PropertyStatement ){
 				PropertyStatement proStatment = (PropertyStatement)statment;
 				System.out.println(proStatment.getProperties());
