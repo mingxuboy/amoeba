@@ -741,13 +741,32 @@ Statement UpdateQuery():
 {
 	Expression expression = null;
 	Table table = null;
+	BaseExpressionList andExpression = new AndExpression();
 	DMLStatement statement = new UpdateStatement();
 }
 {
    	(table = UpdateStatement(statement)
-    [expression= WhereClause(statement) ]){
-    	
-    	statement.setExpression(expression);
+    [expression= WhereClause(statement)    {
+      if(expression instanceof BaseExpressionList)
+      {			BaseExpressionList list = (BaseExpressionList)expression;
+			andExpression =(BaseExpressionList)expression;
+      }else      {
+        	if(expression !=  null)        	{				andExpression.addExpression(expression);
+			}
+      }
+          } ]
+
+	[<K_LIMIT>
+    (<S_PARAMETER_MARKER>{
+	   	andExpression.addExpression(new ParameterExpression(parameterIndex++));
+	} | <INTEGER_LITERAL>)[("," | <K_OFFSET> ) (<S_PARAMETER_MARKER>
+	{
+	   	andExpression.addExpression(new ParameterExpression(parameterIndex++));
+	} |<INTEGER_LITERAL> )
+    ]])
+    {
+      	if(andExpression.getSize() >0)       	{    		statement.setExpression(andExpression);
+   		}
     	return statement;	
     }
 }
