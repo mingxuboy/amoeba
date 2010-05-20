@@ -31,12 +31,14 @@ public class MysqlParserTest {
 		Map<String,Function> funMap = AbstractQueryRouter.loadFunctionMap("./build/build-mysql/conf/functionMap.xml");
 		parser(funMap,"insert into TEST_SD_RELATION.RELATION_REVERSE ( SDID, F_SDID, STATE,   CREATE_TIME,   LAST_MODIFY_TIME, DEL_FLAG)   values (772152974,   1115596664,   1,   UNIX_TIMESTAMP()*1000,   UNIX_TIMESTAMP()*1000,0)  ON DUPLICATE KEY   UPDATE DEL_FLAG=0,   LAST_MODIFY_TIME=UNIX_TIMESTAMP()*1000;");
 		parser(funMap,"EXPLAIN SELECT REPLACE(UUID(), '-', '')");
-		parser(funMap," select * from moodrecord.t_twitter_hot order by add_time desc limit ?,?");
+		parser(funMap," select * from moodrecord.t_twitter_hot where `key`='asdfasfd' order by add_time desc limit ?,?");
 		String t = "select ID from SD_MESSAGE.MESSAGE_NOTIFICATION  where  SDID=11 and name=? order by CREATE_TIME limit ?,?";
 		String sql1 = " SELECT * from account where time = DATE_ADD('1998-01-02', INTERVAL 31 DAY)";
 		String sql2 = "select * from account where 1<2 and not (id between 12+12 and 33) and id >12+3 or id not in (11,33,'23234') or  id  in (select test.ref_Id from test dd where dd.name='test')";
 		String[] sqls = {"SELECT COUNT(*) FROM (   SELECT F_SDID   FROM SD_RELATION.RELATION_FOLLOW   WHERE SDID=12 AND DEL_FLAG = 0   GROUP BY (F_SDID)) A",
 				sql1,sql2,
+				 "UPDATE `uc_app_game`.`sdo_admin_user` SET `usr_sumlogin`=(`usr_sumlogin`+1),`usr_loginip`=1034744162 WHERE `usr_id`=? LIMIT 32,?",
+
 				"select ID from SD_MESSAGE.MESSAGE_NOTIFICATION  where  SDID=11 order by CREATE_TIME limit ?,?",
 				"SELECT /*  #pool */ * FROM AA WHERE ID = 'ASDF\\'ADF'",
 				"SELECT '1997-12-31 23:59:59' + INTERVAL 1 MICROSECOND",
