@@ -16,7 +16,7 @@ package com.meidusa.amoeba.aladdin.parser.sql;
 import com.meidusa.amoeba.parser.dbobject.*;
 import com.meidusa.amoeba.parser.expression.*;
 import com.meidusa.amoeba.parser.function.*;
-import com.meidusa.amoeba.parser.statment.*;
+import com.meidusa.amoeba.parser.statement.*;
 
 import java.math.BigDecimal;
 import java.util.Map;
@@ -38,7 +38,7 @@ public class AladdinParser implements/*@bgen(jjtree)*/ AladdinParserTreeConstant
         private int parameterIndex = 0;
         private Map<String,Table> tableAliasMap = new HashMap<String,Table>();
         private Stack<Table> tableStack = new Stack<Table>();
-        private Statment statment;
+        private Statement statement;
         private Schema defaultSchema;
         private Map<String,Function> functionMap;
 
@@ -58,20 +58,20 @@ public class AladdinParser implements/*@bgen(jjtree)*/ AladdinParserTreeConstant
                 }
         }
 
-        public Statment doParse() throws com.meidusa.amoeba.parser.ParseException{
+        public Statement doParse() throws com.meidusa.amoeba.parser.ParseException{
                 try{
-                        Statment statment = this.parse();
-                        if(statment != null){
-                                statment.setParameterCount(parameterIndex);
+                        Statement statement = this.parse();
+                        if(statement != null){
+                                statement.setParameterCount(parameterIndex);
                         }
-                        return statment;
+                        return statement;
                 }catch(Exception e){
                         throw new com.meidusa.amoeba.parser.ParseException(e);
                 }
         }
 
-        public Statment getParsedStatment(){
-                return statment;
+        public Statement getParsedStatement(){
+                return statement;
         }
 
         private Expression reverseExpression(boolean not,Expression expression){
@@ -125,12 +125,12 @@ public class AladdinParser implements/*@bgen(jjtree)*/ AladdinParserTreeConstant
                 return output.toString();
         }
 
-  final public Statment parse() throws ParseException {
- /*@bgen(jjtree) Statment */
-        SimpleNode jjtn000 = new SimpleNode(JJTSTATMENT);
+  final public Statement parse() throws ParseException {
+ /*@bgen(jjtree) Statement */
+        SimpleNode jjtn000 = new SimpleNode(JJTSTATEMENT);
         boolean jjtc000 = true;
         jjtree.openNodeScope(jjtn000);Expression expression = null;
-        Statment statment = null;
+        Statement statement = null;
     try {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case K_EXPLAIN:
@@ -154,37 +154,37 @@ public class AladdinParser implements/*@bgen(jjtree)*/ AladdinParserTreeConstant
       case 131:
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
         case K_DELETE:
-          statment = DeleteQuery();
+          statement = DeleteQuery();
           break;
         case K_INSERT:
         case K_REPLACE:
-          statment = InsertQuery();
+          statement = InsertQuery();
           break;
         case K_SELECT:
         case 131:
-          statment = SelectQuery();
+          statement = SelectQuery();
           break;
         case K_UPDATE:
-          statment = UpdateQuery();
+          statement = UpdateQuery();
           break;
         case K_SET:
           jj_consume_token(K_SET);
-          statment = PropertySetQuery(new PropertyStatment());
+          statement = PropertySetQuery(new PropertyStatement());
           break;
         case K_USE:
-          statment = SelectSchema();
+          statement = SelectSchema();
           break;
         case K_COMMIT:
           jj_consume_token(K_COMMIT);
-                                                                                     statment = new CommitStatment();
+                                                                                     statement = new CommitStatement();
           break;
         case K_ROLLBACK:
           jj_consume_token(K_ROLLBACK);
-                                                                                      statment = new RollbackStatment();
+                                                                                      statement = new RollbackStatement();
           break;
         case K_START_TRANSACTION:
           jj_consume_token(K_START_TRANSACTION);
-                             statment = new StartTansactionStatment();
+                             statement = new StartTansactionStatement();
           break;
         default:
           jj_la1[1] = jj_gen;
@@ -241,7 +241,7 @@ public class AladdinParser implements/*@bgen(jjtree)*/ AladdinParserTreeConstant
         }
         break;
       case K_SHOW:
-        statment = ShowQuery();
+        statement = ShowQuery();
         break;
       default:
         jj_la1[6] = jj_gen;
@@ -250,7 +250,7 @@ public class AladdinParser implements/*@bgen(jjtree)*/ AladdinParserTreeConstant
       }
       jjtree.closeNodeScope(jjtn000, true);
       jjtc000 = false;
-        if(statment instanceof DMLStatment){
+        if(statement instanceof DMLStatement){
                 List<Table> list = new ArrayList<Table>();
                         for(Map.Entry<String,Table> entry : tableAliasMap.entrySet()){
                                 if(!list.contains(entry.getValue())){
@@ -260,9 +260,9 @@ public class AladdinParser implements/*@bgen(jjtree)*/ AladdinParserTreeConstant
 
                         Table[] tables = new Table[list.size()];
                         list.toArray(tables);
-                        ((DMLStatment)statment).setTables(tables);
+                        ((DMLStatement)statement).setTables(tables);
         }
-        {if (true) return statment;}
+        {if (true) return statement;}
     } catch (Throwable jjte000) {
      if (jjtc000) {
        jjtree.clearNodeScope(jjtn000);
@@ -285,7 +285,7 @@ public class AladdinParser implements/*@bgen(jjtree)*/ AladdinParserTreeConstant
     throw new Error("Missing return statement in function");
   }
 
-  final public Statment SelectSchema() throws ParseException {
+  final public Statement SelectSchema() throws ParseException {
         Token t = null;
         String schema = null;
     jj_consume_token(K_USE);
@@ -311,22 +311,22 @@ public class AladdinParser implements/*@bgen(jjtree)*/ AladdinParserTreeConstant
       jj_consume_token(-1);
       throw new ParseException();
     }
-                PropertyStatment statment = new PropertyStatment();
-                statment.addProperty("schema",new ConstantExpression(schema));
-                {if (true) return statment;}
+                PropertyStatement statement = new PropertyStatement();
+                statement.addProperty("schema",new ConstantExpression(schema));
+                {if (true) return statement;}
     throw new Error("Missing return statement in function");
   }
 
-  final public Statment ShowQuery() throws ParseException {
+  final public Statement ShowQuery() throws ParseException {
         Expression expression = null;
         Column column = null;
         Table table = null;
     jj_consume_token(K_SHOW);
-               {if (true) return ShowStatment.STATMENT;}
+               {if (true) return ShowStatement.STATMENT;}
     throw new Error("Missing return statement in function");
   }
 
-  final public Statment PropertySetQuery(PropertyStatment statment) throws ParseException {
+  final public Statement PropertySetQuery(PropertyStatement statement) throws ParseException {
         Expression expression = null;
 
         Token name = null;
@@ -466,7 +466,7 @@ public class AladdinParser implements/*@bgen(jjtree)*/ AladdinParserTreeConstant
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case 132:
       jj_consume_token(132);
-      PropertySetQuery(statment);
+      PropertySetQuery(statement);
       break;
     default:
       jj_la1[16] = jj_gen;
@@ -474,16 +474,16 @@ public class AladdinParser implements/*@bgen(jjtree)*/ AladdinParserTreeConstant
     }
                 if(value != null){
                         ConstantExpression consExp= new ConstantExpression(value);
-                        statment.addProperty(propertyName,consExp);
+                        statement.addProperty(propertyName,consExp);
                 }
-                {if (true) return statment;}
+                {if (true) return statement;}
     throw new Error("Missing return statement in function");
   }
 
-  final public Statment UpdateQuery() throws ParseException {
+  final public Statement UpdateQuery() throws ParseException {
         Expression expression = null;
         Table table = null;
-        DMLStatment statment = null;
+        DMLStatement statement = null;
     table = UpdateStatement();
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case K_WHERE:
@@ -493,17 +493,17 @@ public class AladdinParser implements/*@bgen(jjtree)*/ AladdinParserTreeConstant
       jj_la1[17] = jj_gen;
       ;
     }
-        statment = new UpdateStatment();
+        statement = new UpdateStatement();
         if(expression != null){
                 if(expression instanceof BaseExpressionList){
                         if(((BaseExpressionList)expression).getSize()>0){
-                                statment.setExpression(expression);
+                                statement.setExpression(expression);
                         }
                 }else{
-                        statment.setExpression(expression);
+                        statement.setExpression(expression);
                 }
         }
-        {if (true) return statment;}
+        {if (true) return statement;}
     throw new Error("Missing return statement in function");
   }
 
@@ -613,10 +613,10 @@ Expression expression = null;
     throw new Error("Missing return statement in function");
   }
 
-  final public Statment DeleteQuery() throws ParseException {
+  final public Statement DeleteQuery() throws ParseException {
         Expression expression = null;
         Table table = null;
-        DMLStatment statment = null;
+        DMLStatement statement = null;
     table = DeleteStatement();
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case K_WHERE:
@@ -626,17 +626,17 @@ Expression expression = null;
       jj_la1[23] = jj_gen;
       ;
     }
-        statment = new DeleteStatment();
+        statement = new DeleteStatement();
         if(expression != null){
                 if(expression instanceof BaseExpressionList){
                         if(((BaseExpressionList)expression).getSize()>0){
-                                statment.setExpression(expression);
+                                statement.setExpression(expression);
                         }
                 }else{
-                        statment.setExpression(expression);
+                        statement.setExpression(expression);
                 }
         }
-        {if (true) return  statment;}
+        {if (true) return  statement;}
     throw new Error("Missing return statement in function");
   }
 
@@ -656,9 +656,9 @@ Expression expression = null;
     throw new Error("Missing return statement in function");
   }
 
-  final public Statment InsertQuery() throws ParseException {
+  final public Statement InsertQuery() throws ParseException {
         Table table = null;
-        DMLStatment statment = new InsertStatment();
+        DMLStatement statement = new InsertStatement();
         Expression expression = null;
         List<Column> insertColumns = null;
         List<Expression> insertValues = null;
@@ -711,10 +711,10 @@ Expression expression = null;
                 if(expression != null){
                                 if(expression instanceof BaseExpressionList){
                                         if(((BaseExpressionList)expression).getSize()>0){
-                                                statment.setExpression(expression);
+                                                statement.setExpression(expression);
                                         }
                                 }else{
-                                        statment.setExpression(expression);
+                                        statement.setExpression(expression);
                                 }
                         }
         }else{
@@ -733,7 +733,7 @@ Expression expression = null;
                         }
 
                         if(andExpression.getSize()>0){
-                                statment.setExpression(andExpression);
+                                statement.setExpression(andExpression);
                         }
                 }
         }
@@ -744,10 +744,10 @@ Expression expression = null;
                 if(expression != null){
                         if(expression instanceof BaseExpressionList){
                                 if(((BaseExpressionList)expression).getSize()>0){
-                                        statment.setExpression(expression);
+                                        statement.setExpression(expression);
                                 }
                         }else{
-                                statment.setExpression(expression);
+                                statement.setExpression(expression);
                         }
                 }
       break;
@@ -756,7 +756,7 @@ Expression expression = null;
       jj_consume_token(-1);
       throw new ParseException();
     }
-        {if (true) return statment;}
+        {if (true) return statement;}
     throw new Error("Missing return statement in function");
   }
 
@@ -825,9 +825,9 @@ Expression expression = null;
     throw new Error("Missing return statement in function");
   }
 
-  final public Statment SelectQuery() throws ParseException {
+  final public Statement SelectQuery() throws ParseException {
         Expression expression = null;
-        DMLStatment statment = null;
+        DMLStatement statement = null;
     expression = FullSelectStatement();
     label_6:
     while (true) {
@@ -845,17 +845,17 @@ Expression expression = null;
       }
       ExtraClauses();
     }
-        statment = new SelectStatment();
+        statement = new SelectStatement();
         if(expression != null){
                 if(expression instanceof BaseExpressionList){
                         if(((BaseExpressionList)expression).getSize()>0){
-                                statment.setExpression(expression);
+                                statement.setExpression(expression);
                         }
                 }else{
-                        statment.setExpression(expression);
+                        statement.setExpression(expression);
                 }
         }
-        {if (true) return statment;}
+        {if (true) return statement;}
     throw new Error("Missing return statement in function");
   }
 

@@ -3,13 +3,13 @@ package com.meidusa.amoeba.aladdin.parser.sql;
 
 public interface AladdinParserTreeConstants
 {
-  public int JJTSTATMENT = 0;
+  public int JJTSTATEMENT = 0;
   public int JJTVOID = 1;
 
 
   public String[] jjtNodeName = {
-    "Statment",
+    "Statement",
     "void",
   };
 }
-/* JavaCC - OriginalChecksum=633191f82f099a9499d26944541c145e (do not edit this line) */
+/* JavaCC - OriginalChecksum=94462d8fd1187b16fa09ca313c48a8fc (do not edit this line) */

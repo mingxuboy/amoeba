@@ -36,7 +36,7 @@ import com.meidusa.amoeba.parser.dbobject.*;
 import com.meidusa.amoeba.parser.expression.*;
 import com.meidusa.amoeba.parser.function.*;
 import com.meidusa.amoeba.parser.Parser;
-import com.meidusa.amoeba.parser.statment.*;
+import com.meidusa.amoeba.parser.statement.*;
 
 import java.math.BigDecimal;
 import java.util.Map;
@@ -59,7 +59,7 @@ public class MysqlParser implements/*@bgen(jjtree)*/ MysqlParserTreeConstants, /
 	private int parameterIndex = 0;
 	private Map<String,Table> tableAliasMap = new HashMap<String,Table>();
 	private Stack<Table> tableStack = new Stack<Table>();
-	private Statment statment;
+	private Statement statement;
 	private Schema defaultSchema;
 	private Map<String,Function> functionMap;
 	private static TimeConverter timeConverter = new TimeConverter();
@@ -99,8 +99,8 @@ public class MysqlParser implements/*@bgen(jjtree)*/ MysqlParserTreeConstants, /
         if ( args.length > 0 ) {
             System.out.println(args[0]) ;
         }
-        Statment statment = p.doParse();
-        System.out.println(statment.getExpression());
+        Statement statement = p.doParse();
+        System.out.println(statement.getExpression());
 
     } // main ends here
 
@@ -126,19 +126,19 @@ public class MysqlParser implements/*@bgen(jjtree)*/ MysqlParserTreeConstants, /
 	
 	
 	
-	public Statment doParse() throws com.meidusa.amoeba.parser.ParseException{
+	public Statement doParse() throws com.meidusa.amoeba.parser.ParseException{
 		try{
-			Statment statment = this.parse();
-			if(statment != null){
-				statment.setParameterCount(parameterIndex);
+			Statement statement = this.parse();
+			if(statement != null){
+				statement.setParameterCount(parameterIndex);
 			}
-			return statment;
+			return statement;
 		}catch(Exception e){
 			throw new com.meidusa.amoeba.parser.ParseException(e);
 		}
 	}
-	public Statment getParsedStatment(){
-		return statment;
+	public Statement getParsedStatement(){
+		return statement;
 	}
 	
 	private Expression reverseExpression(boolean not,Expression expression){
@@ -317,11 +317,12 @@ TOKEN: /* SQL Keywords. prefixed with K_ to avoid name clashes */
 |   <K_HOUR:"HOUR">
 |	<K_COMMIT:"COMMIT">
 |	<K_ROLLBACK:"ROLLBACK">
-
+| 	< K_DESCRIBE:"describe" >
 | < K_IGNORE_INDEX:"IGNORE INDEX" >
 | < K_FORCE_INDEX:"FORCE INDEX" >
 |	<K_TRANSACTION_ISOLATION_LEVEL:"TRANSACTION ISOLATION LEVEL">
-| 	<K_ON_DUPLICATE_UPDATE :"ON DUPLICATE KEY UPDATE" >
+| 	<K_DUPLICATE:"DUPLICATE" >
+| 	<K_KEY :"KEY" >
 //|	<K_TRANSACTION:"TRANSACTION">
 //|	<K_BEGIN:"BEGIN">
 |	<K_START_TRANSACTION:"START TRANSACTION">
@@ -628,34 +629,34 @@ TOKEN:
 }
 
 
-Statment parse()      :
+Statement parse()      :
 {
 	Expression expression = null;
-	Statment statment = null;
+	Statement statement = null;
 }
 {
     ["EXPLAIN"] (
-    statment = DeleteQuery()
+    statement = DeleteQuery()
     |
-    statment = InsertQuery()
+    statement = InsertQuery()
     |
-    statment= SelectQuery()
+    statement= SelectQuery()
     |
-    statment = UpdateQuery()
+    statement = UpdateQuery()
   	|
-  	statment = ShowQuery() 
+  	statement = ShowQuery() 
     |
-    "SET" statment = PropertySetQuery(new PropertyStatment())
+    "SET" statement = PropertySetQuery(new PropertyStatement())
     |
-    statment = SelectSchema()
-    |(<K_COMMIT> /*[<K_WORK>] [<K_AND> [<K_NO>] <K_CHAIN>] [[<K_NO>] <K_RELEASE>]*/){statment = new CommitStatment();}
-    |(<K_ROLLBACK>/*[<K_WORK>] [<K_AND> [<K_NO>] <K_CHAIN>] [[<K_NO>] <K_RELEASE>]*/){statment = new RollbackStatment();}
-    |(<K_START_TRANSACTION>){statment = new StartTansactionStatment();}
+    statement = SelectSchema()
+    |(<K_COMMIT> /*[<K_WORK>] [<K_AND> [<K_NO>] <K_CHAIN>] [[<K_NO>] <K_RELEASE>]*/){statement = new CommitStatement();}
+    |(<K_ROLLBACK>/*[<K_WORK>] [<K_AND> [<K_NO>] <K_CHAIN>] [[<K_NO>] <K_RELEASE>]*/){statement = new RollbackStatement();}
+    |(<K_START_TRANSACTION>){statement = new StartTansactionStatement();}
     )
     [ INDEX() ]
     (";"|<EOF>)
     {
-    	if(statment instanceof DMLStatment){
+    	if(statement instanceof AbstractStatement){
 	    	List<Table> list = new ArrayList<Table>();
 			for(Map.Entry<String,Table> entry : tableAliasMap.entrySet()){
 				if(!list.contains(entry.getValue())){
@@ -665,12 +666,12 @@ Statment parse()      :
 			
 			Table[] tables = new Table[list.size()];
 			list.toArray(tables);
-			((DMLStatment)statment).setTables(tables);
+			((AbstractStatement)statement).setTables(tables);
     	}
-        return statment;
+        return statement;
     }
 }
-Statment SelectSchema() :{
+Statement SelectSchema() :{
 	Token t = null;
 	String schema = null;
 }{
@@ -678,30 +679,30 @@ Statment SelectSchema() :{
 			|t=<S_QUOTED_IDENTIFIER>{schema = (t.image).substring(1,t.image.length()-1);}
 			|t=<S_COMMA_IDENTIFIER>{schema = (t.image).substring(1,t.image.length()-1);}
 			|t=<IDENTIFIER>{schema = t.image;}){
-		PropertyStatment statment = new PropertyStatment();
-		statment.addProperty("schema",new ConstantExpression(schema));
-		return statment;
+		PropertyStatement statement = new PropertyStatement();
+		statement.addProperty("schema",new ConstantExpression(schema));
+		return statement;
 	}
 }
 
 
 /*
-Statment ShowQuery() :{
+Statement ShowQuery() :{
 	Expression expression = null;
 	Column column = null;
 	Table table = null;
 }{
-	"SHOW"{return ShowStatment.STATMENT;}//[(<K_CREATE> [<K_TABLE>|<IDENTIFIER>])|<K_FULL>] column = ColumnName() [<K_FROM> table = TableReference()]{
+	"SHOW"{return ShowStatement.STATMENT;}//[(<K_CREATE> [<K_TABLE>|<IDENTIFIER>])|<K_FULL>] column = ColumnName() [<K_FROM> table = TableReference()]{
 		ColumnExpression columnExpression = new ColumnExpression();
 		columnExpression.setColumn(column);
-		ShowStatment show = new ShowStatment();
+		ShowStatement show = new ShowStatement();
 		show.setExpression(columnExpression);
 		return show;
 	}
 }
 	
 */
-Statment PropertySetQuery(PropertyStatment statment) :{
+Statement PropertySetQuery(PropertyStatement statement) :{
 	Expression expression = null;
 	
 	Token name = null;
@@ -731,60 +732,79 @@ Statment PropertySetQuery(PropertyStatment statment) :{
 			| valueToken = <STRING_LITERAL>{value = (valueToken.image).substring(1,valueToken.image.length()-1);} //{value = valueToken.image.substring(1,token.image.length()-1);}
 			| valueToken = <S_QUOTED_IDENTIFIER>{value = valueToken.image;}
 			))
-			))["," PropertySetQuery(statment)]{
+			))["," PropertySetQuery(statement)]{
 		if(value != null){
 			ConstantExpression consExp= new ConstantExpression(value);
-			statment.addProperty(propertyName,consExp);
+			statement.addProperty(propertyName,consExp);
 		}
-		return statment;
+		return statement;
 	}
 }
 
-Statment UpdateQuery():
+Statement UpdateQuery():
 {
 	Expression expression = null;
 	Table table = null;
-	DMLStatment statment = new UpdateStatment();
+	BaseExpressionList andExpression = new AndExpression();
+	DMLStatement statement = new UpdateStatement();
 }
 {
-   	(table = UpdateStatement(statment)
-    [expression= WhereClause(statment) ]){
-    	
-    	statment.setExpression(expression);
-    	return statment;	
+   	(table = UpdateStatement(statement)
+    [expression= WhereClause(statement)    {
+      if(expression instanceof BaseExpressionList)
+      {			BaseExpressionList list = (BaseExpressionList)expression;
+			andExpression =(BaseExpressionList)expression;
+      }else      {
+        	if(expression !=  null)        	{				andExpression.addExpression(expression);
+			}
+      }
+          } ]
+
+	[<K_LIMIT>
+    (<S_PARAMETER_MARKER>{
+	   	andExpression.addExpression(new ParameterExpression(parameterIndex++));
+	} | <INTEGER_LITERAL>)[("," | <K_OFFSET> ) (<S_PARAMETER_MARKER>
+	{
+	   	andExpression.addExpression(new ParameterExpression(parameterIndex++));
+	} |<INTEGER_LITERAL> )
+    ]])
+    {
+      	if(andExpression.getSize() >0)       	{    		statement.setExpression(andExpression);
+   		}
+    	return statement;	
     }
 }
 
-Statment ShowQuery():
-{	ShowStatment statment = new ShowStatment();
+Statement ShowQuery():
+{	ShowStatement statement = new ShowStatement();
 	Expression expression = null;
-}{	"SHOW" FromItem(statment) [expression = WhereClause(statment)]	{	 statment.setExpression(expression);
-	 return statment;
+}{	(	  "SHOW" | < K_DESCRIBE >	) FromItem(statement) [expression = WhereClause(statement)]	{	 statement.setExpression(expression);
+	 return statement;
 	}
 }
 
-Table UpdateStatement(Statment statment):
+Table UpdateStatement(Statement statement):
 {
 	Table table = null;
 }
 {
     ("UPDATE"
     table = TableReference()["," TableReference()]
-    "SET" AssignmentClause(statment)){
+    "SET" AssignmentClause(statement)){
     	return table;
     }
 }
 
-Expression AssignmentClause(Statment statment):
+Expression AssignmentClause(Statement statement):
 {
 	Expression expression = null;
 }
 {
-       (expression= ColumnValues(statment){
+       (expression= ColumnValues(statement){
        
        
        }
-        |  (   "(" UpdateColumn() ("," UpdateColumn())* ")" "=" "(" ( LOOKAHEAD(2) UpdateValues(statment) |  FullSelectStatement(statment) ) ")" )
+        |  (   "(" UpdateColumn() ("," UpdateColumn())* ")" "=" "(" ( LOOKAHEAD(2) UpdateValues(statement) |  FullSelectStatement(statement) ) ")" )
         ){
         	return expression;
         }
@@ -796,40 +816,40 @@ void UpdateColumn():
     ColumnName()
 }
 
-List<Expression> UpdateValues(Statment statment):
+List<Expression> UpdateValues(Statement statement):
 {
 	Expression expression = null;
 	List<Expression> list = new ArrayList<Expression>();
 }
 {
-       expression= UpdateValue(statment){list.add(expression);} ("," expression=UpdateValue(statment){list.add(expression);})*{
+       expression= UpdateValue(statement){list.add(expression);} ("," expression=UpdateValue(statement){list.add(expression);})*{
        	
        	return list;
        }
 }
 
-Expression UpdateValue(Statment statment):
+Expression UpdateValue(Statement statement):
 {
 Expression expression = null;
 }
 {
-    expression =  SQLSimpleExpression(statment){
+    expression =  SQLSimpleExpression(statement){
        return 	expression;
     }
 }
 
-Statment DeleteQuery():
+Statement DeleteQuery():
 {
 	Expression expression = null;
 	Table table = null;
-	DMLStatment statment = new DeleteStatment();
+	DMLStatement statement = new DeleteStatement();
 }
 {
     (table = DeleteStatement()
-    [expression = WhereClause(statment)]){
+    [expression = WhereClause(statement)]){
     	
-    	statment.setExpression(expression);
-    	return 	statment;
+    	statement.setExpression(expression);
+    	return 	statement;
     }
 }
 
@@ -844,20 +864,20 @@ Table DeleteStatement():
 }
 
 
-Statment InsertQuery():
+Statement InsertQuery():
 {
 	Table table = null;
-	DMLStatment statment = new InsertStatment();
+	DMLStatement statement = new InsertStatement();
 	Expression expression = null;
 	List<Column> insertColumns = null;
 	List<List<Expression> > insertValues = null;
 }
 {
     (<K_INSERT>|<K_REPLACE>) ["INTO"] table = TableName()    (([LOOKAHEAD(4) "(" insertColumns = InsertColumns() ")"]
-    ( insertValues = InsertValues(statment) | expression = FullSelectStatement(statment))
+    ( insertValues = InsertValues(statement) | expression = FullSelectStatement(statement))
     {
     	if(insertValues == null || insertValues.size() == 0){
-    		statment.setExpression(expression);
+    		statement.setExpression(expression);
     	}else{
     		if(insertColumns != null){
 	    		AndExpression andExpression = new AndExpression();
@@ -888,15 +908,15 @@ Statment InsertQuery():
 	    			andExpression.addExpression(insertExpression);
 	    			index ++;
 	    		}
-	    		statment.setExpression(andExpression);
+	    		statement.setExpression(andExpression);
     		}
     	}
     	
     }
-    |    (      "SET" expression = AssignmentClause(statment)    ){statment.setExpression(expression);})
+    |    (      "SET" expression = AssignmentClause(statement)    ){statement.setExpression(expression);})
 
-    [<K_ON_DUPLICATE_UPDATE > AssignmentClause(statment)]  ){
-    	return statment;
+    [<K_ON ><K_DUPLICATE ><K_KEY > <K_UPDATE > AssignmentClause(statement)]  ){
+    	return statement;
     }
 }
 
@@ -923,15 +943,15 @@ Column InsertColumn():
    }
 }
 
-List<List<Expression>> InsertValues(Statment statment):
+List<List<Expression>> InsertValues(Statement statement):
 {
 	List<List<Expression>> insertValues = new ArrayList<List<Expression > >();
 	List<Expression> singleExpressionList = null;
 	Expression expression = null;
 }
 {
-       ("VALUES" singleExpressionList = InsertSingleRowValues(statment) {
-         	if(singleExpressionList != null)	       	{	         	insertValues.add(singleExpressionList);	       	}       }(["," ] singleExpressionList = InsertSingleRowValues(statment) {
+       ("VALUES" singleExpressionList = InsertSingleRowValues(statement) {
+         	if(singleExpressionList != null)	       	{	         	insertValues.add(singleExpressionList);	       	}       }(["," ] singleExpressionList = InsertSingleRowValues(statement) {
          	if(singleExpressionList != null)
 	       	{
 	         	insertValues.add(singleExpressionList);
@@ -943,11 +963,11 @@ List<List<Expression>> InsertValues(Statment statment):
 }
 
 
-List<Expression> InsertSingleRowValues(Statment statment):
+List<Expression> InsertSingleRowValues(Statement statement):
 {	List<Expression> insertValues = new ArrayList<Expression>();
 	Expression expression = null;
-}{	("("  expression = InsertValue(statment){
-		if(expression != null)insertValues.add(expression);	} ("," expression = InsertValue(statment){if(expression != null)insertValues.add(expression);})*  ")")
+}{	("("  expression = InsertValue(statement){
+		if(expression != null)insertValues.add(expression);	} ("," expression = InsertValue(statement){if(expression != null)insertValues.add(expression);})*  ")")
 	{
 	  if(insertValues.size() >0)	  	{		return insertValues;
 		}else		{			return null;
@@ -956,52 +976,52 @@ List<Expression> InsertSingleRowValues(Statment statment):
 
 }
 //This is just a wrapper to provide different formatting in case of Insert
-Expression InsertValue(Statment statment):
+Expression InsertValue(Statement statement):
 {
 	Expression expression = null;
 }
 {
- 	expression = SQLSimpleExpression(statment){
+ 	expression = SQLSimpleExpression(statement){
  		return expression;	
  	}
 }
 
 
-Statment SelectQuery():
+Statement SelectQuery():
 {
 	Expression expression = null;
-	DMLStatment statment = new SelectStatment();;
+	DMLStatement statement = new SelectStatement();;
 }
 {
-   (expression = FullSelectStatement(statment)
-    (ExtraClauses(statment))*)
+   (expression = FullSelectStatement(statement)
+    (ExtraClauses(statement))*)
     {
-    	statment.setExpression(expression);
-    	return statment;
+    	statement.setExpression(expression);
+    	return statement;
     }
     
 }
 
 
-Expression ColumnValues(Statment statment)      :
+Expression ColumnValues(Statement statement)      :
 {
 	Expression expression = null;
 	AndExpression andExpression = new AndExpression();
 }
 {
- (expression= ColumnValue(statment){if(expression != null) andExpression.addExpression(expression);} ("," expression = ColumnValue(statment){if(expression != null) andExpression.addExpression(expression);})*){
+ (expression= ColumnValue(statement){if(expression != null) andExpression.addExpression(expression);} ("," expression = ColumnValue(statement){if(expression != null) andExpression.addExpression(expression);})*){
   return andExpression;
  }
 }
 
-Expression ColumnValue(Statment statment)       :
+Expression ColumnValue(Statement statement)       :
 {
 ColumnExpression colExpression = new ColumnExpression();
 Expression expression = null;
 Column column = null;
 }
 {
-       (column= ColumnName() "=" expression = UpdatedValue(statment)){
+       (column= ColumnName() "=" expression = UpdatedValue(statement)){
        	if(expression == null) return null;
        	
        	colExpression.setColumn(column);
@@ -1014,21 +1034,21 @@ Column column = null;
 }
 
 
-Expression UpdatedValue(Statment statment)      : // Can be a subquery or a expression
+Expression UpdatedValue(Statement statement)      : // Can be a subquery or a expression
 {
 Expression expression = null;
 }
 {
   (LOOKAHEAD(("(")+ "SELECT")
-  "(" expression = SubSelectStatement(statment) ")"
+  "(" expression = SubSelectStatement(statement) ")"
   |
-  expression= SQLSimpleExpression(statment)){
+  expression= SQLSimpleExpression(statement)){
   	return expression;
   }
 }
 
 
-ComparisonExpression IsNullClause(Statment statment)      :
+ComparisonExpression IsNullClause(Statement statement)      :
 {
 	int comparison = Comparative.Equivalent;
 }
@@ -1156,27 +1176,27 @@ Table TableReference():
    	 }
 }
 
-void CaseStatement(Statment statment) :
+void CaseStatement(Statement statement) :
 {}
 {
-    "CASE" [SQLSimpleExpression(statment)] WhenStatement(statment) (WhenStatement(statment))* [ElseStatement(statment)] "END"
+    "CASE" [SQLSimpleExpression(statement)] WhenStatement(statement) (WhenStatement(statement))* [ElseStatement(statement)] "END"
 }
 
 
-void WhenStatement(Statment statment) :
+void WhenStatement(Statement statement) :
 {}
 {
-	"WHEN" SQLExpression(statment) "THEN" SQLSimpleExpression(statment)
+	"WHEN" SQLExpression(statement) "THEN" SQLSimpleExpression(statement)
 }
 
-void ElseStatement(Statment statment) :
+void ElseStatement(Statement statement) :
 {}
 {
-	"ELSE" SQLSimpleExpression(statment)
+	"ELSE" SQLSimpleExpression(statement)
 }
 
 
-void ExtraClauses(Statment statment)       :
+void ExtraClauses(Statement statement)       :
 {}
 {
     (
@@ -1189,14 +1209,14 @@ void ExtraClauses(Statment statment)       :
     )
 }
 
-Expression FullSelectStatement(Statment statment):
+Expression FullSelectStatement(Statement statement):
 {
 	Expression expression = null;
 	Expression unionedExpression = null;
 }
 {
-	((expression = SubSelectStatement(statment) )
-	| "(" expression = FullSelectStatement(statment)")" [ UnionClause() unionedExpression = FullSelectStatement(statment)] ){
+	((expression = SubSelectStatement(statement) )
+	| "(" expression = FullSelectStatement(statement)")" [ UnionClause() unionedExpression = FullSelectStatement(statement)] ){
 		if(unionedExpression != null){
 			if(expression == null){
 				return unionedExpression;
@@ -1217,24 +1237,24 @@ void UnionClause():
         "UNION" ["ALL"]
 }
 
-Expression SubSelectStatement(Statment statment):
+Expression SubSelectStatement(Statement statement):
 {
 	Expression expression = null;
 	Expression fromExpression = null;
 	AndExpression andExpression = new AndExpression();
 }
 {
-    (SelectClause(statment)
-    [fromExpression = FromClause(statment){
+    (SelectClause(statement)
+    [fromExpression = FromClause(statement){
       if(fromExpression != null)	  {
 	   	andExpression.addExpression(fromExpression);	  }    }]
-    [ expression = WhereClause(statment)    {
+    [ expression = WhereClause(statement)    {
       if(expression != null)
 	  {
 	   	andExpression.addExpression(expression);
 	  }    }]
-    [ GroupByClause(statment) ]
-    [ OrderByClause(statment) ]
+    [ GroupByClause(statement) ]
+    [ OrderByClause(statement) ]
     [<K_LIMIT>    (<S_PARAMETER_MARKER>{
 	   	andExpression.addExpression(new ParameterExpression(parameterIndex++));
 	} | <INTEGER_LITERAL>)[("," | <K_OFFSET> ) (<S_PARAMETER_MARKER>	{
@@ -1247,20 +1267,20 @@ Expression SubSelectStatement(Statment statment):
     }
 }
 
-void SelectClause(Statment statment):
+void SelectClause(Statement statement):
 {}
 {
-	  "SELECT" [< POOL >] [ "ALL" | "DISTINCT"|"DISTINCTROW" ]["HIGH_PRIORITY"]["STRAIGHT_JOIN"] ["SQL_SMALL_RESULT"] ["SQL_BIG_RESULT"] ["SQL_BUFFER_RESULT"] ["SQL_CACHE" | "SQL_NO_CACHE"] ["SQL_CALC_FOUND_ROWS"] SelectList(statment)
+	  "SELECT" [< POOL >] [ "ALL" | "DISTINCT"|"DISTINCTROW" ]["HIGH_PRIORITY"]["STRAIGHT_JOIN"] ["SQL_SMALL_RESULT"] ["SQL_BIG_RESULT"] ["SQL_BUFFER_RESULT"] ["SQL_CACHE" | "SQL_NO_CACHE"] ["SQL_CALC_FOUND_ROWS"] SelectList(statement)
 }
 
 /* Checks for whatever follows  SELECT */
-void SelectList(Statment statment) :
+void SelectList(Statement statement) :
 {}
 {
-    ("*"("," SelectItem(statment))*) | (SelectItem(statment) ("," SelectItem(statment))*)
+    ("*"("," SelectItem(statement))*) | (SelectItem(statement) ("," SelectItem(statement))*)
 }
 
-void SelectItem(Statment statment):
+void SelectItem(Statement statement):
 {
 	Token token = null;
 	Expression expression = null;
@@ -1270,21 +1290,21 @@ void SelectItem(Statment statment):
     (
         LOOKAHEAD(2) EntityName()".*" /* table.* */
         |   LOOKAHEAD(4) EntityName()"." EntityName() ".*" /* schema.table.* */
-        |  expression = SQLSimpleExpression(statment)
+        |  expression = SQLSimpleExpression(statement)
         {			if(expression instanceof ColumnExpression)
 		      {
 					column = ((ColumnExpression)expression).getColumn();
-					((DMLStatment)statment).addSelectColumn(column.getName(),column);
+					((DMLStatement)statement).addSelectColumn(column.getName(),column);
 		      }else if(expression instanceof FunctionExpression)
 		      {
 				 	String columnName = ((FunctionExpression)expression).getFunction().getName();
 					column = new Column();
 		          	column.setName(columnName);
-					((DMLStatment)statment).addSelectColumn(columnName,column);
+					((DMLStatement)statement).addSelectColumn(columnName,column);
 		      }
 		
         }    // Column or Expression
-    )[("=" SQLSimpleExpression(statment))] [["AS"] token = <IDENTIFIER>    {
+    )[("=" SQLSimpleExpression(statement))] [["AS"] token = <IDENTIFIER>    {
       if(token != null)
 		{
 		  if(column != null)		  {			column.setAlias(token.image);
@@ -1293,15 +1313,15 @@ void SelectItem(Statment statment):
 }
 
 
-Expression FromClause(Statment statment) :
+Expression FromClause(Statement statement) :
 {
 Expression expression = null;
 AndExpression andExpression = null;
 Expression currentExpression = null;
 }
 {
-    "FROM" currentExpression = FromItem(statment)    {
-      expression = currentExpression;    } ( "," currentExpression = FromItem(statment)    {
+    "FROM" currentExpression = FromItem(statement)    {
+      expression = currentExpression;    } ( "," currentExpression = FromItem(statement)    {
       if(currentExpression != null)      {    	if(andExpression == null){
     		andExpression = new AndExpression();
     	}
@@ -1316,14 +1336,14 @@ Expression currentExpression = null;
 }
 
 
-Expression FromItem(Statment statment) :
+Expression FromItem(Statement statement) :
 {
 Expression expression = null;
 AndExpression andExpression = null;
 Expression currentExpression = null;
 }
 {
-  expression = TableSpec(statment) (currentExpression = JoinedTable(statment)  {	if(currentExpression != null)
+  expression = TableSpec(statement) (currentExpression = JoinedTable(statement)  {	if(currentExpression != null)
       {
     	if(andExpression == null){
     		andExpression = new AndExpression();
@@ -1342,7 +1362,7 @@ Expression currentExpression = null;
 }
 
 
-Expression JoinedTable(Statment statment) :
+Expression JoinedTable(Statement statement) :
 {
 
 Expression expression = null;
@@ -1352,34 +1372,34 @@ Expression currentExpression = null;
 }
 {
 	((["NATURAL"] (("LEFT"|"RIGHT") ["OUTER"])) | (["INNER" | "CROSS"])) "JOIN"
-	(LOOKAHEAD(2) expression = TableSpec(statment) (JoinedTable(statment))* | "(" expression = TableSpec(statment) (JoinedTable(statment))* ")") JoinCondition(statment)
+	(LOOKAHEAD(2) expression = TableSpec(statement) (JoinedTable(statement))* | "(" expression = TableSpec(statement) (JoinedTable(statement))* ")") JoinCondition(statement)
 	{		return expression;
 	}
 }
 
-Expression TableSpec(Statment statment):
+Expression TableSpec(Statement statement):
 {
 	Table table = null;
 	Expression expression = null;
 }
 {
 	(	  table = TableReference()
-	| (["TABLE"] "(" expression= FullSelectStatement(statment) ")" [CorrelationClause()])	)	{		return expression;
+	| (["TABLE"] "(" expression= FullSelectStatement(statement) ")" [CorrelationClause()])	)	{		return expression;
 	}
 }
 
-void JoinCondition(Statment statment):
+void JoinCondition(Statement statement):
 {}
 {
-     ("ON" SQLExpression(statment))|("USING" "(" SQLExpression(statment) ("," SQLExpression(statment))* ")")
+     ("ON" SQLExpression(statement))|("USING" "(" SQLExpression(statement) ("," SQLExpression(statement))* ")")
 }
 
-Expression WhereClause(Statment statment):
+Expression WhereClause(Statement statement):
 {
 	Expression expression;
 }
 {
-    "WHERE" expression = SQLExpression(statment){
+    "WHERE" expression = SQLExpression(statement){
     	return expression;
     }
 }
@@ -1397,35 +1417,35 @@ void ColumnNames() :
 	"(" (<IDENTIFIER>|<S_COMMA_IDENTIFIER>) ("," (<IDENTIFIER>|<S_COMMA_IDENTIFIER>))* ")"
 }
 
-void GroupByClause(Statment statment) :
+void GroupByClause(Statement statement) :
 {}
 {
-    "GROUP" "BY" GroupByColumn(statment) ("," GroupByColumn(statment))*
-    ["HAVING" SQLExpression(statment)]
+    "GROUP" "BY" GroupByColumn(statement) ("," GroupByColumn(statement))*
+    ["HAVING" SQLExpression(statement)]
 }
 
-void GroupByColumn(Statment statment):
+void GroupByColumn(Statement statement):
 {}
 {
-      SQLRelationalExpression(statment)
+      SQLRelationalExpression(statement)
 }
 
-void OrderByClause(Statment statment):
+void OrderByClause(Statement statement):
 {}
 {
-    "ORDER" "BY" ("rand(" ")" |( OrderByColumn(statment) [(<IDENTIFIER>|<S_COMMA_IDENTIFIER>)]
-        ("," OrderByColumn(statment) [(<IDENTIFIER>|<S_COMMA_IDENTIFIER>)])*))
-}
-
-
-void OrderByColumn(Statment statment):
-{}
-{
-      SQLRelationalExpression(statment)
+    "ORDER" "BY" ("rand(" ")" |( OrderByColumn(statement) [(<IDENTIFIER>|<S_COMMA_IDENTIFIER>)]
+        ("," OrderByColumn(statement) [(<IDENTIFIER>|<S_COMMA_IDENTIFIER>)])*))
 }
 
 
-Expression SQLExpression(Statment statment) :
+void OrderByColumn(Statement statement):
+{}
+{
+      SQLRelationalExpression(statement)
+}
+
+
+Expression SQLExpression(Statement statement) :
 {
 	OrExpression orExpression = null;
 	AndExpression andExpression = null;
@@ -1434,11 +1454,11 @@ Expression SQLExpression(Statment statment) :
 	int count = 0;
 }
 {
-    expression = SQLAndExpression(statment){
+    expression = SQLAndExpression(statement){
     	orExpression = new OrExpression(expression);
     }
     (    ("OR" | "||")
-		expression =  SQLAndExpression(statment){
+		expression =  SQLAndExpression(statement){
 			if(expression != null){
 				count++;
 				orExpression.addExpression(expression);
@@ -1453,16 +1473,16 @@ Expression SQLExpression(Statment statment) :
     }
 }
 
-Expression SQLAndExpression(Statment statment) :
+Expression SQLAndExpression(Statement statement) :
 {
 	AndExpression andExpression = null;;
 	Expression expression;
 	Expression currentExpression;
 }
 {
-    expression = SQLUnaryLogicalExpression(statment)
+    expression = SQLUnaryLogicalExpression(statement)
     ( "AND" 
-    	currentExpression = SQLUnaryLogicalExpression(statment){
+    	currentExpression = SQLUnaryLogicalExpression(statement){
     	
     	if(andExpression == null && currentExpression != null){
     		andExpression = new AndExpression(expression);
@@ -1480,30 +1500,30 @@ Expression SQLAndExpression(Statment statment) :
     }
 }
 
-Expression SQLUnaryLogicalExpression(Statment statment) :
+Expression SQLUnaryLogicalExpression(Statement statement) :
 {
 	Expression expression = null;
 	boolean not = false;
 }
 {
-    LOOKAHEAD(2) ExistsClause(statment)
-|   (["NOT"{not = true;}]expression= SQLRelationalExpression(statment)){
+    LOOKAHEAD(2) ExistsClause(statement)
+|   (["NOT"{not = true;}]expression= SQLRelationalExpression(statement)){
 		return reverseExpression(not,expression);
 }
 }
 
-Expression ExistsClause(Statment statment) :
+Expression ExistsClause(Statement statement) :
 {
 	Expression expression = null;
 	boolean not = false;
 }
 {
-    ["NOT"{not = true;}] "EXISTS" "(" expression = FullSelectStatement(statment) ")"{
+    ["NOT"{not = true;}] "EXISTS" "(" expression = FullSelectStatement(statement) ")"{
     	return reverseExpression(not,expression);
     }
 }
 
-Expression SQLRelationalExpression(Statment statment)       :
+Expression SQLRelationalExpression(Statement statement)       :
 {
 	Expression expression = null;
 	Expression otherExpression = null;
@@ -1514,16 +1534,16 @@ Expression SQLRelationalExpression(Statment statment)       :
     /* Only after looking past "(", Expression() and "," we will know that
        it is expression list */
 
-    (LOOKAHEAD("(" SQLSimpleExpression(statment) ",")
-     "(" SQLExpressionList(statment) ")"
+    (LOOKAHEAD("(" SQLSimpleExpression(statement) ",")
+     "(" SQLExpressionList(statement) ")"
 |
-    (expression = SQLSimpleExpression(statment)))
+    (expression = SQLSimpleExpression(statement)))
 	
     /* Lookahead(2) is required because of NOT IN,NOT BETWEEN and NOT LIKE */
    (    functionName = Relop(){
     		function =	Comparative.getComparisonByIdent(functionName);
     	}
-    	otherExpression = SQLRelationalOperatorExpression(statment)
+    	otherExpression = SQLRelationalOperatorExpression(statement)
    			{
    				if(expression == null ||  otherExpression == null){
    					return null;	
@@ -1547,15 +1567,15 @@ Expression SQLRelationalExpression(Statment statment)       :
 		   			return null;
 		   		}
    			}
-        |  LOOKAHEAD(2) (otherExpression=SQLInClause(expression,statment)
+        |  LOOKAHEAD(2) (otherExpression=SQLInClause(expression,statement)
 	        {
 	        	return otherExpression;
 	        })
-        |  LOOKAHEAD(2) (otherExpression=SQLBetweenClause(expression,statment){
+        |  LOOKAHEAD(2) (otherExpression=SQLBetweenClause(expression,statement){
         	return otherExpression;
         })
-        |  LOOKAHEAD(2) (otherExpression = SQLLikeClause(statment)){
-        	if(expression instanceof ColumnExpression){
+        |  LOOKAHEAD(2) (otherExpression = SQLLikeClause(statement)){
+        	if(expression instanceof ColumnExpression && otherExpression != null){
     			ColumnExpression colExp = (ColumnExpression)expression;
     			colExp.setExpression((ComparisonExpression)otherExpression);
     			return colExp;
@@ -1563,8 +1583,8 @@ Expression SQLRelationalExpression(Statment statment)       :
     			return null;	
     		}
         }
-        |  LOOKAHEAD(2)(otherExpression = IsNullClause(statment){
-    		if(expression instanceof ColumnExpression){
+        |  LOOKAHEAD(2)(otherExpression = IsNullClause(statement){
+    		if(expression instanceof ColumnExpression && otherExpression != null){
     			ColumnExpression colExp = (ColumnExpression)expression;
     			colExp.setExpression((ComparisonExpression)otherExpression);
     			return colExp;
@@ -1577,23 +1597,23 @@ Expression SQLRelationalExpression(Statment statment)       :
    }
 }
 
-List<Expression> SQLExpressionList(Statment statment)       :
+List<Expression> SQLExpressionList(Statement statement)       :
 {
 	List<Expression> list = new ArrayList<Expression>();
 	Expression expression;
 }
 {
-   expression = SQLSimpleExpression(statment){
+   expression = SQLSimpleExpression(statement){
    	list.add(expression);
     	
-    } ("," expression = SQLSimpleExpression(statment){
+    } ("," expression = SQLSimpleExpression(statement){
     		list.add(expression);
     })*{
     	return list;	
     }
 }
 
-Expression SQLRelationalOperatorExpression(Statment statment)        :
+Expression SQLRelationalOperatorExpression(Statement statement)        :
 {
 	
 	Expression expression = null;
@@ -1606,16 +1626,16 @@ Expression SQLRelationalOperatorExpression(Statment statment)        :
     determine that is is a sub-query
     */
     (   LOOKAHEAD("ANY" | "ALL" | "(" "SELECT")
-        (["ALL" | "ANY"] "(" FullSelectStatement(statment) ")")
+        (["ALL" | "ANY"] "(" FullSelectStatement(statement) ")")
         |
-        expression = SQLSimpleExpression(statment)
+        expression = SQLSimpleExpression(statement)
     )
     {
     	return expression;
     }
 }
 
-Expression SQLInClause(Expression inputExpression,Statment statment)      :
+Expression SQLInClause(Expression inputExpression,Statement statement)      :
 {
 	boolean not = false;
 	Expression expression = null;
@@ -1623,7 +1643,7 @@ Expression SQLInClause(Expression inputExpression,Statment statment)      :
 	
 }
 {
-    ["NOT"{not = true;}] "IN" "(" (LOOKAHEAD(2) list=SQLExpressionList(statment) | expression = FullSelectStatement(statment)) ")" {
+    ["NOT"{not = true;}] "IN" "(" (LOOKAHEAD(2) list=SQLExpressionList(statement) | expression = FullSelectStatement(statement)) ")" {
     	
     	if(list == null){
     		return expression;	
@@ -1669,7 +1689,7 @@ Expression SQLInClause(Expression inputExpression,Statment statment)      :
     }
 }
 
-Expression SQLBetweenClause(Expression inputExpression,Statment statment)      :
+Expression SQLBetweenClause(Expression inputExpression,Statement statement)      :
 {
 	boolean not = false;
 	Expression minExpression = null;
@@ -1677,7 +1697,7 @@ Expression SQLBetweenClause(Expression inputExpression,Statment statment)      :
 	
 }
 {
-    ["NOT"{not = true;}] "BETWEEN" minExpression = SQLSimpleExpression(statment) "AND" maxExpression = SQLSimpleExpression(statment){
+    ["NOT"{not = true;}] "BETWEEN" minExpression = SQLSimpleExpression(statement) "AND" maxExpression = SQLSimpleExpression(statement){
     	ComparisonExpression comparativeMinExpression = new ComparisonExpression();
     	comparativeMinExpression.setExpression(minExpression);
     	comparativeMinExpression.setComparison(Comparative.GreaterThanOrEqual);
@@ -1706,13 +1726,13 @@ Expression SQLBetweenClause(Expression inputExpression,Statment statment)      :
     }
 }
 
-Expression SQLLikeClause(Statment statment)      :
+Expression SQLLikeClause(Statement statement)      :
 {
 	Expression expression = null;
 	boolean not = false;
 }
 {
-	["NOT"{not = true;}] "LIKE" expression = SQLSimpleExpression(statment){
+	["NOT"{not = true;}] "LIKE" expression = SQLSimpleExpression(statement){
 		ComparisonExpression comparisonExpression = new ComparisonExpression();
 		comparisonExpression.setExpression(expression);
 		comparisonExpression.setComparison(not?Comparative.NotLike:Comparative.Like);
@@ -1720,19 +1740,19 @@ Expression SQLLikeClause(Statment statment)      :
 	}
 }
 
-Expression SQLSimpleExpression(Statment statment)      :
+Expression SQLSimpleExpression(Statement statement)      :
 {
 	Expression expression = null;
 	Token token = null;
 }
 {
-    (expression= SQLAddSubtractExpression(statment)){
+    (expression= SQLAddSubtractExpression(statement)){
     	
     	return expression;	
     } 
 }
 
-Expression SQLAddSubtractExpression(Statment statment)      :
+Expression SQLAddSubtractExpression(Statement statement)      :
 {
 	Expression expression = null;
 	Expression otherExpression = null;
@@ -1741,7 +1761,8 @@ Expression SQLAddSubtractExpression(Statment statment)      :
 	FunctionExpression superExpression = null;
 }
 {
-       (expression = SQLMultiplicativeExpression(statment) ((token = "+" | token = "-"  | token = "|") otherExpression = SQLMultiplicativeExpression(statment){
+       (expression = SQLMultiplicativeExpression(statement) ((token = "+" | token = "-"  | token = "|")
+       otherExpression = SQLMultiplicativeExpression(statement){
 		    function = getFunction(token.image.toUpperCase());
 		    if(function == null) return null;
 		    FunctionExpression functionExpression = new FunctionExpression();
@@ -1765,7 +1786,7 @@ Expression SQLAddSubtractExpression(Statment statment)      :
 
 
 
-Expression SQLMultiplicativeExpression(Statment statment)      :
+Expression SQLMultiplicativeExpression(Statement statement)      :
 {
 	FunctionExpression functionExpression;
 	Expression expression;
@@ -1773,7 +1794,7 @@ Expression SQLMultiplicativeExpression(Statment statment)      :
 	Token token;
 }
 {
-  expression = SQLUnaryExpression(statment) ( (token = "*" | token = "/"  | token= "%" | token = "MOD" | token = "DIV" ) otherExpression = SQLUnaryExpression(statment){
+  expression = SQLUnaryExpression(statement) ( (token = "*" | token = "/"  | token= "%" | token = "MOD" | token = "DIV" ) otherExpression = SQLUnaryExpression(statement){
   	Function function = getFunction(token.image.toUpperCase());
   	if(function != null && expression != null && otherExpression != null){
 	  	functionExpression = new FunctionExpression();
@@ -1797,13 +1818,13 @@ void SQLExpotentExpression() #void:
 }
 **/
 
-Expression SQLUnaryExpression(Statment statment)      :
+Expression SQLUnaryExpression(Statement statement)      :
 {
 	Expression expression;
 	boolean isSub = false;
 }
 {
-    ["+" | "-"{isSub=true;}] expression = SQLPrimaryExpression(statment){
+    ["+" | "-"{isSub=true;}] expression = SQLPrimaryExpression(statement){
     	if(isSub){
     		Function function = getFunction("-");
     		if(function != null){
@@ -1822,7 +1843,7 @@ Expression SQLUnaryExpression(Statment statment)      :
 }
 
 
-Expression SQLPrimaryExpression(Statment statment)      :
+Expression SQLPrimaryExpression(Statement statement)      :
 {
 	Token t = null;
 	Column column = null;
@@ -1870,7 +1891,7 @@ t=<K_NULL>{
 	int index = parameterIndex++;
 	return new ParameterExpression(index);
 }
-| ("INTERVAL" expression=SQLExpression(statment) (token = "YEAR" | token = "MONTH" | token = "DAY" | token = "HOUR" | token = "MINUTE" | token = "SECOND" | token = "MICROSECOND")){
+| ("INTERVAL" expression=SQLExpression(statement) (token = "YEAR" | token = "MONTH" | token = "DAY" | token = "HOUR" | token = "MINUTE" | token = "SECOND" | token = "MICROSECOND")){
 		if(token != null){
     		int field = -1;
     		if(token.image.equalsIgnoreCase("YEAR")){
@@ -1906,13 +1927,13 @@ t=<K_NULL>{
     		return funExp;
     	}
 }
-|   CastFunctionCall(statment)
-|   CaseStatement(statment)
-|   ["!"{not = true; }]LOOKAHEAD({ getFunction(getToken(1).image.toUpperCase())!= null }) expression = OverloadedFunctionCall(statment)	{
+|   CastFunctionCall(statement)
+|   CaseStatement(statement)
+|   ["!"{not = true; }]LOOKAHEAD({ getFunction(getToken(1).image.toUpperCase())!= null }) expression = OverloadedFunctionCall(statement)	{
 	  if(not && expression != null)	  {
 	   	 expression = reverseExpression(not,expression);	  }	}
-|   ("(" expression=SQLExpression(statment) ")")
-|   LOOKAHEAD(EntityName() [ "." EntityName() ["." EntityName()]] "(" ) FunctionCall(statment)
+|   ("(" expression=SQLExpression(statement) ")")
+|   LOOKAHEAD(EntityName() [ "." EntityName() ["." EntityName()]] "(" ) FunctionCall(statement)
 |  column = ColumnName(){
 	ColumnExpression columnExpression = new ColumnExpression();
 	columnExpression.setColumn(column);
@@ -1921,7 +1942,7 @@ t=<K_NULL>{
 	return expression;
 }
 }
-void FunctionCall(Statment statment)       :
+void FunctionCall(Statement statement)       :
 {}
 {
     // caters the following
@@ -1934,15 +1955,15 @@ void FunctionCall(Statment statment)       :
     // function and custom functions
 
     EntityName() [ "." EntityName() ["." EntityName()]]
-    "(" ["DISTINCT" | "ALL"] (SQLExpressionList(statment) | "*") ")"
+    "(" ["DISTINCT" | "ALL"] (SQLExpressionList(statement) | "*") ")"
 }
 
 
-void CastFunctionCall(Statment statment)      :
+void CastFunctionCall(Statement statement)      :
 {}
 {
 	//Cast funciton in DB2 is very different from all other functions
-	"CAST" "(" SQLSimpleExpression(statment) "AS" DataTypes() ")"
+	"CAST" "(" SQLSimpleExpression(statement) "AS" DataTypes() ")"
 }
 
 String FunctionName() :
@@ -1959,6 +1980,7 @@ String FunctionName() :
 	| t=<K_MONTH>
 	| t=<K_HOUR>
 	| t=<K_SECOND>
+	| t=<K_REPLACE>
 	|t=<IDENTIFIER>
 	)
 	{
@@ -1972,7 +1994,7 @@ String FunctionName() :
 
 //This covers all over loaded functions that are using keyword and can not be captured by
 //generic function defination
-Expression OverloadedFunctionCall(Statment statment)      :
+Expression OverloadedFunctionCall(Statement statement)      :
 {
 	Expression expression = null;
 	Function function = null;
@@ -1988,14 +2010,14 @@ Expression OverloadedFunctionCall(Statment statment)      :
 		function = getFunction(functionName);
 		funExpression.setFunction(function);
 	}
-	(["(" [ expression = SQLSimpleExpression(statment){
+	(["(" [ expression = SQLSimpleExpression(statement){
 			if(funExpression != null){
 				if(expression == null){
 					nullExp = true;
 				}
 				funExpression.addArgExpression(expression);
 			}
-		 }] ("," expression = SQLSimpleExpression(statment){
+		 }] ("," expression = SQLSimpleExpression(statement){
 			if(funExpression != null){
 				if(expression == null){
 					nullExp = true;
