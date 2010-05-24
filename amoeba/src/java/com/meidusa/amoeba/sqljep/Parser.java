@@ -63,7 +63,6 @@ public abstract class Parser/*@bgen(jjtree)*/implements ParserTreeConstants, Par
 
         public boolean containsDeclareVar(String declare)
         {
-
                 return declareList.contains(declare);
         }
 

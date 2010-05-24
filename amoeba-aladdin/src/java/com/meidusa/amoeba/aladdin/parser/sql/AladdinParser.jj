@@ -30,7 +30,7 @@ package com.meidusa.amoeba.aladdin.parser.sql;
 import com.meidusa.amoeba.parser.dbobject.*;
 import com.meidusa.amoeba.parser.expression.*;
 import com.meidusa.amoeba.parser.function.*;
-import com.meidusa.amoeba.parser.statment.*;
+import com.meidusa.amoeba.parser.statement.*;
 
 import java.math.BigDecimal;
 import java.util.Map;
@@ -55,7 +55,7 @@ public class AladdinParser implements/*@bgen(jjtree)*/ AladdinParserTreeConstant
 	private int parameterIndex = 0;
 	private Map<String,Table> tableAliasMap = new HashMap<String,Table>();
 	private Stack<Table> tableStack = new Stack<Table>();
-	private Statment statment;
+	private Statement statement;
 	private Schema defaultSchema;
 	private Map<String,Function> functionMap;	
 	
@@ -75,20 +75,20 @@ public class AladdinParser implements/*@bgen(jjtree)*/ AladdinParserTreeConstant
 		}
 	}
 	
-	public Statment doParse() throws com.meidusa.amoeba.parser.ParseException{
+	public Statement doParse() throws com.meidusa.amoeba.parser.ParseException{
 		try{
-			Statment statment = this.parse();
-			if(statment != null){
-				statment.setParameterCount(parameterIndex);
+			Statement statement = this.parse();
+			if(statement != null){
+				statement.setParameterCount(parameterIndex);
 			}
-			return statment;
+			return statement;
 		}catch(Exception e){
 			throw new com.meidusa.amoeba.parser.ParseException(e);
 		}
 	}
 	
-	public Statment getParsedStatment(){
-		return statment;
+	public Statement getParsedStatement(){
+		return statement;
 	}
 	
 	private Expression reverseExpression(boolean not,Expression expression){
@@ -547,45 +547,45 @@ TOKEN:
 }
 
 
-Statment parse()          :
-{/*@bgen(jjtree) Statment */
-        SimpleNode jjtn000 = new SimpleNode(JJTSTATMENT);
+Statement parse()           :
+{/*@bgen(jjtree) Statement */
+        SimpleNode jjtn000 = new SimpleNode(JJTSTATEMENT);
         boolean jjtc000 = true;
         jjtree.openNodeScope(jjtn000);
 /*@egen*/
 	Expression expression = null;
-	Statment statment = null;
+	Statement statement = null;
 }
-{/*@bgen(jjtree) Statment */
+{/*@bgen(jjtree) Statement */
    try {
 /*@egen*/
    ["EXPLAIN"] (((
-    statment = DeleteQuery()
+    statement = DeleteQuery()
     |
-    statment = InsertQuery()
+    statement = InsertQuery()
     |
-    statment= SelectQuery()
+    statement= SelectQuery()
     |
-    statment = UpdateQuery()
+    statement = UpdateQuery()
     |
-    "SET" statment = PropertySetQuery(new PropertyStatment())
+    "SET" statement = PropertySetQuery(new PropertyStatement())
     |
-    statment = SelectSchema()
-    |(<K_COMMIT> /*[<K_WORK>] [<K_AND> [<K_NO>] <K_CHAIN>] [[<K_NO>] <K_RELEASE>]*/){statment = new CommitStatment();}
-    |(<K_ROLLBACK>/*[<K_WORK>] [<K_AND> [<K_NO>] <K_CHAIN>] [[<K_NO>] <K_RELEASE>]*/){statment = new RollbackStatment();}
-    |(<K_START_TRANSACTION>){statment = new StartTansactionStatment();}
+    statement = SelectSchema()
+    |(<K_COMMIT> /*[<K_WORK>] [<K_AND> [<K_NO>] <K_CHAIN>] [[<K_NO>] <K_RELEASE>]*/){statement = new CommitStatement();}
+    |(<K_ROLLBACK>/*[<K_WORK>] [<K_AND> [<K_NO>] <K_CHAIN>] [[<K_NO>] <K_RELEASE>]*/){statement = new RollbackStatement();}
+    |(<K_START_TRANSACTION>){statement = new StartTansactionStatement();}
     )
 	[ ("FORCE INDEX" |"IGNORE INDEX") "(" <IDENTIFIER> ( "," <IDENTIFIER>)* ")"]
     (";"|<EOF>))
     |
-    (statment = ShowQuery()))/*@bgen(jjtree)*/
+    (statement = ShowQuery()))/*@bgen(jjtree)*/
     {
       jjtree.closeNodeScope(jjtn000, true);
       jjtc000 = false;
     }
 /*@egen*/
     {
-    	if(statment instanceof DMLStatment){
+    	if(statement instanceof DMLStatement){
 	    	List<Table> list = new ArrayList<Table>();
 			for(Map.Entry<String,Table> entry : tableAliasMap.entrySet()){
 				if(!list.contains(entry.getValue())){
@@ -595,9 +595,9 @@ Statment parse()          :
 			
 			Table[] tables = new Table[list.size()];
 			list.toArray(tables);
-			((DMLStatment)statment).setTables(tables);
+			((DMLStatement)statement).setTables(tables);
     	}
-        return statment;
+        return statement;
     }/*@bgen(jjtree)*/
    } catch (Throwable jjte000) {
      if (jjtc000) {
@@ -621,7 +621,7 @@ Statment parse()          :
 /*@egen*/
 }
 
-Statment SelectSchema() :{
+Statement SelectSchema() :{
 	Token t = null;
 	String schema = null;
 }{
@@ -629,23 +629,23 @@ Statment SelectSchema() :{
 			|t=<S_QUOTED_IDENTIFIER>{schema = (t.image).substring(1,t.image.length()-1);}
 			|t=<S_COMMA_IDENTIFIER>{schema = (t.image).substring(1,t.image.length()-1);}
 			|t=<IDENTIFIER>{schema = t.image;}){
-		PropertyStatment statment = new PropertyStatment();
-		statment.addProperty("schema",new ConstantExpression(schema));
-		return statment;
+		PropertyStatement statement = new PropertyStatement();
+		statement.addProperty("schema",new ConstantExpression(schema));
+		return statement;
 	}
 }
 
 
-Statment ShowQuery() :{
+Statement ShowQuery() :{
 	Expression expression = null;
 	Column column = null;
 	Table table = null;
 }{
-	"SHOW"{return ShowStatment.STATMENT;}//[(<K_CREATE> [<K_TABLE>|<IDENTIFIER>])|<K_FULL>] column = ColumnName() [<K_FROM> table = TableReference()]{
+	"SHOW"{return ShowStatement.STATMENT;}//[(<K_CREATE> [<K_TABLE>|<IDENTIFIER>])|<K_FULL>] column = ColumnName() [<K_FROM> table = TableReference()]{
 		/**
 		ColumnExpression columnExpression = new ColumnExpression();
 		columnExpression.setColumn(column);
-		ShowStatment show = new ShowStatment();
+		ShowStatement show = new ShowStatement();
 		show.setExpression(columnExpression);
 		return show;
 	}
@@ -653,7 +653,7 @@ Statment ShowQuery() :{
 }
 
 
-Statment PropertySetQuery(PropertyStatment statment) :{
+Statement PropertySetQuery(PropertyStatement statement) :{
 	Expression expression = null;
 	
 	Token name = null;
@@ -683,35 +683,35 @@ Statment PropertySetQuery(PropertyStatment statment) :{
 			| valueToken = <STRING_LITERAL>{value = valueToken.image;} //{value = valueToken.image.substring(1,token.image.length()-1);}
 			| valueToken = <S_QUOTED_IDENTIFIER>{value = valueToken.image;}
 			))
-			))["," PropertySetQuery(statment)]{
+			))["," PropertySetQuery(statement)]{
 		if(value != null){
 			ConstantExpression consExp= new ConstantExpression(value);
-			statment.addProperty(propertyName,consExp);
+			statement.addProperty(propertyName,consExp);
 		}
-		return statment;
+		return statement;
 	}
 }
 
-Statment UpdateQuery():
+Statement UpdateQuery():
 {
 	Expression expression = null;
 	Table table = null;
-	DMLStatment statment = null;
+	DMLStatement statement = null;
 }
 {
    	(table = UpdateStatement()
     [expression= WhereClause() ]){
-    	statment = new UpdateStatment();
+    	statement = new UpdateStatement();
     	if(expression != null){
     		if(expression instanceof BaseExpressionList){
     			if(((BaseExpressionList)expression).getSize()>0){
-    				statment.setExpression(expression);
+    				statement.setExpression(expression);
     			}
     		}else{
-    			statment.setExpression(expression);
+    			statement.setExpression(expression);
     		}
     	}
-    	return statment;	
+    	return statement;	
     }
 }
 
@@ -770,26 +770,26 @@ Expression expression = null;
     }
 }
 
-Statment DeleteQuery():
+Statement DeleteQuery():
 {
 	Expression expression = null;
 	Table table = null;
-	DMLStatment statment = null;
+	DMLStatement statement = null;
 }
 {
     (table = DeleteStatement()
     [expression = WhereClause()]){
-    	statment = new DeleteStatment();
+    	statement = new DeleteStatement();
     	if(expression != null){
     		if(expression instanceof BaseExpressionList){
     			if(((BaseExpressionList)expression).getSize()>0){
-    				statment.setExpression(expression);
+    				statement.setExpression(expression);
     			}
     		}else{
-    			statment.setExpression(expression);
+    			statement.setExpression(expression);
     		}
     	}
-    	return 	statment;
+    	return 	statement;
     }
 }
 
@@ -804,10 +804,10 @@ Table DeleteStatement():
 }
 
 
-Statment InsertQuery():
+Statement InsertQuery():
 {
 	Table table = null;
-	DMLStatment statment = new InsertStatment();
+	DMLStatement statement = new InsertStatement();
 	Expression expression = null;
 	List<Column> insertColumns = null;
 	List<Expression> insertValues = null;
@@ -820,10 +820,10 @@ Statment InsertQuery():
     		if(expression != null){
 				if(expression instanceof BaseExpressionList){
 					if(((BaseExpressionList)expression).getSize()>0){
-						statment.setExpression(expression);
+						statement.setExpression(expression);
 					}
 				}else{
-					statment.setExpression(expression);
+					statement.setExpression(expression);
 				}
 			}
     	}else{
@@ -842,7 +842,7 @@ Statment InsertQuery():
 	    		}
 
     			if(andExpression.getSize()>0){
-    				statment.setExpression(andExpression);
+    				statement.setExpression(andExpression);
     			}
     		}
     	}
@@ -851,14 +851,14 @@ Statment InsertQuery():
 	    	if(expression != null){
 	    		if(expression instanceof BaseExpressionList){
 	    			if(((BaseExpressionList)expression).getSize()>0){
-	    				statment.setExpression(expression);
+	    				statement.setExpression(expression);
 	    			}
 	    		}else{
-	    			statment.setExpression(expression);
+	    			statement.setExpression(expression);
 	    		}
 	    	}
     	}){
-    	return statment;
+    	return statement;
     }
 }
 
@@ -908,26 +908,26 @@ Expression InsertValue():
 }
 
 
-Statment SelectQuery():
+Statement SelectQuery():
 {
 	Expression expression = null;
-	DMLStatment statment = null;
+	DMLStatement statement = null;
 }
 {
    (expression = FullSelectStatement()
     (ExtraClauses())*)
     {
-    	statment = new SelectStatment();
+    	statement = new SelectStatement();
     	if(expression != null){
     		if(expression instanceof BaseExpressionList){
     			if(((BaseExpressionList)expression).getSize()>0){
-    				statment.setExpression(expression);
+    				statement.setExpression(expression);
     			}
     		}else{
-    			statment.setExpression(expression);
+    			statement.setExpression(expression);
     		}
     	}
-    	return statment;
+    	return statement;
     }
     
 }

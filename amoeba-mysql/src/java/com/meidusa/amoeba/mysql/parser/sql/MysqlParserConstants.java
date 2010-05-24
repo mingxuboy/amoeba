@@ -229,55 +229,59 @@ public interface MysqlParserConstants {
   /** RegularExpression Id. */
   int K_ROLLBACK = 107;
   /** RegularExpression Id. */
-  int K_IGNORE_INDEX = 108;
+  int K_DESCRIBE = 108;
   /** RegularExpression Id. */
-  int K_FORCE_INDEX = 109;
+  int K_IGNORE_INDEX = 109;
   /** RegularExpression Id. */
-  int K_TRANSACTION_ISOLATION_LEVEL = 110;
+  int K_FORCE_INDEX = 110;
   /** RegularExpression Id. */
-  int K_ON_DUPLICATE_UPDATE = 111;
+  int K_TRANSACTION_ISOLATION_LEVEL = 111;
   /** RegularExpression Id. */
-  int K_START_TRANSACTION = 112;
+  int K_DUPLICATE = 112;
   /** RegularExpression Id. */
-  int K_SESSION = 113;
+  int K_KEY = 113;
   /** RegularExpression Id. */
-  int K_TRANSACTION_READ_COMMITTED = 114;
+  int K_START_TRANSACTION = 114;
   /** RegularExpression Id. */
-  int K_TRANSACTION_READ_UNCOMMITTED = 115;
+  int K_SESSION = 115;
   /** RegularExpression Id. */
-  int K_TRANSACTION_REPEATABLE_READ = 116;
+  int K_TRANSACTION_READ_COMMITTED = 116;
   /** RegularExpression Id. */
-  int K_TRANSACTION_SERIALIZABLE = 117;
+  int K_TRANSACTION_READ_UNCOMMITTED = 117;
   /** RegularExpression Id. */
-  int K_CLIENT_CHARSET = 118;
+  int K_TRANSACTION_REPEATABLE_READ = 118;
   /** RegularExpression Id. */
-  int INTEGER_LITERAL = 119;
+  int K_TRANSACTION_SERIALIZABLE = 119;
   /** RegularExpression Id. */
-  int FLOATING_POINT_LITERAL = 120;
+  int K_CLIENT_CHARSET = 120;
   /** RegularExpression Id. */
-  int EXPONENT = 121;
+  int INTEGER_LITERAL = 121;
   /** RegularExpression Id. */
-  int DIGIT = 122;
+  int FLOATING_POINT_LITERAL = 122;
   /** RegularExpression Id. */
-  int POOL = 123;
+  int EXPONENT = 123;
   /** RegularExpression Id. */
-  int LINE_COMMENT = 124;
+  int DIGIT = 124;
   /** RegularExpression Id. */
-  int MULTI_LINE_COMMENT = 125;
+  int POOL = 125;
   /** RegularExpression Id. */
-  int IDENTIFIER = 126;
+  int LINE_COMMENT = 126;
   /** RegularExpression Id. */
-  int LETTER = 127;
+  int MULTI_LINE_COMMENT = 127;
   /** RegularExpression Id. */
-  int SPECIAL_CHARS = 128;
+  int IDENTIFIER = 128;
   /** RegularExpression Id. */
-  int STRING_LITERAL = 129;
+  int LETTER = 129;
   /** RegularExpression Id. */
-  int S_QUOTED_IDENTIFIER = 130;
+  int SPECIAL_CHARS = 130;
   /** RegularExpression Id. */
-  int S_COMMA_IDENTIFIER = 131;
+  int STRING_LITERAL = 131;
   /** RegularExpression Id. */
-  int S_PARAMETER_MARKER = 132;
+  int S_QUOTED_IDENTIFIER = 132;
+  /** RegularExpression Id. */
+  int S_COMMA_IDENTIFIER = 133;
+  /** RegularExpression Id. */
+  int S_PARAMETER_MARKER = 134;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -394,10 +398,12 @@ public interface MysqlParserConstants {
     "\"HOUR\"",
     "\"COMMIT\"",
     "\"ROLLBACK\"",
+    "\"describe\"",
     "\"IGNORE INDEX\"",
     "\"FORCE INDEX\"",
     "\"TRANSACTION ISOLATION LEVEL\"",
-    "\"ON DUPLICATE KEY UPDATE\"",
+    "\"DUPLICATE\"",
+    "\"KEY\"",
     "\"START TRANSACTION\"",
     "\"SESSION\"",
     "\"READ COMMITTED\"",

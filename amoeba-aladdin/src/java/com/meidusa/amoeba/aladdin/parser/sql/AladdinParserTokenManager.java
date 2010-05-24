@@ -15,7 +15,7 @@ package com.meidusa.amoeba.aladdin.parser.sql;
 import com.meidusa.amoeba.parser.dbobject.*;
 import com.meidusa.amoeba.parser.expression.*;
 import com.meidusa.amoeba.parser.function.*;
-import com.meidusa.amoeba.parser.statment.*;
+import com.meidusa.amoeba.parser.statement.*;
 import java.math.BigDecimal;
 import java.util.Map;
 import java.util.HashMap;

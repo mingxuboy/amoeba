@@ -127,8 +127,7 @@ public abstract class Parser/*@bgen(jjtree)*/implements ParserTreeConstants/*@eg
 	public void addDeclareVar(String declare)	{		this.declareList.add(declare);
 	}
 
-	public boolean containsDeclareVar(String declare)	{		
-		return declareList.contains(declare);
+	public boolean containsDeclareVar(String declare)	{		return declareList.contains(declare);
 	}
 	
 	public int findColumn(String name){
