@@ -18,8 +18,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
@@ -127,7 +125,6 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 	protected static class CommandQueue{
 		protected List<CommandInfo> sessionInitQueryQueue; //所有的从客户端发送过来的 command 队列
 		protected CommandInfo currentCommand;//当前的query
-		private final Lock lock = new ReentrantLock(false);
 		protected Map<MysqlServerConnection,ConnectionStatuts> connStatusMap = new HashMap<MysqlServerConnection,ConnectionStatuts>();
 		private boolean mainCommandExecuted;
 		private MysqlClientConnection source;
@@ -428,11 +425,12 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 					
 				}
 				
-				if(logger.isInfoEnabled() && MysqlPacketBuffer.isErrorPacket(message)){
+				if(logger.isEnabledFor(Level.WARN) && MysqlPacketBuffer.isErrorPacket(message)){
 					ErrorPacket packet = new ErrorPacket();
 					packet.init(message,fromConn);
-					logger.error("connection="+fromConn.toString()+",return error packet:"+packet);
+					logger.warn("connection="+fromConn.toString()+",return error packet:"+packet);
 				}
+				
 				//判断命令是否完成了
 				CommandStatus commStatus = commandQueue.checkResponseCompleted(fromConn, message);
 				
