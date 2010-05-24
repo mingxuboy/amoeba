@@ -56,6 +56,7 @@ public class MysqlClientAuthenticator extends DummyAuthenticator implements MySq
 			mysqlConn.setCharset(CharsetMapping.INDEX_TO_CHARSET[autheticationPacket.charsetNumber & 0xff]);
 			boolean passwordchecked = false;
 			if(logger.isDebugEnabled()){
+				logger.debug("client charset="+CharsetMapping.INDEX_TO_CHARSET[autheticationPacket.charsetNumber & 0xff]);
 				if(conn.getInetAddress() != null && map.get(conn.getInetAddress().getHostAddress()) == null){
 					map.put(conn.getInetAddress().getHostAddress(), Boolean.TRUE);
 					long clientParam = autheticationPacket.clientParam;
