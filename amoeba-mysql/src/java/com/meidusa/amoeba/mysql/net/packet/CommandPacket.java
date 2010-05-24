@@ -16,7 +16,6 @@ package com.meidusa.amoeba.mysql.net.packet;
 import java.io.UnsupportedEncodingException;
 
 import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
-import com.meidusa.amoeba.util.StringFillFormat;
 
 /**
  * From client to server whenever the client wants the server to do something.
@@ -72,7 +71,6 @@ import com.meidusa.amoeba.util.StringFillFormat;
  * </pre>
  * 
  * @author <a href=mailto:piratebase@sina.com>Struct chen</a>
- * @author hexianmao
  */
 public abstract class CommandPacket extends AbstractPacket {
 
@@ -127,15 +125,6 @@ public abstract class CommandPacket extends AbstractPacket {
         int packLength = super.calculatePacketSize();
         packLength += 1;
         return packLength;
-    }
-
-    @Override
-    public String toString() {
-        StringBuilder s = new StringBuilder();
-        s.append("[Length=").append(StringFillFormat.format(packetLength, 4));
-        s.append(", PacketId=").append(StringFillFormat.format(packetId, 2));
-        s.append(", Command=").append(StringFillFormat.format(command, 2)).append("]");
-        return s.toString();
     }
 
 }
