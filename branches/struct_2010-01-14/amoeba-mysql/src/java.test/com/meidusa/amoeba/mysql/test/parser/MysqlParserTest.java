@@ -37,7 +37,7 @@ public class MysqlParserTest {
 		String sql2 = "select * from account where 1<2 and not (id between 12+12 and 33) and id >12+3 or id not in (11,33,'23234') or  id  in (select test.ref_Id from test dd where dd.name='test')";
 		String[] sqls = {"SELECT COUNT(*) FROM (   SELECT F_SDID   FROM SD_RELATION.RELATION_FOLLOW   WHERE SDID=12 AND DEL_FLAG = 0   GROUP BY (F_SDID)) A",
 				sql1,sql2,
-				 "UPDATE `uc_app_game`.`sdo_admin_user` SET `usr_sumlogin`=(`usr_sumlogin`+1),`usr_loginip`=1034744162 WHERE `usr_id`=? LIMIT 32,?",
+				 "UPDATE `uc_app_game`.`sdo_admin_user` SET `usr_sumlogin`=(`usr_sumlogin`+1),`usr_loginip`=1034744162 WHERE `usr_id`=? LIMIT 1,?",
 
 				"select ID from SD_MESSAGE.MESSAGE_NOTIFICATION  where  SDID=11 order by CREATE_TIME limit ?,?",
 				"SELECT /*  #pool */ * FROM AA WHERE ID = 'ASDF\\'ADF'",
