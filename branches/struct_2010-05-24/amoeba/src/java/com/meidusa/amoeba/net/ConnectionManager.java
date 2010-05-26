@@ -375,5 +375,9 @@ public class ConnectionManager extends LoopingThread implements Reporter, Initia
 
     public void init() throws InitialisationException {
     }
+    
+    protected void handleIterateFailure(Exception e) {
+        logger.error("iterate error:", e);
+    }
 
 }
