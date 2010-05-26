@@ -111,7 +111,11 @@ public class ConnectionManager extends LoopingThread implements Reporter, Initia
         // 关闭已经断开或者宣布死亡的Connection
         Tuple<Connection, Exception> deathTuple;
         while ((deathTuple = _deathq.getNonBlocking()) != null) {
-            deathTuple.left.close(deathTuple.right);
+        	try{
+        		deathTuple.left.close(deathTuple.right);
+        	}catch(Exception e){
+        		logger.error("when close connection="+deathTuple.left,e);
+        	}
         }
 
         if (idleCheckTime > 0 && iterStamp - lastIdleCheckTime >= idleCheckTime) {
