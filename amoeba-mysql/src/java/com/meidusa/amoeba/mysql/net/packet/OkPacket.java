@@ -96,8 +96,14 @@ public class OkPacket extends AbstractResultPacket {
         MysqlPacketBuffer myPacketBuffer = (MysqlPacketBuffer) buffer;
         affectedRows = myPacketBuffer.readFieldLength();
         insertId = myPacketBuffer.readFieldLength();
-        serverStatus = myPacketBuffer.readInt();
-        warningCount = myPacketBuffer.readInt();
+        
+        if(buffer.hasRemaining()){
+        	serverStatus = myPacketBuffer.readInt();
+        }
+        
+        if(buffer.hasRemaining()){
+        	warningCount = myPacketBuffer.readInt();
+        }
 
         if (buffer.getPosition() < myPacketBuffer.getBufLength()) {
             message = myPacketBuffer.readString();
