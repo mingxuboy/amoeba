@@ -836,7 +836,6 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 					logger.info(this+" session ended.");
 				}
 			}
-			this.dispatchMessageTo(this.source, null);
 		}
 	}
 	
