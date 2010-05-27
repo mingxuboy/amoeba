@@ -478,6 +478,13 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 									byte[] errorBuffer = connStatus.buffers.get(connStatus.buffers.size()-1);
 									if(!commandQueue.mainCommandExecuted){
 										dispatchMessageFrom(connStatus.conn,errorBuffer);
+										if(logger.isEnabledFor(Level.WARN)){
+											if(MysqlPacketBuffer.isErrorPacket(errorBuffer)){
+												ErrorPacket errorPacket = new ErrorPacket();
+												errorPacket.init(errorBuffer,this.source);
+												logger.warn("return Error packet from conn ="+ connStatus.conn + ",packet="+errorPacket);
+											}
+										}
 										if(source.isAutoCommit()){
 											this.endSession();
 										}
