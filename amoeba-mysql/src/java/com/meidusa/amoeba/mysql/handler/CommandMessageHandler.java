@@ -272,6 +272,7 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 	private PacketBuffer buffer = new AbstractPacketBuffer(1400);
 	private boolean started;
 	private long lastTimeMillis = System.currentTimeMillis();
+	private ErrorPacket errorPacket;
 	public CommandMessageHandler(final MysqlClientConnection source,byte[] query,Statement statment, ObjectPool[] pools,long timeout){
 		handlerMap.put(source, source.getMessageHandler());
 		source.setMessageHandler(this);
@@ -477,14 +478,12 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 									this.commandQueue.currentCommand.setStatusCode(connStatus.statusCode);
 									byte[] errorBuffer = connStatus.buffers.get(connStatus.buffers.size()-1);
 									if(!commandQueue.mainCommandExecuted){
-										dispatchMessageFrom(connStatus.conn,errorBuffer);
-										if(logger.isEnabledFor(Level.WARN)){
-											if(MysqlPacketBuffer.isErrorPacket(errorBuffer)){
-												ErrorPacket errorPacket = new ErrorPacket();
-												errorPacket.init(errorBuffer,this.source);
-												logger.warn("return Error packet from conn ="+ connStatus.conn + ",packet="+errorPacket);
-											}
-										}
+										ErrorPacket errorPacket = new ErrorPacket();
+										errorPacket.init(errorBuffer,this.source);
+										errorPacket.serverErrorMessage = errorPacket.serverErrorMessage +" from mysqlServer:"+connStatus.conn.getSocketId();
+										this.errorPacket = errorPacket;
+										logger.error("return Error packet from conn ="+ connStatus.conn + ",packet="+errorPacket);
+										dispatchMessageFrom(connStatus.conn,errorPacket.toByteBuffer(connStatus.conn).array());
 										if(source.isAutoCommit()){
 											this.endSession();
 										}
@@ -831,12 +830,14 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 			ended = true;
 			this.releaseAllCompletedConnection();
 			if(!this.commandQueue.mainCommandExecuted){
-				ErrorPacket error = new ErrorPacket();
-				error.errno = 10000;
-				error.packetId = 2;
-				error.serverErrorMessage = "session was killed!!";
-				this.dispatchMessageTo(source, error.toByteBuffer(source).array());
-				logger.warn("session was killed!!",new Exception());
+				if(this.errorPacket == null){
+					ErrorPacket error = new ErrorPacket();
+					error.errno = 10000;
+					error.packetId = 2;
+					error.serverErrorMessage = "session was killed!!";
+					this.dispatchMessageTo(source, error.toByteBuffer(source).array());
+					logger.warn("session was killed!!",new Exception());
+				}
 				source.postClose(null);
 			}else{
 				if(logger.isInfoEnabled()){
