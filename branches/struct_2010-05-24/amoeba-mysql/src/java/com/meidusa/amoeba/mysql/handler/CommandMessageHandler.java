@@ -419,19 +419,6 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 				}
 			}else{
 				
-				if(logger.isDebugEnabled()){
-					if(MysqlPacketBuffer.isErrorPacket(message)){
-						logger.error("connection="+fromConn.hashCode()+",error packet:\n"+StringUtil.dumpAsHex(message, message.length));
-					}
-					
-				}
-				
-				if(logger.isEnabledFor(Level.WARN) && MysqlPacketBuffer.isErrorPacket(message)){
-					ErrorPacket packet = new ErrorPacket();
-					packet.init(message,fromConn);
-					logger.warn("connection="+fromConn.toString()+",return error packet:"+packet);
-				}
-				
 				//判断命令是否完成了
 				CommandStatus commStatus = commandQueue.checkResponseCompleted(fromConn, message);
 				
