@@ -1,4 +1,9 @@
 amoeba for mysql
+2010-06-01 amoeba-mysql-1.2.0-RC4
+1、修复ConnectionManager 在关闭 connection的时候出现异常导致ConnectionManager无法正常工作
+2、修复tableRule在没有规则的情况下无法正常工作的bug
+
+
 
 2010-05-01 amoeba-mysql-1.2.0-RC3
 1、修复了select last_insert_id() 返回id过大以后，客户端无法获得的问题
