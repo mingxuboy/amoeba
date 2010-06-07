@@ -246,4 +246,8 @@ public class PreparedStatmentMessageHandler extends QueryCommandMessageHandler {
     public List<byte[]> getPreparedStatmentBytes(){
     	return this.preparedStatmentBytes;
     }
+    
+    public String toString(){
+    	return ""+super.toString()+", sql="+preparedStatmentInfo.getPreparedStatment();
+    }
 }

@@ -30,7 +30,7 @@ import com.meidusa.amoeba.util.StringUtil;
  */
 public class MysqlClientConnectionManager extends AuthingableConnectionManager {
 	
-    private final static String SERVER_VERSION = "5.1.22-mysql-amoeba-proxy";
+    private final static String SERVER_VERSION = "5.1.45-mysql-amoeba-proxy-1.2.0-GA";
     private static byte[] AUTHENTICATEOKPACKETDATA;
     static {
             OkPacket ok = new OkPacket();
