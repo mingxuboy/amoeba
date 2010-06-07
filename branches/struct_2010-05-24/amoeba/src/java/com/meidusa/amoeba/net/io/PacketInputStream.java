@@ -78,8 +78,12 @@ public abstract class PacketInputStream extends InputStream
             // shift our old data to the start of the buffer, position the
             // buffer appropriately for appending new data onto the end of
             // our existing data, and set the limit to the capacity
-            _buffer.position(_length);
-            _buffer.limit(_have);
+        	try{
+        		_buffer.position(_length);
+        		_buffer.limit(_have);
+        	}catch(IllegalArgumentException e){
+        		throw new IllegalArgumentException("old position="+_buffer.position()+", new position="+_length+",old limit="+_buffer.limit() +", have(new limit)="+_have,e);
+        	}
             _buffer.compact();
             _have -= _length;
             if(_have < 0){
