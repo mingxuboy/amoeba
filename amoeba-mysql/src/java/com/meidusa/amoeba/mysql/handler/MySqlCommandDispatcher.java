@@ -184,6 +184,7 @@ public class MySqlCommandDispatcher implements MessageHandler {
 		                                                                                                              message,
 		                                                                                                              tuple.right,
 		                                                                                                              timeout);
+		                    handler.setExecutePacket(executePacket);
 		                    if (handler instanceof Sessionable) {
 		                        Sessionable session = (Sessionable) handler;
 		                        try {
