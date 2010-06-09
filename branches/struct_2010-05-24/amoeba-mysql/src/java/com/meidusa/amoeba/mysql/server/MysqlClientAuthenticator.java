@@ -86,6 +86,11 @@ public class MysqlClientAuthenticator extends DummyAuthenticator implements MySq
 					logger.debug(builder.toString());
 				}
 			}
+			if((autheticationPacket.clientParam & CLIENT_COMPRESS) !=0){
+				rdata.code = AuthResponseData.ERROR;
+				rdata.message = " cannot use COMPRESSED PROTOCOL over amoeba!";
+				return;
+			}
 
 			if(mysqlConn.getPassword() != null){
 				String encryptPassword = new String(Security.scramble411(mysqlConn.getPassword(),mysqlConn.getSeed()),AuthenticationPacket.CODE_PAGE_1252);
