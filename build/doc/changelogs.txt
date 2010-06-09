@@ -2,7 +2,7 @@ amoeba for mysql
 2010-06-01 amoeba-mysql-1.2.0-GA
 1、修复ConnectionManager 在关闭 connection的时候出现异常导致ConnectionManager无法正常工作
 2、修复tableRule在没有规则的情况下无法正常工作的bug
-
+3、增加queryTimeout机制，具体配置请参考 conf/amoeba.xml，默认时间为60s(timeunit:second)
 
 
 2010-05-01 amoeba-mysql-1.2.0-RC3
