@@ -54,7 +54,7 @@ public class MySqlCommandDispatcher implements MessageHandler {
 
     protected static Logger logger  = Logger.getLogger(MySqlCommandDispatcher.class);
     private static Logger lastInsertID = Logger.getLogger("lastInsertId");
-    private static long     timeout = -1;
+    private long timeout = ProxyRuntimeContext.getInstance().getConfig().getQueryTimeout() * 1000;
 
     private static byte[]   STATIC_OK_BUFFER;
     static {
@@ -130,10 +130,6 @@ public class MySqlCommandDispatcher implements MessageHandler {
 	                        throw e;
 	                    }
 	                }
-	            	/*List<byte[]> byts = handler.getPreparedStatmentBytes();
-	                PreparedStatmentInfo preparedInf = conn.getPreparedStatmentInfo(command.query,byts);
-	                byte[] buffer = preparedInf.getByteBuffer();
-	                conn.postMessage(buffer);*/
 	                return;
 	            } else if (MysqlPacketBuffer.isPacketType(message, QueryCommandPacket.COM_STMT_EXECUTE)) {
 	            	
@@ -184,6 +180,7 @@ public class MySqlCommandDispatcher implements MessageHandler {
 		                                                                                                              message,
 		                                                                                                              tuple.right,
 		                                                                                                              timeout);
+		                    handler.setExecutePacket(executePacket);
 		                    if (handler instanceof Sessionable) {
 		                        Sessionable session = (Sessionable) handler;
 		                        try {

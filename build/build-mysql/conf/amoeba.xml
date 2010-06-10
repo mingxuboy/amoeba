@@ -33,6 +33,9 @@
 		<!--
 		<property name="password">password</property>
 		-->
+		
+		<!-- query timeout( default: 60 second , TimeUnit:second) -->
+		<property name="queryTimeout">30</property>
 	</server>
 	
 	<!-- 

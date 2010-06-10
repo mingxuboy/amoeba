@@ -18,8 +18,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
@@ -127,7 +125,6 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 	protected static class CommandQueue{
 		protected List<CommandInfo> sessionInitQueryQueue; //所有的从客户端发送过来的 command 队列
 		protected CommandInfo currentCommand;//当前的query
-		private final Lock lock = new ReentrantLock(false);
 		protected Map<MysqlServerConnection,ConnectionStatuts> connStatusMap = new HashMap<MysqlServerConnection,ConnectionStatuts>();
 		private boolean mainCommandExecuted;
 		private MysqlClientConnection source;
@@ -275,6 +272,7 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 	private PacketBuffer buffer = new AbstractPacketBuffer(1400);
 	private boolean started;
 	private long lastTimeMillis = System.currentTimeMillis();
+	private ErrorPacket errorPacket;
 	public CommandMessageHandler(final MysqlClientConnection source,byte[] query,Statement statment, ObjectPool[] pools,long timeout){
 		handlerMap.put(source, source.getMessageHandler());
 		source.setMessageHandler(this);
@@ -421,11 +419,6 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 				}
 			}else{
 				
-				if(logger.isDebugEnabled()){
-					if(MysqlPacketBuffer.isErrorPacket(message)){
-						logger.error("connection="+fromConn.hashCode()+",error packet:\n"+StringUtil.dumpAsHex(message, message.length));
-					}
-				}
 				//判断命令是否完成了
 				CommandStatus commStatus = commandQueue.checkResponseCompleted(fromConn, message);
 				
@@ -472,7 +465,12 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 									this.commandQueue.currentCommand.setStatusCode(connStatus.statusCode);
 									byte[] errorBuffer = connStatus.buffers.get(connStatus.buffers.size()-1);
 									if(!commandQueue.mainCommandExecuted){
-										dispatchMessageFrom(connStatus.conn,errorBuffer);
+										ErrorPacket errorPacket = new ErrorPacket();
+										errorPacket.init(errorBuffer,this.source);
+										errorPacket.serverErrorMessage = errorPacket.serverErrorMessage +" from mysqlServer:"+connStatus.conn.getSocketId();
+										this.errorPacket = errorPacket;
+										logger.error("return Error packet from conn ="+ connStatus.conn + ",packet="+errorPacket);
+										dispatchMessageFrom(connStatus.conn,errorPacket.toByteBuffer(connStatus.conn).array());
 										if(source.isAutoCommit()){
 											this.endSession();
 										}
@@ -819,19 +817,21 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 			ended = true;
 			this.releaseAllCompletedConnection();
 			if(!this.commandQueue.mainCommandExecuted){
-				ErrorPacket error = new ErrorPacket();
-				error.errno = 10000;
-				error.packetId = 2;
-				error.serverErrorMessage = "session was killed!!";
-				this.dispatchMessageTo(source, error.toByteBuffer(source).array());
-				logger.warn("session was killed!!",new Exception());
+				if(this.errorPacket == null){
+					ErrorPacket error = new ErrorPacket();
+					error.errno = 10000;
+					error.packetId = 2;
+					error.serverErrorMessage = "session was killed!!";
+					this.dispatchMessageTo(source, error.toByteBuffer(source).array());
+					logger.warn("session was killed!!",new Exception());
+				}
 				source.postClose(null);
 			}else{
 				if(logger.isInfoEnabled()){
 					logger.info(this+" session ended.");
 				}
 			}
-			this.dispatchMessageTo(this.source, null);
+			this.dispatchMessageTo(source,null);
 		}
 	}
 	

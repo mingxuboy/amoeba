@@ -19,7 +19,6 @@ import java.util.Map;
 
 /**
  * @author <a href=mailto:piratebase@sina.com>Struct chen</a>
- * @author hexianmao
  */
 public class ProxyServerConfig {
 
@@ -32,6 +31,7 @@ public class ProxyServerConfig {
     private int                                 serverSideThreadPoolSize = 16;
     private boolean                             tcpNoDelay               = false;
     private int                                 netBufferSize            = 16;
+    private int 								queryTimeout			 = 60; //default per query timeout (time unit: second) 
     
     /**
      * 默认是没有值的
@@ -82,7 +82,15 @@ public class ProxyServerConfig {
         return readThreadPoolSize;
     }
 
-    public void setReadThreadPoolSize(int readThreadPoolSize) {
+    public int getQueryTimeout() {
+		return queryTimeout;
+	}
+
+	public void setQueryTimeout(int queryTimeout) {
+		this.queryTimeout = queryTimeout;
+	}
+
+	public void setReadThreadPoolSize(int readThreadPoolSize) {
         this.readThreadPoolSize = readThreadPoolSize;
     }
 

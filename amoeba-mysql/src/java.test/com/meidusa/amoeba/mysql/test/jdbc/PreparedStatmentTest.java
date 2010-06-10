@@ -36,6 +36,7 @@ public class PreparedStatmentTest {
             statment.setLong(2, 123);
             statment.setLong(3, 112);
             ResultSet rs = statment.executeQuery();
+            statment.getResultSet();
             while(rs.next()){
             	System.out.println(rs.getString("ID"));
             }

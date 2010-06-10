@@ -31,7 +31,6 @@ import com.meidusa.amoeba.net.io.PacketOutputStream;
 import com.meidusa.amoeba.net.packet.Packet;
 import com.meidusa.amoeba.net.packet.PacketFactory;
 import com.meidusa.amoeba.util.Queue;
-import com.meidusa.amoeba.util.StringUtil;
 
 /**
  * @author <a href=mailto:piratebase@sina.com>Struct chen</a>

@@ -78,11 +78,17 @@ public abstract class PacketInputStream extends InputStream
             // shift our old data to the start of the buffer, position the
             // buffer appropriately for appending new data onto the end of
             // our existing data, and set the limit to the capacity
-            _buffer.limit(_have);
-            _buffer.position(_length);
+        	try{
+        		_buffer.position(_length);
+        		_buffer.limit(_have);
+        	}catch(IllegalArgumentException e){
+        		throw new IllegalArgumentException("old position="+_buffer.position()+", new position="+_length+",old limit="+_buffer.limit() +", have(new limit)="+_have,e);
+        	}
             _buffer.compact();
             _have -= _length;
-
+            if(_have < 0){
+            	_have = 0;
+            }
             // we may have picked up the next frame in a previous read, so
             // try decoding the length straight away
             _length = decodeLength();
@@ -106,6 +112,10 @@ public abstract class PacketInputStream extends InputStream
                 // if we didn't already have our length, see if we now
                 // have enough data to obtain it
                 _length = decodeLength();
+            }
+            
+            if(_length < -1){
+            	throw new IOException("decodeLength error:_length="+_length);
             }
 
             // if there's room remaining in the buffer, that means we've
