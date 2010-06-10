@@ -1,0 +1,261 @@
+<?xml version="1.0" encoding="GB18030"?>
+<sqls>
+	<sql name="1">
+		<![CDATA[
+			SELECT * FROM AA WHERE ID = 'ASDF\'ADF'
+		]]>
+	</sql>
+
+	<sql name="2">
+		<![CDATA[
+			SELECT '1997-12-31 23:59:59' + INTERVAL 1 MICROSECOND
+		]]>
+	</sql>
+
+	<sql name="3">
+		<![CDATA[
+			SELECT *,asdf from dd where id = hour('11:12:11.123451')
+		]]>
+	</sql>
+
+	<sql name="4">
+		<![CDATA[
+			SELECT 2 mod 9
+		]]>
+	</sql>
+
+	<sql name="5">
+		<![CDATA[
+			select mod(2,9)
+		]]>
+	</sql>
+
+
+	<sql name="6">
+		<![CDATA[
+			SELECT * from test where gmt_create=YEAR('1998-02-03')
+		]]>
+	</sql>
+
+	<sql name="7">
+		<![CDATA[
+			select now()+0
+		]]>
+	</sql>
+
+	<sql name="8">
+		<![CDATA[
+			SELECT Current_Date
+		]]>
+	</sql>
+
+	<sql name="9">
+		<![CDATA[
+			SELECT * from test where id = week(SYSDATE())
+		]]>
+	</sql>
+
+	<sql name="10">
+		<![CDATA[
+			SELECT * from test where name='asdfafd' || 123
+		]]>
+	</sql>
+
+	<sql name="11">
+		<![CDATA[
+			SELECT * from test where id = now()+1
+		]]>
+	</sql>
+
+	<sql name="12">
+		<![CDATA[
+			Set names utf8
+		]]>
+	</sql>
+
+	<sql name="13">
+		<![CDATA[
+			SET  SESSION  TRANSACTION ISOLATION LEVEL read COMMITTED
+		]]>
+	</sql>
+
+	<sql name="14">
+		<![CDATA[
+			start transaction
+		]]>
+	</sql>
+
+	<sql name="15">
+		<![CDATA[
+			select * from test where id =  ascii('asf')
+		]]>
+	</sql>
+
+	<sql name="16">
+		<![CDATA[
+			SELECT * from test where id = INSERT('Quadratic', 3, 4, 'What');
+		]]>
+	</sql>
+
+	<sql name="17">
+		<![CDATA[
+		insert into  mytable(id,name) values(Instr('ddaass','aas'),INSERT('Quadratic', 3, 4, 'What'))
+		]]>
+	</sql>
+
+	<sql name="18">
+		<![CDATA[
+			SET OPTION SQL_SELECT_LIMIT=DEFAULT,@@global.sort_buffer_size=1000000, @@local.sort_buffer_size=1000000
+		]]>
+	</sql>
+
+	<sql name="19">
+		<![CDATA[
+			insert into account set id=1002, name='qwerqwer' ,create_time=(33+12)
+		]]>
+	</sql>
+
+	<sql name="20">
+		<![CDATA[
+			select `create-time` from account where `game-1`=1
+		]]>
+	</sql>
+
+	<sql name="21">
+		<![CDATA[
+			select `create-time` from `account-table` where `game-1`=UNKNOWFUNCTION()
+		]]>
+	</sql>
+
+	<sql name="22">
+		<![CDATA[
+			SELECT * FROM `roster-groups` 
+				WHERE `collection-owner` = 'wadd@im17.vsa.com.cn' ORDER BY `object-sequence`
+		]]>
+	</sql>
+
+	<sql name="23">
+		<![CDATA[
+			SELECT * , member_Blink.qq AS mqq FROM autoSiteShop    LEFT JOIN shopDetail ON autoSiteShop.id = shopDetail.shopId
+		]]>
+	</sql>
+
+	<sql name="24">
+		<![CDATA[
+			SELECT adsfad , member_Blink.qq AS mqq   FROM autoSiteShop   LEFT JOIN shopDetail ON autoSiteShop.id = shopDetail.shopId  LEFT JOIN member_Blink ON autoSiteShop.id = member_Blink.memberId
+			WHERE autowebsite = 'y'     AND id = 6388"
+		]]>
+	</sql>
+
+	<sql name="25">
+		<![CDATA[
+			insert into test.test1 values('asdfadf',111,11123)
+		]]>
+	</sql>
+
+	<sql name="26">
+		<![CDATA[
+			select * from test.test1
+		]]>
+	</sql>
+
+	<sql name="27">
+		<![CDATA[
+			REPLACE INTO supe_spacecache9(uid, cacheid, value, updatetime) VALUES ('81828', '9', 'a:0:{}', '1219970056')
+		]]>
+	</sql>
+
+	<sql name="28">
+		<![CDATA[
+			REPLACE INTO supe_members (uid, groupid, username, password, secques, timeoffset, dateformat, havespace, newpm) VALUES ('219733', '9', 'KennisWai', '825e73d2764708bc30d4f401c4720f3a', '', '9999', '', '0', '0')
+		]]>
+	</sql>
+
+	<sql name="29">
+		<![CDATA[
+			SELECT sid, uid AS sessionuid, groupid, groupid='6' AS ipbanned, pageviews AS spageviews, styleid, lastolupdate, seccode FROM cdb_sessions WHERE sid='CgShIZ' AND CONCAT_WS('.',ip1,ip2,ip3,ip4)='210.177.156.49'
+		]]>
+	</sql>
+
+	<sql name="30">
+		<![CDATA[
+			SELECT t.tid, t.closed, t.dateline, t.special, t.lastpost AS lastthreadpost,  f.*, ff.*  , f.fid AS fid
+			FROM cdb_threads t INNER JOIN cdb_forums f ON f.fid=t.fid	LEFT JOIN cdb_forumfields ff ON ff.fid=f.fid  
+			WHERE t.tid='1397087' AND t.displayorder>='0' LIMIT 1
+		]]>
+	</sql>
+
+	<sql name="31">
+		<![CDATA[
+			SELECT f.fid, f.fup, f.type, f.name, f.threads, f.posts, f.todayposts, f.lastpost, f.inheritedmod, f.forumcolumns, f.simple, ff.description, ff.moderators, ff.icon, ff.viewperm, ff.redirect FROM cdb_forums f LEFT JOIN cdb_forumfields ff USING(fid)	
+			WHERE f.status>0 ORDER BY f.type, f.displayorder
+		]]>
+	</sql>
+
+	<sql name="32">
+		<![CDATA[
+			SELECT o.* FROM  
+				( SELECT row_id   FROM  
+					(SELECT row_id,    rownum rn     FROM    
+						(SELECT rowid row_id       FROM offer      WHERE member_id = ?    AND status        = ?    AND gmt_expire    > sysdate    AND type = ?   ORDER BY MEMBER_ID,      STATUS         ,      GMT_EXPIRE DESC    )
+					 WHERE rownum<=?  )
+			     WHERE rn >= ?  ) t,  offer o  
+			WHERE t.row_id=o.rowid 
+		]]>
+	</sql>
+
+	<sql name="33">
+		<![CDATA[
+			set CLIENT CHARSET gbk
+		]]>
+	</sql>
+
+	<sql name="34">
+		<![CDATA[
+			select * from offer where id in(12,11) limit 1,2
+		]]>
+	</sql>
+
+	<sql name="35">
+		<![CDATA[
+			SELECT d_tax, d_next_o_id FROM district WHERE d_w_id = 1  AND d_id = 1 FOR UPDATE
+		]]>
+	</sql>
+
+	<sql name="36">
+		<![CDATA[
+			select @@sql_mode
+		]]>
+	</sql>
+
+	<sql name="37">
+		<![CDATA[
+			select * from aaa where id = 12 AND (upper(subject) like upper(?) OR upper(keywords) like upper(?))
+		]]>
+	</sql>
+
+	<sql name="38">
+		<![CDATA[
+			REPLACE INTO cdb_spacecaches (uid, variable, value, expiration) VALUES ('2980526', 'mythreads', 'a:3:{i:0;a:14:{s:3:"tid";s:7:"1606800";s:7:"subject";s:8:"赤版請進";s:7:"special";s:1:"0";s:5:"price";s:1:"0";s:3:"fid";s:3:"129";s:5:"views";s:2:"20";s:7:"replies";s:1:"0";s:6:"author";s:4:"av8d";s:8:"authorid";s:7:"2980526";s:8:"lastpost";s:10:"1236516949";s:10:"lastposter";s:4:"av8d";s:10:"attachment";s:1:"0";s:3:"pid";s:6:"154418";s:7:"message";s:191:"刪我的帖, 我無所謂, 但是總不能把損我的帖子留在那吧?http://bbs.macd.cn/viewthread.php?tid=1585698&amp;extra=page%3D1&amp;authorid=0&amp;page=33656F, 657樓, 660F, 都Quote了損我的言論. 不該刪嗎?";}i:1;a:14:{s:3:"tid";s:7:"1594957";s:7:"subject";s:25:"Q&amp;A With Bob Prechter";s:7:"special";s:1:"0";s:5:"price";s:1:"0";s:3:"fid";s:2:"22";s:5:"views";s:3:"428";s:7:"replies";s:2:"10";s:6:"author";s:4:"av8d";s:8:"authorid";s:7:"2980526";s:8:"lastpost";s:10:"1234267824";s:10:"lastposter";s:9:"cixilarty";s:10:"attachment";s:1:"0";s:3:"pid";s:4:"8429";s:7:"message";s:289:"我不翻譯了, 繁體的翻譯可能大家不習慣,還是看原文的吧!沒多少單字的.:*29*:Q&amp;A With Bob PrechterThe following is a compilation of Bob Prechter\\'s best media interviews.In this Q&amp;A, Bob talks about the validity and practical applicationsof the Wave Principle and explains Socionomics,...";}i:2;a:14:{s:3:"tid";s:7:"1593908";s:7:"subject";s:27:"已超过规定多次 按版规该封IP";s:7:"special";s:1:"0";s:5:"price";s:1:"0";s:3:"fid";s:3:"129";s:5:"views";s:2:"44";s:7:"replies";s:1:"2";s:6:"author";s:4:"av8d";s:8:"authorid";s:7:"2980526";s:8:"lastpost";s:10:"1234077272";s:10:"lastposter";s:5:"嘘。0";s:10:"attachment";s:1:"0";s:3:"pid";s:3:"910";s:7:"message";s:282:"1. 依据 http://bbs.macd.cn/thread-615952-1-1.html 5楼 重阳版主规定, 应予以封IP段方式处理.要营造专业、和谐的交流环境，必须加强版面管理。在原有的版规下增加一些细节：（于2009年1月10日执行）5.使用恶毒语言诅咒他人的，即时禁止登陆（记录在案，禁止其马甲进入论坛）。6.使用马甲进行捣乱的 ...";}}', '1238258538')
+		]]>
+	</sql>
+
+	<sql name="39">
+		<![CDATA[
+			select * from users where user like '%rain%';
+		]]>
+	</sql>
+
+	<sql name="40">
+		<![CDATA[
+			SELECT magid, title FROM mag WHERE parentid = '72' ORDER BY rand() LIMIT 10
+		]]>
+	</sql>
+
+	<sql name="41">
+		<![CDATA[
+			select distinct(a.id),a.InfoTitle,b.corpName,a.ProPrice,a.ShowTime,a.ExpTime,d.user as user_name,b.province,b.city,a.ProIntro from blogs c, users d,provide_info a ,corp_info b ,keyword e where a.blog_id=b.blog_id and a.blog_id!= '85653' and now() - INTERVAL a.InfoExp DAY  and a.blog_id=c.id and c.owner_id=d.id and a.id=e.host_id and e.ktype=4 and `e.kname`='气动行业' order by a.ShowTime desc,a.id desc
+		]]>
+	</sql>
+
+</sqls>
