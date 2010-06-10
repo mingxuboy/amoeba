@@ -14,6 +14,7 @@ package com.meidusa.amoeba.mysql.handler;
 import com.meidusa.amoeba.mysql.net.CommandInfo;
 import com.meidusa.amoeba.mysql.net.MysqlClientConnection;
 import com.meidusa.amoeba.mysql.net.packet.CommandPacket;
+import com.meidusa.amoeba.mysql.net.packet.ExecutePacket;
 import com.meidusa.amoeba.mysql.net.packet.MysqlPacketBuffer;
 import com.meidusa.amoeba.mysql.net.packet.QueryCommandPacket;
 import com.meidusa.amoeba.net.Connection;
@@ -68,6 +69,14 @@ public class PreparedStatmentExecuteMessageHandler extends PreparedStatmentMessa
 		super(source,preparedStatmentInfo,statment,query,pools,timeout,true);
 	}
 
+	private ExecutePacket executePacket;
+	
+	public ExecutePacket getExecutePacket() {
+		return executePacket;
+	}
+	public void setExecutePacket(ExecutePacket executePacket) {
+		this.executePacket = executePacket;
+	}
 	protected void appendPreMainCommand(){
 		super.appendPreMainCommand();
 		QueryCommandPacket preparedCommandPacket = new QueryCommandPacket();
@@ -104,4 +113,17 @@ public class PreparedStatmentExecuteMessageHandler extends PreparedStatmentMessa
 		return new PreparedStatmentExecuteConnectionStatuts(conn,this.preparedStatmentInfo);
 	}
 
+	public String toString(){
+		String parameter = "";
+		if(executePacket.getParameters() != null){
+			StringBuffer buffer = new StringBuffer();
+			for(Object object :executePacket.getParameters()){
+				buffer.append(object).append(",");
+			}
+			if(buffer.length() > 0){
+				parameter = buffer.substring(0, buffer.length()-1);
+			}
+		}
+		return super.toString() +" ,parameter=["+parameter+"]";
+	}
 }
