@@ -29,12 +29,14 @@ import com.meidusa.amoeba.parser.statement.Statement;
 public class PreparedStatmentExecuteMessageHandler extends PreparedStatmentMessageHandler{
 	
 	static class PreparedStatmentExecuteConnectionStatuts extends PreparedStatmentMessageHandler.PreparedStatmentConnectionStatuts{
+		private int packetCount = 0;
 		public PreparedStatmentExecuteConnectionStatuts(Connection conn,PreparedStatmentInfo preparedStatmentInfo){
 			super(conn,preparedStatmentInfo);
 		}
 		
 		@Override
 		public boolean isCompleted(byte[] buffer) {
+			packetCount ++;
 			if(this.commandType == QueryCommandPacket.COM_STMT_EXECUTE){
 				if(MysqlPacketBuffer.isEofPacket(buffer)){
 					if((this.statusCode & PreparedStatmentSessionStatus.EOF_FIELDS)==0){
@@ -49,7 +51,7 @@ public class PreparedStatmentExecuteMessageHandler extends PreparedStatmentMessa
 					this.statusCode |= PreparedStatmentSessionStatus.ERROR;
 					this.statusCode |= PreparedStatmentSessionStatus.COMPLETED;
 					return true;
-				}else if(packetIndex == 0 && MysqlPacketBuffer.isOkPacket(buffer)){
+				}else if(packetCount == 0 && MysqlPacketBuffer.isOkPacket(buffer)){
 					this.statusCode |= PreparedStatmentSessionStatus.OK;
 					this.statusCode |= PreparedStatmentSessionStatus.COMPLETED;
 					return true;

@@ -49,9 +49,10 @@ public class PreparedStatmentMessageHandler extends QueryCommandMessageHandler {
     static class PreparedStatmentConnectionStatuts extends QueryCommandMessageHandler.QueryConnectionStatus {
 
         OKforPreparedStatementPacket ok = null;
-
+        PreparedStatmentInfo preparedStatmentInfo = null;
         public PreparedStatmentConnectionStatuts(Connection conn, PreparedStatmentInfo preparedStatmentInfo){
             super(conn);
+            this.preparedStatmentInfo = preparedStatmentInfo;
         }
 
         /**
