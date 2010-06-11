@@ -51,7 +51,7 @@ public class PreparedStatmentExecuteMessageHandler extends PreparedStatmentMessa
 					this.statusCode |= PreparedStatmentSessionStatus.ERROR;
 					this.statusCode |= PreparedStatmentSessionStatus.COMPLETED;
 					return true;
-				}else if(packetCount == 0 && MysqlPacketBuffer.isOkPacket(buffer)){
+				}else if(packetCount == 1 && MysqlPacketBuffer.isOkPacket(buffer)){
 					this.statusCode |= PreparedStatmentSessionStatus.OK;
 					this.statusCode |= PreparedStatmentSessionStatus.COMPLETED;
 					return true;
