@@ -36,7 +36,7 @@ import com.meidusa.amoeba.util.StringUtil;
  * @author <a href=mailto:piratebase@sina.com>Struct chen</a>
  *
  */
-public class MysqlServerConnection extends MysqlConnection implements MySqlPacketConstant,Reporter.SubReporter,CommandListener,PoolableObject{
+public class MysqlServerConnection extends MysqlConnection implements MySqlPacketConstant,Reporter.SubReporter,PoolableObject{
 	static Logger logger = Logger.getLogger(MysqlServerConnection.class);
 	
 	/**
@@ -85,9 +85,6 @@ public class MysqlServerConnection extends MysqlConnection implements MySqlPacke
 				if(status == Status.WAITE_HANDSHAKE){
 					HandshakePacket handpacket = new HandshakePacket();
 					handpacket.init(buffer);
-					if(logger.isDebugEnabled()){
-						
-					}
 					this.serverCapabilities = handpacket.serverCapabilities;
 			        this.serverVersion = handpacket.serverVersion;
 			        splitVersion();
@@ -177,7 +174,9 @@ public class MysqlServerConnection extends MysqlConnection implements MySqlPacke
 							packet.seed323 = this.seed.substring(0, 8);
 							packet.password = this.getPassword();
 							this.postMessage(packet.toByteBuffer(conn).array());
-							logger.debug("server request scrambled password in old format");
+							if(logger.isDebugEnabled()){
+								logger.debug("server request scrambled password in old format");
+							}
 						}else{
 							logger.warn("server response packet from :"+this._channel.socket().getRemoteSocketAddress()+" :\n"+StringUtil.dumpAsHex(message, message.length),new Exception());
 						}
@@ -325,7 +324,7 @@ public class MysqlServerConnection extends MysqlConnection implements MySqlPacke
 					Sessionable session = (Sessionable)_handler;
 					boolean sessionIdle = session.checkIdle(now);
 					if(sessionIdle){
-						logger.error("Session timeout. conn="+this.toString()+" ,idleMillis="+idleMillis);
+						logger.error("Session timeout. conn="+this.toString()+" ,idleMillis="+idleMillis+",_handler="+_handler.toString());
 					}
 					
 					return sessionIdle;
@@ -354,11 +353,6 @@ public class MysqlServerConnection extends MysqlConnection implements MySqlPacke
 	}
 
 	
-	public void finishedCommand(CommandInfo command) {
-	}
-
-	public void startCommand(CommandInfo command) {
-	}
 
 	public ObjectPool getObjectPool() {
 		return objectPool;
@@ -378,6 +372,7 @@ public class MysqlServerConnection extends MysqlConnection implements MySqlPacke
 	}
 
 	public void setActive(boolean active) {
+		this._lastEvent = System.currentTimeMillis();
 		this.active = active;
 	}
 

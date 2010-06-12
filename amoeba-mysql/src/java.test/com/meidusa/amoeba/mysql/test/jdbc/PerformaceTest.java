@@ -20,8 +20,8 @@ public class PerformaceTest {
 	 * @throws Exception 
 	 */
 	public static void main(String[] args) throws Exception {
-		int threadCount = 400;
-		int totleQuery = 250;
+		int threadCount = 100;
+		int totleQuery = 25000;
 		int count = 10;
 		if(args.length>=2){
 			threadCount = Integer.parseInt(args[0]);
@@ -32,9 +32,9 @@ public class PerformaceTest {
 		}
 		final String ip = System.getProperty("ip","127.0.0.1");
 		final String port = System.getProperty("port","8066");
-		final String password = System.getProperty("password","hello");
-		final String user = System.getProperty("user","root");
-		String sql = System.getProperty("sql","SELECT * FROM sd_relation.LIST_FRIEND_GROUP L; ");
+		final String password = System.getProperty("password","sdfriend");
+		final String user = System.getProperty("user","sdfriend");
+		String sql = System.getProperty("sql","SELECT ID, UUID, SDID, APP_ID, CATEGORY_ID, CREATE_TIME, CONTENT,    SOURCE_SDID,  SOURCE_UUID,  DEL_FLAG   FROM SD_FEED.FRIEND_FEED   WHERE  DEL_FLAG = 0 and CATEGORY_ID = 1001001      and SOURCE_SDID = ?      and APP_ID = ?    ORDER BY CREATE_TIME DESC   LIMIT 1");
 		if(sql.startsWith("\"")){
 			sql = sql.substring(1, sql.length() -1);
 		}
@@ -58,20 +58,27 @@ public class PerformaceTest {
 		Class.forName("com.mysql.jdbc.Driver");
 		ThreadPoolExecutor executor = new ThreadPoolExecutor(threadCount, threadCount, Long.MAX_VALUE, TimeUnit.NANOSECONDS,new LinkedBlockingQueue<Runnable>());
 		long start = System.currentTimeMillis();
+		final ThreadLocal<Connection> threadLocal = new ThreadLocal<Connection>();
 		final CountDownLatch latch = new CountDownLatch(testCount);
 		for(int i=0;i<testCount;i++){
 			executor.execute(new Runnable(){
 				
 				public void run() {
-					Connection conn = null;
+					Connection conn = threadLocal.get();
 					PreparedStatement statment = null;
 					ResultSet result = null;
 					try{
-						conn = DriverManager.getConnection("jdbc:mysql://"+ip+":"+port+"/test",user,password);
+						if(conn == null){
+							conn = DriverManager.getConnection("jdbc:mysql://"+ip+":"+port+"/test",user,password);
+							threadLocal.set(conn);
+						}
 						for(int i=0;i<runcount;i++){
 							try{
-							statment = conn.prepareStatement(sqlext);
-							result = statment.executeQuery();
+								statment = conn.prepareStatement(sqlext);
+								//statment.setLong(1, 15859043585L);
+								statment.setLong(1, 1249305900L);
+								statment.setInt(2, 6);
+								result = statment.executeQuery();
 							}finally{
 								if(result != null){
 									try{
@@ -89,11 +96,11 @@ public class PerformaceTest {
 					}catch(Exception e){
 						e.printStackTrace();
 					}finally{
-						if(conn != null){
+						/*if(conn != null){
 							try{
 								conn.close();
 							}catch(Exception e){}
-						}
+						}*/
 						latch.countDown();
 						System.out.println("countDown count:"+latch.getCount());
 					}

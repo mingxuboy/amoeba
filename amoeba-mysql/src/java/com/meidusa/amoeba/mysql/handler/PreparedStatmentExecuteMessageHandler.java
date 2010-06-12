@@ -13,6 +13,7 @@ package com.meidusa.amoeba.mysql.handler;
 
 import com.meidusa.amoeba.mysql.net.CommandInfo;
 import com.meidusa.amoeba.mysql.net.MysqlClientConnection;
+import com.meidusa.amoeba.mysql.net.MysqlServerConnection;
 import com.meidusa.amoeba.mysql.net.packet.CommandPacket;
 import com.meidusa.amoeba.mysql.net.packet.ExecutePacket;
 import com.meidusa.amoeba.mysql.net.packet.MysqlPacketBuffer;
@@ -29,14 +30,12 @@ import com.meidusa.amoeba.parser.statement.Statement;
 public class PreparedStatmentExecuteMessageHandler extends PreparedStatmentMessageHandler{
 	
 	static class PreparedStatmentExecuteConnectionStatuts extends PreparedStatmentMessageHandler.PreparedStatmentConnectionStatuts{
-		private int packetCount = 0;
 		public PreparedStatmentExecuteConnectionStatuts(Connection conn,PreparedStatmentInfo preparedStatmentInfo){
 			super(conn,preparedStatmentInfo);
 		}
 		
 		@Override
 		public boolean isCompleted(byte[] buffer) {
-			packetCount ++;
 			if(this.commandType == QueryCommandPacket.COM_STMT_EXECUTE){
 				if(MysqlPacketBuffer.isEofPacket(buffer)){
 					if((this.statusCode & PreparedStatmentSessionStatus.EOF_FIELDS)==0){
@@ -47,11 +46,12 @@ public class PreparedStatmentExecuteMessageHandler extends PreparedStatmentMessa
 						this.statusCode |= PreparedStatmentSessionStatus.COMPLETED;
 						return true;
 					}
-				}else if(MysqlPacketBuffer.isErrorPacket(buffer)){
+				}else if(packetIndex == 0 && MysqlPacketBuffer.isErrorPacket(buffer)){
 					this.statusCode |= PreparedStatmentSessionStatus.ERROR;
 					this.statusCode |= PreparedStatmentSessionStatus.COMPLETED;
+					this.setErrorPacket(buffer);
 					return true;
-				}else if(packetCount == 1 && MysqlPacketBuffer.isOkPacket(buffer)){
+				}else if(packetIndex == 0 && MysqlPacketBuffer.isOkPacket(buffer)){
 					this.statusCode |= PreparedStatmentSessionStatus.OK;
 					this.statusCode |= PreparedStatmentSessionStatus.COMPLETED;
 					return true;
@@ -97,9 +97,9 @@ public class PreparedStatmentExecuteMessageHandler extends PreparedStatmentMessa
 			commandQueue.appendCommand(longDataCommand,true);
 		}
 	}
-	protected void finishedConnectionCommand(Connection conn,CommandInfo currentCommand){
-		super.finishedConnectionCommand(conn, currentCommand);
-		if(currentCommand.isMain()){
+	protected  void afterMainCommand(MysqlServerConnection conn){
+		super.afterMainCommand(conn);
+		synchronized(this){
 			if(source.getLongDataList().size()>0){
 				source.clearLongData();
 			}
