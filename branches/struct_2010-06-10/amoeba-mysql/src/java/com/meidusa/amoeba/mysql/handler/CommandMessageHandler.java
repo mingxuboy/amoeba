@@ -23,7 +23,6 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
 import com.meidusa.amoeba.mysql.net.CommandInfo;
-import com.meidusa.amoeba.mysql.net.CommandListener;
 import com.meidusa.amoeba.mysql.net.MysqlClientConnection;
 import com.meidusa.amoeba.mysql.net.MysqlConnection;
 import com.meidusa.amoeba.mysql.net.MysqlServerConnection;
@@ -79,6 +78,7 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 	 */
 	static abstract class ConnectionStatuts{
 		protected Connection conn;
+		protected ErrorPacket errorPacket = null;
 		public ConnectionStatuts(Connection conn){
 			this.conn = conn;
 		}
@@ -106,11 +106,12 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 		public boolean isCompleted(byte[] buffer) {
 			if(this.commandType == QueryCommandPacket.COM_INIT_DB){
 				boolean isCompleted = false; 
-				if(MysqlPacketBuffer.isErrorPacket(buffer)){
+				if(packetIndex == 0 && MysqlPacketBuffer.isErrorPacket(buffer)){
 					statusCode |= SessionStatus.ERROR;
 					statusCode |= SessionStatus.COMPLETED;
+					setErrorPacket(buffer);
 					isCompleted = true;
-				}else if(MysqlPacketBuffer.isOkPacket(buffer)){
+				}else if(packetIndex == 0 && MysqlPacketBuffer.isOkPacket(buffer)){
 					statusCode |= SessionStatus.OK;
 					statusCode |= SessionStatus.COMPLETED;
 					isCompleted = true;
@@ -119,6 +120,11 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 			}else{
 				return false;
 			}
+		}
+		protected void setErrorPacket(byte[] buffer){
+			errorPacket = new ErrorPacket();
+			errorPacket.init(buffer, conn);
+			errorPacket.serverErrorMessage = errorPacket.serverErrorMessage +" from mysqlServer:"+conn.getSocketId();
 		}
 	}
 	
@@ -192,12 +198,14 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 				if(conn != source){
 					
 					if(MysqlPacketBuffer.isOkPacket(buffer)){
-						OkPacket packet = new OkPacket();
-						packet.init(buffer,conn);
 						if(statment instanceof InsertStatement && currentCommand.isMain()){
+							OkPacket packet = new OkPacket();
+							packet.init(buffer,conn);
 							if(packet.insertId>0){
 								source.setLastInsertId(packet.insertId);
-								logger.debug("laster insert id="+packet.insertId);
+								if(logger.isDebugEnabled()){
+									logger.debug("sql="+statment.getSql()+" ,laster insert id="+packet.insertId);
+								}
 							}
 						}
 					}
@@ -268,11 +276,12 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 	private ObjectPool[] pools;
 	private CommandInfo info = new CommandInfo();
 	protected byte commandType;
-	protected Map<Connection,MessageHandler> handlerMap = new HashMap<Connection,MessageHandler>();
-	private PacketBuffer buffer = new AbstractPacketBuffer(1400);
+	protected Map<Connection,MessageHandler> handlerMap = Collections.synchronizedMap(new HashMap<Connection,MessageHandler>());
+	private PacketBuffer buffer = new AbstractPacketBuffer(10240);
 	private boolean started;
 	private long lastTimeMillis = System.currentTimeMillis();
 	private ErrorPacket errorPacket;
+	protected Statement statment;
 	public CommandMessageHandler(final MysqlClientConnection source,byte[] query,Statement statment, ObjectPool[] pools,long timeout){
 		handlerMap.put(source, source.getMessageHandler());
 		source.setMessageHandler(this);
@@ -282,7 +291,7 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 		this.pools = pools;
 		info.setBuffer(query);
 		info.setMain(true);
-		
+		this.statment = statment;
 		this.source = source;
 		this.createTime = System.currentTimeMillis();
 		this.timeout = timeout;
@@ -379,37 +388,15 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 			
 		}
 	}
-	protected void appendAfterMainCommand(){
+	protected void afterMainCommand(MysqlServerConnection conn){
 		
-	}
-
-	/**
-	 * 当连接开始一个命令的时候
-	 * @param conn
-	 */
-	protected void startConnectionCommand(Connection conn,CommandInfo currentCommand){
-		if(conn instanceof CommandListener){
-			CommandListener listener = (CommandListener)conn;
-			listener.startCommand(commandQueue.currentCommand);
-		}
-	}
-	
-	/**
-	 * 当连接完成一个命令的时候执行，只是针对连接自己，而不是所有连接。
-	 * @param conn
-	 */
-	protected void finishedConnectionCommand(Connection conn,CommandInfo currentCommand){
-		if(conn instanceof CommandListener){
-			CommandListener listener = (CommandListener) conn;
-			listener.finishedCommand(this.commandQueue.currentCommand);
-		}
 	}
 	
 	public synchronized void handleMessage(Connection fromConn) {
 		byte[] message = null;
 		lastTimeMillis = System.currentTimeMillis();
-		while((message = fromConn.getInQueue().getNonBlocking()) != null){
-			if(fromConn == source){
+		if(fromConn == source){
+			while((message = fromConn.getInQueue().getNonBlocking()) != null){
 				CommandInfo info = new CommandInfo();
 				info.setBuffer(message);
 				info.setMain(true);
@@ -417,26 +404,31 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 				if(!commandQueue.appendCommand(info,false)){
 					dispatchMessageFrom(source,message);
 				}
-			}else{
-				
+				logger.error("handle message from client after session started,handler="+this+", packet=\n"+StringUtil.dumpAsHex(message, message.length));
+			}
+			
+		}else{
+			ConnectionStatuts fromConnStatus = commandQueue.connStatusMap.get(fromConn);
+			synchronized (fromConnStatus) {
+			while((message = fromConn.getInQueue().getNonBlocking()) != null){
 				//判断命令是否完成了
 				CommandStatus commStatus = commandQueue.checkResponseCompleted(fromConn, message);
 				
 				if(CommandStatus.AllCompleted == commStatus || CommandStatus.ConnectionCompleted == commStatus){
-					finishedConnectionCommand(fromConn,commandQueue.currentCommand);
-					synchronized (this) {
-						if(this.ended){
-							releaseConnection(fromConn);
-							return;
-						}
+					if(commandQueue.currentCommand.isMain() || this.ended){
+						afterMainCommand((MysqlServerConnection)fromConn);
+						releaseConnection(fromConn);
+					}
+					
+					if(this.ended){
+						return;
 					}
 				}
 				
 				if(CommandStatus.AllCompleted == commStatus){
 					try{
 						if(commandQueue.currentCommand.isMain()){
-							commandQueue.mainCommandExecuted = true;
-							releaseConnection(source);
+							
 						}
 	
 						/**
@@ -446,6 +438,8 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 						 */
 						
 						if(commandQueue.currentCommand.isMain()){
+							commandQueue.mainCommandExecuted = true;
+							releaseConnection(source);
 							if(commandQueue.isMultiple()){
 								List<byte[]> list = this.mergeMessages();
 								if(list != null){
@@ -461,16 +455,10 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 							Collection<ConnectionStatuts> connectionStatutsSet = commandQueue.connStatusMap.values();
 							for(ConnectionStatuts connStatus : connectionStatutsSet){
 								//看是否每个服务器返回的数据包都没有异常信息。
-								if((connStatus.statusCode & SessionStatus.ERROR) >0){
+								if(connStatus.errorPacket != null){
 									this.commandQueue.currentCommand.setStatusCode(connStatus.statusCode);
-									byte[] errorBuffer = connStatus.buffers.get(connStatus.buffers.size()-1);
 									if(!commandQueue.mainCommandExecuted){
-										ErrorPacket errorPacket = new ErrorPacket();
-										errorPacket.init(errorBuffer,this.source);
-										errorPacket.serverErrorMessage = errorPacket.serverErrorMessage +" from mysqlServer:"+connStatus.conn.getSocketId();
-										this.errorPacket = errorPacket;
-										logger.error("return Error packet from conn ="+ connStatus.conn + ",packet="+errorPacket);
-										dispatchMessageFrom(connStatus.conn,errorPacket.toByteBuffer(connStatus.conn).array());
+										dispatchMessageFrom(connStatus.conn,connStatus.errorPacket.toByteBuffer(connStatus.conn).array());
 										if(source.isAutoCommit()){
 											this.endSession();
 										}
@@ -481,7 +469,7 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 											buffer.append("Current Command Execute Error:\n");
 											buffer.append(StringUtil.dumpAsHex(commandBuffer,commandBuffer.length));
 											buffer.append("\n error Packet:\n");
-											buffer.append(StringUtil.dumpAsHex(errorBuffer,errorBuffer.length));
+											buffer.append(connStatus.errorPacket.toString());
 											logger.debug(buffer.toString());
 										}
 									}
@@ -499,6 +487,7 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 						}
 					}
 				}
+			}
 			}
 		}
 	}
@@ -540,7 +529,6 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 			if(!commandCompleted){
 				for(ConnectionStatuts status : connSet){
 					status.setCommandType(commandType);
-					startConnectionCommand(status.conn,commandQueue.currentCommand);
 				}
 			}
 			
@@ -600,7 +588,15 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 		
 	}
 	
-	private  boolean appendBufferToWrite(byte[] byts,PacketBuffer buffer,Connection conn,boolean writeNow){
+	/**
+	 * 缓冲写数据到目的地
+	 * @param byts
+	 * @param buffer
+	 * @param conn
+	 * @param writeNow
+	 * @return
+	 */
+	private synchronized boolean appendBufferToWrite(byte[] byts,PacketBuffer buffer,Connection conn,boolean writeNow){
 		if(byts == null){
 			if(buffer.getPosition()>0){
 				conn.postMessage(buffer.toByteBuffer());
@@ -624,7 +620,7 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 		}
 	}
 	
-	protected void releaseConnection(Connection conn){
+	protected synchronized void releaseConnection(Connection conn){
 		MessageHandler handler = handlerMap.remove(conn);
 		if(handler != null){
 			conn.setMessageHandler(handler);
@@ -784,6 +780,9 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 			MysqlServerConnection conn;
 			conn = (MysqlServerConnection)pool.borrowObject();
 			handlerMap.put(conn, conn.getMessageHandler());
+			if(conn.getMessageHandler() instanceof CommandMessageHandler){
+				logger.error("current handler="+conn.getMessageHandler().toString()+",");
+			}
 			conn.setMessageHandler(this);
 			commandQueue.connStatusMap.put(conn, newConnectionStatuts(conn));
 		}
@@ -791,7 +790,6 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 		this.started = true;
 		appendPreMainCommand();
 		this.commandQueue.appendCommand(info, true);
-		appendAfterMainCommand();
 		startNextCommand();
 	}
 	
@@ -817,14 +815,29 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 			ended = true;
 			this.releaseAllCompletedConnection();
 			if(!this.commandQueue.mainCommandExecuted){
+				
+				for(Map.Entry<MysqlServerConnection, ConnectionStatuts> entry : commandQueue.connStatusMap.entrySet()){
+					StringBuffer buffer = new StringBuffer();
+					buffer.append("<---connection="+entry.getKey().getSocketId()+",queueSize="+entry.getKey().getInQueueSize()+"------->\n");
+					for(byte[] buf : entry.getValue().buffers){
+						buffer.append(StringUtil.dumpAsHex(buf,buf.length)+"\n");
+						buffer.append("\n");
+					}
+					buffer.append("<----end Packet:"+entry.getKey().getSocketId()+"------>\n");
+					logger.error(buffer.toString());
+				}
+
 				if(this.errorPacket == null){
-					ErrorPacket error = new ErrorPacket();
-					error.errno = 10000;
-					error.packetId = 2;
-					error.serverErrorMessage = "session was killed!!";
-					this.dispatchMessageTo(source, error.toByteBuffer(source).array());
+					errorPacket = new ErrorPacket();
+					errorPacket.errno = 10000;
+					errorPacket.packetId = 2;
+					errorPacket.serverErrorMessage = " session was killed!!";
+					this.dispatchMessageTo(source, errorPacket.toByteBuffer(source).array());
 					logger.warn("session was killed!!",new Exception());
 				}
+				
+				
+				
 				source.postClose(null);
 			}else{
 				if(logger.isInfoEnabled()){
@@ -848,6 +861,18 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 		}else{
 			buffer.append("\n");
 		}
+	}
+	
+	public String toString(){
+		StringBuffer buffer = new StringBuffer();
+		buffer.append("class=").append(this.getClass().getName());
+		buffer.append(",createTime=").append(createTime);
+		buffer.append(",endTime=").append(this.endTime);
+		buffer.append(",lastTimeMillis=").append(this.lastTimeMillis);
+		buffer.append(",ended=").append(this.ended );
+		buffer.append(",started=").append(this.started );
+		buffer.append(", sql=").append(statment!= null?statment.getSql():"null");
+		return buffer.toString();
 	}
 
 }

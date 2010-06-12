@@ -19,7 +19,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import com.meidusa.amoeba.mysql.net.CommandInfo;
 import com.meidusa.amoeba.mysql.net.MysqlClientConnection;
@@ -39,7 +38,6 @@ import com.meidusa.amoeba.parser.statement.Statement;
 public class PreparedStatmentMessageHandler extends QueryCommandMessageHandler {
 	
 	private List<byte[]> preparedStatmentBytes = new ArrayList<byte[]>();
-	private Map<Connection,List<byte[]>> preparedMap = new HashMap<Connection,List<byte[]>>();
     static class PreparedStatmentSessionStatus extends SessionStatus {
 
         public static final int PREPAED_PARAMETER_EOF = 2048;
@@ -87,9 +85,10 @@ public class PreparedStatmentMessageHandler extends QueryCommandMessageHandler {
                         return true;
                     }
 
-                } else if (MysqlPacketBuffer.isErrorPacket(buffer)) {
+                } else if (packetIndex == 0 && MysqlPacketBuffer.isErrorPacket(buffer)) {
                     this.statusCode |= PreparedStatmentSessionStatus.ERROR;
                     this.statusCode |= PreparedStatmentSessionStatus.COMPLETED;
+                    setErrorPacket(buffer);
                     return true;
                 } else if (packetIndex == 0 && MysqlPacketBuffer.isOkPacket(buffer)) {
                     ok = new OKforPreparedStatementPacket();
@@ -111,9 +110,10 @@ public class PreparedStatmentMessageHandler extends QueryCommandMessageHandler {
                 }
                 return false;
             } else if (this.commandType == QueryCommandPacket.COM_STMT_CLOSE) {
-                if (MysqlPacketBuffer.isErrorPacket(buffer)) {
+                if (packetIndex == 0 && MysqlPacketBuffer.isErrorPacket(buffer)) {
                     this.statusCode |= PreparedStatmentSessionStatus.ERROR;
                     this.statusCode |= PreparedStatmentSessionStatus.COMPLETED;
+                    setErrorPacket(buffer);
                     return true;
                 } else {
                     this.statusCode |= PreparedStatmentSessionStatus.COMPLETED;
@@ -183,60 +183,42 @@ public class PreparedStatmentMessageHandler extends QueryCommandMessageHandler {
      * 替换相应的 prepared Statment id，保存相应的数据包,并且填充 preparedStatmentInfo 的一些信息
      */
     protected void dispatchMessageTo(Connection toConn, byte[] message) {
-        if (toConn == source) {
-            if (commandType == QueryCommandPacket.COM_STMT_PREPARE) {
-                /*
-                 * if(MysqlPacketBuffer.isOkPacket(message)){ //替换statmentId 为 proxy statment id 发送到mysql客户端
-                 * OKforPreparedStatementPacket ok = new OKforPreparedStatementPacket(); ok.init(message,toConn);
-                 * ok.statementHandlerId = preparedStatmentInfo.getStatmentId(); preparedStatmentInfo.setOkPrepared(ok);
-                 * message = ok.toByteBuffer(toConn).array(); }
-                 */
-            	//source.get
-            	/*if(!isExecute){
-            		preparedStatmentBytes.add(message);
-            	}*/
-            	if(isExecute){
-            		return;
-            	}else{
-            		if(MysqlPacketBuffer.isOkPacket(message)){
-            			OKforPreparedStatementPacket ok = new OKforPreparedStatementPacket(); 
-            			ok.init(message,toConn);
-            			ok.statementHandlerId = preparedStatmentInfo.getStatmentId();
-            			message = ok.toByteBuffer(toConn).array();
-            		}
-            	}
-            }
-        } else {
-            if (commandType == CommandPacket.COM_STMT_EXECUTE || commandType == CommandPacket.COM_STMT_SEND_LONG_DATA || commandType == CommandPacket.COM_STMT_CLOSE) {
-                Long id = statmentIdMap.get(toConn);
-                message[5] = (byte) (id & 0xff);
-                message[6] = (byte) (id >>> 8);
-                message[7] = (byte) (id >>> 16);
-                message[8] = (byte) (id >>> 24);
-            }
-        }
+    	if(message != null){
+	        if (toConn == source) {
+	            if (commandType == QueryCommandPacket.COM_STMT_PREPARE) {
+	            	if(isExecute){
+	            		return;
+	            	}else{
+	            		if(MysqlPacketBuffer.isOkPacket(message)){
+	            			OKforPreparedStatementPacket ok = new OKforPreparedStatementPacket(); 
+	            			ok.init(message,toConn);
+	            			ok.statementHandlerId = preparedStatmentInfo.getStatmentId();
+	            			message = ok.toByteBuffer(toConn).array();
+	            		}
+	            	}
+	            }
+	        } else {
+	            if (commandType == CommandPacket.COM_STMT_EXECUTE || commandType == CommandPacket.COM_STMT_SEND_LONG_DATA || commandType == CommandPacket.COM_STMT_CLOSE) {
+	                Long id = statmentIdMap.get(toConn);
+	                message[5] = (byte) (id & 0xff);
+	                message[6] = (byte) (id >>> 8);
+	                message[7] = (byte) (id >>> 16);
+	                message[8] = (byte) (id >>> 24);
+	            }
+	        }
+    	}
         super.dispatchMessageTo(toConn, message);
     }
 
-    protected void appendAfterMainCommand() {
-        super.appendAfterMainCommand();
-        PreparedStatmentClosePacket preparedCloseCommandPacket = new PreparedStatmentClosePacket();
-        preparedCloseCommandPacket.command = CommandPacket.COM_STMT_CLOSE;
-        final byte[] buffer = preparedCloseCommandPacket.toByteBuffer(source).array();
-        CommandInfo info = new CommandInfo();
-        info.setBuffer(buffer);
-        info.setMain(false);
-        info.getCompletedCount().set(commandQueue.connStatusMap.size());
-        info.setRunnable(new Runnable() {
-
-            public void run() {
-                Set<MysqlServerConnection> connSet = commandQueue.connStatusMap.keySet();
-                for (Connection conn : connSet) {
-                    statmentIdMap.remove(conn);
-                }
-            }
-        });
-        commandQueue.appendCommand(info, true);
+    protected void afterMainCommand(MysqlServerConnection conn) {
+        super.afterMainCommand(conn);
+        if (commandType == QueryCommandPacket.COM_STMT_PREPARE) {
+        	ConnectionStatuts status = this.commandQueue.connStatusMap.get(conn);
+            byte[] buffer = status.buffers.get(0);
+            OKforPreparedStatementPacket ok = new OKforPreparedStatementPacket();
+            ok.init(buffer, source);
+            statmentIdMap.put(status.conn, ok.statementHandlerId);
+        }
     }
 
     @Override

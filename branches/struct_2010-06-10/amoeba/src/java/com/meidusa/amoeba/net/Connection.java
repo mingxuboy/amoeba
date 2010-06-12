@@ -185,7 +185,7 @@ public abstract class Connection implements NetEventHandler {
 	            _selkey = null;
 	        }
         }catch(Exception e){
-        	logger.warn("Error cancel connection selectkey [conn=" + toString() + "] error=" + e + "].");
+        	logger.warn("Error cancel connection selectkey [conn=" + toString() + "] error=" + e + "].",e);
         }
         
         if(logger.isDebugEnabled()){
@@ -256,9 +256,7 @@ public abstract class Connection implements NetEventHandler {
                 _fin.read(msg);
                 doReceiveMessage(msg);
             }
-            if(_inQueue.size()>0){
-            	messageProcess();
-            }
+        	messageProcess();
         } catch (EOFException eofe) {
             // close down the socket gracefully
             handleFailure(eofe);
@@ -286,7 +284,9 @@ public abstract class Connection implements NetEventHandler {
     }
     
     protected void messageProcess() {
-        _handler.handleMessage(this);
+    	if(_inQueue.size()>0){
+    		_handler.handleMessage(this);
+    	}
     }
 
     public boolean doWrite() throws IOException {
@@ -330,6 +330,9 @@ public abstract class Connection implements NetEventHandler {
         writeMessage();
     }
 
+    public int getInQueueSize(){
+    	return _outQueue.size();
+    }
     protected void writeMessage() {
         if (isClosed()) {
             return;
@@ -340,15 +343,13 @@ public abstract class Connection implements NetEventHandler {
                 handleFailure(new java.nio.channels.CancelledKeyException());
                 return;
             }
-            synchronized (key) {
-                if (key != null && (key.interestOps() & SelectionKey.OP_WRITE) == 0) {
-                    /**
-                     * 发送数据，如果返回false，则表示socket send buffer 已经满了。则Selector 需要监听 Writeable event
-                     */
-                    boolean finished = doWrite();
-                    if (!finished) {
-                        key.interestOps(key.interestOps() | SelectionKey.OP_WRITE);
-                    }
+            if (key != null && (key.interestOps() & SelectionKey.OP_WRITE) == 0) {
+                /**
+                 * 发送数据，如果返回false，则表示socket send buffer 已经满了。则Selector 需要监听 Writeable event
+                 */
+                boolean finished = doWrite();
+                if (!finished) {
+                    key.interestOps(key.interestOps() | SelectionKey.OP_WRITE);
                 }
             }
         } catch (IOException ioe) {
