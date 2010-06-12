@@ -186,6 +186,16 @@ public class PreparedStatmentMessageHandler extends QueryCommandMessageHandler {
     	if(message != null){
 	        if (toConn == source) {
 	            if (commandType == QueryCommandPacket.COM_STMT_PREPARE) {
+	                /*
+	                 * if(MysqlPacketBuffer.isOkPacket(message)){ //替换statmentId 为 proxy statment id 发送到mysql客户端
+	                 * OKforPreparedStatementPacket ok = new OKforPreparedStatementPacket(); ok.init(message,toConn);
+	                 * ok.statementHandlerId = preparedStatmentInfo.getStatmentId(); preparedStatmentInfo.setOkPrepared(ok);
+	                 * message = ok.toByteBuffer(toConn).array(); }
+	                 */
+	            	//source.get
+	            	/*if(!isExecute){
+	            		preparedStatmentBytes.add(message);
+	            	}*/
 	            	if(isExecute){
 	            		return;
 	            	}else{
@@ -219,6 +229,26 @@ public class PreparedStatmentMessageHandler extends QueryCommandMessageHandler {
             ok.init(buffer, source);
             statmentIdMap.put(status.conn, ok.statementHandlerId);
         }
+        //TODO close STMT
+        PreparedStatmentClosePacket preparedCloseCommandPacket = new PreparedStatmentClosePacket();
+        preparedCloseCommandPacket.command = CommandPacket.COM_STMT_CLOSE;
+        preparedCloseCommandPacket.statementId = statmentIdMap.get(conn);
+        conn.postMessage(preparedCloseCommandPacket.toByteBuffer(conn));
+        /*final byte[] buffer = preparedCloseCommandPacket.toByteBuffer(source).array();
+        CommandInfo info = new CommandInfo();
+        info.setBuffer(buffer);
+        info.setMain(false);
+        info.getCompletedCount().set(commandQueue.connStatusMap.size());
+        info.setRunnable(new Runnable() {
+
+            public void run() {
+                Set<MysqlServerConnection> connSet = commandQueue.connStatusMap.keySet();
+                for (Connection conn : connSet) {
+                    statmentIdMap.remove(conn);
+                }
+            }
+        });
+        commandQueue.appendCommand(info, true);*/
     }
 
     @Override
