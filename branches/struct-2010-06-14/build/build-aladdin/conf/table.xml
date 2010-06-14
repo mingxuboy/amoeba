@@ -1,0 +1,2645 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE amoeba:table SYSTEM "table.dtd">
+<amoeba:table xmlns:amoeba="http://amoeba.meidusa.com/">
+	<table name="@@sql_mode">
+		<row>
+			<field name="@@sql_mode">STRICT_TRANS_TABLES,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION</field>
+		</row>
+	</table>
+	<table name="variables">
+		<row>
+			<field name="Variable_name">auto_increment_increment</field>
+			<field name="Value">1</field>
+		</row>
+		<row>
+			<field name="Variable_name">auto_increment_offset</field>
+			<field name="Value">1</field>
+		</row>
+		<row>
+			<field name="Variable_name">autocommit</field>
+			<field name="Value">ON</field>
+		</row>
+		<row>
+			<field name="Variable_name">automatic_sp_privileges</field>
+			<field name="Value">ON</field>
+		</row>
+		<row>
+			<field name="Variable_name">back_log</field>
+			<field name="Value">50</field>
+		</row>
+		<row>
+			<field name="Variable_name">basedir</field>
+			<field name="Value">/home/mysql/mysql-5.1.22-rc-linux-i686-glibc23/</field>
+		</row>
+		<row>
+			<field name="Variable_name">big_tables</field>
+			<field name="Value">OFF</field>
+		</row>
+		<row>
+			<field name="Variable_name">binlog_cache_size</field>
+			<field name="Value">32768</field>
+		</row>
+		<row>
+			<field name="Variable_name">binlog_format</field>
+			<field name="Value">MIXED</field>
+		</row>
+		<row>
+			<field name="Variable_name">bulk_insert_buffer_size</field>
+			<field name="Value">8388608</field>
+		</row>
+		<row>
+			<field name="Variable_name">character_set_client</field>
+			<field name="Value">utf8</field>
+		</row>
+		<row>
+			<field name="Variable_name">character_set_connection</field>
+			<field name="Value">utf8</field>
+		</row>
+		<row>
+			<field name="Variable_name">character_set_database</field>
+			<field name="Value">gbk</field>
+		</row>
+		<row>
+			<field name="Variable_name">character_set_filesystem</field>
+			<field name="Value">binary</field>
+		</row>
+		<row>
+			<field name="Variable_name">character_set_results</field>
+			<field name="Value">utf8</field>
+		</row>
+		<row>
+			<field name="Variable_name">character_set_server</field>
+			<field name="Value">gbk</field>
+		</row>
+		<row>
+			<field name="Variable_name">character_set_system</field>
+			<field name="Value">utf8</field>
+		</row>
+		<row>
+			<field name="Variable_name">character_sets_dir</field>
+			<field name="Value">/home/mysql/mysql-5.1.22-rc-linux-i686-glibc23/share/mysql/charsets/</field>
+		</row>
+		<row>
+			<field name="Variable_name">collation_connection</field>
+			<field name="Value">utf8_general_ci</field>
+		</row>
+		<row>
+			<field name="Variable_name">collation_database</field>
+			<field name="Value">gbk_chinese_ci</field>
+		</row>
+		<row>
+			<field name="Variable_name">collation_server</field>
+			<field name="Value">gbk_chinese_ci</field>
+		</row>
+		<row>
+			<field name="Variable_name">completion_type</field>
+			<field name="Value">0</field>
+		</row>
+		<row>
+			<field name="Variable_name">concurrent_insert</field>
+			<field name="Value">1</field>
+		</row>
+		<row>
+			<field name="Variable_name">connect_timeout</field>
+			<field name="Value">5</field>
+		</row>
+		<row>
+			<field name="Variable_name">datadir</field>
+			<field name="Value">/usr/local/mysql/data/</field>
+		</row>
+		<row>
+			<field name="Variable_name">date_format</field>
+			<field name="Value">%Y-%m-%d</field>
+    </row>
+    <row>
+      <field name="Variable_name">datetime_format</field>
+      <field name="Value">%Y-%m-%d %H:%i:%s</field>
+    </row>
+    <row>
+      <field name="Variable_name">default_week_format</field>
+      <field name="Value">0</field>
+    </row>
+    <row>
+      <field name="Variable_name">delay_key_write</field>
+      <field name="Value">ON</field>
+    </row>
+    <row>
+      <field name="Variable_name">delayed_insert_limit</field>
+      <field name="Value">100</field>
+    </row>
+    <row>
+      <field name="Variable_name">delayed_insert_timeout</field>
+      <field name="Value">300</field>
+    </row>
+    <row>
+      <field name="Variable_name">delayed_queue_size</field>
+      <field name="Value">1000</field>
+    </row>
+    <row>
+      <field name="Variable_name">div_precision_increment</field>
+      <field name="Value">4</field>
+    </row>
+    <row>
+      <field name="Variable_name">engine_condition_pushdown</field>
+      <field name="Value">ON</field>
+    </row>
+    <row>
+      <field name="Variable_name">error_count</field>
+      <field name="Value">0</field>
+    </row>
+    <row>
+      <field name="Variable_name">event_scheduler</field>
+      <field name="Value">OFF</field>
+    </row>
+    <row>
+      <field name="Variable_name">expire_logs_days</field>
+      <field name="Value">0</field>
+    </row>
+    <row>
+      <field name="Variable_name">flush</field>
+      <field name="Value">OFF</field>
+    </row>
+    <row>
+      <field name="Variable_name">flush_time</field>
+      <field name="Value">0</field>
+    </row>
+    <row>
+      <field name="Variable_name">foreign_key_checks</field>
+      <field name="Value">ON</field>
+    </row>
+    <row>
+      <field name="Variable_name">ft_boolean_syntax</field>
+      <field name="Value">+ -&gt;&lt;()~*:&quot;&quot;&amp;|</field>
+    </row>
+    <row>
+      <field name="Variable_name">ft_max_word_len</field>
+      <field name="Value">84</field>
+    </row>
+    <row>
+      <field name="Variable_name">ft_min_word_len</field>
+      <field name="Value">4</field>
+    </row>
+    <row>
+      <field name="Variable_name">ft_query_expansion_limit</field>
+      <field name="Value">20</field>
+    </row>
+    <row>
+      <field name="Variable_name">ft_stopword_file</field>
+      <field name="Value">(built-in)</field>
+    </row>
+    <row>
+      <field name="Variable_name">general_log</field>
+      <field name="Value">OFF</field>
+    </row>
+    <row>
+      <field name="Variable_name">general_log_file</field>
+      <field name="Value">/usr/local/mysql/data/community-dev3.log</field>
+    </row>
+    <row>
+      <field name="Variable_name">group_concat_max_len</field>
+      <field name="Value">1024</field>
+    </row>
+    <row>
+      <field name="Variable_name">have_compress</field>
+      <field name="Value">YES</field>
+    </row>
+    <row>
+      <field name="Variable_name">have_crypt</field>
+      <field name="Value">YES</field>
+    </row>
+    <row>
+      <field name="Variable_name">have_csv</field>
+      <field name="Value">YES</field>
+    </row>
+    <row>
+      <field name="Variable_name">have_dynamic_loading</field>
+      <field name="Value">YES</field>
+    </row>
+    <row>
+      <field name="Variable_name">have_geometry</field>
+      <field name="Value">YES</field>
+    </row>
+    <row>
+      <field name="Variable_name">have_innodb</field>
+      <field name="Value">YES</field>
+    </row>
+    <row>
+      <field name="Variable_name">have_ndbcluster</field>
+      <field name="Value">NO</field>
+    </row>
+    <row>
+      <field name="Variable_name">have_openssl</field>
+      <field name="Value">DISABLED</field>
+    </row>
+    <row>
+      <field name="Variable_name">have_partitioning</field>
+      <field name="Value">YES</field>
+    </row>
+    <row>
+      <field name="Variable_name">have_query_cache</field>
+      <field name="Value">YES</field>
+    </row>
+    <row>
+      <field name="Variable_name">have_rtree_keys</field>
+      <field name="Value">YES</field>
+    </row>
+    <row>
+      <field name="Variable_name">have_ssl</field>
+      <field name="Value">DISABLED</field>
+    </row>
+    <row>
+      <field name="Variable_name">have_symlink</field>
+      <field name="Value">YES</field>
+    </row>
+    <row>
+      <field name="Variable_name">hostname</field>
+      <field name="Value">community-dev3</field>
+    </row>
+    <row>
+      <field name="Variable_name">identity</field>
+      <field name="Value">0</field>
+    </row>
+    <row>
+      <field name="Variable_name">init_connect</field>
+      <field name="Value"></field>
+    </row>
+    <row>
+      <field name="Variable_name">init_file</field>
+      <field name="Value"></field>
+    </row>
+    <row>
+      <field name="Variable_name">init_slave</field>
+      <field name="Value"></field>
+    </row>
+    <row>
+      <field name="Variable_name">innodb_additional_mem_pool_size</field>
+      <field name="Value">1048576</field>
+    </row>
+    <row>
+      <field name="Variable_name">innodb_autoextend_increment</field>
+      <field name="Value">8</field>
+    </row>
+    <row>
+      <field name="Variable_name">innodb_autoinc_lock_mode</field>
+      <field name="Value">1</field>
+    </row>
+    <row>
+      <field name="Variable_name">innodb_buffer_pool_size</field>
+      <field name="Value">8388608</field>
+    </row>
+    <row>
+      <field name="Variable_name">innodb_checksums</field>
+      <field name="Value">ON</field>
+    </row>
+    <row>
+      <field name="Variable_name">innodb_commit_concurrency</field>
+      <field name="Value">0</field>
+    </row>
+    <row>
+      <field name="Variable_name">innodb_concurrency_tickets</field>
+      <field name="Value">500</field>
+    </row>
+    <row>
+      <field name="Variable_name">innodb_data_file_path</field>
+      <field name="Value">ibdata1:10M:autoextend</field>
+    </row>
+    <row>
+      <field name="Variable_name">innodb_data_home_dir</field>
+      <field name="Value"></field>
+    </row>
+    <row>
+      <field name="Variable_name">innodb_doublewrite</field>
+      <field name="Value">ON</field>
+    </row>
+    <row>
+      <field name="Variable_name">innodb_fast_shutdown</field>
+      <field name="Value">1</field>
+    </row>
+    <row>
+      <field name="Variable_name">innodb_file_io_threads</field>
+      <field name="Value">4</field>
+    </row>
+    <row>
+      <field name="Variable_name">innodb_file_per_table</field>
+      <field name="Value">OFF</field>
+    </row>
+    <row>
+      <field name="Variable_name">innodb_flush_log_at_trx_commit</field>
+      <field name="Value">1</field>
+    </row>
+    <row>
+      <field name="Variable_name">innodb_flush_method</field>
+      <field name="Value"></field>
+    </row>
+    <row>
+      <field name="Variable_name">innodb_force_recovery</field>
+      <field name="Value">0</field>
+    </row>
+    <row>
+      <field name="Variable_name">innodb_lock_wait_timeout</field>
+      <field name="Value">50</field>
+    </row>
+    <row>
+      <field name="Variable_name">innodb_locks_unsafe_for_binlog</field>
+      <field name="Value">OFF</field>
+    </row>
+    <row>
+      <field name="Variable_name">innodb_log_buffer_size</field>
+      <field name="Value">1048576</field>
+    </row>
+    <row>
+      <field name="Variable_name">innodb_log_file_size</field>
+      <field name="Value">5242880</field>
+    </row>
+    <row>
+      <field name="Variable_name">innodb_log_files_in_group</field>
+      <field name="Value">2</field>
+    </row>
+    <row>
+      <field name="Variable_name">innodb_log_group_home_dir</field>
+      <field name="Value">./</field>
+    </row>
+    <row>
+      <field name="Variable_name">innodb_max_dirty_pages_pct</field>
+      <field name="Value">90</field>
+    </row>
+    <row>
+      <field name="Variable_name">innodb_max_purge_lag</field>
+      <field name="Value">0</field>
+    </row>
+    <row>
+      <field name="Variable_name">innodb_mirrored_log_groups</field>
+      <field name="Value">1</field>
+    </row>
+    <row>
+      <field name="Variable_name">innodb_open_files</field>
+      <field name="Value">300</field>
+    </row>
+    <row>
+      <field name="Variable_name">innodb_rollback_on_timeout</field>
+      <field name="Value">OFF</field>
+    </row>
+    <row>
+      <field name="Variable_name">innodb_support_xa</field>
+      <field name="Value">ON</field>
+    </row>
+    <row>
+      <field name="Variable_name">innodb_sync_spin_loops</field>
+      <field name="Value">20</field>
+    </row>
+    <row>
+      <field name="Variable_name">innodb_table_locks</field>
+      <field name="Value">ON</field>
+    </row>
+    <row>
+      <field name="Variable_name">innodb_thread_concurrency</field>
+      <field name="Value">8</field>
+    </row>
+    <row>
+      <field name="Variable_name">innodb_thread_sleep_delay</field>
+      <field name="Value">10000</field>
+    </row>
+    <row>
+      <field name="Variable_name">insert_id</field>
+      <field name="Value">0</field>
+    </row>
+    <row>
+      <field name="Variable_name">interactive_timeout</field>
+      <field name="Value">28800</field>
+    </row>
+    <row>
+      <field name="Variable_name">join_buffer_size</field>
+      <field name="Value">131072</field>
+    </row>
+    <row>
+      <field name="Variable_name">keep_files_on_create</field>
+      <field name="Value">OFF</field>
+    </row>
+    <row>
+      <field name="Variable_name">key_buffer_size</field>
+      <field name="Value">402653184</field>
+    </row>
+    <row>
+      <field name="Variable_name">key_cache_age_threshold</field>
+      <field name="Value">300</field>
+    </row>
+    <row>
+      <field name="Variable_name">key_cache_block_size</field>
+      <field name="Value">1024</field>
+    </row>
+    <row>
+      <field name="Variable_name">key_cache_division_limit</field>
+      <field name="Value">100</field>
+    </row>
+    <row>
+      <field name="Variable_name">language</field>
+      <field name="Value">/home/mysql/mysql-5.1.22-rc-linux-i686-glibc23/share/mysql/english/</field>
+    </row>
+    <row>
+      <field name="Variable_name">large_files_support</field>
+      <field name="Value">ON</field>
+    </row>
+    <row>
+      <field name="Variable_name">large_page_size</field>
+      <field name="Value">0</field>
+    </row>
+    <row>
+      <field name="Variable_name">large_pages</field>
+      <field name="Value">OFF</field>
+    </row>
+    <row>
+      <field name="Variable_name">last_insert_id</field>
+      <field name="Value">0</field>
+    </row>
+    <row>
+      <field name="Variable_name">lc_time_names</field>
+      <field name="Value">en_US</field>
+    </row>
+    <row>
+      <field name="Variable_name">license</field>
+      <field name="Value">GPL</field>
+    </row>
+    <row>
+      <field name="Variable_name">local_infile</field>
+      <field name="Value">ON</field>
+    </row>
+    <row>
+      <field name="Variable_name">locked_in_memory</field>
+      <field name="Value">OFF</field>
+    </row>
+    <row>
+      <field name="Variable_name">log</field>
+      <field name="Value">OFF</field>
+    </row>
+    <row>
+      <field name="Variable_name">log_bin</field>
+      <field name="Value">ON</field>
+    </row>
+    <row>
+      <field name="Variable_name">log_bin_trust_function_creators</field>
+      <field name="Value">ON</field>
+    </row>
+    <row>
+      <field name="Variable_name">log_bin_trust_routine_creators</field>
+      <field name="Value">ON</field>
+    </row>
+    <row>
+      <field name="Variable_name">log_error</field>
+      <field name="Value">/usr/local/mysql/data/community-dev3.err</field>
+    </row>
+    <row>
+      <field name="Variable_name">log_output</field>
+      <field name="Value">FILE</field>
+    </row>
+    <row>
+      <field name="Variable_name">log_queries_not_using_indexes</field>
+      <field name="Value">ON</field>
+    </row>
+    <row>
+      <field name="Variable_name">log_slave_updates</field>
+      <field name="Value">OFF</field>
+    </row>
+    <row>
+      <field name="Variable_name">log_slow_queries</field>
+      <field name="Value">ON</field>
+    </row>
+    <row>
+      <field name="Variable_name">log_warnings</field>
+      <field name="Value">1</field>
+    </row>
+    <row>
+      <field name="Variable_name">long_query_time</field>
+      <field name="Value">1.000000</field>
+    </row>
+    <row>
+      <field name="Variable_name">low_priority_updates</field>
+      <field name="Value">OFF</field>
+    </row>
+    <row>
+      <field name="Variable_name">lower_case_file_system</field>
+      <field name="Value">OFF</field>
+    </row>
+    <row>
+      <field name="Variable_name">lower_case_table_names</field>
+      <field name="Value">0</field>
+    </row>
+    <row>
+      <field name="Variable_name">max_allowed_packet</field>
+      <field name="Value">1047552</field>
+    </row>
+    <row>
+      <field name="Variable_name">max_binlog_cache_size</field>
+      <field name="Value">4294967295</field>
+    </row>
+    <row>
+      <field name="Variable_name">max_binlog_size</field>
+      <field name="Value">1073741824</field>
+    </row>
+    <row>
+      <field name="Variable_name">max_connect_errors</field>
+      <field name="Value">10</field>
+    </row>
+    <row>
+      <field name="Variable_name">max_connections</field>
+      <field name="Value">251</field>
+    </row>
+    <row>
+      <field name="Variable_name">max_delayed_threads</field>
+      <field name="Value">20</field>
+    </row>
+    <row>
+      <field name="Variable_name">max_error_count</field>
+      <field name="Value">64</field>
+    </row>
+    <row>
+      <field name="Variable_name">max_heap_table_size</field>
+      <field name="Value">16777216</field>
+    </row>
+    <row>
+      <field name="Variable_name">max_insert_delayed_threads</field>
+      <field name="Value">20</field>
+    </row>
+    <row>
+      <field name="Variable_name">max_join_size</field>
+      <field name="Value">18446744073709551615</field>
+    </row>
+    <row>
+      <field name="Variable_name">max_length_for_sort_data</field>
+      <field name="Value">1024</field>
+    </row>
+    <row>
+      <field name="Variable_name">max_prepared_stmt_count</field>
+      <field name="Value">16382</field>
+    </row>
+    <row>
+      <field name="Variable_name">max_relay_log_size</field>
+      <field name="Value">0</field>
+    </row>
+    <row>
+      <field name="Variable_name">max_seeks_for_key</field>
+      <field name="Value">4294967295</field>
+    </row>
+    <row>
+      <field name="Variable_name">max_sort_length</field>
+      <field name="Value">1024</field>
+    </row>
+    <row>
+      <field name="Variable_name">max_sp_recursion_depth</field>
+      <field name="Value">0</field>
+    </row>
+    <row>
+      <field name="Variable_name">max_tmp_tables</field>
+      <field name="Value">32</field>
+    </row>
+    <row>
+      <field name="Variable_name">max_user_connections</field>
+      <field name="Value">0</field>
+    </row>
+    <row>
+      <field name="Variable_name">max_write_lock_count</field>
+      <field name="Value">4294967295</field>
+    </row>
+    <row>
+      <field name="Variable_name">min_examined_row_limit</field>
+      <field name="Value">0</field>
+    </row>
+    <row>
+      <field name="Variable_name">multi_range_count</field>
+      <field name="Value">256</field>
+    </row>
+    <row>
+      <field name="Variable_name">myisam_data_pointer_size</field>
+      <field name="Value">6</field>
+    </row>
+    <row>
+      <field name="Variable_name">myisam_max_sort_file_size</field>
+      <field name="Value">2147483647</field>
+    </row>
+    <row>
+      <field name="Variable_name">myisam_recover_options</field>
+      <field name="Value">OFF</field>
+    </row>
+    <row>
+      <field name="Variable_name">myisam_repair_threads</field>
+      <field name="Value">1</field>
+    </row>
+    <row>
+      <field name="Variable_name">myisam_sort_buffer_size</field>
+      <field name="Value">67108864</field>
+    </row>
+    <row>
+      <field name="Variable_name">myisam_stats_method</field>
+      <field name="Value">nulls_unequal</field>
+    </row>
+    <row>
+      <field name="Variable_name">myisam_use_mmap</field>
+      <field name="Value">OFF</field>
+    </row>
+    <row>
+      <field name="Variable_name">ndb_autoincrement_prefetch_sz</field>
+      <field name="Value">32</field>
+    </row>
+    <row>
+      <field name="Variable_name">ndb_cache_check_time</field>
+      <field name="Value">0</field>
+    </row>
+    <row>
+      <field name="Variable_name">ndb_connectstring</field>
+      <field name="Value"></field>
+    </row>
+    <row>
+      <field name="Variable_name">ndb_extra_logging</field>
+      <field name="Value">0</field>
+    </row>
+    <row>
+      <field name="Variable_name">ndb_force_send</field>
+      <field name="Value">ON</field>
+    </row>
+    <row>
+      <field name="Variable_name">ndb_index_stat_cache_entries</field>
+      <field name="Value">32</field>
+    </row>
+    <row>
+      <field name="Variable_name">ndb_index_stat_enable</field>
+      <field name="Value">OFF</field>
+    </row>
+    <row>
+      <field name="Variable_name">ndb_index_stat_update_freq</field>
+      <field name="Value">20</field>
+    </row>
+    <row>
+      <field name="Variable_name">ndb_report_thresh_binlog_epoch_slip</field>
+      <field name="Value">3</field>
+    </row>
+    <row>
+      <field name="Variable_name">ndb_report_thresh_binlog_mem_usage</field>
+      <field name="Value">10</field>
+    </row>
+    <row>
+      <field name="Variable_name">ndb_use_copying_alter_table</field>
+      <field name="Value">OFF</field>
+    </row>
+    <row>
+      <field name="Variable_name">ndb_use_exact_count</field>
+      <field name="Value">ON</field>
+    </row>
+    <row>
+      <field name="Variable_name">ndb_use_transactions</field>
+      <field name="Value">ON</field>
+    </row>
+    <row>
+      <field name="Variable_name">net_buffer_length</field>
+      <field name="Value">16384</field>
+    </row>
+    <row>
+      <field name="Variable_name">net_read_timeout</field>
+      <field name="Value">30</field>
+    </row>
+    <row>
+      <field name="Variable_name">net_retry_count</field>
+      <field name="Value">10</field>
+    </row>
+    <row>
+      <field name="Variable_name">net_write_timeout</field>
+      <field name="Value">60</field>
+    </row>
+    <row>
+      <field name="Variable_name">new</field>
+      <field name="Value">OFF</field>
+    </row>
+    <row>
+      <field name="Variable_name">old</field>
+      <field name="Value">OFF</field>
+    </row>
+    <row>
+      <field name="Variable_name">old_alter_table</field>
+      <field name="Value">OFF</field>
+    </row>
+    <row>
+      <field name="Variable_name">old_passwords</field>
+      <field name="Value">OFF</field>
+    </row>
+    <row>
+      <field name="Variable_name">open_files_limit</field>
+      <field name="Value">51200</field>
+    </row>
+    <row>
+      <field name="Variable_name">optimizer_prune_level</field>
+      <field name="Value">1</field>
+    </row>
+    <row>
+      <field name="Variable_name">optimizer_search_depth</field>
+      <field name="Value">62</field>
+    </row>
+    <row>
+      <field name="Variable_name">pid_file</field>
+      <field name="Value">/usr/local/mysql/data/community-dev3.pid</field>
+    </row>
+    <row>
+      <field name="Variable_name">plugin_dir</field>
+      <field name="Value">/home/mysql/mysql-5.1.22-rc-linux-i686-glibc23/lib</field>
+    </row>
+    <row>
+      <field name="Variable_name">port</field>
+      <field name="Value">3306</field>
+    </row>
+    <row>
+      <field name="Variable_name">preload_buffer_size</field>
+      <field name="Value">32768</field>
+    </row>
+    <row>
+      <field name="Variable_name">protocol_version</field>
+      <field name="Value">10</field>
+    </row>
+    <row>
+      <field name="Variable_name">pseudo_thread_id</field>
+      <field name="Value">176577</field>
+    </row>
+    <row>
+      <field name="Variable_name">query_alloc_block_size</field>
+      <field name="Value">8192</field>
+    </row>
+    <row>
+      <field name="Variable_name">query_cache_limit</field>
+      <field name="Value">1048576</field>
+    </row>
+    <row>
+      <field name="Variable_name">query_cache_min_res_unit</field>
+      <field name="Value">4096</field>
+    </row>
+    <row>
+      <field name="Variable_name">query_cache_size</field>
+      <field name="Value">33554432</field>
+    </row>
+    <row>
+      <field name="Variable_name">query_cache_type</field>
+      <field name="Value">ON</field>
+    </row>
+    <row>
+      <field name="Variable_name">query_cache_wlock_invalidate</field>
+      <field name="Value">OFF</field>
+    </row>
+    <row>
+      <field name="Variable_name">query_prealloc_size</field>
+      <field name="Value">8192</field>
+    </row>
+    <row>
+      <field name="Variable_name">rand_seed1</field>
+      <field name="Value"></field>
+    </row>
+    <row>
+      <field name="Variable_name">rand_seed2</field>
+      <field name="Value"></field>
+    </row>
+    <row>
+      <field name="Variable_name">range_alloc_block_size</field>
+      <field name="Value">2048</field>
+    </row>
+    <row>
+      <field name="Variable_name">read_buffer_size</field>
+      <field name="Value">2093056</field>
+    </row>
+    <row>
+      <field name="Variable_name">read_only</field>
+      <field name="Value">OFF</field>
+    </row>
+    <row>
+      <field name="Variable_name">read_rnd_buffer_size</field>
+      <field name="Value">8384512</field>
+    </row>
+    <row>
+      <field name="Variable_name">relay_log_purge</field>
+      <field name="Value">ON</field>
+    </row>
+    <row>
+      <field name="Variable_name">relay_log_space_limit</field>
+      <field name="Value">0</field>
+    </row>
+    <row>
+      <field name="Variable_name">rpl_recovery_rank</field>
+      <field name="Value">0</field>
+    </row>
+    <row>
+      <field name="Variable_name">secure_auth</field>
+      <field name="Value">OFF</field>
+    </row>
+    <row>
+      <field name="Variable_name">secure_file_priv</field>
+      <field name="Value"></field>
+    </row>
+    <row>
+      <field name="Variable_name">server_id</field>
+      <field name="Value">1</field>
+    </row>
+    <row>
+      <field name="Variable_name">skip_external_locking</field>
+      <field name="Value">ON</field>
+    </row>
+    <row>
+      <field name="Variable_name">skip_networking</field>
+      <field name="Value">OFF</field>
+    </row>
+    <row>
+      <field name="Variable_name">skip_show_database</field>
+      <field name="Value">OFF</field>
+    </row>
+    <row>
+      <field name="Variable_name">slave_compressed_protocol</field>
+      <field name="Value">OFF</field>
+    </row>
+    <row>
+      <field name="Variable_name">slave_load_tmpdir</field>
+      <field name="Value">/tmp</field>
+    </row>
+    <row>
+      <field name="Variable_name">slave_net_timeout</field>
+      <field name="Value">3600</field>
+    </row>
+    <row>
+      <field name="Variable_name">slave_skip_errors</field>
+      <field name="Value">OFF</field>
+    </row>
+    <row>
+      <field name="Variable_name">slave_transaction_retries</field>
+      <field name="Value">10</field>
+    </row>
+    <row>
+      <field name="Variable_name">slow_launch_time</field>
+      <field name="Value">2</field>
+    </row>
+    <row>
+      <field name="Variable_name">slow_query_log</field>
+      <field name="Value">ON</field>
+    </row>
+    <row>
+      <field name="Variable_name">slow_query_log_file</field>
+      <field name="Value">/usr/local/mysql/data/community-dev3-slow.log</field>
+    </row>
+    <row>
+      <field name="Variable_name">socket</field>
+      <field name="Value">/tmp/mysql.sock</field>
+    </row>
+    <row>
+      <field name="Variable_name">sort_buffer_size</field>
+      <field name="Value">2097144</field>
+    </row>
+    <row>
+      <field name="Variable_name">sql_auto_is_null</field>
+      <field name="Value">ON</field>
+    </row>
+    <row>
+      <field name="Variable_name">sql_big_selects</field>
+      <field name="Value">ON</field>
+    </row>
+    <row>
+      <field name="Variable_name">sql_big_tables</field>
+      <field name="Value">OFF</field>
+    </row>
+    <row>
+      <field name="Variable_name">sql_buffer_result</field>
+      <field name="Value">OFF</field>
+    </row>
+    <row>
+      <field name="Variable_name">sql_log_bin</field>
+      <field name="Value">ON</field>
+    </row>
+    <row>
+      <field name="Variable_name">sql_log_off</field>
+      <field name="Value">OFF</field>
+    </row>
+    <row>
+      <field name="Variable_name">sql_log_update</field>
+      <field name="Value">ON</field>
+    </row>
+    <row>
+      <field name="Variable_name">sql_low_priority_updates</field>
+      <field name="Value">OFF</field>
+    </row>
+    <row>
+      <field name="Variable_name">sql_max_join_size</field>
+      <field name="Value">18446744073709551615</field>
+    </row>
+    <row>
+      <field name="Variable_name">sql_mode</field>
+      <field name="Value"></field>
+    </row>
+    <row>
+      <field name="Variable_name">sql_notes</field>
+      <field name="Value">ON</field>
+    </row>
+    <row>
+      <field name="Variable_name">sql_quote_show_create</field>
+      <field name="Value">ON</field>
+    </row>
+    <row>
+      <field name="Variable_name">sql_safe_updates</field>
+      <field name="Value">OFF</field>
+    </row>
+    <row>
+      <field name="Variable_name">sql_select_limit</field>
+      <field name="Value">18446744073709551615</field>
+    </row>
+    <row>
+      <field name="Variable_name">sql_slave_skip_counter</field>
+      <field name="Value"></field>
+    </row>
+    <row>
+      <field name="Variable_name">sql_warnings</field>
+      <field name="Value">OFF</field>
+    </row>
+    <row>
+      <field name="Variable_name">ssl_ca</field>
+      <field name="Value"></field>
+    </row>
+    <row>
+      <field name="Variable_name">ssl_capath</field>
+      <field name="Value"></field>
+    </row>
+    <row>
+      <field name="Variable_name">ssl_cert</field>
+      <field name="Value"></field>
+    </row>
+    <row>
+      <field name="Variable_name">ssl_cipher</field>
+      <field name="Value"></field>
+    </row>
+    <row>
+      <field name="Variable_name">ssl_key</field>
+      <field name="Value"></field>
+    </row>
+    <row>
+      <field name="Variable_name">storage_engine</field>
+      <field name="Value">MyISAM</field>
+    </row>
+    <row>
+      <field name="Variable_name">sync_binlog</field>
+      <field name="Value">0</field>
+    </row>
+    <row>
+      <field name="Variable_name">sync_frm</field>
+      <field name="Value">ON</field>
+    </row>
+    <row>
+      <field name="Variable_name">system_time_zone</field>
+      <field name="Value">CST</field>
+    </row>
+    <row>
+      <field name="Variable_name">table_definition_cache</field>
+      <field name="Value">128</field>
+    </row>
+    <row>
+      <field name="Variable_name">table_lock_wait_timeout</field>
+      <field name="Value">50</field>
+    </row>
+    <row>
+      <field name="Variable_name">table_open_cache</field>
+      <field name="Value">512</field>
+    </row>
+    <row>
+      <field name="Variable_name">table_type</field>
+      <field name="Value">MyISAM</field>
+    </row>
+    <row>
+      <field name="Variable_name">thread_cache_size</field>
+      <field name="Value">8</field>
+    </row>
+    <row>
+      <field name="Variable_name">thread_handling</field>
+      <field name="Value">one-thread-per-connection</field>
+    </row>
+    <row>
+      <field name="Variable_name">thread_stack</field>
+      <field name="Value">196608</field>
+    </row>
+    <row>
+      <field name="Variable_name">time_format</field>
+      <field name="Value">%H:%i:%s</field>
+    </row>
+    <row>
+      <field name="Variable_name">time_zone</field>
+      <field name="Value">SYSTEM</field>
+    </row>
+    <row>
+      <field name="Variable_name">timed_mutexes</field>
+      <field name="Value">OFF</field>
+    </row>
+    <row>
+      <field name="Variable_name">timestamp</field>
+      <field name="Value">1224842449</field>
+    </row>
+    <row>
+      <field name="Variable_name">tmp_table_size</field>
+      <field name="Value">16777216</field>
+    </row>
+    <row>
+      <field name="Variable_name">tmpdir</field>
+      <field name="Value">/tmp</field>
+    </row>
+    <row>
+      <field name="Variable_name">transaction_alloc_block_size</field>
+      <field name="Value">8192</field>
+    </row>
+    <row>
+      <field name="Variable_name">transaction_prealloc_size</field>
+      <field name="Value">4096</field>
+    </row>
+    <row>
+      <field name="Variable_name">tx_isolation</field>
+      <field name="Value">REPEATABLE-READ</field>
+    </row>
+    <row>
+      <field name="Variable_name">unique_checks</field>
+      <field name="Value">ON</field>
+    </row>
+    <row>
+      <field name="Variable_name">updatable_views_with_limit</field>
+      <field name="Value">YES</field>
+    </row>
+    <row>
+      <field name="Variable_name">version</field>
+      <field name="Value">5.1.22-rc-log</field>
+    </row>
+    <row>
+      <field name="Variable_name">version_comment</field>
+      <field name="Value">MySQL Community Server (GPL)</field>
+    </row>
+    <row>
+      <field name="Variable_name">version_compile_machine</field>
+      <field name="Value">i686</field>
+    </row>
+    <row>
+      <field name="Variable_name">version_compile_os</field>
+      <field name="Value">redhat-linux-gnu</field>
+    </row>
+    <row>
+      <field name="Variable_name">wait_timeout</field>
+      <field name="Value">28800</field>
+    </row>
+    <row>
+      <field name="Variable_name">warning_count</field>
+      <field name="Value">0</field>
+    </row>
+	</table>
+	<table name="collation">
+	    <row>
+	      <field name="Collation">big5_chinese_ci</field>
+	      <field name="Charset">big5</field>
+	      <field name="Id">1</field>
+	      <field name="Default">Yes</field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">1</field>
+	    </row>
+	    <row>
+	      <field name="Collation">big5_bin</field>
+	      <field name="Charset">big5</field>
+	      <field name="Id">84</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">1</field>
+	    </row>
+	    <row>
+	      <field name="Collation">dec8_swedish_ci</field>
+	      <field name="Charset">dec8</field>
+	      <field name="Id">3</field>
+	      <field name="Default">Yes</field>
+	      <field name="Compiled"></field>
+	      <field name="Sortlen">0</field>
+	    </row>
+	    <row>
+	      <field name="Collation">dec8_bin</field>
+	      <field name="Charset">dec8</field>
+	      <field name="Id">69</field>
+	      <field name="Default"></field>
+	      <field name="Compiled"></field>
+	      <field name="Sortlen">0</field>
+	    </row>
+	    <row>
+	      <field name="Collation">cp850_general_ci</field>
+	      <field name="Charset">cp850</field>
+	      <field name="Id">4</field>
+	      <field name="Default">Yes</field>
+	      <field name="Compiled"></field>
+	      <field name="Sortlen">0</field>
+	    </row>
+	    <row>
+	      <field name="Collation">cp850_bin</field>
+	      <field name="Charset">cp850</field>
+	      <field name="Id">80</field>
+	      <field name="Default"></field>
+	      <field name="Compiled"></field>
+	      <field name="Sortlen">0</field>
+	    </row>
+	    <row>
+	      <field name="Collation">hp8_english_ci</field>
+	      <field name="Charset">hp8</field>
+	      <field name="Id">6</field>
+	      <field name="Default">Yes</field>
+	      <field name="Compiled"></field>
+	      <field name="Sortlen">0</field>
+	    </row>
+	    <row>
+	      <field name="Collation">hp8_bin</field>
+	      <field name="Charset">hp8</field>
+	      <field name="Id">72</field>
+	      <field name="Default"></field>
+	      <field name="Compiled"></field>
+	      <field name="Sortlen">0</field>
+	    </row>
+	    <row>
+	      <field name="Collation">koi8r_general_ci</field>
+	      <field name="Charset">koi8r</field>
+	      <field name="Id">7</field>
+	      <field name="Default">Yes</field>
+	      <field name="Compiled"></field>
+	      <field name="Sortlen">0</field>
+	    </row>
+	    <row>
+	      <field name="Collation">koi8r_bin</field>
+	      <field name="Charset">koi8r</field>
+	      <field name="Id">74</field>
+	      <field name="Default"></field>
+	      <field name="Compiled"></field>
+	      <field name="Sortlen">0</field>
+	    </row>
+	    <row>
+	      <field name="Collation">latin1_german1_ci</field>
+	      <field name="Charset">latin1</field>
+	      <field name="Id">5</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">1</field>
+	    </row>
+	    <row>
+	      <field name="Collation">latin1_swedish_ci</field>
+	      <field name="Charset">latin1</field>
+	      <field name="Id">8</field>
+	      <field name="Default">Yes</field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">1</field>
+	    </row>
+	    <row>
+	      <field name="Collation">latin1_danish_ci</field>
+	      <field name="Charset">latin1</field>
+	      <field name="Id">15</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">1</field>
+	    </row>
+	    <row>
+	      <field name="Collation">latin1_german2_ci</field>
+	      <field name="Charset">latin1</field>
+	      <field name="Id">31</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">2</field>
+	    </row>
+	    <row>
+	      <field name="Collation">latin1_bin</field>
+	      <field name="Charset">latin1</field>
+	      <field name="Id">47</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">1</field>
+	    </row>
+	    <row>
+	      <field name="Collation">latin1_general_ci</field>
+	      <field name="Charset">latin1</field>
+	      <field name="Id">48</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">1</field>
+	    </row>
+	    <row>
+	      <field name="Collation">latin1_general_cs</field>
+	      <field name="Charset">latin1</field>
+	      <field name="Id">49</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">1</field>
+	    </row>
+	    <row>
+	      <field name="Collation">latin1_spanish_ci</field>
+	      <field name="Charset">latin1</field>
+	      <field name="Id">94</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">1</field>
+	    </row>
+	    <row>
+	      <field name="Collation">latin2_czech_cs</field>
+	      <field name="Charset">latin2</field>
+	      <field name="Id">2</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">4</field>
+	    </row>
+	    <row>
+	      <field name="Collation">latin2_general_ci</field>
+	      <field name="Charset">latin2</field>
+	      <field name="Id">9</field>
+	      <field name="Default">Yes</field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">1</field>
+	    </row>
+	    <row>
+	      <field name="Collation">latin2_hungarian_ci</field>
+	      <field name="Charset">latin2</field>
+	      <field name="Id">21</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">1</field>
+	    </row>
+	    <row>
+	      <field name="Collation">latin2_croatian_ci</field>
+	      <field name="Charset">latin2</field>
+	      <field name="Id">27</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">1</field>
+	    </row>
+	    <row>
+	      <field name="Collation">latin2_bin</field>
+	      <field name="Charset">latin2</field>
+	      <field name="Id">77</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">1</field>
+	    </row>
+	    <row>
+	      <field name="Collation">swe7_swedish_ci</field>
+	      <field name="Charset">swe7</field>
+	      <field name="Id">10</field>
+	      <field name="Default">Yes</field>
+	      <field name="Compiled"></field>
+	      <field name="Sortlen">0</field>
+	    </row>
+	    <row>
+	      <field name="Collation">swe7_bin</field>
+	      <field name="Charset">swe7</field>
+	      <field name="Id">82</field>
+	      <field name="Default"></field>
+	      <field name="Compiled"></field>
+	      <field name="Sortlen">0</field>
+	    </row>
+	    <row>
+	      <field name="Collation">ascii_general_ci</field>
+	      <field name="Charset">ascii</field>
+	      <field name="Id">11</field>
+	      <field name="Default">Yes</field>
+	      <field name="Compiled"></field>
+	      <field name="Sortlen">0</field>
+	    </row>
+	    <row>
+	      <field name="Collation">ascii_bin</field>
+	      <field name="Charset">ascii</field>
+	      <field name="Id">65</field>
+	      <field name="Default"></field>
+	      <field name="Compiled"></field>
+	      <field name="Sortlen">0</field>
+	    </row>
+	    <row>
+	      <field name="Collation">ujis_japanese_ci</field>
+	      <field name="Charset">ujis</field>
+	      <field name="Id">12</field>
+	      <field name="Default">Yes</field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">1</field>
+	    </row>
+	    <row>
+	      <field name="Collation">ujis_bin</field>
+	      <field name="Charset">ujis</field>
+	      <field name="Id">91</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">1</field>
+	    </row>
+	    <row>
+	      <field name="Collation">sjis_japanese_ci</field>
+	      <field name="Charset">sjis</field>
+	      <field name="Id">13</field>
+	      <field name="Default">Yes</field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">1</field>
+	    </row>
+	    <row>
+	      <field name="Collation">sjis_bin</field>
+	      <field name="Charset">sjis</field>
+	      <field name="Id">88</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">1</field>
+	    </row>
+	    <row>
+	      <field name="Collation">hebrew_general_ci</field>
+	      <field name="Charset">hebrew</field>
+	      <field name="Id">16</field>
+	      <field name="Default">Yes</field>
+	      <field name="Compiled"></field>
+	      <field name="Sortlen">0</field>
+	    </row>
+	    <row>
+	      <field name="Collation">hebrew_bin</field>
+	      <field name="Charset">hebrew</field>
+	      <field name="Id">71</field>
+	      <field name="Default"></field>
+	      <field name="Compiled"></field>
+	      <field name="Sortlen">0</field>
+	    </row>
+	    <row>
+	      <field name="Collation">tis620_thai_ci</field>
+	      <field name="Charset">tis620</field>
+	      <field name="Id">18</field>
+	      <field name="Default">Yes</field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">4</field>
+	    </row>
+	    <row>
+	      <field name="Collation">tis620_bin</field>
+	      <field name="Charset">tis620</field>
+	      <field name="Id">89</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">1</field>
+	    </row>
+	    <row>
+	      <field name="Collation">euckr_korean_ci</field>
+	      <field name="Charset">euckr</field>
+	      <field name="Id">19</field>
+	      <field name="Default">Yes</field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">1</field>
+	    </row>
+	    <row>
+	      <field name="Collation">euckr_bin</field>
+	      <field name="Charset">euckr</field>
+	      <field name="Id">85</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">1</field>
+	    </row>
+	    <row>
+	      <field name="Collation">koi8u_general_ci</field>
+	      <field name="Charset">koi8u</field>
+	      <field name="Id">22</field>
+	      <field name="Default">Yes</field>
+	      <field name="Compiled"></field>
+	      <field name="Sortlen">0</field>
+	    </row>
+	    <row>
+	      <field name="Collation">koi8u_bin</field>
+	      <field name="Charset">koi8u</field>
+	      <field name="Id">75</field>
+	      <field name="Default"></field>
+	      <field name="Compiled"></field>
+	      <field name="Sortlen">0</field>
+	    </row>
+	    <row>
+	      <field name="Collation">gb2312_chinese_ci</field>
+	      <field name="Charset">gb2312</field>
+	      <field name="Id">24</field>
+	      <field name="Default">Yes</field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">1</field>
+	    </row>
+	    <row>
+	      <field name="Collation">gb2312_bin</field>
+	      <field name="Charset">gb2312</field>
+	      <field name="Id">86</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">1</field>
+	    </row>
+	    <row>
+	      <field name="Collation">greek_general_ci</field>
+	      <field name="Charset">greek</field>
+	      <field name="Id">25</field>
+	      <field name="Default">Yes</field>
+	      <field name="Compiled"></field>
+	      <field name="Sortlen">0</field>
+	    </row>
+	    <row>
+	      <field name="Collation">greek_bin</field>
+	      <field name="Charset">greek</field>
+	      <field name="Id">70</field>
+	      <field name="Default"></field>
+	      <field name="Compiled"></field>
+	      <field name="Sortlen">0</field>
+	    </row>
+	    <row>
+	      <field name="Collation">cp1250_general_ci</field>
+	      <field name="Charset">cp1250</field>
+	      <field name="Id">26</field>
+	      <field name="Default">Yes</field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">1</field>
+	    </row>
+	    <row>
+	      <field name="Collation">cp1250_czech_cs</field>
+	      <field name="Charset">cp1250</field>
+	      <field name="Id">34</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">2</field>
+	    </row>
+	    <row>
+	      <field name="Collation">cp1250_croatian_ci</field>
+	      <field name="Charset">cp1250</field>
+	      <field name="Id">44</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">1</field>
+	    </row>
+	    <row>
+	      <field name="Collation">cp1250_bin</field>
+	      <field name="Charset">cp1250</field>
+	      <field name="Id">66</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">1</field>
+	    </row>
+	    <row>
+	      <field name="Collation">cp1250_polish_ci</field>
+	      <field name="Charset">cp1250</field>
+	      <field name="Id">99</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">1</field>
+	    </row>
+	    <row>
+	      <field name="Collation">gbk_chinese_ci</field>
+	      <field name="Charset">gbk</field>
+	      <field name="Id">28</field>
+	      <field name="Default">Yes</field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">1</field>
+	    </row>
+	    <row>
+	      <field name="Collation">gbk_bin</field>
+	      <field name="Charset">gbk</field>
+	      <field name="Id">87</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">1</field>
+	    </row>
+	    <row>
+	      <field name="Collation">latin5_turkish_ci</field>
+	      <field name="Charset">latin5</field>
+	      <field name="Id">30</field>
+	      <field name="Default">Yes</field>
+	      <field name="Compiled"></field>
+	      <field name="Sortlen">0</field>
+	    </row>
+	    <row>
+	      <field name="Collation">latin5_bin</field>
+	      <field name="Charset">latin5</field>
+	      <field name="Id">78</field>
+	      <field name="Default"></field>
+	      <field name="Compiled"></field>
+	      <field name="Sortlen">0</field>
+	    </row>
+	    <row>
+	      <field name="Collation">armscii8_general_ci</field>
+	      <field name="Charset">armscii8</field>
+	      <field name="Id">32</field>
+	      <field name="Default">Yes</field>
+	      <field name="Compiled"></field>
+	      <field name="Sortlen">0</field>
+	    </row>
+	    <row>
+	      <field name="Collation">armscii8_bin</field>
+	      <field name="Charset">armscii8</field>
+	      <field name="Id">64</field>
+	      <field name="Default"></field>
+	      <field name="Compiled"></field>
+	      <field name="Sortlen">0</field>
+	    </row>
+	    <row>
+	      <field name="Collation">utf8mb3_general_ci</field>
+	      <field name="Charset">utf8mb3</field>
+	      <field name="Id">33</field>
+	      <field name="Default">Yes</field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">1</field>
+	    </row>
+	    <row>
+	      <field name="Collation">utf8mb3_bin</field>
+	      <field name="Charset">utf8mb3</field>
+	      <field name="Id">83</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">1</field>
+	    </row>
+	    <row>
+	      <field name="Collation">utf8mb3_unicode_ci</field>
+	      <field name="Charset">utf8mb3</field>
+	      <field name="Id">192</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">8</field>
+	    </row>
+	    <row>
+	      <field name="Collation">utf8mb3_icelandic_ci</field>
+	      <field name="Charset">utf8mb3</field>
+	      <field name="Id">193</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">8</field>
+	    </row>
+	    <row>
+	      <field name="Collation">utf8mb3_latvian_ci</field>
+	      <field name="Charset">utf8mb3</field>
+	      <field name="Id">194</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">8</field>
+	    </row>
+	    <row>
+	      <field name="Collation">utf8mb3_romanian_ci</field>
+	      <field name="Charset">utf8mb3</field>
+	      <field name="Id">195</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">8</field>
+	    </row>
+	    <row>
+	      <field name="Collation">utf8mb3_slovenian_ci</field>
+	      <field name="Charset">utf8mb3</field>
+	      <field name="Id">196</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">8</field>
+	    </row>
+	    <row>
+	      <field name="Collation">utf8mb3_polish_ci</field>
+	      <field name="Charset">utf8mb3</field>
+	      <field name="Id">197</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">8</field>
+	    </row>
+	    <row>
+	      <field name="Collation">utf8mb3_estonian_ci</field>
+	      <field name="Charset">utf8mb3</field>
+	      <field name="Id">198</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">8</field>
+	    </row>
+	    <row>
+	      <field name="Collation">utf8mb3_spanish_ci</field>
+	      <field name="Charset">utf8mb3</field>
+	      <field name="Id">199</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">8</field>
+	    </row>
+	    <row>
+	      <field name="Collation">utf8mb3_swedish_ci</field>
+	      <field name="Charset">utf8mb3</field>
+	      <field name="Id">200</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">8</field>
+	    </row>
+	    <row>
+	      <field name="Collation">utf8mb3_turkish_ci</field>
+	      <field name="Charset">utf8mb3</field>
+	      <field name="Id">201</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">8</field>
+	    </row>
+	    <row>
+	      <field name="Collation">utf8mb3_czech_ci</field>
+	      <field name="Charset">utf8mb3</field>
+	      <field name="Id">202</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">8</field>
+	    </row>
+	    <row>
+	      <field name="Collation">utf8mb3_danish_ci</field>
+	      <field name="Charset">utf8mb3</field>
+	      <field name="Id">203</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">8</field>
+	    </row>
+	    <row>
+	      <field name="Collation">utf8mb3_lithuanian_ci</field>
+	      <field name="Charset">utf8mb3</field>
+	      <field name="Id">204</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">8</field>
+	    </row>
+	    <row>
+	      <field name="Collation">utf8mb3_slovak_ci</field>
+	      <field name="Charset">utf8mb3</field>
+	      <field name="Id">205</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">8</field>
+	    </row>
+	    <row>
+	      <field name="Collation">utf8mb3_spanish2_ci</field>
+	      <field name="Charset">utf8mb3</field>
+	      <field name="Id">206</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">8</field>
+	    </row>
+	    <row>
+	      <field name="Collation">utf8mb3_roman_ci</field>
+	      <field name="Charset">utf8mb3</field>
+	      <field name="Id">207</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">8</field>
+	    </row>
+	    <row>
+	      <field name="Collation">utf8mb3_persian_ci</field>
+	      <field name="Charset">utf8mb3</field>
+	      <field name="Id">208</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">8</field>
+	    </row>
+	    <row>
+	      <field name="Collation">utf8mb3_esperanto_ci</field>
+	      <field name="Charset">utf8mb3</field>
+	      <field name="Id">209</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">8</field>
+	    </row>
+	    <row>
+	      <field name="Collation">utf8mb3_hungarian_ci</field>
+	      <field name="Charset">utf8mb3</field>
+	      <field name="Id">210</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">8</field>
+	    </row>
+	    <row>
+	      <field name="Collation">utf8mb3_sinhala_ci</field>
+	      <field name="Charset">utf8mb3</field>
+	      <field name="Id">211</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">8</field>
+	    </row>
+	    <row>
+	      <field name="Collation">ucs2_general_ci</field>
+	      <field name="Charset">ucs2</field>
+	      <field name="Id">35</field>
+	      <field name="Default">Yes</field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">1</field>
+	    </row>
+	    <row>
+	      <field name="Collation">ucs2_bin</field>
+	      <field name="Charset">ucs2</field>
+	      <field name="Id">90</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">1</field>
+	    </row>
+	    <row>
+	      <field name="Collation">ucs2_unicode_ci</field>
+	      <field name="Charset">ucs2</field>
+	      <field name="Id">128</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">8</field>
+	    </row>
+	    <row>
+	      <field name="Collation">ucs2_icelandic_ci</field>
+	      <field name="Charset">ucs2</field>
+	      <field name="Id">129</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">8</field>
+	    </row>
+	    <row>
+	      <field name="Collation">ucs2_latvian_ci</field>
+	      <field name="Charset">ucs2</field>
+	      <field name="Id">130</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">8</field>
+	    </row>
+	    <row>
+	      <field name="Collation">ucs2_romanian_ci</field>
+	      <field name="Charset">ucs2</field>
+	      <field name="Id">131</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">8</field>
+	    </row>
+	    <row>
+	      <field name="Collation">ucs2_slovenian_ci</field>
+	      <field name="Charset">ucs2</field>
+	      <field name="Id">132</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">8</field>
+	    </row>
+	    <row>
+	      <field name="Collation">ucs2_polish_ci</field>
+	      <field name="Charset">ucs2</field>
+	      <field name="Id">133</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">8</field>
+	    </row>
+	    <row>
+	      <field name="Collation">ucs2_estonian_ci</field>
+	      <field name="Charset">ucs2</field>
+	      <field name="Id">134</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">8</field>
+	    </row>
+	    <row>
+	      <field name="Collation">ucs2_spanish_ci</field>
+	      <field name="Charset">ucs2</field>
+	      <field name="Id">135</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">8</field>
+	    </row>
+	    <row>
+	      <field name="Collation">ucs2_swedish_ci</field>
+	      <field name="Charset">ucs2</field>
+	      <field name="Id">136</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">8</field>
+	    </row>
+	    <row>
+	      <field name="Collation">ucs2_turkish_ci</field>
+	      <field name="Charset">ucs2</field>
+	      <field name="Id">137</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">8</field>
+	    </row>
+	    <row>
+	      <field name="Collation">ucs2_czech_ci</field>
+	      <field name="Charset">ucs2</field>
+	      <field name="Id">138</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">8</field>
+	    </row>
+	    <row>
+	      <field name="Collation">ucs2_danish_ci</field>
+	      <field name="Charset">ucs2</field>
+	      <field name="Id">139</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">8</field>
+	    </row>
+	    <row>
+	      <field name="Collation">ucs2_lithuanian_ci</field>
+	      <field name="Charset">ucs2</field>
+	      <field name="Id">140</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">8</field>
+	    </row>
+	    <row>
+	      <field name="Collation">ucs2_slovak_ci</field>
+	      <field name="Charset">ucs2</field>
+	      <field name="Id">141</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">8</field>
+	    </row>
+	    <row>
+	      <field name="Collation">ucs2_spanish2_ci</field>
+	      <field name="Charset">ucs2</field>
+	      <field name="Id">142</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">8</field>
+	    </row>
+	    <row>
+	      <field name="Collation">ucs2_roman_ci</field>
+	      <field name="Charset">ucs2</field>
+	      <field name="Id">143</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">8</field>
+	    </row>
+	    <row>
+	      <field name="Collation">ucs2_persian_ci</field>
+	      <field name="Charset">ucs2</field>
+	      <field name="Id">144</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">8</field>
+	    </row>
+	    <row>
+	      <field name="Collation">ucs2_esperanto_ci</field>
+	      <field name="Charset">ucs2</field>
+	      <field name="Id">145</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">8</field>
+	    </row>
+	    <row>
+	      <field name="Collation">ucs2_hungarian_ci</field>
+	      <field name="Charset">ucs2</field>
+	      <field name="Id">146</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">8</field>
+	    </row>
+	    <row>
+	      <field name="Collation">ucs2_sinhala_ci</field>
+	      <field name="Charset">ucs2</field>
+	      <field name="Id">147</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">8</field>
+	    </row>
+	    <row>
+	      <field name="Collation">cp866_general_ci</field>
+	      <field name="Charset">cp866</field>
+	      <field name="Id">36</field>
+	      <field name="Default">Yes</field>
+	      <field name="Compiled"></field>
+	      <field name="Sortlen">0</field>
+	    </row>
+	    <row>
+	      <field name="Collation">cp866_bin</field>
+	      <field name="Charset">cp866</field>
+	      <field name="Id">68</field>
+	      <field name="Default"></field>
+	      <field name="Compiled"></field>
+	      <field name="Sortlen">0</field>
+	    </row>
+	    <row>
+	      <field name="Collation">keybcs2_general_ci</field>
+	      <field name="Charset">keybcs2</field>
+	      <field name="Id">37</field>
+	      <field name="Default">Yes</field>
+	      <field name="Compiled"></field>
+	      <field name="Sortlen">0</field>
+	    </row>
+	    <row>
+	      <field name="Collation">keybcs2_bin</field>
+	      <field name="Charset">keybcs2</field>
+	      <field name="Id">73</field>
+	      <field name="Default"></field>
+	      <field name="Compiled"></field>
+	      <field name="Sortlen">0</field>
+	    </row>
+	    <row>
+	      <field name="Collation">macce_general_ci</field>
+	      <field name="Charset">macce</field>
+	      <field name="Id">38</field>
+	      <field name="Default">Yes</field>
+	      <field name="Compiled"></field>
+	      <field name="Sortlen">0</field>
+	    </row>
+	    <row>
+	      <field name="Collation">macce_bin</field>
+	      <field name="Charset">macce</field>
+	      <field name="Id">43</field>
+	      <field name="Default"></field>
+	      <field name="Compiled"></field>
+	      <field name="Sortlen">0</field>
+	    </row>
+	    <row>
+	      <field name="Collation">macroman_general_ci</field>
+	      <field name="Charset">macroman</field>
+	      <field name="Id">39</field>
+	      <field name="Default">Yes</field>
+	      <field name="Compiled"></field>
+	      <field name="Sortlen">0</field>
+	    </row>
+	    <row>
+	      <field name="Collation">macroman_bin</field>
+	      <field name="Charset">macroman</field>
+	      <field name="Id">53</field>
+	      <field name="Default"></field>
+	      <field name="Compiled"></field>
+	      <field name="Sortlen">0</field>
+	    </row>
+	    <row>
+	      <field name="Collation">cp852_general_ci</field>
+	      <field name="Charset">cp852</field>
+	      <field name="Id">40</field>
+	      <field name="Default">Yes</field>
+	      <field name="Compiled"></field>
+	      <field name="Sortlen">0</field>
+	    </row>
+	    <row>
+	      <field name="Collation">cp852_bin</field>
+	      <field name="Charset">cp852</field>
+	      <field name="Id">81</field>
+	      <field name="Default"></field>
+	      <field name="Compiled"></field>
+	      <field name="Sortlen">0</field>
+	    </row>
+	    <row>
+	      <field name="Collation">latin7_estonian_cs</field>
+	      <field name="Charset">latin7</field>
+	      <field name="Id">20</field>
+	      <field name="Default"></field>
+	      <field name="Compiled"></field>
+	      <field name="Sortlen">0</field>
+	    </row>
+	    <row>
+	      <field name="Collation">latin7_general_ci</field>
+	      <field name="Charset">latin7</field>
+	      <field name="Id">41</field>
+	      <field name="Default">Yes</field>
+	      <field name="Compiled"></field>
+	      <field name="Sortlen">0</field>
+	    </row>
+	    <row>
+	      <field name="Collation">latin7_general_cs</field>
+	      <field name="Charset">latin7</field>
+	      <field name="Id">42</field>
+	      <field name="Default"></field>
+	      <field name="Compiled"></field>
+	      <field name="Sortlen">0</field>
+	    </row>
+	    <row>
+	      <field name="Collation">latin7_bin</field>
+	      <field name="Charset">latin7</field>
+	      <field name="Id">79</field>
+	      <field name="Default"></field>
+	      <field name="Compiled"></field>
+	      <field name="Sortlen">0</field>
+	    </row>
+	    <row>
+	      <field name="Collation">utf8_general_ci</field>
+	      <field name="Charset">utf8</field>
+	      <field name="Id">45</field>
+	      <field name="Default">Yes</field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">1</field>
+	    </row>
+	    <row>
+	      <field name="Collation">utf8_bin</field>
+	      <field name="Charset">utf8</field>
+	      <field name="Id">46</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">1</field>
+	    </row>
+	    <row>
+	      <field name="Collation">utf8_unicode_ci</field>
+	      <field name="Charset">utf8</field>
+	      <field name="Id">224</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">8</field>
+	    </row>
+	    <row>
+	      <field name="Collation">utf8_icelandic_ci</field>
+	      <field name="Charset">utf8</field>
+	      <field name="Id">225</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">8</field>
+	    </row>
+	    <row>
+	      <field name="Collation">utf8_latvian_ci</field>
+	      <field name="Charset">utf8</field>
+	      <field name="Id">226</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">8</field>
+	    </row>
+	    <row>
+	      <field name="Collation">utf8_romanian_ci</field>
+	      <field name="Charset">utf8</field>
+	      <field name="Id">227</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">8</field>
+	    </row>
+	    <row>
+	      <field name="Collation">utf8_slovenian_ci</field>
+	      <field name="Charset">utf8</field>
+	      <field name="Id">228</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">8</field>
+	    </row>
+	    <row>
+	      <field name="Collation">utf8_polish_ci</field>
+	      <field name="Charset">utf8</field>
+	      <field name="Id">229</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">8</field>
+	    </row>
+	    <row>
+	      <field name="Collation">utf8_estonian_ci</field>
+	      <field name="Charset">utf8</field>
+	      <field name="Id">230</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">8</field>
+	    </row>
+	    <row>
+	      <field name="Collation">utf8_spanish_ci</field>
+	      <field name="Charset">utf8</field>
+	      <field name="Id">231</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">8</field>
+	    </row>
+	    <row>
+	      <field name="Collation">utf8_swedish_ci</field>
+	      <field name="Charset">utf8</field>
+	      <field name="Id">232</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">8</field>
+	    </row>
+	    <row>
+	      <field name="Collation">utf8_turkish_ci</field>
+	      <field name="Charset">utf8</field>
+	      <field name="Id">233</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">8</field>
+	    </row>
+	    <row>
+	      <field name="Collation">utf8_czech_ci</field>
+	      <field name="Charset">utf8</field>
+	      <field name="Id">234</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">8</field>
+	    </row>
+	    <row>
+	      <field name="Collation">utf8_danish_ci</field>
+	      <field name="Charset">utf8</field>
+	      <field name="Id">235</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">8</field>
+	    </row>
+	    <row>
+	      <field name="Collation">utf8_lithuanian_ci</field>
+	      <field name="Charset">utf8</field>
+	      <field name="Id">236</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">8</field>
+	    </row>
+	    <row>
+	      <field name="Collation">utf8_slovak_ci</field>
+	      <field name="Charset">utf8</field>
+	      <field name="Id">237</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">8</field>
+	    </row>
+	    <row>
+	      <field name="Collation">utf8_spanish2_ci</field>
+	      <field name="Charset">utf8</field>
+	      <field name="Id">238</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">8</field>
+	    </row>
+	    <row>
+	      <field name="Collation">utf8_roman_ci</field>
+	      <field name="Charset">utf8</field>
+	      <field name="Id">239</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">8</field>
+	    </row>
+	    <row>
+	      <field name="Collation">utf8_persian_ci</field>
+	      <field name="Charset">utf8</field>
+	      <field name="Id">240</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">8</field>
+	    </row>
+	    <row>
+	      <field name="Collation">utf8_esperanto_ci</field>
+	      <field name="Charset">utf8</field>
+	      <field name="Id">241</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">8</field>
+	    </row>
+	    <row>
+	      <field name="Collation">utf8_hungarian_ci</field>
+	      <field name="Charset">utf8</field>
+	      <field name="Id">242</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">8</field>
+	    </row>
+	    <row>
+	      <field name="Collation">utf8_sinhala_ci</field>
+	      <field name="Charset">utf8</field>
+	      <field name="Id">243</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">8</field>
+	    </row>
+	    <row>
+	      <field name="Collation">cp1251_bulgarian_ci</field>
+	      <field name="Charset">cp1251</field>
+	      <field name="Id">14</field>
+	      <field name="Default"></field>
+	      <field name="Compiled"></field>
+	      <field name="Sortlen">0</field>
+	    </row>
+	    <row>
+	      <field name="Collation">cp1251_ukrainian_ci</field>
+	      <field name="Charset">cp1251</field>
+	      <field name="Id">23</field>
+	      <field name="Default"></field>
+	      <field name="Compiled"></field>
+	      <field name="Sortlen">0</field>
+	    </row>
+	    <row>
+	      <field name="Collation">cp1251_bin</field>
+	      <field name="Charset">cp1251</field>
+	      <field name="Id">50</field>
+	      <field name="Default"></field>
+	      <field name="Compiled"></field>
+	      <field name="Sortlen">0</field>
+	    </row>
+	    <row>
+	      <field name="Collation">cp1251_general_ci</field>
+	      <field name="Charset">cp1251</field>
+	      <field name="Id">51</field>
+	      <field name="Default">Yes</field>
+	      <field name="Compiled"></field>
+	      <field name="Sortlen">0</field>
+	    </row>
+	    <row>
+	      <field name="Collation">cp1251_general_cs</field>
+	      <field name="Charset">cp1251</field>
+	      <field name="Id">52</field>
+	      <field name="Default"></field>
+	      <field name="Compiled"></field>
+	      <field name="Sortlen">0</field>
+	    </row>
+	    <row>
+	      <field name="Collation">utf16_general_ci</field>
+	      <field name="Charset">utf16</field>
+	      <field name="Id">54</field>
+	      <field name="Default">Yes</field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">1</field>
+	    </row>
+	    <row>
+	      <field name="Collation">utf16_bin</field>
+	      <field name="Charset">utf16</field>
+	      <field name="Id">55</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">1</field>
+	    </row>
+	    <row>
+	      <field name="Collation">utf16_unicode_ci</field>
+	      <field name="Charset">utf16</field>
+	      <field name="Id">101</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">8</field>
+	    </row>
+	    <row>
+	      <field name="Collation">utf16_icelandic_ci</field>
+	      <field name="Charset">utf16</field>
+	      <field name="Id">102</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">8</field>
+	    </row>
+	    <row>
+	      <field name="Collation">utf16_latvian_ci</field>
+	      <field name="Charset">utf16</field>
+	      <field name="Id">103</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">8</field>
+	    </row>
+	    <row>
+	      <field name="Collation">utf16_romanian_ci</field>
+	      <field name="Charset">utf16</field>
+	      <field name="Id">104</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">8</field>
+	    </row>
+	    <row>
+	      <field name="Collation">utf16_slovenian_ci</field>
+	      <field name="Charset">utf16</field>
+	      <field name="Id">105</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">8</field>
+	    </row>
+	    <row>
+	      <field name="Collation">utf16_polish_ci</field>
+	      <field name="Charset">utf16</field>
+	      <field name="Id">106</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">8</field>
+	    </row>
+	    <row>
+	      <field name="Collation">utf16_estonian_ci</field>
+	      <field name="Charset">utf16</field>
+	      <field name="Id">107</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">8</field>
+	    </row>
+	    <row>
+	      <field name="Collation">utf16_spanish_ci</field>
+	      <field name="Charset">utf16</field>
+	      <field name="Id">108</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">8</field>
+	    </row>
+	    <row>
+	      <field name="Collation">utf16_swedish_ci</field>
+	      <field name="Charset">utf16</field>
+	      <field name="Id">109</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">8</field>
+	    </row>
+	    <row>
+	      <field name="Collation">utf16_turkish_ci</field>
+	      <field name="Charset">utf16</field>
+	      <field name="Id">110</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">8</field>
+	    </row>
+	    <row>
+	      <field name="Collation">utf16_czech_ci</field>
+	      <field name="Charset">utf16</field>
+	      <field name="Id">111</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">8</field>
+	    </row>
+	    <row>
+	      <field name="Collation">utf16_danish_ci</field>
+	      <field name="Charset">utf16</field>
+	      <field name="Id">112</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">8</field>
+	    </row>
+	    <row>
+	      <field name="Collation">utf16_lithuanian_ci</field>
+	      <field name="Charset">utf16</field>
+	      <field name="Id">113</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">8</field>
+	    </row>
+	    <row>
+	      <field name="Collation">utf16_slovak_ci</field>
+	      <field name="Charset">utf16</field>
+	      <field name="Id">114</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">8</field>
+	    </row>
+	    <row>
+	      <field name="Collation">utf16_spanish2_ci</field>
+	      <field name="Charset">utf16</field>
+	      <field name="Id">115</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">8</field>
+	    </row>
+	    <row>
+	      <field name="Collation">utf16_roman_ci</field>
+	      <field name="Charset">utf16</field>
+	      <field name="Id">116</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">8</field>
+	    </row>
+	    <row>
+	      <field name="Collation">utf16_persian_ci</field>
+	      <field name="Charset">utf16</field>
+	      <field name="Id">117</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">8</field>
+	    </row>
+	    <row>
+	      <field name="Collation">utf16_esperanto_ci</field>
+	      <field name="Charset">utf16</field>
+	      <field name="Id">118</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">8</field>
+	    </row>
+	    <row>
+	      <field name="Collation">utf16_hungarian_ci</field>
+	      <field name="Charset">utf16</field>
+	      <field name="Id">119</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">8</field>
+	    </row>
+	    <row>
+	      <field name="Collation">utf16_sinhala_ci</field>
+	      <field name="Charset">utf16</field>
+	      <field name="Id">120</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">8</field>
+	    </row>
+	    <row>
+	      <field name="Collation">cp1256_general_ci</field>
+	      <field name="Charset">cp1256</field>
+	      <field name="Id">57</field>
+	      <field name="Default">Yes</field>
+	      <field name="Compiled"></field>
+	      <field name="Sortlen">0</field>
+	    </row>
+	    <row>
+	      <field name="Collation">cp1256_bin</field>
+	      <field name="Charset">cp1256</field>
+	      <field name="Id">67</field>
+	      <field name="Default"></field>
+	      <field name="Compiled"></field>
+	      <field name="Sortlen">0</field>
+	    </row>
+	    <row>
+	      <field name="Collation">cp1257_lithuanian_ci</field>
+	      <field name="Charset">cp1257</field>
+	      <field name="Id">29</field>
+	      <field name="Default"></field>
+	      <field name="Compiled"></field>
+	      <field name="Sortlen">0</field>
+	    </row>
+	    <row>
+	      <field name="Collation">cp1257_bin</field>
+	      <field name="Charset">cp1257</field>
+	      <field name="Id">58</field>
+	      <field name="Default"></field>
+	      <field name="Compiled"></field>
+	      <field name="Sortlen">0</field>
+	    </row>
+	    <row>
+	      <field name="Collation">cp1257_general_ci</field>
+	      <field name="Charset">cp1257</field>
+	      <field name="Id">59</field>
+	      <field name="Default">Yes</field>
+	      <field name="Compiled"></field>
+	      <field name="Sortlen">0</field>
+	    </row>
+	    <row>
+	      <field name="Collation">utf32_general_ci</field>
+	      <field name="Charset">utf32</field>
+	      <field name="Id">60</field>
+	      <field name="Default">Yes</field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">1</field>
+	    </row>
+	    <row>
+	      <field name="Collation">utf32_bin</field>
+	      <field name="Charset">utf32</field>
+	      <field name="Id">61</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">1</field>
+	    </row>
+	    <row>
+	      <field name="Collation">utf32_unicode_ci</field>
+	      <field name="Charset">utf32</field>
+	      <field name="Id">160</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">8</field>
+	    </row>
+	    <row>
+	      <field name="Collation">utf32_icelandic_ci</field>
+	      <field name="Charset">utf32</field>
+	      <field name="Id">161</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">8</field>
+	    </row>
+	    <row>
+	      <field name="Collation">utf32_latvian_ci</field>
+	      <field name="Charset">utf32</field>
+	      <field name="Id">162</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">8</field>
+	    </row>
+	    <row>
+	      <field name="Collation">utf32_romanian_ci</field>
+	      <field name="Charset">utf32</field>
+	      <field name="Id">163</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">8</field>
+	    </row>
+	    <row>
+	      <field name="Collation">utf32_slovenian_ci</field>
+	      <field name="Charset">utf32</field>
+	      <field name="Id">164</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">8</field>
+	    </row>
+	    <row>
+	      <field name="Collation">utf32_polish_ci</field>
+	      <field name="Charset">utf32</field>
+	      <field name="Id">165</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">8</field>
+	    </row>
+	    <row>
+	      <field name="Collation">utf32_estonian_ci</field>
+	      <field name="Charset">utf32</field>
+	      <field name="Id">166</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">8</field>
+	    </row>
+	    <row>
+	      <field name="Collation">utf32_spanish_ci</field>
+	      <field name="Charset">utf32</field>
+	      <field name="Id">167</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">8</field>
+	    </row>
+	    <row>
+	      <field name="Collation">utf32_swedish_ci</field>
+	      <field name="Charset">utf32</field>
+	      <field name="Id">168</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">8</field>
+	    </row>
+	    <row>
+	      <field name="Collation">utf32_turkish_ci</field>
+	      <field name="Charset">utf32</field>
+	      <field name="Id">169</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">8</field>
+	    </row>
+	    <row>
+	      <field name="Collation">utf32_czech_ci</field>
+	      <field name="Charset">utf32</field>
+	      <field name="Id">170</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">8</field>
+	    </row>
+	    <row>
+	      <field name="Collation">utf32_danish_ci</field>
+	      <field name="Charset">utf32</field>
+	      <field name="Id">171</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">8</field>
+	    </row>
+	    <row>
+	      <field name="Collation">utf32_lithuanian_ci</field>
+	      <field name="Charset">utf32</field>
+	      <field name="Id">172</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">8</field>
+	    </row>
+	    <row>
+	      <field name="Collation">utf32_slovak_ci</field>
+	      <field name="Charset">utf32</field>
+	      <field name="Id">173</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">8</field>
+	    </row>
+	    <row>
+	      <field name="Collation">utf32_spanish2_ci</field>
+	      <field name="Charset">utf32</field>
+	      <field name="Id">174</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">8</field>
+	    </row>
+	    <row>
+	      <field name="Collation">utf32_roman_ci</field>
+	      <field name="Charset">utf32</field>
+	      <field name="Id">175</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">8</field>
+	    </row>
+	    <row>
+	      <field name="Collation">utf32_persian_ci</field>
+	      <field name="Charset">utf32</field>
+	      <field name="Id">176</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">8</field>
+	    </row>
+	    <row>
+	      <field name="Collation">utf32_esperanto_ci</field>
+	      <field name="Charset">utf32</field>
+	      <field name="Id">177</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">8</field>
+	    </row>
+	    <row>
+	      <field name="Collation">utf32_hungarian_ci</field>
+	      <field name="Charset">utf32</field>
+	      <field name="Id">178</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">8</field>
+	    </row>
+	    <row>
+	      <field name="Collation">utf32_sinhala_ci</field>
+	      <field name="Charset">utf32</field>
+	      <field name="Id">179</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">8</field>
+	    </row>
+	    <row>
+	      <field name="Collation">binary</field>
+	      <field name="Charset">binary</field>
+	      <field name="Id">63</field>
+	      <field name="Default">Yes</field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">1</field>
+	    </row>
+	    <row>
+	      <field name="Collation">geostd8_general_ci</field>
+	      <field name="Charset">geostd8</field>
+	      <field name="Id">92</field>
+	      <field name="Default">Yes</field>
+	      <field name="Compiled"></field>
+	      <field name="Sortlen">0</field>
+	    </row>
+	    <row>
+	      <field name="Collation">geostd8_bin</field>
+	      <field name="Charset">geostd8</field>
+	      <field name="Id">93</field>
+	      <field name="Default"></field>
+	      <field name="Compiled"></field>
+	      <field name="Sortlen">0</field>
+	    </row>
+	    <row>
+	      <field name="Collation">cp932_japanese_ci</field>
+	      <field name="Charset">cp932</field>
+	      <field name="Id">95</field>
+	      <field name="Default">Yes</field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">1</field>
+	    </row>
+	    <row>
+	      <field name="Collation">cp932_bin</field>
+	      <field name="Charset">cp932</field>
+	      <field name="Id">96</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">1</field>
+	    </row>
+	    <row>
+	      <field name="Collation">eucjpms_japanese_ci</field>
+	      <field name="Charset">eucjpms</field>
+	      <field name="Id">97</field>
+	      <field name="Default">Yes</field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">1</field>
+	    </row>
+	    <row>
+	      <field name="Collation">eucjpms_bin</field>
+	      <field name="Charset">eucjpms</field>
+	      <field name="Id">98</field>
+	      <field name="Default"></field>
+	      <field name="Compiled">Yes</field>
+	      <field name="Sortlen">1</field>
+	    </row>
+	</table>
+</amoeba:table>
