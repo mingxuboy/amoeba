@@ -20,13 +20,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.meidusa.amoeba.mysql.handler.session.ConnectionStatuts;
+import com.meidusa.amoeba.mysql.handler.session.SessionStatus;
 import com.meidusa.amoeba.mysql.net.CommandInfo;
 import com.meidusa.amoeba.mysql.net.MysqlClientConnection;
 import com.meidusa.amoeba.mysql.net.MysqlServerConnection;
 import com.meidusa.amoeba.mysql.net.packet.CommandPacket;
 import com.meidusa.amoeba.mysql.net.packet.MysqlPacketBuffer;
 import com.meidusa.amoeba.mysql.net.packet.OKforPreparedStatementPacket;
-import com.meidusa.amoeba.mysql.net.packet.PreparedStatmentClosePacket;
 import com.meidusa.amoeba.mysql.net.packet.QueryCommandPacket;
 import com.meidusa.amoeba.net.Connection;
 import com.meidusa.amoeba.net.poolable.ObjectPool;
@@ -127,7 +128,7 @@ public class PreparedStatmentMessageHandler extends QueryCommandMessageHandler {
 
     protected PreparedStatmentInfo preparedStatmentInfo = null;
     /** 当前的请求数据包 */
-    private Map<Connection, Long>  statmentIdMap        = Collections.synchronizedMap(new HashMap<Connection, Long>());
+    protected Map<Connection, Long>  statmentIdMap        = Collections.synchronizedMap(new HashMap<Connection, Long>());
 	private boolean isExecute;
 
     public PreparedStatmentMessageHandler(MysqlClientConnection source, PreparedStatmentInfo preparedStatmentInfo,Statement statment,
@@ -138,15 +139,6 @@ public class PreparedStatmentMessageHandler extends QueryCommandMessageHandler {
     }
 
     protected void afterCommandCompleted(CommandInfo currentCommand) {
-        if (commandType == QueryCommandPacket.COM_STMT_PREPARE) {
-            Collection<ConnectionStatuts> collection = this.commandQueue.connStatusMap.values();
-            for (ConnectionStatuts status : collection) {
-                byte[] buffer = status.buffers.get(0);
-                OKforPreparedStatementPacket ok = new OKforPreparedStatementPacket();
-                ok.init(buffer, source);
-                statmentIdMap.put(status.conn, ok.statementHandlerId);
-            }
-        }
         super.afterCommandCompleted(currentCommand);
     }
 
@@ -186,16 +178,6 @@ public class PreparedStatmentMessageHandler extends QueryCommandMessageHandler {
     	if(message != null){
 	        if (toConn == source) {
 	            if (commandType == QueryCommandPacket.COM_STMT_PREPARE) {
-	                /*
-	                 * if(MysqlPacketBuffer.isOkPacket(message)){ //替换statmentId 为 proxy statment id 发送到mysql客户端
-	                 * OKforPreparedStatementPacket ok = new OKforPreparedStatementPacket(); ok.init(message,toConn);
-	                 * ok.statementHandlerId = preparedStatmentInfo.getStatmentId(); preparedStatmentInfo.setOkPrepared(ok);
-	                 * message = ok.toByteBuffer(toConn).array(); }
-	                 */
-	            	//source.get
-	            	/*if(!isExecute){
-	            		preparedStatmentBytes.add(message);
-	            	}*/
 	            	if(isExecute){
 	            		return;
 	            	}else{
@@ -230,10 +212,6 @@ public class PreparedStatmentMessageHandler extends QueryCommandMessageHandler {
             statmentIdMap.put(status.conn, ok.statementHandlerId);
         }
         //TODO close STMT
-        PreparedStatmentClosePacket preparedCloseCommandPacket = new PreparedStatmentClosePacket();
-        preparedCloseCommandPacket.command = CommandPacket.COM_STMT_CLOSE;
-        preparedCloseCommandPacket.statementId = statmentIdMap.get(conn);
-        conn.postMessage(preparedCloseCommandPacket.toByteBuffer(conn));
         /*final byte[] buffer = preparedCloseCommandPacket.toByteBuffer(source).array();
         CommandInfo info = new CommandInfo();
         info.setBuffer(buffer);
@@ -258,9 +236,5 @@ public class PreparedStatmentMessageHandler extends QueryCommandMessageHandler {
 
     public List<byte[]> getPreparedStatmentBytes(){
     	return this.preparedStatmentBytes;
-    }
-    
-    public String toString(){
-    	return ""+super.toString()+", sql="+preparedStatmentInfo.getPreparedStatment();
     }
 }

@@ -20,8 +20,8 @@ public class PerformaceTest {
 	 * @throws Exception 
 	 */
 	public static void main(String[] args) throws Exception {
-		int threadCount = 100;
-		int totleQuery = 25000;
+		int threadCount = 10;
+		int totleQuery = 100000;
 		int count = 10;
 		if(args.length>=2){
 			threadCount = Integer.parseInt(args[0]);
@@ -34,7 +34,7 @@ public class PerformaceTest {
 		final String port = System.getProperty("port","8066");
 		final String password = System.getProperty("password","sdfriend");
 		final String user = System.getProperty("user","sdfriend");
-		String sql = System.getProperty("sql","SELECT ID, UUID, SDID, APP_ID, CATEGORY_ID, CREATE_TIME, CONTENT,    SOURCE_SDID,  SOURCE_UUID,  DEL_FLAG   FROM SD_FEED.FRIEND_FEED   WHERE  DEL_FLAG = 0 and CATEGORY_ID = 1001001      and SOURCE_SDID = ?      and APP_ID = ?    ORDER BY CREATE_TIME DESC   LIMIT 1");
+		String sql = System.getProperty("sql","SELECT ID, UUID, SDID, APP_ID, CATEGORY_ID, CREATE_TIME, CONTENT,    SOURCE_SDID,  SOURCE_UUID,  DEL_FLAG   FROM SD_FEED.FRIEND_FEED     LIMIT 1");
 		if(sql.startsWith("\"")){
 			sql = sql.substring(1, sql.length() -1);
 		}
@@ -69,15 +69,15 @@ public class PerformaceTest {
 					ResultSet result = null;
 					try{
 						if(conn == null){
-							conn = DriverManager.getConnection("jdbc:mysql://"+ip+":"+port+"/test",user,password);
+							conn = DriverManager.getConnection("jdbc:mysql://"+ip+":"+port+"/test?useUnicode=true&characterEncoding=utf-8&useServerPrepStmts=true&autoReconnect=true&socketTimeout=100000000&&zeroDateTimeBehavior=convertToNull",user,password);
 							threadLocal.set(conn);
 						}
 						for(int i=0;i<runcount;i++){
 							try{
 								statment = conn.prepareStatement(sqlext);
-								//statment.setLong(1, 15859043585L);
-								statment.setLong(1, 1249305900L);
-								statment.setInt(2, 6);
+								//statment.setLong(1, 1109969745L);
+								//statment.setLong(2, 1108391525L);
+								//statment.setInt(3, 6);
 								result = statment.executeQuery();
 							}finally{
 								if(result != null){

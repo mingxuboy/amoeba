@@ -15,6 +15,8 @@ package com.meidusa.amoeba.mysql.handler;
 
 import org.apache.log4j.Logger;
 
+import com.meidusa.amoeba.mysql.handler.session.ConnectionStatuts;
+import com.meidusa.amoeba.mysql.handler.session.SessionStatus;
 import com.meidusa.amoeba.mysql.net.MysqlClientConnection;
 import com.meidusa.amoeba.mysql.net.packet.MysqlPacketBuffer;
 import com.meidusa.amoeba.mysql.net.packet.QueryCommandPacket;
@@ -31,7 +33,7 @@ public class QueryCommandMessageHandler extends CommandMessageHandler {
 
     private static Logger logger = Logger.getLogger(QueryCommandMessageHandler.class);
 
-    static class QueryConnectionStatus extends CommandMessageHandler.ConnectionStatuts {
+    static class QueryConnectionStatus extends ConnectionStatuts {
 
         public QueryConnectionStatus(Connection conn){
             super(conn);
