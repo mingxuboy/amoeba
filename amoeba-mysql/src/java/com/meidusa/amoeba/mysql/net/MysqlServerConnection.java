@@ -400,7 +400,7 @@ public class MysqlServerConnection extends MysqlConnection implements MySqlPacke
 					 */
 					Sessionable session = (Sessionable)_handler;
 					if(!session.isEnded()){
-						session.endSession();
+						session.endSession(true);
 					}
 				}
 			}

@@ -221,6 +221,9 @@ public class ConnectionManager extends LoopingThread implements Reporter, Initia
      */
     void closeConnection(Connection conn, Exception exception) {
         if (!conn.isClosed()) {
+        	if(exception != null){
+        		logger.warn("post close Connection="+conn,exception);
+        	}
             _deathq.append(new Tuple<Connection, Exception>(conn, exception));
         }
     }

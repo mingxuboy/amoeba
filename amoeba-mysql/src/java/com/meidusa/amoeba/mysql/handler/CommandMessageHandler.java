@@ -22,11 +22,13 @@ import java.util.Set;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
+import com.meidusa.amoeba.mysql.handler.session.CommandStatus;
+import com.meidusa.amoeba.mysql.handler.session.ConnectionStatuts;
+import com.meidusa.amoeba.mysql.handler.session.SessionStatus;
 import com.meidusa.amoeba.mysql.net.CommandInfo;
 import com.meidusa.amoeba.mysql.net.MysqlClientConnection;
 import com.meidusa.amoeba.mysql.net.MysqlConnection;
 import com.meidusa.amoeba.mysql.net.MysqlServerConnection;
-import com.meidusa.amoeba.mysql.net.packet.EOFPacket;
 import com.meidusa.amoeba.mysql.net.packet.ErrorPacket;
 import com.meidusa.amoeba.mysql.net.packet.MysqlPacketBuffer;
 import com.meidusa.amoeba.mysql.net.packet.OkPacket;
@@ -35,11 +37,9 @@ import com.meidusa.amoeba.net.Connection;
 import com.meidusa.amoeba.net.MessageHandler;
 import com.meidusa.amoeba.net.Sessionable;
 import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
-import com.meidusa.amoeba.net.packet.Packet;
 import com.meidusa.amoeba.net.packet.PacketBuffer;
 import com.meidusa.amoeba.net.poolable.ObjectPool;
 import com.meidusa.amoeba.net.poolable.PoolableObject;
-import com.meidusa.amoeba.parser.statement.InsertStatement;
 import com.meidusa.amoeba.parser.statement.Statement;
 import com.meidusa.amoeba.util.Reporter;
 import com.meidusa.amoeba.util.StringUtil;
@@ -50,221 +50,7 @@ import com.meidusa.amoeba.util.StringUtil;
  *
  */
 public abstract class CommandMessageHandler implements MessageHandler,Sessionable,Reporter.SubReporter {
-	private static Logger logger = Logger.getLogger(CommandMessageHandler.class); 
-	
-	/**
-	 * 表示服务器返回的数据包所表示当前会话状态
-	 * @author <a href=mailto:piratebase@sina.com>Struct chen</a>
-	 *
-	 */
-	static class SessionStatus{
-		public static final int QUERY = 1;
-		public static final int RESULT_HEAD  = 2;
-		public static final int EOF_FIELDS  = 4;
-		public static final int EOF_ROWS  = 8;
-		public static final int OK  = 16;
-		public static final int ERROR  = 32;
-		public static final int COMPLETED  = 64;
-	}
-	
-	static enum CommandStatus{
-		ConnectionNotComplete,ConnectionCompleted,AllCompleted
-	}
-	
-	/**
-	 * 描述服务端连接的状态。包括当前命令的状态,当前连接的数据包
-	 * @author <a href=mailto:piratebase@sina.com>Struct chen</a>
-	 *
-	 */
-	static abstract class ConnectionStatuts{
-		protected Connection conn;
-		protected ErrorPacket errorPacket = null;
-		public ConnectionStatuts(Connection conn){
-			this.conn = conn;
-		}
-		int statusCode;
-		int packetIndex;
-		List<byte[]> buffers = new ArrayList<byte[]>();
-		protected  byte commandType;
-		
-		public void clearBuffer(){
-			if(buffers != null){
-				buffers.clear();
-			}
-		}
-		
-		public void setCommandType(byte commandType){
-			this.commandType = commandType;
-			statusCode = 0;
-			packetIndex = 0; 
-		}
-		/**
-		 * 判断从服务器端返回得数据包是否表示当前请求的结束。
-		 * @param buffer
-		 * @return
-		 */
-		public boolean isCompleted(byte[] buffer) {
-			if(this.commandType == QueryCommandPacket.COM_INIT_DB){
-				boolean isCompleted = false; 
-				if(packetIndex == 0 && MysqlPacketBuffer.isErrorPacket(buffer)){
-					statusCode |= SessionStatus.ERROR;
-					statusCode |= SessionStatus.COMPLETED;
-					setErrorPacket(buffer);
-					isCompleted = true;
-				}else if(packetIndex == 0 && MysqlPacketBuffer.isOkPacket(buffer)){
-					statusCode |= SessionStatus.OK;
-					statusCode |= SessionStatus.COMPLETED;
-					isCompleted = true;
-				}
-				return isCompleted;
-			}else{
-				return false;
-			}
-		}
-		protected void setErrorPacket(byte[] buffer){
-			errorPacket = new ErrorPacket();
-			errorPacket.init(buffer, conn);
-			errorPacket.serverErrorMessage = errorPacket.serverErrorMessage +" from mysqlServer:"+conn.getSocketId();
-		}
-	}
-	
-	protected static class CommandQueue{
-		protected List<CommandInfo> sessionInitQueryQueue; //所有的从客户端发送过来的 command 队列
-		protected CommandInfo currentCommand;//当前的query
-		protected Map<MysqlServerConnection,ConnectionStatuts> connStatusMap = new HashMap<MysqlServerConnection,ConnectionStatuts>();
-		private boolean mainCommandExecuted;
-		private MysqlClientConnection source;
-		private Statement statment;
-		public CommandQueue(MysqlClientConnection source,Statement statment){
-			this.source = source;
-			this.statment = statment;
-		}
-		public boolean isMultiple(){
-			return connStatusMap.size()>1;
-		}
-		
-		public void clearAllBuffer(){
-			Collection<ConnectionStatuts> collection = connStatusMap.values();
-			for(ConnectionStatuts status : collection){
-				status.clearBuffer();
-			}
-		}
-		
-		/**
-		 * 尝试下一个命令，如果返回false，表示队列中没有命令了。
-		 * 
-		 * @return
-		 */
-		private boolean tryNextCommandTuple(){
-			if(sessionInitQueryQueue == null){
-				return false;
-			}else{
-				if(sessionInitQueryQueue.size()>0){
-					currentCommand = sessionInitQueryQueue.get(0);
-					if(logger.isDebugEnabled()){
-						QueryCommandPacket command = new QueryCommandPacket();
-						command.init(currentCommand.getBuffer(),source);
-						logger.debug(command);
-					}
-					return true;
-				}
-				return false;
-			}
-		}
-		
-		/**
-		 * 判断返回的数据是否是当前命令的结束包。
-		 * 当前全部连接都全部返回以后则表示当前命令完全结束。
-		 * @param conn
-		 * @param buffer
-		 * @return
-		 */
-		protected  CommandStatus checkResponseCompleted(Connection conn,byte[] buffer){
-			boolean isCompleted = false;
-			ConnectionStatuts connStatus = connStatusMap.get(conn);
-			if(connStatus == null){
-				logger.error("connection Status not Found, byffer="+StringUtil.dumpAsHex(buffer, buffer.length));
-			}
-			connStatus.buffers.add(buffer);
-			isCompleted = connStatus.isCompleted(buffer);
-			connStatus.packetIndex ++;
-			/**
-			 * 如果是多个连接的，需要将数据缓存起来，等待命令全部完成以后，将数据进行组装，然后发送到客户端
-			 * {@link #CommandMessageHandler.mergeMessageToClient}
-			 */
-			
-			if(isCompleted){
-				//set last insert id to client connection;
-				if(conn != source){
-					
-					if(MysqlPacketBuffer.isOkPacket(buffer)){
-						if(statment instanceof InsertStatement && currentCommand.isMain()){
-							OkPacket packet = new OkPacket();
-							packet.init(buffer,conn);
-							if(packet.insertId>0){
-								source.setLastInsertId(packet.insertId);
-								if(logger.isDebugEnabled()){
-									logger.debug("sql="+statment.getSql()+" ,laster insert id="+packet.insertId);
-								}
-							}
-						}
-					}
-				}
-				if(currentCommand.getCompletedCount().incrementAndGet() == connStatusMap.size()){
-					if(logger.isDebugEnabled()){
-						Packet packet = null;
-						if(MysqlPacketBuffer.isErrorPacket(buffer)){
-							packet = new ErrorPacket();
-						}else if(MysqlPacketBuffer.isEofPacket(buffer)){
-							packet = new EOFPacket();
-						}else if(MysqlPacketBuffer.isOkPacket(buffer)){
-							packet = new OkPacket();
-						}
-						packet.init(buffer,conn);
-						logger.debug("returned Packet:"+packet);
-					}
-					return CommandStatus.AllCompleted;
-					
-				}else{
-					return CommandStatus.ConnectionCompleted;
-				}
-			}else{
-				return CommandStatus.ConnectionNotComplete;
-			}
-		}
-		
-		/**
-		 * 是否append 成功，如果成功则表示以前曾经堆积过，需要队列来保证发送命令的循序。
-		 * 如果队列中没有堆积的命令，则返回false.
-		 * 否则返回true， 则表示可直接发送命令
-		 * @param commandInfo
-		 * @param force 强制append 命令，返回为true
-		 * @return
-		 */
-		public synchronized  boolean appendCommand(CommandInfo commandInfo,boolean force){
-			if(force){
-				if(sessionInitQueryQueue == null){
-					sessionInitQueryQueue = Collections.synchronizedList(new ArrayList<CommandInfo>());
-				}
-				if(!sessionInitQueryQueue.contains(commandInfo)){
-					sessionInitQueryQueue.add(commandInfo);
-				}
-				return true;
-			}else{
-				if(sessionInitQueryQueue == null){
-					return false;
-				}else{
-					if(sessionInitQueryQueue.size() ==0){
-						return false;
-					}
-					if(!sessionInitQueryQueue.contains(commandInfo)){
-						sessionInitQueryQueue.add(commandInfo);
-					}
-					return true;
-				}
-			}
-		}
-	}
+	static Logger logger = Logger.getLogger(CommandMessageHandler.class); 
 	
 	protected MysqlClientConnection source;
 	private boolean completed;
@@ -273,6 +59,7 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 	private long endTime;
 	private boolean ended = false;
 	protected CommandQueue commandQueue;
+	private boolean forceEnded =  false; 
 	private ObjectPool[] pools;
 	private CommandInfo info = new CommandInfo();
 	protected byte commandType;
@@ -283,8 +70,6 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 	private ErrorPacket errorPacket;
 	protected Statement statment;
 	public CommandMessageHandler(final MysqlClientConnection source,byte[] query,Statement statment, ObjectPool[] pools,long timeout){
-		handlerMap.put(source, source.getMessageHandler());
-		source.setMessageHandler(this);
 		commandQueue = new CommandQueue(source,statment);
 		QueryCommandPacket command = new QueryCommandPacket();
 		command.init(query,source);
@@ -385,7 +170,6 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 				});
 				commandQueue.appendCommand(info,true);
 			}
-			
 		}
 	}
 	protected void afterMainCommand(MysqlServerConnection conn){
@@ -408,29 +192,28 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 			}
 			
 		}else{
-			ConnectionStatuts fromConnStatus = commandQueue.connStatusMap.get(fromConn);
-			synchronized (fromConnStatus) {
 			while((message = fromConn.getInQueue().getNonBlocking()) != null){
 				//判断命令是否完成了
 				CommandStatus commStatus = commandQueue.checkResponseCompleted(fromConn, message);
 				
 				if(CommandStatus.AllCompleted == commStatus || CommandStatus.ConnectionCompleted == commStatus){
+					
+					//记录 prepared statement ID 或者 close statement
+					afterMainCommand((MysqlServerConnection)fromConn);
+					
 					if(commandQueue.currentCommand.isMain() || this.ended){
-						afterMainCommand((MysqlServerConnection)fromConn);
+						//mysqlServer connection return to pool
 						releaseConnection(fromConn);
 					}
-					
 					if(this.ended){
 						return;
 					}
 				}
 				
 				if(CommandStatus.AllCompleted == commStatus){
+					ConnectionStatuts fromConnStatus = commandQueue.connStatusMap.get(fromConn);
 					try{
-						if(commandQueue.currentCommand.isMain()){
-							
-						}
-	
+						
 						/**
 						 * 如果是客户端请求的命令则:
 						 * 1、请求是多台server的，需要进行合并数据
@@ -439,12 +222,13 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 						
 						if(commandQueue.currentCommand.isMain()){
 							commandQueue.mainCommandExecuted = true;
-							releaseConnection(source);
 							if(commandQueue.isMultiple()){
-								List<byte[]> list = this.mergeMessages();
-								if(list != null){
-									for(byte[] buffer : list){
-										dispatchMessageFrom(fromConn,buffer);
+								if(fromConnStatus.isMerged){
+									List<byte[]> list = this.mergeMessages();
+									if(list != null){
+										for(byte[] buffer : list){
+											dispatchMessageFrom(fromConn,buffer);
+										}
 									}
 								}
 							}else{
@@ -460,7 +244,7 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 									if(!commandQueue.mainCommandExecuted){
 										dispatchMessageFrom(connStatus.conn,connStatus.errorPacket.toByteBuffer(connStatus.conn).array());
 										if(source.isAutoCommit()){
-											this.endSession();
+											this.endSession(false);
 										}
 									}else{
 										if(logger.isDebugEnabled()){
@@ -478,7 +262,9 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 							}
 						}
 					}finally{
-						afterCommandCompleted(commandQueue.currentCommand);
+						if(fromConnStatus.isMerged){
+							afterCommandCompleted(commandQueue.currentCommand);
+						}
 					}
 				}else{
 					if(commandQueue.currentCommand.isMain()){
@@ -487,7 +273,6 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 						}
 					}
 				}
-			}
 			}
 		}
 	}
@@ -498,6 +283,9 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 	 * @param oldCommand 当前的command
 	 */
 	protected synchronized void afterCommandCompleted(CommandInfo oldCommand){
+		if(this.commandQueue.currentCommand != oldCommand){
+			return;
+		}
 		if(oldCommand.getRunnable()!= null){
 			oldCommand.getRunnable().run();
 		}
@@ -515,7 +303,7 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 	protected synchronized void startNextCommand(){
 		if(commandQueue.currentCommand != null && (commandQueue.currentCommand.getStatusCode() & SessionStatus.ERROR) >0){
 			if(source.isAutoCommit()){
-				this.endSession();
+				this.endSession(false);
 			}
 			return;
 		}
@@ -526,10 +314,8 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 			
 			boolean commandCompleted = commandQueue.currentCommand.getCompletedCount().get() == commandQueue.connStatusMap.size();
 			
-			if(!commandCompleted){
-				for(ConnectionStatuts status : connSet){
-					status.setCommandType(commandType);
-				}
+			for(ConnectionStatuts status : connSet){
+				status.setCommandType(commandType);
 			}
 			
 			dispatchMessageFrom(source,commandQueue.currentCommand.getBuffer());
@@ -539,7 +325,7 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 			}
 		}else{
 			if(source.isAutoCommit()){
-				this.endSession();
+				this.endSession(false);
 			}
 		}
 	}
@@ -677,6 +463,10 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 	 * @return
 	 */
 	protected synchronized List<byte[]> mergeMessages(){
+		if(this.commandQueue.currentCommand.isMerged()){
+			return null;
+		}
+		this.commandQueue.currentCommand.setMerged(true);
 		Collection<ConnectionStatuts> connectionStatutsSet = commandQueue.connStatusMap.values();
 		boolean isSelectQuery = true;
 		List<byte[]> buffers = null;
@@ -809,16 +599,17 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 		}
 	}
 
-	public synchronized void endSession() {
+	public synchronized void endSession(boolean force) {
 		if(!ended){
+			forceEnded = force;
 			endTime = System.currentTimeMillis();
 			ended = true;
 			this.releaseAllCompletedConnection();
 			if(!this.commandQueue.mainCommandExecuted){
-				
+				StringBuffer buffer = new StringBuffer();
+				buffer.append("<<---client connection="+source.getSocketId()+",source handler ischanged="+(source.getMessageHandler()==this)+",\n session Handler="+this+"----->>\n");
 				for(Map.Entry<MysqlServerConnection, ConnectionStatuts> entry : commandQueue.connStatusMap.entrySet()){
-					StringBuffer buffer = new StringBuffer();
-					buffer.append("<---connection="+entry.getKey().getSocketId()+",queueSize="+entry.getKey().getInQueueSize()+"------->\n");
+					buffer.append("--connection="+entry.getKey().getSocketId()+",queueSize="+entry.getKey().getInQueueSize()+"-------\n");
 					for(byte[] buf : entry.getValue().buffers){
 						buffer.append(StringUtil.dumpAsHex(buf,buf.length)+"\n");
 						buffer.append("\n");
@@ -870,7 +661,12 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 		buffer.append(",endTime=").append(this.endTime);
 		buffer.append(",lastTimeMillis=").append(this.lastTimeMillis);
 		buffer.append(",ended=").append(this.ended );
+		buffer.append(",forceEnded=").append(this.forceEnded );
 		buffer.append(",started=").append(this.started );
+		buffer.append(",ServerConnectionSize=").append(this.handlerMap.size());
+		buffer.append(",currentCommand[").append("CompletedCount=").append(this.commandQueue.currentCommand.getCompletedCount().get());
+		buffer.append(",isMerged=").append(this.commandQueue.currentCommand.isMerged());
+		buffer.append(",buffer=\n").append(StringUtil.dumpAsHex(commandQueue.currentCommand.getBuffer(),commandQueue.currentCommand.getBuffer().length));
 		buffer.append(", sql=").append(statment!= null?statment.getSql():"null");
 		return buffer.toString();
 	}

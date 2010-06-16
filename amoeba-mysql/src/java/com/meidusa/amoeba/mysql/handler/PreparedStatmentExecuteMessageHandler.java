@@ -11,12 +11,16 @@
  */
 package com.meidusa.amoeba.mysql.handler;
 
+import java.util.List;
+
+import com.meidusa.amoeba.mysql.handler.session.ConnectionStatuts;
 import com.meidusa.amoeba.mysql.net.CommandInfo;
 import com.meidusa.amoeba.mysql.net.MysqlClientConnection;
 import com.meidusa.amoeba.mysql.net.MysqlServerConnection;
 import com.meidusa.amoeba.mysql.net.packet.CommandPacket;
 import com.meidusa.amoeba.mysql.net.packet.ExecutePacket;
 import com.meidusa.amoeba.mysql.net.packet.MysqlPacketBuffer;
+import com.meidusa.amoeba.mysql.net.packet.PreparedStatmentClosePacket;
 import com.meidusa.amoeba.mysql.net.packet.QueryCommandPacket;
 import com.meidusa.amoeba.net.Connection;
 import com.meidusa.amoeba.net.poolable.ObjectPool;
@@ -96,13 +100,15 @@ public class PreparedStatmentExecuteMessageHandler extends PreparedStatmentMessa
 			longDataCommand.getCompletedCount().set(this.commandQueue.connStatusMap.size());
 			commandQueue.appendCommand(longDataCommand,true);
 		}
+		source.clearLongData();
 	}
 	protected  void afterMainCommand(MysqlServerConnection conn){
 		super.afterMainCommand(conn);
-		synchronized(this){
-			if(source.getLongDataList().size()>0){
-				source.clearLongData();
-			}
+		if (commandType == QueryCommandPacket.COM_STMT_EXECUTE) {
+			PreparedStatmentClosePacket preparedCloseCommandPacket = new PreparedStatmentClosePacket();
+	        preparedCloseCommandPacket.command = CommandPacket.COM_STMT_CLOSE;
+	        preparedCloseCommandPacket.statementId = statmentIdMap.get(conn);
+	        conn.postMessage(preparedCloseCommandPacket.toByteBuffer(conn));
 		}
 	}
 	
@@ -115,6 +121,9 @@ public class PreparedStatmentExecuteMessageHandler extends PreparedStatmentMessa
 		return new PreparedStatmentExecuteConnectionStatuts(conn,this.preparedStatmentInfo);
 	}
 
+	protected List<byte[]> mergeMessages() {
+		return super.mergeMessages();
+	}
 	public String toString(){
 		String parameter = "";
 		if(executePacket.getParameters() != null){

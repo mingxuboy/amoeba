@@ -110,7 +110,7 @@ public abstract class CommandMessageHandler implements MessageHandler, Sessionab
             }
         }
 
-        endSession();
+        endSession(false);
         packet.wirteToConnection(source);
     }
 
@@ -119,7 +119,7 @@ public abstract class CommandMessageHandler implements MessageHandler, Sessionab
     protected abstract QueryRunnable newQueryRunnable(CountDownLatch latch, PoolableObject conn, String query2,
                                                       Object parameter, ResultPacket packet);
 
-    public void endSession() {
+    public void endSession(boolean force) {
         if (isEnded()) {
             return;
         }

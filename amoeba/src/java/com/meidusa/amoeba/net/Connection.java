@@ -169,9 +169,13 @@ public abstract class Connection implements NetEventHandler {
         }
 
         if (_handler instanceof Sessionable) {
-            Sessionable session = (Sessionable) _handler;
-            logger.error(this + ",closeSocket,and endSession,handler=" + session);
-            session.endSession();
+        	try{
+	            Sessionable session = (Sessionable) _handler;
+	            logger.error(this + ",closeSocket,and endSession,handler=" + session);
+	            session.endSession(true);
+        	}catch(Exception e){
+        		logger.warn("Error endSession [conn=" + toString() + "]",e);
+        	}
         }
         
         try{
@@ -231,6 +235,9 @@ public abstract class Connection implements NetEventHandler {
         // 如果已经关闭
         if (isClosed()) {
             logger.warn("Failure reported on closed connection " + this + ".", ioe);
+            //reclose socket
+            socketClosed = false;
+            this.close(ioe);
             return;
         }
         postClose(ioe);
@@ -280,13 +287,11 @@ public abstract class Connection implements NetEventHandler {
 
     
     protected void doReceiveMessage(byte[] message){
-    	_inQueue.appendSilent(message);
+    	_inQueue.append(message);
     }
     
     protected void messageProcess() {
-    	if(_inQueue.size()>0){
-    		_handler.handleMessage(this);
-    	}
+		_handler.handleMessage(this);
     }
 
     public boolean doWrite() throws IOException {

@@ -106,7 +106,7 @@ public class AladdinMessageDispatcher implements MessageHandler {
 	                        logger.error("start Session error:", e);
 	                        throw e;
 	                    } finally {
-	                        session.endSession();
+	                        session.endSession(false);
 	                    }
 	                }
 	            } else if (MysqlPacketBuffer.isPacketType(message, QueryCommandPacket.COM_STMT_PREPARE)) {
@@ -172,7 +172,7 @@ public class AladdinMessageDispatcher implements MessageHandler {
 	                            logger.error("start Session error:", e);
 	                            throw e;
 	                        } finally {
-	                            session.endSession();
+	                            session.endSession(false);
 	                        }
 	                    }
 	                }
