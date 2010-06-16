@@ -15,13 +15,14 @@ import com.meidusa.amoeba.util.StringUtil;
 
 public class PerformaceTest {
 
+	
 	/**
 	 * @param args
 	 * @throws Exception 
 	 */
 	public static void main(String[] args) throws Exception {
-		int threadCount = 400;
-		int totleQuery = 250;
+		int threadCount = 10;
+		int totleQuery = 10;
 		int count = 10;
 		if(args.length>=2){
 			threadCount = Integer.parseInt(args[0]);
@@ -30,11 +31,12 @@ public class PerformaceTest {
 				count = Integer.parseInt(args[2]);
 			}
 		}
+		final ThreadLocal<Connection> threadLocal = new ThreadLocal<Connection>();
 		final String ip = System.getProperty("ip","127.0.0.1");
 		final String port = System.getProperty("port","8066");
-		final String password = System.getProperty("password","hello");
-		final String user = System.getProperty("user","root");
-		String sql = System.getProperty("sql","SELECT * FROM sd_relation.LIST_FRIEND_GROUP L; ");
+		final String password = System.getProperty("password","sdfriend");
+		final String user = System.getProperty("user","sdfriend");
+		String sql = System.getProperty("sql","SELECT * FROM SD_RELATION.LIST_FRIEND_GROUP L; ");
 		if(sql.startsWith("\"")){
 			sql = sql.substring(1, sql.length() -1);
 		}
@@ -51,8 +53,8 @@ public class PerformaceTest {
 		//∆Ù”√¬÷—Ø
 		//props.put("roundRobinLoadBalance", "false"); 
 
-		props.put("user", "root"); 
-		props.put("password", "hello"); 
+		props.put("user", "sdfriend"); 
+		props.put("password", "sdfriend"); 
 		//props.put("password", "...."); 
 		int testCount = totleQuery;
 		Class.forName("com.mysql.jdbc.Driver");
@@ -67,7 +69,10 @@ public class PerformaceTest {
 					PreparedStatement statment = null;
 					ResultSet result = null;
 					try{
-						conn = DriverManager.getConnection("jdbc:mysql://"+ip+":"+port+"/test",user,password);
+						if(conn == null){
+							conn = DriverManager.getConnection("jdbc:mysql://"+ip+":"+port+"/test?useUnicode=true&characterEncoding=utf-8&useServerPrepStmts=true&autoReconnect=true&socketTimeout=10000&&zeroDateTimeBehavior=convertToNull",user,password);
+							threadLocal.set(conn);
+						}
 						for(int i=0;i<runcount;i++){
 							try{
 							statment = conn.prepareStatement(sqlext);

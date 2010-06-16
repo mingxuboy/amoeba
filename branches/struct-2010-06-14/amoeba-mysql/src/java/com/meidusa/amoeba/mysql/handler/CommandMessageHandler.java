@@ -84,6 +84,7 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 		}
 		int statusCode;
 		int packetIndex;
+		public boolean isMergedConnection;
 		List<byte[]> buffers = new ArrayList<byte[]>();
 		protected  byte commandType;
 		
@@ -202,7 +203,10 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 						}
 					}
 				}
-				if(currentCommand.getCompletedCount().incrementAndGet() == connStatusMap.size()){
+				
+				connStatus.isMergedConnection = (currentCommand.getCompletedCount().incrementAndGet() == connStatusMap.size());
+				
+				if(currentCommand.getCompletedCount().get() == connStatusMap.size()){
 					if(logger.isDebugEnabled()){
 						Packet packet = null;
 						if(MysqlPacketBuffer.isErrorPacket(buffer)){
@@ -405,7 +409,7 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 		}
 	}
 	
-	public synchronized void handleMessage(Connection fromConn) {
+	public void handleMessage(Connection fromConn) {
 		byte[] message = null;
 		lastTimeMillis = System.currentTimeMillis();
 		while((message = fromConn.getInQueue().getNonBlocking()) != null){
@@ -418,7 +422,7 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 					dispatchMessageFrom(source,message);
 				}
 			}else{
-				
+				ConnectionStatuts currentConnStatus = commandQueue.connStatusMap.get(fromConn);
 				//判断命令是否完成了
 				CommandStatus commStatus = commandQueue.checkResponseCompleted(fromConn, message);
 				
@@ -447,10 +451,12 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 						
 						if(commandQueue.currentCommand.isMain()){
 							if(commandQueue.isMultiple()){
-								List<byte[]> list = this.mergeMessages();
-								if(list != null){
-									for(byte[] buffer : list){
-										dispatchMessageFrom(fromConn,buffer);
+								if(currentConnStatus.isMergedConnection){
+									List<byte[]> list = this.mergeMessages();
+									if(list != null){
+										for(byte[] buffer : list){
+											dispatchMessageFrom(fromConn,buffer);
+										}
 									}
 								}
 							}else{
@@ -458,39 +464,44 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 							}
 						}else{
 							//非主命令发送以后返回出错信息，则结束当前的session
-							Collection<ConnectionStatuts> connectionStatutsSet = commandQueue.connStatusMap.values();
-							for(ConnectionStatuts connStatus : connectionStatutsSet){
-								//看是否每个服务器返回的数据包都没有异常信息。
-								if((connStatus.statusCode & SessionStatus.ERROR) >0){
-									this.commandQueue.currentCommand.setStatusCode(connStatus.statusCode);
-									byte[] errorBuffer = connStatus.buffers.get(connStatus.buffers.size()-1);
-									if(!commandQueue.mainCommandExecuted){
-										ErrorPacket errorPacket = new ErrorPacket();
-										errorPacket.init(errorBuffer,this.source);
-										errorPacket.serverErrorMessage = errorPacket.serverErrorMessage +" from mysqlServer:"+connStatus.conn.getSocketId();
-										this.errorPacket = errorPacket;
-										logger.error("return Error packet from conn ="+ connStatus.conn + ",packet="+errorPacket);
-										dispatchMessageFrom(connStatus.conn,errorPacket.toByteBuffer(connStatus.conn).array());
-										if(source.isAutoCommit()){
-											this.endSession();
+							if(currentConnStatus.isMergedConnection){
+								Collection<ConnectionStatuts> connectionStatutsSet = commandQueue.connStatusMap.values();
+								for(ConnectionStatuts connStatus : connectionStatutsSet){
+									//看是否每个服务器返回的数据包都没有异常信息。
+									if((connStatus.statusCode & SessionStatus.ERROR) >0){
+										this.commandQueue.currentCommand.setStatusCode(connStatus.statusCode);
+										byte[] errorBuffer = connStatus.buffers.get(connStatus.buffers.size()-1);
+										if(!commandQueue.mainCommandExecuted){
+											ErrorPacket errorPacket = new ErrorPacket();
+											errorPacket.init(errorBuffer,this.source);
+											errorPacket.serverErrorMessage = errorPacket.serverErrorMessage +" from mysqlServer:"+connStatus.conn.getSocketId();
+											this.errorPacket = errorPacket;
+											logger.error("return Error packet from conn ="+ connStatus.conn + ",packet="+errorPacket);
+											dispatchMessageFrom(connStatus.conn,errorPacket.toByteBuffer(connStatus.conn).array());
+											if(source.isAutoCommit()){
+												this.endSession();
+											}
+										}else{
+											if(logger.isDebugEnabled()){
+												byte[] commandBuffer = commandQueue.currentCommand.getBuffer();
+												StringBuffer buffer = new StringBuffer();
+												buffer.append("Current Command Execute Error:\n");
+												buffer.append(StringUtil.dumpAsHex(commandBuffer,commandBuffer.length));
+												buffer.append("\n error Packet:\n");
+												buffer.append(StringUtil.dumpAsHex(errorBuffer,errorBuffer.length));
+												logger.debug(buffer.toString());
+											}
 										}
-									}else{
-										if(logger.isDebugEnabled()){
-											byte[] commandBuffer = commandQueue.currentCommand.getBuffer();
-											StringBuffer buffer = new StringBuffer();
-											buffer.append("Current Command Execute Error:\n");
-											buffer.append(StringUtil.dumpAsHex(commandBuffer,commandBuffer.length));
-											buffer.append("\n error Packet:\n");
-											buffer.append(StringUtil.dumpAsHex(errorBuffer,errorBuffer.length));
-											logger.debug(buffer.toString());
-										}
+										return;
 									}
-									return;
 								}
 							}
 						}
 					}finally{
-						afterCommandCompleted(commandQueue.currentCommand);
+						if(currentConnStatus.isMergedConnection){
+							afterCommandCompleted(commandQueue.currentCommand);
+							currentConnStatus.isMergedConnection = false;
+						}
 					}
 				}else{
 					if(commandQueue.currentCommand.isMain()){

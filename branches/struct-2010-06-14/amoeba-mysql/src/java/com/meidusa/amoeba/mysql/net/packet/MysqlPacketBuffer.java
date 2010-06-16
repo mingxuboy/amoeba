@@ -357,7 +357,7 @@ public class MysqlPacketBuffer extends AbstractPacketBuffer {
     }
 
     public static boolean isEofPacket(byte[] bty) {
-        return isPacketType(bty, (byte) 0xfe);
+        return bty.length<13 && isPacketType(bty, (byte) 0xfe);
     }
 
     public static int increasePacketId(int packetId) {
