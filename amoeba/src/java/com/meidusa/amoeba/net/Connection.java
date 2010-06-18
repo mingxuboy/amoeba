@@ -141,32 +141,23 @@ public abstract class Connection implements NetEventHandler {
      * 
      * @return
      */
-    public boolean isClosed() {
-        closeLock.lock();
-        try {
-            return socketClosed;
-        } finally {
-            closeLock.unlock();
-        }
+    public synchronized boolean isClosed() {
+        return socketClosed;
 
     }
 
     /**
      * 关闭当前连接，并且从ConnectionManager中删除该连接。
      */
-    protected void close(Exception exception) {
-        closeLock.lock();
-        try {
+    protected synchronized void close(Exception exception) {
             // we shouldn't be closed twice
-            if (isClosed()) {
-                logger.warn("Attempted to re-close connection ["+ toString() + "]");
-                Thread.dumpStack();
-                return;
-            }
-            socketClosed = true;
-        } finally {
-            closeLock.unlock();
+        if (isClosed()) {
+            logger.warn("Attempted to re-close connection ["+ toString() + "]");
+            Thread.dumpStack();
+            return;
         }
+        
+    	socketClosed = true;
 
         if (_handler instanceof Sessionable) {
         	try{
@@ -177,7 +168,7 @@ public abstract class Connection implements NetEventHandler {
         		logger.warn("Error endSession [conn=" + toString() + "]",e);
         	}
         }
-        
+    
         try{
 	        if (_selkey != null) {
 	            _selkey.attach(null);
@@ -200,11 +191,14 @@ public abstract class Connection implements NetEventHandler {
         } catch (IOException ioe) {
             logger.warn("Error closing connection ["+ toString() + "], error=" + ioe + "].");
         }
-
-        if (exception != null) {
-            _cmgr.connectionFailed(this, exception);
-        } else {
-            _cmgr.connectionClosed(this);
+        try{
+	        if (exception != null) {
+	            _cmgr.connectionFailed(this, exception);
+	        } else {
+	            _cmgr.connectionClosed(this);
+	        }
+        }catch(Exception e){
+        	logger.warn("notify ConnectionManager closing connection ["+ toString() + "], error=" + e + "].",e);
         }
     }
 

@@ -129,7 +129,7 @@ public class ConnectionManager extends LoopingThread implements Reporter, Initia
                     	Connection conn = (Connection) handler;
                     	long idlesecond = (iterStamp - conn._lastEvent)/1000;
                     	logger.warn("Disconnecting non-communicative server [manager=" + this + " conn="+conn.toString()+", socket closed!" +", idle=" + idlesecond + " s]. life="+((System.currentTimeMillis()-conn._createTime)/1000) +" s");
-
+                    	
                         closeConnection((Connection) handler, null);
                     }
                 }
@@ -220,12 +220,7 @@ public class ConnectionManager extends LoopingThread implements Reporter, Initia
      * 采用异步方式关闭一个连接。 将即将关闭的连接放入deathQueue中
      */
     void closeConnection(Connection conn, Exception exception) {
-        if (!conn.isClosed()) {
-        	if(exception != null){
-        		logger.warn("post close Connection="+conn,exception);
-        	}
-            _deathq.append(new Tuple<Connection, Exception>(conn, exception));
-        }
+    	_deathq.append(new Tuple<Connection, Exception>(conn, exception));
     }
 
     public void closeAll() {
