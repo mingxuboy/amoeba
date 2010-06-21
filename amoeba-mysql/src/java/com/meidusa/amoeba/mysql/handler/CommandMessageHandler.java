@@ -665,7 +665,6 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 		buffer.append(",started=").append(this.started );
 		buffer.append(",ServerConnectionSize=").append(this.handlerMap.size());
 		buffer.append(",currentCommand[").append("CompletedCount=").append(this.commandQueue.currentCommand != null ?this.commandQueue.currentCommand.getCompletedCount().get():"");
-		buffer.append(",isMerged=").append(this.commandQueue.currentCommand.isMerged());
 		buffer.append(",buffer=\n").append(StringUtil.dumpAsHex(commandQueue.currentCommand.getBuffer(),commandQueue.currentCommand.getBuffer().length));
 		buffer.append(", sql=").append(statment!= null?statment.getSql():"null");
 		return buffer.toString();
