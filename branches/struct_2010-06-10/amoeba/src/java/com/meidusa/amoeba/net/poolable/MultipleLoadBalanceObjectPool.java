@@ -171,7 +171,7 @@ public class MultipleLoadBalanceObjectPool implements ObjectPool,Initialisable {
         ObjectPool pool = null;
         ObjectPool[] poolsTemp = runtimeObjectPools;
         if (poolsTemp.length == 0) {
-            throw new Exception("poolName="+name+"  ,no valid pools");
+            throw new Exception("poolName="+name+", no valid pools");
         }
 
         if (loadbalance == LOADBALANCING_ROUNDROBIN) {

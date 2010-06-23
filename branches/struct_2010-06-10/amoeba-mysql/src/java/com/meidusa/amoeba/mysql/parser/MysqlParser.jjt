@@ -616,8 +616,8 @@ TOKEN:
 				"\uffd2" - "\uffd7",
 				"\uffda" - "\uffdc"
 			]>
-|   < #SPECIAL_CHARS: "$" | "_">
-|   < STRING_LITERAL: ("_" <IDENTIFIER>)*"'" ((~["'"])|("\\" "'"))* "'">
+|   < #SPECIAL_CHARS: "$" | "_" >
+|   < STRING_LITERAL: ( "_" <IDENTIFIER> | "x" )* "'" ((~["'"])|("\\" "'"))* "'">
 |   < S_QUOTED_IDENTIFIER: "\"" (~["\n","\r","\""])* "\"" >
 |	< S_COMMA_IDENTIFIER: "`" ((["@"])*( <LETTER> )+ ( <DIGIT> | "-"|<LETTER> |<SPECIAL_CHARS>)*) "`">
 |   < S_PARAMETER_MARKER: "?">
