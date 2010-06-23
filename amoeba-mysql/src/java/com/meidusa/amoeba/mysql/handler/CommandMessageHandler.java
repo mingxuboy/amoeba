@@ -609,12 +609,16 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 				StringBuffer buffer = new StringBuffer();
 				buffer.append("<<---client connection="+source.getSocketId()+",source handler ischanged="+(source.getMessageHandler()==this)+",\n session Handler="+this+"----->>\n");
 				for(Map.Entry<MysqlServerConnection, ConnectionStatuts> entry : commandQueue.connStatusMap.entrySet()){
-					buffer.append("--connection="+entry.getKey().getSocketId()+",queueSize="+entry.getKey().getInQueueSize()+"-------\n");
-					for(byte[] buf : entry.getValue().buffers){
-						buffer.append(StringUtil.dumpAsHex(buf,buf.length)+"\n");
-						buffer.append("\n");
+					if((entry.getValue().statusCode & SessionStatus.COMPLETED) == 0){
+						buffer.append("--connection="+entry.getKey().getSocketId()+",queueSize="+entry.getKey().getInQueueSize()+"-------\n");
+						for(byte[] buf : entry.getValue().buffers){
+							buffer.append(StringUtil.dumpAsHex(buf,buf.length)+"\n");
+							buffer.append("\n");
+						}
+						buffer.append("<----end Packet:"+entry.getKey().getSocketId()+"------>\n");
+					}else{
+						buffer.append("<----start -- end Packet:"+entry.getKey().getSocketId()+",COMPLETED = true------>\n");	
 					}
-					buffer.append("<----end Packet:"+entry.getKey().getSocketId()+"------>\n");
 					logger.error(buffer.toString());
 				}
 
@@ -664,8 +668,10 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 		buffer.append(",forceEnded=").append(this.forceEnded );
 		buffer.append(",started=").append(this.started );
 		buffer.append(",ServerConnectionSize=").append(this.handlerMap.size());
-		buffer.append(",currentCommand[").append("CompletedCount=").append(this.commandQueue.currentCommand != null ?this.commandQueue.currentCommand.getCompletedCount().get():"");
-		buffer.append(",buffer=\n").append(StringUtil.dumpAsHex(commandQueue.currentCommand.getBuffer(),commandQueue.currentCommand.getBuffer().length));
+		if(commandQueue.currentCommand != null){
+			buffer.append(",currentCommand[").append("CompletedCount=").append(this.commandQueue.currentCommand != null ?this.commandQueue.currentCommand.getCompletedCount().get():"");
+			buffer.append(",buffer=\n").append(StringUtil.dumpAsHex(commandQueue.currentCommand.getBuffer(),commandQueue.currentCommand.getBuffer().length));
+		}
 		buffer.append(", sql=").append(statment!= null?statment.getSql():"null");
 		return buffer.toString();
 	}
