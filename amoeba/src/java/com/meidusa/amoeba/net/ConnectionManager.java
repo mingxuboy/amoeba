@@ -206,7 +206,9 @@ public class ConnectionManager extends LoopingThread implements Reporter, Initia
                         closeConnection((Connection) handler, e);
                     }
                 }
-            } else if (selkey.isReadable() || selkey.isAcceptable()) {
+            }
+            
+            if (selkey.isReadable() || selkey.isAcceptable()) {
             	handler.handleEvent(iterStamp);
             } else {
                 logger.error(selkey.attachment() + ", isAcceptable=" + selkey.isAcceptable() + ",isConnectable=" + selkey.isConnectable() + ",isReadable=" + selkey.isReadable() + ",isWritable=" + selkey.isWritable());
@@ -285,6 +287,10 @@ public class ConnectionManager extends LoopingThread implements Reporter, Initia
         _selector.wakeup();
     }
 
+
+    public Selector getSelector(){
+    	return this._selector;
+    }
     /**
      * 往ConnectionManager 增加一个SocketChannel
      */
