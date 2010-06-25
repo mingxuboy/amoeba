@@ -29,7 +29,9 @@ public class MysqlParserTest {
 	static Map<Column,Comparative> columnMap = new HashMap<Column,Comparative>();
 	public static void main(String[] args) throws Exception{
 		Map<String,Function> funMap = AbstractQueryRouter.loadFunctionMap("./build/build-mysql/conf/functionMap.xml");
+		parser(funMap,"SELECT UUID, CREATE_TIME, CONTENT, ACTIVITY_TYPE, COMPRESS_FLAG   FROM SD_FEED.FEED_CONTENT   WHERE `UUID`='3ef88ee7e8994d1796291f64c83d2edd' ");
 		parser(funMap,"insert into TEST_SD_RELATION.RELATION_REVERSE ( SDID, F_SDID, STATE,   CREATE_TIME,   LAST_MODIFY_TIME, DEL_FLAG)   values (772152974,   1115596664,   1,   UNIX_TIMESTAMP()*1000,   UNIX_TIMESTAMP()*1000,0)  ON DUPLICATE KEY   UPDATE DEL_FLAG=0,   LAST_MODIFY_TIME=UNIX_TIMESTAMP()*1000;");
+		
 		parser(funMap,"EXPLAIN SELECT REPLACE(UUID(), '-', '')");
 		parser(funMap," select * from moodrecord.t_twitter_hot where `key`='asdfasfd' order by add_time desc limit ?,?");
 		String t = "select ID from SD_MESSAGE.MESSAGE_NOTIFICATION  where  SDID=11 and name=? order by CREATE_TIME limit ?,?";

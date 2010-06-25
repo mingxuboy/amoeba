@@ -610,12 +610,16 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 				buffer.append("<<---client connection="+source.getSocketId()+",source handler ischanged="+(source.getMessageHandler()==this)+",\n session Handler="+this+"----->>\n");
 				for(Map.Entry<MysqlServerConnection, ConnectionStatuts> entry : commandQueue.connStatusMap.entrySet()){
 					if((entry.getValue().statusCode & SessionStatus.COMPLETED) == 0){
-						buffer.append("--connection="+entry.getKey().getSocketId()+",queueSize="+entry.getKey().getInQueueSize()+"-------\n");
+						buffer.append("<----start-connection="+entry.getKey().getSocketId()
+								+",queueSize="+entry.getKey().getInQueueSize()
+								+",manager="+entry.getKey().getConnectionManager().getName() 
+								+",managerRunning="+entry.getKey().getConnectionManager().isRunning()
+								+",selectorOpened="+entry.getKey().getConnectionManager().getSelector().isOpen()+"-------\n");
 						for(byte[] buf : entry.getValue().buffers){
 							buffer.append(StringUtil.dumpAsHex(buf,buf.length)+"\n");
 							buffer.append("\n");
 						}
-						buffer.append("<----end Packet:"+entry.getKey().getSocketId()+"------>\n");
+						buffer.append("<----end connection:"+entry.getKey().getSocketId()+"------>\n");
 					}else{
 						buffer.append("<----start -- end Packet:"+entry.getKey().getSocketId()+",COMPLETED = true------>\n");	
 					}

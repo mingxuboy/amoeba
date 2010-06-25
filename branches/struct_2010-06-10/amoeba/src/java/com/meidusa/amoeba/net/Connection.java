@@ -380,6 +380,10 @@ public abstract class Connection implements NetEventHandler {
 
     }
 
+    public ConnectionManager getConnectionManager(){
+    	return this._cmgr;
+    }
+    
     protected PacketInputStream getPacketInputStream() {
         if (_fin == null) {
             _fin = createPacketInputStream();
