@@ -185,11 +185,13 @@ public class MysqlClientConnection extends MysqlConnection {
 	public void handleMessage(Connection conn) {
 		
 		byte[] message = this.getInQueue().getNonBlocking();
-		// 在未验证通过的时候
-		/** 此时接收到的应该是认证数据，保存数据为认证提供数据 */
-		this.authenticationMessage = message;
-		((AuthingableConnectionManager) _cmgr).getAuthenticator()
-				.authenticateConnection(this);
+		if(message != null){
+			// 在未验证通过的时候
+			/** 此时接收到的应该是认证数据，保存数据为认证提供数据 */
+			this.authenticationMessage = message;
+			((AuthingableConnectionManager) _cmgr).getAuthenticator()
+					.authenticateConnection(this);
+		}
 	}
 
     protected void doReceiveMessage(byte[] message){

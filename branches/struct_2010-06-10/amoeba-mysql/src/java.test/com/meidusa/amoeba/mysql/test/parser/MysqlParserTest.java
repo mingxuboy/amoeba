@@ -29,6 +29,10 @@ public class MysqlParserTest {
 	static Map<Column,Comparative> columnMap = new HashMap<Column,Comparative>();
 	public static void main(String[] args) throws Exception{
 		Map<String,Function> funMap = AbstractQueryRouter.loadFunctionMap("./build/build-mysql/conf/functionMap.xml");
+		parser(funMap,"SELECT SOURCE_UUID  FROM SD_FEED.FEED  FORCE INDEX(INDX_SDID_DFALG_ATYPE_CRTTIME)" 
+				+" WHERE DEL_FLAG = 0 AND   SDID IN   (    1247553060   ,    1247832413   ,    1181647770   ,    1248002785   ,    1248203227   ,    1247999383   ,    1247811558   ,    1181607039   ,    1221592290   ,    1246478650   ,    1109266877   ,    999259458   ,    595684235   ,    658423815   ,    1109949156   ,    1145903891   ,    1034904986   ,    1180096992   ,    216712   ,    937839624   )       AND     ACTIVITY_TYPE IN     (      1002003       ,      1002005       ,      1002007       ,      1002009       ,      1002011       )"            
+				+" AND  ACTIVITY_TYPE IN ( 1002003       ,      1002005)  AND  CREATE_TIME                  >          1277572966915"      
+				+" AND     SOURCE_SDID = SDID ORDER BY CREATE_TIME       ASC          LIMIT 30;");
 		parser(funMap,"SELECT UUID, CREATE_TIME, CONTENT, ACTIVITY_TYPE, COMPRESS_FLAG   FROM SD_FEED.FEED_CONTENT   WHERE `UUID`='3ef88ee7e8994d1796291f64c83d2edd' ");
 		parser(funMap,"insert into TEST_SD_RELATION.RELATION_REVERSE ( SDID, F_SDID, STATE,   CREATE_TIME,   LAST_MODIFY_TIME, DEL_FLAG)   values (772152974,   1115596664,   1,   UNIX_TIMESTAMP()*1000,   UNIX_TIMESTAMP()*1000,0)  ON DUPLICATE KEY   UPDATE DEL_FLAG=0,   LAST_MODIFY_TIME=UNIX_TIMESTAMP()*1000;");
 		
