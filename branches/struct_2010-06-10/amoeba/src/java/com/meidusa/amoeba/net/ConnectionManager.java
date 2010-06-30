@@ -210,8 +210,6 @@ public class ConnectionManager extends LoopingThread implements Reporter, Initia
             
             if (selkey.isReadable() || selkey.isAcceptable()) {
             	handler.handleEvent(iterStamp);
-            } else {
-                logger.error(selkey.attachment() + ", isAcceptable=" + selkey.isAcceptable() + ",isConnectable=" + selkey.isConnectable() + ",isReadable=" + selkey.isReadable() + ",isWritable=" + selkey.isWritable());
             }
         }
 
