@@ -414,7 +414,7 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 		
 		if(conn instanceof MysqlServerConnection){
 			PoolableObject pooledObject = (PoolableObject)conn;
-			if(pooledObject.getObjectPool() != null){
+			if(pooledObject.getObjectPool() != null && pooledObject.isActive()){
 				try {
 					pooledObject.getObjectPool().returnObject(conn);
 					if(logger.isDebugEnabled()){
@@ -430,7 +430,7 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 	/**
 	 * 关闭该messageHandler 并且恢复所有这个messageHandler所handle的Connection
 	 */
-	protected synchronized void releaseAllCompletedConnection(){
+	protected void releaseAllCompletedConnection(){
 		Set<Map.Entry<Connection,MessageHandler>> handlerSet = handlerMap.entrySet();
 		for(Map.Entry<Connection,MessageHandler> entry:handlerSet){
 			MessageHandler handler = entry.getValue();
@@ -599,52 +599,57 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 		}
 	}
 
-	public synchronized void endSession(boolean force) {
-		if(!ended){
-			forceEnded = force;
-			endTime = System.currentTimeMillis();
-			ended = true;
-			this.releaseAllCompletedConnection();
-			if(!this.commandQueue.mainCommandExecuted){
-				StringBuffer buffer = new StringBuffer();
-				buffer.append("<<---client connection="+source.getSocketId()+",source handler ischanged="+(source.getMessageHandler()==this)+",\n session Handler="+this+"----->>\n");
-				for(Map.Entry<MysqlServerConnection, ConnectionStatuts> entry : commandQueue.connStatusMap.entrySet()){
-					if((entry.getValue().statusCode & SessionStatus.COMPLETED) == 0){
-						buffer.append("<----start-connection="+entry.getKey().getSocketId()
-								+",queueSize="+entry.getKey().getInQueueSize()
-								+",manager="+entry.getKey().getConnectionManager().getName() 
-								+",managerRunning="+entry.getKey().getConnectionManager().isRunning()
-								+",selectorOpened="+entry.getKey().getConnectionManager().getSelector().isOpen()+"-------\n");
-						for(byte[] buf : entry.getValue().buffers){
-							buffer.append(StringUtil.dumpAsHex(buf,buf.length)+"\n");
-							buffer.append("\n");
-						}
-						buffer.append("<----end connection:"+entry.getKey().getSocketId()+"------>\n");
-					}else{
-						buffer.append("<----start -- end Packet:"+entry.getKey().getSocketId()+",COMPLETED = true------>\n");	
-					}
-					logger.error(buffer.toString());
-				}
-
-				if(this.errorPacket == null){
-					errorPacket = new ErrorPacket();
-					errorPacket.errno = 10000;
-					errorPacket.packetId = 2;
-					errorPacket.serverErrorMessage = " session was killed!!";
-					this.dispatchMessageTo(source, errorPacket.toByteBuffer(source).array());
-					logger.warn("session was killed!!",new Exception());
-				}
-				
-				
-				
-				source.postClose(null);
-			}else{
-				if(logger.isInfoEnabled()){
-					logger.info(this+" session ended.");
+	public  void endSession(boolean force) {
+		if(!isEnded()){
+			synchronized (this) {
+				if(!ended){
+					forceEnded = force;
+					endTime = System.currentTimeMillis();
+					ended = true;
+				}else{
+					return;
 				}
 			}
-			this.dispatchMessageTo(source,null);
 		}
+		
+		this.releaseAllCompletedConnection();
+		if(!this.commandQueue.mainCommandExecuted){
+			StringBuffer buffer = new StringBuffer();
+			buffer.append("<<---client connection="+source.getSocketId()+",source handler ischanged="+(source.getMessageHandler()==this)+",\n session Handler="+this+"----->>\n");
+			for(Map.Entry<MysqlServerConnection, ConnectionStatuts> entry : commandQueue.connStatusMap.entrySet()){
+				if((entry.getValue().statusCode & SessionStatus.COMPLETED) == 0){
+					buffer.append("<----start-connection="+entry.getKey().getSocketId()
+							+",queueSize="+entry.getKey().getInQueueSize()
+							+",manager="+entry.getKey().getConnectionManager().getName() 
+							+",managerRunning="+entry.getKey().getConnectionManager().isRunning()
+							+",selectorOpened="+entry.getKey().getConnectionManager().getSelector().isOpen()+"-------\n");
+					for(byte[] buf : entry.getValue().buffers){
+						buffer.append(StringUtil.dumpAsHex(buf,buf.length)+"\n");
+						buffer.append("\n");
+					}
+					buffer.append("<----end connection:"+entry.getKey().getSocketId()+"------>\n");
+				}else{
+					buffer.append("<----start -- end Packet:"+entry.getKey().getSocketId()+",COMPLETED = true------>\n");	
+				}
+				logger.error(buffer.toString());
+			}
+
+			if(this.errorPacket == null){
+				errorPacket = new ErrorPacket();
+				errorPacket.errno = 10000;
+				errorPacket.packetId = 2;
+				errorPacket.serverErrorMessage = " session was killed!!";
+				this.dispatchMessageTo(source, errorPacket.toByteBuffer(source).array());
+				logger.warn("session was killed!!",new Exception());
+			}
+			
+			source.postClose(null);
+		}else{
+			if(logger.isInfoEnabled()){
+				logger.info(this+" session ended.");
+			}
+		}
+		this.dispatchMessageTo(source,null);
 	}
 	
 

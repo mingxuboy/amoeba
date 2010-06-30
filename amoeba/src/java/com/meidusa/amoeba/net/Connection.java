@@ -149,15 +149,20 @@ public abstract class Connection implements NetEventHandler {
     /**
      * 关闭当前连接，并且从ConnectionManager中删除该连接。
      */
-    protected synchronized void close(Exception exception) {
+    protected void close(Exception exception) {
             // we shouldn't be closed twice
         if (isClosed()) {
             logger.warn("Attempted to re-close connection ["+ toString() + "]");
             return;
         }
         
-    	socketClosed = true;
-
+        synchronized (this) {
+        	if (isClosed()) {
+        		return;
+        	}
+        	socketClosed = true;
+		}
+        
         if (_handler instanceof Sessionable) {
         	try{
 	            Sessionable session = (Sessionable) _handler;
