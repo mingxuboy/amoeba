@@ -30,7 +30,6 @@ import com.meidusa.amoeba.util.StringUtil;
  */
 public class MysqlClientConnectionManager extends AuthingableConnectionManager {
 	
-    private final static String SERVER_VERSION = "5.1.45-mysql-amoeba-proxy-1.3.0-BETA";
     private static byte[] AUTHENTICATEOKPACKETDATA;
     static {
             OkPacket ok = new OkPacket();
@@ -59,7 +58,7 @@ public class MysqlClientConnectionManager extends AuthingableConnectionManager {
         handshakePacket.restOfScrambleBuff = StringUtil.getRandomString(12);
 
         handshakePacket.serverStatus = 2;
-        handshakePacket.serverVersion = SERVER_VERSION;
+        handshakePacket.serverVersion = MysqlProxyRuntimeContext.SERVER_VERSION;
         handshakePacket.serverCapabilities = 41516;
 
         MysqlProxyRuntimeContext context = ((MysqlProxyRuntimeContext) MysqlProxyRuntimeContext.getInstance());

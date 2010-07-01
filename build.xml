@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="GB2312"?>
 <project default="mysql" name="AmoebaBuilder" basedir="." xmlns:artifact="urn:maven-artifact-ant">
-  	<property name="amoeba.mysql.version"     value="1.3.0-BETA"/>
+  	<property name="amoeba.mysql.version"     value="1.2.1-GA"/>
   	<property name="amoeba.aladdin.version"     value="1.0.0-BETA"/>
   	<property name="app.name"     value="amoeba"/>
   	<property name="deploy.dir"   value="dist"/>
