@@ -77,7 +77,11 @@ public class ConnectionManager extends LoopingThread implements Reporter, Initia
         this.idleCheckTime = idleCheckTime;
     }
 
-    public void appendReport(StringBuilder report, long now, long sinceLast, boolean reset, Level level) {
+    public long getIdleCheckTime() {
+		return idleCheckTime;
+	}
+
+	public void appendReport(StringBuilder report, long now, long sinceLast, boolean reset, Level level) {
         report.append("* ").append(this.getName()).append("\n");
         report.append("- Registed Connection size: ").append(_selector.keys().size()).append("\n");
         report.append("- created Connection size: ").append(_stats.connects.get()).append("\n");
