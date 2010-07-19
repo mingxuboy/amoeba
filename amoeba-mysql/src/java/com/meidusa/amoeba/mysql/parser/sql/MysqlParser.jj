@@ -620,8 +620,8 @@ TOKEN:
 				"\uffd2" - "\uffd7",
 				"\uffda" - "\uffdc"
 			]>
-|   < #SPECIAL_CHARS: "$" | "_">
-|   < STRING_LITERAL: ("_" <IDENTIFIER>)*"'" ((~["'"])|("\\" "'"))* "'">
+|   < #SPECIAL_CHARS: "$" | "_" >
+|   < STRING_LITERAL: ( "_" <IDENTIFIER> | "x" )* "'" ((~["'"])|("\\" "'"))* "'">
 |   < S_QUOTED_IDENTIFIER: "\"" (~["\n","\r","\""])* "\"" >
 |	< S_COMMA_IDENTIFIER: "`" ((["@"])*( <LETTER> )+ ( <DIGIT> | "-"|<LETTER> |<SPECIAL_CHARS>)*) "`">
 |   < S_PARAMETER_MARKER: "?">
@@ -1698,31 +1698,34 @@ Expression SQLBetweenClause(Expression inputExpression,Statement statement)     
 }
 {
     ["NOT"{not = true;}] "BETWEEN" minExpression = SQLSimpleExpression(statement) "AND" maxExpression = SQLSimpleExpression(statement){
-    	ComparisonExpression comparativeMinExpression = new ComparisonExpression();
-    	comparativeMinExpression.setExpression(minExpression);
-    	comparativeMinExpression.setComparison(Comparative.GreaterThanOrEqual);
+
+		if(minExpression != null && maxExpression != null)		{	    	ComparisonExpression comparativeMinExpression = new ComparisonExpression();
+	    	comparativeMinExpression.setExpression(minExpression);
+	    	comparativeMinExpression.setComparison(Comparative.GreaterThanOrEqual);
+	    	
+	    	ComparisonExpression comparativeMaxExpression = new ComparisonExpression();
+	    	comparativeMaxExpression.setExpression(maxExpression);
+	    	comparativeMaxExpression.setComparison(Comparative.LessThanOrEqual);
+	    	AndExpression andExpression = new AndExpression();
+	    	if(inputExpression instanceof ColumnExpression){
+	    		ColumnExpression columnMinExpression = new ColumnExpression();
+				columnMinExpression.setExpression(comparativeMinExpression);
+				columnMinExpression.setColumn(((ColumnExpression)inputExpression).getColumn());
+				
+				ColumnExpression columnMaxExpression = new ColumnExpression();
+				columnMaxExpression.setExpression(comparativeMaxExpression);
+				columnMaxExpression.setColumn(((ColumnExpression)inputExpression).getColumn());
+				
+				andExpression.addExpression(columnMinExpression);
+				andExpression.addExpression(columnMaxExpression);
+	    	}else{
+	    		andExpression.addExpression(comparativeMinExpression);
+	    		andExpression.addExpression(comparativeMaxExpression);
+	    	}
     	
-    	ComparisonExpression comparativeMaxExpression = new ComparisonExpression();
-    	comparativeMaxExpression.setExpression(maxExpression);
-    	comparativeMaxExpression.setComparison(Comparative.LessThanOrEqual);
-    	AndExpression andExpression = new AndExpression();
-    	if(inputExpression instanceof ColumnExpression){
-    		ColumnExpression columnMinExpression = new ColumnExpression();
-			columnMinExpression.setExpression(comparativeMinExpression);
-			columnMinExpression.setColumn(((ColumnExpression)inputExpression).getColumn());
-			
-			ColumnExpression columnMaxExpression = new ColumnExpression();
-			columnMaxExpression.setExpression(comparativeMaxExpression);
-			columnMaxExpression.setColumn(((ColumnExpression)inputExpression).getColumn());
-			
-			andExpression.addExpression(columnMinExpression);
-			andExpression.addExpression(columnMaxExpression);
-    	}else{
-    		andExpression.addExpression(comparativeMinExpression);
-    		andExpression.addExpression(comparativeMaxExpression);
-    	}
-    	
-		return reverseExpression(not,andExpression);
+			return reverseExpression(not,andExpression);
+		}else		{			return null;
+		}
     }
 }
 
