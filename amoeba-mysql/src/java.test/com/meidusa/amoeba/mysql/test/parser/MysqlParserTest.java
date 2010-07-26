@@ -30,6 +30,8 @@ public class MysqlParserTest {
 	public static void main(String[] args) throws Exception{
 		Map<String,Function> funMap = AbstractQueryRouter.loadFunctionMap("./build/build-mysql/conf/functionMap.xml");
 		parser(funMap,"SELECT * FROM d_visitor.t_visitor_visit WHERE `user`='1235625354' and visitors<>'1235625354' ORDER BY date DESC LIMIT 0,30");
+		parser(funMap,"SELECT PRIVILEGE,PRIVILEGE & 1   FROM SD_PHOTO.IMAGE    WHERE SDID=13916728412 and PRIVILEGE = 1& DD" );
+		
 		parser(funMap,"select count(tfi.Financing_Invest_ID) as investCount  from tbl_financing_invest as tfi,tbl_financing_event as tfe where tfe.HappenDate between DATE_FORMAT(DATE_ADD(Now(), Interval -10 year),'%Y') and DATE_FORMAT(NOW(),'%Y') and tfi.FinancingEvent_ID = tfe.Financing_Event_ID and tfi.Organization_ID =3;");
 		parser(funMap,"SELECT SOURCE_UUID  FROM SD_FEED.FEED  FORCE INDEX(INDX_SDID_DFALG_ATYPE_CRTTIME)" 
 				+" WHERE DEL_FLAG = 0 AND   SDID IN   (    1247553060   ,    1247832413   ,    1181647770   ,    1248002785   ,    1248203227   ,    1247999383   ,    1247811558   ,    1181607039   ,    1221592290   ,    1246478650   ,    1109266877   ,    999259458   ,    595684235   ,    658423815   ,    1109949156   ,    1145903891   ,    1034904986   ,    1180096992   ,    216712   ,    937839624   )       AND     ACTIVITY_TYPE IN     (      1002003       ,      1002005       ,      1002007       ,      1002009       ,      1002011       )"            

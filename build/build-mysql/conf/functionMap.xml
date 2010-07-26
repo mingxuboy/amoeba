@@ -5,6 +5,8 @@
 <amoeba:function xmlns:amoeba="http://amoeba.meidusa.com/">
 
 	<function name="+" class="com.meidusa.amoeba.parser.function.Add"/>
+	
+	<function name="AND" class="com.meidusa.amoeba.parser.function.And"/>
 
 	<function name="-" class="com.meidusa.amoeba.parser.function.Sub"/>
 	

@@ -44,7 +44,7 @@ public class ColumnExpression extends Expression {
 	}
 	
 	public boolean isRealtime(){
-		return expression.isRealtime();
+		return expression!= null? expression.isRealtime():false;
 	}
 	
 	@SuppressWarnings("unchecked")
