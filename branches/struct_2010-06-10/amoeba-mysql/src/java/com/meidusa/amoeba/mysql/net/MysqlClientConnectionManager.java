@@ -17,6 +17,7 @@ import java.io.IOException;
 
 import com.meidusa.amoeba.mysql.context.MysqlProxyRuntimeContext;
 import com.meidusa.amoeba.mysql.handler.MySqlCommandDispatcher;
+import com.meidusa.amoeba.mysql.io.MySqlPacketConstant;
 import com.meidusa.amoeba.mysql.net.packet.ErrorPacket;
 import com.meidusa.amoeba.mysql.net.packet.HandshakePacket;
 import com.meidusa.amoeba.mysql.net.packet.OkPacket;
@@ -28,7 +29,7 @@ import com.meidusa.amoeba.util.StringUtil;
 /**
  * @author <a href=mailto:piratebase@sina.com>Struct chen</a>
  */
-public class MysqlClientConnectionManager extends AuthingableConnectionManager {
+public class MysqlClientConnectionManager extends AuthingableConnectionManager implements MySqlPacketConstant{
 	
     private static byte[] AUTHENTICATEOKPACKETDATA;
     static {
@@ -59,8 +60,11 @@ public class MysqlClientConnectionManager extends AuthingableConnectionManager {
 
         handshakePacket.serverStatus = 2;
         handshakePacket.serverVersion = MysqlProxyRuntimeContext.SERVER_VERSION;
-        handshakePacket.serverCapabilities = 41516;
-
+    	
+        //handshakePacket.serverCapabilities = 41516 & (~32);
+        handshakePacket.serverCapabilities = CLIENT_LONG_FLAG | CLIENT_CONNECT_WITH_DB
+        									| CLIENT_PROTOCOL_41 | CLIENT_SECURE_CONNECTION ;
+        
         MysqlProxyRuntimeContext context = ((MysqlProxyRuntimeContext) MysqlProxyRuntimeContext.getInstance());
         handshakePacket.serverCharsetIndex = (byte) (context.getServerCharsetIndex() & 0xff);
         handshakePacket.threadId = Thread.currentThread().hashCode();
@@ -89,6 +93,14 @@ public class MysqlClientConnectionManager extends AuthingableConnectionManager {
         conn.postMessage(error.toByteBuffer(conn).array());
         MysqlClientConnection aconn = (MysqlClientConnection) conn;
         aconn.afterAuth();
+    }
+    
+    public static void main(String[] args){
+    	long hello =  CLIENT_LONG_FLAG | CLIENT_CONNECT_WITH_DB
+		| CLIENT_PROTOCOL_41 | CLIENT_SECURE_CONNECTION | CLIENT_TRANSACTIONS;
+    	System.out.println(hello);
+    	System.out.println(41516 & (~32));
+    	
     }
 
 }
