@@ -15,8 +15,6 @@ package com.meidusa.amoeba.net;
 
 import java.io.IOException;
 
-import org.apache.log4j.Logger;
-
 /**
  * 支持Connection 身份验证流程的 ConnectionManager
  * 

@@ -1,3 +1,18 @@
+/**
+ * <pre>
+ * copy right meidusa.com
+ * 
+ * 	This program is free software; you can redistribute it and/or modify it under the terms of 
+ * the GNU General Public License as published by the Free Software Foundation; either version 3 of the License, 
+ * or (at your option) any later version. 
+ * 
+ * 	This program is distributed in the hope that it will be useful, 
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+ * See the GNU General Public License for more details. 
+ * 	You should have received a copy of the GNU General Public License along with this program; 
+ * if not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ * </pre>
+ */
 package com.meidusa.amoeba.net.packet;
 
 import java.io.UnsupportedEncodingException;
@@ -11,10 +26,10 @@ import com.meidusa.amoeba.net.Connection;
 /**
  * @author struct
  */
-public abstract class AbstractPacket implements Packet {
+public abstract class AbstractPacket<T extends AbstractPacketBuffer> implements Packet {
 
     public void init(byte[] buffer, Connection conn) {
-        AbstractPacketBuffer packetBuffer = constractorBuffer(buffer);
+        T packetBuffer = constractorBuffer(buffer);
         packetBuffer.init(conn);
         init(packetBuffer);
         afterInit(packetBuffer);
@@ -23,18 +38,18 @@ public abstract class AbstractPacket implements Packet {
     /**
      * 分析数据包(分析包头+数据区域,分析完包头以后应该将Buffer的postion设置到数据区)
      */
-    protected abstract void init(AbstractPacketBuffer buffer);
+    protected abstract void init(T buffer);
 
     /**
      * 做完初始化以后
      */
-    protected void afterInit(AbstractPacketBuffer buffer) {
+    protected void afterInit(T buffer) {
     }
 
     public ByteBuffer toByteBuffer(Connection conn) {
         try {
             int bufferSize = calculatePacketSize();
-            AbstractPacketBuffer packetBuffer = constractorBuffer(bufferSize);
+            T packetBuffer = constractorBuffer(bufferSize);
             packetBuffer.init(conn);
             return toBuffer(packetBuffer).toByteBuffer();
         } catch (UnsupportedEncodingException e) {
@@ -42,10 +57,10 @@ public abstract class AbstractPacket implements Packet {
         }
     }
 
-    private AbstractPacketBuffer constractorBuffer(int bufferSize) {
-        AbstractPacketBuffer buffer = null;
+    private T constractorBuffer(int bufferSize) {
+        T buffer = null;
         try {
-            Constructor<? extends AbstractPacketBuffer> constractor = getPacketBufferClass().getConstructor(int.class);
+            Constructor<T> constractor = getPacketBufferClass().getConstructor(int.class);
             buffer = constractor.newInstance(bufferSize);
         } catch (Exception e) {
             e.printStackTrace();
@@ -59,7 +74,7 @@ public abstract class AbstractPacket implements Packet {
      *  并且调用了{@link #afterPacketWritten(PacketBuffer)}
      * </pre>
      */
-    private AbstractPacketBuffer toBuffer(AbstractPacketBuffer buffer) throws UnsupportedEncodingException {
+    private T toBuffer(T buffer) throws UnsupportedEncodingException {
         write2Buffer(buffer);
         afterPacketWritten(buffer);
         return buffer;
@@ -68,7 +83,7 @@ public abstract class AbstractPacket implements Packet {
     /**
      * 包含头的消息封装
      */
-    protected abstract void write2Buffer(AbstractPacketBuffer buffer) throws UnsupportedEncodingException;
+    protected abstract void write2Buffer(T buffer) throws UnsupportedEncodingException;
 
     /**
      * <pre>
@@ -76,17 +91,17 @@ public abstract class AbstractPacket implements Packet {
      * 这儿一般是计算数据包总长度,或者其他需要数据包写完才能完成的数据
      * </pre>
      */
-    protected abstract void afterPacketWritten(AbstractPacketBuffer buffer);
+    protected abstract void afterPacketWritten(T buffer);
 
     /**
      * 估算packet的大小，估算的太大浪费内存，估算的太小会影响性能
      */
     protected abstract int calculatePacketSize();
 
-    private AbstractPacketBuffer constractorBuffer(byte[] buffer) {
-        AbstractPacketBuffer packetbuffer = null;
+    private T constractorBuffer(byte[] buffer) {
+        T packetbuffer = null;
         try {
-            Constructor<? extends AbstractPacketBuffer> constractor = getPacketBufferClass().getConstructor(byte[].class);
+            Constructor<T> constractor = getPacketBufferClass().getConstructor(byte[].class);
             packetbuffer = constractor.newInstance(buffer);
         } catch (Exception e) {
             e.printStackTrace();
@@ -94,7 +109,7 @@ public abstract class AbstractPacket implements Packet {
         return packetbuffer;
     }
 
-    protected abstract Class<? extends AbstractPacketBuffer> getPacketBufferClass();
+    protected abstract Class<T> getPacketBufferClass();
 
     public String toString() {
         return ToStringBuilder.reflectionToString(this);
