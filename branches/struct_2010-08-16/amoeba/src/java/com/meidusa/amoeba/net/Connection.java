@@ -342,7 +342,7 @@ public abstract class Connection implements NetEventHandler {
         }
         try {
             SelectionKey key = getSelectionKey();
-            if (!key.isValid()) {
+            if (key!= null && !key.isValid()) {
                 handleFailure(new java.nio.channels.CancelledKeyException());
                 return;
             }
