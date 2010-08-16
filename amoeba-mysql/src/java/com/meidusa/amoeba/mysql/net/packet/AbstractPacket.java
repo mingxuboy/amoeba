@@ -19,11 +19,9 @@ import org.apache.log4j.Logger;
 
 import com.meidusa.amoeba.mysql.io.MySqlPacketConstant;
 import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
-import com.meidusa.amoeba.util.StringFillFormat;
 
 /**
  * @author <a href=mailto:piratebase@sina.com>Struct chen</a>
- * @author hexianmao
  */
 public class AbstractPacket extends com.meidusa.amoeba.net.packet.AbstractPacket implements MySqlPacketConstant {
 
@@ -69,14 +67,6 @@ public class AbstractPacket extends com.meidusa.amoeba.net.packet.AbstractPacket
     @Override
     protected Class<? extends AbstractPacketBuffer> getPacketBufferClass() {
         return MysqlPacketBuffer.class;
-    }
-
-    @Override
-    public String toString() {
-        StringBuilder s = new StringBuilder();
-        s.append("[Length=").append(StringFillFormat.format(packetLength, 4));
-        s.append(",PacketId=").append(StringFillFormat.format(packetId, 2)).append("]");
-        return s.toString();
     }
 
 }

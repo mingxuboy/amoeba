@@ -35,7 +35,7 @@
 		-->
 		
 		<!-- query timeout( default: 60 second , TimeUnit:second) -->
-		<property name="queryTimeout">30</property>
+		<property name="queryTimeout">60</property>
 	</server>
 	
 	<!-- 

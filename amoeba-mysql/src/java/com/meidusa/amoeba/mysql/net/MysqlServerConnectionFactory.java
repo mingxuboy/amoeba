@@ -29,5 +29,13 @@ public class MysqlServerConnectionFactory extends PoolableConnectionFactory{
 		return new MysqlServerConnection(channel,createStamp);
 	}
 	
-	
+	/*public boolean validateObject(Object arg0) {
+		boolean isValid = super.validateObject(arg0);
+		if(isValid){
+			MysqlServerConnection conn = (MysqlServerConnection)arg0;
+			return true;
+		}else{
+			return false;
+		}
+	}*/
 }

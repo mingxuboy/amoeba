@@ -356,8 +356,38 @@ public class MysqlPacketBuffer extends AbstractPacketBuffer {
         return isPacketType(bty, (byte) 0xff);
     }
 
+    /**
+     * <PRE>
+     * VERSION 4.0
+	 *  Bytes                 Name
+	 *  -----                 ----
+	 *  1                     field_count, always = 0xfe
+	 *  
+	 *  VERSION 4.1
+	 *  Bytes                 Name
+	 *  -----                 ----
+	 *  1                     field_count, always = 0xfe
+	 *  2                     warning_count
+	 *  2                     Status Flags
+	 *  
+	 *  field_count:          The value is always 0xfe (decimal 254).
+	 *                        However ... recall (from the
+	 *                        section "Elements", above) that the value 254 can begin
+	 *                        a Length-Encoded-Binary value which contains an 8-byte
+	 *                        integer. So, to ensure that a packet is really an EOF
+	 *                        Packet: (a) check that first byte in packet = 0xfe, (b)
+	 *                        check that size of packet < 9.
+	 *  
+	 *  warning_count:        Number of warnings. Sent after all data has been sent
+	 *                        to the client.
+	 *  
+	 *  server_status:        Contains flags like SERVER_MORE_RESULTS_EXISTS
+	 * </PRE>
+	 * @param bty
+     * @return
+     */
     public static boolean isEofPacket(byte[] bty) {
-        return isPacketType(bty, (byte) 0xfe);
+        return bty.length< 13 && isPacketType(bty, (byte) 0xfe);
     }
 
     public static int increasePacketId(int packetId) {

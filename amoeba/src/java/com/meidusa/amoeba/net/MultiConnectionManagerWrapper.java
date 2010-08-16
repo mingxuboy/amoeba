@@ -64,6 +64,8 @@ public class MultiConnectionManagerWrapper extends ConnectionManager{
 	    		try {
 	    			connMgrs[i] = (ConnectionManager)Class.forName(subManagerClassName).newInstance();
 	    			connMgrs[i].setName(this.getName()+"-"+i);
+	    			connMgrs[i].setIdleCheckTime(this.getIdleCheckTime());
+	    			connMgrs[i]._observers.addAll(this._observers);
 					} catch (Exception e) {
 						log.error("create sub manager error",e);
 						e.printStackTrace();

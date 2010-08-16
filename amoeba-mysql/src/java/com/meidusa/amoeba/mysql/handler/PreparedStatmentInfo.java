@@ -19,9 +19,6 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import com.meidusa.amoeba.context.ProxyRuntimeContext;
-import com.meidusa.amoeba.mysql.jdbc.MysqlDefs;
-import com.meidusa.amoeba.mysql.net.packet.EOFPacket;
-import com.meidusa.amoeba.mysql.net.packet.FieldPacket;
 import com.meidusa.amoeba.mysql.net.packet.OKforPreparedStatementPacket;
 import com.meidusa.amoeba.net.DatabaseConnection;
 import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
@@ -60,43 +57,6 @@ public class PreparedStatmentInfo {
         statmentId = id;
         this.preparedStatment = preparedSql;
         parameterCount = ProxyRuntimeContext.getInstance().getQueryRouter().parseParameterCount(conn, preparedSql);
-        /* PacketBuffer buffer = new AbstractPacketBuffer(2048);
-        OKforPreparedStatementPacket okPaket = new OKforPreparedStatementPacket();
-        okPaket.columns = 1;
-        okPaket.packetId = 1;
-        byte packetId = 1;
-        parameterCount = ProxyRuntimeContext.getInstance().getQueryRouter().parseParameterCount(conn, preparedSql);
-        okPaket.parameters = parameterCount;
-        okPaket.statementHandlerId = statmentId;
-        buffer.writeBytes(okPaket.toByteBuffer(conn).array());
-        if (parameterCount > 0) {
-            for (int i = 0; i < parameterCount; i++) {
-                FieldPacket field = new FieldPacket();
-                field.packetId = (byte) (++packetId);
-
-                buffer.writeBytes(field.toByteBuffer(conn).array());
-            }
-            EOFPacket eof = new EOFPacket();
-            eof.packetId = ++packetId;
-            eof.serverStatus = 2;
-
-            buffer.writeBytes(eof.toByteBuffer(conn).array());
-        }
-
-        if (okPaket.columns > 0) {
-            for (int i = 0; i < okPaket.columns; i++) {
-                FieldPacket field = new FieldPacket();
-                field.packetId = (byte) (++packetId);
-                field.length = 8;
-                field.type = (byte) MysqlDefs.FIELD_TYPE_VAR_STRING;
-                buffer.writeBytes(field.toByteBuffer(conn).array());
-            }
-            EOFPacket eof = new EOFPacket();
-            eof.packetId = ++packetId;
-            eof.serverStatus = 2;
-            buffer.writeBytes(eof.toByteBuffer(conn).array());
-        }
-        packetBuffer = buffer.toByteBuffer().array();*/
     }
     
     public PreparedStatmentInfo (DatabaseConnection conn,long id, String preparedSql,List<byte[]> messageList) throws ParseException{

@@ -141,8 +141,8 @@ public class Queue<T> {
 
 	/**
 	 * Gets the next item from the queue blocking for no longer than
-	 * <code>maxwait</code> milliseconds waiting for an item to be added to
-	 * the queue if it is empty at the time of invocation.
+	 * <code>maxwait</code> milliseconds waiting for an item to be added to the
+	 * queue if it is empty at the time of invocation.
 	 */
 	public synchronized T get(long maxwait) {
 		if (_count == 0) {
@@ -248,4 +248,5 @@ public class Queue<T> {
 	protected int _count = 0;
 	protected int _start = 0, _end = 0;
 	protected int _suggestedSize, _size = 0;
+	
 }

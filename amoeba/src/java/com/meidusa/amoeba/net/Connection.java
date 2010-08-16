@@ -141,13 +141,8 @@ public abstract class Connection implements NetEventHandler {
      * 
      * @return
      */
-    public boolean isClosed() {
-        closeLock.lock();
-        try {
-            return socketClosed;
-        } finally {
-            closeLock.unlock();
-        }
+    public synchronized boolean isClosed() {
+        return socketClosed;
 
     }
 
@@ -155,25 +150,29 @@ public abstract class Connection implements NetEventHandler {
      * 关闭当前连接，并且从ConnectionManager中删除该连接。
      */
     protected void close(Exception exception) {
-        closeLock.lock();
-        try {
             // we shouldn't be closed twice
-            if (isClosed()) {
-                logger.warn("Attempted to re-close connection ["+ toString() + "]");
-                Thread.dumpStack();
-                return;
-            }
-            socketClosed = true;
-        } finally {
-            closeLock.unlock();
-        }
-
-        if (_handler instanceof Sessionable) {
-            Sessionable session = (Sessionable) _handler;
-            logger.error(this + ",closeSocket,and endSession,handler=" + session);
-            session.endSession();
+        if (isClosed()) {
+            logger.warn("Attempted to re-close connection ["+ toString() + "]");
+            return;
         }
         
+        synchronized (this) {
+        	if (isClosed()) {
+        		return;
+        	}
+        	socketClosed = true;
+		}
+        
+        if (_handler instanceof Sessionable) {
+        	try{
+	            Sessionable session = (Sessionable) _handler;
+	            logger.error(this + ",closeSocket,and endSession,handler=" + session);
+	            session.endSession(true);
+        	}catch(Exception e){
+        		logger.warn("Error endSession [conn=" + toString() + "]",e);
+        	}
+        }
+    
         try{
 	        if (_selkey != null) {
 	            _selkey.attach(null);
@@ -185,7 +184,7 @@ public abstract class Connection implements NetEventHandler {
 	            _selkey = null;
 	        }
         }catch(Exception e){
-        	logger.warn("Error cancel connection selectkey [conn=" + toString() + "] error=" + e + "].");
+        	logger.warn("Error cancel connection selectkey [conn=" + toString() + "] error=" + e + "].",e);
         }
         
         if(logger.isDebugEnabled()){
@@ -196,11 +195,14 @@ public abstract class Connection implements NetEventHandler {
         } catch (IOException ioe) {
             logger.warn("Error closing connection ["+ toString() + "], error=" + ioe + "].");
         }
-
-        if (exception != null) {
-            _cmgr.connectionFailed(this, exception);
-        } else {
-            _cmgr.connectionClosed(this);
+        try{
+	        if (exception != null) {
+	            _cmgr.connectionFailed(this, exception);
+	        } else {
+	            _cmgr.connectionClosed(this);
+	        }
+        }catch(Exception e){
+        	logger.warn("notify ConnectionManager closing connection ["+ toString() + "], error=" + e + "].",e);
         }
     }
 
@@ -231,6 +233,9 @@ public abstract class Connection implements NetEventHandler {
         // 如果已经关闭
         if (isClosed()) {
             logger.warn("Failure reported on closed connection " + this + ".", ioe);
+            //reclose socket
+            socketClosed = false;
+            this.close(ioe);
             return;
         }
         postClose(ioe);
@@ -256,9 +261,7 @@ public abstract class Connection implements NetEventHandler {
                 _fin.read(msg);
                 doReceiveMessage(msg);
             }
-            if(_inQueue.size()>0){
-            	messageProcess();
-            }
+        	messageProcess();
         } catch (EOFException eofe) {
             // close down the socket gracefully
             handleFailure(eofe);
@@ -282,11 +285,11 @@ public abstract class Connection implements NetEventHandler {
 
     
     protected void doReceiveMessage(byte[] message){
-    	_inQueue.appendSilent(message);
+    	_inQueue.append(message);
     }
     
     protected void messageProcess() {
-        _handler.handleMessage(this);
+		_handler.handleMessage(this);
     }
 
     public boolean doWrite() throws IOException {
@@ -330,6 +333,9 @@ public abstract class Connection implements NetEventHandler {
         writeMessage();
     }
 
+    public int getInQueueSize(){
+    	return _outQueue.size();
+    }
     protected void writeMessage() {
         if (isClosed()) {
             return;
@@ -340,15 +346,13 @@ public abstract class Connection implements NetEventHandler {
                 handleFailure(new java.nio.channels.CancelledKeyException());
                 return;
             }
-            synchronized (key) {
-                if (key != null && (key.interestOps() & SelectionKey.OP_WRITE) == 0) {
-                    /**
-                     * 发送数据，如果返回false，则表示socket send buffer 已经满了。则Selector 需要监听 Writeable event
-                     */
-                    boolean finished = doWrite();
-                    if (!finished) {
-                        key.interestOps(key.interestOps() | SelectionKey.OP_WRITE);
-                    }
+            if (key != null && (key.interestOps() & SelectionKey.OP_WRITE) == 0) {
+                /**
+                 * 发送数据，如果返回false，则表示socket send buffer 已经满了。则Selector 需要监听 Writeable event
+                 */
+                boolean finished = doWrite();
+                if (!finished) {
+                    key.interestOps(key.interestOps() | SelectionKey.OP_WRITE);
                 }
             }
         } catch (IOException ioe) {
@@ -381,6 +385,10 @@ public abstract class Connection implements NetEventHandler {
 
     }
 
+    public ConnectionManager getConnectionManager(){
+    	return this._cmgr;
+    }
+    
     protected PacketInputStream getPacketInputStream() {
         if (_fin == null) {
             _fin = createPacketInputStream();
