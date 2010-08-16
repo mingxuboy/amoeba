@@ -19,7 +19,7 @@ public class JettyServer {
     public static void main(String[] args) {
     	
     	String jettyConf = System.getProperty("jetty.conf", "${amoeba.home}/conf/jetty.xml");
-    	String rootContext = System.getProperty("jetty.conf", "${amoeba.home}/htdocs");
+    	String rootContext = System.getProperty("rootContext", "${amoeba.home}/htdocs");
     	jettyConf = ConfigUtil.filter(jettyConf);
     	rootContext = ConfigUtil.filter(rootContext);
         Server server = new Server();

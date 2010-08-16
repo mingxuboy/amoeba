@@ -20,7 +20,15 @@ public class CommandInfo{
 		private boolean main;
 		private int statusCode;
 		private Runnable runnable;
-		
+		private boolean isMerged = false;
+		public boolean isMerged() {
+			return isMerged;
+		}
+
+		public void setMerged(boolean isMerged) {
+			this.isMerged = isMerged;
+		}
+
 		public byte[] getBuffer() {
 			return buffer;
 		}

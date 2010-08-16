@@ -77,7 +77,11 @@ public class ConnectionManager extends LoopingThread implements Reporter, Initia
         this.idleCheckTime = idleCheckTime;
     }
 
-    public void appendReport(StringBuilder report, long now, long sinceLast, boolean reset, Level level) {
+    public long getIdleCheckTime() {
+		return idleCheckTime;
+	}
+
+	public void appendReport(StringBuilder report, long now, long sinceLast, boolean reset, Level level) {
         report.append("* ").append(this.getName()).append("\n");
         report.append("- Registed Connection size: ").append(_selector.keys().size()).append("\n");
         report.append("- created Connection size: ").append(_stats.connects.get()).append("\n");
@@ -128,8 +132,8 @@ public class ConnectionManager extends LoopingThread implements Reporter, Initia
                     if (handler instanceof Connection) {
                     	Connection conn = (Connection) handler;
                     	long idlesecond = (iterStamp - conn._lastEvent)/1000;
-                    	logger.warn("Disconnecting non-communicative server [manager=[" + this + "] conn=["+conn.toString()+"], socket closed!" +", idle=" + idlesecond + " s]. life="+((System.currentTimeMillis()-conn._createTime)/1000) +" s");
-
+                    	logger.warn("Disconnecting non-communicative server [manager=" + this + " conn="+conn.toString()+", socket closed!" +", idle=" + idlesecond + " s]. life="+((System.currentTimeMillis()-conn._createTime)/1000) +" s");
+                    	
                         closeConnection((Connection) handler, null);
                     }
                 }
@@ -206,10 +210,10 @@ public class ConnectionManager extends LoopingThread implements Reporter, Initia
                         closeConnection((Connection) handler, e);
                     }
                 }
-            } else if (selkey.isReadable() || selkey.isAcceptable()) {
+            }
+            
+            if (selkey.isReadable() || selkey.isAcceptable()) {
             	handler.handleEvent(iterStamp);
-            } else {
-                logger.error(selkey.attachment() + ", isAcceptable=" + selkey.isAcceptable() + ",isConnectable=" + selkey.isConnectable() + ",isReadable=" + selkey.isReadable() + ",isWritable=" + selkey.isWritable());
             }
         }
 
@@ -220,9 +224,7 @@ public class ConnectionManager extends LoopingThread implements Reporter, Initia
      * 采用异步方式关闭一个连接。 将即将关闭的连接放入deathQueue中
      */
     void closeConnection(Connection conn, Exception exception) {
-        if (!conn.isClosed()) {
-            _deathq.append(new Tuple<Connection, Exception>(conn, exception));
-        }
+    	_deathq.append(new Tuple<Connection, Exception>(conn, exception));
     }
 
     public void closeAll() {
@@ -287,6 +289,10 @@ public class ConnectionManager extends LoopingThread implements Reporter, Initia
         _selector.wakeup();
     }
 
+
+    public Selector getSelector(){
+    	return this._selector;
+    }
     /**
      * 往ConnectionManager 增加一个SocketChannel
      */

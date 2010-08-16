@@ -104,7 +104,7 @@ public class MySqlCommandDispatcher implements MessageHandler {
 	                        session.startSession();
 	                    } catch (Exception e) {
 	                        logger.error("start Session error:", e);
-	                        session.endSession();
+	                        session.endSession(true);
 	                        throw e;
 	                    }
 	                }
@@ -126,7 +126,7 @@ public class MySqlCommandDispatcher implements MessageHandler {
 	                        session.startSession();
 	                    } catch (Exception e) {
 	                        logger.error("start Session error:", e);
-	                        session.endSession();
+	                        session.endSession(true);
 	                        throw e;
 	                    }
 	                }
@@ -187,7 +187,7 @@ public class MySqlCommandDispatcher implements MessageHandler {
 		                            session.startSession();
 		                        } catch (Exception e) {
 		                            logger.error("start Session error:", e);
-		                            session.endSession();
+		                            session.endSession(true);
 		                            throw e;
 		                        }
 		                    }

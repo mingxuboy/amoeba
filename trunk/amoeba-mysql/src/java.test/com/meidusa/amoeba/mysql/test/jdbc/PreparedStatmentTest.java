@@ -28,7 +28,7 @@ public class PreparedStatmentTest {
         PreparedStatement statment = null;
         ResultSet result = null;
         
-        conn = DriverManager.getConnection("jdbc:mysql://127.0.0.1:8066/test?useUnicode=true&characterEncoding=utf-8&useServerPrepStmts=true", "sdfriend", "sdfriend");
+        conn = DriverManager.getConnection("jdbc:mysql://127.0.0.1:8066/test?useUnicode=true&characterEncoding=utf-8&useServerPrepStmts=true&useCompression=true", "sdfriend", "sdfriend");
         try {
         	for(int i=0;i<1;i++){
             statment = conn.prepareStatement("SELECT ID, SDID, F_SDID, APP_ID, RESERVE1, RESERVE2, RESERVE3 FROM SD_RELATION.RELATION_ORIGIN WHERE SDID =? AND F_SDID=? AND APP_ID = ?");

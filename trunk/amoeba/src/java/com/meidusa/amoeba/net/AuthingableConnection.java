@@ -40,31 +40,28 @@ public abstract class AuthingableConnection extends Connection implements Messag
 		return authenticatedSeted;
 	}
 	
-	public void setAuthenticated(boolean authenticated){
-		synchronized(this){
-			authenticatedSeted = true;
-			this.authenticated = authenticated;
-			this.notifyAll();
-			if(logger.isDebugEnabled()){
-				try{
-				logger.debug(this.toString()+" , authenticated: "+ authenticated +" (" + toString()+")");
-				}catch(Exception e){};
-			}
+	public synchronized void setAuthenticated(boolean authenticated){
+		authenticatedSeted = true;
+		this.authenticated = authenticated;
+		this.notifyAll();
+		if(logger.isDebugEnabled()){
+			try{
+			logger.debug(this.toString()+" , authenticated: "+ authenticated +" (" + toString()+")");
+			}catch(Exception e){};
 		}
 	}
 	
-	public boolean isAuthenticatedWithBlocked(long timeout){
-		if(authenticatedSeted) return authenticated;
-		synchronized(this){
-			if(authenticatedSeted) return authenticated;
-			try {
-				this.wait(timeout);
-			} catch (InterruptedException e) {
-			}
+	public synchronized boolean isAuthenticatedWithBlocked(long timeout) {
+		if (authenticatedSeted){
+			return authenticated;
 		}
-		
-		if(!authenticatedSeted){
-			logger.warn("authenticate to server:"+toString() +" time out");
+		try {
+			this.wait(timeout);
+		} catch (InterruptedException e) {
+		}
+
+		if (!authenticatedSeted) {
+			logger.warn("authenticate to server:" + toString() + " time out");
 		}
 		return authenticated;
 	}
