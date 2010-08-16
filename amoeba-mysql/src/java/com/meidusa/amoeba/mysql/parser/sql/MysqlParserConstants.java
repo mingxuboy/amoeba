@@ -454,6 +454,7 @@ public interface MysqlParserConstants {
     "\"+\"",
     "\"-\"",
     "\"|\"",
+    "\"&\"",
     "\"/\"",
     "\"%\"",
     "\"DATE\"",
