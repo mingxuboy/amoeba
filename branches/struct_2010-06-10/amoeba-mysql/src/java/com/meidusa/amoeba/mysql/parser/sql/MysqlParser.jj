@@ -1764,9 +1764,11 @@ Expression SQLAddSubtractExpression(Statement statement)      :
 	FunctionExpression superExpression = null;
 }
 {
-       (expression = SQLMultiplicativeExpression(statement) ((token = "+" | token = "-"  | token = "|")
+       (expression = SQLMultiplicativeExpression(statement) ((token = "+" | token = "-"  | token = "|" | token = "&")
        otherExpression = SQLMultiplicativeExpression(statement){
-		    function = getFunction(token.image.toUpperCase());
+         String ident = token.image.toUpperCase();
+         	
+		    function = getFunction(ident);
 		    if(function == null) return null;
 		    FunctionExpression functionExpression = new FunctionExpression();
 		    functionExpression.setFunction(function);
