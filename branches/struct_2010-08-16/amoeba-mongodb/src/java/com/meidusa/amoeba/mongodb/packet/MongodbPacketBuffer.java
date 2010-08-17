@@ -1,6 +1,12 @@
 package com.meidusa.amoeba.mongodb.packet;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+
+import org.bson.BSONDecoder;
+import org.bson.BSONEncoder;
+import org.bson.BSONObject;
+import org.bson.io.BasicOutputBuffer;
 
 import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
 
@@ -10,7 +16,18 @@ import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
  *
  */
 public class MongodbPacketBuffer extends AbstractPacketBuffer {
-
+	static ThreadLocal<BSONDecoder> BSONDecoderTL = new ThreadLocal<BSONDecoder>(){
+		public BSONDecoder initialValue(){
+			return new BSONDecoder();
+		}
+	}; 
+	
+	static ThreadLocal<BSONEncoder> ENCODER = new ThreadLocal<BSONEncoder>(){
+		public BSONEncoder initialValue(){
+			return new BSONEncoder();
+		}
+	}; 
+	
 	public MongodbPacketBuffer(byte[] buf) {
 		super(buf);
 	}
@@ -72,12 +89,16 @@ public class MongodbPacketBuffer extends AbstractPacketBuffer {
 		writeByte((byte)0);
 	}
 	
-	public String readCString() throws UnsupportedEncodingException{
+	public String readCString(){
 		byte[] b = this.buffer; // a little bit optimization
 		int save = this.position;
 		while(this.position<b.length){
 			if(b[position++] == (byte)0){
-				return new String(b,save,this.position-save,"UTF-8");
+				try {
+					return new String(b,save,this.position-save,"UTF-8");
+				} catch (UnsupportedEncodingException e) {
+					return new String(b,save,this.position-save);
+				}
 			}else{
 				continue;
 			}
@@ -93,5 +114,30 @@ public class MongodbPacketBuffer extends AbstractPacketBuffer {
 	public double readDouble() {
 		long value = readLong();
 		return Double.longBitsToDouble(value);
+	}
+	
+	public BSONObject readBSONObject(){
+		try {
+			return BSONDecoderTL.get().readObject(this.asInputStream());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	public void writeBSONObject(BSONObject object) throws IOException{
+		BasicOutputBuffer buffer = new BasicOutputBuffer();
+		ENCODER.get().set(buffer);
+		ENCODER.get().encode(object);
+		buffer.pipe(this.asOutputStream());
+	}
+	
+	static int POSITION = 12;
+	public static int getOPMessageType(byte[] message){
+		byte[] b = message; // a little bit optimization
+		
+		return (b[POSITION] & 0xff) | ((b[POSITION+1] & 0xff) << 8)
+				| ((b[POSITION+2] & 0xff) << 16)
+				| ((b[POSITION+3] & 0xff) << 24);
 	}
 }
