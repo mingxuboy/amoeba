@@ -19,5 +19,14 @@ package com.meidusa.amoeba.mongodb.io;
 public interface MongodbPacketConstant {
 	public static final int HEADER_SIZE = 24;
 	public static final byte[] HEADER_PAD = new byte[HEADER_SIZE];
-
+	
+	public static int OP_REPLY =  1;//  Reply to a client request. responseTo is set  
+	public static int OP_MSG = 1000;//  generic msg command followed by a string  
+	public static int OP_UPDATE = 2001;//  update document  
+	public static int OP_INSERT = 2002;//  insert new document  
+	public static int RESERVED = 2003;//  formerly used for OP_GET_BY_OID  
+	public static int OP_QUERY = 2004;//  query a collection  
+	public static int OP_GET_MORE = 2005;//  Get more data from a query. See Cursors  
+	public static int OP_DELETE = 2006;//  Delete documents  
+	public static int OP_KILL_CURSORS=  2007;//  Tell database client is done with a cursor  
 }
