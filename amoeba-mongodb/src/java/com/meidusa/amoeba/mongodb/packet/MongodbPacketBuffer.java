@@ -1,5 +1,7 @@
 package com.meidusa.amoeba.mongodb.packet;
 
+import java.io.UnsupportedEncodingException;
+
 import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
 
 /**
@@ -63,6 +65,27 @@ public class MongodbPacketBuffer extends AbstractPacketBuffer {
 		writeByte((byte) (0xFFL & (x >> 56)));
 	}
 
+	public void writeCString(String content) throws UnsupportedEncodingException{
+		byte[] ab = content.getBytes("utf-8");
+		ensureCapacity(ab.length+1);
+		writeBytes(ab, 0, ab.length);
+		writeByte((byte)0);
+	}
+	
+	public String readCString() throws UnsupportedEncodingException{
+		byte[] b = this.buffer; // a little bit optimization
+		int save = this.position;
+		while(this.position<b.length){
+			if(b[position++] == (byte)0){
+				return new String(b,save,this.position-save,"UTF-8");
+			}else{
+				continue;
+			}
+		}
+		return null;
+		
+	}
+	
 	public void writeDouble(double x) {
 		writeLong(Double.doubleToRawLongBits(x));
 	}
