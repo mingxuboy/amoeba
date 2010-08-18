@@ -408,11 +408,9 @@ public class BSONEncoder {
     	
     	CodeWScope scope = new CodeWScope("helloCode",new BasicBSONObject("x",1));
     	bson.put("key", scope);
-    	encoder.encode(bson);
     	bson.put("key1", "asdfqwerqwer");
-    	ByteArrayOutputStream as = new ByteArrayOutputStream();
-    	buffer.pipe(as);
-    	decoder.decode(as.toByteArray(), callback);
+    	System.out.println(bson);
+    	decoder.decode(encoder.encode(bson), callback);
     	System.out.println(callback.get());
     }
 }

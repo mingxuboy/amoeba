@@ -197,13 +197,17 @@ public class BSONDecoder {
             _callback.gotMaxKey( name );
             break;
         case CODE_W_SCOPE:
+        	_callback.objectStart( name );
         	_in.readInt();  // total size - we don't care....
-        	_in.readInt();
-        	String codeName = _in.readCStr();
+        	String codeName = _in.readString();
+        	_in.readInt();  // total size - we don't care....
         	 _callback.objectStart( codeName );
              while ( decodeElement() );
-             BSONObject obj = (BSONObject)_callback.objectDone();
-        	_callback.gotCodeWScope(codeName,obj );
+             _callback.objectDone();
+             _callback.objectDone();
+            /* CodeWScope scope =  new CodeWScope(codeName,scopeObj);
+             BSONObject obj = (BSONObject)_callback.objectDone();*/
+        	//_callback.got(name,obj );
         	break;
         default:
             throw new UnsupportedOperationException( "BSONDecoder doesn't understand type : " + type + " name: " + name  );
@@ -235,7 +239,6 @@ public class BSONDecoder {
         _callback.gotBinary( name , bType , data );
     }
 
-    
     class Input {
         Input( InputStream in ){
             _in = in;
@@ -303,6 +306,23 @@ public class BSONDecoder {
             _stringBuffer.reset();
             return out;
         }
+        
+        String readString() throws IOException {
+        int lenght = readInt();
+        _stringBuffer.reset();
+        
+        byte[] content = new byte[lenght -1];
+        this.fill(content);
+        String out = null;
+        try {
+            out = new String(content, "UTF-8" );
+        }
+        catch ( UnsupportedOperationException e ){
+            throw new RuntimeException( "impossible" , e );
+        }
+        this.read();//skip 0x00 
+        return out;
+    }
         
         int _read;
         final InputStream _in;

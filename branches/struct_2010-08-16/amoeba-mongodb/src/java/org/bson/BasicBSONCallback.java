@@ -120,7 +120,7 @@ public class BasicBSONCallback implements BSONCallback {
         _put( name , id );
     }
     
-    public void gotCodeWScope(String name,BSONObject object){
+    public void gotCodeWScope(String name,CodeWScope object){
         _put( name , object );
     }
     public void gotDBRef( String name , String ns , ObjectId id ){
@@ -139,7 +139,7 @@ public class BasicBSONCallback implements BSONCallback {
         cur().put( name , BSON.applyDecodingHooks( o ) );
     }
     
-    protected BSONObject cur(){
+    public BSONObject cur(){
         return _stack.getLast();
     }
     

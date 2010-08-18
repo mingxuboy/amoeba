@@ -16,7 +16,7 @@ public interface BSONCallback {
     void arrayStart(String name);
     Object arrayDone();
 
-    
+    BSONObject cur();
     void gotNull( String name );
     void gotUndefined( String name );
     void gotMinKey( String name );
@@ -35,7 +35,7 @@ public interface BSONCallback {
     void gotTimestamp( String name , int time , int inc );
     void gotObjectId( String name , ObjectId id );
     void gotDBRef( String name , String ns , ObjectId id );
-    void gotCodeWScope(String name,BSONObject object);
+    void gotCodeWScope(String name,CodeWScope object);
     /**
      * subtype 2
      */
