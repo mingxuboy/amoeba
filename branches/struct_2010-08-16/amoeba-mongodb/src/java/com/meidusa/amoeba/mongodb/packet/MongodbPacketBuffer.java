@@ -16,7 +16,7 @@ import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
  *
  */
 public class MongodbPacketBuffer extends AbstractPacketBuffer {
-	static ThreadLocal<BSONDecoder> BSONDecoderTL = new ThreadLocal<BSONDecoder>(){
+	static ThreadLocal<BSONDecoder> DECODER = new ThreadLocal<BSONDecoder>(){
 		public BSONDecoder initialValue(){
 			return new BSONDecoder();
 		}
@@ -118,7 +118,7 @@ public class MongodbPacketBuffer extends AbstractPacketBuffer {
 	
 	public BSONObject readBSONObject(){
 		try {
-			return BSONDecoderTL.get().readObject(this.asInputStream());
+			return DECODER.get().readObject(this.asInputStream());
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
