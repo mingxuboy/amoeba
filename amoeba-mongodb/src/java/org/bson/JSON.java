@@ -187,9 +187,9 @@ public class JSON {
         	CodeWScope  scope = (CodeWScope)o;
         	buf.append( "{ " );
             buf.append("\"").append(scope.getCode()).append("\" : ");
-            DBObject dbo = (DBObject)scope.getScope();
+            BSONObject dbo = (BSONObject)scope.getScope();
             serialize(dbo,buf);
-            buf.append( " } " );
+            buf.append( "}" );
             return;
         }
         
