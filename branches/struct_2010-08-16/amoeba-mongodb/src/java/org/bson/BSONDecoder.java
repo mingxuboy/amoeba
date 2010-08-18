@@ -116,6 +116,7 @@ public class BSONDecoder {
             
         case SYMBOL:
             // intentional fallthrough
+        case CODE:
         case STRING:
             int size = _in.readInt();
             if ( size < 0 || size > ( 3 * 1024 * 1024 ) )
@@ -160,8 +161,8 @@ public class BSONDecoder {
             _binary( name );
             break;
             
-        case CODE:
-            throw new UnsupportedOperationException( "can't handle CODE yet" );
+       /* case CODE:
+            throw new UnsupportedOperationException( "can't handle CODE yet" );*/
 
         case ARRAY:
             _in.readInt();  // total size - we don't care....
@@ -195,7 +196,15 @@ public class BSONDecoder {
         case MAXKEY:
             _callback.gotMaxKey( name );
             break;
-
+        case CODE_W_SCOPE:
+        	_in.readInt();  // total size - we don't care....
+        	_in.readInt();
+        	String codeName = _in.readCStr();
+        	 _callback.objectStart( codeName );
+             while ( decodeElement() );
+             BSONObject obj = (BSONObject)_callback.objectDone();
+        	_callback.gotCodeWScope(codeName,obj );
+        	break;
         default:
             throw new UnsupportedOperationException( "BSONDecoder doesn't understand type : " + type + " name: " + name  );
         }

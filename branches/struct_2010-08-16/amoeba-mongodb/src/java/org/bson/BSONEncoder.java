@@ -10,6 +10,8 @@ import java.util.*;
 import java.util.regex.*;
 import java.util.concurrent.atomic.*;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.nio.*;
 import java.nio.charset.*;
 
@@ -394,4 +396,23 @@ public class BSONEncoder {
     private ByteBuffer _stringB = ByteBuffer.wrap( new byte[1024 + 1] );
     private CharsetEncoder _encoder = BSON._utf8.newEncoder();
 
+    
+    public static void main(String[] args) throws IOException{
+    	BSONEncoder encoder = new BSONEncoder();
+    	BasicOutputBuffer buffer = new BasicOutputBuffer();
+    	
+    	//encoder.set(buffer);
+    	BSONDecoder decoder = new BSONDecoder();
+    	BasicBSONCallback callback = new BasicBSONCallback();
+    	BasicBSONObject bson = new BasicBSONObject();
+    	
+    	CodeWScope scope = new CodeWScope("helloCode",new BasicBSONObject("x",1));
+    	bson.put("key", scope);
+    	encoder.encode(bson);
+    	bson.put("key1", "asdfqwerqwer");
+    	ByteArrayOutputStream as = new ByteArrayOutputStream();
+    	buffer.pipe(as);
+    	decoder.decode(as.toByteArray(), callback);
+    	System.out.println(callback.get());
+    }
 }
