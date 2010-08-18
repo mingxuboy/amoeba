@@ -125,11 +125,15 @@ public class MongodbPacketBuffer extends AbstractPacketBuffer {
 		return null;
 	}
 	
-	public void writeBSONObject(BSONObject object) throws IOException{
+	public void writeBSONObject(BSONObject object){
 		BasicOutputBuffer buffer = new BasicOutputBuffer();
 		ENCODER.get().set(buffer);
 		ENCODER.get().encode(object);
-		buffer.pipe(this.asOutputStream());
+		try {
+			buffer.pipe(this.asOutputStream());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	static int POSITION = 12;

@@ -1,6 +1,5 @@
 package com.meidusa.amoeba.mongodb.packet;
 
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,9 +25,10 @@ public class ResponseMongodbPacket extends AbstractMongodbPacket {
 		numberReturned = buffer.readInt();
 		if(buffer.hasRemaining()){
 			documents = new ArrayList<BSONObject>();
-		}
-		while(buffer.hasRemaining()){
-			documents.add(buffer.readBSONObject());
+			do{
+				BSONObject obj = buffer.readBSONObject();
+				documents.add(obj);
+			}while(buffer.hasRemaining());
 		}
 	}
 
@@ -42,11 +42,7 @@ public class ResponseMongodbPacket extends AbstractMongodbPacket {
 		buffer.writeInt(numberReturned);
 		if(documents != null){
 			for(BSONObject doc: documents){
-				try {
-					buffer.writeBSONObject(doc);
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
+				buffer.writeBSONObject(doc);
 			}
 		}
 	}
