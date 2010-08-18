@@ -35,7 +35,7 @@ public interface BSONCallback {
     void gotTimestamp( String name , int time , int inc );
     void gotObjectId( String name , ObjectId id );
     void gotDBRef( String name , String ns , ObjectId id );
-    
+    void gotCodeWScope(String name,BSONObject object);
     /**
      * subtype 2
      */

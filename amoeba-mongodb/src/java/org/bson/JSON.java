@@ -183,6 +183,16 @@ public class JSON {
             return;
         }
 
+        if( o instanceof CodeWScope){
+        	CodeWScope  scope = (CodeWScope)o;
+        	buf.append( "{ " );
+            buf.append("\"").append(scope.getCode()).append("\" : ");
+            DBObject dbo = (DBObject)scope.getScope();
+            serialize(dbo,buf);
+            buf.append( " } " );
+            return;
+        }
+        
         throw new RuntimeException( "json can't serialize type : " + o.getClass() );
     }
 

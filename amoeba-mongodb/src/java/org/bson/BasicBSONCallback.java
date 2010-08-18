@@ -119,6 +119,10 @@ public class BasicBSONCallback implements BSONCallback {
     public void gotObjectId( String name , ObjectId id ){
         _put( name , id );
     }
+    
+    public void gotCodeWScope(String name,BSONObject object){
+        _put( name , object );
+    }
     public void gotDBRef( String name , String ns , ObjectId id ){
         _put( name , new BasicBSONObject( "$ns" , ns ).append( "$id" , id ) );
     }
