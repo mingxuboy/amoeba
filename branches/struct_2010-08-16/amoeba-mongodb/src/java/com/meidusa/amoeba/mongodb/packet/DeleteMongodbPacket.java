@@ -1,0 +1,57 @@
+package com.meidusa.amoeba.mongodb.packet;
+
+import java.io.UnsupportedEncodingException;
+
+import org.bson.BSONObject;
+
+import com.meidusa.amoeba.mongodb.io.MongodbPacketConstant;
+
+/**
+ * <h6><a name="MongoWireProtocol-OPDELETE"></a>OP_DELETE <a name="MongoWireProtocol-OPDELETE"></a></h6>
+ * 
+ * <p>The OP_DELETE message is used to remove one or more messages from a collection.  The format of the OP_DELETE message is :</p>
+ * 
+ * <div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+ * <pre class="code-java">struct {
+ *     MsgHeader header;             <span class="code-comment">// standard message header
+ * </span>    int32     ZERO;               <span class="code-comment">// 0 - reserved <span class="code-keyword">for</span> <span class="code-keyword">future</span> use
+ * </span>    cstring   fullCollectionName; <span class="code-comment">// <span class="code-quote">"dbname.collectionname"</span>
+ * 
+ * </span>    int32     flags;              <span class="code-comment">// bit vector - see below <span class="code-keyword">for</span> details.
+ * </span>    document  selector;           <span class="code-comment">// query object.  See below <span class="code-keyword">for</span> details.
+ * </span>}
+ * </pre>
+
+ * @author Struct
+ *
+ */
+public class DeleteMongodbPacket extends AbstractMongodbPacket {
+	
+	public int ZERO = 0;
+	public String fullCollectionName;
+	public int flags;
+	public BSONObject selector;
+	public DeleteMongodbPacket(){
+		this.opCode = MongodbPacketConstant.OP_DELETE;
+	}
+	protected void init(MongodbPacketBuffer buffer) {
+		super.init(buffer);
+		buffer.readInt();//ZERO 
+		fullCollectionName = buffer.readCString();
+		flags = buffer.readInt();
+		if(buffer.hasRemaining()){
+			selector  = buffer.readBSONObject();
+		}
+	}
+
+	@Override
+	protected void write2Buffer(MongodbPacketBuffer buffer)
+			throws UnsupportedEncodingException {
+		super.write2Buffer(buffer);
+		buffer.writeInt(0);
+		buffer.writeCString(fullCollectionName);
+		buffer.writeInt(flags);
+		buffer.writeBSONObject(selector);
+	}
+	
+}

@@ -1,6 +1,5 @@
 package com.meidusa.amoeba.mongodb.packet;
 
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 
 import org.bson.BSONObject;
@@ -28,11 +27,7 @@ public class QueryMongodbPacket extends AbstractMongodbPacket {
 		buffer.writeCString(fullCollectionName);
 		buffer.writeInt(numberToSkip);
 		buffer.writeInt(numberToReturn);
-		try {
-			buffer.writeBSONObject(document);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		buffer.writeBSONObject(document);
 	}
 	
 }
