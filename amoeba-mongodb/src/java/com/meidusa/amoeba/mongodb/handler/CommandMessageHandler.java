@@ -56,24 +56,23 @@ public class CommandMessageHandler implements MessageHandler ,Sessionable{
 					switch(type){
 						case MongodbPacketConstant.OP_QUERY:
 							packet = new QueryMongodbPacket();
-							
 							break;
 						case MongodbPacketConstant.OP_GET_MORE:
 							packet = new GetMoreMongodbPacket();
 							break;
 						case MongodbPacketConstant.OP_DELETE:
 							packet = new DeleteMongodbPacket();
-							endSession(serverConn);
+							endQuery(serverConn);
 							break;
 						case MongodbPacketConstant.OP_KILL_CURSORS:
 							break;
 						case MongodbPacketConstant.OP_UPDATE:
 							packet = new UpdateMongodbPacket();
-							endSession(serverConn);
+							endQuery(serverConn);
 							break;
 						case MongodbPacketConstant.OP_INSERT:
 							packet = new InsertMongodbPacket();
-							endSession(serverConn);
+							endQuery(serverConn);
 							break;
 						case MongodbPacketConstant.OP_MSG:
 							packet = new MessageMongodbPacket();
@@ -101,7 +100,7 @@ public class CommandMessageHandler implements MessageHandler ,Sessionable{
 					}
 					clientConn.postMessage(message);
 				}
-				endSession(conn);
+				endQuery(conn);
 			}
 			
 		} catch (Exception e) {
@@ -110,7 +109,7 @@ public class CommandMessageHandler implements MessageHandler ,Sessionable{
 		
 	}
 	
-	public void endSession(Connection conn){
+	public void endQuery(Connection conn){
 		MongodbServerConnection serverConn = (MongodbServerConnection) conn;
 		serverConn.setMessageHandler(handlerMap.remove(serverConn));
 		try {
