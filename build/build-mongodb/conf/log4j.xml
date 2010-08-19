@@ -59,8 +59,8 @@
         <appender-ref ref="PROJECT"/>
     </logger>
     
-    <logger name="com.meidusa.amoeba.mysql" additivity="false">
-        <level value="warn"/>
+    <logger name="com.meidusa.amoeba.mongodb" additivity="false">
+        <level value="debug"/>
         <appender-ref ref="PROJECT"/>
         
         <!-- for debug -->
@@ -68,7 +68,7 @@
     </logger>
     
     <logger name="com.meidusa.amoeba.net" additivity="false">
-        <level value="warn"/>
+        <level value="debug"/>
         <appender-ref ref="PROJECT"/>
     </logger>
     
@@ -89,8 +89,8 @@
         <appender-ref ref="PROJECT"/>
     </logger>
     
-    <logger name="com.meidusa.amoeba.mysql.handler" additivity="false">
-        <level value="warn"/>
+    <logger name="com.meidusa.amoeba.mongodb.handler" additivity="false">
+        <level value="debug"/>
         <appender-ref ref="PROJECT"/>
     </logger>
     

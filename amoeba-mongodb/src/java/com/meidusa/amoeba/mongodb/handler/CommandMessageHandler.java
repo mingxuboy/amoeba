@@ -19,24 +19,16 @@ import com.meidusa.amoeba.mongodb.packet.ResponseMongodbPacket;
 import com.meidusa.amoeba.mongodb.packet.UpdateMongodbPacket;
 import com.meidusa.amoeba.net.Connection;
 import com.meidusa.amoeba.net.MessageHandler;
-import com.meidusa.amoeba.net.Sessionable;
 import com.meidusa.amoeba.net.poolable.ObjectPool;
 
-public class CommandMessageHandler implements MessageHandler ,Sessionable{
+public class CommandMessageHandler implements MessageHandler{
 	private static Logger logger = Logger.getLogger(CommandMessageHandler.class);
 	public MessageHandler messageHandler;
 	public Connection clientConn;
-	public Connection[] serverConns;
-	//public Connection serverConn;
 	public Map<Connection,MessageHandler> handlerMap = new HashMap<Connection,MessageHandler>();
 	
-	public CommandMessageHandler(Connection clientConn,Connection ...serverConns){
+	public CommandMessageHandler(Connection clientConn){
 		this.clientConn = clientConn;
-		this.serverConns = serverConns;
-		for(Connection serverConn:serverConns){
-			serverConn.setMessageHandler(this);
-		}
-		clientConn.setMessageHandler(this);
 	}
 	
 	@Override
@@ -99,8 +91,9 @@ public class CommandMessageHandler implements MessageHandler ,Sessionable{
 						}
 					}
 					clientConn.postMessage(message);
+					endQuery(conn);
 				}
-				endQuery(conn);
+				
 			}
 			
 		} catch (Exception e) {
@@ -117,40 +110,6 @@ public class CommandMessageHandler implements MessageHandler ,Sessionable{
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-	}
-
-	@Override
-	public boolean checkIdle(long now) {
-		return false;
-	}
-
-	@Override
-	public void endSession(boolean force) {
-		
-	}
-
-	@Override
-	public boolean isEnded() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public boolean isMultiplayer() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public boolean isStarted() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public void startSession() throws Exception {
-		// TODO Auto-generated method stub
-		
 	}
 
 }
