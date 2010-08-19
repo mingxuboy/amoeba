@@ -95,9 +95,9 @@ public class MongodbPacketBuffer extends AbstractPacketBuffer {
 		while(this.position<b.length){
 			if(b[position++] == (byte)0){
 				try {
-					return new String(b,save,this.position-save,"UTF-8");
+					return new String(b,save,this.position-save-1,"UTF-8");
 				} catch (UnsupportedEncodingException e) {
-					return new String(b,save,this.position-save);
+					return new String(b,save,this.position-save-1);
 				}
 			}else{
 				continue;
