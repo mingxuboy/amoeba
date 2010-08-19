@@ -193,6 +193,11 @@ public class JSON {
             return;
         }
         
+        if(o instanceof org.bson.types.Binary){
+        	buf.append("<binary>");
+        	return;
+        }
+        
         throw new RuntimeException( "json can't serialize type : " + o.getClass() );
     }
 

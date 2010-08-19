@@ -28,6 +28,13 @@ public class MongodbServerConnection extends Connection implements PoolableObjec
 		return new MongodbFramingOutputStream(true);
 	}
 
+	public boolean checkIdle(long now){
+		if (isClosed()) {
+			return true;
+		}
+		return false;
+	}
+	
 	@Override
 	public ObjectPool getObjectPool() {
 		return objectPool;
