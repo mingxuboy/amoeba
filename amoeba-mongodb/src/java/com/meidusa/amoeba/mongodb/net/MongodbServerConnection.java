@@ -4,13 +4,12 @@ import java.nio.channels.SocketChannel;
 
 import com.meidusa.amoeba.mongodb.io.MongodbFramedInputStream;
 import com.meidusa.amoeba.mongodb.io.MongodbFramingOutputStream;
-import com.meidusa.amoeba.net.Connection;
 import com.meidusa.amoeba.net.io.PacketInputStream;
 import com.meidusa.amoeba.net.io.PacketOutputStream;
 import com.meidusa.amoeba.net.poolable.ObjectPool;
 import com.meidusa.amoeba.net.poolable.PoolableObject;
 
-public class MongodbServerConnection extends Connection implements PoolableObject {
+public class MongodbServerConnection extends AbstractMongodbConnection implements PoolableObject {
 	private ObjectPool objectPool;
 	
 	private boolean active;

@@ -40,7 +40,9 @@ public class CommandMessageHandler implements MessageHandler{
 					int type = MongodbPacketBuffer.getOPMessageType(message);
 					ObjectPool pool = (ObjectPool)ProxyRuntimeContext.getInstance().getPoolMap().get("server1");
 					Connection serverConn = (Connection)pool.borrowObject();
-					
+					if(logger.isDebugEnabled()){
+						logger.debug("start query");
+					}
 					AbstractMongodbPacket packet = null;
 					handlerMap.put(serverConn, serverConn.getMessageHandler());
 					serverConn.setMessageHandler(this);
@@ -75,22 +77,22 @@ public class CommandMessageHandler implements MessageHandler{
 					if(logger.isDebugEnabled()){
 						if(packet != null){
 							packet.init(message, conn);
-							logger.debug("--->>>"+clientConn.getSocketId()+" send packet --->"+serverConn.getSocketId()+"\n"+packet);
+							logger.debug("--->>>"+clientConn.getSocketId()+" send packet --->"+serverConn.getSocketId()+"\r\n"+packet);
 						}
 					}
 
 				}
 			}else{
 				while((message = conn.getInQueue().getNonBlocking()) != null){
+					clientConn.postMessage(message);
 					if(logger.isDebugEnabled()){
 						int type = MongodbPacketBuffer.getOPMessageType(message);
 						if(type == MongodbPacketConstant.OP_REPLY){
 							AbstractMongodbPacket packet = new ResponseMongodbPacket();
 							packet.init(message, conn);
-							logger.debug("<<<---receive from "+conn.getSocketId()+" -->"+clientConn.getSocketId()+" \n"+packet);
+							logger.debug("<<<---receive from "+conn.getSocketId()+" -->"+clientConn.getSocketId()+" \r\n"+packet);
 						}
 					}
-					clientConn.postMessage(message);
 					endQuery(conn);
 				}
 				
@@ -109,6 +111,10 @@ public class CommandMessageHandler implements MessageHandler{
 			serverConn.getObjectPool().returnObject(conn);
 		} catch (Exception e) {
 			e.printStackTrace();
+		}
+		
+		if(logger.isDebugEnabled()){
+			logger.debug("end query");
 		}
 	}
 
