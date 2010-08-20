@@ -99,8 +99,14 @@ public abstract class Connection implements NetEventHandler {
     /**
      * 设置与 SocketChannel 相关的 SelectionKey
      */
-    public void setSelectionKey(SelectionKey selkey) {
+    public synchronized void setSelectionKey(SelectionKey selkey) {
         this._selkey = selkey;
+        if(_outQueue.size()>0){
+        	selkey.interestOps(selkey.interestOps() | SelectionKey.OP_WRITE);
+        }
+        if(logger.isDebugEnabled()){
+    		logger.debug("socketId="+this.getSocketId()+" hascode="+hashCode()+" key="+selkey);
+    	}
     }
 
     /**
@@ -188,7 +194,7 @@ public abstract class Connection implements NetEventHandler {
         }
         
         if(logger.isDebugEnabled()){
-        	logger.debug("Closing channel " + this + ".");
+        	logger.debug("Closing channel " + this + ".",exception);
         }
         try {
             _channel.close();
@@ -260,9 +266,6 @@ public abstract class Connection implements NetEventHandler {
                 byte[] msg = new byte[bytesIn];
                 _fin.read(msg);
                 doReceiveMessage(msg);
-                if(logger.isDebugEnabled()){
-            		logger.debug("received from <<---"+this.getSocketId()+" buffer size="+msg.length);
-            	}
             }
         	messageProcess();
         } catch (EOFException eofe) {
@@ -306,13 +309,9 @@ public abstract class Connection implements NetEventHandler {
                     _outQueue.prepend(buffer);
                     return false;
                 } else {
-                	
                     // buffer.clear();
                     message++;
                 }
-                if(logger.isDebugEnabled()){
-            		logger.debug("write-->"+this.getSocketId()+" buffer code="+buffer.toString()+" [size="+buffer.limit()+",remaining="+buffer.remaining());
-            	}
             }
             return true;
 
@@ -358,9 +357,14 @@ public abstract class Connection implements NetEventHandler {
                  * 发送数据，如果返回false，则表示socket send buffer 已经满了。则Selector 需要监听 Writeable event
                  */
                 boolean finished = doWrite();
+                
                 if (!finished) {
                     key.interestOps(key.interestOps() | SelectionKey.OP_WRITE);
                 }
+            }else{
+            	if(key == null){
+            		logger.error("writeMessage socketId="+this.getSocketId()+" hascode="+hashCode()+" but key="+key);
+            	}
             }
         } catch (IOException ioe) {
             handleFailure(ioe);

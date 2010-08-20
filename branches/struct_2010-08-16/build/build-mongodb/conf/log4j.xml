@@ -30,6 +30,15 @@
             <param name="ConversionPattern" value="%d %-5p %c{2} - %m%n"/>
         </layout>
     </appender>
+    
+    <appender name="NET" class="org.apache.log4j.DailyRollingFileAppender">
+        <param name="file" value="${amoeba.home}/logs/net.log"/>
+        <param name="append" value="false"/>
+        <param name="encoding" value="GBK"/>
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="%d %-5p %c{2} - %m%n"/>
+        </layout>
+    </appender>
 
 	<appender name="reportAppender" class="org.apache.log4j.DailyRollingFileAppender">
         <param name="file" value="${amoeba.home}/logs/report.log"/>
@@ -49,6 +58,19 @@
         </layout>
     </appender>
     
+    <appender name="TRACE" class="org.apache.log4j.DailyRollingFileAppender">
+        <param name="file" value="${amoeba.home}/logs/trace.log"/>
+        <param name="append" value="false"/>
+        <param name="encoding" value="GBK"/>
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="%d %-5p %c{2} - %m%n"/>
+        </layout>
+    </appender>
+    
+    <logger name="QueryStackLogger" additivity="true">
+        <level value="debug"/>
+        <appender-ref ref="TRACE"/>
+    </logger>
 	<logger name="report" additivity="true">
         <level value="info"/>
         <appender-ref ref="reportAppender"/>
@@ -70,6 +92,7 @@
     <logger name="com.meidusa.amoeba.net" additivity="false">
         <level value="debug"/>
         <appender-ref ref="PROJECT"/>
+        <appender-ref ref="NET"/>
     </logger>
     
     <logger name="com.meidusa.amoeba.net.ServerableConnectionManager" additivity="false">

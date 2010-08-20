@@ -13,7 +13,7 @@ public class MongodbClientConnection extends AbstractMongodbConnection{
 
 	public MongodbClientConnection(SocketChannel channel, long createStamp) {
 		super(channel, createStamp);
-		this.setMessageHandler(new CommandMessageHandler(this));
+		//this.setMessageHandler(new CommandMessageHandler(this));
 	}
 
 	@Override
@@ -26,6 +26,11 @@ public class MongodbClientConnection extends AbstractMongodbConnection{
 		return new MongodbFramingOutputStream(true);
 	}
 
+	protected void doReceiveMessage(byte[] message){
+		CommandMessageHandler handler =	new CommandMessageHandler(this);
+		handler.handleMessage(this,message);
+	}
+	
 	/*@Override
 	public void handleMessage(Connection conn) {
 		try {
@@ -34,5 +39,13 @@ public class MongodbClientConnection extends AbstractMongodbConnection{
 			e.printStackTrace();
 		}
 	}*/
+	
+	/*protected void messageProcess() {
+		byte[] message = null;
+		while((message = getInQueue().getNonBlocking()) != null){
+			CommandMessageHandler handler =	new CommandMessageHandler(this);
+			handler.handleMessage(this,message);
+		}
+    }*/
 
 }
