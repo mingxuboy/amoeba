@@ -4,7 +4,6 @@ import java.nio.channels.SocketChannel;
 
 import org.apache.log4j.Logger;
 
-import com.meidusa.amoeba.mongodb.handler.CommandMessageHandler;
 import com.meidusa.amoeba.mongodb.io.MongodbFramedInputStream;
 import com.meidusa.amoeba.mongodb.io.MongodbFramingOutputStream;
 import com.meidusa.amoeba.net.Connection;
