@@ -17,7 +17,7 @@ import com.meidusa.amoeba.mongodb.io.MongodbPacketConstant;
  * </span>    int32     ZERO;               <span class="code-comment">// 0 - reserved <span class="code-keyword">for</span> <span class="code-keyword">future</span> use
  * 
  * </span>    cstring   fullCollectionName; <span class="code-comment">// <span class="code-quote">"dbname.collectionname"</span>
- * </span>    int32     flags;              <span class="code-comment">// bit vector. see below
+ * </span>    int32     updateFlags;              <span class="code-comment">// bit vector. see below
  * </span>    document  selector;           <span class="code-comment">// the query to select the document
  * </span>    document  update;             <span class="code-comment">// specification of the update to perform
  * </span>}
@@ -26,11 +26,9 @@ import com.meidusa.amoeba.mongodb.io.MongodbPacketConstant;
  * @author Struct
  *
  */
-public class UpdateMongodbPacket extends AbstractMongodbPacket {
+public class UpdateMongodbPacket extends RequestMongodbPacket {
 	
-	public int ZERO = 0;
-	public String fullCollectionName;
-	public int flags;
+	public int updateFlags;
 	public BSONObject selector;
 	public BSONObject update;
 	public UpdateMongodbPacket(){
@@ -38,9 +36,7 @@ public class UpdateMongodbPacket extends AbstractMongodbPacket {
 	}
 	protected void init(MongodbPacketBuffer buffer) {
 		super.init(buffer);
-		buffer.readInt();//ZERO 
-		fullCollectionName = buffer.readCString();
-		flags = buffer.readInt();
+		updateFlags = buffer.readInt();
 		if(buffer.hasRemaining()){
 			selector = buffer.readBSONObject();
 		}
@@ -53,9 +49,7 @@ public class UpdateMongodbPacket extends AbstractMongodbPacket {
 	protected void write2Buffer(MongodbPacketBuffer buffer)
 			throws UnsupportedEncodingException {
 		super.write2Buffer(buffer);
-		buffer.writeInt(0);
-		buffer.writeCString(fullCollectionName);
-		buffer.writeInt(flags);
+		buffer.writeInt(updateFlags);
 		if(selector != null){
 			buffer.writeBSONObject(selector);
 		}
