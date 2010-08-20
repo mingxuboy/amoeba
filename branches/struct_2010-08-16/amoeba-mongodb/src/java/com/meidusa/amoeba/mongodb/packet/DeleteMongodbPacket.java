@@ -25,10 +25,8 @@ import com.meidusa.amoeba.mongodb.io.MongodbPacketConstant;
  * @author Struct
  *
  */
-public class DeleteMongodbPacket extends AbstractMongodbPacket {
+public class DeleteMongodbPacket extends RequestMongodbPacket {
 	
-	public int ZERO = 0;
-	public String fullCollectionName;
 	public int flags;
 	public BSONObject selector;
 	public DeleteMongodbPacket(){
@@ -36,8 +34,6 @@ public class DeleteMongodbPacket extends AbstractMongodbPacket {
 	}
 	protected void init(MongodbPacketBuffer buffer) {
 		super.init(buffer);
-		buffer.readInt();//ZERO 
-		fullCollectionName = buffer.readCString();
 		flags = buffer.readInt();
 		if(buffer.hasRemaining()){
 			selector  = buffer.readBSONObject();
@@ -48,8 +44,6 @@ public class DeleteMongodbPacket extends AbstractMongodbPacket {
 	protected void write2Buffer(MongodbPacketBuffer buffer)
 			throws UnsupportedEncodingException {
 		super.write2Buffer(buffer);
-		buffer.writeInt(0);
-		buffer.writeCString(fullCollectionName);
 		buffer.writeInt(flags);
 		buffer.writeBSONObject(selector);
 	}

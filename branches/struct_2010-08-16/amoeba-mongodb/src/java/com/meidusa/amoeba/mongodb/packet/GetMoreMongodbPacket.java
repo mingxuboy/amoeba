@@ -25,9 +25,7 @@ import com.meidusa.amoeba.mongodb.io.MongodbPacketConstant;
  * @author Struct
  *
  */
-public class GetMoreMongodbPacket extends AbstractMongodbPacket {
-	public int ZERO = 0;
-	public String fullCollectionName;
+public class GetMoreMongodbPacket extends RequestMongodbPacket {
 	public int numberToReturn;
 	public long cursorID;
 	
@@ -37,8 +35,6 @@ public class GetMoreMongodbPacket extends AbstractMongodbPacket {
 	
 	protected void init(MongodbPacketBuffer buffer) {
 		super.init(buffer);
-		buffer.readInt();//ZERO 
-		fullCollectionName = buffer.readCString();
 		numberToReturn = buffer.readInt();
 		cursorID = buffer.readLong();
 	}
@@ -46,8 +42,6 @@ public class GetMoreMongodbPacket extends AbstractMongodbPacket {
 	protected void write2Buffer(MongodbPacketBuffer buffer)
 	throws UnsupportedEncodingException {
 		super.write2Buffer(buffer);
-		buffer.writeInt(0);//ZERO
-		buffer.writeCString(fullCollectionName);
 		buffer.writeInt(numberToReturn);
 		buffer.writeLong(cursorID);
 	}

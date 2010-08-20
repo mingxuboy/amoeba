@@ -30,10 +30,8 @@ import com.meidusa.amoeba.mongodb.io.MongodbPacketConstant;
  * @author Struct
  *
  */
-public class QueryMongodbPacket extends AbstractMongodbPacket {
+public class QueryMongodbPacket extends RequestMongodbPacket {
 
-	public int flags;
-	public String fullCollectionName;
 	public int numberToSkip;
 	public int numberToReturn;
 	public BSONObject query;
@@ -43,8 +41,6 @@ public class QueryMongodbPacket extends AbstractMongodbPacket {
 	}
 	protected void init(MongodbPacketBuffer buffer) {
 		super.init(buffer);
-		flags = buffer.readInt();
-		fullCollectionName = buffer.readCString();
 		numberToSkip = buffer.readInt();
 		numberToReturn = buffer.readInt();
 		query = buffer.readBSONObject();
@@ -56,8 +52,6 @@ public class QueryMongodbPacket extends AbstractMongodbPacket {
 	protected void write2Buffer(MongodbPacketBuffer buffer)
 	throws UnsupportedEncodingException {
 		super.write2Buffer(buffer);
-		buffer.writeInt(flags);
-		buffer.writeCString(fullCollectionName);
 		buffer.writeInt(numberToSkip);
 		buffer.writeInt(numberToReturn);
 		buffer.writeBSONObject(query);

@@ -25,18 +25,14 @@ import com.meidusa.amoeba.mongodb.io.MongodbPacketConstant;
  * @author Struct
  *
  */
-public class InsertMongodbPacket extends AbstractMongodbPacket {
+public class InsertMongodbPacket extends RequestMongodbPacket {
 	
-	public int ZERO = 0;
-	public String fullCollectionName;
 	public List<BSONObject> documents;
 	public InsertMongodbPacket(){
 		this.opCode = MongodbPacketConstant.OP_INSERT;
 	}
 	protected void init(MongodbPacketBuffer buffer) {
 		super.init(buffer);
-		buffer.readInt();//ZERO 
-		fullCollectionName = buffer.readCString();
 		if(buffer.hasRemaining()){
 			documents = new ArrayList<BSONObject>();
 			do{
@@ -50,8 +46,6 @@ public class InsertMongodbPacket extends AbstractMongodbPacket {
 	protected void write2Buffer(MongodbPacketBuffer buffer)
 			throws UnsupportedEncodingException {
 		super.write2Buffer(buffer);
-		buffer.writeInt(0);
-		buffer.writeCString(fullCollectionName);
 		if(documents != null){
 			for(BSONObject doc: documents){
 				buffer.writeBSONObject(doc);
