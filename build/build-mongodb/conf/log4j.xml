@@ -58,8 +58,8 @@
         </layout>
     </appender>
     
-    <appender name="TRACE" class="org.apache.log4j.DailyRollingFileAppender">
-        <param name="file" value="${amoeba.home}/logs/trace.log"/>
+    <appender name="packetLogger" class="org.apache.log4j.DailyRollingFileAppender">
+        <param name="file" value="${amoeba.home}/logs/packetLogger.log"/>
         <param name="append" value="false"/>
         <param name="encoding" value="GBK"/>
         <layout class="org.apache.log4j.PatternLayout">
@@ -67,9 +67,9 @@
         </layout>
     </appender>
     
-    <logger name="QueryStackLogger" additivity="true">
+    <logger name="PACKETLOGGER" additivity="true">
         <level value="debug"/>
-        <appender-ref ref="TRACE"/>
+        <appender-ref ref="packetLogger"/>
     </logger>
 	<logger name="report" additivity="true">
         <level value="info"/>

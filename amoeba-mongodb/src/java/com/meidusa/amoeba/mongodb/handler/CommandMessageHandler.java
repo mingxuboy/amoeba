@@ -23,7 +23,7 @@ import com.meidusa.amoeba.net.SessionMessageHandler;
 import com.meidusa.amoeba.net.poolable.ObjectPool;
 
 public class CommandMessageHandler implements SessionMessageHandler{
-	private static Logger logger = Logger.getLogger("QueryStackLogger");
+	private static Logger logger = Logger.getLogger("PACKETLOGGER");
 	public MessageHandler messageHandler;
 	public Connection clientConn;
 	public Map<Connection,MessageHandler> handlerMap = new HashMap<Connection,MessageHandler>();
