@@ -9,7 +9,7 @@ import com.meidusa.amoeba.net.Connection;
 import com.meidusa.amoeba.net.io.PacketInputStream;
 import com.meidusa.amoeba.net.io.PacketOutputStream;
 
-public class MongodbClientConnection extends Connection{
+public class MongodbClientConnection extends AbstractMongodbConnection{
 
 	public MongodbClientConnection(SocketChannel channel, long createStamp) {
 		super(channel, createStamp);

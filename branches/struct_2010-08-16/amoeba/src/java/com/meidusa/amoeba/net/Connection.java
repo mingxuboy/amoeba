@@ -260,6 +260,9 @@ public abstract class Connection implements NetEventHandler {
                 byte[] msg = new byte[bytesIn];
                 _fin.read(msg);
                 doReceiveMessage(msg);
+                if(logger.isDebugEnabled()){
+            		logger.debug("received from <<---"+this.getSocketId()+" buffer size="+msg.length);
+            	}
             }
         	messageProcess();
         } catch (EOFException eofe) {
@@ -303,9 +306,13 @@ public abstract class Connection implements NetEventHandler {
                     _outQueue.prepend(buffer);
                     return false;
                 } else {
+                	
                     // buffer.clear();
                     message++;
                 }
+                if(logger.isDebugEnabled()){
+            		logger.debug("write-->"+this.getSocketId()+" buffer code="+buffer.toString()+" [size="+buffer.limit()+",remaining="+buffer.remaining());
+            	}
             }
             return true;
 
