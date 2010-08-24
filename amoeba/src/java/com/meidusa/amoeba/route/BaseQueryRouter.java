@@ -46,20 +46,18 @@ import com.meidusa.amoeba.config.BeanObjectEntityConfig;
 import com.meidusa.amoeba.config.ConfigurationException;
 import com.meidusa.amoeba.config.DocumentUtil;
 import com.meidusa.amoeba.context.ProxyRuntimeContext;
-import com.meidusa.amoeba.net.DatabaseConnection;
+import com.meidusa.amoeba.net.Connection;
 import com.meidusa.amoeba.net.poolable.ObjectPool;
-import com.meidusa.amoeba.parser.Parser;
+import com.meidusa.amoeba.parser.ParseException;
 import com.meidusa.amoeba.parser.dbobject.Column;
 import com.meidusa.amoeba.parser.dbobject.Schema;
 import com.meidusa.amoeba.parser.dbobject.Table;
 import com.meidusa.amoeba.parser.function.Function;
-import com.meidusa.amoeba.parser.function.LastInsertId;
 import com.meidusa.amoeba.parser.statement.AbstractStatement;
 import com.meidusa.amoeba.parser.statement.CommitStatement;
 import com.meidusa.amoeba.parser.statement.DMLStatement;
 import com.meidusa.amoeba.parser.statement.PropertyStatement;
 import com.meidusa.amoeba.parser.statement.RollbackStatement;
-import com.meidusa.amoeba.parser.statement.SelectStatement;
 import com.meidusa.amoeba.parser.statement.ShowStatement;
 import com.meidusa.amoeba.parser.statement.StartTansactionStatement;
 import com.meidusa.amoeba.parser.statement.Statement;
@@ -129,12 +127,11 @@ import com.meidusa.amoeba.util.Tuple;
 
 /**
  * @author struct
- * @author hexianmao
  */
 @SuppressWarnings("deprecation")
-public abstract class AbstractQueryRouter implements QueryRouter, Initialisable {
+public abstract class  BaseQueryRouter<T extends Connection,V> implements NewQueryRouter<T,V>, Initialisable {
 	private static final String _CURRENT_STATEMENT_ = "_CURRENT_STATEMENT_";
-    private static Logger                           logger          = Logger.getLogger(AbstractQueryRouter.class);
+	protected static Logger                           logger          = Logger.getLogger(BaseQueryRouter.class);
 
     public final static Map<String, PostfixCommand> ruleFunTab      = new HashMap<String, PostfixCommand>();
     static {
@@ -218,11 +215,11 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable 
 
     /* 默认1000 */
     private int                                     LRUMapSize      = 1000;
-    private LRUMap                                  map;
-    private Lock                                    mapLock         = new ReentrantLock(false);
+    protected LRUMap                                  map;
+    protected Lock                                    mapLock         = new ReentrantLock(false);
 
     private Map<Table, TableRule>                   tableRuleMap    = new HashMap<Table, TableRule>();
-    private Map<String, Function>                   functionMap     = new HashMap<String, Function>();
+    protected Map<String, Function>                   functionMap     = new HashMap<String, Function>();
     private Map<String, PostfixCommand>             ruleFunctionMap = new HashMap<String, PostfixCommand>();
 
     protected ObjectPool[]                          defaultPools;
@@ -240,15 +237,13 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable 
     private boolean                                 needParse       = true;
     private boolean                                 needEvaluate    = true;
 
-    public AbstractQueryRouter(){
+    public BaseQueryRouter(){
         ruleFunctionMap.putAll(ruleFunTab);
     }
 
     public String getRuleConfig() {
         return ruleConfig;
     }
-
-    public abstract Parser newParser(String sql);
 
     public void setRuleConfig(String ruleConfig) {
         this.ruleConfig = ruleConfig;
@@ -270,349 +265,352 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable 
         this.writePool = writePool;
     }
 
-    public Tuple<Statement,ObjectPool[]> doRoute(DatabaseConnection connection, String sql, boolean ispreparedStatment,
-                                Object[] parameters) {
-        if (sql == null) {
+    public Tuple<Statement,ObjectPool[]> doRoute(T connection,V queryObject) throws ParseException {
+        if (queryObject == null) {
             return tuple;
         }
         if (needParse) {
-            return selectPool(connection, sql, ispreparedStatment, parameters);
+            return selectPool(connection, queryObject);
         } else {
             return tuple;
         }
     }
 
+    protected abstract  Map<Table, Map<Column, Comparative>> evaluateStatement(Statement statment,V queryObject);
+    
+    protected abstract void setConnectionPropertiesWithStatement(T connection,Statement statment,V queryObject);
+    
+    public ObjectPool[] dealStatement(T connection, V queryObject,Statement statment){
+    	DMLStatement dmlStatment = null;
+    	List<String> poolNames = new ArrayList<String>();
+    	 if (statment instanceof DMLStatement) {
+             if (logger.isDebugEnabled()) {
+                 logger.debug("DMLStatement:[" + queryObject + "] Expression=[" + statment.getExpression() + "]");
+             }
+
+             dmlStatment = (DMLStatement) statment;
+             Map<Table, Map<Column, Comparative>> tables = null;
+             if (needEvaluate) {
+                 tables = evaluateStatement(dmlStatment,queryObject);
+                 if (tables != null && tables.size() > 0) {
+                     Set<Map.Entry<Table, Map<Column, Comparative>>> entrySet = tables.entrySet();
+                     for (Map.Entry<Table, Map<Column, Comparative>> entry : entrySet) {
+                         Map<Column, Comparative> columnMap = entry.getValue();
+                         TableRule tableRule = this.tableRuleMap.get(entry.getKey());
+
+                         // 如果存在table Rule 则需要看是否有Rule
+                         if (tableRule != null) {
+                             // 没有列的sql语句，使用默认的tableRule
+                             if (columnMap == null || statment.isPrepared()) {
+                                 String[] pools = dmlStatment.isReadStatement() ? tableRule.readPools : tableRule.writePools;
+                                 if (pools == null || pools.length == 0) {
+                                     pools = tableRule.defaultPools;
+                                 }
+                                 for (String poolName : pools) {
+                                     if (!poolNames.contains(poolName)) {
+                                         poolNames.add(poolName);
+                                     }
+                                 }
+                                 
+                                 if(!statment.isPrepared()){
+ 	                                if (logger.isDebugEnabled()) {
+ 	                                    logger.debug("[" + statment.getSql() + "] no Column rule, using table:" + tableRule.table + " default rules:" + Arrays.toString(tableRule.defaultPools));
+ 	                                }
+                                 }
+                                 continue;
+                             }
+
+                             List<String> groupMatched = new ArrayList<String>();
+                             for (Rule rule : tableRule.ruleList) {
+                                 if (rule.group != null) {
+                                     if (groupMatched.contains(rule.group)) {
+                                         continue;
+                                     }
+                                 }
+
+                                 // 如果参数比必须的参数个数少，则继续下一条规则
+                                 if (columnMap.size() < rule.parameterMap.size()) {
+                                     continue;
+                                 } else {
+                                     boolean matched = true;
+                                     // 如果查询语句中包含了该规则不需要的参数，则该规则将被忽略
+                                     for (Column exclude : rule.excludes) {
+                                         Comparable<?> condition = columnMap.get(exclude);
+                                         if (condition != null) {
+                                             matched = false;
+                                             break;
+                                         }
+                                     }
+
+                                     // 如果不匹配将继续下一条规则
+                                     if (!matched) {
+                                         continue;
+                                     }
+
+                                     Comparable<?>[] comparables = new Comparable[rule.parameterMap.size()];
+                                     // 规则中的参数必须在dmlstatement中存在，否则这个规则将不启作用
+                                     for (Map.Entry<Column, Integer> parameter : rule.cloumnMap.entrySet()) {
+                                         Comparative condition = columnMap.get(parameter.getKey());
+                                         if (condition != null) {
+                                             // 如果规则忽略 数组的 参数，并且参数有array 参数，则忽略该规则
+                                             if (rule.ignoreArray && condition instanceof ComparativeBaseList) {
+                                                 matched = false;
+                                                 break;
+                                             }
+
+                                             comparables[parameter.getValue()] = (Comparative) condition.clone();
+                                         } else {
+                                             matched = false;
+                                             break;
+                                         }
+                                     }
+
+                                     // 如果不匹配将继续下一条规则
+                                     if (!matched) {
+                                         continue;
+                                     }
+                                     
+                                     try {
+                                         Comparable<?> result = rule.rowJep.getValue(comparables);
+                                         Integer i = 0;
+                                         if (result instanceof Comparative) {
+                                             if (rule.result == RuleResult.INDEX) {
+                                                 i = (Integer) ((Comparative) result).getValue();
+                                                 if (i < 0) {
+                                                     continue;
+                                                 }
+                                                 matched = true;
+                                             } else if(rule.result == RuleResult.POOLNAME){
+                                             	String matchedPoolsString = ((Comparative) result).getValue().toString();
+                                             	String[] poolNamesMatched = matchedPoolsString.split(",");
+                                             	
+                                             	if(poolNamesMatched != null && poolNamesMatched.length >0){
+ 	                                            	for(String poolName : poolNamesMatched){
+ 		                                            	if (!poolNames.contains(poolName)) {
+ 		                                                    poolNames.add(poolName);
+ 		                                                }
+ 	                                            	}
+ 	                                            	
+ 	                                            	if (logger.isDebugEnabled()) {
+ 	                                                    logger.debug("[" + statment.getSql() + "] matched table:" + tableRule.table.getName() + ", rule:" + rule.name);
+ 	                                                }
+                                             	}
+                                             	continue;
+                                             }else{
+                                                 matched = (Boolean) ((Comparative) result).getValue();
+                                             }
+                                         } else {
+                                         	
+                                         	if (rule.result == RuleResult.INDEX) {
+                                                 i = (Integer) Integer.valueOf(result.toString());
+                                                 if (i < 0) {
+                                                     continue;
+                                                 }
+                                                 matched = true;
+                                             } else if(rule.result == RuleResult.POOLNAME){
+                                             	String matchedPoolsString = result.toString();
+                                             	String[] poolNamesMatched = StringUtil.split(matchedPoolsString,";");
+                                             	if(poolNamesMatched != null && poolNamesMatched.length >0){
+ 	                                            	for(String poolName : poolNamesMatched){
+ 		                                            	if (!poolNames.contains(poolName)) {
+ 		                                                    poolNames.add(poolName);
+ 		                                                }
+ 	                                            	}
+ 	                                            	
+ 	                                            	if (logger.isDebugEnabled()) {
+ 	                                                    logger.debug("[" + statment.getSql() + "] matched table:" + tableRule.table.getName() + ", rule:" + rule.name);
+ 	                                                }
+                                             	}
+                                             	continue;
+                                             }else{
+                                             	matched = (Boolean) result;
+                                             }
+                                         }
+
+                                         if (matched) {
+                                             if (rule.group != null) {
+                                                 groupMatched.add(rule.group);
+                                             }
+                                             String[] pools = dmlStatment.isReadStatement() ? rule.readPools : rule.writePools;
+                                             if (pools == null || pools.length == 0) {
+                                                 pools = rule.defaultPools;
+                                             }
+                                             if (pools != null && pools.length > 0) {
+                                                 if (rule.isSwitch) {
+                                                     if (!poolNames.contains(pools[i])) {
+                                                         poolNames.add(pools[i]);
+                                                     }
+                                                 } else {
+                                                     for (String poolName : pools) {
+                                                         if (!poolNames.contains(poolName)) {
+                                                             poolNames.add(poolName);
+                                                         }
+                                                     }
+                                                 }
+                                             } else {
+                                                 logger.error("rule:" + rule.name + " matched, but pools is null");
+                                             }
+
+                                             if (logger.isDebugEnabled()) {
+                                                 logger.debug("[" + statment.getSql() + "] matched table:" + tableRule.table.getName() + ", rule:" + rule.name);
+                                             }
+                                         }
+                                     } catch (com.meidusa.amoeba.sqljep.ParseException e) {
+                                         // logger.error("parse rule error:"+rule.expression,e);
+                                     }
+                                 }
+                             }
+
+                             // 如果所有规则都无法匹配，则默认采用TableRule中的pool设置。
+                             if (poolNames.size() == 0) {
+                                 String[] pools = dmlStatment.isReadStatement() ? tableRule.readPools : tableRule.writePools;
+                                 if (pools == null || pools.length == 0) {
+                                     pools = tableRule.defaultPools;
+                                 }
+                                 
+                                 if(!statment.isPrepared()){
+                                 	if(tableRule.ruleList != null && tableRule.ruleList.size()>0){
+                                 		logger.warn("sql=["+statment.getSql()+"]no rule matched, using tableRule:[" + tableRule.table.getName() + "] defaultPools");
+                                 	}else{
+                                 		if(logger.isDebugEnabled()){
+                                 			if(pools != null){
+                                 				StringBuffer buffer = new StringBuffer();
+ 	                                			for(String pool : pools){
+ 	                                				buffer.append(pool).append(",");
+ 	                                			}
+                                 				logger.debug("sql=["+statment.getSql()+"] , using tableRule:[" + tableRule.table.getName() + "] defaultPools="+buffer.toString());
+                                 			}
+                                 		}
+                                 	}
+                                 }
+                                 for (String poolName : pools) {
+                                     if (!poolNames.contains(poolName)) {
+                                         poolNames.add(poolName);
+                                     }
+                                 }
+                             }
+                         }
+                     }
+                 }
+             }
+         } else if (statment instanceof PropertyStatement) {
+             if (logger.isDebugEnabled()) {
+                 logger.debug("PropertyStatment:[" + statment.getSql() + "]");
+             }
+
+             return null;
+         } else if (statment instanceof ShowStatement) {
+             if (logger.isDebugEnabled()) {
+                 logger.debug("ShowStatment:[" + statment.getSql() + "]");
+             }
+             AbstractStatement ast = (ShowStatement)statment;
+             if(ast.getTables() != null){
+ 	            for(Table table:ast.getTables()){
+ 	            	TableRule tableRule = this.tableRuleMap.get(table);
+ 	            	if(tableRule != null && tableRule.defaultPools != null && tableRule.defaultPools.length > 0) {
+ 		            	for (String poolName : tableRule.defaultPools) {
+ 		                    if (!poolNames.contains(poolName)) {
+ 		                        poolNames.add(poolName);
+ 		                    }
+ 		                    
+ 		                    //only route to single pool
+ 		                    if(poolNames.size()>0){
+ 		                    	break;
+ 		                    }
+ 		                }
+ 	            	}
+ 	            }
+             }else{
+ 	            TableRule tableRule = this.tableRuleMap.get(null);
+ 	            if (tableRule != null && tableRule.defaultPools != null && tableRule.defaultPools.length > 0) {
+ 	                for (String poolName : tableRule.defaultPools) {
+ 	                    if (!poolNames.contains(poolName)) {
+ 	                        poolNames.add(poolName);
+ 	                    }
+ 	                    
+ 	                    //only route to single pool
+ 	                    if(poolNames.size()>0){
+ 	                    	break;
+ 	                    }
+ 	                }
+ 	            }
+             }
+         } else if (statment instanceof StartTansactionStatement) {
+             if (logger.isDebugEnabled()) {
+                 logger.debug("StartTansactionStatment:[" + statment.getSql() + "]");
+             }
+             return null;
+         } else if (statment instanceof CommitStatement) {
+             if (logger.isDebugEnabled()) {
+                 logger.debug("CommitStatment:[" + statment.getSql() + "]");
+             }
+             return null;
+         } else if (statment instanceof RollbackStatement) {
+             if (logger.isDebugEnabled()) {
+                 logger.debug("RollbackStatment:[" + statment.getSql() + "]");
+             }
+             return null;
+         } else {
+             //throw new RuntimeException("error,unknown statement:[" + sql + "]");
+         	 logger.warn("error,unknown statement:[" + statment.getSql() + "]");
+              return defaultPools;
+         }
+
+         ObjectPool[] pools = new ObjectPool[poolNames.size()];
+         int i = 0;
+         for (String name : poolNames) {
+         	ObjectPool pool = ProxyRuntimeContext.getInstance().getPoolMap().get(name);
+         	if(pool == null){
+         		logger.error("cannot found Pool="+name);
+         		throw new RuntimeException("cannot found Pool="+name);
+         	}
+         	pools[i++] = pool;
+         }
+
+         if (pools == null || pools.length == 0) {
+             if (dmlStatment != null) {
+                 pools = dmlStatment.isReadStatement() ? this.readPools : this.writePools;
+                 if (logger.isDebugEnabled() && pools != null && pools.length > 0) {
+                     if (dmlStatment.isReadStatement()) {
+                         logger.debug("[" + statment.getSql() + "] parameter:"+ queryObject+" route to queryRouter readPool:" + readPool + "\n");
+                     } else {
+                         logger.debug("[" + statment.getSql() + "] parameter:"+ queryObject+" route to queryRouter writePool:" + writePool + "\n");
+                     }
+                 }
+             }
+
+             if (pools == null || pools.length == 0) {
+                 pools = this.defaultPools;
+                 if (logger.isDebugEnabled() && pools != null && pools.length > 0) {
+                     logger.debug("[" + statment.getSql() + "] parameter:"+ queryObject +" route to queryRouter defaultPool:" + defaultPool + "\n");
+                 }
+             }
+         } else {
+             if (logger.isDebugEnabled() && pools != null && pools.length > 0) {
+                 logger.debug("[" + statment.getSql() + "] parameter:"+ queryObject+" route to pools:" + poolNames + "\n");
+             }
+         }
+         return pools;
+    }
     /**
      * 返回Query 被route到目标地址 ObjectPool集合 如果返回null，则是属于DatabaseConnection 自身属性设置的请求。
+     * @throws ParseException 
      */
-    protected Tuple<Statement,ObjectPool[]> selectPool(DatabaseConnection connection, String sql, boolean ispreparedStatment,
-                                      Object[] parameters) {
-        List<String> poolNames = new ArrayList<String>();
+    protected Tuple<Statement,ObjectPool[]> selectPool(T connection, V queryObject) throws ParseException {
+        
         Tuple<Statement,ObjectPool[]> resultTuple = new Tuple<Statement,ObjectPool[]>();
-        Statement statment = parseSql(connection, sql);
+        Statement statment = parseStatement(connection, queryObject);
+        setConnectionPropertiesWithStatement(connection, (PropertyStatement) statment, queryObject);
         resultTuple.left = statment;
-        DMLStatement dmlStatment = null;
+        
         ThreadLocalMap.put(_CURRENT_STATEMENT_, statment);
-        if (statment instanceof DMLStatement) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("DMLStatement:[" + sql + "] Expression=[" + statment.getExpression() + "]");
-            }
-
-            dmlStatment = (DMLStatement) statment;
-            Map<Table, Map<Column, Comparative>> tables = null;
-            if (needEvaluate) {
-                tables = dmlStatment.evaluate(parameters);
-                if (tables != null && tables.size() > 0) {
-                    Set<Map.Entry<Table, Map<Column, Comparative>>> entrySet = tables.entrySet();
-                    for (Map.Entry<Table, Map<Column, Comparative>> entry : entrySet) {
-                        Map<Column, Comparative> columnMap = entry.getValue();
-                        TableRule tableRule = this.tableRuleMap.get(entry.getKey());
-
-                        // 如果存在table Rule 则需要看是否有Rule
-                        if (tableRule != null) {
-                            // 没有列的sql语句，使用默认的tableRule
-                            if (columnMap == null || ispreparedStatment) {
-                                String[] pools = dmlStatment.isReadStatement() ? tableRule.readPools : tableRule.writePools;
-                                if (pools == null || pools.length == 0) {
-                                    pools = tableRule.defaultPools;
-                                }
-                                for (String poolName : pools) {
-                                    if (!poolNames.contains(poolName)) {
-                                        poolNames.add(poolName);
-                                    }
-                                }
-                                
-                                if(!ispreparedStatment){
-	                                if (logger.isDebugEnabled()) {
-	                                    logger.debug("[" + sql + "] no Column rule, using table:" + tableRule.table + " default rules:" + Arrays.toString(tableRule.defaultPools));
-	                                }
-                                }
-                                continue;
-                            }
-
-                            List<String> groupMatched = new ArrayList<String>();
-                            for (Rule rule : tableRule.ruleList) {
-                                if (rule.group != null) {
-                                    if (groupMatched.contains(rule.group)) {
-                                        continue;
-                                    }
-                                }
-
-                                // 如果参数比必须的参数个数少，则继续下一条规则
-                                if (columnMap.size() < rule.parameterMap.size()) {
-                                    continue;
-                                } else {
-                                    boolean matched = true;
-                                    // 如果查询语句中包含了该规则不需要的参数，则该规则将被忽略
-                                    for (Column exclude : rule.excludes) {
-                                        Comparable<?> condition = columnMap.get(exclude);
-                                        if (condition != null) {
-                                            matched = false;
-                                            break;
-                                        }
-                                    }
-
-                                    // 如果不匹配将继续下一条规则
-                                    if (!matched) {
-                                        continue;
-                                    }
-
-                                    Comparable<?>[] comparables = new Comparable[rule.parameterMap.size()];
-                                    // 规则中的参数必须在dmlstatement中存在，否则这个规则将不启作用
-                                    for (Map.Entry<Column, Integer> parameter : rule.cloumnMap.entrySet()) {
-                                        Comparative condition = columnMap.get(parameter.getKey());
-                                        if (condition != null) {
-                                            // 如果规则忽略 数组的 参数，并且参数有array 参数，则忽略该规则
-                                            if (rule.ignoreArray && condition instanceof ComparativeBaseList) {
-                                                matched = false;
-                                                break;
-                                            }
-
-                                            comparables[parameter.getValue()] = (Comparative) condition.clone();
-                                        } else {
-                                            matched = false;
-                                            break;
-                                        }
-                                    }
-
-                                    // 如果不匹配将继续下一条规则
-                                    if (!matched) {
-                                        continue;
-                                    }
-                                    
-                                    try {
-                                        Comparable<?> result = rule.rowJep.getValue(comparables);
-                                        Integer i = 0;
-                                        if (result instanceof Comparative) {
-                                            if (rule.result == RuleResult.INDEX) {
-                                                i = (Integer) ((Comparative) result).getValue();
-                                                if (i < 0) {
-                                                    continue;
-                                                }
-                                                matched = true;
-                                            } else if(rule.result == RuleResult.POOLNAME){
-                                            	String matchedPoolsString = ((Comparative) result).getValue().toString();
-                                            	String[] poolNamesMatched = matchedPoolsString.split(",");
-                                            	
-                                            	if(poolNamesMatched != null && poolNamesMatched.length >0){
-	                                            	for(String poolName : poolNamesMatched){
-		                                            	if (!poolNames.contains(poolName)) {
-		                                                    poolNames.add(poolName);
-		                                                }
-	                                            	}
-	                                            	
-	                                            	if (logger.isDebugEnabled()) {
-	                                                    logger.debug("[" + sql + "] matched table:" + tableRule.table.getName() + ", rule:" + rule.name);
-	                                                }
-                                            	}
-                                            	continue;
-                                            }else{
-                                                matched = (Boolean) ((Comparative) result).getValue();
-                                            }
-                                        } else {
-                                        	
-                                        	if (rule.result == RuleResult.INDEX) {
-                                                i = (Integer) Integer.valueOf(result.toString());
-                                                if (i < 0) {
-                                                    continue;
-                                                }
-                                                matched = true;
-                                            } else if(rule.result == RuleResult.POOLNAME){
-                                            	String matchedPoolsString = result.toString();
-                                            	String[] poolNamesMatched = StringUtil.split(matchedPoolsString,";");
-                                            	if(poolNamesMatched != null && poolNamesMatched.length >0){
-	                                            	for(String poolName : poolNamesMatched){
-		                                            	if (!poolNames.contains(poolName)) {
-		                                                    poolNames.add(poolName);
-		                                                }
-	                                            	}
-	                                            	
-	                                            	if (logger.isDebugEnabled()) {
-	                                                    logger.debug("[" + sql + "] matched table:" + tableRule.table.getName() + ", rule:" + rule.name);
-	                                                }
-                                            	}
-                                            	continue;
-                                            }else{
-                                            	matched = (Boolean) result;
-                                            }
-                                        }
-
-                                        if (matched) {
-                                            if (rule.group != null) {
-                                                groupMatched.add(rule.group);
-                                            }
-                                            String[] pools = dmlStatment.isReadStatement() ? rule.readPools : rule.writePools;
-                                            if (pools == null || pools.length == 0) {
-                                                pools = rule.defaultPools;
-                                            }
-                                            if (pools != null && pools.length > 0) {
-                                                if (rule.isSwitch) {
-                                                    if (!poolNames.contains(pools[i])) {
-                                                        poolNames.add(pools[i]);
-                                                    }
-                                                } else {
-                                                    for (String poolName : pools) {
-                                                        if (!poolNames.contains(poolName)) {
-                                                            poolNames.add(poolName);
-                                                        }
-                                                    }
-                                                }
-                                            } else {
-                                                logger.error("rule:" + rule.name + " matched, but pools is null");
-                                            }
-
-                                            if (logger.isDebugEnabled()) {
-                                                logger.debug("[" + sql + "] matched table:" + tableRule.table.getName() + ", rule:" + rule.name);
-                                            }
-                                        }
-                                    } catch (com.meidusa.amoeba.sqljep.ParseException e) {
-                                        // logger.error("parse rule error:"+rule.expression,e);
-                                    }
-                                }
-                            }
-
-                            // 如果所有规则都无法匹配，则默认采用TableRule中的pool设置。
-                            if (poolNames.size() == 0) {
-                                String[] pools = dmlStatment.isReadStatement() ? tableRule.readPools : tableRule.writePools;
-                                if (pools == null || pools.length == 0) {
-                                    pools = tableRule.defaultPools;
-                                }
-                                
-                                if(!ispreparedStatment){
-                                	if(tableRule.ruleList != null && tableRule.ruleList.size()>0){
-                                		logger.warn("sql=["+sql+"]no rule matched, using tableRule:[" + tableRule.table.getName() + "] defaultPools");
-                                	}else{
-                                		if(logger.isDebugEnabled()){
-                                			if(pools != null){
-                                				StringBuffer buffer = new StringBuffer();
-	                                			for(String pool : pools){
-	                                				buffer.append(pool).append(",");
-	                                			}
-                                				logger.debug("sql=["+sql+"] , using tableRule:[" + tableRule.table.getName() + "] defaultPools="+buffer.toString());
-                                			}
-                                		}
-                                	}
-                                }
-                                for (String poolName : pools) {
-                                    if (!poolNames.contains(poolName)) {
-                                        poolNames.add(poolName);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        } else if (statment instanceof PropertyStatement) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("PropertyStatment:[" + sql + "]");
-            }
-            setProperty(connection, (PropertyStatement) statment, parameters);
-            return this.tuple;
-        } else if (statment instanceof ShowStatement) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("ShowStatment:[" + sql + "]");
-            }
-            AbstractStatement ast = (ShowStatement)statment;
-            if(ast.getTables() != null){
-	            for(Table table:ast.getTables()){
-	            	TableRule tableRule = this.tableRuleMap.get(table);
-	            	if(tableRule != null && tableRule.defaultPools != null && tableRule.defaultPools.length > 0) {
-		            	for (String poolName : tableRule.defaultPools) {
-		                    if (!poolNames.contains(poolName)) {
-		                        poolNames.add(poolName);
-		                    }
-		                    
-		                    //only route to single pool
-		                    if(poolNames.size()>0){
-		                    	break;
-		                    }
-		                }
-	            	}
-	            }
-            }else{
-	            TableRule tableRule = this.tableRuleMap.get(null);
-	            if (tableRule != null && tableRule.defaultPools != null && tableRule.defaultPools.length > 0) {
-	                for (String poolName : tableRule.defaultPools) {
-	                    if (!poolNames.contains(poolName)) {
-	                        poolNames.add(poolName);
-	                    }
-	                    
-	                    //only route to single pool
-	                    if(poolNames.size()>0){
-	                    	break;
-	                    }
-	                }
-	            }
-            }
-        } else if (statment instanceof StartTansactionStatement) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("StartTansactionStatment:[" + sql + "]");
-            }
-            return this.tuple;
-        } else if (statment instanceof CommitStatement) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("CommitStatment:[" + sql + "]");
-            }
-            return this.tuple;
-        } else if (statment instanceof RollbackStatement) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("RollbackStatment:[" + sql + "]");
-            }
-            return this.tuple;
-        } else {
-            //throw new RuntimeException("error,unknown statement:[" + sql + "]");
-        	 logger.warn("error,unknown statement:[" + sql + "]");
-        	 resultTuple.right = defaultPools;
-             return resultTuple;
-        }
-
-        ObjectPool[] pools = new ObjectPool[poolNames.size()];
-        int i = 0;
-        for (String name : poolNames) {
-        	ObjectPool pool = ProxyRuntimeContext.getInstance().getPoolMap().get(name);
-        	if(pool == null){
-        		logger.error("cannot found Pool="+name);
-        		throw new RuntimeException("cannot found Pool="+name);
-        	}
-        	pools[i++] = pool;
-        }
-
-        if (pools == null || pools.length == 0) {
-            if (dmlStatment != null) {
-                pools = dmlStatment.isReadStatement() ? this.readPools : this.writePools;
-                if (logger.isDebugEnabled() && pools != null && pools.length > 0) {
-                    if (dmlStatment.isReadStatement()) {
-                        logger.debug("[" + sql + "] parameter:"+ StringUtil.toString(parameters)+" route to queryRouter readPool:" + readPool + "\n");
-                    } else {
-                        logger.debug("[" + sql + "] parameter:"+ StringUtil.toString(parameters)+" route to queryRouter writePool:" + writePool + "\n");
-                    }
-                }
-            }
-
-            if (pools == null || pools.length == 0) {
-                pools = this.defaultPools;
-                if (logger.isDebugEnabled() && pools != null && pools.length > 0) {
-                    logger.debug("[" + sql + "] parameter:"+ StringUtil.toString(parameters)+" route to queryRouter defaultPool:" + defaultPool + "\n");
-                }
-            }
-        } else {
-            if (logger.isDebugEnabled() && pools != null && pools.length > 0) {
-                logger.debug("[" + sql + "] parameter:"+ StringUtil.toString(parameters)+" route to pools:" + poolNames + "\n");
-            }
-        }
-        resultTuple.right = pools;
+        
+        resultTuple.right = dealStatement(connection,queryObject,statment);
+        
         return resultTuple;
+        
+       
     }
-
-    /**
-     * 根据 PropertyStatment 设置相关连接的属性
-     * 
-     * @param conn 当前请求的连接
-     * @param statment 当前请求的Statment
-     * @param parameters
-     */
-    protected abstract void setProperty(DatabaseConnection conn, PropertyStatement statment, Object[] parameters);
 
     public void init() throws InitialisationException {
         defaultPools = new ObjectPool[] { ProxyRuntimeContext.getInstance().getPoolMap().get(defaultPool) };
@@ -642,12 +640,12 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable 
 
                 this.setDaemon(true);
                 this.setName("ruleConfigCheckThread");
-                ruleFile = new File(AbstractQueryRouter.this.ruleConfig);
-                funFile = new File(AbstractQueryRouter.this.functionConfig);
+                ruleFile = new File(BaseQueryRouter.this.ruleConfig);
+                funFile = new File(BaseQueryRouter.this.functionConfig);
                 lastRuleModified = ruleFile.lastModified();
                 lastFunFileModified = funFile.lastModified();
-                if (AbstractQueryRouter.this.ruleFunctionConfig != null) {
-                    ruleFunctionFile = new File(AbstractQueryRouter.this.ruleFunctionConfig);
+                if (BaseQueryRouter.this.ruleFunctionConfig != null) {
+                    ruleFunctionFile = new File(BaseQueryRouter.this.ruleFunctionConfig);
                     lastRuleFunctionFileModified = ruleFunctionFile.lastModified();
                 }
             }
@@ -660,37 +658,37 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable 
                         Map<String, PostfixCommand> ruleFunMap = null;
                         Map<Table, TableRule> tableRuleMap = null;
                         try {
-                            if (AbstractQueryRouter.this.functionConfig != null) {
+                            if (BaseQueryRouter.this.functionConfig != null) {
                                 if (funFile.lastModified() != lastFunFileModified) {
                                     try {
-                                        funMap = loadFunctionMap(AbstractQueryRouter.this.functionConfig);
+                                        funMap = loadFunctionMap(BaseQueryRouter.this.functionConfig);
                                     } catch (ConfigurationException exception) {
                                     }
 
                                 }
                             }
-                            if (AbstractQueryRouter.this.ruleFunctionConfig != null) {
+                            if (BaseQueryRouter.this.ruleFunctionConfig != null) {
                                 if (ruleFunctionFile.lastModified() != lastRuleFunctionFileModified) {
-                                    ruleFunMap = loadRuleFunctionMap(AbstractQueryRouter.this.ruleFunctionConfig);
+                                    ruleFunMap = loadRuleFunctionMap(BaseQueryRouter.this.ruleFunctionConfig);
                                 }
                             }
 
-                            if (AbstractQueryRouter.this.ruleConfig != null) {
-                                if (ruleFile.lastModified() != lastRuleModified || (AbstractQueryRouter.this.ruleFunctionConfig != null && ruleFunctionFile.lastModified() != lastRuleFunctionFileModified)) {
-                                    tableRuleMap = loadConfig(AbstractQueryRouter.this.ruleConfig);
+                            if (BaseQueryRouter.this.ruleConfig != null) {
+                                if (ruleFile.lastModified() != lastRuleModified || (BaseQueryRouter.this.ruleFunctionConfig != null && ruleFunctionFile.lastModified() != lastRuleFunctionFileModified)) {
+                                    tableRuleMap = loadConfig(BaseQueryRouter.this.ruleConfig);
                                 }
                             }
 
                             if (funMap != null) {
-                                AbstractQueryRouter.this.functionMap = funMap;
+                                BaseQueryRouter.this.functionMap = funMap;
                             }
 
                             if (ruleFunMap != null) {
-                                AbstractQueryRouter.this.ruleFunctionMap = ruleFunMap;
+                                BaseQueryRouter.this.ruleFunctionMap = ruleFunMap;
                             }
 
                             if (tableRuleMap != null) {
-                                AbstractQueryRouter.this.tableRuleMap = tableRuleMap;
+                                BaseQueryRouter.this.tableRuleMap = tableRuleMap;
                             }
                         } catch (ConfigurationException e) {
                         } finally {
@@ -713,19 +711,19 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable 
         if (needParse) {
             boolean configNeedCheck = false;
 
-            if (AbstractQueryRouter.this.functionConfig != null) {
-                this.functionMap = loadFunctionMap(AbstractQueryRouter.this.functionConfig);
+            if (BaseQueryRouter.this.functionConfig != null) {
+                this.functionMap = loadFunctionMap(BaseQueryRouter.this.functionConfig);
                 configNeedCheck = true;
             } else {
                 needEvaluate = false;
             }
 
-            if (AbstractQueryRouter.this.ruleFunctionConfig != null) {
-                AbstractQueryRouter.this.ruleFunctionMap = loadRuleFunctionMap(AbstractQueryRouter.this.ruleFunctionConfig);
+            if (BaseQueryRouter.this.ruleFunctionConfig != null) {
+                BaseQueryRouter.this.ruleFunctionMap = loadRuleFunctionMap(BaseQueryRouter.this.ruleFunctionConfig);
                 configNeedCheck = true;
             }
 
-            if (AbstractQueryRouter.this.ruleConfig != null) {
+            if (BaseQueryRouter.this.ruleConfig != null) {
                 this.tableRuleMap = loadConfig(this.ruleConfig);
                 configNeedCheck = true;
             } else {
@@ -797,9 +795,9 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable 
 
                 public InputSource resolveEntity(String publicId, String systemId) {
                     if (systemId.endsWith("rule.dtd")) {
-                        InputStream in = AbstractQueryRouter.class.getResourceAsStream("/com/meidusa/amoeba/xml/rule.dtd");
+                        InputStream in = BaseQueryRouter.class.getResourceAsStream("/com/meidusa/amoeba/xml/rule.dtd");
                         if (in == null) {
-                            LogLog.error("Could not find [rule.dtd]. Used [" + AbstractQueryRouter.class.getClassLoader() + "] class loader in the search.");
+                            LogLog.error("Could not find [rule.dtd]. Used [" + BaseQueryRouter.class.getClassLoader() + "] class loader in the search.");
                             return null;
                         } else {
                             return new InputSource(in);
@@ -1078,68 +1076,10 @@ public abstract class AbstractQueryRouter implements QueryRouter, Initialisable 
         return null;
     }
 
-    public Statement parseSql(DatabaseConnection connection, String sql) {
-        Statement statment = null;
+    public abstract Statement parseStatement(T conn, V queryObject);
 
-        String defaultSchema = (connection == null || StringUtil.isEmpty(connection.getSchema())) ? null : connection.getSchema();
-
-        long sqlKey = ((long) sql.length() << 32) | (long) (defaultSchema != null ? (defaultSchema.hashCode() ^ sql.hashCode()) : sql.hashCode());
-        mapLock.lock();
-        try {
-            statment = (Statement) map.get(sqlKey);
-        } finally {
-            mapLock.unlock();
-        }
-        if (statment == null) {
-            synchronized (sql) {
-                statment = (Statement) map.get(sqlKey);
-                if (statment != null) {
-                    return statment;
-                }
-
-                Parser parser = newParser(sql);
-                parser.setFunctionMap(this.functionMap);
-                if (defaultSchema != null) {
-                    Schema schema = new Schema();
-                    schema.setName(defaultSchema);
-                    parser.setDefaultSchema(schema);
-                }
-
-                try {
-                    statment = parser.doParse();
-                    if(statment instanceof SelectStatement){
-                    	SelectStatement st = (SelectStatement)statment;
-                    	if(st.getTables() == null || st.getTables().length == 0){
-                    		Boolean queryInsertId = (Boolean)ThreadLocalMap.get(LastInsertId.class.getName());
-                    		if(queryInsertId != null && queryInsertId.booleanValue()){
-                    			st.setQueryLastInsertId(true);
-                    		}
-                    	}
-                    }
-                    mapLock.lock();
-                    if(statment instanceof DMLStatement){
-                    	((DMLStatement)statment).setSql(sql);
-                    }
-                    try {
-                        map.put(sqlKey, statment);
-                    } finally {
-                        mapLock.unlock();
-                    }
-                } catch (Error e) {
-                    logger.error(sql, e);
-                    return null;
-                }catch(Exception e){
-                	logger.error(sql, e);
-                    return null;
-                }
-               
-            }
-        }
-        return statment;
-    }
-
-    public int parseParameterCount(DatabaseConnection connection, String sql) {
-        Statement statment = parseSql(connection, sql);
+    public int parseParameterCount(T conn, V queryObject) {
+        Statement statment = parseStatement(conn, queryObject);
         if(statment != null){
         	return statment.getParameterCount();
         }else{

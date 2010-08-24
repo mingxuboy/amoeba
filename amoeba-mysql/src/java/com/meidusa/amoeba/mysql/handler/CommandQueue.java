@@ -100,9 +100,6 @@ class CommandQueue{
 							packet.init(buffer,conn);
 							if(packet.insertId>0){
 								source.setLastInsertId(packet.insertId);
-								if(CommandMessageHandler.logger.isDebugEnabled()){
-									CommandMessageHandler.logger.debug("sql="+statment.getSql()+" ,laster insert id="+packet.insertId);
-								}
 							}
 						}
 					}
