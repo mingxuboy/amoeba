@@ -22,6 +22,7 @@ import com.meidusa.amoeba.net.MessageHandler;
 import com.meidusa.amoeba.net.SessionMessageHandler;
 import com.meidusa.amoeba.net.poolable.ObjectPool;
 
+@SuppressWarnings("deprecation")
 public class CommandMessageHandler implements SessionMessageHandler{
 	private static Logger logger = Logger.getLogger("PACKETLOGGER");
 	public MessageHandler messageHandler;
@@ -72,7 +73,7 @@ public class CommandMessageHandler implements SessionMessageHandler{
 							packet.init(message, conn);
 							logger.debug("--->>>"+clientConn.getSocketId()+" send packet --->"+serverConn.getSocketId()+"   "+packet);
 						}else{
-							logger.debug("ERROR --->>>"+clientConn.getSocketId()+" send packet --->"+serverConn.getSocketId()+"   "+packet);
+							logger.debug("ERROR --->>>"+clientConn.getSocketId()+" send packet --->"+serverConn.getSocketId()+"  unknow type="+type);
 						}
 					}
 					
