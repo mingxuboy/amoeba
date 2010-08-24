@@ -49,4 +49,5 @@ public class KillCurosorsMongodbPacket extends RequestMongodbPacket {
 			}
 		}
 	}
+
 }
