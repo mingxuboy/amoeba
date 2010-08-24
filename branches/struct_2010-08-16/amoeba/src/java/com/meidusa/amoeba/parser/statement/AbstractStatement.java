@@ -7,6 +7,8 @@ public abstract class AbstractStatement implements Statement {
 	protected Table[]                            tables;
 	private int parameterCount;
 	
+	private boolean isPrepared;
+	
 	public int getParameterCount() {
 		return parameterCount;
 	}
@@ -25,4 +27,12 @@ public abstract class AbstractStatement implements Statement {
     public void setTables(Table[] tables) {
         this.tables = tables;
     }
+
+	public boolean isPrepared() {
+		return isPrepared;
+	}
+
+	public void setPrepared(boolean isPrepared) {
+		this.isPrepared = isPrepared;
+	}
 }

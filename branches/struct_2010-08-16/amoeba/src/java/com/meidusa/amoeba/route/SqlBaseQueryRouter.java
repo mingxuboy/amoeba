@@ -1,0 +1,100 @@
+package com.meidusa.amoeba.route;
+
+import java.util.Map;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
+import com.meidusa.amoeba.net.DatabaseConnection;
+import com.meidusa.amoeba.parser.Parser;
+import com.meidusa.amoeba.parser.dbobject.Column;
+import com.meidusa.amoeba.parser.dbobject.Schema;
+import com.meidusa.amoeba.parser.dbobject.Table;
+import com.meidusa.amoeba.parser.function.LastInsertId;
+import com.meidusa.amoeba.parser.statement.DMLStatement;
+import com.meidusa.amoeba.parser.statement.SelectStatement;
+import com.meidusa.amoeba.parser.statement.Statement;
+import com.meidusa.amoeba.sqljep.function.Comparative;
+import com.meidusa.amoeba.util.StringUtil;
+import com.meidusa.amoeba.util.ThreadLocalMap;
+
+public abstract  class  SqlBaseQueryRouter extends BaseQueryRouter<DatabaseConnection,SqlQueryObject> {
+
+    private Lock                                    mapLock         = new ReentrantLock(false);
+	@Override
+	protected Map<Table, Map<Column, Comparative>> evaluateStatement(
+			Statement statment,SqlQueryObject queryObject) {
+		if(statment instanceof DMLStatement){
+			Map<Table, Map<Column, Comparative>> tables = ((DMLStatement)statment).evaluate(queryObject.parameters);
+			return tables;
+		}
+		return null;
+	}
+
+	public Statement parseStatement(DatabaseConnection connection, SqlQueryObject queryObject) {
+        Statement statment = null;
+        String defaultSchema = (connection == null || StringUtil.isEmpty(connection.getSchema())) ? null : connection.getSchema();
+
+        long sqlKey = ((long) queryObject.sql.length() << 32) | (long) (defaultSchema != null ? (defaultSchema.hashCode() ^ queryObject.sql.hashCode()) : queryObject.sql.hashCode());
+        mapLock.lock();
+        try {
+            statment = (Statement) map.get(sqlKey);
+        } finally {
+            mapLock.unlock();
+        }
+        if (statment == null) {
+            synchronized (queryObject.sql) {
+                statment = (Statement) map.get(sqlKey);
+                if (statment != null) {
+                    return statment;
+                }
+
+                Parser parser = newParser(queryObject.sql);
+                parser.setFunctionMap(this.functionMap);
+                if (defaultSchema != null) {
+                    Schema schema = new Schema();
+                    schema.setName(defaultSchema);
+                    parser.setDefaultSchema(schema);
+                }
+
+                try {
+                    statment = parser.doParse();
+                    if(statment instanceof SelectStatement){
+                    	SelectStatement st = (SelectStatement)statment;
+                    	if(st.getTables() == null || st.getTables().length == 0){
+                    		Boolean queryInsertId = (Boolean)ThreadLocalMap.get(LastInsertId.class.getName());
+                    		if(queryInsertId != null && queryInsertId.booleanValue()){
+                    			st.setQueryLastInsertId(true);
+                    		}
+                    	}
+                    }
+                    mapLock.lock();
+                    if(statment instanceof DMLStatement){
+                    	((DMLStatement)statment).setSql(queryObject.sql);
+                    }
+                    try {
+                        map.put(sqlKey, statment);
+                    } finally {
+                        mapLock.unlock();
+                    }
+                } catch (Error e) {
+                    logger.error(queryObject.sql, e);
+                    return null;
+                }catch(Exception e){
+                	logger.error(queryObject.sql, e);
+                    return null;
+                }
+               
+            }
+        }
+        return statment;
+    }
+	
+	@Override
+	protected void setConnectionPropertiesWithStatement(DatabaseConnection connection,
+			Statement statment, SqlQueryObject queryObject) {
+		
+	}
+
+	public abstract Parser newParser(String sql);
+
+}

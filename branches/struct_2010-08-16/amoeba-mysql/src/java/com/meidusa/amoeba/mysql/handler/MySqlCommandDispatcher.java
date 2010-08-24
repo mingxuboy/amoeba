@@ -147,19 +147,10 @@ public class MySqlCommandDispatcher implements MessageHandler {
 		                } else {
 		                	Statement statment = preparedInf.getStatment();
 		                	if (statment != null && statment instanceof SelectStatement && ((SelectStatement)statment).isQueryLastInsertId()) {
-		                		if(lastInsertID.isDebugEnabled()){
-		                			lastInsertID.debug("SQL="+statment.getSql());
-		                		}
 		                		MysqlResultSetPacket lastPacketResult = createLastInsertIdPacket(conn,(SelectStatement)statment,true);
 		            			lastPacketResult.wirteToConnection(conn);
 		            			return;
 			                }
-		                	
-		                	if(statment instanceof InsertStatement){
-		                		if(lastInsertID.isDebugEnabled()){
-		                			lastInsertID.debug("SQL="+statment.getSql());
-		                		}
-		                	}
 		                	
 		                    Map<Integer, Object> longMap = new HashMap<Integer, Object>();
 		                    for (byte[] longdate : conn.getLongDataList()) {

@@ -141,7 +141,7 @@ public class MysqlParserTest {
 			if(statment instanceof DMLStatement){
 				DMLStatement dmlStatment = (DMLStatement)statment;
 				Expression expression = dmlStatment.getExpression();
-				System.out.println(sql+" =[ "+ expression+"], evaluated = {"+dmlStatment.evaluate(null,(AbstractStatement)statment)+"} ,parameterCount="+dmlStatment.getParameterCount());
+				System.out.println(sql+" =[ "+ expression+"], evaluated = {"+dmlStatment.evaluate(null)+"} ,parameterCount="+dmlStatment.getParameterCount());
 			}else if(statment instanceof PropertyStatement ){
 				PropertyStatement proStatment = (PropertyStatement)statment;
 				System.out.println(proStatment.getProperties());

@@ -74,7 +74,7 @@ public abstract class DMLStatement extends AbstractStatement {
         this.preparedStatment = preparedStatment;
     }
 
-    public Map<Table, Map<Column, Comparative>> evaluate(Object[] parameters,AbstractStatement statment) {
+    public Map<Table, Map<Column, Comparative>> evaluate(Object[] parameters) {
         Map<Table, Map<Column, Comparative>> currentEvaluatedTableMap = null;
         if (this.evaluatedTableMap == null) {
             currentEvaluatedTableMap = new HashMap<Table, Map<Column, Comparative>>();
