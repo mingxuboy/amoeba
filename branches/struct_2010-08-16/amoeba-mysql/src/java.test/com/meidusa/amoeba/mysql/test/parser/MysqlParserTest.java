@@ -29,6 +29,7 @@ public class MysqlParserTest {
 	static Map<Column,Comparative> columnMap = new HashMap<Column,Comparative>();
 	public static void main(String[] args) throws Exception{
 		Map<String,Function> funMap = AbstractQueryRouter.loadFunctionMap("./build/build-mysql/conf/functionMap.xml");
+		parser(funMap,"select lease_price,global_price,advance_price,advance_price2,outlicheng_money,timeout_price,delay_work,pay_points from cartype_price where status=1 and '2010-08-25 09:20:56' BETWEEN start_datetime and end_datetime AND cartype_id=27 AND city_id=21 AND price_type=1 order by end_datetime desc limit 1");
 		parser(funMap,"SELECT * FROM d_visitor.t_visitor_visit WHERE `user`='1235625354' and visitors<>'1235625354' ORDER BY date DESC LIMIT 0,30");
 		parser(funMap,"SELECT PRIVILEGE,PRIVILEGE & 1   FROM SD_PHOTO.IMAGE    WHERE SDID=13916728412 and PRIVILEGE = 1& DD" );
 		

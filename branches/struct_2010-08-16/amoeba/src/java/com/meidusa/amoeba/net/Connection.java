@@ -89,7 +89,9 @@ public abstract class Connection implements NetEventHandler {
      * @see <code> {@link ConnectionManager#registerConnection(Connection, int)}</code>
      */
     protected void init() {
-
+    	if(_outQueue.size()>0){
+    		_selkey.interestOps(_selkey.interestOps() | SelectionKey.OP_WRITE);
+        }
     }
 
     public void setConnectionManager(ConnectionManager cmgr) {
@@ -101,12 +103,6 @@ public abstract class Connection implements NetEventHandler {
      */
     public synchronized void setSelectionKey(SelectionKey selkey) {
         this._selkey = selkey;
-        if(_outQueue.size()>0){
-        	selkey.interestOps(selkey.interestOps() | SelectionKey.OP_WRITE);
-        }
-        if(logger.isDebugEnabled()){
-    		logger.debug("socketId="+this.getSocketId()+" hascode="+hashCode()+" key="+selkey);
-    	}
     }
 
     /**
@@ -363,7 +359,7 @@ public abstract class Connection implements NetEventHandler {
                 }
             }else{
             	if(key == null){
-            		logger.error("writeMessage socketId="+this.getSocketId()+" hascode="+hashCode()+" but key="+key);
+            		logger.debug("writeMessage socketId="+this.getSocketId()+" hascode="+hashCode()+" but key="+key);
             	}
             }
         } catch (IOException ioe) {
