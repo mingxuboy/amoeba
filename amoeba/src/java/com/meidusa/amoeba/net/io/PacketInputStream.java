@@ -47,7 +47,7 @@ public abstract class PacketInputStream extends InputStream
 
     /** ×î´óÈÝÁ¿ */
     protected static final int MAX_BUFFER_CAPACITY = 512 * 1024;
-    
+    private byte[] tmp = new byte[4096]; 
     /**
      * Creates a new framed input stream.
      */
@@ -147,6 +147,77 @@ public abstract class PacketInputStream extends InputStream
         return checkForCompletePacket();
     }
 
+    /**
+     * only for bio
+     * @param source
+     * @return
+     * @throws IOException
+     */
+    public boolean readPacket (InputStream source)
+    throws IOException
+	{
+	    // flush data from any previous frame from the buffer
+	    if (_buffer.limit() == _length) {
+	        // this will remove the old frame's bytes from the buffer,
+	        // shift our old data to the start of the buffer, position the
+	        // buffer appropriately for appending new data onto the end of
+	        // our existing data, and set the limit to the capacity
+	        _buffer.limit(_have);
+	        _buffer.position(_length);
+	        _buffer.compact();
+	        _have -= _length;
+	
+	        // we may have picked up the next frame in a previous read, so
+	        // try decoding the length straight away
+	        _length = decodeLength();
+	    }
+	
+	    // we may already have the next frame entirely in the buffer from
+	    // a previous read
+	    if (checkForCompletePacket()) {
+	        return true;
+	    }
+	   
+	    // read whatever data we can from the source
+	    do {
+	    	int got = source.read(tmp);
+	    	expandCapacity(got);
+	    	if(got ==0) return false;
+	    	if(got >0){
+	    		
+	    		//got = source.read(byt);
+	    		this._buffer.put(tmp, 0, got);
+	    	}
+	    	
+	        if (got == -1) {
+	            throw new EOFException();
+	        }
+	        _have += got;
+	        if (_length == -1) {
+	            // if we didn't already have our length, see if we now
+	            // have enough data to obtain it
+	            _length = decodeLength();
+	        }
+	        if(_length<-1 || _length > MAX_BUFFER_CAPACITY){
+	        	throw new IOException("over max packet limit");
+	        }
+	        // don't let things grow without bounds
+	    } while (_buffer.capacity() < MAX_BUFFER_CAPACITY &&  !checkForCompletePacket());
+	
+	    // finally check to see if there's a complete frame in the buffer
+	    // and prepare to serve it up if there is
+	    return true;
+	}
+    
+    private void expandCapacity(int needSize){
+    	if(_buffer.remaining()<needSize){
+    		int newSize = _buffer.capacity() << 1;
+            newSize = newSize>_length ? newSize:_length+16;
+            ByteBuffer newbuf = ByteBuffer.allocate(newSize>needSize?newSize:needSize);
+            newbuf.put((ByteBuffer)_buffer.flip());
+            _buffer = newbuf;
+    	}
+    }
     /**
      * Decodes and returns the length of the current packet from the buffer
      * if possible. Returns -1 otherwise.
