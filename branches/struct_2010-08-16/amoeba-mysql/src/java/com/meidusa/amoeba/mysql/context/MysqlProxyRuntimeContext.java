@@ -20,7 +20,7 @@ import com.meidusa.amoeba.mysql.util.CharsetMapping;
  * @author <a href=mailto:piratebase@sina.com>Struct chen</a>
  */
 public class MysqlProxyRuntimeContext extends ProxyRuntimeContext {
-	public final static String SERVER_VERSION = "5.1.45-mysql-amoeba-proxy-1.2.1-GA";
+	public final static String SERVER_VERSION = "5.1.45-mysql-amoeba-proxy-1.3.0-BETA";
     public static final String DEFAULT_SERVER_CONNECTION_FACTORY_CLASS = "com.meidusa.amoeba.mysql.net.MysqlServerConnectionFactory";
 
     private byte               serverCharsetIndex;

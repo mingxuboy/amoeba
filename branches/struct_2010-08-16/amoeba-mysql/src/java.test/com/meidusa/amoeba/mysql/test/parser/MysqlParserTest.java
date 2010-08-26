@@ -29,6 +29,7 @@ public class MysqlParserTest {
 	static Map<Column,Comparative> columnMap = new HashMap<Column,Comparative>();
 	public static void main(String[] args) throws Exception{
 		Map<String,Function> funMap = AbstractQueryRouter.loadFunctionMap("./build/build-mysql/conf/functionMap.xml");
+		parser(funMap,"select i.id,i.title,i.img_url,i.link,i.`order`,i.type_id from imgdemo AS i where display_type=1 and type_id=9 order by i.`order`");
 		parser(funMap,"SELECT `n`.*, `au`.`user_true_name`, `ct`.`type_name` FROM `content` AS `n` JOIN `admin_user` AS `au` ON (`n`.`author` = `au`.`user_id`) JOIN `content_type` AS `ct` ON (`n`.`content_type` = `ct`.`type_id`) WHERE `content_type` = 15 AND `n`.`status` = 1 ORDER BY `n`.`content_type` ASC, `n`.`is_first` DESC, `n`.`content_id` DESC LIMIT 0, 6");
 		parser(funMap,"SELECT `c`.* FROM `city` AS `c` LEFT JOIN `shops` AS `s` ON (`s`.`city_id` = `c`.`city_id`) WHERE `s`.`shop_status` = 1 AND `s`.`booking_start_date` <= '2010-08-25 11:37:22' and `c`.city='weqwerq'	GROUP BY `c`.`city_id`");
 		parser(funMap,"select lease_price,global_price,advance_price,advance_price2,outlicheng_money,timeout_price,delay_work,pay_points from cartype_price where status=1 and '2010-08-25 09:20:56' BETWEEN start_datetime and end_datetime AND cartype_id=27 AND city_id=21 AND price_type=1 order by end_datetime desc limit 1");
