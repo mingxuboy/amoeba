@@ -839,14 +839,29 @@ Statement DeleteQuery():
 	Expression expression = null;
 	Table table = null;
 	DMLStatement statement = new DeleteStatement();
+	AndExpression andExpression = new AndExpression();
 }
 {
-    (table = DeleteStatement()
+    (      (table = DeleteStatement()
     [expression = WhereClause(statement)]){
-    	
+    	if(expression != null)
+	  	{
+	   		andExpression.addExpression(expression);
+	  	}
     	statement.setExpression(expression);
-    	return 	statement;
     }
+    [ OrderByClause(statement) ]
+    [<K_LIMIT>
+    (<S_PARAMETER_MARKER>{
+	   	andExpression.addExpression(new ParameterExpression(parameterIndex++));
+	} | <INTEGER_LITERAL>)[("," | <K_OFFSET> ) (<S_PARAMETER_MARKER>
+	{
+	   	andExpression.addExpression(new ParameterExpression(parameterIndex++));
+	} |<INTEGER_LITERAL> )
+    ]]  )  {    
+ 	 return statement;
+	}
+    
 }
 
 Table DeleteStatement():
