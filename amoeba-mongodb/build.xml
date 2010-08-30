@@ -62,7 +62,7 @@
 	        </jar>
 	    </target>
 	    
-	    <target name="server" description="Amoeba for Mysql" depends="compile">
+	    <target name="server" description="Amoeba for mongoDB" depends="compile">
 	        <java classname="com.meidusa.amoeba.mongodb.server.MongodbProxyServer" fork="true" maxmemory="128m">
 	        <sysproperty key="amoeba.home" value="${basedir}"/>
 	         <classpath>
