@@ -153,14 +153,14 @@ public class PacketUtil {
 		case MysqlDefs.FIELD_TYPE_VAR_STRING:
 		case MysqlDefs.FIELD_TYPE_STRING:
 		case MysqlDefs.FIELD_TYPE_VARCHAR:
-			String charset = packet.getConnection().getCharset();
+			String charset = packet.getCharset();
 			bindValue.value = packet.readLengthCodedString(charset);
 			if(bindValue.value == null)bindValue.isNull = true;
 			bindValue.isSet =true;
 			return;
 		case MysqlDefs.FIELD_TYPE_DECIMAL:
 		case MysqlDefs.FIELD_TYPE_NEW_DECIMAL:
-			charset = packet.getConnection().getCharset();
+			charset = packet.getCharset();
 			bindValue.value = new BigDecimal(packet.readLengthCodedString(charset));
 			if(bindValue.value == null)bindValue.isNull = true;
 			bindValue.isSet =true;

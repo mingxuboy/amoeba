@@ -431,6 +431,7 @@ public interface MysqlParserConstants {
     "\",\"",
     "\"(\"",
     "\")\"",
+    "\"`\"",
     "\"!=\"",
     "\"<>\"",
     "\">\"",
