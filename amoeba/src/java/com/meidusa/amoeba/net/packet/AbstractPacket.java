@@ -27,8 +27,6 @@ import com.meidusa.amoeba.net.Connection;
  * @author struct
  */
 public abstract class AbstractPacket<T extends AbstractPacketBuffer> implements Packet {
-	private transient String toString;
-	private transient boolean inited = false;
     public void init(byte[] buffer, Connection conn) {
         T packetBuffer = constractorBuffer(buffer);
         packetBuffer.init(conn);
@@ -45,7 +43,6 @@ public abstract class AbstractPacket<T extends AbstractPacketBuffer> implements 
      * 做完初始化以后
      */
     protected void afterInit(T buffer) {
-    	inited = true;
     }
 
     public ByteBuffer toByteBuffer(Connection conn) {
@@ -114,14 +111,7 @@ public abstract class AbstractPacket<T extends AbstractPacketBuffer> implements 
     protected abstract Class<T> getPacketBufferClass();
 
     public String toString() {
-    	if(inited){
-	    	if(toString == null){
-	    		toString = ToStringBuilder.reflectionToString(this);
-	    	}
-    	}else{
-    		return ToStringBuilder.reflectionToString(this);
-    	}
-        return toString;
+		return ToStringBuilder.reflectionToString(this);
     }
 
 }

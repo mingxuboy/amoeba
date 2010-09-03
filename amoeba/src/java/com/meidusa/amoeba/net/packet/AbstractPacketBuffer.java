@@ -33,10 +33,6 @@ public class AbstractPacketBuffer implements PacketBuffer {
 
     protected byte[]     buffer   = null;
 
-    protected Connection conn;
-
-    private InputStream is;
-    private OutputStream os;
     public AbstractPacketBuffer(byte[] buf){
         buffer = new byte[buf.length];
         System.arraycopy(buf, 0, buffer, 0, buf.length);
@@ -134,7 +130,6 @@ public class AbstractPacketBuffer implements PacketBuffer {
     }
 
     protected void init(Connection conn) {
-        this.conn = conn;
     }
 
     public synchronized void reset() {
@@ -155,71 +150,65 @@ public class AbstractPacketBuffer implements PacketBuffer {
     }
 
     public InputStream asInputStream() {
-    	if(is == null){
-    		is = new InputStream() {
-                @Override
-                public int available() {
-                    return AbstractPacketBuffer.this.remaining();
-                }
+		return new InputStream() {
+            @Override
+            public int available() {
+                return AbstractPacketBuffer.this.remaining();
+            }
 
-                @Override
-                public int read() {
-                    if (AbstractPacketBuffer.this.hasRemaining()) {
-                        return AbstractPacketBuffer.this.readByte() & 0xff;
-                    } else {
-                        return -1;
-                    }
+            @Override
+            public int read() {
+                if (AbstractPacketBuffer.this.hasRemaining()) {
+                    return AbstractPacketBuffer.this.readByte() & 0xff;
+                } else {
+                    return -1;
                 }
+            }
 
-                @Override
-                public int read(byte[] b, int off, int len) {
-                    int remaining = AbstractPacketBuffer.this.remaining();
-                    if (remaining > 0) {
-                        int readBytes = Math.min(remaining, len);
-                        AbstractPacketBuffer.this.readBytes(b, off, readBytes);
-                        return readBytes;
-                    } else {
-                        return -1;
-                    }
+            @Override
+            public int read(byte[] b, int off, int len) {
+                int remaining = AbstractPacketBuffer.this.remaining();
+                if (remaining > 0) {
+                    int readBytes = Math.min(remaining, len);
+                    AbstractPacketBuffer.this.readBytes(b, off, readBytes);
+                    return readBytes;
+                } else {
+                    return -1;
                 }
+            }
 
-                @Override
-                public synchronized void reset() {
-                    AbstractPacketBuffer.this.reset();
-                }
+            @Override
+            public synchronized void reset() {
+                AbstractPacketBuffer.this.reset();
+            }
 
-                @Override
-                public long skip(long n) {
-                    int bytes;
-                    if (n > Integer.MAX_VALUE) {
-                        bytes = AbstractPacketBuffer.this.remaining();
-                    } else {
-                        bytes = Math.min(AbstractPacketBuffer.this.remaining(), (int) n);
-                    }
-                    AbstractPacketBuffer.this.skip(bytes);
-                    return bytes;
+            @Override
+            public long skip(long n) {
+                int bytes;
+                if (n > Integer.MAX_VALUE) {
+                    bytes = AbstractPacketBuffer.this.remaining();
+                } else {
+                    bytes = Math.min(AbstractPacketBuffer.this.remaining(), (int) n);
                 }
-            };
-    	}
-    	return is;
+                AbstractPacketBuffer.this.skip(bytes);
+                return bytes;
+            }
+        };
     }
 
     public OutputStream asOutputStream() {
-    	if(os == null){
-    		os = new OutputStream() {
+		return new OutputStream() {
 
-                @Override
-                public void write(byte[] b, int off, int len) {
-                    AbstractPacketBuffer.this.writeBytes(b, off, len);
-                }
+            @Override
+            public void write(byte[] b, int off, int len) {
+                AbstractPacketBuffer.this.writeBytes(b, off, len);
+            }
 
-                @Override
-                public void write(int b) {
-                    AbstractPacketBuffer.this.writeByte((byte) b);
-                }
-            };
-    	}
-        return os;
+            @Override
+            public void write(int b) {
+                AbstractPacketBuffer.this.writeByte((byte) b);
+            }
+        };
     }
 
     public static boolean appendBufferToWrite(byte[] byts, PacketBuffer buffer, Connection conn, boolean writeNow) {
@@ -236,6 +225,18 @@ public class AbstractPacketBuffer implements PacketBuffer {
             buffer.writeBytes(byts);
             return true;
         }
+    }
+    
+    public static void main(String[] args){
+    	AbstractPacketBuffer buffer = new AbstractPacketBuffer(10);
+    	buffer.writeByte((byte)12);
+    	buffer.setPosition(10);
+    	ByteBuffer byteBuffer = buffer.toByteBuffer();
+    	System.out.println(byteBuffer.get());
+    	buffer.reset();
+    	buffer.writeByte((byte)14);
+    	byteBuffer = buffer.toByteBuffer();
+    	System.out.println(byteBuffer.get());
     }
 
 }

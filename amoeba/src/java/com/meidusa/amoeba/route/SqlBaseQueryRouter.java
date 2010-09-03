@@ -21,10 +21,13 @@ public abstract  class  SqlBaseQueryRouter extends BaseQueryRouter<DatabaseConne
 
     private Lock                                    mapLock         = new ReentrantLock(false);
 	@Override
-	protected Map<Table, Map<Column, Comparative>> evaluateStatement(
-			Statement statment,SqlQueryObject queryObject) {
+	protected Map<Table, Map<Column, Comparative>> evaluateTable(DatabaseConnection connection,SqlQueryObject queryObject) {
+		Statement statment = parseStatement(connection,queryObject);
 		if(statment instanceof DMLStatement){
+			DMLStatement dmlStatment = ((DMLStatement)statment);
+			queryObject.isRead = dmlStatment.isReadStatement();
 			Map<Table, Map<Column, Comparative>> tables = ((DMLStatement)statment).evaluate(queryObject.parameters);
+			
 			return tables;
 		}
 		return null;
@@ -89,7 +92,6 @@ public abstract  class  SqlBaseQueryRouter extends BaseQueryRouter<DatabaseConne
         return statment;
     }
 	
-	@Override
 	protected void setConnectionPropertiesWithStatement(DatabaseConnection connection,
 			Statement statment, SqlQueryObject queryObject) {
 		

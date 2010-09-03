@@ -16,19 +16,12 @@ package com.meidusa.amoeba.route;
 import com.meidusa.amoeba.net.Connection;
 import com.meidusa.amoeba.net.poolable.ObjectPool;
 import com.meidusa.amoeba.parser.ParseException;
-import com.meidusa.amoeba.parser.statement.Statement;
-import com.meidusa.amoeba.util.Tuple;
 
 /**
  * @author struct
  */
 public interface NewQueryRouter<T extends Connection,V> {
 
-    public Tuple<Statement,ObjectPool[]> doRoute(T connection, V queryObjct) throws ParseException;
-
-
-    public Statement parseStatement(T connection, V queryObjct) throws ParseException;
-
-    public int parseParameterCount(T connection, V queryObjct) throws ParseException;
+    public ObjectPool[] doRoute(T connection, V queryObjct) throws ParseException;
 
 }
