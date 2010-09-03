@@ -2,7 +2,7 @@ package com.meidusa.amoeba.mongodb.packet;
 
 import java.io.UnsupportedEncodingException;
 
-public abstract class RequestMongodbPacket extends AbstractMongodbPacket {
+public class RequestMongodbPacket extends AbstractMongodbPacket {
 	public int requestFlags = 0;
 	public String fullCollectionName;
 

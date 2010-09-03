@@ -144,4 +144,17 @@ public class MongodbPacketBuffer extends AbstractPacketBuffer {
 				| ((b[POSITION+2] & 0xff) << 16)
 				| ((b[POSITION+3] & 0xff) << 24);
 	}
+	public static int getRequestId(byte[] message){
+		byte[] b = message; // a little bit optimization
+		return (b[4] & 0xff) | ((b[4+1] & 0xff) << 8)
+				| ((b[4+2] & 0xff) << 16)
+				| ((b[4+3] & 0xff) << 24);
+	}
+	
+	public static int getResponseId(byte[] message){
+		byte[] b = message; // a little bit optimization
+		return (b[8] & 0xff) | ((b[8+1] & 0xff) << 8)
+				| ((b[8+2] & 0xff) << 16)
+				| ((b[8+3] & 0xff) << 24);
+	}
 }

@@ -28,11 +28,14 @@ public class BSONEncoder {
     }
 
     public byte[] encode( BSONObject o ){
-        BasicOutputBuffer buf = new BasicOutputBuffer();
-        set( buf );
+    	 if ( _buf == null ){
+    		 BasicOutputBuffer buf = new BasicOutputBuffer();
+    		 set( buf );
+    	 }
         putObject( o );
+        byte[] ret = _buf.toByteArray();
         done();
-        return buf.toByteArray();
+        return ret;
     }
 
     public void set( OutputBuffer out ){
