@@ -68,7 +68,7 @@
     </appender>
     
     <logger name="PACKETLOGGER" additivity="true">
-        <level value="debug"/>
+        <level value="error"/>
         <appender-ref ref="packetLogger"/>
     </logger>
 	<logger name="report" additivity="true">
@@ -90,7 +90,7 @@
     </logger>
     
     <logger name="com.meidusa.amoeba.net" additivity="false">
-        <level value="debug"/>
+        <level value="warn"/>
         <appender-ref ref="PROJECT"/>
         <appender-ref ref="NET"/>
     </logger>
@@ -113,7 +113,7 @@
     </logger>
     
     <logger name="com.meidusa.amoeba.mongodb.handler" additivity="false">
-        <level value="debug"/>
+        <level value="error"/>
         <appender-ref ref="PROJECT"/>
     </logger>
     
