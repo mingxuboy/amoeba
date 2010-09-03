@@ -843,14 +843,29 @@ Statement DeleteQuery():
 	Expression expression = null;
 	Table table = null;
 	DMLStatement statement = new DeleteStatement();
+	AndExpression andExpression = new AndExpression();
 }
 {
-    (table = DeleteStatement()
+    (      (table = DeleteStatement()
     [expression = WhereClause(statement)]){
-    	
+    	if(expression != null)
+	  	{
+	   		andExpression.addExpression(expression);
+	  	}
     	statement.setExpression(expression);
-    	return 	statement;
     }
+    [ OrderByClause(statement) ]
+    [<K_LIMIT>
+    (<S_PARAMETER_MARKER>{
+	   	andExpression.addExpression(new ParameterExpression(parameterIndex++));
+	} | <INTEGER_LITERAL>)[("," | <K_OFFSET> ) (<S_PARAMETER_MARKER>
+	{
+	   	andExpression.addExpression(new ParameterExpression(parameterIndex++));
+	} |<INTEGER_LITERAL> )
+    ]]  )  {    
+ 	 return statement;
+	}
+    
 }
 
 Table DeleteStatement():
@@ -1103,9 +1118,9 @@ String EntityName()      :
 	Token token = null;
 }
 {
- 	token =  <IDENTIFIER>{
+ 	( 	  ["`"] token =  <IDENTIFIER>{
  		return token.image;
- 	}
+ 	}["`"])
  	|
  	token =  <S_QUOTED_IDENTIFIER>{
  		return token.image.substring(1,token.image.length()-1);
@@ -1165,9 +1180,13 @@ Table TableReference():
 }
 {
     table = TableName() 
-     [["AS"] token = <IDENTIFIER>{
+     [["AS"]     (     token = <S_COMMA_IDENTIFIER>{
+ 		table.setAlias(token.image.substring(1,token.image.length()-1));	
+ 	}
+|token = <IDENTIFIER>{
     	table.setAlias(token.image);
-    }][ INDEX()]{
+    }  )
+][ INDEX()]{
    	 if(table.getAlias() != null){
    	 	tableAliasMap.put(table.getAlias(),table);	
    	 }
@@ -1383,8 +1402,7 @@ Expression TableSpec(Statement statement):
 	Expression expression = null;
 }
 {
-	(	  table = TableReference()
-	| (["TABLE"] "(" expression= FullSelectStatement(statement) ")" [CorrelationClause()])	)	{		return expression;
+	(	     table = TableReference()	| (["TABLE"] "(" expression= FullSelectStatement(statement) ")" [CorrelationClause()])	)	{		return expression;
 	}
 }
 

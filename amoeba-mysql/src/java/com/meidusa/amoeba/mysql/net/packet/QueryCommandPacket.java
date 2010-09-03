@@ -82,7 +82,7 @@ public class QueryCommandPacket extends CommandPacket {
     public void init(AbstractPacketBuffer myBuffer) {
         super.init(myBuffer);
         MysqlPacketBuffer buffer = (MysqlPacketBuffer) myBuffer;
-        String charset = buffer.getConnection().getCharset();
+        String charset = buffer.getCharset();
         this.query = (charset == null ? buffer.readString() : buffer.readString(charset));
     }
 

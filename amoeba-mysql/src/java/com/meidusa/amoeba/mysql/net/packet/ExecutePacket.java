@@ -179,7 +179,7 @@ public class ExecutePacket extends CommandPacket {
         for (int i = 0; i < this.parameterCount; i++) {
             if (!this.values[i].isLongData) {
                 if (!this.values[i].isNull) {
-                    PacketUtil.storeBinding(buffer, this.values[i], buffer.getConnection().getCharset());
+                    PacketUtil.storeBinding(buffer, this.values[i], buffer.getCharset());
                 } else {
                     nullBitsBuffer[i / 8] |= (1 << (i & 7));
                 }

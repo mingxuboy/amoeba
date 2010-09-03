@@ -41,6 +41,7 @@ public class MysqlPacketBuffer extends AbstractPacketBuffer {
     static final long NULL_LENGTH       = -1;
 
     protected boolean wasMultiPacket    = false;
+    private String charset;
 
     public static int getPacketLength(byte[] byteBuffer) {
         if (byteBuffer == null || byteBuffer.length < 4) {
@@ -63,12 +64,16 @@ public class MysqlPacketBuffer extends AbstractPacketBuffer {
 
     public void init(Connection conn) {
         super.init(conn);
+        if(conn!= null){
+        	charset = ((DatabaseConnection)conn).getCharset();
+        }
     }
 
-    public DatabaseConnection getConnection() {
-        return (DatabaseConnection) this.conn;
-    }
 
+    public String getCharset(){
+    	return charset;
+    }
+    
     public int getBufLength() {
         return length;
     }
