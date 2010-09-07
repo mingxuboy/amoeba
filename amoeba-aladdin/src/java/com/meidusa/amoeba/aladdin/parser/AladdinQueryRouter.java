@@ -8,21 +8,23 @@ import com.meidusa.amoeba.net.DatabaseConnection;
 import com.meidusa.amoeba.parser.Parser;
 import com.meidusa.amoeba.parser.expression.Expression;
 import com.meidusa.amoeba.parser.statement.PropertyStatement;
-import com.meidusa.amoeba.route.AbstractQueryRouter;
+import com.meidusa.amoeba.parser.statement.Statement;
+import com.meidusa.amoeba.route.SqlBaseQueryRouter;
+import com.meidusa.amoeba.route.SqlQueryObject;
 
 /**
  * @author struct
  */
-public class AladdinQueryRouter extends AbstractQueryRouter {
+public class AladdinQueryRouter extends SqlBaseQueryRouter {
 
     @Override
     public Parser newParser(String sql) {
         return new AladdinParser(new StringReader(sql));
     }
 
-	@Override
-	protected void setProperty(DatabaseConnection conn, PropertyStatement statment,Object[] parameters) {
+	protected void setProperty(DatabaseConnection conn, Statement st,SqlQueryObject parameters) {
 		Expression value = null;
+		PropertyStatement statment = (PropertyStatement)st;
 		if((value = statment.getValue("autocommit")) != null){
 			
 			//暂时不支持非自动提交
@@ -32,13 +34,13 @@ public class AladdinQueryRouter extends AbstractQueryRouter {
 				conn.setAutoCommit(false);
 			}*/
 		}else if((value = statment.getValue("names")) != null){
-			((MysqlConnection)conn).setCharset((String)value.evaluate(parameters));
+			((MysqlConnection)conn).setCharset((String)value.evaluate(parameters.parameters));
 		}else if((value = statment.getValue("charset")) != null){
-				((MysqlConnection)conn).setCharset((String)value.evaluate(parameters));
+				((MysqlConnection)conn).setCharset((String)value.evaluate(parameters.parameters));
 		}else if((value = statment.getValue("transactionisolation")) != null){
 			//conn.setTransactionIsolation((int)((Long)comparable).longValue());
 		}else if((value = statment.getValue("schema")) != null){
-			conn.setSchema((String)value.evaluate(parameters)); 
+			conn.setSchema((String)value.evaluate(parameters.parameters)); 
 		}
 	}
 

@@ -25,6 +25,7 @@ import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
 import com.meidusa.amoeba.net.packet.PacketBuffer;
 import com.meidusa.amoeba.parser.ParseException;
 import com.meidusa.amoeba.parser.statement.Statement;
+import com.meidusa.amoeba.route.SqlBaseQueryRouter;
 
 /**
  * @author <a href=mailto:piratebase@sina.com>Struct chen</a>
@@ -53,21 +54,23 @@ public class PreparedStatmentInfo {
     private Lock   typesLock = new ReentrantLock(false);
 
     public PreparedStatmentInfo(DatabaseConnection conn, long id, String preparedSql)throws ParseException{
-    	statment = ProxyRuntimeContext.getInstance().getQueryRouter().parseSql(conn, preparedSql);
+    	SqlBaseQueryRouter router = (SqlBaseQueryRouter)ProxyRuntimeContext.getInstance().getQueryRouter();
+    	statment = router.parseStatement(conn, preparedSql);
         statmentId = id;
         this.preparedStatment = preparedSql;
-        parameterCount = ProxyRuntimeContext.getInstance().getQueryRouter().parseParameterCount(conn, preparedSql);
+        parameterCount = router.parseParameterCount(conn, preparedSql);
     }
     
     public PreparedStatmentInfo (DatabaseConnection conn,long id, String preparedSql,List<byte[]> messageList) throws ParseException{
-    	statment = ProxyRuntimeContext.getInstance().getQueryRouter().parseSql(conn, preparedSql);
+    	SqlBaseQueryRouter router = (SqlBaseQueryRouter)ProxyRuntimeContext.getInstance().getQueryRouter();
+    	statment = router.parseStatement(conn, preparedSql);
     	PacketBuffer buffer = new AbstractPacketBuffer(2048);
         statmentId = id;
         this.preparedStatment = preparedSql;
         OKforPreparedStatementPacket okPaket = new OKforPreparedStatementPacket();
         okPaket.init(messageList.get(0),conn);
         okPaket.statementHandlerId = id;
-        parameterCount = ProxyRuntimeContext.getInstance().getQueryRouter().parseParameterCount(conn, preparedSql);
+        parameterCount = router.parseParameterCount(conn, preparedSql);
         messageList.remove(0);
         messageList.add(0, okPaket.toByteBuffer(conn).array());
         for(byte[] message : messageList){

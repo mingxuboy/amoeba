@@ -68,10 +68,10 @@
 				<property name="manager">defaultManager</property>
 				
 				<!-- 真实mysql数据库端口 -->
-				<property name="port">27017</property>
+				<property name="port">12338</property>
 				
 				<!-- 真实mysql数据库IP -->
-				<property name="ipAddress">127.0.0.1</property>
+				<property name="ipAddress">10.241.14.41</property>
 				
 			</factoryConfig>
 			
@@ -87,6 +87,31 @@
 			</poolConfig>
 		</dbServer>
 		
+		<dbServer name="server2">
+			
+			<!-- PoolableObjectFactory实现类 -->
+			<factoryConfig class="com.meidusa.amoeba.mongodb.net.MongodbServerConnectionFactory">
+				<property name="manager">defaultManager</property>
+				
+				<!-- 真实mysql数据库端口 -->
+				<property name="port">12338</property>
+				
+				<!-- 真实mysql数据库IP -->
+				<property name="ipAddress">10.241.14.43</property>
+				
+			</factoryConfig>
+			
+			<!-- ObjectPool实现类 -->
+			<poolConfig class="com.meidusa.amoeba.net.poolable.PoolableObjectPool">
+				<property name="maxActive">200</property>
+				<property name="maxIdle">200</property>
+				<property name="minIdle">10</property>
+				<property name="minEvictableIdleTimeMillis">600000</property>
+				<property name="timeBetweenEvictionRunsMillis">600000</property>
+				<property name="testOnBorrow">true</property>
+				<property name="testWhileIdle">true</property>
+			</poolConfig>
+		</dbServer>
 		
 		<dbServer name="multiPool" virtual="true">
 			<poolConfig class="com.meidusa.amoeba.server.MultipleServerPool">
@@ -100,7 +125,7 @@
 		
 	</dbServerList>
 	
-	<queryRouter class="com.meidusa.amoeba.mysql.parser.MysqlQueryRouter">
+	<queryRouter class="com.meidusa.amoeba.mongodb.route.MongodbQueryRouter">
 		<property name="ruleConfig">${amoeba.home}/conf/rule.xml</property>
 		<property name="functionConfig">${amoeba.home}/conf/functionMap.xml</property>
 		<property name="ruleFunctionConfig">${amoeba.home}/conf/ruleFunctionMap.xml</property>
@@ -111,7 +136,7 @@
 		<property name="writePool">server1</property>
 		<property name="readPool">server1</property>
 		-->
-		<property name="needParse">false</property>
+		<property name="needParse">true</property>
 	</queryRouter>
 </amoeba:configuration>
 

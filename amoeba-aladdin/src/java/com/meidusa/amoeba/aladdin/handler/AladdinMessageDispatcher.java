@@ -23,10 +23,10 @@ import com.meidusa.amoeba.net.Sessionable;
 import com.meidusa.amoeba.net.poolable.ObjectPool;
 import com.meidusa.amoeba.parser.statement.SelectStatement;
 import com.meidusa.amoeba.parser.statement.Statement;
-import com.meidusa.amoeba.route.QueryRouter;
+import com.meidusa.amoeba.route.SqlBaseQueryRouter;
+import com.meidusa.amoeba.route.SqlQueryObject;
 import com.meidusa.amoeba.util.ByteUtil;
 import com.meidusa.amoeba.util.StringFillFormat;
-import com.meidusa.amoeba.util.Tuple;
 
 /**
  * @author struct
@@ -77,11 +77,14 @@ public class AladdinMessageDispatcher implements MessageHandler {
 	                    logger.debug(StringFillFormat.format("COM_QUERY:", fillLength) + packet);
 	                }
 	
-	                QueryRouter router = ProxyRuntimeContext.getInstance().getQueryRouter();
-	                Tuple<Statement,ObjectPool[]> tuple = router.doRoute(conn, packet.query, false, null);
-	                Statement statment = tuple.left;
-	                ObjectPool[] pools = tuple.right;
-	                if (statment != null && statment instanceof SelectStatement && ((SelectStatement)tuple.left).isQueryLastInsertId()) {
+	                SqlBaseQueryRouter router = (SqlBaseQueryRouter)ProxyRuntimeContext.getInstance().getQueryRouter();
+	                SqlQueryObject queryObject = new SqlQueryObject();
+	                queryObject.isPrepared = false;
+	                queryObject.sql = packet.query;
+	               
+	                ObjectPool[] pools = router.doRoute(conn, queryObject);
+	                Statement statment = router.parseStatement(conn, packet.query);
+	                if (statment != null && statment instanceof SelectStatement && ((SelectStatement)statment).isQueryLastInsertId()) {
             			List<RowDataPacket> list = new ArrayList<RowDataPacket>();
             			RowDataPacket row = new RowDataPacket(false);
             			row.columns = new ArrayList<Object>();
@@ -97,7 +100,7 @@ public class AladdinMessageDispatcher implements MessageHandler {
 	                	return;
 	                }
 	                
-	                MessageHandler handler = new QueryCommandMessageHandler(conn, packet.query, null, tuple.right, timeout);
+	                MessageHandler handler = new QueryCommandMessageHandler(conn, packet.query, null, pools, timeout);
 	                if (handler instanceof Sessionable) {
 	                    Sessionable session = (Sessionable) handler;
 	                    try {
@@ -160,10 +163,15 @@ public class AladdinMessageDispatcher implements MessageHandler {
 	                    if (logger.isDebugEnabled()) {
 	                        logger.debug(StringFillFormat.format("COM_STMT_EXECUTE:", fillLength) + "[" + packet + "]");
 	                    }
-	                    QueryRouter router = ProxyRuntimeContext.getInstance().getQueryRouter();
-	                    Tuple<Statement,ObjectPool[]> tuple = router.doRoute(conn, sql, false, packet.getParameters());
-	
-	                    PreparedStatmentExecuteMessageHandler handler = new PreparedStatmentExecuteMessageHandler(conn, pInfo, packet, tuple.right, timeout);
+	                    SqlBaseQueryRouter router = (SqlBaseQueryRouter)ProxyRuntimeContext.getInstance().getQueryRouter();
+	                    
+	                    SqlQueryObject queryObject = new SqlQueryObject();
+		                queryObject.isPrepared = true;
+		                queryObject.sql = sql;
+		                queryObject.parameters = packet.getParameters();
+		                ObjectPool[] pools = router.doRoute(conn, queryObject);
+		                
+	                    PreparedStatmentExecuteMessageHandler handler = new PreparedStatmentExecuteMessageHandler(conn, pInfo, packet, pools, timeout);
 	                    if (handler instanceof Sessionable) {
 	                        Sessionable session = (Sessionable) handler;
 	                        try {

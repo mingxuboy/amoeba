@@ -1,5 +1,6 @@
 package com.meidusa.amoeba.route;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -10,34 +11,57 @@ import com.meidusa.amoeba.parser.dbobject.Column;
 import com.meidusa.amoeba.parser.dbobject.Schema;
 import com.meidusa.amoeba.parser.dbobject.Table;
 import com.meidusa.amoeba.parser.function.LastInsertId;
+import com.meidusa.amoeba.parser.statement.AbstractStatement;
 import com.meidusa.amoeba.parser.statement.DMLStatement;
+import com.meidusa.amoeba.parser.statement.PropertyStatement;
 import com.meidusa.amoeba.parser.statement.SelectStatement;
+import com.meidusa.amoeba.parser.statement.ShowStatement;
 import com.meidusa.amoeba.parser.statement.Statement;
 import com.meidusa.amoeba.sqljep.function.Comparative;
 import com.meidusa.amoeba.util.StringUtil;
 import com.meidusa.amoeba.util.ThreadLocalMap;
 
-public abstract  class  SqlBaseQueryRouter extends BaseQueryRouter<DatabaseConnection,SqlQueryObject> {
+public abstract class SqlBaseQueryRouter extends AbstractQueryRouter<DatabaseConnection,SqlQueryObject> {
 
     private Lock                                    mapLock         = new ReentrantLock(false);
 	@Override
 	protected Map<Table, Map<Column, Comparative>> evaluateTable(DatabaseConnection connection,SqlQueryObject queryObject) {
-		Statement statment = parseStatement(connection,queryObject);
+		Statement statment = parseStatement(connection,queryObject.sql);
+		Map<Table, Map<Column, Comparative>> tables = null;
 		if(statment instanceof DMLStatement){
 			DMLStatement dmlStatment = ((DMLStatement)statment);
 			queryObject.isRead = dmlStatment.isReadStatement();
-			Map<Table, Map<Column, Comparative>> tables = ((DMLStatement)statment).evaluate(queryObject.parameters);
+			tables = ((DMLStatement)statment).evaluate(queryObject.parameters);
 			
 			return tables;
-		}
+		}else if (statment instanceof PropertyStatement) {
+			if (logger.isDebugEnabled()) {
+                logger.debug("ShowStatment:[" + queryObject.sql + "]");
+            }
+            setProperty(connection, (PropertyStatement) statment, queryObject);
+            return null;
+        }else if (statment instanceof ShowStatement) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("ShowStatment:[" + queryObject.sql + "]");
+            }
+            AbstractStatement ast = (ShowStatement)statment;
+            if(ast.getTables() != null){
+            	tables = new HashMap<Table, Map<Column, Comparative>>();
+	            for(Table table:ast.getTables()){
+	            	tables.put(table, null);
+	            }
+            }else{
+            	tables.put(null, null);
+            }
+        }
 		return null;
 	}
 
-	public Statement parseStatement(DatabaseConnection connection, SqlQueryObject queryObject) {
+	public Statement parseStatement(DatabaseConnection connection, String sql) {
         Statement statment = null;
         String defaultSchema = (connection == null || StringUtil.isEmpty(connection.getSchema())) ? null : connection.getSchema();
 
-        long sqlKey = ((long) queryObject.sql.length() << 32) | (long) (defaultSchema != null ? (defaultSchema.hashCode() ^ queryObject.sql.hashCode()) : queryObject.sql.hashCode());
+        long sqlKey = ((long) sql.length() << 32) | (long) (defaultSchema != null ? (defaultSchema.hashCode() ^ sql.hashCode()) : sql.hashCode());
         mapLock.lock();
         try {
             statment = (Statement) map.get(sqlKey);
@@ -45,13 +69,13 @@ public abstract  class  SqlBaseQueryRouter extends BaseQueryRouter<DatabaseConne
             mapLock.unlock();
         }
         if (statment == null) {
-            synchronized (queryObject.sql) {
+            synchronized (sql) {
                 statment = (Statement) map.get(sqlKey);
                 if (statment != null) {
                     return statment;
                 }
 
-                Parser parser = newParser(queryObject.sql);
+                Parser parser = newParser(sql);
                 parser.setFunctionMap(this.functionMap);
                 if (defaultSchema != null) {
                     Schema schema = new Schema();
@@ -72,7 +96,7 @@ public abstract  class  SqlBaseQueryRouter extends BaseQueryRouter<DatabaseConne
                     }
                     mapLock.lock();
                     if(statment instanceof DMLStatement){
-                    	((DMLStatement)statment).setSql(queryObject.sql);
+                    	((DMLStatement)statment).setSql(sql);
                     }
                     try {
                         map.put(sqlKey, statment);
@@ -80,10 +104,10 @@ public abstract  class  SqlBaseQueryRouter extends BaseQueryRouter<DatabaseConne
                         mapLock.unlock();
                     }
                 } catch (Error e) {
-                    logger.error(queryObject.sql, e);
+                    logger.error(sql, e);
                     return null;
                 }catch(Exception e){
-                	logger.error(queryObject.sql, e);
+                	logger.error(sql, e);
                     return null;
                 }
                
@@ -92,11 +116,20 @@ public abstract  class  SqlBaseQueryRouter extends BaseQueryRouter<DatabaseConne
         return statment;
     }
 	
-	protected void setConnectionPropertiesWithStatement(DatabaseConnection connection,
+	protected void setProperty(DatabaseConnection connection,
 			Statement statment, SqlQueryObject queryObject) {
 		
 	}
 
+	 public int parseParameterCount(DatabaseConnection connection, String sql) {
+		Statement statment = parseStatement(connection, sql);
+		if (statment != null) {
+			return statment.getParameterCount();
+		} else {
+			return 0;
+		}
+	}
+	 
 	public abstract Parser newParser(String sql);
 
 }

@@ -39,11 +39,10 @@ import com.meidusa.amoeba.net.MessageHandler;
 import com.meidusa.amoeba.net.Sessionable;
 import com.meidusa.amoeba.net.poolable.ObjectPool;
 import com.meidusa.amoeba.parser.dbobject.Column;
-import com.meidusa.amoeba.parser.statement.InsertStatement;
 import com.meidusa.amoeba.parser.statement.SelectStatement;
 import com.meidusa.amoeba.parser.statement.Statement;
-import com.meidusa.amoeba.route.QueryRouter;
-import com.meidusa.amoeba.util.Tuple;
+import com.meidusa.amoeba.route.SqlBaseQueryRouter;
+import com.meidusa.amoeba.route.SqlQueryObject;
 
 /**
  * handler
@@ -82,11 +81,15 @@ public class MySqlCommandDispatcher implements MessageHandler {
 	        }
 	        try {
 	            if (MysqlPacketBuffer.isPacketType(message, QueryCommandPacket.COM_QUERY)) {
-	                QueryRouter router = ProxyRuntimeContext.getInstance().getQueryRouter();
-	                Tuple<Statement,ObjectPool[]> tuple = router.doRoute(conn, command.query, false, null);
-	                Statement statment = tuple.left;
-	                ObjectPool[] pools = tuple.right;
-	                if (statment != null && statment instanceof SelectStatement && ((SelectStatement)tuple.left).isQueryLastInsertId()) {
+	            	SqlBaseQueryRouter router = (SqlBaseQueryRouter)ProxyRuntimeContext.getInstance().getQueryRouter();
+	                SqlQueryObject queryObject = new SqlQueryObject();
+	                queryObject.isPrepared = false;
+	                queryObject.sql = command.query;
+	               
+	                ObjectPool[] pools = router.doRoute(conn, queryObject);
+	                Statement statment = router.parseStatement(conn, command.query);
+		                
+	                if (statment != null && statment instanceof SelectStatement && ((SelectStatement)statment).isQueryLastInsertId()) {
 	                	MysqlResultSetPacket lastPacketResult = createLastInsertIdPacket(conn,(SelectStatement)statment,false);
             			lastPacketResult.wirteToConnection(conn);
             			return;
@@ -97,7 +100,7 @@ public class MySqlCommandDispatcher implements MessageHandler {
 	                	return;
 	                }
 	                
-	                MessageHandler handler = new QueryCommandMessageHandler(conn, message,statment, tuple.right, timeout);
+	                MessageHandler handler = new QueryCommandMessageHandler(conn, message,statment, pools, timeout);
 	                if (handler instanceof Sessionable) {
 	                    Sessionable session = (Sessionable) handler;
 	                    try {
@@ -116,10 +119,15 @@ public class MySqlCommandDispatcher implements MessageHandler {
 	                	return;
 	                }
 	                
-	                QueryRouter router = ProxyRuntimeContext.getInstance().getQueryRouter();
-	                Tuple<Statement,ObjectPool[]> tuple = router.doRoute(conn, command.query, true, null);
+	                SqlBaseQueryRouter router = (SqlBaseQueryRouter)ProxyRuntimeContext.getInstance().getQueryRouter();
+	                SqlQueryObject queryObject = new SqlQueryObject();
+	                queryObject.isPrepared = true;
+	                queryObject.sql = command.query;
+	               
+	                ObjectPool[] pools = router.doRoute(conn, queryObject);
+	                Statement statment = router.parseStatement(conn, command.query);
 	                
-	            	PreparedStatmentMessageHandler handler = new PreparedStatmentMessageHandler(conn,preparedInf,tuple.left, message , new ObjectPool[]{tuple.right[0]}, timeout,false);
+	            	PreparedStatmentMessageHandler handler = new PreparedStatmentMessageHandler(conn,preparedInf,statment, message , new ObjectPool[]{pools[0]}, timeout,false);
 	            	if (handler instanceof Sessionable) {
 	                    Sessionable session = (Sessionable) handler;
 	                    try {
@@ -162,14 +170,18 @@ public class MySqlCommandDispatcher implements MessageHandler {
 		                    ExecutePacket executePacket = new ExecutePacket(preparedInf, longMap);
 		                    executePacket.init(message, connection);
 		
-		                    QueryRouter router = ProxyRuntimeContext.getInstance().getQueryRouter();
-		                    Tuple<Statement,ObjectPool[]> tuple = router.doRoute(conn, preparedInf.getPreparedStatment(), false, executePacket.getParameters());
+		                    SqlBaseQueryRouter router = (SqlBaseQueryRouter)ProxyRuntimeContext.getInstance().getQueryRouter();
+			                SqlQueryObject queryObject = new SqlQueryObject();
+			                queryObject.isPrepared = false;
+			                queryObject.sql = preparedInf.getPreparedStatment();
+			                queryObject.parameters = executePacket.getParameters();
+			                ObjectPool[] pools = router.doRoute(conn, queryObject);
 		
 		                    PreparedStatmentExecuteMessageHandler handler = new PreparedStatmentExecuteMessageHandler(
 		                                                                                                              conn,
-		                                                                                                              preparedInf,tuple.left,
+		                                                                                                              preparedInf,statment,
 		                                                                                                              message,
-		                                                                                                              tuple.right,
+		                                                                                                              pools,
 		                                                                                                              timeout);
 		                    handler.setExecutePacket(executePacket);
 		                    if (handler instanceof Sessionable) {

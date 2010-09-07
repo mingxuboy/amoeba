@@ -2,7 +2,7 @@
 <!DOCTYPE amoeba:rule SYSTEM "rule.dtd">
 
 <amoeba:rule xmlns:amoeba="http://amoeba.meidusa.com/">
-	<tableRule name="TestTable,user,message" schema="test" defaultPools="server1">
+	<tableRule name="test" schema="test" defaultPools="server1">
 		<!--
 		<rule name="rule1">
 			<parameters>ID</parameters>
@@ -33,6 +33,14 @@
 			<defaultPools>server3</defaultPools>
 		</rule>
 		-->
+		<rule name="rule1" ruleResult="POOLNAME">
+                   <parameters>s</parameters>
+                   <expression><![CDATA[
+                     var hashid = abs(hash(s)) % 2; 
+                     (hashid = 1)?'server1':'server2'
+                    
+                   ]]></expression>
+           </rule>
 	</tableRule>
 	
 </amoeba:rule>

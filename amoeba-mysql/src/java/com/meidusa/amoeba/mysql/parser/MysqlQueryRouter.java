@@ -12,7 +12,6 @@
 package com.meidusa.amoeba.mysql.parser;
 
 import java.io.StringReader;
-import java.util.regex.Pattern;
 
 import com.meidusa.amoeba.mysql.net.MysqlConnection;
 import com.meidusa.amoeba.mysql.parser.sql.MysqlParser;
@@ -22,22 +21,23 @@ import com.meidusa.amoeba.parser.Parser;
 import com.meidusa.amoeba.parser.expression.Expression;
 import com.meidusa.amoeba.parser.statement.PropertyStatement;
 import com.meidusa.amoeba.parser.statement.Statement;
-import com.meidusa.amoeba.route.AbstractQueryRouter;
-import com.meidusa.amoeba.util.Tuple;
+import com.meidusa.amoeba.route.SqlBaseQueryRouter;
+import com.meidusa.amoeba.route.SqlQueryObject;
 
 /**
  * 
  * @author <a href=mailto:piratebase@sina.com>Struct chen</a>
  *
  */
-public class MysqlQueryRouter extends AbstractQueryRouter{
+public class MysqlQueryRouter extends SqlBaseQueryRouter{
 	
 	@Override
 	public Parser newParser(String sql) {
 		return new MysqlParser(new StringReader(sql));
 	}
 
-	protected Tuple<Statement,ObjectPool[]> selectPool(DatabaseConnection connection,String sql,boolean ispreparedStatment,Object[] parameters){
+	public ObjectPool[] selectPool(DatabaseConnection connection,SqlQueryObject queryObject){
+		String sql = queryObject.sql;
 		if(sql != null){
 			sql = sql.trim();
 			while(sql.startsWith("/*")){
@@ -50,13 +50,14 @@ public class MysqlQueryRouter extends AbstractQueryRouter{
 				sql = sql.trim();
 			}
 			if(sql.length()>4 && sql.subSequence(0, 4).toString().equalsIgnoreCase("show")){
-				return tuple;
+				return defaultPools;
 			}
 		}
-		return super.selectPool(connection, sql, ispreparedStatment, parameters);
+		return super.selectPool(connection, queryObject);
 	}
 	@Override
-	protected void setProperty(DatabaseConnection conn, PropertyStatement statment,Object[] parameters) {
+	protected void setProperty(DatabaseConnection conn, Statement st,SqlQueryObject queryObject) {
+		PropertyStatement statment = (PropertyStatement)st;
 		Expression value = null;
 		if((value = statment.getValue("autocommit")) != null){
 			
@@ -67,13 +68,13 @@ public class MysqlQueryRouter extends AbstractQueryRouter{
 				conn.setAutoCommit(false);
 			}*/
 		}else if((value = statment.getValue("names")) != null){
-			((MysqlConnection)conn).setCharset((String)value.evaluate(parameters));
+			((MysqlConnection)conn).setCharset((String)value.evaluate(queryObject.parameters));
 		}else if((value = statment.getValue("charset")) != null){
-				((MysqlConnection)conn).setCharset((String)value.evaluate(parameters));
+				((MysqlConnection)conn).setCharset((String)value.evaluate(queryObject.parameters));
 		}else if((value = statment.getValue("transactionisolation")) != null){
 			//conn.setTransactionIsolation((int)((Long)comparable).longValue());
 		}else if((value = statment.getValue("schema")) != null){
-			conn.setSchema((String)value.evaluate(parameters)); 
+			conn.setSchema((String)value.evaluate(queryObject.parameters)); 
 		}
 	}
 	
