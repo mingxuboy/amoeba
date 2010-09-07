@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
-import org.bson.BasicBSONObject;
 
 import com.meidusa.amoeba.context.ProxyRuntimeContext;
 import com.meidusa.amoeba.mongodb.io.MongodbPacketConstant;
@@ -26,7 +25,6 @@ import com.meidusa.amoeba.net.Connection;
 import com.meidusa.amoeba.net.MessageHandler;
 import com.meidusa.amoeba.net.SessionMessageHandler;
 import com.meidusa.amoeba.net.poolable.ObjectPool;
-import com.meidusa.amoeba.route.QueryRouter;
 
 @SuppressWarnings("deprecation")
 public class CommandMessageHandler implements SessionMessageHandler{

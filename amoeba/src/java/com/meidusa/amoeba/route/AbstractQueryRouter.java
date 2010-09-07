@@ -125,7 +125,7 @@ import com.meidusa.amoeba.util.Tuple;
 @SuppressWarnings("deprecation")
 public abstract class  AbstractQueryRouter<T extends Connection,V> implements QueryRouter<T,V>, Initialisable {
 	private static final String _CURRENT_STATEMENT_ = "_CURRENT_STATEMENT_";
-	protected static Logger                           logger          = Logger.getLogger(AbstractQueryRouter.class);
+	protected static Logger logger = Logger.getLogger(AbstractQueryRouter.class);
 
     public final static Map<String, PostfixCommand> ruleFunTab      = new HashMap<String, PostfixCommand>();
     static {
@@ -472,7 +472,9 @@ public abstract class  AbstractQueryRouter<T extends Connection,V> implements Qu
 	                         
 	                         if(!isPrepared){
 	                         	if(tableRule.ruleList != null && tableRule.ruleList.size()>0){
-	                         		loggerBuffer.append(", no rule matched, using tableRule:[" + tableRule.table.getName() + "] defaultPools");
+	                         		if (logger.isDebugEnabled()) {
+	                         			loggerBuffer.append(", no rule matched, using tableRule:[" + tableRule.table.getName() + "] defaultPools");
+	                         		}
 	                         	}else{
 	                         		if(logger.isDebugEnabled()){
 	                         			if(pools != null){
@@ -511,28 +513,29 @@ public abstract class  AbstractQueryRouter<T extends Connection,V> implements Qu
              pools = isRead ? this.readPools : this.writePools;
              if (logger.isDebugEnabled() && pools != null && pools.length > 0) {
                  if (isRead) {
-                	 loggerBuffer.append(",  route to queryRouter readPool:" + readPool + "\n");
+                	 loggerBuffer.append(",  route to queryRouter readPool:" + readPool + "\r\n");
                  } else {
-                	 loggerBuffer.append(",  route to queryRouter writePool:" + writePool + "\n");
+                	 loggerBuffer.append(",  route to queryRouter writePool:" + writePool + "\r\n");
                  }
              }
 
              if (pools == null || pools.length == 0) {
                  pools = this.defaultPools;
                  if (logger.isDebugEnabled() && pools != null && pools.length > 0) {
-                	 loggerBuffer.append(",  route to queryRouter defaultPool:" + defaultPool + "\n");
+                	 loggerBuffer.append(",  route to queryRouter defaultPool:" + defaultPool + "\r\n");
                  }
              }
          } else {
              if (logger.isDebugEnabled() && pools != null && pools.length > 0) {
-            	 loggerBuffer.append(",  route to pools:" + poolNames + "\n");
+            	 loggerBuffer.append(",  route to pools:" + poolNames + "\r\n");
              }
          }
          
-         if(loggerBuffer != null){
-        	 if(logger.isDebugEnabled()){
-        		 logger.debug(loggerBuffer.toString());
-        	 }
+         
+    	 if(logger.isDebugEnabled()){
+    		 if(loggerBuffer != null){
+    			 logger.debug(loggerBuffer.toString());
+    		 }
          }
          return pools;
     }
