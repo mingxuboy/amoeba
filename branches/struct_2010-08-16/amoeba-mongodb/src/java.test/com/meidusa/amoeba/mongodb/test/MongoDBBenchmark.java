@@ -19,7 +19,6 @@ public class MongoDBBenchmark extends AbstractBenchmark{
 		AbstractBenchmark.main(args);
 	}
 
-	@Override
 	public AbstractBenchmarkClientConnection<?> newBenchmarkClientConnection(
 			SocketChannel channel, long time,CountDownLatch latcher) {
 		return new MongodbBenchmarkClientConnection(channel,time,latcher);
