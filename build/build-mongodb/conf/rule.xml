@@ -34,12 +34,12 @@
 		</rule>
 		-->
 		<rule name="rule1" ruleResult="POOLNAME">
-                   <parameters>s</parameters>
-                   <expression><![CDATA[
-                     var hashid = abs(hash(s)) % 2; 
-                     (hashid == 1)?'server1':'server2'
-                    
-                   ]]></expression>
+       <parameters>s</parameters>
+       <expression><![CDATA[
+         var hashid = abs(hash(s)) % 2; 
+         (hashid == 1)?'server1':'server2'
+        
+       ]]></expression>
            </rule>
 	</tableRule>
 	
