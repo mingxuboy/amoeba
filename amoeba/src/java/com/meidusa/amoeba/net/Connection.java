@@ -322,9 +322,6 @@ public abstract class Connection implements NetEventHandler {
 	        try {
 	            _framer.write(msg);
 	            buffer = _framer.returnPacketBuffer();
-	            /*
-	             * ByteBuffer out= ByteBuffer.allocate(buffer.limit()); out.put(buffer); out.flip();
-	             */
 	        } catch (IOException e) {
 	            this._cmgr.connectionFailed(this, e);
 	            return;
