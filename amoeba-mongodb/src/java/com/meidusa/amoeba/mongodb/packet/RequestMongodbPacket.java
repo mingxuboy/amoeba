@@ -2,7 +2,9 @@ package com.meidusa.amoeba.mongodb.packet;
 
 import java.io.UnsupportedEncodingException;
 
-public class RequestMongodbPacket extends AbstractMongodbPacket {
+import com.meidusa.amoeba.route.Request;
+
+public class RequestMongodbPacket extends AbstractMongodbPacket implements Request {
 	public int requestFlags = 0;
 	public String fullCollectionName;
 
@@ -17,5 +19,13 @@ public class RequestMongodbPacket extends AbstractMongodbPacket {
 		super.write2Buffer(buffer);
 		buffer.writeInt(requestFlags);
 		buffer.writeCString(fullCollectionName);
+	}
+
+	public boolean isPrepared() {
+		return false;
+	}
+
+	public boolean isRead() {
+		return false;
 	}
 }

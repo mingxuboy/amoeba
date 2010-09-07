@@ -45,4 +45,8 @@ public class GetMoreMongodbPacket extends RequestMongodbPacket {
 		buffer.writeInt(numberToReturn);
 		buffer.writeLong(cursorID);
 	}
+	
+	public boolean isRead() {
+		return true;
+	}
 }
