@@ -79,10 +79,6 @@ public class CommandMessageHandler implements SessionMessageHandler{
 				}
 			}
 			if(type == MongodbPacketConstant.OP_QUERY){
-				if(packet == null){
-					packet = new QueryMongodbPacket();
-					packet.init(message, conn);
-				}
 				QueryMongodbPacket last = (QueryMongodbPacket) packet;
 				if(last.fullCollectionName.indexOf("$")>0 && last.query != null 
 						&& last.query.get("getlasterror") != null){
@@ -136,33 +132,28 @@ public class CommandMessageHandler implements SessionMessageHandler{
 					serverConn.postMessage(message);
 				}
 			}
-
-	}else{
-		if(logger.isDebugEnabled()){
-			int type = MongodbPacketBuffer.getOPMessageType(message);
-			if(type == MongodbPacketConstant.OP_REPLY){
-				AbstractMongodbPacket packet = new ResponseMongodbPacket();
-				packet.init(message, conn);
-				logger.debug("<<<--- "+(isLastErrorRequest?"@errorReponse":"Reponse")+"pakcet="+packet+" receive from "+conn.getSocketId()+" -->"+clientConn.getSocketId());
-			}
-		}
-		
-		if(!isLastErrorRequest){
-			clientConn.postMessage(message);
 		}else{
-			clientConn.lastResponsePacket = new ResponseMongodbPacket();
-			clientConn.lastResponsePacket.init(message, clientConn);
-			clientConn.setLastErrorMessage(message);
-		}
-		
-		endQuery(conn);
-		
-	}
+			if(logger.isDebugEnabled()){
+				int type = MongodbPacketBuffer.getOPMessageType(message);
+				if(type == MongodbPacketConstant.OP_REPLY){
+					AbstractMongodbPacket packet = new ResponseMongodbPacket();
+					packet.init(message, conn);
+					logger.debug("<<<--- "+(isLastErrorRequest?"@errorReponse":"Reponse")+"pakcet="+packet+" receive from "+conn.getSocketId()+" -->"+clientConn.getSocketId());
+				}
+			}
 			
+			if(!isLastErrorRequest){
+				clientConn.postMessage(message);
+			}else{
+				clientConn.lastResponsePacket = new ResponseMongodbPacket();
+				clientConn.lastResponsePacket.init(message, clientConn);
+				clientConn.setLastErrorMessage(message);
+			}
+			endQuery(conn);
+		}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
 	}
 	
 	public void endQuery(Connection conn){
@@ -174,10 +165,6 @@ public class CommandMessageHandler implements SessionMessageHandler{
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
-		/*if(logger.isDebugEnabled()){
-			QueryStackLogger.flushLog(this);
-		}*/
 	}
 
 }
