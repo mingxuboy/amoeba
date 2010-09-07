@@ -70,16 +70,6 @@ public class MongodbClientConnection extends AbstractMongodbConnection{
 		//this.setMessageHandler(new CommandMessageHandler(this));
 	}
 
-	@Override
-	protected PacketInputStream createPacketInputStream() {
-		return new MongodbFramedInputStream(true);
-	}
-
-	@Override
-	protected PacketOutputStream createPakcetOutputStream() {
-		return new MongodbFramingOutputStream(true);
-	}
-
 	protected synchronized void doReceiveMessage(byte[] message){
 		CommandMessageHandler handler =	new CommandMessageHandler(this);
 		handler.handleMessage(this,message);

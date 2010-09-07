@@ -3,8 +3,12 @@ package com.meidusa.amoeba.mongodb.net;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 
+import com.meidusa.amoeba.mongodb.io.MongodbFramedInputStream;
+import com.meidusa.amoeba.mongodb.io.MongodbFramingOutputStream;
 import com.meidusa.amoeba.net.Connection;
 import com.meidusa.amoeba.net.SessionMessageHandler;
+import com.meidusa.amoeba.net.io.PacketInputStream;
+import com.meidusa.amoeba.net.io.PacketOutputStream;
 
 public abstract class AbstractMongodbConnection extends Connection {
 	
@@ -23,4 +27,13 @@ public abstract class AbstractMongodbConnection extends Connection {
 		postMessage(ByteBuffer.wrap(msg));
 	}
 	
+	@Override
+	protected PacketInputStream createPacketInputStream() {
+		return new MongodbFramedInputStream(true);
+	}
+
+	@Override
+	protected PacketOutputStream createPacketOutputStream() {
+		return new MongodbFramingOutputStream(true);
+	}
 }

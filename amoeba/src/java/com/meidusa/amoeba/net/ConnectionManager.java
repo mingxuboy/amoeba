@@ -180,7 +180,7 @@ public class ConnectionManager extends LoopingThread implements Reporter, Initia
             // orderly fashion
             logger.warn("Failure select()ing.", re);
             if (_runtimeExceptionCount++ >= 20) {
-                logger.warn("Too many errors, bailing.");
+                logger.error("Too many errors, bailing.");
                 shutdown();
             }
             return;

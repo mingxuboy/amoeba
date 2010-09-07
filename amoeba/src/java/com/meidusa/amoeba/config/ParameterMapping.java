@@ -16,7 +16,9 @@ package com.meidusa.amoeba.config;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -193,5 +195,40 @@ public class ParameterMapping {
             return false;
         }
 
+    }
+    
+    public static void mappingObjectField(Object object, Map<String, Object> parameter,Class stopClass){
+    	Class clazz = object.getClass();
+    	while(clazz != stopClass && clazz != null){
+	    	Field[] fields = clazz.getDeclaredFields();
+	    	for(Field field : fields){
+	    		Object obj = parameter.get(field.getName());
+	            Object value = obj;
+	            Class<?> cls = field.getClass();
+	            if (obj instanceof String) {
+	                String string = (String) obj;
+	                if (!StringUtil.isEmpty(string)) {
+	                    string = ConfigUtil.filter(string);
+	                }
+	
+	                if (isPrimitiveType(cls)) {
+	                    value = deStringize(cls, string);
+	                }
+	                
+	                if (value != null) {
+	                	if(Modifier.isPublic(field.getModifiers())){
+	                		try {
+								field.set(object, value);
+							} catch (Exception e) {
+								e.printStackTrace();
+							}
+	                	}
+	                }
+	            }
+	    	}
+	    	clazz = clazz.getSuperclass();
+            
+    	}
+    	
     }
 }
