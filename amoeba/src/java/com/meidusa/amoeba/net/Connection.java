@@ -316,21 +316,24 @@ public abstract class Connection implements NetEventHandler {
 
     public void postMessage(byte[] msg) {
         PacketOutputStream _framer = getPacketOutputStream();
+        ByteBuffer buffer = null;
 		synchronized (_framer) {
 	        _framer.resetPacket();
 	        try {
 	            _framer.write(msg);
-	            ByteBuffer buffer = _framer.returnPacketBuffer();
+	            buffer = _framer.returnPacketBuffer();
 	            /*
 	             * ByteBuffer out= ByteBuffer.allocate(buffer.limit()); out.put(buffer); out.flip();
 	             */
-	            _outQueue.append(buffer);
 	        } catch (IOException e) {
 	            this._cmgr.connectionFailed(this, e);
 	            return;
 	        }
 		}
-        writeMessage();
+		
+		if(buffer != null){
+			postMessage(buffer);
+		}
     }
 
     public void postMessage(ByteBuffer msg) {
