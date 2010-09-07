@@ -35,8 +35,8 @@ public abstract class AbstractBenchmark {
 			return;
 		}
 
-		int conn = Integer.parseInt(System.getProperty("conn", "100"));
-		final int totle = Integer.parseInt(System.getProperty("totle", "1000"));
+		int conn = Integer.parseInt(System.getProperty("conn", "1"));
+		final int totle = Integer.parseInt(System.getProperty("totle", "1"));
 		String ip = System.getProperty("ip", "127.0.0.1");
 		final CountDownLatch latcher = new CountDownLatch(totle);
 		

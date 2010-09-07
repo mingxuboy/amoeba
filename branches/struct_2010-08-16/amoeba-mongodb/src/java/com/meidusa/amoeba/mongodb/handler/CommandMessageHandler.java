@@ -21,10 +21,12 @@ import com.meidusa.amoeba.mongodb.packet.QueryMongodbPacket;
 import com.meidusa.amoeba.mongodb.packet.RequestMongodbPacket;
 import com.meidusa.amoeba.mongodb.packet.ResponseMongodbPacket;
 import com.meidusa.amoeba.mongodb.packet.UpdateMongodbPacket;
+import com.meidusa.amoeba.mongodb.route.MongodbQueryRouter;
 import com.meidusa.amoeba.net.Connection;
 import com.meidusa.amoeba.net.MessageHandler;
 import com.meidusa.amoeba.net.SessionMessageHandler;
 import com.meidusa.amoeba.net.poolable.ObjectPool;
+import com.meidusa.amoeba.route.QueryRouter;
 
 @SuppressWarnings("deprecation")
 public class CommandMessageHandler implements SessionMessageHandler{
@@ -42,110 +44,122 @@ public class CommandMessageHandler implements SessionMessageHandler{
 	public void handleMessage(Connection conn,byte[] message) {
 		try {
 			if(conn == clientConn){
-					int type = MongodbPacketBuffer.getOPMessageType(message);
-					
-					AbstractMongodbPacket packet = null;
-					if(logger.isDebugEnabled()){
-						switch(type){
-							case MongodbPacketConstant.OP_QUERY:
-								packet = new QueryMongodbPacket();
-								break;
-							case MongodbPacketConstant.OP_GET_MORE:
-								packet = new GetMoreMongodbPacket();
-								break;
-							case MongodbPacketConstant.OP_DELETE:
-								packet = new DeleteMongodbPacket();
-								break;
-							case MongodbPacketConstant.OP_KILL_CURSORS:
-								packet = new KillCurosorsMongodbPacket();
-								break;
-							case MongodbPacketConstant.OP_UPDATE:
-								packet = new UpdateMongodbPacket();
-								break;
-							case MongodbPacketConstant.OP_INSERT:
-								packet = new InsertMongodbPacket();
-								break;
-							case MongodbPacketConstant.OP_MSG:
-								packet = new MessageMongodbPacket();
-								break;
-						}
-					
-						if(packet != null){
-							packet.init(message, conn);
-						}
-						
-						if(logger.isDebugEnabled()){
-							if(packet != null){
-								logger.debug("--->>>pakcet="+packet+"," +clientConn.getSocketId());
-							}else{
-								logger.debug("ERROR --->>>"+clientConn.getSocketId()+"  unknow type="+type);
-							}
-						}
-					}
-					if(type == MongodbPacketConstant.OP_QUERY){
-						if(packet == null){
-							packet = new QueryMongodbPacket();
-							packet.init(message, conn);
-						}
-						QueryMongodbPacket last = (QueryMongodbPacket) packet;
-						if(last.fullCollectionName.indexOf("$")>0 && last.query != null 
-								&& last.query.get("getlasterror") != null){
-							byte[] msg = clientConn.getLastErrorMessage();
-							packet = new ResponseMongodbPacket();
-							packet.init(msg, conn);
-							if(logger.isDebugEnabled()){
-								logger.debug("<<----@ReponsePacket="+packet+", " +clientConn.getSocketId());
-							}
-							clientConn.postMessage(msg);
-							return;
-						}
-					}
-					
-					ObjectPool pool = (ObjectPool)ProxyRuntimeContext.getInstance().getPoolMap().get("server1");
-					MongodbServerConnection serverConn = (MongodbServerConnection)pool.borrowObject();
-					handlerMap.put(serverConn, serverConn.getMessageHandler());
-					serverConn.setSessionMessageHandler(this);
-					
-					if(type == MongodbPacketConstant.OP_INSERT  
-					|| type == MongodbPacketConstant.OP_UPDATE 
-					|| type == MongodbPacketConstant.OP_DELETE){
-						isLastErrorRequest = true;
-						byte[] msg = clientConn.getLastErrorRequest();
-						packet = new QueryMongodbPacket();
-						packet.init(msg, conn);
-						if(logger.isDebugEnabled()){
-							logger.debug("--->>>@errorRequestPakcet="+packet+"," +clientConn.getSocketId()+" send packet --->"+serverConn.getSocketId());
-						}
-						clientConn.clearErrorMessage();
-						serverConn.postMessage(message);
-						serverConn.postMessage(msg);
-						//endQuery(serverConn);
-					}else{
-						isLastErrorRequest = false;
-						serverConn.postMessage(message);
-					}
-
-			}else{
-				if(logger.isDebugEnabled()){
-					int type = MongodbPacketBuffer.getOPMessageType(message);
-					if(type == MongodbPacketConstant.OP_REPLY){
-						AbstractMongodbPacket packet = new ResponseMongodbPacket();
-						packet.init(message, conn);
-						logger.debug("<<<--- "+(isLastErrorRequest?"@errorReponse":"Reponse")+"pakcet="+packet+" receive from "+conn.getSocketId()+" -->"+clientConn.getSocketId());
-					}
-				}
-				
-				if(!isLastErrorRequest){
-					clientConn.postMessage(message);
-				}else{
-					clientConn.lastResponsePacket = new ResponseMongodbPacket();
-					clientConn.lastResponsePacket.init(message, clientConn);
-					clientConn.setLastErrorMessage(message);
-				}
-				
-				endQuery(conn);
-				
+				int type = MongodbPacketBuffer.getOPMessageType(message);
+				AbstractMongodbPacket packet = null;
+				switch(type){
+				case MongodbPacketConstant.OP_QUERY:
+					packet = new QueryMongodbPacket();
+					break;
+				case MongodbPacketConstant.OP_GET_MORE:
+					packet = new GetMoreMongodbPacket();
+					break;
+				case MongodbPacketConstant.OP_DELETE:
+					packet = new DeleteMongodbPacket();
+					break;
+				case MongodbPacketConstant.OP_KILL_CURSORS:
+					packet = new KillCurosorsMongodbPacket();
+					break;
+				case MongodbPacketConstant.OP_UPDATE:
+					packet = new UpdateMongodbPacket();
+					break;
+				case MongodbPacketConstant.OP_INSERT:
+					packet = new InsertMongodbPacket();
+					break;
+				case MongodbPacketConstant.OP_MSG:
+					packet = new MessageMongodbPacket();
+					break;
 			}
+		
+			if(packet != null){
+				packet.init(message, conn);
+			}
+			if(logger.isDebugEnabled()){
+				if(packet != null){
+					logger.debug("--->>>pakcet="+packet+"," +clientConn.getSocketId());
+				}else{
+					logger.debug("ERROR --->>>"+clientConn.getSocketId()+"  unknow type="+type);
+				}
+			}
+			if(type == MongodbPacketConstant.OP_QUERY){
+				if(packet == null){
+					packet = new QueryMongodbPacket();
+					packet.init(message, conn);
+				}
+				QueryMongodbPacket last = (QueryMongodbPacket) packet;
+				if(last.fullCollectionName.indexOf("$")>0 && last.query != null 
+						&& last.query.get("getlasterror") != null){
+					byte[] msg = clientConn.getLastErrorMessage();
+					packet = new ResponseMongodbPacket();
+					packet.init(msg, conn);
+					if(logger.isDebugEnabled()){
+						logger.debug("<<----@ReponsePacket="+packet+", " +clientConn.getSocketId());
+					}
+					clientConn.postMessage(msg);
+					return;
+				}
+			}
+			ObjectPool[] pools = null;
+			MongodbQueryRouter router = (MongodbQueryRouter)ProxyRuntimeContext.getInstance().getQueryRouter();
+			if(type == MongodbPacketConstant.OP_QUERY 
+					|| type == MongodbPacketConstant.OP_DELETE 
+					|| type == MongodbPacketConstant.OP_INSERT
+					|| type == MongodbPacketConstant.OP_UPDATE){
+				
+				RequestMongodbPacket requestPacket = (RequestMongodbPacket)packet;
+				pools = router.doRoute(clientConn, requestPacket);
+				if(pools == null || pools.length==0){
+					pools = router.getDefaultObjectPool();
+				}
+			}else{
+				pools = router.getDefaultObjectPool();
+			}
+			
+			for(ObjectPool pool: pools){
+				MongodbServerConnection serverConn = (MongodbServerConnection)pool.borrowObject();
+				handlerMap.put(serverConn, serverConn.getMessageHandler());
+				serverConn.setSessionMessageHandler(this);
+				
+				if(type == MongodbPacketConstant.OP_INSERT  
+				|| type == MongodbPacketConstant.OP_UPDATE 
+				|| type == MongodbPacketConstant.OP_DELETE){
+					isLastErrorRequest = true;
+					byte[] msg = clientConn.getLastErrorRequest();
+					packet = new QueryMongodbPacket();
+					packet.init(msg, conn);
+					if(logger.isDebugEnabled()){
+						logger.debug("--->>>@errorRequestPakcet="+packet+"," +clientConn.getSocketId()+" send packet --->"+serverConn.getSocketId());
+					}
+					clientConn.clearErrorMessage();
+					serverConn.postMessage(message);
+					serverConn.postMessage(msg);
+					//endQuery(serverConn);
+				}else{
+					isLastErrorRequest = false;
+					serverConn.postMessage(message);
+				}
+			}
+
+	}else{
+		if(logger.isDebugEnabled()){
+			int type = MongodbPacketBuffer.getOPMessageType(message);
+			if(type == MongodbPacketConstant.OP_REPLY){
+				AbstractMongodbPacket packet = new ResponseMongodbPacket();
+				packet.init(message, conn);
+				logger.debug("<<<--- "+(isLastErrorRequest?"@errorReponse":"Reponse")+"pakcet="+packet+" receive from "+conn.getSocketId()+" -->"+clientConn.getSocketId());
+			}
+		}
+		
+		if(!isLastErrorRequest){
+			clientConn.postMessage(message);
+		}else{
+			clientConn.lastResponsePacket = new ResponseMongodbPacket();
+			clientConn.lastResponsePacket.init(message, clientConn);
+			clientConn.setLastErrorMessage(message);
+		}
+		
+		endQuery(conn);
+		
+	}
 			
 		} catch (Exception e) {
 			e.printStackTrace();

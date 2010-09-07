@@ -103,7 +103,7 @@
     </logger>
     
     <logger name="com.meidusa.amoeba.route" additivity="false">
-        <level value="warn"/>
+        <level value="debug"/>
         <appender-ref ref="ROUTER"/>
     </logger>
     

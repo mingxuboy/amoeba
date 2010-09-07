@@ -11,6 +11,7 @@ import com.meidusa.amoeba.net.DatabaseConnection;
 import com.meidusa.amoeba.net.poolable.ObjectPool;
 import com.meidusa.amoeba.net.poolable.PoolableObject;
 import com.meidusa.amoeba.parser.ParseException;
+import com.meidusa.amoeba.route.SqlBaseQueryRouter;
 
 /**
  * @author struct
@@ -27,7 +28,8 @@ public class PreparedStatmentMessageHandler extends CommandMessageHandler {
 
         @Override
         protected void doRun(PoolableObject conn) throws ParseException{
-            int count = ProxyRuntimeContext.getInstance().getQueryRouter().parseParameterCount((DatabaseConnection) this.source, query);
+        	SqlBaseQueryRouter router = (SqlBaseQueryRouter)ProxyRuntimeContext.getInstance().getQueryRouter();
+            int count = router.parseParameterCount((DatabaseConnection) this.source, query);
             PreparedResultPacket preparedPacket = (PreparedResultPacket) packet;
             PreparedStatmentInfo preparedInfo = (PreparedStatmentInfo) parameter;
             preparedPacket.setStatementId(preparedInfo.getStatmentId());
