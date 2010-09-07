@@ -117,7 +117,7 @@ public interface ParserConstants {
     "<MOD>",
     "\">\"",
     "\"<\"",
-    "\"=\"",
+    "<EQ>",
     "\"<=\"",
     "\">=\"",
     "\"!=\"",
