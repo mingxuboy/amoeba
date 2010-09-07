@@ -37,7 +37,7 @@ public abstract class MysqlConnection extends DatabaseConnection {
 	}
 	
 	@Override
-	protected PacketOutputStream createPakcetOutputStream() {
+	protected PacketOutputStream createPacketOutputStream() {
 		return new MysqlFramingOutputStream(true);
 	}
 	

@@ -88,18 +88,17 @@ public class CommandMessageHandler implements SessionMessageHandler{
 							packet.init(message, conn);
 						}
 						QueryMongodbPacket last = (QueryMongodbPacket) packet;
-							if(last.fullCollectionName.indexOf("$")>0 && last.query != null 
-									&& last.query.get("getlasterror") != null){
-								byte[] msg = clientConn.getLastErrorMessage();
-								packet = new ResponseMongodbPacket();
-								packet.init(msg, conn);
-								if(logger.isDebugEnabled()){
-									logger.debug("<<----@ReponsePacket="+packet+", " +clientConn.getSocketId());
-								}
-								clientConn.postMessage(msg);
-								return;
+						if(last.fullCollectionName.indexOf("$")>0 && last.query != null 
+								&& last.query.get("getlasterror") != null){
+							byte[] msg = clientConn.getLastErrorMessage();
+							packet = new ResponseMongodbPacket();
+							packet.init(msg, conn);
+							if(logger.isDebugEnabled()){
+								logger.debug("<<----@ReponsePacket="+packet+", " +clientConn.getSocketId());
 							}
-						//}
+							clientConn.postMessage(msg);
+							return;
+						}
 					}
 					
 					ObjectPool pool = (ObjectPool)ProxyRuntimeContext.getInstance().getPoolMap().get("server1");

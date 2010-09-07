@@ -33,15 +33,6 @@ public class MongodbServerConnection extends AbstractMongodbConnection implement
 	public void setSessionMessageHandler(SessionMessageHandler singleHandler) {
 		this.sessionMessageHandler = singleHandler;
 	}
-	@Override
-	protected PacketInputStream createPacketInputStream() {
-		return new MongodbFramedInputStream(true);
-	}
-
-	@Override
-	protected PacketOutputStream createPakcetOutputStream() {
-		return new MongodbFramingOutputStream(true);
-	}
 
 	/*protected void messageProcess() {
 		byte[] message = null;

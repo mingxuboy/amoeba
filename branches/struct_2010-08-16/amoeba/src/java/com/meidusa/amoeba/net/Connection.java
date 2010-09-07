@@ -385,11 +385,11 @@ public abstract class Connection implements NetEventHandler {
 
     protected abstract PacketInputStream createPacketInputStream();
 
-    protected abstract PacketOutputStream createPakcetOutputStream();
+    protected abstract PacketOutputStream createPacketOutputStream();
 
     protected PacketOutputStream getPacketOutputStream() {
         if (_fout == null) {
-            _fout = createPakcetOutputStream();
+            _fout = createPacketOutputStream();
         }
         return this._fout;
 
