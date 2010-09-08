@@ -21,6 +21,7 @@ import java.util.Map;
 import org.apache.log4j.Logger;
 
 import com.meidusa.amoeba.context.ProxyRuntimeContext;
+import com.meidusa.amoeba.mysql.context.MysqlProxyRuntimeContext;
 import com.meidusa.amoeba.mysql.jdbc.MysqlDefs;
 import com.meidusa.amoeba.mysql.net.MysqlClientConnection;
 import com.meidusa.amoeba.mysql.net.packet.BindValue;
@@ -81,13 +82,22 @@ public class MySqlCommandDispatcher implements MessageHandler {
 	        }
 	        try {
 	            if (MysqlPacketBuffer.isPacketType(message, QueryCommandPacket.COM_QUERY)) {
+	            	
 	            	SqlBaseQueryRouter router = (SqlBaseQueryRouter)ProxyRuntimeContext.getInstance().getQueryRouter();
+	            	Statement statment = router.parseStatement(conn, command.query);
+
+	            	if(command.query != null && (command.query.indexOf("'$version'")>0 || command.query.indexOf("@amoebaversion")>0)){
+	            		MysqlResultSetPacket lastPacketResult = createAmoebaVersion(conn,(SelectStatement)statment,false);
+            			lastPacketResult.wirteToConnection(conn);
+            			return;
+	            	}
+	            	
 	                SqlQueryObject queryObject = new SqlQueryObject();
 	                queryObject.isPrepared = false;
 	                queryObject.sql = command.query;
 	               
 	                ObjectPool[] pools = router.doRoute(conn, queryObject);
-	                Statement statment = router.parseStatement(conn, command.query);
+	               
 		                
 	                if (statment != null && statment instanceof SelectStatement && ((SelectStatement)statment).isQueryLastInsertId()) {
 	                	MysqlResultSetPacket lastPacketResult = createLastInsertIdPacket(conn,(SelectStatement)statment,false);
@@ -221,6 +231,57 @@ public class MySqlCommandDispatcher implements MessageHandler {
 	            logger.error("messageDispate error", e);
 	        }
 		}
+    }
+    
+    private MysqlResultSetPacket createAmoebaVersion(MysqlClientConnection conn,SelectStatement statment,boolean isPrepared){
+    	Map<String,Column> selectedMap = ((SelectStatement)statment).getSelectColumnMap();
+		MysqlResultSetPacket lastPacketResult = new MysqlResultSetPacket(null);
+		lastPacketResult.resulthead = new ResultSetHeaderPacket();
+		lastPacketResult.resulthead.columns = (selectedMap.size()==0?1:selectedMap.size());
+		if(selectedMap.size() == 0){
+			Column column = new Column();
+			column.setName("@amoebaversion");
+			selectedMap.put("@amoebaversion", column);
+		}
+		lastPacketResult.resulthead.extra = 1;
+		RowDataPacket row = new RowDataPacket(isPrepared);
+		row.columns = new ArrayList<Object>();
+		int index =0; 
+		lastPacketResult.fieldPackets = new FieldPacket[selectedMap.size()];
+		for(Map.Entry<String, Column> entry : selectedMap.entrySet()){
+			FieldPacket field = new FieldPacket();
+			String alias = entry.getValue().getAlias();
+			
+			
+			if("@amoebaversion".equalsIgnoreCase(entry.getValue().getName()) 
+				||  "'$version'".equalsIgnoreCase(entry.getValue().getName())){
+				BindValue value = new BindValue();
+				value.bufferType = MysqlDefs.FIELD_TYPE_VARCHAR;
+				value.value = MysqlProxyRuntimeContext.SERVER_VERSION;
+				value.scale = 20;
+				value.isSet = true;
+				row.columns.add(value);
+				field.name = (alias == null?entry.getValue().getName()+"()":alias);
+			}else{
+				BindValue value = new BindValue();
+				value.bufferType = MysqlDefs.FIELD_TYPE_VARCHAR;
+				value.scale = 20;
+				value.isNull = true;
+				row.columns.add(value);
+				field.name = (alias == null?entry.getValue().getName():alias);
+			}
+			
+			field.type = (byte)MysqlDefs.FIELD_TYPE_VARCHAR;
+			field.catalog = "def";
+			field.length = 20;
+			lastPacketResult.fieldPackets[index] = field; 
+			index++;
+		}
+			
+		List<RowDataPacket> list = new ArrayList<RowDataPacket>();
+		list.add(row);
+		lastPacketResult.setRowList(list);
+		return lastPacketResult;
     }
     
     private MysqlResultSetPacket createLastInsertIdPacket(MysqlClientConnection conn,SelectStatement statment,boolean isPrepared){

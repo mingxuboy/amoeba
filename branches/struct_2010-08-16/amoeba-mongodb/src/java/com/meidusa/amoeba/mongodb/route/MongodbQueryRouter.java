@@ -34,14 +34,16 @@ public class MongodbQueryRouter extends AbstractQueryRouter<MongodbClientConnect
 				table.setName(queryObject.fullCollectionName);
 			}
 		}
+		
 		BSONObject bson = null;
 		if(queryObject instanceof QueryMongodbPacket){
 			QueryMongodbPacket query = (QueryMongodbPacket)queryObject;
 			bson = query.query;
-		}
-		else if(queryObject  instanceof InsertMongodbPacket){
+		}else if(queryObject  instanceof InsertMongodbPacket){
 			InsertMongodbPacket query = (InsertMongodbPacket)queryObject;
-			bson = query.documents.get(0);
+			if(query.documents != null && query.documents.size()>0){
+				bson = query.documents.get(0);
+			}
 		}else if(queryObject  instanceof DeleteMongodbPacket){
 			DeleteMongodbPacket query = (DeleteMongodbPacket)queryObject;
 			bson =  query.selector;
