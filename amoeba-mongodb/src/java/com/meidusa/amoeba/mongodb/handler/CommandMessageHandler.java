@@ -6,6 +6,7 @@ import java.util.Map;
 import org.apache.log4j.Logger;
 
 import com.meidusa.amoeba.context.ProxyRuntimeContext;
+import com.meidusa.amoeba.mongodb.handler.entry.CursorEntry;
 import com.meidusa.amoeba.mongodb.io.MongodbPacketConstant;
 import com.meidusa.amoeba.mongodb.net.MongodbClientConnection;
 import com.meidusa.amoeba.mongodb.net.MongodbServerConnection;
@@ -19,21 +20,23 @@ import com.meidusa.amoeba.mongodb.packet.MongodbPacketBuffer;
 import com.meidusa.amoeba.mongodb.packet.QueryMongodbPacket;
 import com.meidusa.amoeba.mongodb.packet.RequestMongodbPacket;
 import com.meidusa.amoeba.mongodb.packet.ResponseMongodbPacket;
+import com.meidusa.amoeba.mongodb.packet.SimpleResponseMongodbPacket;
 import com.meidusa.amoeba.mongodb.packet.UpdateMongodbPacket;
 import com.meidusa.amoeba.mongodb.route.MongodbQueryRouter;
 import com.meidusa.amoeba.net.Connection;
 import com.meidusa.amoeba.net.MessageHandler;
 import com.meidusa.amoeba.net.SessionMessageHandler;
 import com.meidusa.amoeba.net.poolable.ObjectPool;
+import com.meidusa.amoeba.util.Tuple;
 
 @SuppressWarnings("deprecation")
 public class CommandMessageHandler implements SessionMessageHandler{
 	private static Logger logger = Logger.getLogger("PACKETLOGGER");
 	
-	public MessageHandler messageHandler;
 	public MongodbClientConnection clientConn;
 	public Map<Connection,MessageHandler> handlerMap = new HashMap<Connection,MessageHandler>();
 	private boolean isLastErrorRequest = false;
+	private String fullCollectionName;
 	public CommandMessageHandler(MongodbClientConnection clientConn){
 		this.clientConn = clientConn;
 	}
@@ -42,6 +45,8 @@ public class CommandMessageHandler implements SessionMessageHandler{
 	public void handleMessage(Connection conn,byte[] message) {
 		try {
 			if(conn == clientConn){
+				
+				//deserialize to packet from message
 				int type = MongodbPacketBuffer.getOPMessageType(message);
 				AbstractMongodbPacket packet = null;
 				switch(type){
@@ -70,7 +75,12 @@ public class CommandMessageHandler implements SessionMessageHandler{
 		
 			if(packet != null){
 				packet.init(message, conn);
+				if(packet instanceof RequestMongodbPacket){
+					this.fullCollectionName = ((RequestMongodbPacket)packet).fullCollectionName;
+				}
 			}
+			
+			//debug packet info
 			if(logger.isDebugEnabled()){
 				if(packet != null){
 					logger.debug("--->>>pakcet="+packet+"," +clientConn.getSocketId());
@@ -78,8 +88,11 @@ public class CommandMessageHandler implements SessionMessageHandler{
 					logger.debug("ERROR --->>>"+clientConn.getSocketId()+"  unknow type="+type);
 				}
 			}
+			
+			//getLastError packet
 			if(type == MongodbPacketConstant.OP_QUERY){
 				QueryMongodbPacket last = (QueryMongodbPacket) packet;
+				
 				if(last.fullCollectionName.indexOf("$")>0 && last.query != null 
 						&& last.query.get("getlasterror") != null){
 					byte[] msg = clientConn.getLastErrorMessage();
@@ -92,6 +105,29 @@ public class CommandMessageHandler implements SessionMessageHandler{
 					return;
 				}
 			}
+			
+			//kill cursor
+			if(type == MongodbPacketConstant.OP_KILL_CURSORS){
+				KillCurosorsMongodbPacket kpacket = (KillCurosorsMongodbPacket)packet;
+				for(long cursorID:kpacket.cursorIDs){
+					Tuple<CursorEntry,ObjectPool>[] tupes = (Tuple<CursorEntry,ObjectPool>[])clientConn.removeCursor(cursorID);
+					
+					//start close cursor request
+					if(tupes != null && tupes.length >0){
+						new CursorCloseMessageHandler(clientConn,tupes);
+					}
+					
+					ResponseMongodbPacket response = new ResponseMongodbPacket();
+					clientConn.postMessage(response.toByteBuffer(clientConn));
+				}
+				return;
+			}
+			
+			//get More result from cursor
+			if(type == MongodbPacketConstant.OP_GET_MORE){
+				
+			}
+
 			ObjectPool[] pools = null;
 			MongodbQueryRouter router = (MongodbQueryRouter)ProxyRuntimeContext.getInstance().getQueryRouter();
 			if(type == MongodbPacketConstant.OP_QUERY 
@@ -133,12 +169,22 @@ public class CommandMessageHandler implements SessionMessageHandler{
 				}
 			}
 		}else{
+			SimpleResponseMongodbPacket packet = null;
 			if(logger.isDebugEnabled()){
 				int type = MongodbPacketBuffer.getOPMessageType(message);
 				if(type == MongodbPacketConstant.OP_REPLY){
-					AbstractMongodbPacket packet = new ResponseMongodbPacket();
-					packet.init(message, conn);
+					packet = new ResponseMongodbPacket();
 					logger.debug("<<<--- "+(isLastErrorRequest?"@errorReponse":"Reponse")+"pakcet="+packet+" receive from "+conn.getSocketId()+" -->"+clientConn.getSocketId());
+				}
+			}else{
+				packet = new SimpleResponseMongodbPacket();
+			}
+			
+			packet.init(message, conn);
+			if(packet.cursorID >0){
+				Tuple<CursorEntry,ObjectPool>[] tupes = (Tuple<CursorEntry,ObjectPool>[])this.clientConn.getCursor(packet.cursorID);
+				if(tupes == null){
+					
 				}
 			}
 			

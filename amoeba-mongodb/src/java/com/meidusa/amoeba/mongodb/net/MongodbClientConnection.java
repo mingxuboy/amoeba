@@ -1,8 +1,6 @@
 package com.meidusa.amoeba.mongodb.net;
 
 import java.nio.channels.SocketChannel;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -19,7 +17,6 @@ import com.meidusa.amoeba.mongodb.packet.ResponseMongodbPacket;
 import com.meidusa.amoeba.net.poolable.ObjectPool;
 import com.meidusa.amoeba.util.Tuple;
 
-
 public class MongodbClientConnection extends AbstractMongodbConnection{
 	static byte[] LASTERROR = null;
 	public ResponseMongodbPacket lastResponsePacket = null;
@@ -30,7 +27,7 @@ public class MongodbClientConnection extends AbstractMongodbConnection{
 		@SuppressWarnings("unchecked")
 		protected boolean removeLRU(LinkEntry entry){
 			boolean result = super.removeLRU(entry);
-			Tuple<CursorEntry,ObjectPool> tuple = (Tuple<CursorEntry,ObjectPool>)entry.getValue();
+			Tuple<CursorEntry,ObjectPool>[] tuple = (Tuple<CursorEntry,ObjectPool>[])entry.getValue();
 			new CursorCloseMessageHandler(MongodbClientConnection.this,tuple);
 			return result;
 		}
@@ -65,6 +62,26 @@ public class MongodbClientConnection extends AbstractMongodbConnection{
 
 	public void clearErrorMessage(){
 		lastErrorQueue.clear();
+	}
+	
+	public void addCursor(long cursorID,Tuple<CursorEntry,ObjectPool>... tuple){
+		synchronized (cursorMap) {
+			cursorMap.put(cursorID, tuple);
+		}
+	}
+	
+	@SuppressWarnings("unchecked")
+	public Tuple<CursorEntry,ObjectPool>[] removeCursor(long cursorID){
+		synchronized (cursorMap) {
+			return (Tuple<CursorEntry,ObjectPool>[]) cursorMap.remove(cursorID);
+		}
+	}
+	
+	@SuppressWarnings("unchecked")
+	public Tuple<CursorEntry,ObjectPool>[] getCursor(long cursorID){
+		synchronized (cursorMap) {
+			return (Tuple<CursorEntry,ObjectPool>[])cursorMap.get(cursorID);
+		}
 	}
 	
 	public synchronized byte[] getLastErrorRequest(){

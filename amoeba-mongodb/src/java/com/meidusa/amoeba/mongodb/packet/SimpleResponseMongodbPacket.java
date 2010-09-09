@@ -30,39 +30,27 @@ import com.meidusa.amoeba.mongodb.io.MongodbPacketConstant;
  * @author Struct
  *
  */
-public class ResponseMongodbPacket extends SimpleResponseMongodbPacket {
-	public int startingFrom;
-	public int numberReturned;
-	public List<BSONObject> documents;
+public class SimpleResponseMongodbPacket extends AbstractMongodbPacket {
+	public int responseFlags;
+	public long cursorID;
 	
-	public ResponseMongodbPacket(){
+	public SimpleResponseMongodbPacket(){
 		this.opCode = MongodbPacketConstant.OP_REPLY;
 	}
 	
 	protected void init(MongodbPacketBuffer buffer) {
 		super.init(buffer);
-		startingFrom = buffer.readInt();
-		numberReturned = buffer.readInt();
-		if(buffer.hasRemaining()){
-			documents = new ArrayList<BSONObject>();
-			do{
-				BSONObject obj = buffer.readBSONObject();
-				documents.add(obj);
-			}while(buffer.hasRemaining());
-		}
+		responseFlags = buffer.readInt();
+		cursorID = buffer.readLong();
+		
 	}
 
 	@Override
 	protected void write2Buffer(MongodbPacketBuffer buffer)
 			throws UnsupportedEncodingException {
 		super.write2Buffer(buffer);
-		buffer.writeInt(startingFrom);
-		buffer.writeInt(numberReturned);
-		if(documents != null){
-			for(BSONObject doc: documents){
-				buffer.writeBSONObject(doc);
-			}
-		}
+		buffer.writeInt(responseFlags);
+		buffer.writeLong(cursorID);
 	}
 
 }
