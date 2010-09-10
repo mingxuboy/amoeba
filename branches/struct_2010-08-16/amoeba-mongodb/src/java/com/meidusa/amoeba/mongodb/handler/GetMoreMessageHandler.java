@@ -43,7 +43,7 @@ public class GetMoreMessageHandler extends AbstractSessionHandler<GetMoreMongodb
 		List<Tuple<CursorEntry,ObjectPool>> tuples = (List<Tuple<CursorEntry,ObjectPool>>)clientConn.getCursor(cursorID);
 		
 		if(tuples == null){
-			//TODO need to fill packet field
+			//TODO need to fill packet field, return cursor not found message
 			ResponseMongodbPacket response = new ResponseMongodbPacket();
 			clientConn.postMessage(response.toByteBuffer(clientConn));
 			return;
