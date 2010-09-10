@@ -1,3 +1,16 @@
+/*
+ * Copyright amoeba.meidusa.com
+ * 
+ * 	This program is free software; you can redistribute it and/or modify it under the terms of 
+ * the GNU General Public License as published by the Free Software Foundation; either version 3 of the License, 
+ * or (at your option) any later version. 
+ * 
+ * 	This program is distributed in the hope that it will be useful, 
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+ * See the GNU General Public License for more details. 
+ * 	You should have received a copy of the GNU General Public License along with this program; 
+ * if not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ */
 package com.meidusa.amoeba.mongodb.handler;
 
 import java.util.ArrayList;
@@ -8,19 +21,10 @@ import java.util.Map;
 import org.apache.log4j.Logger;
 import org.bson.BSONObject;
 
-import com.meidusa.amoeba.mongodb.io.MongodbPacketConstant;
 import com.meidusa.amoeba.mongodb.net.MongodbClientConnection;
 import com.meidusa.amoeba.mongodb.net.MongodbServerConnection;
 import com.meidusa.amoeba.mongodb.packet.AbstractMongodbPacket;
-import com.meidusa.amoeba.mongodb.packet.DeleteMongodbPacket;
-import com.meidusa.amoeba.mongodb.packet.GetMoreMongodbPacket;
-import com.meidusa.amoeba.mongodb.packet.InsertMongodbPacket;
-import com.meidusa.amoeba.mongodb.packet.KillCurosorsMongodbPacket;
-import com.meidusa.amoeba.mongodb.packet.MessageMongodbPacket;
-import com.meidusa.amoeba.mongodb.packet.MongodbPacketBuffer;
-import com.meidusa.amoeba.mongodb.packet.QueryMongodbPacket;
 import com.meidusa.amoeba.mongodb.packet.ResponseMongodbPacket;
-import com.meidusa.amoeba.mongodb.packet.UpdateMongodbPacket;
 import com.meidusa.amoeba.net.Connection;
 import com.meidusa.amoeba.net.MessageHandler;
 import com.meidusa.amoeba.net.SessionMessageHandler;
