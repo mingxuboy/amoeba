@@ -1,4 +1,4 @@
-package com.meidusa.amoeba.mongodb.handler.entry;
+package com.meidusa.amoeba.mongodb.packet;
 
 import org.apache.commons.lang.StringUtils;
 

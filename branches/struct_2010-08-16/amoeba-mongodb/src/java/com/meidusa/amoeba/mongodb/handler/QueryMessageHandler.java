@@ -1,0 +1,119 @@
+package com.meidusa.amoeba.mongodb.handler;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.log4j.Logger;
+
+import com.meidusa.amoeba.context.ProxyRuntimeContext;
+import com.meidusa.amoeba.mongodb.io.MongodbPacketConstant;
+import com.meidusa.amoeba.mongodb.net.MongodbClientConnection;
+import com.meidusa.amoeba.mongodb.net.MongodbServerConnection;
+import com.meidusa.amoeba.mongodb.packet.CursorEntry;
+import com.meidusa.amoeba.mongodb.packet.MongodbPacketBuffer;
+import com.meidusa.amoeba.mongodb.packet.QueryMongodbPacket;
+import com.meidusa.amoeba.mongodb.packet.ResponseMongodbPacket;
+import com.meidusa.amoeba.mongodb.packet.SimpleResponseMongodbPacket;
+import com.meidusa.amoeba.mongodb.route.MongodbQueryRouter;
+import com.meidusa.amoeba.net.poolable.ObjectPool;
+import com.meidusa.amoeba.util.Tuple;
+
+public class QueryMessageHandler extends AbstractSessionHandler<QueryMongodbPacket> {
+	private static Logger logger = Logger.getLogger("PACKETLOGGER");
+	
+	private List<Tuple<CursorEntry,ObjectPool>> cursorList;
+	public QueryMessageHandler(MongodbClientConnection clientConn,QueryMongodbPacket packet) {
+		super(clientConn,packet);
+	}
+
+	@Override
+	protected void doClientRequest(MongodbClientConnection conn,
+			byte[] message) throws Exception {
+		if(requestPacket.fullCollectionName.indexOf("$")>0 && requestPacket.query != null 
+				&& requestPacket.query.get("getlasterror") != null){
+			byte[] msg = clientConn.getLastErrorMessage();
+			ResponseMongodbPacket packet = new ResponseMongodbPacket();
+			packet.init(msg, conn);
+			if(logger.isDebugEnabled()){
+				logger.debug("<<----@ReponsePacket="+packet+", " +clientConn.getSocketId());
+			}
+			clientConn.postMessage(msg);
+			return;
+		}
+		
+		MongodbQueryRouter router = (MongodbQueryRouter)ProxyRuntimeContext.getInstance().getQueryRouter();
+
+		ObjectPool[] pools = router.doRoute(clientConn, requestPacket);
+		if(pools == null || pools.length==0){
+			pools = router.getDefaultObjectPool();
+		}
+		
+		if(pools != null && pools.length >1){
+			isMulti = true;
+			cursorList = new ArrayList<Tuple<CursorEntry,ObjectPool>>();
+			this.multiResponsePacket = new ArrayList<ResponseMongodbPacket>();
+		}
+		
+		for(ObjectPool pool: pools){
+			MongodbServerConnection serverConn = (MongodbServerConnection)pool.borrowObject();
+			handlerMap.put(serverConn, serverConn.getMessageHandler());
+			serverConn.setSessionMessageHandler(this);
+			serverConn.postMessage(message);
+		}
+	}
+
+	@Override
+	protected void doServerResponse(MongodbServerConnection conn,
+			byte[] message) {
+		SimpleResponseMongodbPacket packet = null;
+		MongodbServerConnection serverConn = (MongodbServerConnection) conn;
+		int type = MongodbPacketBuffer.getOPMessageType(message);
+		
+		if(type != MongodbPacketConstant.OP_REPLY){
+			logger.error("unkown response packet type="+type+" , request="+this.requestPacket);
+		}
+		
+		if(logger.isDebugEnabled() || isMulti){
+			packet = new ResponseMongodbPacket();
+		}else{
+			packet = new SimpleResponseMongodbPacket();
+		}
+		packet.init(message, conn);
+		
+		if(isMulti){
+			multiResponsePacket.add((ResponseMongodbPacket)packet);
+			if(packet.cursorID >0){
+				CursorEntry entry = new CursorEntry();
+				entry.cursorID = packet.cursorID;
+				entry.fullCollectionName = this.requestPacket.fullCollectionName;
+				Tuple<CursorEntry,ObjectPool> tuple = new Tuple<CursorEntry,ObjectPool>(entry,serverConn.getObjectPool());
+				this.cursorList.add(tuple);
+			}
+			
+			if(endQuery(conn)){
+				long cursrID = 0;
+				if(cursorList.size()>=1){
+					cursrID = this.clientConn.nextCursorID();
+					clientConn.putCursor(cursrID, cursorList);
+				}
+				ResponseMongodbPacket result = mergeResponse();
+				result.cursorID = cursrID;
+				clientConn.postMessage(result.toByteBuffer(this.clientConn));
+			}
+		}else{
+		
+			if(packet.cursorID >0){
+				CursorEntry entry = new CursorEntry();
+				entry.cursorID = packet.cursorID;
+				
+				entry.fullCollectionName = this.requestPacket.fullCollectionName;
+				
+				Tuple<CursorEntry,ObjectPool> tuple = new Tuple<CursorEntry,ObjectPool>(entry,serverConn.getObjectPool());
+				clientConn.addCursorItem(packet.cursorID, tuple);
+			}
+			endQuery(conn);
+			clientConn.postMessage(message);
+		}
+	}
+
+}
