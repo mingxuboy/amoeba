@@ -1,15 +1,15 @@
 package com.meidusa.amoeba.mongodb.handler;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
 
-import com.meidusa.amoeba.mongodb.handler.entry.CursorEntry;
 import com.meidusa.amoeba.mongodb.io.MongodbPacketConstant;
-import com.meidusa.amoeba.mongodb.net.MongodbClientConnection;
 import com.meidusa.amoeba.mongodb.net.MongodbServerConnection;
 import com.meidusa.amoeba.mongodb.packet.AbstractMongodbPacket;
+import com.meidusa.amoeba.mongodb.packet.CursorEntry;
 import com.meidusa.amoeba.mongodb.packet.KillCurosorsMongodbPacket;
 import com.meidusa.amoeba.mongodb.packet.MongodbPacketBuffer;
 import com.meidusa.amoeba.mongodb.packet.ResponseMongodbPacket;
@@ -19,12 +19,15 @@ import com.meidusa.amoeba.net.SessionMessageHandler;
 import com.meidusa.amoeba.net.poolable.ObjectPool;
 import com.meidusa.amoeba.util.Tuple;
 
+/**
+ * only for 
+ */
 public class CursorCloseMessageHandler implements SessionMessageHandler{
 	private static Logger logger = Logger.getLogger("PACKETLOGGER");
 	public Map<Connection,MessageHandler> handlerMap = new HashMap<Connection,MessageHandler>();
-	public MongodbClientConnection clientConn;
-	public CursorCloseMessageHandler(MongodbClientConnection clientConn,Tuple<CursorEntry,ObjectPool>...tuples){
-		this.clientConn = clientConn;
+	private String sourceClient;
+	public CursorCloseMessageHandler(String sourceClient,List<Tuple<CursorEntry,ObjectPool>> tuples){
+		this.sourceClient = sourceClient;
 		for(Tuple<CursorEntry,ObjectPool> tuple : tuples){
 			KillCurosorsMongodbPacket packet = new KillCurosorsMongodbPacket();
 			packet.cursorIDs = new long[]{ tuple.left.cursorID};
@@ -37,7 +40,7 @@ public class CursorCloseMessageHandler implements SessionMessageHandler{
 				serverConn.setSessionMessageHandler(this);
 				serverConn.postMessage(packet.toByteBuffer(serverConn));
 				if(logger.isDebugEnabled()){
-					logger.debug("--->>>@CursorCloseRequestPakcet="+packet+"," +clientConn.getSocketId()+" send packet --->"+serverConn.getSocketId());
+					logger.debug("--->>>@CursorCloseRequestPakcet="+packet+"," +sourceClient+" send packet --->"+serverConn.getSocketId());
 				}
 			} catch (Exception e) {
 			}
@@ -51,7 +54,7 @@ public class CursorCloseMessageHandler implements SessionMessageHandler{
 			if(type == MongodbPacketConstant.OP_REPLY){
 				AbstractMongodbPacket packet = new ResponseMongodbPacket();
 				packet.init(message, conn);
-				logger.debug("<<<--- @CursorCloseResponsePakcet="+packet+" receive from "+conn.getSocketId()+" -->"+clientConn.getSocketId());
+				logger.debug("<<<--- @CursorCloseResponsePakcet="+packet+" receive from "+conn.getSocketId()+" -->"+sourceClient);
 			}
 		}
 		endQuery(conn);
