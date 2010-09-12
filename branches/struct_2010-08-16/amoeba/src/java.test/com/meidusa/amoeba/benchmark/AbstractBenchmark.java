@@ -51,7 +51,10 @@ public abstract class AbstractBenchmark {
 		MultiConnectionManagerWrapper manager = new MultiConnectionManagerWrapper();
 		manager.init();
 		manager.start();
-		
+		do{
+			Thread.sleep(100L);
+		}while(!manager.isAlive());
+		System.out.println("Connection manager started....");
 		new Thread(){
 			long lastCount = latcher.getCount();
 			{this.setDaemon(true);}
