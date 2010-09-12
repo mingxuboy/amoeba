@@ -145,8 +145,9 @@ public class ConnectionManager extends LoopingThread implements Reporter, Initia
         while ((registerHandler = _registerQueue.getNonBlocking()) != null) {
             if (registerHandler.left instanceof Connection) {
                 Connection connection = (Connection) registerHandler.left;
-                this.registerConnection(connection, registerHandler.right.intValue());
-                _handlers.add(connection);
+               if( this.registerConnection(connection, registerHandler.right.intValue())){
+            	   _handlers.add(connection);
+               }
             } else {
                 _handlers.add(registerHandler.left);
             }
@@ -296,7 +297,7 @@ public class ConnectionManager extends LoopingThread implements Reporter, Initia
     /**
      * 往ConnectionManager 增加一个SocketChannel
      */
-    protected void registerConnection(Connection connection, int key) {
+    protected boolean registerConnection(Connection connection, int key) {
         SocketChannel channel = connection.getChannel();
         if (logger.isDebugEnabled()) {
             logger.debug("[" + this.getName() + "] registed Connection[" + connection.toString() + "] connected!");
@@ -313,7 +314,7 @@ public class ConnectionManager extends LoopingThread implements Reporter, Initia
                 if (channel != null) {
                     channel.socket().close();
                 }
-                return;
+                return false;
             }
 
             SelectableChannel selchan = (SelectableChannel) channel;
@@ -325,7 +326,7 @@ public class ConnectionManager extends LoopingThread implements Reporter, Initia
             _stats.connects.incrementAndGet();
             connection.init();
             _selector.wakeup();
-            return;
+            return true;
         } catch (IOException ioe) {
             logger.error("register connection error: " + ioe);
         }
@@ -343,6 +344,7 @@ public class ConnectionManager extends LoopingThread implements Reporter, Initia
                 logger.warn("Failed closing aborted connection: " + ioe);
             }
         }
+        return false;
     }
 
     protected void configConnection(Connection connection) throws SocketException {

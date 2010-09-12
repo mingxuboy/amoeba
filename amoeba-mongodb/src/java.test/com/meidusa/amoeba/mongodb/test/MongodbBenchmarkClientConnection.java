@@ -1,7 +1,6 @@
 package com.meidusa.amoeba.mongodb.test;
 
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
@@ -10,9 +9,6 @@ import java.util.Random;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import javax.sound.midi.SysexMessage;
-
-import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.Logger;
 import org.bson.BSONObject;
 import org.bson.BasicBSONObject;
@@ -43,9 +39,11 @@ import com.meidusa.amoeba.net.io.PacketOutputStream;
 public class MongodbBenchmarkClientConnection extends AbstractBenchmarkClientConnection<AbstractMongodbPacket> {
 	private static Logger	logger        = Logger.getLogger(MongodbBenchmarkClientConnection.class);
 	private Random random = new Random();
-	final int nreturn  = Integer.parseInt(System.getProperty("return", "1"));
+	private Random random2 = new Random();
+	final int nreturn  = Integer.parseInt(System.getProperty("return", "2"));
 	final String requestFile  = System.getProperty("requestFile");
 	private AtomicInteger index = new AtomicInteger();
+	private boolean isLastModifyOperation = false;
 	public MongodbBenchmarkClientConnection(SocketChannel channel, long createStamp,CountDownLatch latcher) {
 		super(channel, createStamp,latcher);
 	}
@@ -105,7 +103,7 @@ public class MongodbBenchmarkClientConnection extends AbstractBenchmarkClientCon
 		return null;
 	}
 
-	public AbstractMongodbPacket createRequestPacket() {
+	public AbstractMongodbPacket createRequestPacket2() {
 			QueryMongodbPacket packet = new QueryMongodbPacket();
 			packet.fullCollectionName = "test.test";
 			packet.numberToReturn = nreturn;
@@ -114,22 +112,33 @@ public class MongodbBenchmarkClientConnection extends AbstractBenchmarkClientCon
 			packet.numberToSkip = 0;
 			packet.requestID = index.getAndIncrement();
 			BasicBSONObject query = new BasicBSONObject();
-			query.put("s", random.nextInt(400));
+			query.put("s", random.nextInt(10));
 			packet.query = query;
 			return packet;
 	}
+	
+	public AbstractMongodbPacket createRequestPacket() {
+		GetMoreMongodbPacket packet = new GetMoreMongodbPacket();
+		packet.fullCollectionName = "test.test";
+		packet.numberToReturn = nreturn;
+		//packet.returnFieldSelector = new BasicBSONObject();
+		//packet.returnFieldSelector.put("s", 1);
+		packet.requestID = index.getAndIncrement();
+		packet.cursorID = 1179089230899L;
+		return packet;
+}
 	
 	public AbstractMongodbPacket createRequestPacket3() {
 		InsertMongodbPacket packet = new InsertMongodbPacket();
 		packet.fullCollectionName = "test.test";
 		packet.documents = new ArrayList<BSONObject>();
 		BasicBSONObject document = new BasicBSONObject();
-		document.put("s", random.nextInt(100));
-		document.put("f", random.nextInt(100000));
+		document.put("s", random.nextInt(10));
+		document.put("f", random2.nextInt(100000));
 		packet.documents.add(document);
 		packet.requestID = index.getAndIncrement();
 		return packet;
-}
+	}
 
     protected void messageProcess() {
 		//_handler.handleMessage(this);
@@ -149,8 +158,19 @@ public class MongodbBenchmarkClientConnection extends AbstractBenchmarkClientCon
 
 	@Override
 	public void startBenchmark() {
-		postMessage(this.createRequestPacket().toByteBuffer(this));
-		//postMessage(getLastErrorPacket().toByteBuffer(this));
+		AbstractMongodbPacket packet = this.createRequestPacket();
+		if(packet.opCode == MongodbPacketConstant.OP_DELETE 
+				|| packet.opCode == MongodbPacketConstant.OP_INSERT 
+				|| packet.opCode == MongodbPacketConstant.OP_UPDATE){
+			isLastModifyOperation = true;
+		}else{
+			isLastModifyOperation = false;
+		}
+		postMessage(packet.toByteBuffer(this));
+		
+		if(isLastModifyOperation){
+			postMessage(getLastErrorPacket().toByteBuffer(this));
+		}
 		
 	}
 	
@@ -165,6 +185,8 @@ public class MongodbBenchmarkClientConnection extends AbstractBenchmarkClientCon
 	}
 	protected void doReceiveMessage(byte[] message) {
 		super.doReceiveMessage(message);
-		//postMessage(getLastErrorPacket().toByteBuffer(this));
+		if(isLastModifyOperation){
+			postMessage(getLastErrorPacket().toByteBuffer(this));
+		}
 	}
 }

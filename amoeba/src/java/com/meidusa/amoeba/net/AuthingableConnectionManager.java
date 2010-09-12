@@ -40,10 +40,12 @@ public class AuthingableConnectionManager extends ConnectionManager {
         return _author;
     }
 
-    public void registerConnection(Connection connection, int key) {
-        super.registerConnection(connection, key);
-        
-        beforeAuthing(connection);
+    public boolean registerConnection(Connection connection, int key) {
+       boolean result = super.registerConnection(connection, key);
+        if(result){
+        	beforeAuthing(connection);
+        }
+        return result;
     }
 
     protected void beforeAuthing(Connection authing) {
