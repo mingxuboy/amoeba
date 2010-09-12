@@ -29,6 +29,8 @@ public abstract class AbstractBenchmarkClientConnection<T extends Packet>
 
 	public abstract T createPacketWithBytes(byte[] message);
 
+	public abstract void startBenchmark();
+	
 	protected void doReceiveMessage(byte[] message) {
 		latcher.countDown();
 		end = System.nanoTime();

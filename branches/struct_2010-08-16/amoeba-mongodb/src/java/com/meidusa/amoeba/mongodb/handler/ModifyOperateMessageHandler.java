@@ -33,10 +33,9 @@ public class ModifyOperateMessageHandler<T extends RequestMongodbPacket> extends
 	@Override
 	protected void doClientRequest(MongodbClientConnection conn,
 			byte[] message) throws Exception {
-		//4. other request packet
-		ObjectPool[] pools = null;
+
 		MongodbQueryRouter router = (MongodbQueryRouter)ProxyRuntimeContext.getInstance().getQueryRouter();
-		pools = router.doRoute(clientConn, (RequestMongodbPacket)requestPacket);
+		ObjectPool[] pools = router.doRoute(clientConn, (RequestMongodbPacket)requestPacket);
 		if(pools == null || pools.length==0){
 			pools = router.getDefaultObjectPool();
 		}

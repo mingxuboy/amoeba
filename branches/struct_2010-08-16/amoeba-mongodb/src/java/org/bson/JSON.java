@@ -13,7 +13,10 @@ import java.util.regex.*;
  *   Helper methods for JSON serialization and de-serialization
  */
 public class JSON {
-
+	
+	public static void main(String[] args){
+		System.out.println(parse("{\"s\":1,\"f\":\"asdfasdf\"}").getClass());
+	}
     /**
      *  Serializes an object into it's JSON form
      *

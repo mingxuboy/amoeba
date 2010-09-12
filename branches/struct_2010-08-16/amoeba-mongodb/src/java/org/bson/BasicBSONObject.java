@@ -213,6 +213,9 @@ public class BasicBSONObject extends LinkedHashMap<String,Object> implements BSO
         }
         return true;
     }
-
+    
+    public static void main(String[] args){
+    	System.out.println(BasicDBObject.class.asSubclass(BasicBSONObject.class));
+    }
 
 }
