@@ -36,7 +36,22 @@ public class ParameterMapping {
 
     private static Logger                              logger                = Logger.getLogger(ParameterMapping.class);
     private static Map<Class<?>, PropertyDescriptor[]> propertyDescriptorMap = new HashMap<Class<?>, PropertyDescriptor[]>();
-
+    private static Map<Class<?>,PropertyTransfer<?>> stringTransferMap = new HashMap<Class<?>,PropertyTransfer<?>>();
+    
+    public static void registerTransfer(Class<?> type,PropertyTransfer<?> transfer){
+    	stringTransferMap.put(type,transfer);
+    }
+    
+    public static PropertyTransfer<?> lookup(Class fieldType){
+    	for(Map.Entry<Class<?>,PropertyTransfer<?>> entry :stringTransferMap.entrySet()){
+    		Class clazz = entry.getKey();
+    		if(clazz.asSubclass(fieldType) != null){
+    			return entry.getValue();
+    		}
+    	}
+    	return null;
+    }
+    
     private static PropertyDescriptor[] getDescriptors(Class<?> clazz) {
         PropertyDescriptor[] descriptors;
         List<PropertyDescriptor> list;
@@ -213,6 +228,11 @@ public class ParameterMapping {
 	
 	                if (isPrimitiveType(cls)) {
 	                    value = deStringize(cls, string);
+	                }else{
+	                	PropertyTransfer transfer = lookup(cls);
+	                	if(transfer != null){
+	                		value = transfer.transfer(string);
+	                	}
 	                }
 	                
 	                if (value != null) {

@@ -11,6 +11,10 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.log4j.ConsoleAppender;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
+
 import com.meidusa.amoeba.net.MultiConnectionManagerWrapper;
 import com.meidusa.amoeba.util.InitialisationException;
 
@@ -24,8 +28,10 @@ public abstract class AbstractBenchmark {
 	}
 	public abstract AbstractBenchmarkClientConnection<?> newBenchmarkClientConnection(SocketChannel channel,long time,CountDownLatch latcher);
 	
-	public static void main(String[] args) throws IOException,
-			InterruptedException, InitialisationException {
+	public static void main(String[] args) throws Exception {
+		Logger logger = Logger.getLogger("rootLogger");
+		logger.addAppender(new ConsoleAppender());
+		logger.setLevel(Level.DEBUG);
 		if(args != null && args.length ==1 && "-h".equalsIgnoreCase(args[0])){
 			System.out.println("-Dconn=<int> ;Concurrency connection size\r\n");
 			System.out.println("-Dip=<String> ;remote ip\r\n");
@@ -76,7 +82,7 @@ public abstract class AbstractBenchmark {
 		
 		
 		for(AbstractBenchmarkClientConnection<?> connection: connList){
-			connection.postMessage(connection.createRequestPacket().toByteBuffer(connection));
+			connection.startBenchmark();
 		}
 		latcher.await();
 		

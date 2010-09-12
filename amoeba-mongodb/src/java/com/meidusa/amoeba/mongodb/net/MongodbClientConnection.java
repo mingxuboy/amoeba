@@ -58,7 +58,6 @@ public class MongodbClientConnection extends AbstractMongodbConnection{
 	private AtomicLong currentCursorID = new AtomicLong(0x10001L);
 	private LRUMap cursorMap = new LRUMap(10){
 		private static final long serialVersionUID = 1L;
-		@SuppressWarnings("unchecked")
 		protected boolean removeLRU(LinkEntry entry){
 			boolean result = super.removeLRU(entry);
 			List<Tuple<CursorEntry,ObjectPool>> tupleList = (List<Tuple<CursorEntry,ObjectPool>>)entry.getValue();
