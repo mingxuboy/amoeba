@@ -18,15 +18,15 @@ import java.util.List;
 import com.meidusa.amoeba.mongodb.net.MongodbClientConnection;
 import com.meidusa.amoeba.mongodb.net.MongodbServerConnection;
 import com.meidusa.amoeba.mongodb.packet.CursorEntry;
-import com.meidusa.amoeba.mongodb.packet.KillCurosorsMongodbPacket;
+import com.meidusa.amoeba.mongodb.packet.KillCursorsMongodbPacket;
 import com.meidusa.amoeba.mongodb.packet.ResponseMongodbPacket;
 import com.meidusa.amoeba.net.poolable.ObjectPool;
 import com.meidusa.amoeba.util.Tuple;
 
-public class KillCursorMessageHandler extends AbstractSessionHandler<KillCurosorsMongodbPacket> {
+public class KillCursorMessageHandler extends AbstractSessionHandler<KillCursorsMongodbPacket> {
 
 	public KillCursorMessageHandler(MongodbClientConnection clientConn,
-			KillCurosorsMongodbPacket t) {
+			KillCursorsMongodbPacket t) {
 		super(clientConn, t);
 	}
 

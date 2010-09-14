@@ -57,13 +57,21 @@ public class GetMoreMessageHandler extends AbstractSessionHandler<GetMoreMongodb
 			cursorMap = new HashMap<MongodbServerConnection,CursorEntry>();
 		}
 		
+		int index =0;
+		MongodbServerConnection[] conns = new MongodbServerConnection[tuples.size()];
 		for(Tuple<CursorEntry,ObjectPool> tuple: tuples){
 			MongodbServerConnection serverConn = (MongodbServerConnection)tuple.right.borrowObject();
 			handlerMap.put(serverConn, serverConn.getMessageHandler());
 			serverConn.setSessionMessageHandler(this);
-			this.requestPacket.cursorID = tuple.left.cursorID;
+			conns[index++] = serverConn;
 			cursorMap.put(serverConn, tuple.left);
-			serverConn.postMessage(requestPacket.toByteBuffer(this.clientConn));
+		}
+		
+		index = 0;
+		for(Tuple<CursorEntry,ObjectPool> tuple: tuples){
+			this.requestPacket.cursorID = tuple.left.cursorID;
+			conns[index].postMessage(requestPacket.toByteBuffer(this.clientConn));
+			index++;
 		}
 	}
 

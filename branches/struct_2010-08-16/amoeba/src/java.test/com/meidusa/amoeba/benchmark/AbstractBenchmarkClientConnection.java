@@ -16,7 +16,7 @@ public abstract class AbstractBenchmarkClientConnection<T extends Packet>
 	long end = min;
 	long next = min;
 	long count = 0;
-	private CountDownLatch latcher;
+	protected CountDownLatch latcher;
 
 	public AbstractBenchmarkClientConnection(SocketChannel channel,
 			long createStamp, CountDownLatch latcher) {

@@ -29,7 +29,7 @@ import com.meidusa.amoeba.mongodb.packet.CursorEntry;
 import com.meidusa.amoeba.mongodb.packet.DeleteMongodbPacket;
 import com.meidusa.amoeba.mongodb.packet.GetMoreMongodbPacket;
 import com.meidusa.amoeba.mongodb.packet.InsertMongodbPacket;
-import com.meidusa.amoeba.mongodb.packet.KillCurosorsMongodbPacket;
+import com.meidusa.amoeba.mongodb.packet.KillCursorsMongodbPacket;
 import com.meidusa.amoeba.mongodb.packet.MessageMongodbPacket;
 import com.meidusa.amoeba.mongodb.packet.MongodbPacketBuffer;
 import com.meidusa.amoeba.mongodb.packet.QueryMongodbPacket;
@@ -88,7 +88,7 @@ public class CommandMessageHandler implements SessionMessageHandler{
 				packet = new DeleteMongodbPacket();
 				break;
 			case MongodbPacketConstant.OP_KILL_CURSORS:
-				packet = new KillCurosorsMongodbPacket();
+				packet = new KillCursorsMongodbPacket();
 				break;
 			case MongodbPacketConstant.OP_UPDATE:
 				packet = new UpdateMongodbPacket();
@@ -133,7 +133,7 @@ public class CommandMessageHandler implements SessionMessageHandler{
 		
 		//2. kill cursor, end session
 		if(type == MongodbPacketConstant.OP_KILL_CURSORS){
-			KillCurosorsMongodbPacket kpacket = (KillCurosorsMongodbPacket)packet;
+			KillCursorsMongodbPacket kpacket = (KillCursorsMongodbPacket)packet;
 			for(long cursorID:kpacket.cursorIDs){
 				List<Tuple<CursorEntry,ObjectPool>> tupes = (List<Tuple<CursorEntry,ObjectPool>>)clientConn.removeCursor(cursorID);
 				
@@ -196,7 +196,7 @@ public class CommandMessageHandler implements SessionMessageHandler{
 			isMulti = true;
 			this.multiResponsePacket = new ArrayList<ResponseMongodbPacket>();
 		}
-		
+		byte[] lastErrorRequest = clientConn.getLastErrorRequest().toByteBuffer(this.clientConn).array();
 		for(ObjectPool pool: pools){
 			MongodbServerConnection serverConn = (MongodbServerConnection)pool.borrowObject();
 			handlerMap.put(serverConn, serverConn.getMessageHandler());
@@ -206,7 +206,7 @@ public class CommandMessageHandler implements SessionMessageHandler{
 			|| type == MongodbPacketConstant.OP_UPDATE 
 			|| type == MongodbPacketConstant.OP_DELETE){
 				isLastErrorRequest = true;
-				byte[] lastErrorRequest = clientConn.getLastErrorRequest();
+				
 				packet = new QueryMongodbPacket();
 				packet.init(lastErrorRequest, conn);
 				if(logger.isDebugEnabled()){
@@ -272,7 +272,6 @@ public class CommandMessageHandler implements SessionMessageHandler{
 			}else{
 				ResponseMongodbPacket lastResponsePacket = new ResponseMongodbPacket();
 				lastResponsePacket.init(message, clientConn);
-				clientConn.lastResponsePacket = lastResponsePacket;
 				clientConn.setLastErrorMessage(message);
 			}
 			endQuery(conn);

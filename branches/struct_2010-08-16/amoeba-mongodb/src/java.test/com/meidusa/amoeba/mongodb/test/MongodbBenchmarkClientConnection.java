@@ -21,7 +21,7 @@ import com.meidusa.amoeba.mongodb.packet.AbstractMongodbPacket;
 import com.meidusa.amoeba.mongodb.packet.DeleteMongodbPacket;
 import com.meidusa.amoeba.mongodb.packet.GetMoreMongodbPacket;
 import com.meidusa.amoeba.mongodb.packet.InsertMongodbPacket;
-import com.meidusa.amoeba.mongodb.packet.KillCurosorsMongodbPacket;
+import com.meidusa.amoeba.mongodb.packet.KillCursorsMongodbPacket;
 import com.meidusa.amoeba.mongodb.packet.MessageMongodbPacket;
 import com.meidusa.amoeba.mongodb.packet.MongodbPacketBuffer;
 import com.meidusa.amoeba.mongodb.packet.QueryMongodbPacket;
@@ -70,7 +70,7 @@ public class MongodbBenchmarkClientConnection extends AbstractBenchmarkClientCon
 			packet = new DeleteMongodbPacket();
 			break;
 		case MongodbPacketConstant.OP_KILL_CURSORS:
-			packet = new KillCurosorsMongodbPacket();
+			packet = new KillCursorsMongodbPacket();
 			break;
 		case MongodbPacketConstant.OP_UPDATE:
 			packet = new UpdateMongodbPacket();
@@ -103,7 +103,7 @@ public class MongodbBenchmarkClientConnection extends AbstractBenchmarkClientCon
 		return null;
 	}
 
-	public AbstractMongodbPacket createRequestPacket2() {
+	public AbstractMongodbPacket createRequestPacket3() {
 			QueryMongodbPacket packet = new QueryMongodbPacket();
 			packet.fullCollectionName = "test.test";
 			packet.numberToReturn = nreturn;
@@ -117,7 +117,7 @@ public class MongodbBenchmarkClientConnection extends AbstractBenchmarkClientCon
 			return packet;
 	}
 	
-	public AbstractMongodbPacket createRequestPacket() {
+	public AbstractMongodbPacket createRequestPacket2() {
 		GetMoreMongodbPacket packet = new GetMoreMongodbPacket();
 		packet.fullCollectionName = "test.test";
 		packet.numberToReturn = nreturn;
@@ -128,7 +128,7 @@ public class MongodbBenchmarkClientConnection extends AbstractBenchmarkClientCon
 		return packet;
 }
 	
-	public AbstractMongodbPacket createRequestPacket3() {
+	public AbstractMongodbPacket createRequestPacket() {
 		InsertMongodbPacket packet = new InsertMongodbPacket();
 		packet.fullCollectionName = "test.test";
 		packet.documents = new ArrayList<BSONObject>();
@@ -185,6 +185,9 @@ public class MongodbBenchmarkClientConnection extends AbstractBenchmarkClientCon
 	}
 	protected void doReceiveMessage(byte[] message) {
 		super.doReceiveMessage(message);
+		if (latcher.getCount() <= 0) {
+			return;
+		}
 		if(isLastModifyOperation){
 			postMessage(getLastErrorPacket().toByteBuffer(this));
 		}

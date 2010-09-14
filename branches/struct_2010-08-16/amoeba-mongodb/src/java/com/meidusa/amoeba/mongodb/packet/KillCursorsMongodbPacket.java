@@ -33,11 +33,11 @@ import com.meidusa.amoeba.mongodb.io.MongodbPacketConstant;
  * @author Struct
  *
  */
-public class KillCurosorsMongodbPacket extends RequestMongodbPacket {
+public class KillCursorsMongodbPacket extends RequestMongodbPacket {
 	public int numberOfCursorIDs;
 	public long[] cursorIDs;
 	
-	public KillCurosorsMongodbPacket(){
+	public KillCursorsMongodbPacket(){
 		this.opCode = MongodbPacketConstant.OP_KILL_CURSORS;
 	}
 	
