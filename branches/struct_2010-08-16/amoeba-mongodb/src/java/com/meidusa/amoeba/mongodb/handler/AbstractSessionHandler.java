@@ -20,6 +20,7 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.bson.BSONObject;
+import org.bson.BasicBSONObject;
 
 import com.meidusa.amoeba.mongodb.net.MongodbClientConnection;
 import com.meidusa.amoeba.mongodb.net.MongodbServerConnection;
@@ -31,7 +32,12 @@ import com.meidusa.amoeba.net.SessionMessageHandler;
 
 public abstract class AbstractSessionHandler<T extends AbstractMongodbPacket> implements SessionMessageHandler {
 	protected static Logger logger = Logger.getLogger("PACKETLOGGER");
-	
+	public static final BSONObject BSON_OK = new BasicBSONObject();
+	static{
+		BSON_OK.put("err", null);
+		BSON_OK.put("n", 0);
+		BSON_OK.put("ok", 1.0);
+	}
 	protected MongodbClientConnection clientConn;
 	protected Map<Connection,MessageHandler> handlerMap = new HashMap<Connection,MessageHandler>();
 	protected boolean isMulti = false;

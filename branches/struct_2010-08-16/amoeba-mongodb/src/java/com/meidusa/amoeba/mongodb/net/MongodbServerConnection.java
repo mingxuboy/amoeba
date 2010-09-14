@@ -17,13 +17,9 @@ import java.nio.channels.SocketChannel;
 
 import org.apache.log4j.Logger;
 
-import com.meidusa.amoeba.mongodb.io.MongodbFramedInputStream;
-import com.meidusa.amoeba.mongodb.io.MongodbFramingOutputStream;
 import com.meidusa.amoeba.net.Connection;
 import com.meidusa.amoeba.net.MessageHandler;
 import com.meidusa.amoeba.net.SessionMessageHandler;
-import com.meidusa.amoeba.net.io.PacketInputStream;
-import com.meidusa.amoeba.net.io.PacketOutputStream;
 import com.meidusa.amoeba.net.poolable.ObjectPool;
 import com.meidusa.amoeba.net.poolable.PoolableObject;
 

@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.log4j.Logger;
+import org.bson.BSONObject;
 
 import com.meidusa.amoeba.context.ProxyRuntimeContext;
 import com.meidusa.amoeba.mongodb.io.MongodbPacketConstant;
@@ -46,7 +47,15 @@ public class QueryMessageHandler extends AbstractSessionHandler<QueryMongodbPack
 				&& requestPacket.query.get("getlasterror") != null){
 			byte[] msg = clientConn.getLastErrorMessage();
 			ResponseMongodbPacket packet = new ResponseMongodbPacket();
-			packet.init(msg, conn);
+			if(msg == null){
+				packet.responseTo = this.requestPacket.requestID;
+				packet.numberReturned = 1;
+				packet.documents = new ArrayList<BSONObject>(1);
+				packet.documents.add(BSON_OK);
+				logger.error("cannot getLasterrorMessage with requst="+this.requestPacket);
+			}else{
+				packet.init(msg, conn);
+			}
 			if(logger.isDebugEnabled()){
 				logger.debug("<<----@ReponsePacket="+packet+", " +clientConn.getSocketId());
 			}

@@ -44,7 +44,6 @@ import com.meidusa.amoeba.mongodb.packet.MessageMongodbPacket;
 import com.meidusa.amoeba.mongodb.packet.MongodbPacketBuffer;
 import com.meidusa.amoeba.mongodb.packet.QueryMongodbPacket;
 import com.meidusa.amoeba.mongodb.packet.RequestMongodbPacket;
-import com.meidusa.amoeba.mongodb.packet.ResponseMongodbPacket;
 import com.meidusa.amoeba.mongodb.packet.UpdateMongodbPacket;
 import com.meidusa.amoeba.net.poolable.ObjectPool;
 import com.meidusa.amoeba.util.Tuple;
@@ -54,10 +53,9 @@ import com.meidusa.amoeba.util.Tuple;
  * @author struct
  *
  */
-@SuppressWarnings("unchecked")
+@SuppressWarnings({ "unchecked", "deprecation" })
 public class MongodbClientConnection extends AbstractMongodbConnection{
 	private static Logger logger = Logger.getLogger("PACKETLOGGER");
-	static byte[] LASTERROR = null;
 	private LinkedBlockingQueue<byte[]> lastErrorQueue = new LinkedBlockingQueue<byte[]>(1);
 	private AtomicInteger requestId = new AtomicInteger(0);
 	private AtomicLong currentCursorID = new AtomicLong(0x10001L);
@@ -83,14 +81,6 @@ public class MongodbClientConnection extends AbstractMongodbConnection{
 		LastErrorPacket.query.put("getlasterror", 1);
 	}
 	
-	static{
-		ResponseMongodbPacket temp =  new ResponseMongodbPacket();
-		LASTERROR = temp.toByteBuffer(null).array();
-		//LastErrorResponsePacket.documents = new ArrayList();
-	}
-	
-	public byte[] lastErrorMessage = LASTERROR;
-	
 	public byte[] getLastErrorMessage() {
 		try {
 			do{
@@ -103,17 +93,11 @@ public class MongodbClientConnection extends AbstractMongodbConnection{
 				}
 			}while(true);
 		} catch (InterruptedException e) {
-			e.printStackTrace();
-			return LASTERROR;
+			return null;
 		}
-	}
-
-	public int getLastErrorRequestID(){
-		return requestId.get();
 	}
 	
 	public void setLastErrorMessage(byte[] lastErrorMessage) {
-		System.out.println("<<----"+MongodbPacketBuffer.getResponseId(lastErrorMessage));
 		if(requestId.get() == MongodbPacketBuffer.getResponseId(lastErrorMessage)){
 			lastErrorQueue.clear();
 			lastErrorQueue.offer(lastErrorMessage);
@@ -172,14 +156,12 @@ public class MongodbClientConnection extends AbstractMongodbConnection{
 		}
 	}
 	
-	@SuppressWarnings("unchecked")
 	public List<Tuple<CursorEntry,ObjectPool>> removeCursor(long cursorID){
 		synchronized (cursorMap) {
 			return (List<Tuple<CursorEntry,ObjectPool>>) cursorMap.remove(cursorID);
 		}
 	}
 	
-	@SuppressWarnings("unchecked")
 	public List<Tuple<CursorEntry,ObjectPool>> getCursor(long cursorID){
 		synchronized (cursorMap) {
 			return (List<Tuple<CursorEntry,ObjectPool>>)cursorMap.get(cursorID);
