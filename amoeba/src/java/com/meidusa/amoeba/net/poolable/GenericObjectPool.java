@@ -371,7 +371,7 @@ public class GenericObjectPool extends org.apache.commons.pool.impl.GenericObjec
 
 	public Object borrowObject() throws Exception{
 		if(!isValid){
-			throw new NoSuchElementException("poolName="+name+" ,pool is invalid");
+			throw new NoSuchElementException("poolName="+name+", pool is invalid");
 		}
 		try {
 			return super.borrowObject();

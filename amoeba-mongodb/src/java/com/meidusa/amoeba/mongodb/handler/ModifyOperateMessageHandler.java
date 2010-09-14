@@ -25,7 +25,7 @@ import com.meidusa.amoeba.mongodb.route.MongodbQueryRouter;
 import com.meidusa.amoeba.net.poolable.ObjectPool;
 
 public class ModifyOperateMessageHandler<T extends RequestMongodbPacket> extends AbstractSessionHandler<T> {
-
+	private int lastRequestId = 0;
 	public ModifyOperateMessageHandler(MongodbClientConnection clientConn,T t) {
 		super(clientConn, t);
 	}
@@ -44,20 +44,24 @@ public class ModifyOperateMessageHandler<T extends RequestMongodbPacket> extends
 			isMulti = true;
 			this.multiResponsePacket = new ArrayList<ResponseMongodbPacket>();
 		}
-		
+		RequestMongodbPacket lastErrorRequest = clientConn.getLastErrorRequest();
+		byte[] bts = lastErrorRequest.toByteBuffer(this.clientConn).array();
+		this.lastRequestId = lastErrorRequest.requestID;
+		MongodbServerConnection[] conns = new MongodbServerConnection[pools.length];
+		int index =0;
 		for(ObjectPool pool: pools){
 			MongodbServerConnection serverConn = (MongodbServerConnection)pool.borrowObject();
 			handlerMap.put(serverConn, serverConn.getMessageHandler());
 			serverConn.setSessionMessageHandler(this);
-			byte[] lastErrorRequest = clientConn.getLastErrorRequest();
-			QueryMongodbPacket packet = new QueryMongodbPacket();
-			packet.init(lastErrorRequest, conn);
+			conns[index++] = serverConn;
+		}
+		
+		for(MongodbServerConnection serverConn : conns){
 			if(logger.isDebugEnabled()){
-				logger.debug("--->>>@errorRequestPakcet="+packet+"," +clientConn.getSocketId()+" send packet --->"+serverConn.getSocketId());
+				logger.debug("--->>>@errorRequestPakcet="+lastErrorRequest+"," +clientConn.getSocketId()+" send packet --->"+serverConn.getSocketId());
 			}
-			clientConn.clearErrorMessage();
 			serverConn.postMessage(message);
-			serverConn.postMessage(lastErrorRequest);
+			serverConn.postMessage(bts);
 		}
 	}
 
@@ -70,14 +74,11 @@ public class ModifyOperateMessageHandler<T extends RequestMongodbPacket> extends
 		if(isMulti){
 			multiResponsePacket.add(lastResponsePacket);
 			if(endQuery(conn)){
-				
+				ResponseMongodbPacket result = this.mergeResponse();
+				result.responseTo = lastRequestId;
+				clientConn.setLastErrorMessage(result.toByteBuffer(this.clientConn).array());
 			}
-			//TODO
-			clientConn.lastResponsePacket = lastResponsePacket;
-			clientConn.setLastErrorMessage(message);
-			
 		}else{
-			clientConn.lastResponsePacket = lastResponsePacket;
 			clientConn.setLastErrorMessage(message);
 			endQuery(conn);
 		}

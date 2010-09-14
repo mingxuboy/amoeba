@@ -411,7 +411,7 @@ public abstract class  AbstractQueryRouter<T extends Connection,V> implements Qu
 	                                         matched = true;
 	                                     } else if(rule.result == RuleResult.POOLNAME){
 	                                     	String matchedPoolsString = result.toString();
-	                                     	String[] poolNamesMatched = StringUtil.split(matchedPoolsString,";");
+	                                     	String[] poolNamesMatched = StringUtil.split(matchedPoolsString,";,");
 	                                     	if(poolNamesMatched != null && poolNamesMatched.length >0){
 	                                        	for(String poolName : poolNamesMatched){
 	                                            	if (!poolNames.contains(poolName)) {

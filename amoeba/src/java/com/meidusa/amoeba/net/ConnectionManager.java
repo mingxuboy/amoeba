@@ -348,9 +348,11 @@ public class ConnectionManager extends LoopingThread implements Reporter, Initia
     }
 
     protected void configConnection(Connection connection) throws SocketException {
-        connection.getChannel().socket().setSendBufferSize(ProxyRuntimeContext.getInstance().getConfig().getNetBufferSize() * 1024);
-        connection.getChannel().socket().setReceiveBufferSize(ProxyRuntimeContext.getInstance().getConfig().getNetBufferSize() * 1024);
-        connection.getChannel().socket().setTcpNoDelay(ProxyRuntimeContext.getInstance().getConfig().isTcpNoDelay());
+    	if(ProxyRuntimeContext.getInstance() != null){
+	        connection.getChannel().socket().setSendBufferSize(ProxyRuntimeContext.getInstance().getConfig().getNetBufferSize() * 1024);
+	        connection.getChannel().socket().setReceiveBufferSize(ProxyRuntimeContext.getInstance().getConfig().getNetBufferSize() * 1024);
+	        connection.getChannel().socket().setTcpNoDelay(ProxyRuntimeContext.getInstance().getConfig().isTcpNoDelay());
+    	}
     }
 
     /**

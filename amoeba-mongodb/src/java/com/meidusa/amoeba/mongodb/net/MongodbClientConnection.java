@@ -27,17 +27,23 @@ import org.bson.BasicBSONObject;
 
 import com.meidusa.amoeba.mongodb.handler.AbstractSessionHandler;
 import com.meidusa.amoeba.mongodb.handler.CursorCloseMessageHandler;
+import com.meidusa.amoeba.mongodb.handler.DeleteMessageHandler;
+import com.meidusa.amoeba.mongodb.handler.GetMoreMessageHandler;
+import com.meidusa.amoeba.mongodb.handler.InsertMessageHandler;
+import com.meidusa.amoeba.mongodb.handler.KillCursorMessageHandler;
 import com.meidusa.amoeba.mongodb.handler.QueryMessageHandler;
+import com.meidusa.amoeba.mongodb.handler.UpdateMessageHandler;
 import com.meidusa.amoeba.mongodb.io.MongodbPacketConstant;
 import com.meidusa.amoeba.mongodb.packet.AbstractMongodbPacket;
 import com.meidusa.amoeba.mongodb.packet.CursorEntry;
 import com.meidusa.amoeba.mongodb.packet.DeleteMongodbPacket;
 import com.meidusa.amoeba.mongodb.packet.GetMoreMongodbPacket;
 import com.meidusa.amoeba.mongodb.packet.InsertMongodbPacket;
-import com.meidusa.amoeba.mongodb.packet.KillCurosorsMongodbPacket;
+import com.meidusa.amoeba.mongodb.packet.KillCursorsMongodbPacket;
 import com.meidusa.amoeba.mongodb.packet.MessageMongodbPacket;
 import com.meidusa.amoeba.mongodb.packet.MongodbPacketBuffer;
 import com.meidusa.amoeba.mongodb.packet.QueryMongodbPacket;
+import com.meidusa.amoeba.mongodb.packet.RequestMongodbPacket;
 import com.meidusa.amoeba.mongodb.packet.ResponseMongodbPacket;
 import com.meidusa.amoeba.mongodb.packet.UpdateMongodbPacket;
 import com.meidusa.amoeba.net.poolable.ObjectPool;
@@ -52,7 +58,6 @@ import com.meidusa.amoeba.util.Tuple;
 public class MongodbClientConnection extends AbstractMongodbConnection{
 	private static Logger logger = Logger.getLogger("PACKETLOGGER");
 	static byte[] LASTERROR = null;
-	public ResponseMongodbPacket lastResponsePacket = null;
 	private LinkedBlockingQueue<byte[]> lastErrorQueue = new LinkedBlockingQueue<byte[]>(1);
 	private AtomicInteger requestId = new AtomicInteger(0);
 	private AtomicLong currentCursorID = new AtomicLong(0x10001L);
@@ -88,13 +93,33 @@ public class MongodbClientConnection extends AbstractMongodbConnection{
 	
 	public byte[] getLastErrorMessage() {
 		try {
-			return lastErrorQueue.poll(5, TimeUnit.SECONDS);
+			do{
+				byte[] byts = lastErrorQueue.poll(5, TimeUnit.SECONDS);
+				if(byts == null){
+					return null;
+				}
+				if(requestId.get() == MongodbPacketBuffer.getResponseId(byts)){
+					return byts;
+				}
+			}while(true);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 			return LASTERROR;
 		}
 	}
 
+	public int getLastErrorRequestID(){
+		return requestId.get();
+	}
+	
+	public void setLastErrorMessage(byte[] lastErrorMessage) {
+		System.out.println("<<----"+MongodbPacketBuffer.getResponseId(lastErrorMessage));
+		if(requestId.get() == MongodbPacketBuffer.getResponseId(lastErrorMessage)){
+			lastErrorQueue.clear();
+			lastErrorQueue.offer(lastErrorMessage);
+		}
+	}
+	
 	public long nextCursorID(){
 		return currentCursorID.incrementAndGet();
 	}
@@ -161,17 +186,17 @@ public class MongodbClientConnection extends AbstractMongodbConnection{
 		}
 	}
 	
-	public synchronized byte[] getLastErrorRequest(){
-		LastErrorPacket.requestID = requestId.incrementAndGet();
-		return LastErrorPacket.toByteBuffer(this).array();
+	public synchronized RequestMongodbPacket getLastErrorRequest(){
+		QueryMongodbPacket packet = new QueryMongodbPacket();
+		packet.query = new BasicBSONObject();
+		packet.numberToReturn = -1;
+		packet.fullCollectionName = "admin.$cmd";
+		packet.query.put("getlasterror", 1);
+		packet.requestID = requestId.incrementAndGet();
+		return packet;
 	}
 	
-	public void setLastErrorMessage(byte[] lastErrorMessage) {
-		if(requestId.get() == MongodbPacketBuffer.getResponseId(lastErrorMessage)){
-			lastErrorQueue.clear();
-			lastErrorQueue.offer(lastErrorMessage);
-		}
-	}
+
 
 	public MongodbClientConnection(SocketChannel channel, long createStamp) {
 		super(channel, createStamp);
@@ -189,18 +214,23 @@ public class MongodbClientConnection extends AbstractMongodbConnection{
 			break;
 		case MongodbPacketConstant.OP_GET_MORE:
 			packet = new GetMoreMongodbPacket();
+			handler = new GetMoreMessageHandler(this,(GetMoreMongodbPacket)packet);
 			break;
 		case MongodbPacketConstant.OP_DELETE:
 			packet = new DeleteMongodbPacket();
+			handler = new DeleteMessageHandler(this,(DeleteMongodbPacket)packet);
 			break;
 		case MongodbPacketConstant.OP_KILL_CURSORS:
-			packet = new KillCurosorsMongodbPacket();
+			packet = new KillCursorsMongodbPacket();
+			handler = new KillCursorMessageHandler(this,(KillCursorsMongodbPacket)packet);
 			break;
 		case MongodbPacketConstant.OP_UPDATE:
 			packet = new UpdateMongodbPacket();
+			handler = new UpdateMessageHandler(this,(UpdateMongodbPacket)packet);
 			break;
 		case MongodbPacketConstant.OP_INSERT:
 			packet = new InsertMongodbPacket();
+			handler = new InsertMessageHandler(this,(InsertMongodbPacket)packet);
 			break;
 		case MongodbPacketConstant.OP_MSG:
 			packet = new MessageMongodbPacket();

@@ -67,10 +67,16 @@ public class QueryMessageHandler extends AbstractSessionHandler<QueryMongodbPack
 			this.multiResponsePacket = new ArrayList<ResponseMongodbPacket>();
 		}
 		
+		MongodbServerConnection[] conns = new MongodbServerConnection[pools.length];
+		int index =0;
 		for(ObjectPool pool: pools){
 			MongodbServerConnection serverConn = (MongodbServerConnection)pool.borrowObject();
 			handlerMap.put(serverConn, serverConn.getMessageHandler());
 			serverConn.setSessionMessageHandler(this);
+			conns[index++] = serverConn;
+		}
+		
+		for(MongodbServerConnection serverConn : conns){
 			serverConn.postMessage(message);
 		}
 	}

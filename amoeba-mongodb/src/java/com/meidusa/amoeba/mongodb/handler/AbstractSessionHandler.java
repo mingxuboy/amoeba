@@ -90,6 +90,7 @@ public abstract class AbstractSessionHandler<T extends AbstractMongodbPacket> im
 				result.documents.addAll(response.documents);
 			}
 		}
+		result.responseTo = this.requestPacket.requestID;
 		result.numberReturned = (result.documents == null?0:result.documents.size());
 		return result;
 	}

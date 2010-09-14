@@ -23,7 +23,7 @@ import com.meidusa.amoeba.mongodb.io.MongodbPacketConstant;
 import com.meidusa.amoeba.mongodb.net.MongodbServerConnection;
 import com.meidusa.amoeba.mongodb.packet.AbstractMongodbPacket;
 import com.meidusa.amoeba.mongodb.packet.CursorEntry;
-import com.meidusa.amoeba.mongodb.packet.KillCurosorsMongodbPacket;
+import com.meidusa.amoeba.mongodb.packet.KillCursorsMongodbPacket;
 import com.meidusa.amoeba.mongodb.packet.MongodbPacketBuffer;
 import com.meidusa.amoeba.mongodb.packet.ResponseMongodbPacket;
 import com.meidusa.amoeba.net.Connection;
@@ -42,7 +42,7 @@ public class CursorCloseMessageHandler implements SessionMessageHandler{
 	public CursorCloseMessageHandler(String sourceClient,List<Tuple<CursorEntry,ObjectPool>> tuples){
 		this.sourceClient = sourceClient;
 		for(Tuple<CursorEntry,ObjectPool> tuple : tuples){
-			KillCurosorsMongodbPacket packet = new KillCurosorsMongodbPacket();
+			KillCursorsMongodbPacket packet = new KillCursorsMongodbPacket();
 			packet.cursorIDs = new long[]{ tuple.left.cursorID};
 			packet.fullCollectionName = tuple.left.fullCollectionName;
 			packet.numberOfCursorIDs = 1;
