@@ -41,8 +41,8 @@ public class KillCursorMessageHandler extends AbstractSessionHandler<KillCursors
 				new CursorCloseMessageHandler(clientConn.getSocketId(),tupes);
 			}
 		}
-		//TODO need to fill packet field
 		ResponseMongodbPacket response = new ResponseMongodbPacket();
+		response.responseTo = this.requestPacket.requestID;
 		clientConn.postMessage(response.toByteBuffer(clientConn));
 	}
 

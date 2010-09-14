@@ -14,10 +14,6 @@
 package com.meidusa.amoeba.mongodb.packet;
 
 import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.bson.BSONObject;
 
 import com.meidusa.amoeba.mongodb.io.MongodbPacketConstant;
 
