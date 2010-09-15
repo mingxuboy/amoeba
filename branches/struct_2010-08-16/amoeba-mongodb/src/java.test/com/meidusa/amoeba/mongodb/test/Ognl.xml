@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties version="1.0">
+	<entry key="class"></entry>
+	<entry key="selector"><![CDATA[
+		{
+		"s" : ${#math.abs(#random.nextLong())},
+		 "f" : ${#math.abs(#random.nextLong())},
+		 "f" : ${@Math@abs(#random.nextLong())},
+		 "name" : "struct",
+		 "home" : "${amoeba.home}",
+		 "age" : 12
+		}
+		]]></entry>
+</properties>
