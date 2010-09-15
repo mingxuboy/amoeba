@@ -23,6 +23,7 @@ import com.meidusa.amoeba.mongodb.packet.DeleteMongodbPacket;
 import com.meidusa.amoeba.mongodb.packet.InsertMongodbPacket;
 import com.meidusa.amoeba.mongodb.packet.QueryMongodbPacket;
 import com.meidusa.amoeba.mongodb.packet.RequestMongodbPacket;
+import com.meidusa.amoeba.mongodb.packet.UpdateMongodbPacket;
 import com.meidusa.amoeba.parser.dbobject.Column;
 import com.meidusa.amoeba.parser.dbobject.Schema;
 import com.meidusa.amoeba.parser.dbobject.Table;
@@ -60,6 +61,9 @@ public class MongodbQueryRouter extends AbstractQueryRouter<MongodbClientConnect
 		}else if(queryObject  instanceof DeleteMongodbPacket){
 			DeleteMongodbPacket query = (DeleteMongodbPacket)queryObject;
 			bson =  query.selector;
+		}else if(queryObject instanceof UpdateMongodbPacket){
+			UpdateMongodbPacket query =(UpdateMongodbPacket)queryObject;
+			bson = query.selector;
 		}
 		
 		if(bson != null){

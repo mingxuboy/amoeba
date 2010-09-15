@@ -62,5 +62,9 @@ public class KillCursorsMongodbPacket extends RequestMongodbPacket {
 			}
 		}
 	}
+	
+	public boolean isRead() {
+		return true;
+	}
 
 }

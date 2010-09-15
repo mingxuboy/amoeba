@@ -87,7 +87,7 @@ public abstract class PostfixCommand implements PostfixCommandI {
 				}
 				return d;
 			} catch (NumberFormatException ex) {
-				throw new ParseException("Not a number");
+				throw new ParseException(param+" Not a number");
 			}
 		}
 	}

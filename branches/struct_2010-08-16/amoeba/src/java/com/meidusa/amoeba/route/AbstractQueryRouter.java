@@ -124,7 +124,7 @@ import com.meidusa.amoeba.util.Tuple;
  */
 @SuppressWarnings("deprecation")
 public abstract class  AbstractQueryRouter<T extends Connection,V> implements QueryRouter<T,V>, Initialisable {
-	private static final String _CURRENT_STATEMENT_ = "_CURRENT_STATEMENT_";
+	protected static final String _CURRENT_QUERY_OBJECT_ = "_CURRENT_STATEMENT_";
 	protected static Logger logger = Logger.getLogger(AbstractQueryRouter.class);
 
     public final static Map<String, PostfixCommand> ruleFunTab      = new HashMap<String, PostfixCommand>();
@@ -197,9 +197,9 @@ public abstract class  AbstractQueryRouter<T extends Connection,V> implements Qu
 		variableMap.put("isReadStatement",new Variable(){
 		@Override
 		public Comparable<?> getValue() {
-			Object st = (Object)ThreadLocalMap.get(_CURRENT_STATEMENT_);
-			if(st != null && st instanceof DMLStatement){
-				return ((DMLStatement)st).isReadStatement();
+			Object st = (Object)ThreadLocalMap.get(_CURRENT_QUERY_OBJECT_);
+			if(st instanceof Request){
+				return ((Request)st).isRead();
 			}else{
 				return null;
 			}
@@ -276,16 +276,21 @@ public abstract class  AbstractQueryRouter<T extends Connection,V> implements Qu
      * 返回Query 被route到目标地址 ObjectPool集合 如果返回null，则是属于DatabaseConnection 自身属性设置的请求。
      * @throws ParseException 
      */
+    
+    protected void beforeSelectPool(T connection, V queryObject){
+    	
+    }
     public ObjectPool[] selectPool(T connection, V queryObject){
+    	beforeSelectPool(connection,queryObject);
     	List<String> poolNames = new ArrayList<String>();
-		boolean isRead = true;
+    	StringBuffer loggerBuffer = null;
+    	
+    	boolean isRead = true;
 		boolean isPrepared = false;
-		StringBuffer loggerBuffer = null;
 		if (queryObject instanceof Request) {
-			isRead = ((Request) queryObject).isRead();
-			isPrepared = ((Request) queryObject).isPrepared();
-		}
-
+ 			isRead = ((Request) queryObject).isRead();
+ 			isPrepared = ((Request) queryObject).isPrepared();
+ 		}
 		if (logger.isDebugEnabled()) {
 			loggerBuffer = new StringBuffer("query=");
 			loggerBuffer.append(queryObject);
@@ -294,6 +299,7 @@ public abstract class  AbstractQueryRouter<T extends Connection,V> implements Qu
 		Map<Table, Map<Column, Comparative>> tables = null;
 	     if (needEvaluate) {
 	         tables = evaluateTable(connection,queryObject);
+
 	         if (tables != null && tables.size() > 0) {
 	             Set<Map.Entry<Table, Map<Column, Comparative>>> entrySet = tables.entrySet();
 	             for (Map.Entry<Table, Map<Column, Comparative>> entry : entrySet) {
@@ -304,7 +310,7 @@ public abstract class  AbstractQueryRouter<T extends Connection,V> implements Qu
 	                 if (tableRule != null) {
 	                     // 没有列的sql语句，使用默认的tableRule
 	                     if (columnMap == null || isPrepared) {
-	                         String[] pools = isRead ? tableRule.readPools : tableRule.writePools;
+	                         String[] pools = (isRead ? tableRule.readPools : tableRule.writePools);
 	                         if (pools == null || pools.length == 0) {
 	                             pools = tableRule.defaultPools;
 	                         }
@@ -433,7 +439,7 @@ public abstract class  AbstractQueryRouter<T extends Connection,V> implements Qu
 	                                     if (rule.group != null) {
 	                                         groupMatched.add(rule.group);
 	                                     }
-	                                     String[] pools = isRead ? rule.readPools : rule.writePools;
+	                                     String[] pools = (isRead ? rule.readPools : rule.writePools);
 	                                     if (pools == null || pools.length == 0) {
 	                                         pools = rule.defaultPools;
 	                                     }
@@ -465,7 +471,7 @@ public abstract class  AbstractQueryRouter<T extends Connection,V> implements Qu
 	
 	                     // 如果所有规则都无法匹配，则默认采用TableRule中的pool设置。
 	                     if (poolNames.size() == 0) {
-	                         String[] pools = isRead ? tableRule.readPools : tableRule.writePools;
+	                         String[] pools = (isRead ? tableRule.readPools : tableRule.writePools);
 	                         if (pools == null || pools.length == 0) {
 	                             pools = tableRule.defaultPools;
 	                         }
@@ -503,14 +509,14 @@ public abstract class  AbstractQueryRouter<T extends Connection,V> implements Qu
          for (String name : poolNames) {
          	ObjectPool pool = ProxyRuntimeContext.getInstance().getPoolMap().get(name);
          	if(pool == null){
-         		logger.error("cannot found Pool="+name);
-         		throw new RuntimeException("cannot found Pool="+name);
+         		logger.error("cannot found Pool="+name+",sqlObject="+queryObject);
+         		throw new RuntimeException("cannot found Pool="+name+",sqlObject="+queryObject);
          	}
          	pools[i++] = pool;
          }
 
          if (pools == null || pools.length == 0) {
-             pools = isRead ? this.readPools : this.writePools;
+             pools = (isRead ? this.readPools : this.writePools);
              if (logger.isDebugEnabled() && pools != null && pools.length > 0) {
                  if (isRead) {
                 	 loggerBuffer.append(",  route to queryRouter readPool:" + readPool + "\r\n");
@@ -552,7 +558,6 @@ public abstract class  AbstractQueryRouter<T extends Connection,V> implements Qu
         if (writePool != null && !StringUtil.isEmpty(writePool)) {
             writePools = new ObjectPool[] { ProxyRuntimeContext.getInstance().getPoolMap().get(writePool) };
         }
-        tuple= new Tuple<Statement,ObjectPool[]>(null,defaultPools);
         map = new LRUMap(LRUMapSize);
 
         class ConfigCheckTread extends Thread {
@@ -1006,5 +1011,12 @@ public abstract class  AbstractQueryRouter<T extends Connection,V> implements Qu
 
     public ObjectPool[] getDefaultObjectPool(){
     	return this.defaultPools;
+    }
+    
+    public static void main(String[] aa){
+    	String[] aaa = StringUtil.split("asdfasdf,asdf;aqwer",";,");
+    	for(String aaaaa : aaa){
+    		System.out.println(aaaaa);
+    	}
     }
 }

@@ -24,15 +24,22 @@ import com.meidusa.amoeba.util.ThreadLocalMap;
 public abstract class SqlBaseQueryRouter extends AbstractQueryRouter<DatabaseConnection,SqlQueryObject> {
 
     private Lock                                    mapLock         = new ReentrantLock(false);
+    
+    protected void beforeSelectPool(DatabaseConnection connection, SqlQueryObject queryObject){
+    	Statement statment = parseStatement(connection,queryObject.sql);
+		if(statment instanceof DMLStatement){
+			DMLStatement dmlStatment = ((DMLStatement)statment);
+			queryObject.isRead = dmlStatment.isReadStatement();
+		}
+		ThreadLocalMap.put(_CURRENT_QUERY_OBJECT_, queryObject);
+    }
+
 	@Override
 	protected Map<Table, Map<Column, Comparative>> evaluateTable(DatabaseConnection connection,SqlQueryObject queryObject) {
 		Statement statment = parseStatement(connection,queryObject.sql);
 		Map<Table, Map<Column, Comparative>> tables = null;
 		if(statment instanceof DMLStatement){
-			DMLStatement dmlStatment = ((DMLStatement)statment);
-			queryObject.isRead = dmlStatment.isReadStatement();
 			tables = ((DMLStatement)statment).evaluate(queryObject.parameters);
-			
 			return tables;
 		}else if (statment instanceof PropertyStatement) {
 			if (logger.isDebugEnabled()) {

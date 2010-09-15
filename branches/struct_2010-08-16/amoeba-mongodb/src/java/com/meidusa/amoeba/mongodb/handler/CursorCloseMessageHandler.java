@@ -80,7 +80,6 @@ public class CursorCloseMessageHandler implements SessionMessageHandler{
 		try {
 			serverConn.getObjectPool().returnObject(serverConn);
 		} catch (Exception e) {
-			e.printStackTrace();
 		}
 	}
 }
