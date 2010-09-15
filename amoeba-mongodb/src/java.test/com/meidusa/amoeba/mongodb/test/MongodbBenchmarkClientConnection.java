@@ -14,6 +14,7 @@ import org.bson.BSONObject;
 import org.bson.BasicBSONObject;
 
 import com.meidusa.amoeba.benchmark.AbstractBenchmarkClientConnection;
+import com.meidusa.amoeba.config.ConfigUtil;
 import com.meidusa.amoeba.mongodb.io.MongodbFramedInputStream;
 import com.meidusa.amoeba.mongodb.io.MongodbFramingOutputStream;
 import com.meidusa.amoeba.mongodb.io.MongodbPacketConstant;
@@ -95,7 +96,7 @@ public class MongodbBenchmarkClientConnection extends AbstractBenchmarkClientCon
 			FileInputStream fis = new FileInputStream(requestFile);
 			propertis.load(fis);
 			AbstractMongodbPacket apacket = (AbstractMongodbPacket)Class.forName((String)propertis.get("class")).newInstance();
-			
+			//ConfigUtil.filter(text, properties)
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.exit(-1);
@@ -103,10 +104,10 @@ public class MongodbBenchmarkClientConnection extends AbstractBenchmarkClientCon
 		return null;
 	}
 
-	public AbstractMongodbPacket createRequestPacket3() {
+	public AbstractMongodbPacket createRequestPacket() {
 			QueryMongodbPacket packet = new QueryMongodbPacket();
 			packet.fullCollectionName = "test.test";
-			packet.numberToReturn = nreturn;
+			packet.numberToReturn = 10;//nreturn;
 			//packet.returnFieldSelector = new BasicBSONObject();
 			//packet.returnFieldSelector.put("s", 1);
 			packet.numberToSkip = 0;
@@ -128,7 +129,7 @@ public class MongodbBenchmarkClientConnection extends AbstractBenchmarkClientCon
 		return packet;
 }
 	
-	public AbstractMongodbPacket createRequestPacket() {
+	public AbstractMongodbPacket createRequestPacket3() {
 		InsertMongodbPacket packet = new InsertMongodbPacket();
 		packet.fullCollectionName = "test.test";
 		packet.documents = new ArrayList<BSONObject>();
