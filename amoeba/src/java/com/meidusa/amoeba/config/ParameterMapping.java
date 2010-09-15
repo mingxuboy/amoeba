@@ -212,7 +212,7 @@ public class ParameterMapping {
 
     }
     
-    public static void mappingObjectField(Object object, Map<String, Object> parameter,Class stopClass){
+    public static void mappingObjectField(Object object, Map parameter,Class stopClass){
     	Class clazz = object.getClass();
     	while(clazz != stopClass && clazz != null){
 	    	Field[] fields = clazz.getDeclaredFields();
@@ -224,6 +224,53 @@ public class ParameterMapping {
 	                String string = (String) obj;
 	                if (!StringUtil.isEmpty(string)) {
 	                    string = ConfigUtil.filter(string);
+	                }
+	
+	                if (isPrimitiveType(cls)) {
+	                    value = deStringize(cls, string);
+	                }else{
+	                	PropertyTransfer transfer = lookup(cls);
+	                	if(transfer != null){
+	                		value = transfer.transfer(string);
+	                	}
+	                }
+	                
+	                if (value != null) {
+	                	if(Modifier.isPublic(field.getModifiers())){
+	                		try {
+								field.set(object, value);
+							} catch (Exception e) {
+								e.printStackTrace();
+							}
+	                	}
+	                }
+	            }
+	    	}
+	    	clazz = clazz.getSuperclass();
+            
+    	}
+    	
+    }
+    
+    /**
+     * 
+     * @param object to be mapping
+     * @param parameter field key/value map
+     * @param context ognl context
+     * @param stopClass
+     */
+    public static void mappingObjectField(Object object, Map parameter,Map context,Object root,Class stopClass){
+    	Class clazz = object.getClass();
+    	while(clazz != stopClass && clazz != null){
+	    	Field[] fields = clazz.getDeclaredFields();
+	    	for(Field field : fields){
+	    		Object obj = parameter.get(field.getName());
+	            Object value = obj;
+	            Class<?> cls = field.getClass();
+	            if (obj instanceof String) {
+	                String string = (String) obj;
+	                if (!StringUtil.isEmpty(string)) {
+	                    string = ConfigUtil.filterWtihOGNL(string, context, root);
 	                }
 	
 	                if (isPrimitiveType(cls)) {

@@ -9,12 +9,15 @@ import java.util.Random;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import ognl.Ognl;
+
 import org.apache.log4j.Logger;
 import org.bson.BSONObject;
 import org.bson.BasicBSONObject;
 
 import com.meidusa.amoeba.benchmark.AbstractBenchmarkClientConnection;
 import com.meidusa.amoeba.config.ConfigUtil;
+import com.meidusa.amoeba.config.ParameterMapping;
 import com.meidusa.amoeba.mongodb.io.MongodbFramedInputStream;
 import com.meidusa.amoeba.mongodb.io.MongodbFramingOutputStream;
 import com.meidusa.amoeba.mongodb.io.MongodbPacketConstant;
@@ -96,6 +99,7 @@ public class MongodbBenchmarkClientConnection extends AbstractBenchmarkClientCon
 			FileInputStream fis = new FileInputStream(requestFile);
 			propertis.load(fis);
 			AbstractMongodbPacket apacket = (AbstractMongodbPacket)Class.forName((String)propertis.get("class")).newInstance();
+			ParameterMapping.mappingObjectField(apacket, propertis, AbstractMongodbPacket.class);
 			//ConfigUtil.filter(text, properties)
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -159,6 +163,7 @@ public class MongodbBenchmarkClientConnection extends AbstractBenchmarkClientCon
 
 	@Override
 	public void startBenchmark() {
+		
 		AbstractMongodbPacket packet = this.createRequestPacket();
 		if(packet.opCode == MongodbPacketConstant.OP_DELETE 
 				|| packet.opCode == MongodbPacketConstant.OP_INSERT 
