@@ -1,14 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
 <properties version="1.0">
-	<entry key="class"></entry>
-	<entry key="selector"><![CDATA[
+	<entry key="class">com.meidusa.amoeba.mongodb.packet.QueryMongodbPacket</entry>
+	<entry key="fullCollectionName">test.test</entry>
+	<entry key="numberToSkip">0</entry>
+	<entry key="numberToReturn">1</entry>
+	<entry key="requestFlags">120</entry>
+	<entry key="requestID">${#atomicInteger.getAndIncrement()+2}</entry>
+	<entry key="query"><![CDATA[
 		{
 		"s" : ${#math.abs(#random.nextLong())},
 		 "f" : ${#math.abs(#random.nextLong())},
 		 "f" : ${@Math@abs(#random.nextLong())},
 		 "name" : "struct",
-		 "home" : "${amoeba.home}",
+		 "home" : "{amoeba.home}",
 		 "age" : 12
 		}
 		]]></entry>

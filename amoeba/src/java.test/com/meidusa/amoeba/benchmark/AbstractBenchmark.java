@@ -8,6 +8,7 @@ import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -23,6 +24,9 @@ public abstract class AbstractBenchmark {
 	protected static void setBenchmark(AbstractBenchmark benckmark){
 		AbstractBenchmark.benckmark = benckmark;
 	}
+	
+	public abstract Map getContextMap();
+	
 	public static AbstractBenchmark getInstance(){
 		return AbstractBenchmark.benckmark;
 	}
@@ -85,6 +89,7 @@ public abstract class AbstractBenchmark {
 		
 		
 		for(AbstractBenchmarkClientConnection<?> connection: connList){
+			connection.setContextMap(benckmark.getContextMap());
 			connection.startBenchmark();
 		}
 		latcher.await();

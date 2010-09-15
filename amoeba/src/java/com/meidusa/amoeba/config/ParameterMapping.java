@@ -219,7 +219,7 @@ public class ParameterMapping {
 	    	for(Field field : fields){
 	    		Object obj = parameter.get(field.getName());
 	            Object value = obj;
-	            Class<?> cls = field.getClass();
+	            Class<?> cls = field.getType();
 	            if (obj instanceof String) {
 	                String string = (String) obj;
 	                if (!StringUtil.isEmpty(string)) {
@@ -253,7 +253,8 @@ public class ParameterMapping {
     }
     
     /**
-     * 
+     * mapping object public field with ognlContext
+     *  
      * @param object to be mapping
      * @param parameter field key/value map
      * @param context ognl context
@@ -266,7 +267,7 @@ public class ParameterMapping {
 	    	for(Field field : fields){
 	    		Object obj = parameter.get(field.getName());
 	            Object value = obj;
-	            Class<?> cls = field.getClass();
+	            Class<?> cls = field.getType();
 	            if (obj instanceof String) {
 	                String string = (String) obj;
 	                if (!StringUtil.isEmpty(string)) {
@@ -283,13 +284,14 @@ public class ParameterMapping {
 	                }
 	                
 	                if (value != null) {
-	                	if(Modifier.isPublic(field.getModifiers())){
-	                		try {
-								field.set(object, value);
-							} catch (Exception e) {
-								e.printStackTrace();
-							}
+	                	if(!Modifier.isPublic(field.getModifiers())){
+	                		field.setAccessible(true);
 	                	}
+                		try {
+							field.set(object, value);
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
 	                }
 	            }
 	    	}

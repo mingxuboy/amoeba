@@ -1,11 +1,16 @@
 package com.meidusa.amoeba.mongodb.test;
 
 
+import java.io.IOException;
 import java.nio.channels.SocketChannel;
 import java.util.HashMap;
+import java.util.InvalidPropertiesFormatException;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Random;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.bson.BSONObject;
 import org.bson.JSON;
@@ -17,18 +22,28 @@ import com.meidusa.amoeba.config.ParameterMapping;
 import com.meidusa.amoeba.config.PropertyTransfer;
 
 public class MongoDBBenchmark extends AbstractBenchmark{
+	private Map contextMap = new HashMap();
+	private Properties properties = new Properties();
 	private MongoDBBenchmark(){
 		AbstractBenchmark.setBenchmark(this);
-	}
-	public static void main(String[] args) throws Exception {
-		final Map ctx0 = new HashMap();
 		Random random = new Random();
-		ctx0.put("random",random);
+		contextMap.put("random",random);
+		contextMap.put("atomicInteger",new AtomicInteger());
+		contextMap.put("atomicLong",new AtomicLong());
+		try {
+			properties.loadFromXML(this.getClass().getResourceAsStream("Ognl.xml"));
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.exit(-1);
+		}
+		
+	}
+	
+	public static void main(String[] args) throws Exception {
 		ParameterMapping.registerTransfer(BSONObject.class, new PropertyTransfer<BSONObject>(){
 			@Override
 			public BSONObject transfer(String inputString) {
-				Map<String,Object> expressionMap = ConfigUtil.preparedOGNL(inputString);
-				return (BSONObject)JSON.parse(ConfigUtil.filterWtihOGNL(inputString, ctx0));
+				return (BSONObject)JSON.parse(ConfigUtil.filterWtihOGNL(inputString, AbstractBenchmark.getInstance().getContextMap()));
 			}
 		});
 		new MongoDBBenchmark();
@@ -37,7 +52,14 @@ public class MongoDBBenchmark extends AbstractBenchmark{
 
 	public AbstractBenchmarkClientConnection<?> newBenchmarkClientConnection(
 			SocketChannel channel, long time,CountDownLatch latcher) {
-		return new MongodbBenchmarkClientConnection(channel,time,latcher);
+		AbstractBenchmarkClientConnection conn = new MongodbBenchmarkClientConnection(channel,time,latcher);
+		conn.putAllRequestProperties(properties);
+		return conn;
+	}
+
+	@Override
+	public Map getContextMap() {
+		return contextMap;
 	}
 	
 }
