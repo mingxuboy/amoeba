@@ -15,7 +15,8 @@ import java.util.regex.*;
 public class JSON {
 	
 	public static void main(String[] args){
-		System.out.println(parse("{ s : [ { s : 243 } , { s : 11 } ] }"));
+		Object object = parse("{'j':{'$in': [2,4,6]}}");
+		System.out.println(object);
 	}
     /**
      *  Serializes an object into it's JSON form

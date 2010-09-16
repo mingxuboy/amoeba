@@ -18,6 +18,8 @@ import java.util.Map;
 import java.util.Stack;
 
 import org.bson.BSONObject;
+import org.bson.BasicDBList;
+import org.bson.JSON;
 import org.bson.types.BasicBSONList;
 
 import com.meidusa.amoeba.mongodb.net.MongodbClientConnection;
@@ -31,9 +33,20 @@ import com.meidusa.amoeba.parser.dbobject.Schema;
 import com.meidusa.amoeba.parser.dbobject.Table;
 import com.meidusa.amoeba.route.AbstractQueryRouter;
 import com.meidusa.amoeba.sqljep.function.Comparative;
+import com.meidusa.amoeba.sqljep.function.ComparativeAND;
+import com.meidusa.amoeba.sqljep.function.ComparativeBaseList;
+import com.meidusa.amoeba.sqljep.function.ComparativeOR;
 
 public class MongodbQueryRouter extends AbstractQueryRouter<MongodbClientConnection,RequestMongodbPacket> {
+	private static Map<String,Integer> operatorMap = new HashMap<String,Integer>();
 	static{
+		operatorMap.put("$gt", Comparative.GreaterThan);
+		operatorMap.put("$gte", Comparative.GreaterThanOrEqual);
+		operatorMap.put("$lt", Comparative.LessThan);
+		operatorMap.put("$lte", Comparative.LessThanOrEqual);
+		operatorMap.put("$ne", Comparative.NotEquivalent);
+		operatorMap.put("$in", Comparative.Equivalent);
+		operatorMap.put("$nin", Comparative.NotEquivalent);
 		
 	}
 	@Override
@@ -105,7 +118,7 @@ public class MongodbQueryRouter extends AbstractQueryRouter<MongodbClientConnect
 		return null;
 	}
 	
-	private void toComparative(Map<Column, Comparative> parameterMap,Stack stack,BSONObject bson,Table table){
+	public static void toComparative(Map<Column, Comparative> parameterMap,Stack stack,BSONObject bson,Table table){
 		if(bson != null){
 			Map map = bson.toMap();
 			if(map != null && map.size() >0){
@@ -113,45 +126,115 @@ public class MongodbQueryRouter extends AbstractQueryRouter<MongodbClientConnect
 					Map.Entry entry = (Map.Entry)item;
 					String name = (String)entry.getKey();
 					Object value =  entry.getValue();
-					Column column = new Column();
-					column.setName(name);
-					column.setTable(table);
 					
-					//value is BSONObject
-					if(!(value instanceof BasicBSONList) && value instanceof BSONObject){
-						//stack.push(column);
-						int size = stack.size();
-						toComparative(parameterMap,stack,(BSONObject)value,table);
-						int next = stack.size();
-						if(next > size){
-							Comparative comparable = (Comparative)stack.pop();
-							parameterMap.put(column, comparable);
-						}
-					}else if(value instanceof BasicBSONList){
-						
+					Column column = null;
+					Comparative comparable = null;
+					Integer comparativeValue = null;
+					boolean and = false;
+					boolean isMulti = false;
+					//name
+					if(!name.startsWith("$")){
+						column = new Column();
+						column.setName(name);
+						column.setTable(table);
+						comparativeValue = Comparative.Equivalent;
 					}else{
-						if(name.startsWith("$")){
-							if("$in".equalsIgnoreCase(name)){
-								BasicBSONList list = (BasicBSONList)value;
-								if(list.size()==1){
-								}else if(list.size() >1){
-									
-								}
-							}
-						}else{
-							Comparative comparable = new Comparative(Comparative.Equivalent,(Comparable)value);
-							parameterMap.put(column, comparable);
+						
+						//if Conditional Operators not in map ,we will ignore the entry,such as '$size'
+						comparativeValue = operatorMap.get(name);
+						if("$nin".equalsIgnoreCase(name)){
+							and = true;
+							isMulti = true;
+						}else if("$in".equalsIgnoreCase(name)){
+							and = false;
+							isMulti = true;
+						}
+						
+						if(comparativeValue == null){
+							return;
 						}
 					}
 					
-					
-					
-					Comparative comparable = new Comparative(Comparative.Equivalent,(Comparable)value);
-					parameterMap.put(column, comparable);
+					//value class is BSONObject
+					if(value instanceof BSONObject){
+						if(value instanceof BasicBSONList){
+							
+							BasicBSONList list = (BasicBSONList)value;
+							ComparativeBaseList comparativeList = null;
+							if(isMulti){
+								if(and){
+									comparativeList = new ComparativeAND();
+								}else{
+									comparativeList = new ComparativeOR();
+								}
+							}
+							
+							for(Object object : list){
+								if(object instanceof BSONObject ){
+									int size = stack.size();
+									toComparative(parameterMap,stack,(BSONObject)object,table);
+									int next = stack.size();
+									if(next > size){
+										comparable = (Comparative)stack.pop();
+										comparativeList.addComparative(comparable);
+									}
+								}else{
+									comparativeList.addComparative(new Comparative(Comparative.Equivalent,(Comparable)object));
+								}
+							}
+							
+							if(comparativeList.getList().size()>0){
+								if(column != null){
+									parameterMap.put(column, comparativeList);
+								}else{
+									stack.push(comparativeList);
+								}
+							}
+							
+						}else{
+							int size = stack.size();
+							toComparative(parameterMap,stack,(BSONObject)value,table);
+							int next = stack.size();
+							if(next > size){
+								comparable = (Comparative)stack.pop();
+								if(column != null){
+									parameterMap.put(column, comparable);
+								}else{
+									stack.push(comparable);
+								}
+							}
+						}
+					}
+					// value is constant
+					else{
+						
+						//put to map or push to stack
+						comparable = new Comparative(comparativeValue,(Comparable)value);
+						if(column != null){
+							parameterMap.put(column, comparable);
+						}else{
+							stack.push(comparable);
+						}
+						return;
+					}
 				}
 			}
 		}
 		
 	}
-
+	
+	public static void main(String[] args){
+		String lines[] = new String[]{
+				"{ 'x' : 3 }, { 'z' : 1 }",
+				"{'j':{'$in': [2,4,6]}}",
+				"{ 'field' : { '$gt': 1, '$lt': 12 } }",
+				"{'j':{'$nin': [2,4,6]}}"
+		};
+		for(String line : lines){
+			BSONObject object = (BSONObject)JSON.parse(line);
+			Map<Column, Comparative> parameterMap = new HashMap<Column, Comparative>();
+			toComparative(parameterMap,new Stack(),object,null);
+			System.out.println(parameterMap);
+		}
+	}
 }
