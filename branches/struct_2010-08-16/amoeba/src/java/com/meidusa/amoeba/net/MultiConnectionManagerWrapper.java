@@ -14,11 +14,9 @@ public class MultiConnectionManagerWrapper extends ConnectionManager{
 	public ConnectionManager[] connMgrs;
 	private String subManagerClassName;
 	private int processors = Runtime.getRuntime().availableProcessors();
-	
 	{
-		int maxsubManager = Integer.valueOf(System.getProperty("maxSubManager","32"));
-        int processors = Runtime.getRuntime().availableProcessors();
-		processors = processors>=maxsubManager?maxsubManager:processors+1;
+		int managers = Integer.valueOf(System.getProperty("managers","0"));
+		processors = processors+managers;
 	}
 	
 	public void setSubManagerClassName(String className) {
@@ -57,21 +55,21 @@ public class MultiConnectionManagerWrapper extends ConnectionManager{
     
     public void init() throws InitialisationException {
     	if(connMgrs == null || connMgrs.length<1 || connMgrs[0] == null){
-    		connMgrs = null;
-    		if(subManagerClassName != null){
-	    		connMgrs = new ConnectionManager[processors];
-	    		for(int i=0;i<processors;i++){
-	    		try {
-	    			connMgrs[i] = (ConnectionManager)Class.forName(subManagerClassName).newInstance();
-	    			connMgrs[i].setName(this.getName()+"-"+i);
-	    			connMgrs[i].setIdleCheckTime(this.getIdleCheckTime());
-	    			connMgrs[i]._observers.addAll(this._observers);
-					} catch (Exception e) {
-						log.error("create sub manager error",e);
-						e.printStackTrace();
-						System.exit(-1);
-					}
-	    		}
+    		if(subManagerClassName == null){
+    			subManagerClassName = ConnectionManager.class.getName();
+    		}
+    		connMgrs = new ConnectionManager[processors];
+    		for(int i=0;i<processors;i++){
+    		try {
+    			connMgrs[i] = (ConnectionManager)Class.forName(subManagerClassName).newInstance();
+    			connMgrs[i].setName(this.getName()+"-"+i);
+    			connMgrs[i].setIdleCheckTime(this.getIdleCheckTime());
+    			connMgrs[i]._observers.addAll(this._observers);
+				} catch (Exception e) {
+					log.error("create sub manager error",e);
+					e.printStackTrace();
+					System.exit(-1);
+				}
     		}
     	}
     	
@@ -87,9 +85,19 @@ public class MultiConnectionManagerWrapper extends ConnectionManager{
 	        	}
 	        	if(!connMgrs[i].isAlive()){
 	        		connMgrs[i].start();
+	        		log.info(connMgrs[i].getName() + " connectionManager willStart....");
 	        	}
 	        	
 	        }
         }
+    }
+    
+    public synchronized void shutdown() {
+    	if(connMgrs != null){
+    		for(int i=0;i<connMgrs.length;i++){
+    			connMgrs[i].shutdown();
+    		}
+    	}
+    	super.shutdown();
     }
 }

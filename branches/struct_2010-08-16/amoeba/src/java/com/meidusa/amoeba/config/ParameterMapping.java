@@ -44,9 +44,12 @@ public class ParameterMapping {
     
     public static PropertyTransfer<?> lookup(Class fieldType){
     	for(Map.Entry<Class<?>,PropertyTransfer<?>> entry :stringTransferMap.entrySet()){
-    		Class clazz = entry.getKey();
-    		if(clazz.asSubclass(fieldType) != null){
-    			return entry.getValue();
+    		try{
+    			Class clazz = entry.getKey();
+    			if(clazz.equals(fieldType) || clazz.asSubclass(fieldType) != null){
+    				return entry.getValue();
+    			}
+    		}catch(ClassCastException e){
     		}
     	}
     	return null;

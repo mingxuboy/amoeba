@@ -55,8 +55,8 @@ public class MongodbQueryRouter extends AbstractQueryRouter<MongodbClientConnect
 			bson = query.query;
 		}else if(queryObject  instanceof InsertMongodbPacket){
 			InsertMongodbPacket query = (InsertMongodbPacket)queryObject;
-			if(query.documents != null && query.documents.size()>0){
-				bson = query.documents.get(0);
+			if(query.documents != null && query.documents.length>0){
+				bson = (query.documents != null && query.documents.length >0)?query.documents[0]:null;
 			}
 		}else if(queryObject  instanceof DeleteMongodbPacket){
 			DeleteMongodbPacket query = (DeleteMongodbPacket)queryObject;
