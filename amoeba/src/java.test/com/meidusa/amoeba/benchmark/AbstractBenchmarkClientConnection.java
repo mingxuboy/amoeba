@@ -24,9 +24,8 @@ public abstract class AbstractBenchmarkClientConnection<T extends Packet>
 	public void putAllRequestProperties(Properties source){
 		if(properties == null){
 			properties = new Properties();
-		}else{
-			properties.putAll(source);
 		}
+		properties.putAll(source);
 	}
 	
 	public  Properties getRequestProperties(){
