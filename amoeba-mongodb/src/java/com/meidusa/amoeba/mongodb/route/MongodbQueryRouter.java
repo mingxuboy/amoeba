@@ -15,8 +15,10 @@ package com.meidusa.amoeba.mongodb.route;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Stack;
 
 import org.bson.BSONObject;
+import org.bson.types.BasicBSONList;
 
 import com.meidusa.amoeba.mongodb.net.MongodbClientConnection;
 import com.meidusa.amoeba.mongodb.packet.DeleteMongodbPacket;
@@ -31,7 +33,9 @@ import com.meidusa.amoeba.route.AbstractQueryRouter;
 import com.meidusa.amoeba.sqljep.function.Comparative;
 
 public class MongodbQueryRouter extends AbstractQueryRouter<MongodbClientConnection,RequestMongodbPacket> {
-
+	static{
+		
+	}
 	@Override
 	protected Map<Table, Map<Column, Comparative>> evaluateTable(MongodbClientConnection connection,RequestMongodbPacket queryObject) {
 		Table table = new Table();
@@ -76,6 +80,19 @@ public class MongodbQueryRouter extends AbstractQueryRouter<MongodbClientConnect
 					Map.Entry entry = (Map.Entry)item;
 					String name = (String)entry.getKey();
 					Object value =  entry.getValue();
+					if(name.startsWith("$")){
+						if("$in".equalsIgnoreCase(name)){
+							BasicBSONList list = (BasicBSONList)value;
+							if(list.size()==1){
+							}else if(list.size() >1){
+								
+							}
+						}
+					}else{
+						
+					}
+					
+					
 					Column column = new Column();
 					column.setName(name);
 					column.setTable(table);
@@ -86,6 +103,55 @@ public class MongodbQueryRouter extends AbstractQueryRouter<MongodbClientConnect
 			}
 		}
 		return null;
+	}
+	
+	private void toComparative(Map<Column, Comparative> parameterMap,Stack stack,BSONObject bson,Table table){
+		if(bson != null){
+			Map map = bson.toMap();
+			if(map != null && map.size() >0){
+				for(Object item : map.entrySet()){
+					Map.Entry entry = (Map.Entry)item;
+					String name = (String)entry.getKey();
+					Object value =  entry.getValue();
+					Column column = new Column();
+					column.setName(name);
+					column.setTable(table);
+					
+					//value is BSONObject
+					if(!(value instanceof BasicBSONList) && value instanceof BSONObject){
+						//stack.push(column);
+						int size = stack.size();
+						toComparative(parameterMap,stack,(BSONObject)value,table);
+						int next = stack.size();
+						if(next > size){
+							Comparative comparable = (Comparative)stack.pop();
+							parameterMap.put(column, comparable);
+						}
+					}else if(value instanceof BasicBSONList){
+						
+					}else{
+						if(name.startsWith("$")){
+							if("$in".equalsIgnoreCase(name)){
+								BasicBSONList list = (BasicBSONList)value;
+								if(list.size()==1){
+								}else if(list.size() >1){
+									
+								}
+							}
+						}else{
+							Comparative comparable = new Comparative(Comparative.Equivalent,(Comparable)value);
+							parameterMap.put(column, comparable);
+						}
+					}
+					
+					
+					
+					Comparative comparable = new Comparative(Comparative.Equivalent,(Comparable)value);
+					parameterMap.put(column, comparable);
+				}
+			}
+		}
+		
 	}
 
 }
