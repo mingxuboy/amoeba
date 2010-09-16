@@ -1,31 +1,97 @@
 package com.meidusa.amoeba.benchmark;
 
 
-import java.io.IOException;
+import java.io.File;
+import java.io.FileInputStream;
 import java.net.InetSocketAddress;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
+import java.util.Random;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
+import org.bson.BSONObject;
+import org.bson.JSON;
 
+import com.meidusa.amoeba.config.ConfigUtil;
+import com.meidusa.amoeba.config.ParameterMapping;
+import com.meidusa.amoeba.config.PropertyTransfer;
 import com.meidusa.amoeba.net.MultiConnectionManagerWrapper;
-import com.meidusa.amoeba.util.InitialisationException;
 
+@SuppressWarnings("unchecked")
 public abstract class AbstractBenchmark {
 	private static AbstractBenchmark benckmark;
 	protected static void setBenchmark(AbstractBenchmark benckmark){
 		AbstractBenchmark.benckmark = benckmark;
 	}
 	
-	public abstract Map getContextMap();
+	private static Map contextMap = new HashMap();
+	private static Properties properties = new Properties();
+	public AbstractBenchmark(){
+		Random random = new Random();
+		contextMap.put("random",random);
+		contextMap.put("atomicInteger",new AtomicInteger());
+		contextMap.put("atomicLong",new AtomicLong());
+		String reqestXml = System.getProperty("requestFile");
+		
+		if(reqestXml != null){
+			File reqestXmlFile = new File(reqestXml);
+			if(reqestXmlFile.exists() && reqestXmlFile.isFile()){
+				try {
+					properties.loadFromXML(new FileInputStream(reqestXmlFile));
+				} catch (Exception e) {
+					e.printStackTrace();
+					System.exit(-1);
+				}
+			}else{
+				System.err.println("requestFile not found or not file :"+reqestXmlFile.getAbsolutePath());
+				System.exit(-1);
+			}
+		}else{
+			System.err.println("system property named 'reqestXml' not set");
+			System.exit(-1);
+		}
+		
+		String contextFile = System.getProperty("contextFile");
+		
+		if(contextFile != null){
+			Properties properties = new Properties();
+			File contextXmlFile = new File(contextFile);
+			if(contextXmlFile.exists() && contextXmlFile.isFile()){
+				try {
+					properties.loadFromXML(new FileInputStream(contextXmlFile));
+					for(Map.Entry entry : properties.entrySet()){
+						String name = (String)entry.getKey();
+						Object obj = Class.forName(((String)entry.getKey()).trim()).newInstance();
+						contextMap.put(name, obj);
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+					System.exit(-1);
+				}
+			}else{
+				System.err.println("requestFile not found or not file :"+contextXmlFile.getAbsolutePath());
+				System.exit(-1);
+			}
+		}
+		
+	}
+	
+	
+	public Map getContextMap(){
+		return contextMap;
+	}
 	
 	public static AbstractBenchmark getInstance(){
 		return AbstractBenchmark.benckmark;
@@ -33,6 +99,12 @@ public abstract class AbstractBenchmark {
 	public abstract AbstractBenchmarkClientConnection<?> newBenchmarkClientConnection(SocketChannel channel,long time,CountDownLatch latcher);
 	
 	public static void main(String[] args) throws Exception {
+		ParameterMapping.registerTransfer(BSONObject.class, new PropertyTransfer<BSONObject>(){
+			@Override
+			public BSONObject transfer(String inputString) {
+				return (BSONObject)JSON.parse(ConfigUtil.filterWtihOGNL(inputString, AbstractBenchmark.getInstance().getContextMap()));
+			}
+		});
 		Logger logger = Logger.getLogger("rootLogger");
 		logger.addAppender(new ConsoleAppender());
 		logger.setLevel(Level.DEBUG);
@@ -82,14 +154,22 @@ public abstract class AbstractBenchmark {
 		AbstractBenchmark benckmark = AbstractBenchmark.getInstance();
 		List<AbstractBenchmarkClientConnection<?>> connList = new ArrayList<AbstractBenchmarkClientConnection<?>>();
 		for(int i=0;i<conn;i++){
-			AbstractBenchmarkClientConnection<?> connection = benckmark.newBenchmarkClientConnection(SocketChannel.open(new InetSocketAddress(ip,port)),System.currentTimeMillis(),latcher);
-			manager.postRegisterNetEventHandler(connection, SelectionKey.OP_READ);
-			connList.add(connection);
+			InetSocketAddress address = new InetSocketAddress(ip,port);
+			try{
+				AbstractBenchmarkClientConnection<?> connection = benckmark.newBenchmarkClientConnection(SocketChannel.open(address),System.currentTimeMillis(),latcher);
+				connection.putAllRequestProperties(properties);
+				connection.setContextMap(benckmark.getContextMap());
+				manager.postRegisterNetEventHandler(connection, SelectionKey.OP_READ);
+				connList.add(connection);
+			}catch(Exception e){
+				System.err.println("connect to "+address+" error:");
+				e.printStackTrace();
+				System.exit(-1);
+			}
 		}
 		
 		
 		for(AbstractBenchmarkClientConnection<?> connection: connList){
-			connection.setContextMap(benckmark.getContextMap());
 			connection.startBenchmark();
 		}
 		latcher.await();

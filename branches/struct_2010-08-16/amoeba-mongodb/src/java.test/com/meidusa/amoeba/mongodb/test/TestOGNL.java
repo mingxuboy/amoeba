@@ -77,9 +77,9 @@ public class TestOGNL {
 		System.out.println(createRequestPacket(properties,ctx0));
 		
 		long start= System.currentTimeMillis();
-		/*for(int i=0;i<100000;i++){
-			ConfigUtil.filterWtihOGNL(selector, expression, ctx0);
-		}*/
+		for(int i=0;i<100000;i++){
+			createRequestPacket(properties,ctx0);
+		}
 		System.out.println((System.currentTimeMillis() - start));
 	}
 
