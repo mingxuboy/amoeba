@@ -21,12 +21,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
-import org.bson.BSONObject;
-import org.bson.JSON;
 
-import com.meidusa.amoeba.config.ConfigUtil;
-import com.meidusa.amoeba.config.ParameterMapping;
-import com.meidusa.amoeba.config.PropertyTransfer;
 import com.meidusa.amoeba.net.MultiConnectionManagerWrapper;
 
 @SuppressWarnings("unchecked")
@@ -99,12 +94,6 @@ public abstract class AbstractBenchmark {
 	public abstract AbstractBenchmarkClientConnection<?> newBenchmarkClientConnection(SocketChannel channel,long time,CountDownLatch latcher);
 	
 	public static void main(String[] args) throws Exception {
-		ParameterMapping.registerTransfer(BSONObject.class, new PropertyTransfer<BSONObject>(){
-			@Override
-			public BSONObject transfer(String inputString) {
-				return (BSONObject)JSON.parse(ConfigUtil.filterWtihOGNL(inputString, AbstractBenchmark.getInstance().getContextMap()));
-			}
-		});
 		Logger logger = Logger.getLogger("rootLogger");
 		logger.addAppender(new ConsoleAppender());
 		logger.setLevel(Level.DEBUG);
