@@ -15,7 +15,7 @@ import java.util.regex.*;
 public class JSON {
 	
 	public static void main(String[] args){
-		System.out.println(parse("{\"s\":1,\"f\":\"asdfasdf\"}").getClass());
+		System.out.println(parse("{ s : [ { s : 243 } , { s : 11 } ] }"));
 	}
     /**
      *  Serializes an object into it's JSON form
