@@ -32,6 +32,7 @@ import com.meidusa.amoeba.net.SessionMessageHandler;
 
 public abstract class AbstractSessionHandler<T extends AbstractMongodbPacket> implements SessionMessageHandler {
 	protected static Logger logger = Logger.getLogger("PACKETLOGGER");
+	private  static Logger handlerLogger = Logger.getLogger(AbstractSessionHandler.class);
 	public static final BSONObject BSON_OK = new BasicBSONObject();
 	static{
 		BSON_OK.put("err", null);
@@ -51,16 +52,27 @@ public abstract class AbstractSessionHandler<T extends AbstractMongodbPacket> im
 	
 	@Override
 	public void handleMessage(Connection conn,byte[] message) {
-		try {
+		
 			if(conn == clientConn){
+				try {
 				//deserialize to packet from message
-				doClientRequest((MongodbClientConnection)conn,message);
+					doClientRequest((MongodbClientConnection)conn,message);
+				} catch (Exception e) {
+					handlerLogger.error("do client recieve message error",e);
+					ResponseMongodbPacket result = new ResponseMongodbPacket();
+					result.numberReturned = 1;
+					result.responseFlags = 1;
+					result.documents = new ArrayList<BSONObject>();
+					BSONObject error = new BasicBSONObject();
+					error.put("err", e.getMessage());
+					error.put("n", 1);
+					result.documents.add(error);
+					conn.postMessage(result.toByteBuffer(conn));
+				}
 			}else{
 				doServerResponse((MongodbServerConnection)conn,message);
 			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		
 	}
 
 	protected abstract void doServerResponse(MongodbServerConnection conn, byte[] message);

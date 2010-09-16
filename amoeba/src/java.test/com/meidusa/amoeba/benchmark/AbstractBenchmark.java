@@ -68,7 +68,7 @@ public abstract class AbstractBenchmark {
 					properties.loadFromXML(new FileInputStream(contextXmlFile));
 					for(Map.Entry entry : properties.entrySet()){
 						String name = (String)entry.getKey();
-						Object obj = Class.forName(((String)entry.getKey()).trim()).newInstance();
+						Object obj = Class.forName(((String)entry.getValue()).trim()).newInstance();
 						contextMap.put(name, obj);
 					}
 				} catch (Exception e) {
@@ -116,9 +116,7 @@ public abstract class AbstractBenchmark {
 		MultiConnectionManagerWrapper manager = new MultiConnectionManagerWrapper();
 		manager.init();
 		manager.start();
-		do{
-			Thread.sleep(100L);
-		}while(!manager.isAlive());
+		Thread.sleep(100L);
 		System.out.println("Connection manager started....");
 		new Thread(){
 			long lastCount = latcher.getCount();
@@ -187,5 +185,6 @@ public abstract class AbstractBenchmark {
 		System.out.println("max="+TimeUnit.MILLISECONDS.convert(max, TimeUnit.NANOSECONDS)+"ms");
 		System.out.println("average="+TimeUnit.MILLISECONDS.convert(average, TimeUnit.NANOSECONDS)+"ms");
 		manager.shutdown();
+		
 	}
 }

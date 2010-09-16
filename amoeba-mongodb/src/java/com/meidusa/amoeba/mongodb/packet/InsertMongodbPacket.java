@@ -14,6 +14,7 @@
 package com.meidusa.amoeba.mongodb.packet;
 
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,18 +41,21 @@ import com.meidusa.amoeba.mongodb.io.MongodbPacketConstant;
  */
 public class InsertMongodbPacket extends RequestMongodbPacket {
 	
-	public List<BSONObject> documents;
+	public BSONObject[] documents;
 	public InsertMongodbPacket(){
 		this.opCode = MongodbPacketConstant.OP_INSERT;
 	}
 	protected void init(MongodbPacketBuffer buffer) {
 		super.init(buffer);
 		if(buffer.hasRemaining()){
-			documents = new ArrayList<BSONObject>();
+			List<BSONObject> documents = new ArrayList<BSONObject>();
 			do{
 				BSONObject obj = buffer.readBSONObject();
 				documents.add(obj);
 			}while(buffer.hasRemaining());
+			if(documents.size()>0){
+				this.documents = documents.toArray((BSONObject[])Array.newInstance(BSONObject.class, documents.size()));
+			}
 		}
 	}
 

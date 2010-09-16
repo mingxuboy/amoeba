@@ -12,6 +12,7 @@ import com.meidusa.amoeba.benchmark.AbstractBenchmarkClientConnection;
 import com.meidusa.amoeba.config.ConfigUtil;
 import com.meidusa.amoeba.config.ParameterMapping;
 import com.meidusa.amoeba.config.PropertyTransfer;
+import com.meidusa.amoeba.util.StringUtil;
 
 public class MongoDBBenchmark extends AbstractBenchmark{
 	
@@ -21,7 +22,20 @@ public class MongoDBBenchmark extends AbstractBenchmark{
 			public BSONObject transfer(String inputString) {
 				return (BSONObject)JSON.parse(ConfigUtil.filterWtihOGNL(inputString, AbstractBenchmark.getInstance().getContextMap()));
 			}
+		});
+		
+		ParameterMapping.registerTransfer(BSONObject[].class, new PropertyTransfer<BSONObject[]>(){
+			@Override
+			public BSONObject[] transfer(String inputString) {
+				String[] items = StringUtil.split(inputString,"//--");
+				BSONObject[] list = new BSONObject[items.length];
+				for(int i=0;i<items.length;i++){
+					list[i] = (BSONObject)JSON.parse(ConfigUtil.filterWtihOGNL(items[i].trim(), AbstractBenchmark.getInstance().getContextMap()));
+				}
+				return list;
+			}
 		});	
+		
 		AbstractBenchmark.setBenchmark(new MongoDBBenchmark());
 		AbstractBenchmark.main(args);
 	}
