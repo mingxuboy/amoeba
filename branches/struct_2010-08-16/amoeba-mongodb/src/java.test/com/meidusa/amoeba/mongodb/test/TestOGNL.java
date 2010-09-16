@@ -9,19 +9,16 @@ import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
+import ognl.OgnlException;
+
 import org.bson.BSONObject;
 import org.bson.JSON;
 
-import com.meidusa.amoeba.benchmark.AbstractBenchmark;
 import com.meidusa.amoeba.config.ConfigUtil;
 import com.meidusa.amoeba.config.ParameterMapping;
 import com.meidusa.amoeba.config.PropertyTransfer;
 import com.meidusa.amoeba.mongodb.packet.AbstractMongodbPacket;
 import com.meidusa.amoeba.net.packet.AbstractPacket;
-
-
-import ognl.Ognl;
-import ognl.OgnlException;
 
 public class TestOGNL {
 

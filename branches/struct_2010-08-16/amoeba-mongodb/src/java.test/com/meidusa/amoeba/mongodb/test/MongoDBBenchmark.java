@@ -2,7 +2,6 @@ package com.meidusa.amoeba.mongodb.test;
 
 
 import java.nio.channels.SocketChannel;
-import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
 
 import org.bson.BSONObject;

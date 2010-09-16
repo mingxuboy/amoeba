@@ -36,8 +36,6 @@ import com.meidusa.amoeba.net.packet.AbstractPacket;
  */
 public class MongodbBenchmarkClientConnection extends AbstractBenchmarkClientConnection<AbstractMongodbPacket> {
 	private static Logger	logger        = Logger.getLogger(MongodbBenchmarkClientConnection.class);
-	final String requestFile  = System.getProperty("requestFile");
-	private AtomicInteger index = new AtomicInteger();
 	private boolean isLastModifyOperation = false;
 	public MongodbBenchmarkClientConnection(SocketChannel channel, long createStamp,CountDownLatch latcher) {
 		super(channel, createStamp,latcher);
