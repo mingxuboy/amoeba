@@ -39,6 +39,12 @@ import com.meidusa.amoeba.sqljep.function.ComparativeOR;
 
 public class MongodbQueryRouter extends AbstractQueryRouter<MongodbClientConnection,RequestMongodbPacket> {
 	private static Map<String,Integer> operatorMap = new HashMap<String,Integer>();
+	private static ThreadLocal<Stack<Comparative>> threadLocal = new ThreadLocal<Stack<Comparative>>(){
+		protected Stack<Comparative> initialValue() {
+	        return new Stack<Comparative>();
+	    }
+	};
+	
 	static{
 		operatorMap.put("$gt", Comparative.GreaterThan);
 		operatorMap.put("$gte", Comparative.GreaterThanOrEqual);
@@ -84,44 +90,45 @@ public class MongodbQueryRouter extends AbstractQueryRouter<MongodbClientConnect
 		}
 		
 		if(bson != null){
-			Map map = bson.toMap();
-			if(map != null && map.size() >0){
-				Map<Column, Comparative> parameterMap = new HashMap<Column, Comparative>();
-				Map<Table, Map<Column, Comparative>> tableMap = new HashMap<Table, Map<Column, Comparative>>();
-				tableMap.put(table, parameterMap);
-				for(Object item : map.entrySet()){
-					Map.Entry entry = (Map.Entry)item;
-					String name = (String)entry.getKey();
-					Object value =  entry.getValue();
-					if(name.startsWith("$")){
-						if("$in".equalsIgnoreCase(name)){
-							BasicBSONList list = (BasicBSONList)value;
-							if(list.size()==1){
-							}else if(list.size() >1){
-								
-							}
-						}
-					}else{
-						
-					}
-					
-					
-					Column column = new Column();
-					column.setName(name);
-					column.setTable(table);
-					Comparative comparable = new Comparative(Comparative.Equivalent,(Comparable)value);
-					parameterMap.put(column, comparable);
-				}
-				return tableMap;
-			}
+			Map<Column, Comparative> parameterMap = new HashMap<Column, Comparative>();
+			Map<Table, Map<Column, Comparative>> tableMap = new HashMap<Table, Map<Column, Comparative>>();
+			tableMap.put(table, parameterMap);
+			Stack<Comparative> stack = threadLocal.get();
+			stack.clear();
+			toComparative(parameterMap,stack,bson,table);
+			return tableMap;
 		}
 		return null;
 	}
 	
-	public static void toComparative(Map<Column, Comparative> parameterMap,Stack stack,BSONObject bson,Table table){
+	public static void toComparative(Map<Column, Comparative> parameterMap,Stack<Comparative> stack,BSONObject bson,Table table){
 		if(bson != null){
+			if(bson instanceof BasicBSONList){
+				ComparativeBaseList comparativeList = null;
+				comparativeList = new ComparativeAND();
+				int start = stack.size();
+				for(Object object : (BasicBSONList)bson){
+					if(object instanceof BSONObject ){
+						toComparative(parameterMap,stack,(BSONObject)object,table);
+					}else{
+						comparativeList.addComparative(new Comparative(Comparative.Equivalent,(Comparable)object));
+					}
+				}
+				
+				int end = stack.size();
+				if(end - start > 1){
+					for(int i = end-start;i>0;i--){
+						comparativeList.addComparative((Comparative)stack.pop());
+					}
+					stack.push(comparativeList);
+				}
+				return;
+			}
+			
 			Map map = bson.toMap();
 			if(map != null && map.size() >0){
+				int current = stack.size();
+				
 				for(Object item : map.entrySet()){
 					Map.Entry entry = (Map.Entry)item;
 					String name = (String)entry.getKey();
@@ -171,10 +178,10 @@ public class MongodbQueryRouter extends AbstractQueryRouter<MongodbClientConnect
 							
 							for(Object object : list){
 								if(object instanceof BSONObject ){
-									int size = stack.size();
+									int start = stack.size();
 									toComparative(parameterMap,stack,(BSONObject)object,table);
-									int next = stack.size();
-									if(next > size){
+									int end = stack.size();
+									if(end > start){
 										comparable = (Comparative)stack.pop();
 										comparativeList.addComparative(comparable);
 									}
@@ -192,10 +199,10 @@ public class MongodbQueryRouter extends AbstractQueryRouter<MongodbClientConnect
 							}
 							
 						}else{
-							int size = stack.size();
+							int start = stack.size();
 							toComparative(parameterMap,stack,(BSONObject)value,table);
-							int next = stack.size();
-							if(next > size){
+							int end = stack.size();
+							if(end > start){
 								comparable = (Comparative)stack.pop();
 								if(column != null){
 									parameterMap.put(column, comparable);
@@ -207,7 +214,6 @@ public class MongodbQueryRouter extends AbstractQueryRouter<MongodbClientConnect
 					}
 					// value is constant
 					else{
-						
 						//put to map or push to stack
 						comparable = new Comparative(comparativeValue,(Comparable)value);
 						if(column != null){
@@ -215,8 +221,16 @@ public class MongodbQueryRouter extends AbstractQueryRouter<MongodbClientConnect
 						}else{
 							stack.push(comparable);
 						}
-						return;
 					}
+				}
+				
+				int end = stack.size();
+				if(end - current > 1){
+					ComparativeBaseList comparativeList = new ComparativeAND();
+					for(int i = end-current;i>0;i--){
+						comparativeList.addComparative((Comparative)stack.pop());
+					}
+					stack.push(comparativeList);
 				}
 			}
 		}
@@ -225,9 +239,10 @@ public class MongodbQueryRouter extends AbstractQueryRouter<MongodbClientConnect
 	
 	public static void main(String[] args){
 		String lines[] = new String[]{
-				"{ 'x' : 3 }, { 'z' : 1 }",
-				"{'j':{'$in': [2,4,6]}}",
+				"{'a': { '$all': [ 2, 3, 4 ] } }",
 				"{ 'field' : { '$gt': 1, '$lt': 12 } }",
+				"{ 'x' : 3 ,  'z' : 1 }",
+				"{'j':{'$in': [2,4,6]}}",
 				"{'j':{'$nin': [2,4,6]}}"
 		};
 		for(String line : lines){
