@@ -70,6 +70,10 @@ public class ModifyOperateMessageHandler<T extends RequestMongodbPacket> extends
 	
 		ResponseMongodbPacket lastResponsePacket = new ResponseMongodbPacket();
 		lastResponsePacket.init(message, clientConn);
+		if(logger.isDebugEnabled()){
+			putDebugInfoToPacket(lastResponsePacket,conn);
+		}
+		
 		if(isMulti){
 			multiResponsePacket.add(lastResponsePacket);
 			if(endQuery(conn)){
