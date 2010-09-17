@@ -101,7 +101,7 @@ public abstract class AbstractSessionHandler<T extends AbstractMongodbPacket> im
 		ResponseMongodbPacket result = new ResponseMongodbPacket();
 		
 		for(ResponseMongodbPacket response :multiResponsePacket){
-			if(result.numberReturned > 0){
+			if(response.numberReturned > 0){
 				if(result.documents == null){
 					result.documents = new ArrayList<BSONObject>();
 				}

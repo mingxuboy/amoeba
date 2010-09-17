@@ -595,6 +595,7 @@ public abstract class  AbstractQueryRouter<T extends Connection,V> implements Qu
                                 if (funFile.lastModified() != lastFunFileModified) {
                                     try {
                                         funMap = loadFunctionMap(AbstractQueryRouter.this.functionConfig);
+                                        logger.info("loading FunctionMap from File="+functionConfig);
                                     } catch (ConfigurationException exception) {
                                     }
 
@@ -603,12 +604,14 @@ public abstract class  AbstractQueryRouter<T extends Connection,V> implements Qu
                             if (AbstractQueryRouter.this.ruleFunctionConfig != null) {
                                 if (ruleFunctionFile.lastModified() != lastRuleFunctionFileModified) {
                                     ruleFunMap = loadRuleFunctionMap(AbstractQueryRouter.this.ruleFunctionConfig);
+                                    logger.info("loading ruleFunMap from File="+ruleFunctionConfig);
                                 }
                             }
 
                             if (AbstractQueryRouter.this.ruleConfig != null) {
                                 if (ruleFile.lastModified() != lastRuleModified || (AbstractQueryRouter.this.ruleFunctionConfig != null && ruleFunctionFile.lastModified() != lastRuleFunctionFileModified)) {
                                     tableRuleMap = loadConfig(AbstractQueryRouter.this.ruleConfig);
+                                    logger.info("loading ruleConfig from File="+ruleConfig);
                                 }
                             }
 

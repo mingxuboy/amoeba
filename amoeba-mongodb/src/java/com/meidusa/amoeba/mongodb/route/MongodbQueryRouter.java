@@ -53,6 +53,7 @@ public class MongodbQueryRouter extends AbstractQueryRouter<MongodbClientConnect
 		operatorMap.put("$ne", Comparative.NotEquivalent);
 		operatorMap.put("$in", Comparative.Equivalent);
 		operatorMap.put("$nin", Comparative.NotEquivalent);
+		operatorMap.put("$or", Comparative.Equivalent);
 		
 	}
 	@Override
@@ -99,6 +100,23 @@ public class MongodbQueryRouter extends AbstractQueryRouter<MongodbClientConnect
 			return tableMap;
 		}
 		return null;
+	}
+	
+	private static void putToColumnMap(Map<Column, Comparative> parameterMap,Column column,Comparative comparative){
+		Comparative comp = parameterMap.get(column);
+		if(comp == null){
+			parameterMap.put(column, comparative);
+		}else{
+			ComparativeBaseList comparativeList;
+			if(comp instanceof ComparativeBaseList){
+				comparativeList = (ComparativeBaseList)comp;
+			}else{
+				comparativeList = new ComparativeOR();
+				comparativeList.addComparative(comp);
+			}
+			comparativeList.addComparative(comparative);
+			parameterMap.put(column, comparativeList);
+		}
 	}
 	
 	public static void toComparative(Map<Column, Comparative> parameterMap,Stack<Comparative> stack,BSONObject bson,Table table){
@@ -155,6 +173,9 @@ public class MongodbQueryRouter extends AbstractQueryRouter<MongodbClientConnect
 						}else if("$in".equalsIgnoreCase(name)){
 							and = false;
 							isMulti = true;
+						}else if("$or".equalsIgnoreCase(name)){
+							and = false;
+							isMulti = true;
 						}
 						
 						if(comparativeValue == null){
@@ -192,7 +213,7 @@ public class MongodbQueryRouter extends AbstractQueryRouter<MongodbClientConnect
 							
 							if(comparativeList.getList().size()>0){
 								if(column != null){
-									parameterMap.put(column, comparativeList);
+									putToColumnMap(parameterMap,column,comparativeList);
 								}else{
 									stack.push(comparativeList);
 								}
@@ -205,7 +226,7 @@ public class MongodbQueryRouter extends AbstractQueryRouter<MongodbClientConnect
 							if(end > start){
 								comparable = (Comparative)stack.pop();
 								if(column != null){
-									parameterMap.put(column, comparable);
+									putToColumnMap(parameterMap,column,comparable);
 								}else{
 									stack.push(comparable);
 								}
@@ -217,7 +238,7 @@ public class MongodbQueryRouter extends AbstractQueryRouter<MongodbClientConnect
 						//put to map or push to stack
 						comparable = new Comparative(comparativeValue,(Comparable)value);
 						if(column != null){
-							parameterMap.put(column, comparable);
+							putToColumnMap(parameterMap,column,comparable);
 						}else{
 							stack.push(comparable);
 						}
@@ -239,6 +260,7 @@ public class MongodbQueryRouter extends AbstractQueryRouter<MongodbClientConnect
 	
 	public static void main(String[] args){
 		String lines[] = new String[]{
+				"{ '$or' : [ { 's' : 281} , { 's' : 28}]}",
 				"{'a': { '$all': [ 2, 3, 4 ] } }",
 				"{ 'field' : { '$gt': 1, '$lt': 12 } }",
 				"{ 'x' : 3 ,  'z' : 1 }",

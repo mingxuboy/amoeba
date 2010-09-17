@@ -21,9 +21,10 @@ public class Main {
 	 * @throws ParseException 
 	 */
 	public static void main(String[] args) throws ParseException {
-		ComparativeBaseList ID =  new ComparativeOR(Comparative.Equivalent,22);
+		ComparativeBaseList ID =  new ComparativeOR();
+		ID.addComparative(new Comparative(Comparative.Equivalent,50));
+		ID.addComparative(new Comparative(Comparative.Equivalent,150));
 		//Comparable<?> ID = 12;
-		ID.addComparative(new Comparative(Comparative.Equivalent,6));
 		/*ID.addComparative(new Comparative(Comparative.Equivalent,6));
 		ID.addComparative(new Comparative(Comparative.Equivalent,6));
 		ID.addComparative(new Comparative(Comparative.Equivalent,6));
@@ -63,39 +64,15 @@ public class Main {
 		});
 		Object result = null;
 		System.out.println("wwe".hashCode()%500);
-		final RowJEP sqljep = new RowJEP("var hello=abs(hash(ID)) % 32; var isBool = false; " +
+		final RowJEP sqljep = new RowJEP("var hello=abs(hash(ID)) % 3; var isBool = false; " +
 				"(case hello " +
-	  			"	WHEN range(0,1,1,0) THEN 'aadf0' ;" +
-	  			"	WHEN range(1,2,1,0) THEN 'aadf1' ;" +
-	  			"	WHEN range(2,3,1,0) THEN 'aadf2' ;" +
-	  			"	WHEN range(3,4,1,0) THEN 'aadf3' ;" +
-	  			"	WHEN range(4,5,1,0) THEN 'aadf4' ;" +
-	  			"	WHEN range(5,6,1,0) THEN 'aadf5' ;" +
-	  			"	WHEN range(6,7,1,0) THEN 'aadf6' ;" +
-	  			"	WHEN range(7,8,1,0) THEN 'aadf7' ;" +
-	  			"	WHEN range(8,9,1,0) THEN 'aadf8' ;" +
-	  			"	WHEN range(9,10,1,0) THEN 'aadf9' ;" +
-	  			"	WHEN range(10,11,1,0) THEN 'aadf10' ;" +
-	  			"	WHEN range(11,12,1,0) THEN 'aadf11' ;" +
-	  			"	WHEN range(12,13,1,0) THEN age1?'hell12':'aadf12' ;" +
-	  			"	WHEN range(13,14,1,0) THEN 'aadf13' ;" +
-	  			"	WHEN range(14,15,1,0) THEN 'aadf14' ;" +
-	  			"	WHEN range(15,16,1,0) THEN 'aadf15' ;" +
-	  			"	WHEN range(16,17,1,0) THEN 'aadf16' ;" +
-	  			"	WHEN range(17,18,1,0) THEN 'aadf17' ;" +
-	  			"	WHEN range(18,19,1,0) THEN 'aadf18' ;" +
-	  			"	WHEN range(19,20,1,0) THEN 'aadf19' ;" +
-	  			"	WHEN range(20,21,1,0) THEN 'aadf20' ;" +
-	  			"	WHEN range(21,22,1,0) THEN 'aadf21' ;" +
-	  			"	WHEN range(22,23,1,0) THEN 'aadf22' ;" +
-	  			"	WHEN range(23,24,1,0) THEN 'aadf23' ;" +
-	  			"	WHEN range(24,25,1,0) THEN 'aadf24' ;" +
-	  			
-	  			"	ELSE 'aadf25...' " +
-	  			"END CASE;)|| 'qwerqer' || (12+12)");	
+	  			"	WHEN range(0,1,1,0) THEN 'server0' ;" +
+	  			"	WHEN range(1,2,1,0) THEN 'server1' ;" +
+	  			"	WHEN range(2,3,1,0) THEN 'server2' ;" +
+	  			"END CASE;)");	
 		sqljep.parseExpression(columnMapping,valMap,AbstractQueryRouter.ruleFunTab);
 		result = sqljep.getValue(row);
-		for(int j=0;j<100;j++){
+		for(int j=0;j<0;j++){
 		new Thread(){
 			public void run(){
 				final long start = System.currentTimeMillis();
@@ -118,7 +95,7 @@ public class Main {
 		}
 		result = sqljep.getValue(row);
 		final long start = System.currentTimeMillis();
-		for(int i=0;i<1000;i++)
+		for(int i=0;i<1;i++)
 		result = sqljep.getValue(row);
 		System.out.println(result+"\n"+"...totle:"+(System.currentTimeMillis() -start));
 		
