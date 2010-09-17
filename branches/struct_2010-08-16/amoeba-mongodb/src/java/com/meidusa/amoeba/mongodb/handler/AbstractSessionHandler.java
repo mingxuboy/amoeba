@@ -31,7 +31,7 @@ import com.meidusa.amoeba.net.MessageHandler;
 import com.meidusa.amoeba.net.SessionMessageHandler;
 
 public abstract class AbstractSessionHandler<T extends AbstractMongodbPacket> implements SessionMessageHandler {
-	protected static Logger logger = Logger.getLogger("PACKETLOGGER");
+	public static Logger PACKET_LOGGER = Logger.getLogger("PACKETLOGGER");
 	private  static Logger handlerLogger = Logger.getLogger(AbstractSessionHandler.class);
 	public static final BSONObject BSON_OK = new BasicBSONObject();
 	static{
@@ -97,11 +97,14 @@ public abstract class AbstractSessionHandler<T extends AbstractMongodbPacket> im
 		return handlerMap.size() == 0;
 	}
 	
-	protected void putDebugInfoToPacket(ResponseMongodbPacket packet,MongodbServerConnection conn){
+	protected void putDebugInfoToResponsePacket(ResponseMongodbPacket packet,MongodbServerConnection conn){
 		if(packet.numberReturned>0){
 			for(BSONObject bson :packet.documents){
 				bson.put("_pool_name_", conn.getObjectPool().getName());
 			}
+		}
+		if(PACKET_LOGGER.isDebugEnabled()){
+			PACKET_LOGGER.debug("<<----ReponsePacket="+packet+", requestHandler="+this.hashCode()+", " +conn.getSocketId() +"-->"+this.clientConn.getSocketId()+"\r\n");
 		}
 	}
 	

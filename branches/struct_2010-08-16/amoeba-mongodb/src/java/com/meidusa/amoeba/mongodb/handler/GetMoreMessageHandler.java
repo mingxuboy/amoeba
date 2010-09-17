@@ -84,17 +84,17 @@ public class GetMoreMessageHandler extends AbstractSessionHandler<GetMoreMongodb
 		int type = MongodbPacketBuffer.getOPMessageType(message);
 		
 		if(type != MongodbPacketConstant.OP_REPLY){
-			logger.error("unkown response packet type="+type+" , request="+this.requestPacket);
+			PACKET_LOGGER.error("unkown response packet type="+type+" , request="+this.requestPacket);
 		}
 		
-		if(logger.isDebugEnabled() || isMulti){
+		if(PACKET_LOGGER.isDebugEnabled() || isMulti){
 			packet = new ResponseMongodbPacket();
 		}else{
 			packet = new SimpleResponseMongodbPacket();
 		}
 		packet.init(message, conn);
-		if(logger.isDebugEnabled()){
-			putDebugInfoToPacket((ResponseMongodbPacket)packet,conn);
+		if(PACKET_LOGGER.isDebugEnabled()){
+			putDebugInfoToResponsePacket((ResponseMongodbPacket)packet,conn);
 		}
 		if(packet.cursorID <= 0){
 			this.clientConn.removeCursorItem(this.cursorID,cursorMap.get(serverConn));

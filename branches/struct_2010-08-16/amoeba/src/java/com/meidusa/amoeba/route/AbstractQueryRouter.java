@@ -291,6 +291,7 @@ public abstract class  AbstractQueryRouter<T extends Connection,V> implements Qu
  			isRead = ((Request) queryObject).isRead();
  			isPrepared = ((Request) queryObject).isPrepared();
  		}
+		
 		if (logger.isDebugEnabled()) {
 			loggerBuffer = new StringBuffer("query=");
 			loggerBuffer.append(queryObject);
