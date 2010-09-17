@@ -16,7 +16,6 @@ package com.meidusa.amoeba.mongodb.handler;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.log4j.Logger;
 import org.bson.BSONObject;
 
 import com.meidusa.amoeba.context.ProxyRuntimeContext;
@@ -33,8 +32,6 @@ import com.meidusa.amoeba.net.poolable.ObjectPool;
 import com.meidusa.amoeba.util.Tuple;
 
 public class QueryMessageHandler extends AbstractSessionHandler<QueryMongodbPacket> {
-	private static Logger logger = Logger.getLogger("PACKETLOGGER");
-	
 	private List<Tuple<CursorEntry,ObjectPool>> cursorList;
 	public QueryMessageHandler(MongodbClientConnection clientConn,QueryMongodbPacket packet) {
 		super(clientConn,packet);
@@ -43,6 +40,8 @@ public class QueryMessageHandler extends AbstractSessionHandler<QueryMongodbPack
 	@Override
 	protected void doClientRequest(MongodbClientConnection conn,
 			byte[] message) throws Exception {
+		
+		//request last error
 		if(requestPacket.fullCollectionName.indexOf("$")>0 && requestPacket.query != null 
 				&& requestPacket.query.get("getlasterror") != null){
 			byte[] msg = clientConn.getLastErrorMessage();
@@ -52,17 +51,18 @@ public class QueryMessageHandler extends AbstractSessionHandler<QueryMongodbPack
 				packet.numberReturned = 1;
 				packet.documents = new ArrayList<BSONObject>(1);
 				packet.documents.add(BSON_OK);
-				logger.error("cannot getLasterrorMessage with requst="+this.requestPacket);
+				PACKET_LOGGER.error("cannot getLasterrorMessage with requst="+this.requestPacket);
 			}else{
 				packet.init(msg, conn);
 			}
-			if(logger.isDebugEnabled()){
-				logger.debug("<<----@ReponsePacket="+packet+", " +clientConn.getSocketId());
+			if(PACKET_LOGGER.isDebugEnabled()){
+				PACKET_LOGGER.debug("<<----@ReponsePacket="+packet+", " +clientConn.getSocketId());
 			}
 			clientConn.postMessage(msg);
 			return;
 		}
 		
+		//other request
 		MongodbQueryRouter router = (MongodbQueryRouter)ProxyRuntimeContext.getInstance().getQueryRouter();
 
 		ObjectPool[] pools = router.doRoute(clientConn, requestPacket);
@@ -98,17 +98,17 @@ public class QueryMessageHandler extends AbstractSessionHandler<QueryMongodbPack
 		int type = MongodbPacketBuffer.getOPMessageType(message);
 		
 		if(type != MongodbPacketConstant.OP_REPLY){
-			logger.error("unkown response packet type="+type+" , request="+this.requestPacket);
+			PACKET_LOGGER.error("unkown response packet type="+type+" , request="+this.requestPacket);
 		}
 		
-		if(logger.isDebugEnabled() || isMulti){
+		if(PACKET_LOGGER.isDebugEnabled() || isMulti){
 			packet = new ResponseMongodbPacket();
 		}else{
 			packet = new SimpleResponseMongodbPacket();
 		}
 		packet.init(message, conn);
-		if(logger.isDebugEnabled()){
-			putDebugInfoToPacket((ResponseMongodbPacket)packet,conn);
+		if(PACKET_LOGGER.isDebugEnabled()){
+			putDebugInfoToResponsePacket((ResponseMongodbPacket)packet,conn);
 		}
 		if(isMulti){
 			multiResponsePacket.add((ResponseMongodbPacket)packet);

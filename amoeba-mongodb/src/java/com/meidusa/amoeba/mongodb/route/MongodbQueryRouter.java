@@ -80,7 +80,7 @@ public class MongodbQueryRouter extends AbstractQueryRouter<MongodbClientConnect
 		}else if(queryObject  instanceof InsertMongodbPacket){
 			InsertMongodbPacket query = (InsertMongodbPacket)queryObject;
 			if(query.documents != null && query.documents.length>0){
-				bson = (query.documents != null && query.documents.length >0)?query.documents[0]:null;
+				bson = query.documents[0];
 			}
 		}else if(queryObject  instanceof DeleteMongodbPacket){
 			DeleteMongodbPacket query = (DeleteMongodbPacket)queryObject;
@@ -260,6 +260,7 @@ public class MongodbQueryRouter extends AbstractQueryRouter<MongodbClientConnect
 	
 	public static void main(String[] args){
 		String lines[] = new String[]{
+				"{ 'SDID' : 1 , '$or' : [ { 'DEL_FLAG' : { '$ne' : 0}} , { 'RESERVE' : { '$in' : [ 1 , 2 , 3]}}]}",
 				"{ '$or' : [ { 's' : 281} , { 's' : 28}]}",
 				"{'a': { '$all': [ 2, 3, 4 ] } }",
 				"{ 'field' : { '$gt': 1, '$lt': 12 } }",

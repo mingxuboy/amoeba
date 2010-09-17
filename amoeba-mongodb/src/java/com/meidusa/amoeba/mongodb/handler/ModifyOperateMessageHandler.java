@@ -56,8 +56,8 @@ public class ModifyOperateMessageHandler<T extends RequestMongodbPacket> extends
 		}
 		
 		for(MongodbServerConnection serverConn : conns){
-			if(logger.isDebugEnabled()){
-				logger.debug("--->>>@errorRequestPakcet="+lastErrorRequest+"," +clientConn.getSocketId()+" send packet --->"+serverConn.getSocketId());
+			if(PACKET_LOGGER.isDebugEnabled()){
+				PACKET_LOGGER.debug("--->>>@errorRequestPakcet="+lastErrorRequest+"," +clientConn.getSocketId()+" send packet --->"+serverConn.getSocketId());
 			}
 			serverConn.postMessage(message);
 			serverConn.postMessage(bts);
@@ -70,8 +70,8 @@ public class ModifyOperateMessageHandler<T extends RequestMongodbPacket> extends
 	
 		ResponseMongodbPacket lastResponsePacket = new ResponseMongodbPacket();
 		lastResponsePacket.init(message, clientConn);
-		if(logger.isDebugEnabled()){
-			putDebugInfoToPacket(lastResponsePacket,conn);
+		if(PACKET_LOGGER.isDebugEnabled()){
+			putDebugInfoToResponsePacket(lastResponsePacket,conn);
 		}
 		
 		if(isMulti){

@@ -132,7 +132,7 @@ public class Comparative implements Comparable ,Cloneable{
 	}
 	
 	public String toString(){
-		return ""+this.value;
+		return getComparisonName(this.comparison)+this.value;
 	}
 	
 	public Object clone(){

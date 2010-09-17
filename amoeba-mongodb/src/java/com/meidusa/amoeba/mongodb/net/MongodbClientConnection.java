@@ -22,7 +22,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.commons.collections.map.LRUMap;
-import org.apache.log4j.Logger;
 import org.bson.BasicBSONObject;
 
 import com.meidusa.amoeba.mongodb.handler.AbstractSessionHandler;
@@ -55,7 +54,6 @@ import com.meidusa.amoeba.util.Tuple;
  */
 @SuppressWarnings({ "unchecked", "deprecation" })
 public class MongodbClientConnection extends AbstractMongodbConnection{
-	private static Logger logger = Logger.getLogger("PACKETLOGGER");
 	private LinkedBlockingQueue<byte[]> lastErrorQueue = new LinkedBlockingQueue<byte[]>(1);
 	private AtomicInteger requestId = new AtomicInteger(0);
 	private AtomicLong currentCursorID = new AtomicLong(0x10001L);
@@ -221,11 +219,11 @@ public class MongodbClientConnection extends AbstractMongodbConnection{
 		packet.init(message, this);
 		
 		//debug packet info
-		if(logger.isDebugEnabled()){
+		if(AbstractSessionHandler.PACKET_LOGGER.isDebugEnabled()){
 			if(packet != null){
-				logger.debug("--->>>pakcet="+packet+"," +this.getSocketId());
+				AbstractSessionHandler.PACKET_LOGGER.debug("--->>>pakcet="+packet+"," +this.getSocketId());
 			}else{
-				logger.debug("ERROR --->>>"+this.getSocketId()+"  unknow type="+type);
+				AbstractSessionHandler.PACKET_LOGGER.debug("ERROR --->>>"+this.getSocketId()+"  unknow type="+type);
 			}
 		}
 		handler.handleMessage(this,message);
