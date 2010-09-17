@@ -97,6 +97,14 @@ public abstract class AbstractSessionHandler<T extends AbstractMongodbPacket> im
 		return handlerMap.size() == 0;
 	}
 	
+	protected void putDebugInfoToPacket(ResponseMongodbPacket packet,MongodbServerConnection conn){
+		if(packet.numberReturned>0){
+			for(BSONObject bson :packet.documents){
+				bson.put("_pool_name_", conn.getObjectPool().getName());
+			}
+		}
+	}
+	
 	protected ResponseMongodbPacket mergeResponse(){
 		ResponseMongodbPacket result = new ResponseMongodbPacket();
 		
