@@ -109,6 +109,14 @@ public class QueryMessageHandler extends AbstractSessionHandler<QueryMongodbPack
 		packet.init(message, conn);
 		
 		if(isMulti){
+			if(logger.isDebugEnabled()){
+				ResponseMongodbPacket response = (ResponseMongodbPacket)packet;
+				if(response.numberReturned>0){
+					for(BSONObject bson :response.documents){
+						bson.put("_pool_name_", conn.getObjectPool().getName());
+					}
+				}
+			}
 			multiResponsePacket.add((ResponseMongodbPacket)packet);
 			if(packet.cursorID >0){
 				CursorEntry entry = new CursorEntry();

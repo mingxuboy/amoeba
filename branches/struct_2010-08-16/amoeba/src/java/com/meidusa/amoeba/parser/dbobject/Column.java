@@ -11,6 +11,8 @@
  */
 package com.meidusa.amoeba.parser.dbobject;
 
+import com.meidusa.amoeba.util.ObjectUtil;
+
 /**
  * 
  * @author <a href=mailto:piratebase@sina.com>Struct chen</a>
@@ -52,7 +54,7 @@ public class Column implements DBObjectBase {
 	public boolean equals(Object o){
 		if(o instanceof Column){
 			Column other = (Column)o;
-			if(table.equals(other.getTable()) && name.equalsIgnoreCase(other.getName())){
+			if(ObjectUtil.equals(table, other.getTable()) && name.equalsIgnoreCase(other.getName())){
 				return true;
 			}
 		}
