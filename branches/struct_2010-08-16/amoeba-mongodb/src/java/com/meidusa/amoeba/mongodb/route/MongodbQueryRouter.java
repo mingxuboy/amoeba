@@ -18,7 +18,6 @@ import java.util.Map;
 import java.util.Stack;
 
 import org.bson.BSONObject;
-import org.bson.BasicDBList;
 import org.bson.JSON;
 import org.bson.types.BasicBSONList;
 
@@ -37,6 +36,12 @@ import com.meidusa.amoeba.sqljep.function.ComparativeAND;
 import com.meidusa.amoeba.sqljep.function.ComparativeBaseList;
 import com.meidusa.amoeba.sqljep.function.ComparativeOR;
 
+/**
+ * 
+ * @author Struct
+ *
+ */
+@SuppressWarnings("unchecked")
 public class MongodbQueryRouter extends AbstractQueryRouter<MongodbClientConnection,RequestMongodbPacket> {
 	private static Map<String,Integer> operatorMap = new HashMap<String,Integer>();
 	private static ThreadLocal<Stack<Comparative>> threadLocal = new ThreadLocal<Stack<Comparative>>(){
@@ -257,6 +262,7 @@ public class MongodbQueryRouter extends AbstractQueryRouter<MongodbClientConnect
 		}
 		
 	}
+	
 	
 	public static void main(String[] args){
 		String lines[] = new String[]{
