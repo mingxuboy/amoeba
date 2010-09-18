@@ -42,7 +42,6 @@ public class TestOGNL {
 	public static void main(String[] args) throws OgnlException, InvalidPropertiesFormatException, IOException {
 		final Map ctx0 = new HashMap();
 		Random random = new Random();
-		ctx0.put("v1","length()");
 		ctx0.put("random",random);
 		ctx0.put("atomicInteger",new AtomicInteger());
 		ctx0.put("atomicLong",new AtomicLong());

@@ -181,6 +181,68 @@ public abstract class ProxyRuntimeContext implements Reporter {
 
     private List<Initialisable> initialisableList = new ArrayList<Initialisable>();
 
+    /**
+     * 
+     * @param parent
+     * @param dest
+     * @return
+     */
+    private void inheritDBServerConfig(DBServerConfig parent ,DBServerConfig dest){
+    	BeanObjectEntityConfig destBeanConfig = dest.getFactoryConfig();
+		BeanObjectEntityConfig parentBeanConfig = parent.getFactoryConfig();
+		
+    	if(destBeanConfig != null){
+    		if(parentBeanConfig != null){
+    			inheritBeanObjectEntityConfig(parentBeanConfig,destBeanConfig);
+    		}
+    	}else{
+    		dest.setFactoryConfig(parentBeanConfig);
+    	}
+    	
+    	destBeanConfig = dest.getPoolConfig();
+		parentBeanConfig = parent.getPoolConfig();
+		
+		if(destBeanConfig != null){
+    		if(parentBeanConfig != null){
+    			inheritBeanObjectEntityConfig(parentBeanConfig,destBeanConfig);
+    		}
+    	}else{
+    		dest.setPoolConfig(parentBeanConfig);
+    	}
+		
+		if(dest.getVirtual()== null){
+			dest.setVirtual(parent.getVirtual());
+		}
+		
+		if(dest.getAbstractive()== null){
+			dest.setAbstractive(parent.getAbstractive());
+		}
+		
+    }
+    
+    void inheritBeanObjectEntityConfig(BeanObjectEntityConfig parent,BeanObjectEntityConfig dest){
+    	BeanObjectEntityConfig parentCloned = (BeanObjectEntityConfig)parent.clone();
+    	if(dest.getClassName() != null){
+    		parentCloned.setClassName(dest.getClassName());
+    	}
+    	
+    	if(dest.getName() != null){
+    		parentCloned.setName(dest.getName());
+    	}
+    	
+    	if(dest.getParams() != null){
+    		if(parentCloned.getParams() == null){
+    			parentCloned.setParams(dest.getParams());
+    		}else{
+    			parentCloned.getParams().putAll(dest.getParams());
+    		}
+    	}
+    	
+    	dest.setClassName(parentCloned.getClassName());
+    	dest.setName(parentCloned.getName());
+    	dest.setParams(parentCloned.getParams());
+    }
+    
     public void init(String file) {
         config = loadConfig(file);
         readExecutor = new ReNameableThreadExecutor(config.getReadThreadPoolSize());
@@ -202,6 +264,20 @@ public abstract class ProxyRuntimeContext implements Reporter {
 
         for (Map.Entry<String, DBServerConfig> entry : config.getDbServers().entrySet()) {
             DBServerConfig dbServerConfig = entry.getValue();
+            String parent = dbServerConfig.getParent();
+            if(!StringUtil.isEmpty(parent)){
+            	DBServerConfig parentConfig = config.getDbServers().get(parent);
+            	if(parentConfig == null){
+            		throw new ConfigurationException(entry.getKey()+" cannot found parent with name="+parent);
+            	}
+            	inheritDBServerConfig(parentConfig,dbServerConfig);
+            }
+            
+            //ignore if dbServer is abstract
+            if(dbServerConfig.getAbstractive() != null && dbServerConfig.getAbstractive().booleanValue()){
+            	continue;
+            }
+            
             try {
                 BeanObjectEntityConfig poolConfig = dbServerConfig.getPoolConfig();
                 ObjectPool pool = (ObjectPool) poolConfig.createBeanObject(false);
@@ -272,7 +348,7 @@ public abstract class ProxyRuntimeContext implements Reporter {
             try {
                 bean.init();
             } catch (InitialisationException e) {
-                throw new ConfigurationException("Initialisation Exception", e);
+                throw new ConfigurationException("Initialisation bean="+bean+" error", e);
             }
         }
     }
@@ -392,7 +468,7 @@ public abstract class ProxyRuntimeContext implements Reporter {
             if (childNode instanceof Element) {
                 Element child = (Element) childNode;
                 DBServerConfig serverConfig = loadServer(child);
-                if (serverConfig.isVirtual()) {
+                if (serverConfig.getVirtual() != null && serverConfig.getVirtual().booleanValue()) {
                     if (serverConfig.getPoolConfig() != null) {
                         if (StringUtil.isEmpty(serverConfig.getPoolConfig().getClassName())) {
                             serverConfig.getPoolConfig().setClassName(getDefaultVirtualPoolClassName());
