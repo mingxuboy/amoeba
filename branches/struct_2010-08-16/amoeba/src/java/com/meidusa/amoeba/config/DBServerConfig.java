@@ -14,18 +14,35 @@ package com.meidusa.amoeba.config;
 public class DBServerConfig extends ConfigEntity implements Cloneable{
 	private static final long serialVersionUID = 1L;
 	private String name;
-	private boolean isVirtual;
+	private Boolean abstractive = false;
+	private Boolean virtual;
 	private String parent;
 	private BeanObjectEntityConfig factoryConfig;
 	private BeanObjectEntityConfig poolConfig;
 	public String getName() {
 		return name;
 	}
-
+	
 	public void setName(String name) {
 		this.name = name;
 	}
 	
+	public Boolean getVirtual() {
+		return virtual;
+	}
+
+	public void setVirtual(Boolean virtual) {
+		this.virtual = virtual;
+	}
+
+	public Boolean getAbstractive() {
+		return abstractive;
+	}
+
+	public void setAbstractive(Boolean abstractive) {
+		this.abstractive = abstractive;
+	}
+
 	public String getParent() {
 		return parent;
 	}
@@ -34,13 +51,6 @@ public class DBServerConfig extends ConfigEntity implements Cloneable{
 		this.parent = parent;
 	}
 	
-	public boolean isVirtual() {
-		return isVirtual;
-	}
-
-	public void setVirtual(boolean isVirtual) {
-		this.isVirtual = isVirtual;
-	}
 
 	public BeanObjectEntityConfig getFactoryConfig() {
 		return factoryConfig;
@@ -60,7 +70,8 @@ public class DBServerConfig extends ConfigEntity implements Cloneable{
 	
 	public Object clone(){
 		DBServerConfig config = new DBServerConfig();
-		config.isVirtual = isVirtual;
+		config.virtual = (virtual != null? Boolean.valueOf(virtual):null);
+		config.abstractive = (abstractive != null? Boolean.valueOf(abstractive):null);
 		config.name = name;
 		config.parent = parent;
 		if(factoryConfig != null){

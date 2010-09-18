@@ -60,7 +60,7 @@ public class DocumentUtil {
         	beanConfig.setClassName(current.getAttribute("class"));
         }
         
-        Map<String,Object> map = new HashMap<String,Object>();
+        HashMap<String,Object> map = new HashMap<String,Object>();
         for (int i = 0; i < childSize; i++) {
             Node childNode = children.item(i);
             if (childNode instanceof Element) {
