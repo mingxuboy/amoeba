@@ -13,12 +13,14 @@
  */
 package com.meidusa.amoeba.mongodb.route;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Stack;
 
 import org.bson.BSONObject;
 import org.bson.JSON;
+import org.bson.types.BSONTimestamp;
 import org.bson.types.BasicBSONList;
 
 import com.meidusa.amoeba.mongodb.net.MongodbClientConnection;
@@ -64,24 +66,54 @@ public class MongodbQueryRouter extends AbstractQueryRouter<MongodbClientConnect
 	@Override
 	protected Map<Table, Map<Column, Comparative>> evaluateTable(MongodbClientConnection connection,RequestMongodbPacket queryObject) {
 		Table table = new Table();
+		Schema schema = new Schema();
+		int cmd = 0;
 		if(queryObject.fullCollectionName != null){
-			int index = queryObject.fullCollectionName.indexOf(".");
-			if(index >0){
-				String schemaName = queryObject.fullCollectionName.substring(0,index);
-				String tableBame =  queryObject.fullCollectionName.substring(index +1);
-				table.setName(tableBame);
-				Schema schema = new Schema();
+			
+			cmd = queryObject.fullCollectionName.indexOf(".$cmd");
+			if(cmd >0){
+				String schemaName = queryObject.fullCollectionName.substring(0,cmd);
 				schema.setName(schemaName);
 				table.setSchema(schema);
 			}else{
-				table.setName(queryObject.fullCollectionName);
+				int	index = queryObject.fullCollectionName.indexOf(".");
+				if(index >0){
+					String schemaName = queryObject.fullCollectionName.substring(0,index);
+					String tableName =  queryObject.fullCollectionName.substring(index +1);
+					table.setName(tableName);
+					schema.setName(schemaName);
+					table.setSchema(schema);
+				}else{
+					table.setName(queryObject.fullCollectionName);
+				}
 			}
 		}
-		
 		BSONObject bson = null;
+		
 		if(queryObject instanceof QueryMongodbPacket){
 			QueryMongodbPacket query = (QueryMongodbPacket)queryObject;
-			bson = query.query;
+			
+			if(cmd >0){
+				String tableName = null;
+				
+				_tableName:{
+					tableName = (String)query.query.get("count");
+					if(tableName != null) break _tableName;
+					
+					tableName = (String)query.query.get("mapreduce");
+					if(tableName != null) break _tableName;
+					
+					tableName = (String)query.query.get("distinct");
+					if(tableName != null) break _tableName;
+				}
+				
+				if(tableName != null){
+					table.setName(tableName);
+				}
+				bson = (BSONObject)query.query.get("query");
+			}else{
+				bson = query.query;
+			}
 		}else if(queryObject  instanceof InsertMongodbPacket){
 			InsertMongodbPacket query = (InsertMongodbPacket)queryObject;
 			if(query.documents != null && query.documents.length>0){
@@ -240,6 +272,15 @@ public class MongodbQueryRouter extends AbstractQueryRouter<MongodbClientConnect
 					}
 					// value is constant
 					else{
+						if(value instanceof byte[]){
+							value = new String((byte[]) value);
+						}else if(value instanceof BSONTimestamp){
+							value =  new Date( ((BSONTimestamp)value).getTime() * 1000L );
+						}else if(value instanceof java.util.regex.Pattern){
+							value = ((java.util.regex.Pattern)value).pattern();
+							//ignore 
+							continue;
+						}
 						//put to map or push to stack
 						comparable = new Comparative(comparativeValue,(Comparable)value);
 						if(column != null){

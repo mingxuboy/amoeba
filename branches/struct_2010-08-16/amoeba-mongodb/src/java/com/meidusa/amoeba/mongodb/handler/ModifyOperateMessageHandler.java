@@ -27,6 +27,7 @@ public class ModifyOperateMessageHandler<T extends RequestMongodbPacket> extends
 	private int lastRequestId = 0;
 	public ModifyOperateMessageHandler(MongodbClientConnection clientConn,T t) {
 		super(clientConn, t);
+		isFindOne = true;
 	}
 
 	@Override

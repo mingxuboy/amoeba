@@ -44,7 +44,8 @@ public abstract class AbstractSessionHandler<T extends AbstractMongodbPacket> im
 	protected boolean isMulti = false;
 	protected T requestPacket;
 	protected List<ResponseMongodbPacket> multiResponsePacket = null;
-	
+	protected int cmd  = 0;
+	protected boolean isFindOne = false;
 	public AbstractSessionHandler(MongodbClientConnection clientConn,T t){
 		this.clientConn = clientConn;
 		this.requestPacket = t;
@@ -110,16 +111,37 @@ public abstract class AbstractSessionHandler<T extends AbstractMongodbPacket> im
 	
 	protected ResponseMongodbPacket mergeResponse(){
 		ResponseMongodbPacket result = new ResponseMongodbPacket();
+		BSONObject cmdResult = null;
 		
 		for(ResponseMongodbPacket response :multiResponsePacket){
 			if(response.numberReturned > 0){
-				if(result.documents == null){
-					result.documents = new ArrayList<BSONObject>();
+				if(cmd>0 || isFindOne){
+					if(cmdResult == null){
+						cmdResult = response.documents.get(0);
+					}else{
+						Number value = (Number)cmdResult.get("n");
+						Number add = (Number)response.documents.get(0).get("n");
+						if(value != null && add != null){
+							value = value.longValue() + add.longValue(); 
+							cmdResult.put("n", value.doubleValue());
+						}
+					}
+				}else{
+					if(result.documents == null){
+						result.documents = new ArrayList<BSONObject>();
+					}
+					result.documents.addAll(response.documents);
 				}
-				result.documents.addAll(response.documents);
 			}
 		}
+		
 		result.responseTo = this.requestPacket.requestID;
+		if(cmd>0 || isFindOne){
+			result.documents = new ArrayList<BSONObject>();
+			if(cmdResult != null){
+				result.documents.add(cmdResult);
+			}
+		}
 		result.numberReturned = (result.documents == null?0:result.documents.size());
 		return result;
 	}
