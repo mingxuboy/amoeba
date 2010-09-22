@@ -42,24 +42,38 @@ public class QueryMessageHandler extends AbstractSessionHandler<QueryMongodbPack
 			byte[] message) throws Exception {
 		
 		//request last error
-		if(requestPacket.fullCollectionName.indexOf("$")>0 && requestPacket.query != null 
-				&& requestPacket.query.get("getlasterror") != null){
-			byte[] msg = clientConn.getLastErrorMessage();
-			ResponseMongodbPacket packet = new ResponseMongodbPacket();
-			if(msg == null){
-				packet.responseTo = this.requestPacket.requestID;
-				packet.numberReturned = 1;
-				packet.documents = new ArrayList<BSONObject>(1);
-				packet.documents.add(BSON_OK);
-				PACKET_LOGGER.error("cannot getLasterrorMessage with requst="+this.requestPacket);
-			}else{
-				packet.init(msg, conn);
+		if(requestPacket.fullCollectionName.indexOf(".$cmd")>0){
+			if(requestPacket.query != null){
+				if(requestPacket.query.get("getlasterror") != null){
+					byte[] msg = clientConn.getLastErrorMessage();
+					ResponseMongodbPacket packet = new ResponseMongodbPacket();
+					if(msg == null){
+						packet.responseTo = this.requestPacket.requestID;
+						packet.numberReturned = 1;
+						packet.documents = new ArrayList<BSONObject>(1);
+						packet.documents.add(BSON_OK);
+						PACKET_LOGGER.error("cannot getLasterrorMessage with requst="+this.requestPacket);
+					}else{
+						packet.init(msg, conn);
+					}
+					if(PACKET_LOGGER.isDebugEnabled()){
+						PACKET_LOGGER.debug("<<----@ReponsePacket="+packet+", " +clientConn.getSocketId());
+					}
+					clientConn.postMessage(msg);
+					return;
+				}else{
+					if(requestPacket.query.get("group") != null){
+						this.cmd = MongodbPacketConstant.CMD_GROUP;
+					}else if(requestPacket.query.get("count") != null){
+						this.cmd = MongodbPacketConstant.CMD_COUNT;
+					}else if(requestPacket.query.get("drop") != null){
+						this.cmd = MongodbPacketConstant.CMD_DROP;
+					}else if(requestPacket.query.get("distinct") != null){
+						this.cmd = MongodbPacketConstant.CMD_DROP;
+					}
+					
+				}
 			}
-			if(PACKET_LOGGER.isDebugEnabled()){
-				PACKET_LOGGER.debug("<<----@ReponsePacket="+packet+", " +clientConn.getSocketId());
-			}
-			clientConn.postMessage(msg);
-			return;
 		}
 		
 		//other request

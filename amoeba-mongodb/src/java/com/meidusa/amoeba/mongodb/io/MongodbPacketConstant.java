@@ -29,4 +29,11 @@ public interface MongodbPacketConstant {
 	public static int OP_GET_MORE = 2005;//  Get more data from a query. See Cursors  
 	public static int OP_DELETE = 2006;//  Delete documents  
 	public static int OP_KILL_CURSORS=  2007;//  Tell database client is done with a cursor
+	
+	public static int CMD_COUNT = 1<<1;
+	public static int CMD_DISTINCT = 1<<2;
+	public static int CMD_MAP_REDUCE = 1<<3;
+	public static int CMD_GROUP = 1<<4;
+	public static int CMD_DROP = 1<<5;
+	public static int CMD_DROP_INDEXES = 1<<6;
 }
