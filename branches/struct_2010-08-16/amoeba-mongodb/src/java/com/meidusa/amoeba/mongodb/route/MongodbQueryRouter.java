@@ -213,6 +213,9 @@ public class MongodbQueryRouter extends AbstractQueryRouter<MongodbClientConnect
 						}else if("$or".equalsIgnoreCase(name)){
 							and = false;
 							isMulti = true;
+						}else if("$where".equalsIgnoreCase(name)){
+							and = false;
+							isMulti = true;
 						}
 						
 						if(comparativeValue == null){
@@ -232,6 +235,8 @@ public class MongodbQueryRouter extends AbstractQueryRouter<MongodbClientConnect
 								}else{
 									comparativeList = new ComparativeOR();
 								}
+							}else{
+								comparativeList = new ComparativeAND();
 							}
 							
 							for(Object object : list){

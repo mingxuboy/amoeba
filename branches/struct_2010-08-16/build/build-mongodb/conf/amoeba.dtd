@@ -15,6 +15,8 @@
 <!ELEMENT dbServer ( factoryConfig?, poolConfig* ) >
 <!ATTLIST dbServer name NMTOKEN #REQUIRED >
 <!ATTLIST dbServer virtual NMTOKEN #IMPLIED >
+<!ATTLIST dbServer abstractive NMTOKEN #IMPLIED >
+<!ATTLIST dbServer parent NMTOKEN #IMPLIED >
 
 <!ELEMENT dbServerList ( dbServer+ ) >
 
