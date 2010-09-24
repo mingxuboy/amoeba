@@ -124,7 +124,12 @@ public abstract class AbstractSessionHandler<T extends AbstractMongodbPacket> im
 						if(value != null && add != null){
 							value = value.longValue() + add.longValue(); 
 							cmdResult.put("n", value.doubleValue());
+						}else{
+							if(add != null){
+								cmdResult.put("n", add.doubleValue());
+							}
 						}
+							
 					}
 				}else{
 					if(result.documents == null){
