@@ -11,11 +11,10 @@
  */
 package com.meidusa.amoeba.net;
 
-public interface Sessionable {
+public interface Sessionable extends IdleChecker{
 	
 	public void startSession() throws Exception;
 	public boolean isMultiplayer();
-	public boolean checkIdle(long now);
 	public void endSession(boolean force);
 	public boolean isStarted();
 	public boolean isEnded();

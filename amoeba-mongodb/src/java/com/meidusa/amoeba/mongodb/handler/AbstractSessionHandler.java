@@ -22,6 +22,7 @@ import org.apache.log4j.Logger;
 import org.bson.BSONObject;
 import org.bson.BasicBSONObject;
 
+import com.meidusa.amoeba.context.ProxyRuntimeContext;
 import com.meidusa.amoeba.mongodb.net.MongodbClientConnection;
 import com.meidusa.amoeba.mongodb.net.MongodbServerConnection;
 import com.meidusa.amoeba.mongodb.packet.AbstractMongodbPacket;
@@ -46,6 +47,7 @@ public abstract class AbstractSessionHandler<T extends AbstractMongodbPacket> im
 	protected List<ResponseMongodbPacket> multiResponsePacket = null;
 	protected int cmd  = 0;
 	protected boolean isFindOne = false;
+	protected final long startTime = System.currentTimeMillis();
 	public AbstractSessionHandler(MongodbClientConnection clientConn,T t){
 		this.clientConn = clientConn;
 		this.requestPacket = t;
@@ -149,5 +151,9 @@ public abstract class AbstractSessionHandler<T extends AbstractMongodbPacket> im
 		}
 		result.numberReturned = (result.documents == null?0:result.documents.size());
 		return result;
+	}
+	
+	public boolean checkIdle(long now){
+		return (now - startTime) > ProxyRuntimeContext.getInstance().getConfig().getQueryTimeout() * 1000; 
 	}
 }

@@ -159,5 +159,4 @@ public class QueryMessageHandler extends AbstractSessionHandler<QueryMongodbPack
 			clientConn.postMessage(message);
 		}
 	}
-
 }

@@ -19,7 +19,7 @@ import java.nio.channels.SelectionKey;
  * @author <a href=mailto:piratebase@sina.com>Struct chen</a>
  *
  */
-public interface NetEventHandler {
+public interface NetEventHandler extends IdleChecker{
 	
 	/**
 	 * 此时handler需要处理 when 时刻 所 handle 的网络事件。
@@ -28,13 +28,6 @@ public interface NetEventHandler {
 	 * @return
 	 */
 	public int handleEvent (long when);
-	
-	/**
-	 * 检查是否以及处于idle，如果返回true，则需要关闭.
-	 * @param now
-	 * @return
-	 */
-	public boolean checkIdle (long now);
 	
 	public SelectionKey getSelectionKey();
 	

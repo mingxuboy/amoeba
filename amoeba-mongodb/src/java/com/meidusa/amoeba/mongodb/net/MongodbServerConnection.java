@@ -27,20 +27,11 @@ public class MongodbServerConnection extends AbstractMongodbConnection implement
 	private static Logger logger = Logger.getLogger(MongodbServerConnection.class);
 	
 	private ObjectPool objectPool;
-	private SessionMessageHandler sessionMessageHandler = null;
+	
 	private boolean active;
 	public MongodbServerConnection(SocketChannel channel, long createStamp) {
 		super(channel, createStamp);
 		this.setMessageHandler(this);
-	}
-
-	
-	public SessionMessageHandler getSessionMessageHandler() {
-		return sessionMessageHandler;
-	}
-
-	public void setSessionMessageHandler(SessionMessageHandler singleHandler) {
-		this.sessionMessageHandler = singleHandler;
 	}
 
 	/*protected void messageProcess() {
@@ -52,13 +43,6 @@ public class MongodbServerConnection extends AbstractMongodbConnection implement
 	
 	protected void doReceiveMessage(byte[] message){
 		sessionMessageHandler.handleMessage(this,message);
-	}
-	
-	public boolean checkIdle(long now){
-		if (isClosed()) {
-			return true;
-		}
-		return false;
 	}
 	
 	@Override
