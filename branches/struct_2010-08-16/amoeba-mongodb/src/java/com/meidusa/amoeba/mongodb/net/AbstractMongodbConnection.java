@@ -19,16 +19,25 @@ import java.nio.channels.SocketChannel;
 import com.meidusa.amoeba.mongodb.io.MongodbFramedInputStream;
 import com.meidusa.amoeba.mongodb.io.MongodbFramingOutputStream;
 import com.meidusa.amoeba.net.Connection;
+import com.meidusa.amoeba.net.SessionMessageHandler;
 import com.meidusa.amoeba.net.io.PacketInputStream;
 import com.meidusa.amoeba.net.io.PacketOutputStream;
 
 public abstract class AbstractMongodbConnection extends Connection {
-	
+	protected SessionMessageHandler sessionMessageHandler = null;
 	
 	public AbstractMongodbConnection(SocketChannel channel, long createStamp) {
 		super(channel, createStamp);
 	}
 
+	public SessionMessageHandler getSessionMessageHandler() {
+		return sessionMessageHandler;
+	}
+
+	public void setSessionMessageHandler(SessionMessageHandler singleHandler) {
+		this.sessionMessageHandler = singleHandler;
+	}
+	
     protected abstract void doReceiveMessage(byte[] message);
     
     protected void messageProcess() {
@@ -47,5 +56,17 @@ public abstract class AbstractMongodbConnection extends Connection {
 	@Override
 	protected PacketOutputStream createPacketOutputStream() {
 		return new MongodbFramingOutputStream(true);
+	}
+	
+	public boolean checkIdle(long now){
+		if (isClosed()) {
+			return true;
+		}else{
+			SessionMessageHandler sessionMessageHandler = this.sessionMessageHandler;
+			if(sessionMessageHandler != null){
+				return sessionMessageHandler.checkIdle(now);
+			}
+		}
+		return false;
 	}
 }

@@ -19,7 +19,7 @@ package com.meidusa.amoeba.net;
  * @author <a href=mailto:piratebase@sina.com>Struct chen</a>
  * 
  */
-public interface SessionMessageHandler {
+public interface SessionMessageHandler extends IdleChecker{
 	
 	/**
 	 * 
@@ -30,5 +30,6 @@ public interface SessionMessageHandler {
 	 * @param message 当前handle 的消息数据
 	 */
 	public void handleMessage(Connection conn,byte[] message);
+	
 	
 }

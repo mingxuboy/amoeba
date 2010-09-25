@@ -214,7 +214,7 @@ public class MongodbQueryRouter extends AbstractQueryRouter<MongodbClientConnect
 							and = false;
 							isMulti = true;
 						}else if("$where".equalsIgnoreCase(name)){
-							and = false;
+							and = true;
 							isMulti = true;
 						}
 						

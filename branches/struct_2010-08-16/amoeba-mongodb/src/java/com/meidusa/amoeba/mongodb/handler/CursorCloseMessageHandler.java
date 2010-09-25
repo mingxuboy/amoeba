@@ -19,6 +19,7 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 
+import com.meidusa.amoeba.context.ProxyRuntimeContext;
 import com.meidusa.amoeba.mongodb.io.MongodbPacketConstant;
 import com.meidusa.amoeba.mongodb.net.MongodbServerConnection;
 import com.meidusa.amoeba.mongodb.packet.AbstractMongodbPacket;
@@ -39,6 +40,7 @@ public class CursorCloseMessageHandler implements SessionMessageHandler{
 	private static Logger logger = Logger.getLogger("PACKETLOGGER");
 	public Map<Connection,MessageHandler> handlerMap = new HashMap<Connection,MessageHandler>();
 	private String sourceClient;
+	protected final long startTime = System.currentTimeMillis();
 	public CursorCloseMessageHandler(String sourceClient,List<Tuple<CursorEntry,ObjectPool>> tuples){
 		this.sourceClient = sourceClient;
 		for(Tuple<CursorEntry,ObjectPool> tuple : tuples){
@@ -81,5 +83,9 @@ public class CursorCloseMessageHandler implements SessionMessageHandler{
 			serverConn.getObjectPool().returnObject(serverConn);
 		} catch (Exception e) {
 		}
+	}
+	
+	public boolean checkIdle(long now){
+		return (now - startTime) > ProxyRuntimeContext.getInstance().getConfig().getQueryTimeout() * 1000; 
 	}
 }
