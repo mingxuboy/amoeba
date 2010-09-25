@@ -8,7 +8,7 @@ import java.util.List;
 import com.meidusa.amoeba.mongodb.packet.RequestMongodbPacket;
 import com.meidusa.amoeba.mongodb.packet.ResponseMongodbPacket;
 
-class GroupFunctionMerge implements FunctionMerge{
+public class GroupFunctionMerge implements FunctionMerge{
 
 	@Override
 	public ResponseMongodbPacket mergeResponse(RequestMongodbPacket requestPacket,
