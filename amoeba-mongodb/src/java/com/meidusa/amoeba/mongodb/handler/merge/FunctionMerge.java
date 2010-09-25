@@ -8,6 +8,6 @@ import java.util.List;
 import com.meidusa.amoeba.mongodb.packet.RequestMongodbPacket;
 import com.meidusa.amoeba.mongodb.packet.ResponseMongodbPacket;
 
-interface FunctionMerge{
+public interface FunctionMerge{
 	public ResponseMongodbPacket mergeResponse(RequestMongodbPacket requestPacket,List<ResponseMongodbPacket> multiResponsePacket);
 }
