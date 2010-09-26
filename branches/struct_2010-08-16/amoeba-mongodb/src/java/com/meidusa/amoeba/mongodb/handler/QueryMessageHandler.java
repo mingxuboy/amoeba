@@ -14,11 +14,18 @@
 package com.meidusa.amoeba.mongodb.handler;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.bson.BSONObject;
 
 import com.meidusa.amoeba.context.ProxyRuntimeContext;
+import com.meidusa.amoeba.mongodb.handler.merge.CountFunctionMerge;
+import com.meidusa.amoeba.mongodb.handler.merge.DistinctFunctionMerge;
+import com.meidusa.amoeba.mongodb.handler.merge.FunctionMerge;
+import com.meidusa.amoeba.mongodb.handler.merge.GroupFunctionMerge;
+import com.meidusa.amoeba.mongodb.handler.merge.OKFunctionMerge;
 import com.meidusa.amoeba.mongodb.io.MongodbPacketConstant;
 import com.meidusa.amoeba.mongodb.net.MongodbClientConnection;
 import com.meidusa.amoeba.mongodb.net.MongodbServerConnection;
@@ -32,6 +39,7 @@ import com.meidusa.amoeba.net.poolable.ObjectPool;
 import com.meidusa.amoeba.util.Tuple;
 
 public class QueryMessageHandler extends AbstractSessionHandler<QueryMongodbPacket> {
+	
 	private List<Tuple<CursorEntry,ObjectPool>> cursorList;
 	public QueryMessageHandler(MongodbClientConnection clientConn,QueryMongodbPacket packet) {
 		super(clientConn,packet);
@@ -69,7 +77,11 @@ public class QueryMessageHandler extends AbstractSessionHandler<QueryMongodbPack
 					}else if(requestPacket.query.get("drop") != null){
 						this.cmd = MongodbPacketConstant.CMD_DROP;
 					}else if(requestPacket.query.get("distinct") != null){
-						this.cmd = MongodbPacketConstant.CMD_DROP;
+						this.cmd = MongodbPacketConstant.CMD_DISTINCT;
+					}else if(requestPacket.query.get("deleteIndexes") != null){
+						this.cmd = MongodbPacketConstant.CMD_DROP_INDEXES;
+					}else if(requestPacket.query.get("mapreduce") != null){
+						this.cmd = MongodbPacketConstant.CMD_MAP_REDUCE;
 					}
 					
 				}
@@ -140,7 +152,13 @@ public class QueryMessageHandler extends AbstractSessionHandler<QueryMongodbPack
 					cursrID = this.clientConn.nextCursorID();
 					clientConn.putCursor(cursrID, cursorList);
 				}
-				ResponseMongodbPacket result = mergeResponse();
+				ResponseMongodbPacket result = null;
+				if(this.cmd>0){
+					FunctionMerge merge = FUNCTION_MERGE_MAP.get(this.cmd);
+					result = merge.mergeResponse(this.requestPacket, multiResponsePacket);
+				}else{
+					result = this.mergeResponse();
+				}
 				result.cursorID = cursrID;
 				clientConn.postMessage(result.toByteBuffer(this.clientConn));
 			}

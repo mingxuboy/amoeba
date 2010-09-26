@@ -23,6 +23,12 @@ import org.bson.BSONObject;
 import org.bson.BasicBSONObject;
 
 import com.meidusa.amoeba.context.ProxyRuntimeContext;
+import com.meidusa.amoeba.mongodb.handler.merge.CountFunctionMerge;
+import com.meidusa.amoeba.mongodb.handler.merge.DistinctFunctionMerge;
+import com.meidusa.amoeba.mongodb.handler.merge.FunctionMerge;
+import com.meidusa.amoeba.mongodb.handler.merge.GroupFunctionMerge;
+import com.meidusa.amoeba.mongodb.handler.merge.OKFunctionMerge;
+import com.meidusa.amoeba.mongodb.io.MongodbPacketConstant;
 import com.meidusa.amoeba.mongodb.net.MongodbClientConnection;
 import com.meidusa.amoeba.mongodb.net.MongodbServerConnection;
 import com.meidusa.amoeba.mongodb.packet.AbstractMongodbPacket;
@@ -33,10 +39,21 @@ import com.meidusa.amoeba.net.SessionMessageHandler;
 
 public abstract class AbstractSessionHandler<T extends AbstractMongodbPacket> implements SessionMessageHandler {
 	public static Logger PACKET_LOGGER = Logger.getLogger("PACKETLOGGER");
-	private  static Logger handlerLogger = Logger.getLogger(AbstractSessionHandler.class);
+	protected  static Logger handlerLogger = Logger.getLogger(AbstractSessionHandler.class);
 	public static final BSONObject BSON_OK = new BasicBSONObject();
+	protected static Map<Integer,FunctionMerge> FUNCTION_MERGE_MAP = new HashMap<Integer,FunctionMerge>();
+	static{
+		FUNCTION_MERGE_MAP.put(MongodbPacketConstant.CMD_GROUP, new GroupFunctionMerge());
+		FUNCTION_MERGE_MAP.put(MongodbPacketConstant.CMD_COUNT, new CountFunctionMerge());
+		FUNCTION_MERGE_MAP.put(MongodbPacketConstant.CMD_DROP, new OKFunctionMerge());
+		FUNCTION_MERGE_MAP.put(MongodbPacketConstant.CMD_DROP_INDEXES, new OKFunctionMerge());
+		FUNCTION_MERGE_MAP.put(MongodbPacketConstant.CMD_DISTINCT, new DistinctFunctionMerge());
+		FUNCTION_MERGE_MAP.put(MongodbPacketConstant.CMD_GETLASTERROR, new OKFunctionMerge());
+	}
+	
 	static{
 		BSON_OK.put("err", null);
+		BSON_OK.put("errmsg", null);
 		BSON_OK.put("n", 0);
 		BSON_OK.put("ok", 1.0);
 	}
@@ -111,6 +128,10 @@ public abstract class AbstractSessionHandler<T extends AbstractMongodbPacket> im
 		}
 	}
 	
+	/**
+	 * generic merge function
+	 * @return
+	 */
 	protected ResponseMongodbPacket mergeResponse(){
 		ResponseMongodbPacket result = new ResponseMongodbPacket();
 		BSONObject cmdResult = null;

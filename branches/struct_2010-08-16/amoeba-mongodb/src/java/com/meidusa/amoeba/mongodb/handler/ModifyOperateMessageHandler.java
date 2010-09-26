@@ -18,6 +18,8 @@ import java.util.ArrayList;
 import org.bson.BSONObject;
 
 import com.meidusa.amoeba.context.ProxyRuntimeContext;
+import com.meidusa.amoeba.mongodb.handler.merge.FunctionMerge;
+import com.meidusa.amoeba.mongodb.io.MongodbPacketConstant;
 import com.meidusa.amoeba.mongodb.net.MongodbClientConnection;
 import com.meidusa.amoeba.mongodb.net.MongodbServerConnection;
 import com.meidusa.amoeba.mongodb.packet.RequestMongodbPacket;
@@ -80,7 +82,8 @@ public class ModifyOperateMessageHandler<T extends RequestMongodbPacket> extends
 		if(isMulti){
 			multiResponsePacket.add(lastResponsePacket);
 			if(endQuery(conn)){
-				ResponseMongodbPacket result = this.mergeResponse();
+				FunctionMerge merge = FUNCTION_MERGE_MAP.get(MongodbPacketConstant.CMD_GETLASTERROR);
+				ResponseMongodbPacket result = merge.mergeResponse(requestPacket, multiResponsePacket);
 				result.responseTo = lastRequestId;
 				clientConn.setLastErrorMessage(result.toByteBuffer(this.clientConn).array());
 			}
