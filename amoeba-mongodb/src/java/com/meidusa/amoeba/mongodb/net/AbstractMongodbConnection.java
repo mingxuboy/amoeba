@@ -59,14 +59,14 @@ public abstract class AbstractMongodbConnection extends Connection {
 	}
 	
 	public boolean checkIdle(long now){
-		if (isClosed()) {
+		/*if (isClosed()) {
 			return true;
 		}else{
 			SessionMessageHandler sessionMessageHandler = this.sessionMessageHandler;
 			if(sessionMessageHandler != null){
 				return sessionMessageHandler.checkIdle(now);
 			}
-		}
+		}*/
 		return false;
 	}
 }

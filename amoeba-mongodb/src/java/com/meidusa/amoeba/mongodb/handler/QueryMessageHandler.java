@@ -14,18 +14,12 @@
 package com.meidusa.amoeba.mongodb.handler;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.bson.BSONObject;
 
 import com.meidusa.amoeba.context.ProxyRuntimeContext;
-import com.meidusa.amoeba.mongodb.handler.merge.CountFunctionMerge;
-import com.meidusa.amoeba.mongodb.handler.merge.DistinctFunctionMerge;
 import com.meidusa.amoeba.mongodb.handler.merge.FunctionMerge;
-import com.meidusa.amoeba.mongodb.handler.merge.GroupFunctionMerge;
-import com.meidusa.amoeba.mongodb.handler.merge.OKFunctionMerge;
 import com.meidusa.amoeba.mongodb.io.MongodbPacketConstant;
 import com.meidusa.amoeba.mongodb.net.MongodbClientConnection;
 import com.meidusa.amoeba.mongodb.net.MongodbServerConnection;

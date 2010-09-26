@@ -46,7 +46,7 @@ public abstract class PacketInputStream extends InputStream
     protected static final int INITIAL_BUFFER_CAPACITY = 32;
 
     /** ×î´óÈÝÁ¿ */
-    protected static final int MAX_BUFFER_CAPACITY = 512 * 1024;
+    protected static final int MAX_BUFFER_CAPACITY = 1024 * 1024 * 2;
     private byte[] tmp = new byte[4096]; 
     /**
      * Creates a new framed input stream.
@@ -135,6 +135,9 @@ public abstract class PacketInputStream extends InputStream
             // read, expand it and try reading some more
             int newSize = _buffer.capacity() << 1;
             newSize = newSize>_length ? newSize:_length+16;
+            if(newSize > MAX_BUFFER_CAPACITY){
+            	throw new IOException("packet over MAX_BUFFER_CAPACITY size="+newSize);
+            }
             ByteBuffer newbuf = ByteBuffer.allocate(newSize);
             newbuf.put((ByteBuffer)_buffer.flip());
             _buffer = newbuf;

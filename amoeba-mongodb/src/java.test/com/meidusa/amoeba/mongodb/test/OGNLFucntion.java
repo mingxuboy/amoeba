@@ -41,7 +41,7 @@ public class OGNLFucntion {
 		obj.put("count", 13);
 		ctx0.put("obj",obj);
 
-		System.out.println(Ognl.getValue("#prev.count = (#obj.count + 1)", ctx0, new Object()));
+		System.out.println(Ognl.getValue("#prev['count'] =1 + #prev['count']", ctx0, new Object()));
 		
 		System.out.println(prev.get("count"));
 	}
