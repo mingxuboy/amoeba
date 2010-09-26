@@ -98,19 +98,45 @@ public class MongodbQueryRouter extends AbstractQueryRouter<MongodbClientConnect
 				
 				_tableName:{
 					tableName = (String)query.query.get("count");
-					if(tableName != null) break _tableName;
+					if(tableName != null){
+						bson = (BSONObject)query.query.get("query");
+						break _tableName;
+					}
 					
 					tableName = (String)query.query.get("mapreduce");
-					if(tableName != null) break _tableName;
+					if(tableName != null){
+						bson = (BSONObject)query.query.get("query");
+						break _tableName;
+					}
 					
 					tableName = (String)query.query.get("distinct");
-					if(tableName != null) break _tableName;
+					if(tableName != null){
+						bson = (BSONObject)query.query.get("query");
+						break _tableName;
+					}
+					
+					tableName = (String)query.query.get("group");
+					if(tableName != null){
+						bson = (BSONObject)query.query.get("cond");
+						break _tableName;
+					}
+					
+					tableName = (String)query.query.get("drop");
+					if(tableName != null){
+						break _tableName;
+					}
+					
+					tableName = (String)query.query.get("deleteIndexes");
+					if(tableName != null){
+						break _tableName;
+					}
+					
 				}
-				
 				if(tableName != null){
 					table.setName(tableName);
+				}else{
+					bson = (BSONObject)query.query.get("query");
 				}
-				bson = (BSONObject)query.query.get("query");
 			}else{
 				bson = query.query;
 			}

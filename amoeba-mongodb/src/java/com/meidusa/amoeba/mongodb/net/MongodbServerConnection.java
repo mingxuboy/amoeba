@@ -19,7 +19,6 @@ import org.apache.log4j.Logger;
 
 import com.meidusa.amoeba.net.Connection;
 import com.meidusa.amoeba.net.MessageHandler;
-import com.meidusa.amoeba.net.SessionMessageHandler;
 import com.meidusa.amoeba.net.poolable.ObjectPool;
 import com.meidusa.amoeba.net.poolable.PoolableObject;
 
@@ -42,7 +41,9 @@ public class MongodbServerConnection extends AbstractMongodbConnection implement
     }*/
 	
 	protected void doReceiveMessage(byte[] message){
-		sessionMessageHandler.handleMessage(this,message);
+		if(sessionMessageHandler != null){
+			sessionMessageHandler.handleMessage(this,message);
+		}
 	}
 	
 	@Override
