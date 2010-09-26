@@ -95,7 +95,6 @@ import com.meidusa.amoeba.net.packet.AbstractPacket;
  *
  */
 public class AbstractMongodbPacket extends AbstractPacket<MongodbPacketBuffer>{
-    public transient int queryCmd;
     public int messageLength; // total message size, including this
     public int requestID;// identifier for this message
     public int responseTo;// requestID from the original request
