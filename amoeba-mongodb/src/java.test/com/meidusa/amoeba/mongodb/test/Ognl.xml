@@ -9,7 +9,7 @@
 	<entry key="requestID">${#atomicInteger.getAndIncrement()+2}</entry>
 	<entry key="query"><![CDATA[
 		{
-		"s" : ${@Math@abs(#random.nextLong())},
+		"s" : "${@java.util.UUID@randomUUID()}",
 		 "f" : ${@Math@abs(#random.nextLong())},
 		 "f" : ${@Math@abs(#random.nextLong())},
 		 "name" : "struct",
