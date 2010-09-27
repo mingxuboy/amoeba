@@ -4,6 +4,8 @@ package com.meidusa.amoeba.mongodb.test;
 import java.nio.channels.SocketChannel;
 import java.util.concurrent.CountDownLatch;
 
+import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
 import org.bson.BSONObject;
 import org.bson.JSON;
 
@@ -12,25 +14,33 @@ import com.meidusa.amoeba.benchmark.AbstractBenchmarkClientConnection;
 import com.meidusa.amoeba.config.ConfigUtil;
 import com.meidusa.amoeba.config.ParameterMapping;
 import com.meidusa.amoeba.config.PropertyTransfer;
-import com.meidusa.amoeba.util.StringUtil;
 
 public class MongoDBBenchmark extends AbstractBenchmark{
-	
+	private static Logger logger = Logger.getLogger(MongoDBBenchmark.class);
 	public static void main(String[] args) throws Exception {
 		ParameterMapping.registerTransfer(BSONObject.class, new PropertyTransfer<BSONObject>(){
 			@Override
 			public BSONObject transfer(String inputString) {
-				return (BSONObject)JSON.parse(ConfigUtil.filterWtihOGNL(inputString, AbstractBenchmark.getInstance().getContextMap()));
+				String json = ConfigUtil.filterWtihOGNL(inputString, AbstractBenchmark.getInstance().getContextMap());
+				if(logger.isDebugEnabled()){
+					logger.debug("output="+json);
+				}
+				
+				return (BSONObject)JSON.parse(json);
 			}
 		});
 		
 		ParameterMapping.registerTransfer(BSONObject[].class, new PropertyTransfer<BSONObject[]>(){
 			@Override
 			public BSONObject[] transfer(String inputString) {
-				String[] items = StringUtil.split(inputString,"//--");
+				String[] items = StringUtils.splitByWholeSeparator(inputString,"//--");
 				BSONObject[] list = new BSONObject[items.length];
 				for(int i=0;i<items.length;i++){
-					list[i] = (BSONObject)JSON.parse(ConfigUtil.filterWtihOGNL(items[i].trim(), AbstractBenchmark.getInstance().getContextMap()));
+					String json = ConfigUtil.filterWtihOGNL(items[i].trim(), AbstractBenchmark.getInstance().getContextMap());
+					if(logger.isDebugEnabled()){
+						logger.debug("output="+json);
+					}
+					list[i] = (BSONObject)JSON.parse(json);
 				}
 				return list;
 			}
