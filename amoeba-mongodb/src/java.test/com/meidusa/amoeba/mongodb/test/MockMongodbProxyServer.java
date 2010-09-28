@@ -23,7 +23,6 @@ import com.meidusa.amoeba.config.ConfigUtil;
 import com.meidusa.amoeba.context.ProxyRuntimeContext;
 import com.meidusa.amoeba.log4j.DOMConfigurator;
 import com.meidusa.amoeba.mongodb.context.MongodbProxyRuntimeContext;
-import com.meidusa.amoeba.mongodb.net.MongodbClientConnectionFactory;
 import com.meidusa.amoeba.net.ConnectionManager;
 import com.meidusa.amoeba.net.MultiConnectionManagerWrapper;
 import com.meidusa.amoeba.net.ServerableConnectionManager;

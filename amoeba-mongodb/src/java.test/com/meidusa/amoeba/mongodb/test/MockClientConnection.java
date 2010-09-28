@@ -15,41 +15,12 @@ package com.meidusa.amoeba.mongodb.test;
 
 import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
 
-import org.apache.commons.collections.map.LRUMap;
 import org.bson.BSONObject;
-import org.bson.BasicBSONObject;
 import org.bson.JSON;
 
-import com.meidusa.amoeba.mongodb.handler.AbstractSessionHandler;
-import com.meidusa.amoeba.mongodb.handler.CursorCloseMessageHandler;
-import com.meidusa.amoeba.mongodb.handler.DeleteMessageHandler;
-import com.meidusa.amoeba.mongodb.handler.GetMoreMessageHandler;
-import com.meidusa.amoeba.mongodb.handler.InsertMessageHandler;
-import com.meidusa.amoeba.mongodb.handler.KillCursorMessageHandler;
-import com.meidusa.amoeba.mongodb.handler.QueryMessageHandler;
-import com.meidusa.amoeba.mongodb.handler.UpdateMessageHandler;
-import com.meidusa.amoeba.mongodb.io.MongodbPacketConstant;
 import com.meidusa.amoeba.mongodb.net.AbstractMongodbConnection;
-import com.meidusa.amoeba.mongodb.packet.AbstractMongodbPacket;
-import com.meidusa.amoeba.mongodb.packet.CursorEntry;
-import com.meidusa.amoeba.mongodb.packet.DeleteMongodbPacket;
-import com.meidusa.amoeba.mongodb.packet.GetMoreMongodbPacket;
-import com.meidusa.amoeba.mongodb.packet.InsertMongodbPacket;
-import com.meidusa.amoeba.mongodb.packet.KillCursorsMongodbPacket;
-import com.meidusa.amoeba.mongodb.packet.MessageMongodbPacket;
-import com.meidusa.amoeba.mongodb.packet.MongodbPacketBuffer;
-import com.meidusa.amoeba.mongodb.packet.QueryMongodbPacket;
-import com.meidusa.amoeba.mongodb.packet.RequestMongodbPacket;
 import com.meidusa.amoeba.mongodb.packet.ResponseMongodbPacket;
-import com.meidusa.amoeba.mongodb.packet.UpdateMongodbPacket;
-import com.meidusa.amoeba.net.poolable.ObjectPool;
-import com.meidusa.amoeba.util.Tuple;
 
 /**
  * 
@@ -76,26 +47,5 @@ public class MockClientConnection extends AbstractMongodbConnection{
 		response.numberReturned = 1;
 		this.postMessage(response.toByteBuffer(this));
 	}
-	
-	/*@Override
-	public void handleMessage(Connection conn) {
-		try {
-			new CommandMessageHandler(this).handleMessage(conn);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}*/
-	
-	/*protected void messageProcess() {
-		byte[] message = null;
-		while((message = getInQueue().getNonBlocking()) != null){
-			CommandMessageHandler handler =	new CommandMessageHandler(this);
-			handler.handleMessage(this,message);
-		}
-    }*/
 
-	public static void main(String[] args){
-		BSONObject bs = (BSONObject)JSON.parse(string);
-		System.out.println(bs);
-	}
 }

@@ -135,7 +135,6 @@ public class MongodbBenchmarkClientConnection extends AbstractBenchmarkClientCon
 		if(isLastModifyOperation){
 			postMessage(getLastErrorPacket().toByteBuffer(this));
 		}
-		
 	}
 	
 	protected QueryMongodbPacket getLastErrorPacket(){
@@ -148,13 +147,15 @@ public class MongodbBenchmarkClientConnection extends AbstractBenchmarkClientCon
 		return packet;
 	}
 	
-	protected void doReceiveMessage(byte[] message) {
-		super.doReceiveMessage(message);
-		if (responseLatcher.getCount() <= 0) {
-			return;
-		}
-		if(isLastModifyOperation){
-			postMessage(getLastErrorPacket().toByteBuffer(this));
+	protected void postPacketToServer(){
+		if(task.running){
+			if(requestLatcher.getCount()>0){
+				requestLatcher.countDown();
+				postMessage(createRequestPacket().toByteBuffer(this));
+				if(isLastModifyOperation){
+					postMessage(getLastErrorPacket().toByteBuffer(this));
+				}
+			}
 		}
 	}
 }
