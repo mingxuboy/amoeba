@@ -249,18 +249,14 @@ public abstract class Connection implements NetEventHandler {
             if (_fin == null) {
                 _fin = createPacketInputStream();
             }
-
-            while (_channel != null && _channel.isOpen() && _fin.readPacket(_channel)) {
-                int bytesIn = 0;
+            byte[] msg = null;
+            while (_channel != null && _channel.isOpen() && (msg = _fin.readPacket(_channel)) != null) {
                 // 记录最后一次发生时间
                 _lastEvent = when;
                 /**
                  * 得到FramedInputStream 的所有字节
                  */
-                bytesIn = _fin.available();
-                bytesInTotle += bytesIn;
-                byte[] msg = new byte[bytesIn];
-                _fin.read(msg);
+                bytesInTotle +=msg.length;
                 doReceiveMessage(msg);
             }
         	messageProcess();
