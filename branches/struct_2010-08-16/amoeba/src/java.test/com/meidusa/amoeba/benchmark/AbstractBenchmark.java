@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Random;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
@@ -118,7 +119,7 @@ public abstract class AbstractBenchmark {
 		final int totle = Integer.parseInt(System.getProperty("totle", "1"));
 		String ip = System.getProperty("ip", "127.0.0.1");
 		
-		final CountDownLatch requestLatcher = new CountDownLatch(totle+1);
+		final CountDownLatch requestLatcher = new CountDownLatch(totle);
 		final CountDownLatch responseLatcher = new CountDownLatch(totle);
 		final TaskRunnable task = new TaskRunnable();
 		int port = Integer.parseInt(System.getProperty("port", "8066"));
@@ -167,7 +168,8 @@ public abstract class AbstractBenchmark {
 		
 		
 		for(AbstractBenchmarkClientConnection<?> connection: connList){
-			if(requestLatcher.countDownAndAvailable()){
+			if(requestLatcher.getCount()>0){
+				requestLatcher.countDown();
 				connection.startBenchmark();
 			}
 		}
