@@ -15,7 +15,7 @@ import java.util.regex.*;
 public class JSON {
 	
 	public static void main(String[] args){
-		Object object = parse("{'j':{'$in': [2,4,6]}}");
+		Object object = parse("{'j':{'$in': [2,4,6]},'s':\"asdf-1werqwer\"}");
 		System.out.println(object);
 	}
     /**

@@ -4,8 +4,8 @@ import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.util.Map;
 import java.util.Properties;
-import java.util.concurrent.CountDownLatch;
 
+import com.meidusa.amoeba.benchmark.AbstractBenchmark.TaskRunnable;
 import com.meidusa.amoeba.net.Connection;
 import com.meidusa.amoeba.net.packet.Packet;
 
@@ -19,7 +19,9 @@ public abstract class AbstractBenchmarkClientConnection<T extends Packet>
 	long end = min;
 	long next = min;
 	long count = 0;
-	protected CountDownLatch latcher;
+	protected CountDownLatch requestLatcher;
+	protected CountDownLatch responseLatcher;
+	protected TaskRunnable task;
 	private Map contextMap; 
 	public void putAllRequestProperties(Properties source){
 		if(properties == null){
@@ -33,10 +35,12 @@ public abstract class AbstractBenchmarkClientConnection<T extends Packet>
 	}
 	
 	public AbstractBenchmarkClientConnection(SocketChannel channel,
-			long createStamp, CountDownLatch latcher) {
+			long createStamp, CountDownLatch requestLatcher,CountDownLatch responseLatcher,TaskRunnable task) {
 		super(channel, createStamp);
 		start = System.nanoTime();
-		this.latcher = latcher;
+		this.requestLatcher = requestLatcher;
+		this.responseLatcher = responseLatcher;
+		this.task = task;
 	}
 
 	
@@ -56,7 +60,7 @@ public abstract class AbstractBenchmarkClientConnection<T extends Packet>
 	public abstract void startBenchmark();
 	
 	protected void doReceiveMessage(byte[] message) {
-		latcher.countDown();
+		
 		end = System.nanoTime();
 		long current = end - next;
 		min = Math.min(min, current);
@@ -67,13 +71,15 @@ public abstract class AbstractBenchmarkClientConnection<T extends Packet>
 			T t = createPacketWithBytes(message);
 			System.out.println("<<--" + t);
 		}
-
-		if (latcher.getCount() <= 0) {
-			return;
-		}
-		postMessage(createRequestPacket().toByteBuffer(this));
+		responseLatcher.countDownAndAvailable();
+		postPacketToServer();
 	}
 
+	protected void postPacketToServer(){
+		if(task.running && requestLatcher.countDownAndAvailable()){
+			postMessage(createRequestPacket().toByteBuffer(this));
+		}
+	}
 	
 	public void postMessage(ByteBuffer msg) {
 		next = System.nanoTime();
