@@ -3,13 +3,14 @@ package com.meidusa.amoeba.mongodb.test;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.util.Properties;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.log4j.Logger;
 import org.bson.BasicBSONObject;
 
 import com.meidusa.amoeba.benchmark.AbstractBenchmarkClientConnection;
+import com.meidusa.amoeba.benchmark.CountDownLatch;
+import com.meidusa.amoeba.benchmark.AbstractBenchmark.TaskRunnable;
 import com.meidusa.amoeba.config.ParameterMapping;
 import com.meidusa.amoeba.mongodb.io.MongodbFramedInputStream;
 import com.meidusa.amoeba.mongodb.io.MongodbFramingOutputStream;
@@ -37,8 +38,8 @@ import com.meidusa.amoeba.net.packet.AbstractPacket;
 public class MongodbBenchmarkClientConnection extends AbstractBenchmarkClientConnection<AbstractMongodbPacket> {
 	private static Logger	logger        = Logger.getLogger(MongodbBenchmarkClientConnection.class);
 	private boolean isLastModifyOperation = false;
-	public MongodbBenchmarkClientConnection(SocketChannel channel, long createStamp,CountDownLatch latcher) {
-		super(channel, createStamp,latcher);
+	public MongodbBenchmarkClientConnection(SocketChannel channel, long createStamp,CountDownLatch requestLatcher,CountDownLatch responseLatcher,TaskRunnable task) {
+		super(channel, createStamp,requestLatcher,responseLatcher,task);
 	}
 
 	public boolean needPing(long now) {
@@ -143,9 +144,10 @@ public class MongodbBenchmarkClientConnection extends AbstractBenchmarkClientCon
 		packet.query = document;
 		return packet;
 	}
+	
 	protected void doReceiveMessage(byte[] message) {
 		super.doReceiveMessage(message);
-		if (latcher.getCount() <= 0) {
+		if (responseLatcher.getCount() <= 0) {
 			return;
 		}
 		if(isLastModifyOperation){
