@@ -28,6 +28,7 @@ import com.meidusa.amoeba.mongodb.packet.UpdateMongodbPacket;
 import com.meidusa.amoeba.net.io.PacketInputStream;
 import com.meidusa.amoeba.net.io.PacketOutputStream;
 import com.meidusa.amoeba.net.packet.AbstractPacket;
+import com.meidusa.amoeba.util.StringUtil;
 
 
 /**
@@ -78,6 +79,8 @@ public class MongodbBenchmarkClientConnection extends AbstractBenchmarkClientCon
 		case MongodbPacketConstant.OP_REPLY:
 			packet = new ResponseMongodbPacket();
 			break;
+		default:
+			logger.error("error type="+type+"\r\n"+StringUtil.dumpAsHex(message, message.length));
 		}
 		packet.init(message, this);
 		return packet;

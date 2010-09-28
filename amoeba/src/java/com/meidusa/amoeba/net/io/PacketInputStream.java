@@ -68,39 +68,13 @@ public abstract class PacketInputStream extends InputStream
      * before again calling {@link #readPacket} as the previous packet's
      * data will be elimitated upon the subsequent call.
      *
-     * @return true if the entire packet has been read, false if the buffer
-     * contains only a partial packet.
+     * @return byte[] if the entire packet has been read, null if the buffer contains only a partial packet. 
      */
-    public boolean readPacket (ReadableByteChannel source)
+    public byte[] readPacket(ReadableByteChannel source)
         throws IOException
     {
-        // flush data from any previous frame from the buffer
-        if (_buffer.limit() == _length) {
-            // this will remove the old frame's bytes from the buffer,
-            // shift our old data to the start of the buffer, position the
-            // buffer appropriately for appending new data onto the end of
-            // our existing data, and set the limit to the capacity
-        	try{
-        		_buffer.position(_length);
-        		_buffer.limit(_have);
-        	}catch(IllegalArgumentException e){
-        		throw new IllegalArgumentException("old position="+_buffer.position()+", new position="+_length+",old limit="+_buffer.limit() +", have(new limit)="+_have,e);
-        	}
-            _buffer.compact();
-            _have -= _length;
-            if(_have < 0){
-            	_have = 0;
-            //	throw new IllegalArgumentException("old position="+_buffer.position()+", new position="+_length+",old limit="+_buffer.limit() +", have(new limit)="+_have);
-            }
-            // we may have picked up the next frame in a previous read, so
-            // try decoding the length straight away
-            _length = decodeLength();
-        }
-
-        // we may already have the next frame entirely in the buffer from
-        // a previous read
         if (checkForCompletePacket()) {
-            return true;
+            return readPacket();
         }
 
         // read whatever data we can from the source
@@ -110,7 +84,7 @@ public abstract class PacketInputStream extends InputStream
                 throw new EOFException();
             }
             if(got == 0){
-            	return false;
+            	return null;
             }
             _have += got;
 
@@ -153,11 +127,27 @@ public abstract class PacketInputStream extends InputStream
             // don't let things grow without bounds
         } while (_buffer.capacity() < MAX_BUFFER_CAPACITY);
 
-        // finally check to see if there's a complete frame in the buffer
-        // and prepare to serve it up if there is
-        return checkForCompletePacket();
+        if (checkForCompletePacket()) {
+            return readPacket();
+        }else{
+        	return null;
+        }
     }
 
+    protected byte[] readPacket(){
+        byte[] msg = new byte[_length];
+        int position = _buffer.position();
+        _buffer.position(0);
+        _buffer.get(msg, 0, _length);
+    	try{
+    		_buffer.limit(_have);
+    		_buffer.compact();
+            _have -= _length;
+    	}catch(IllegalArgumentException e){
+    		throw new IllegalArgumentException("old position="+_buffer.position()+", new position="+_length+",old limit="+_buffer.limit() +", have(new limit)="+_have,e);
+    	}
+        return msg;
+    }
     /**
      * only for bio
      * @param source
@@ -217,6 +207,7 @@ public abstract class PacketInputStream extends InputStream
 	
 	    // finally check to see if there's a complete frame in the buffer
 	    // and prepare to serve it up if there is
+	    
 	    return true;
 	}
     
@@ -242,13 +233,9 @@ public abstract class PacketInputStream extends InputStream
      */
     protected boolean checkForCompletePacket ()
     {
-        if (_length == -1 || _have < _length || _length < getHeaderSize()) {
+        if (_length <= -1 || _have < _length || _length < getHeaderSize()) {
             return false;
         }
-
-        // prepare the buffer such that this frame can be read
-        _buffer.position(getHeaderSize());
-        _buffer.limit(_length);
         return true;
     }
 

@@ -81,7 +81,7 @@ public class MysqlFramedInputStream extends PacketInputStream implements MySqlPa
 		return HEADER_SIZE;
 	}
 	
-	protected boolean checkForCompletePacket ()
+	/*protected boolean checkForCompletePacket ()
     {
         if (_length == -1 || _have < _length) {
             return false;
@@ -94,5 +94,26 @@ public class MysqlFramedInputStream extends PacketInputStream implements MySqlPa
         }
         _buffer.limit(_length);
         return true;
+    }*/
+	
+	protected byte[] readPacket(){
+        byte[] msg = new byte[_length];
+        int position = _buffer.position();
+        if(readPackedWithHead){
+        	_buffer.position(0);
+        }else{
+        	_buffer.position(this.getHeaderSize());
+        }
+        _buffer.get(msg, 0, _length);
+    	try{
+    		_buffer.limit(_have);
+    		
+    		_buffer.compact();
+    		_buffer.position(position - _length);
+            _have -= _length;
+    	}catch(IllegalArgumentException e){
+    		throw new IllegalArgumentException("old position="+_buffer.position()+", new position="+_length+",old limit="+_buffer.limit() +", have(new limit)="+_have,e);
+    	}
+        return msg;
     }
 }
