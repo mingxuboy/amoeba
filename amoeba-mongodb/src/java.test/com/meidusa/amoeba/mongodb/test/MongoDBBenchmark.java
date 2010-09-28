@@ -2,6 +2,7 @@ package com.meidusa.amoeba.mongodb.test;
 
 
 import java.nio.channels.SocketChannel;
+import java.util.concurrent.CountDownLatch;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
@@ -10,7 +11,6 @@ import org.bson.JSON;
 
 import com.meidusa.amoeba.benchmark.AbstractBenchmark;
 import com.meidusa.amoeba.benchmark.AbstractBenchmarkClientConnection;
-import com.meidusa.amoeba.benchmark.CountDownLatch;
 import com.meidusa.amoeba.config.ConfigUtil;
 import com.meidusa.amoeba.config.ParameterMapping;
 import com.meidusa.amoeba.config.PropertyTransfer;

@@ -3,13 +3,13 @@ package com.meidusa.amoeba.mongodb.test;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.util.Properties;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.log4j.Logger;
 import org.bson.BasicBSONObject;
 
 import com.meidusa.amoeba.benchmark.AbstractBenchmarkClientConnection;
-import com.meidusa.amoeba.benchmark.CountDownLatch;
 import com.meidusa.amoeba.benchmark.AbstractBenchmark.TaskRunnable;
 import com.meidusa.amoeba.config.ParameterMapping;
 import com.meidusa.amoeba.mongodb.io.MongodbFramedInputStream;

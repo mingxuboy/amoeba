@@ -4,6 +4,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.CountDownLatch;
 
 import com.meidusa.amoeba.benchmark.AbstractBenchmark.TaskRunnable;
 import com.meidusa.amoeba.net.Connection;
@@ -71,13 +72,16 @@ public abstract class AbstractBenchmarkClientConnection<T extends Packet>
 			T t = createPacketWithBytes(message);
 			System.out.println("<<--" + t);
 		}
-		responseLatcher.countDownAndAvailable();
+		responseLatcher.countDown();
 		postPacketToServer();
 	}
 
 	protected void postPacketToServer(){
-		if(task.running && requestLatcher.countDownAndAvailable()){
-			postMessage(createRequestPacket().toByteBuffer(this));
+		if(task.running){
+			if(requestLatcher.getCount()>0){
+				requestLatcher.countDown();
+				postMessage(createRequestPacket().toByteBuffer(this));
+			}
 		}
 	}
 	
