@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Random;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
@@ -91,9 +90,18 @@ public abstract class AbstractBenchmark {
 	public static AbstractBenchmark getInstance(){
 		return AbstractBenchmark.benckmark;
 	}
-	public abstract AbstractBenchmarkClientConnection<?> newBenchmarkClientConnection(SocketChannel channel,long time,CountDownLatch latcher);
-	
+	public abstract AbstractBenchmarkClientConnection<?> newBenchmarkClientConnection(SocketChannel channel,long time,CountDownLatch requestLatcher,CountDownLatch responseLatcher,TaskRunnable task);
+	public static class TaskRunnable{
+		public boolean running = true;
+	}
 	public static void main(String[] args) throws Exception {
+	/*	final CountDownLatch my = new CountDownLatch(10);
+		int j = 13;
+		while(j-->0){
+			System.out.println(my.countDownAndAvailable()+".."+my.getCount()+"...");
+		}
+		
+		System.exit(1);*/
 		Logger logger = Logger.getLogger("rootLogger");
 		logger.addAppender(new ConsoleAppender());
 		logger.setLevel(Level.DEBUG);
@@ -109,8 +117,10 @@ public abstract class AbstractBenchmark {
 		int conn = Integer.parseInt(System.getProperty("conn", "1"));
 		final int totle = Integer.parseInt(System.getProperty("totle", "1"));
 		String ip = System.getProperty("ip", "127.0.0.1");
-		final CountDownLatch latcher = new CountDownLatch(totle);
 		
+		final CountDownLatch requestLatcher = new CountDownLatch(totle+1);
+		final CountDownLatch responseLatcher = new CountDownLatch(totle);
+		final TaskRunnable task = new TaskRunnable();
 		int port = Integer.parseInt(System.getProperty("port", "8066"));
 		
 		MultiConnectionManagerWrapper manager = new MultiConnectionManagerWrapper();
@@ -119,11 +129,11 @@ public abstract class AbstractBenchmark {
 		Thread.sleep(100L);
 		System.out.println("Connection manager started....");
 		new Thread(){
-			long lastCount = latcher.getCount();
+			long lastCount = responseLatcher.getCount();
 			{this.setDaemon(true);}
 			public void run(){
-				while(latcher.getCount()>0){
-					long current = latcher.getCount();
+				while(responseLatcher.getCount()>0){
+					long current = responseLatcher.getCount();
 					long tps = lastCount - current;
 					lastCount = current;
 					System.out.println(new Date() +"     compeleted="+(totle - lastCount)+ " TPS="+tps);
@@ -143,7 +153,7 @@ public abstract class AbstractBenchmark {
 		for(int i=0;i<conn;i++){
 			InetSocketAddress address = new InetSocketAddress(ip,port);
 			try{
-				AbstractBenchmarkClientConnection<?> connection = benckmark.newBenchmarkClientConnection(SocketChannel.open(address),System.currentTimeMillis(),latcher);
+				AbstractBenchmarkClientConnection<?> connection = benckmark.newBenchmarkClientConnection(SocketChannel.open(address),System.currentTimeMillis(),requestLatcher,responseLatcher,task);
 				connection.putAllRequestProperties(properties);
 				connection.setContextMap(benckmark.getContextMap());
 				manager.postRegisterNetEventHandler(connection, SelectionKey.OP_READ);
@@ -157,9 +167,13 @@ public abstract class AbstractBenchmark {
 		
 		
 		for(AbstractBenchmarkClientConnection<?> connection: connList){
-			connection.startBenchmark();
+			if(requestLatcher.countDownAndAvailable()){
+				connection.startBenchmark();
+			}
 		}
-		latcher.await();
+		requestLatcher.await();
+		task.running = false;
+		responseLatcher.await();
 		
 		long min = connList.get(0).min;
 		long max = 0;

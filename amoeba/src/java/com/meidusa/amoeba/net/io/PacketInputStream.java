@@ -18,6 +18,8 @@ import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.ReadableByteChannel;
 
+import com.meidusa.amoeba.util.StringUtil;
+
 /**
  * 
  * 
@@ -88,6 +90,7 @@ public abstract class PacketInputStream extends InputStream
             _have -= _length;
             if(_have < 0){
             	_have = 0;
+            //	throw new IllegalArgumentException("old position="+_buffer.position()+", new position="+_length+",old limit="+_buffer.limit() +", have(new limit)="+_have);
             }
             // we may have picked up the next frame in a previous read, so
             // try decoding the length straight away
@@ -106,6 +109,9 @@ public abstract class PacketInputStream extends InputStream
             if (got == -1) {
                 throw new EOFException();
             }
+            if(got == 0){
+            	return false;
+            }
             _have += got;
 
             if (_length == -1) {
@@ -115,7 +121,9 @@ public abstract class PacketInputStream extends InputStream
             }
             
             if(_length < -1){
-            	throw new IOException("decodeLength error:_length="+_length);
+            	_buffer.flip();
+            	byte[] bts = _buffer.array();
+            	throw new IOException("decodeLength error:_length="+_length+"\r\n"+StringUtil.dumpAsHex(bts, bts.length));
             }
 
             // if there's room remaining in the buffer, that means we've
