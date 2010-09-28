@@ -143,6 +143,7 @@ public abstract class PacketInputStream extends InputStream
     		_buffer.limit(_have);
     		_buffer.compact();
             _have -= _length;
+            _length = -1;
     	}catch(IllegalArgumentException e){
     		throw new IllegalArgumentException("old position="+_buffer.position()+", new position="+_length+",old limit="+_buffer.limit() +", have(new limit)="+_have,e);
     	}
