@@ -6,8 +6,8 @@
         <entry key="requestFlags">0</entry>
         <entry key="documents"><![CDATA[
                 {
-                 "s" : ${#atomicInteger.getAndIncrement()+1000},
-                 "f" :  ${@Math@abs(#random.nextInt(500))},
+                 "s" : ${@Math@abs(#random.nextInt(10000))},
+                 "f" :  ${@Math@abs(#random.nextInt(100500))},
                  "name" : "struct"
                 }
                 ]]></entry>

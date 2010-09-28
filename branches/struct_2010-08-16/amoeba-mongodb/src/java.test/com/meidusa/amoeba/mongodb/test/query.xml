@@ -8,6 +8,6 @@
 	<entry key="requestFlags">0</entry>
 	<entry key="requestID">${#atomicInteger.getAndIncrement()+2}</entry>
 	<entry key="query"><![CDATA[
-		{ "$or" : [ { "s" : 1000 } , { "s" : 1001} ] }
+		{"s":${@Math@abs(#random.nextInt(10000))}}
 		]]></entry>
 </properties>
