@@ -134,21 +134,7 @@ public abstract class PacketInputStream extends InputStream
         }
     }
 
-    protected byte[] readPacket(){
-        byte[] msg = new byte[_length];
-        int position = _buffer.position();
-        _buffer.position(0);
-        _buffer.get(msg, 0, _length);
-    	try{
-    		_buffer.limit(_have);
-    		_buffer.compact();
-            _have -= _length;
-            _length = -1;
-    	}catch(IllegalArgumentException e){
-    		throw new IllegalArgumentException("old position="+_buffer.position()+", new position="+_length+",old limit="+_buffer.limit() +", have(new limit)="+_have,e);
-    	}
-        return msg;
-    }
+    protected abstract byte[] readPacket();
     /**
      * only for bio
      * @param source
