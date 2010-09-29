@@ -22,6 +22,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.commons.collections.map.LRUMap;
+import org.apache.log4j.Logger;
 import org.bson.BasicBSONObject;
 
 import com.meidusa.amoeba.mongodb.handler.AbstractSessionHandler;
@@ -54,8 +55,9 @@ import com.meidusa.amoeba.util.Tuple;
  */
 @SuppressWarnings({ "unchecked", "deprecation" })
 public class MongodbClientConnection extends AbstractMongodbConnection{
+	protected  static Logger logger = Logger.getLogger(MongodbClientConnection.class);
 	private LinkedBlockingQueue<byte[]> lastErrorQueue = new LinkedBlockingQueue<byte[]>(1);
-	private AtomicInteger requestId = new AtomicInteger(0);
+	private AtomicInteger LastErrorrequestId = new AtomicInteger(0);
 	private AtomicLong currentCursorID = new AtomicLong(0x10001L);
 	private LRUMap cursorMap = new LRUMap(10){
 		private static final long serialVersionUID = 1L;
@@ -69,16 +71,6 @@ public class MongodbClientConnection extends AbstractMongodbConnection{
 		}
 	};
 	
-	//private Map<Long,Tuple<Long,ObjectPool>> cursorMap = new HashMap<Long,Tuple<Long,ObjectPool>>(2);
-	
-	private  QueryMongodbPacket LastErrorPacket = new QueryMongodbPacket();
-	{
-		LastErrorPacket.query = new BasicBSONObject();
-		LastErrorPacket.numberToReturn = -1;
-		LastErrorPacket.fullCollectionName="admin.$cmd";
-		LastErrorPacket.query.put("getlasterror", 1);
-	}
-	
 	public byte[] getLastErrorMessage() {
 		try {
 			do{
@@ -86,7 +78,7 @@ public class MongodbClientConnection extends AbstractMongodbConnection{
 				if(byts == null){
 					return null;
 				}
-				if(requestId.get() == MongodbPacketBuffer.getResponseId(byts)){
+				if(LastErrorrequestId.get() == MongodbPacketBuffer.getResponseId(byts)){
 					return byts;
 				}
 			}while(true);
@@ -96,18 +88,18 @@ public class MongodbClientConnection extends AbstractMongodbConnection{
 	}
 	
 	public void setLastErrorMessage(byte[] lastErrorMessage) {
-		if(requestId.get() == MongodbPacketBuffer.getResponseId(lastErrorMessage)){
+		int lastId = LastErrorrequestId.get();
+		int lastResponseId = MongodbPacketBuffer.getResponseId(lastErrorMessage);
+		if(lastId == lastResponseId){
 			lastErrorQueue.clear();
 			lastErrorQueue.offer(lastErrorMessage);
+		}else{
+			logger.warn("last ErrorMessage not fit: lastId="+lastId+", lastResponse="+lastResponseId);
 		}
 	}
 	
 	public long nextCursorID(){
 		return currentCursorID.incrementAndGet();
-	}
-	
-	public void clearErrorMessage(){
-		lastErrorQueue.clear();
 	}
 	
 	public void putCursor(long cursorID,List<Tuple<CursorEntry,ObjectPool>> tuples){
@@ -123,14 +115,12 @@ public class MongodbClientConnection extends AbstractMongodbConnection{
 				newList.add(tuple);
 				cursorMap.put(cursorID, newList);
 			}else{
-				_addNew_:{
-					for(Tuple<CursorEntry,ObjectPool> storedTuple : tuples){
-						if(storedTuple.left.equals(tuple.left)){
-							break _addNew_;
-						}
+				for(Tuple<CursorEntry,ObjectPool> storedTuple : tuples){
+					if(storedTuple.left.equals(tuple.left)){
+						return;
 					}
-					tuples.add(tuple);
 				}
+				tuples.add(tuple);
 			}
 		}
 	}
@@ -139,15 +129,13 @@ public class MongodbClientConnection extends AbstractMongodbConnection{
 		synchronized (cursorMap) {
 			List<Tuple<CursorEntry,ObjectPool>> tuples = (List<Tuple<CursorEntry,ObjectPool>>)cursorMap.get(cursorID);
 			if(tuples != null){
-				_addNew_:{
-					for(Tuple<CursorEntry,ObjectPool> storedTuple : tuples){
-						if(storedTuple.left.equals(cursorEntry)){
-							tuples.remove(storedTuple);
-							if(tuples.size() == 0){
-								cursorMap.remove(cursorID);
-							}
-							break _addNew_;
+				for(Tuple<CursorEntry,ObjectPool> storedTuple : tuples){
+					if(storedTuple.left.equals(cursorEntry)){
+						tuples.remove(storedTuple);
+						if(tuples.size() == 0){
+							cursorMap.remove(cursorID);
 						}
+						break;
 					}
 				}
 			}
@@ -172,7 +160,7 @@ public class MongodbClientConnection extends AbstractMongodbConnection{
 		packet.numberToReturn = -1;
 		packet.fullCollectionName = "admin.$cmd";
 		packet.query.put("getlasterror", 1);
-		packet.requestID = requestId.incrementAndGet();
+		packet.requestID = LastErrorrequestId.incrementAndGet();
 		return packet;
 	}
 	

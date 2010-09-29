@@ -85,6 +85,7 @@ public abstract class AbstractSessionHandler<T extends AbstractMongodbPacket> im
 					result.documents = new ArrayList<BSONObject>();
 					BSONObject error = new BasicBSONObject();
 					error.put("err", e.getMessage());
+					error.put("errmsg", e.getMessage());
 					error.put("n", 1);
 					result.documents.add(error);
 					conn.postMessage(result.toByteBuffer(conn));

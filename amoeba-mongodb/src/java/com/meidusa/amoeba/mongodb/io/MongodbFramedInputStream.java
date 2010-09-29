@@ -91,6 +91,7 @@ public class MongodbFramedInputStream extends PacketInputStream implements Mongo
     		_buffer.compact();
     		_buffer.position(position - _length);
             _have -= _length;
+            _length = this.decodeLength();
     	}catch(IllegalArgumentException e){
     		throw new IllegalArgumentException("old position="+_buffer.position()+", new position="+_length+",old limit="+_buffer.limit() +", have(new limit)="+_have,e);
     	}
