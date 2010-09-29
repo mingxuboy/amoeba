@@ -50,11 +50,11 @@ public abstract class AbstractBenchmark {
 					System.exit(-1);
 				}
 			}else{
-				System.err.println("requestFile not found or not file :"+reqestXmlFile.getAbsolutePath());
+				System.err.println("requestFile not found or is not file :"+reqestXmlFile.getAbsolutePath());
 				System.exit(-1);
 			}
 		}else{
-			System.err.println("system property named 'reqestXml' not set");
+			System.err.println("system property named 'requestFile' not set");
 			System.exit(-1);
 		}
 		
