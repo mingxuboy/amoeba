@@ -57,6 +57,7 @@ public class QueryMongodbPacket extends RequestMongodbPacket {
 		numberToSkip = buffer.readInt();
 		numberToReturn = buffer.readInt();
 		query = buffer.readBSONObject();
+		
 		if(buffer.hasRemaining()){
 			returnFieldSelector  = buffer.readBSONObject();
 		}
@@ -67,7 +68,7 @@ public class QueryMongodbPacket extends RequestMongodbPacket {
 		super.write2Buffer(buffer);
 		buffer.writeInt(numberToSkip);
 		buffer.writeInt(numberToReturn);
-		buffer.writeBSONObject(query);
+		buffer.writeBSONObject(query);//can not be null
 		if(returnFieldSelector != null){
 			buffer.writeBSONObject(returnFieldSelector);
 		}

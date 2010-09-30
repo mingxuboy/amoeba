@@ -17,6 +17,7 @@ import com.meidusa.amoeba.mongodb.packet.ResponseMongodbPacket;
  */
 public class GroupFunctionMerge implements FunctionMerge{
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public ResponseMongodbPacket mergeResponse(RequestMongodbPacket requestPacket,
 			List<ResponseMongodbPacket> multiResponsePacket) {

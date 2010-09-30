@@ -15,8 +15,6 @@ package com.meidusa.amoeba.mongodb.handler;
 
 import java.util.ArrayList;
 
-import org.bson.BSONObject;
-
 import com.meidusa.amoeba.context.ProxyRuntimeContext;
 import com.meidusa.amoeba.mongodb.handler.merge.FunctionMerge;
 import com.meidusa.amoeba.mongodb.io.MongodbPacketConstant;
@@ -31,7 +29,6 @@ public class ModifyOperateMessageHandler<T extends RequestMongodbPacket> extends
 	private int lastRequestId = 0;
 	public ModifyOperateMessageHandler(MongodbClientConnection clientConn,T t) {
 		super(clientConn, t);
-		isFindOne = true;
 	}
 
 	@Override
@@ -92,47 +89,6 @@ public class ModifyOperateMessageHandler<T extends RequestMongodbPacket> extends
 			endQuery(conn);
 		}
 		
-	}
-	
-	protected ResponseMongodbPacket mergeResponse(){
-		ResponseMongodbPacket result = new ResponseMongodbPacket();
-		BSONObject cmdResult = null;
-		
-		for(ResponseMongodbPacket response :multiResponsePacket){
-			if(response.numberReturned > 0){
-				if(cmd>0 || isFindOne){
-					if(cmdResult == null){
-						cmdResult = response.documents.get(0);
-					}else{
-						Number value = (Number)cmdResult.get("n");
-						Number add = (Number)response.documents.get(0).get("n");
-						if(value != null && add != null){
-							value = value.longValue() + add.longValue(); 
-							cmdResult.put("n", value.doubleValue());
-						}else{
-							if(add != null){
-								cmdResult.put("n", add.doubleValue());
-							}
-						}
-					}
-				}else{
-					if(result.documents == null){
-						result.documents = new ArrayList<BSONObject>();
-					}
-					result.documents.addAll(response.documents);
-				}
-			}
-		}
-		
-		result.responseTo = this.requestPacket.requestID;
-		if(cmd>0 || isFindOne){
-			result.documents = new ArrayList<BSONObject>();
-			if(cmdResult != null){
-				result.documents.add(cmdResult);
-			}
-		}
-		result.numberReturned = (result.documents == null?0:result.documents.size());
-		return result;
 	}
 
 }

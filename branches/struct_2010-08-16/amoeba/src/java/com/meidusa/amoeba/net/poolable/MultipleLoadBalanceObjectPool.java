@@ -264,16 +264,6 @@ public class MultipleLoadBalanceObjectPool implements ObjectPool,Initialisable {
 		this.valid = valid;
 	}
 
-/*	public synchronized void afterChecked(ObjectPool pool) {
-		List<ObjectPool> poolList = new ArrayList<ObjectPool>();
-		for(ObjectPool object :this.objectPools){
-			if(object.isValid()){
-				poolList.add(object);
-			}
-		}
-        runtimeObjectPools = poolList.toArray(new ObjectPool[poolList.size()]);
-	}*/
-
 	public static class MultipleHeartbeatDelayed extends HeartbeatDelayed {
 
 		public MultipleHeartbeatDelayed(long nsTime, TimeUnit timeUnit,
@@ -288,16 +278,6 @@ public class MultipleLoadBalanceObjectPool implements ObjectPool,Initialisable {
 		public STATUS doCheck() {
 			return super.doCheck();
 		}
-		/*public STATUS doCheck() {
-			MultipleLoadBalanceObjectPool mult = (MultipleLoadBalanceObjectPool)this.getPool();
-			if(mult.validate()){
-				mult.setValid(true);
-				return STATUS.VALID;
-			}else{
-				mult.setValid(false);
-				return STATUS.INVALID;
-			}
-		}*/
 	}
 
 	@Override
