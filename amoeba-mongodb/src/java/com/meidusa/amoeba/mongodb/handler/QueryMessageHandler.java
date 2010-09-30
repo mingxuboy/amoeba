@@ -42,7 +42,6 @@ public class QueryMessageHandler extends AbstractSessionHandler<QueryMongodbPack
 	@Override
 	protected void doClientRequest(MongodbClientConnection conn,
 			byte[] message) throws Exception {
-		
 		//request last error
 		if(requestPacket.fullCollectionName.indexOf(".$cmd")>0){
 			if(requestPacket.query != null){
@@ -151,7 +150,7 @@ public class QueryMessageHandler extends AbstractSessionHandler<QueryMongodbPack
 					FunctionMerge merge = FUNCTION_MERGE_MAP.get(this.cmd);
 					result = merge.mergeResponse(this.requestPacket, multiResponsePacket);
 				}else{
-					result = this.mergeResponse();
+					result = this.mergeResponse(this.requestPacket.numberToReturn == -1);
 				}
 				result.cursorID = cursrID;
 				clientConn.postMessage(result.toByteBuffer(this.clientConn));

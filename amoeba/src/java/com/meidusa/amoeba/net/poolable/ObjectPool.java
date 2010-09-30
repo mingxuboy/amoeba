@@ -25,7 +25,11 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.log4j.Logger;
 
-
+/**
+ * 
+ * @author struct
+ *
+ */
 public interface ObjectPool extends org.apache.commons.pool.ObjectPool {
 	static Logger logger = Logger.getLogger(ObjectPool.class); 
 	static enum STATUS {

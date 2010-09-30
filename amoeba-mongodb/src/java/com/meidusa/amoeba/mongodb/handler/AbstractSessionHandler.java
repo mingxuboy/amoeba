@@ -63,7 +63,6 @@ public abstract class AbstractSessionHandler<T extends AbstractMongodbPacket> im
 	protected T requestPacket;
 	protected List<ResponseMongodbPacket> multiResponsePacket = null;
 	protected int cmd  = 0;
-	protected boolean isFindOne = false;
 	protected final long startTime = System.currentTimeMillis();
 	public AbstractSessionHandler(MongodbClientConnection clientConn,T t){
 		this.clientConn = clientConn;
@@ -133,13 +132,13 @@ public abstract class AbstractSessionHandler<T extends AbstractMongodbPacket> im
 	 * generic merge function
 	 * @return
 	 */
-	protected ResponseMongodbPacket mergeResponse(){
+	protected ResponseMongodbPacket mergeResponse(boolean isFindOne){
 		ResponseMongodbPacket result = new ResponseMongodbPacket();
+		result.responseTo = this.requestPacket.requestID;
 		BSONObject cmdResult = null;
-		
-		for(ResponseMongodbPacket response :multiResponsePacket){
-			if(response.numberReturned > 0){
-				if(cmd>0 || isFindOne){
+		if(cmd>0 || isFindOne){
+			for(ResponseMongodbPacket response :multiResponsePacket){
+				if(response.numberReturned > 0){
 					if(cmdResult == null){
 						cmdResult = response.documents.get(0);
 					}else{
@@ -153,9 +152,16 @@ public abstract class AbstractSessionHandler<T extends AbstractMongodbPacket> im
 								cmdResult.put("n", add.doubleValue());
 							}
 						}
-							
 					}
-				}else{
+				}
+			}
+			result.documents = new ArrayList<BSONObject>();
+			if(cmdResult != null){
+				result.documents.add(cmdResult);
+			}
+		}else{
+			for(ResponseMongodbPacket response :multiResponsePacket){
+				if(response.numberReturned > 0){
 					if(result.documents == null){
 						result.documents = new ArrayList<BSONObject>();
 					}
@@ -163,14 +169,7 @@ public abstract class AbstractSessionHandler<T extends AbstractMongodbPacket> im
 				}
 			}
 		}
-		
-		result.responseTo = this.requestPacket.requestID;
-		if(cmd>0 || isFindOne){
-			result.documents = new ArrayList<BSONObject>();
-			if(cmdResult != null){
-				result.documents.add(cmdResult);
-			}
-		}
+
 		result.numberReturned = (result.documents == null?0:result.documents.size());
 		return result;
 	}

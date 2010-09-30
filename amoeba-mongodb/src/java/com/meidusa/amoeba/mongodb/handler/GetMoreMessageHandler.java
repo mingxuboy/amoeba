@@ -18,8 +18,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.bson.BSONObject;
-
 import com.meidusa.amoeba.mongodb.io.MongodbPacketConstant;
 import com.meidusa.amoeba.mongodb.net.MongodbClientConnection;
 import com.meidusa.amoeba.mongodb.net.MongodbServerConnection;
@@ -104,7 +102,7 @@ public class GetMoreMessageHandler extends AbstractSessionHandler<GetMoreMongodb
 			multiResponsePacket.add((ResponseMongodbPacket)packet);
 
 			if(endQuery(conn)){
-				ResponseMongodbPacket result = mergeResponse();
+				ResponseMongodbPacket result = mergeResponse(this.requestPacket.numberToReturn == -1);
 				result.cursorID = cursorID;
 				clientConn.postMessage(result.toByteBuffer(this.clientConn));
 			}
