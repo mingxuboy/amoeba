@@ -115,10 +115,15 @@ public class MongodbQueryRouter extends AbstractQueryRouter<MongodbClientConnect
 						break _tableName;
 					}
 					
-					tableName = (String)query.query.get("group");
-					if(tableName != null){
-						bson = (BSONObject)query.query.get("cond");
-						break _tableName;
+					BSONObject groupBSObject = (BSONObject)query.query.get("group");
+					
+					if(groupBSObject != null){
+						tableName = (String)groupBSObject.get("ns");
+						if(tableName != null){
+							bson = (BSONObject)groupBSObject.get("cond");
+							break _tableName;
+						}
+					
 					}
 					
 					tableName = (String)query.query.get("drop");
