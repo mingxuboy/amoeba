@@ -41,6 +41,7 @@ public abstract class Connection implements NetEventHandler {
     public static final long    PING_INTERVAL = 90 * 1000L;
     protected static final long LATENCY_GRACE = 30 * 1000L;
 
+    private final Object writeLock = new Object();
     protected ConnectionManager _cmgr;
     protected SelectionKey      _selkey;
     protected SocketChannel     _channel;
@@ -288,7 +289,7 @@ public abstract class Connection implements NetEventHandler {
     }
 
     public boolean doWrite() throws IOException {
-        synchronized (this.getSelectionKey()) {
+        synchronized (writeLock) {
             ByteBuffer buffer = null;
             int wrote = 0;
             int message = 0;
