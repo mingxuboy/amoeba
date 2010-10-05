@@ -27,6 +27,7 @@ import com.meidusa.amoeba.mongodb.handler.merge.CountFunctionMerge;
 import com.meidusa.amoeba.mongodb.handler.merge.DistinctFunctionMerge;
 import com.meidusa.amoeba.mongodb.handler.merge.FunctionMerge;
 import com.meidusa.amoeba.mongodb.handler.merge.GroupFunctionMerge;
+import com.meidusa.amoeba.mongodb.handler.merge.ListDBFunctionMerge;
 import com.meidusa.amoeba.mongodb.handler.merge.OKFunctionMerge;
 import com.meidusa.amoeba.mongodb.io.MongodbPacketConstant;
 import com.meidusa.amoeba.mongodb.net.MongodbClientConnection;
@@ -49,6 +50,7 @@ public abstract class AbstractSessionHandler<T extends AbstractMongodbPacket> im
 		FUNCTION_MERGE_MAP.put(MongodbPacketConstant.CMD_DROP_INDEXES, new OKFunctionMerge());
 		FUNCTION_MERGE_MAP.put(MongodbPacketConstant.CMD_DISTINCT, new DistinctFunctionMerge());
 		FUNCTION_MERGE_MAP.put(MongodbPacketConstant.CMD_GETLASTERROR, new OKFunctionMerge());
+		FUNCTION_MERGE_MAP.put(MongodbPacketConstant.CMD_LISTDATABASES, new ListDBFunctionMerge());
 	}
 	
 	static{

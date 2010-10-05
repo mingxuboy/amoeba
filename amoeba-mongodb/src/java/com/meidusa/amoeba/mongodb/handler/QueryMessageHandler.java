@@ -75,6 +75,19 @@ public class QueryMessageHandler extends AbstractSessionHandler<QueryMongodbPack
 						this.cmd = MongodbPacketConstant.CMD_DROP_INDEXES;
 					}else if(requestPacket.query.get("mapreduce") != null){
 						this.cmd = MongodbPacketConstant.CMD_MAP_REDUCE;
+					}else if(requestPacket.query.get("listDatabases") != null){
+						this.cmd = MongodbPacketConstant.CMD_LISTDATABASES;
+					}else if(requestPacket.query.get("$eval") != null){
+						Object object = requestPacket.query.get("$eval");
+						if(object instanceof BSONObject){
+							BSONObject bson = (BSONObject) object;
+							for(String name : bson.keySet()){
+								if(name.startsWith("db.getSisterDB")){
+									this.cmd = MongodbPacketConstant.CMD_LISTDATABASES;
+									break;
+								}
+							}
+						}
 					}
 					
 				}

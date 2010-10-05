@@ -37,4 +37,6 @@ public interface MongodbPacketConstant {
 	public static int CMD_DROP = 1<<5;
 	public static int CMD_DROP_INDEXES = 1<<6;
 	public static int CMD_GETLASTERROR = 1<<7;
+	public static int CMD_LISTDATABASES = 1<<8;
+	public static int CMD_GETCOLLECTION = 1<<9;
 }
