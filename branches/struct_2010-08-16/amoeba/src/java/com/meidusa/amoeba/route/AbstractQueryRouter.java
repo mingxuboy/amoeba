@@ -280,231 +280,240 @@ public abstract class  AbstractQueryRouter<T extends Connection,V> implements Qu
     protected void beforeSelectPool(T connection, V queryObject){
     	
     }
-    public ObjectPool[] selectPool(T connection, V queryObject){
-    	beforeSelectPool(connection,queryObject);
-    	List<String> poolNames = new ArrayList<String>();
-    	StringBuffer loggerBuffer = null;
-    	
+    
+    protected List<String> evaluate(StringBuffer loggerBuffer,T connection, V queryObject){
     	boolean isRead = true;
 		boolean isPrepared = false;
 		if (queryObject instanceof Request) {
  			isRead = ((Request) queryObject).isRead();
  			isPrepared = ((Request) queryObject).isPrepared();
  		}
+		List<String> poolNames = new ArrayList<String>();
+   	 	Map<Table, Map<Column, Comparative>> tables  = evaluateTable(connection,queryObject);
+
+        if (tables != null && tables.size() > 0) {
+            Set<Map.Entry<Table, Map<Column, Comparative>>> entrySet = tables.entrySet();
+            for (Map.Entry<Table, Map<Column, Comparative>> entry : entrySet) {
+                Map<Column, Comparative> columnMap = entry.getValue();
+                TableRule tableRule = this.tableRuleMap.get(entry.getKey());
+
+                // 如果存在table Rule 则需要看是否有Rule
+                if (tableRule != null) {
+                    // 没有列的sql语句，使用默认的tableRule
+                    if (columnMap == null || isPrepared) {
+                        String[] pools = (isRead ? tableRule.readPools : tableRule.writePools);
+                        if (pools == null || pools.length == 0) {
+                            pools = tableRule.defaultPools;
+                        }
+                        for (String poolName : pools) {
+                            if (!poolNames.contains(poolName)) {
+                                poolNames.add(poolName);
+                            }
+                        }
+                        
+                        if(!isPrepared){
+                           if (logger.isDebugEnabled()) {
+                           	loggerBuffer.append(", no Column rule, using table:" + tableRule.table + " default rules:" + Arrays.toString(tableRule.defaultPools));
+                           }
+                        }
+                        continue;
+                    }
+
+                    List<String> groupMatched = new ArrayList<String>();
+                    for (Rule rule : tableRule.ruleList) {
+                        if (rule.group != null) {
+                            if (groupMatched.contains(rule.group)) {
+                                continue;
+                            }
+                        }
+
+                        // 如果参数比必须的参数个数少，则继续下一条规则
+                        if (columnMap.size() < rule.parameterMap.size()) {
+                            continue;
+                        } else {
+                            boolean matched = true;
+                            // 如果查询语句中包含了该规则不需要的参数，则该规则将被忽略
+                            for (Column exclude : rule.excludes) {
+                                Comparable<?> condition = columnMap.get(exclude);
+                                if (condition != null) {
+                                    matched = false;
+                                    break;
+                                }
+                            }
+
+                            // 如果不匹配将继续下一条规则
+                            if (!matched) {
+                                continue;
+                            }
+
+                            Comparable<?>[] comparables = new Comparable[rule.parameterMap.size()];
+                            // 规则中的参数必须在dmlstatement中存在，否则这个规则将不启作用
+                            for (Map.Entry<Column, Integer> parameter : rule.cloumnMap.entrySet()) {
+                                Comparative condition = columnMap.get(parameter.getKey());
+                                if (condition != null) {
+                                    // 如果规则忽略 数组的 参数，并且参数有array 参数，则忽略该规则
+                                    if (rule.ignoreArray && condition instanceof ComparativeBaseList) {
+                                        matched = false;
+                                        break;
+                                    }
+
+                                    comparables[parameter.getValue()] = (Comparative) condition.clone();
+                                } else {
+                                    matched = false;
+                                    break;
+                                }
+                            }
+
+                            // 如果不匹配将继续下一条规则
+                            if (!matched) {
+                                continue;
+                            }
+                            
+                            try {
+                                Comparable<?> result = rule.rowJep.getValue(comparables);
+                                Integer i = 0;
+                                if (result instanceof Comparative) {
+                                    if (rule.result == RuleResult.INDEX) {
+                                        i = (Integer) ((Comparative) result).getValue();
+                                        if (i < 0) {
+                                            continue;
+                                        }
+                                        matched = true;
+                                    } else if(rule.result == RuleResult.POOLNAME){
+                                    	String matchedPoolsString = ((Comparative) result).getValue().toString();
+                                    	String[] poolNamesMatched = matchedPoolsString.split(",");
+                                    	
+                                    	if(poolNamesMatched != null && poolNamesMatched.length >0){
+                                       	for(String poolName : poolNamesMatched){
+                                           	if (!poolNames.contains(poolName)) {
+                                                   poolNames.add(poolName);
+                                               }
+                                       	}
+                                       	
+                                       	if (logger.isDebugEnabled()) {
+                                       		loggerBuffer.append(", matched table:" + tableRule.table.getName() + ", rule:" + rule.name);
+                                           }
+                                    	}
+                                    	continue;
+                                    }else{
+                                        matched = (Boolean) ((Comparative) result).getValue();
+                                    }
+                                } else {
+                                	
+                                	if (rule.result == RuleResult.INDEX) {
+                                        i = (Integer) Integer.valueOf(result.toString());
+                                        if (i < 0) {
+                                            continue;
+                                        }
+                                        matched = true;
+                                    } else if(rule.result == RuleResult.POOLNAME){
+                                    	String matchedPoolsString = result.toString();
+                                    	String[] poolNamesMatched = StringUtil.split(matchedPoolsString,";,");
+                                    	if(poolNamesMatched != null && poolNamesMatched.length >0){
+                                       	for(String poolName : poolNamesMatched){
+                                           	if (!poolNames.contains(poolName)) {
+                                                   poolNames.add(poolName);
+                                               }
+                                       	}
+                                       	
+                                       	if (logger.isDebugEnabled()) {
+                                       		loggerBuffer.append(", matched table:" + tableRule.table.getName() + ", rule:" + rule.name);
+                                           }
+                                    	}
+                                    	continue;
+                                    }else{
+                                    	matched = (Boolean) result;
+                                    }
+                                }
+
+                                if (matched) {
+                                    if (rule.group != null) {
+                                        groupMatched.add(rule.group);
+                                    }
+                                    String[] pools = (isRead ? rule.readPools : rule.writePools);
+                                    if (pools == null || pools.length == 0) {
+                                        pools = rule.defaultPools;
+                                    }
+                                    if (pools != null && pools.length > 0) {
+                                        if (rule.isSwitch) {
+                                            if (!poolNames.contains(pools[i])) {
+                                                poolNames.add(pools[i]);
+                                            }
+                                        } else {
+                                            for (String poolName : pools) {
+                                                if (!poolNames.contains(poolName)) {
+                                                    poolNames.add(poolName);
+                                                }
+                                            }
+                                        }
+                                    } else {
+                                        logger.error("rule:" + rule.name + " matched, but pools is null");
+                                    }
+
+                                    if (logger.isDebugEnabled()) {
+                                   	 loggerBuffer.append(", matched table:" + tableRule.table.getName() + ", rule:" + rule.name);
+                                    }
+                                }
+                            } catch (com.meidusa.amoeba.sqljep.ParseException e) {
+                                // logger.error("parse rule error:"+rule.expression,e);
+                            }
+                        }
+                    }
+
+                    // 如果所有规则都无法匹配，则默认采用TableRule中的pool设置。
+                    if (poolNames.size() == 0) {
+                        String[] pools = (isRead ? tableRule.readPools : tableRule.writePools);
+                        if (pools == null || pools.length == 0) {
+                            pools = tableRule.defaultPools;
+                        }
+                        
+                        if(!isPrepared){
+                        	if(tableRule.ruleList != null && tableRule.ruleList.size()>0){
+                        		if (logger.isDebugEnabled()) {
+                        			loggerBuffer.append(", no rule matched, using tableRule:[" + tableRule.table.getName() + "] defaultPools");
+                        		}
+                        	}else{
+                        		if(logger.isDebugEnabled()){
+                        			if(pools != null){
+                        				StringBuffer buffer = new StringBuffer();
+                           			for(String pool : pools){
+                           				buffer.append(pool).append(",");
+                           			}
+                           			loggerBuffer.append(", using tableRule:[" + tableRule.table.getName() + "] defaultPools="+buffer.toString());
+                        			}
+                        		}
+                        	}
+                        }
+                        for (String poolName : pools) {
+                            if (!poolNames.contains(poolName)) {
+                                poolNames.add(poolName);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return poolNames;
+    }
+    
+    public ObjectPool[] selectPool(T connection, V queryObject){
+    	beforeSelectPool(connection,queryObject);
+    	
+    	StringBuffer loggerBuffer = null;
+    	
+    	boolean isRead = true;
+		if (queryObject instanceof Request) {
+ 			isRead = ((Request) queryObject).isRead();
+ 		}
 		
 		if (logger.isDebugEnabled()) {
 			loggerBuffer = new StringBuffer("query=");
 			loggerBuffer.append(queryObject);
 		}
-		
-		Map<Table, Map<Column, Comparative>> tables = null;
+		List<String> poolNames = new ArrayList<String>();
 	     if (needEvaluate) {
-	         tables = evaluateTable(connection,queryObject);
-
-	         if (tables != null && tables.size() > 0) {
-	             Set<Map.Entry<Table, Map<Column, Comparative>>> entrySet = tables.entrySet();
-	             for (Map.Entry<Table, Map<Column, Comparative>> entry : entrySet) {
-	                 Map<Column, Comparative> columnMap = entry.getValue();
-	                 TableRule tableRule = this.tableRuleMap.get(entry.getKey());
-	
-	                 // 如果存在table Rule 则需要看是否有Rule
-	                 if (tableRule != null) {
-	                     // 没有列的sql语句，使用默认的tableRule
-	                     if (columnMap == null || isPrepared) {
-	                         String[] pools = (isRead ? tableRule.readPools : tableRule.writePools);
-	                         if (pools == null || pools.length == 0) {
-	                             pools = tableRule.defaultPools;
-	                         }
-	                         for (String poolName : pools) {
-	                             if (!poolNames.contains(poolName)) {
-	                                 poolNames.add(poolName);
-	                             }
-	                         }
-	                         
-	                         if(!isPrepared){
-	                            if (logger.isDebugEnabled()) {
-	                            	loggerBuffer.append(", no Column rule, using table:" + tableRule.table + " default rules:" + Arrays.toString(tableRule.defaultPools));
-	                            }
-	                         }
-	                         continue;
-	                     }
-	
-	                     List<String> groupMatched = new ArrayList<String>();
-	                     for (Rule rule : tableRule.ruleList) {
-	                         if (rule.group != null) {
-	                             if (groupMatched.contains(rule.group)) {
-	                                 continue;
-	                             }
-	                         }
-	
-	                         // 如果参数比必须的参数个数少，则继续下一条规则
-	                         if (columnMap.size() < rule.parameterMap.size()) {
-	                             continue;
-	                         } else {
-	                             boolean matched = true;
-	                             // 如果查询语句中包含了该规则不需要的参数，则该规则将被忽略
-	                             for (Column exclude : rule.excludes) {
-	                                 Comparable<?> condition = columnMap.get(exclude);
-	                                 if (condition != null) {
-	                                     matched = false;
-	                                     break;
-	                                 }
-	                             }
-	
-	                             // 如果不匹配将继续下一条规则
-	                             if (!matched) {
-	                                 continue;
-	                             }
-	
-	                             Comparable<?>[] comparables = new Comparable[rule.parameterMap.size()];
-	                             // 规则中的参数必须在dmlstatement中存在，否则这个规则将不启作用
-	                             for (Map.Entry<Column, Integer> parameter : rule.cloumnMap.entrySet()) {
-	                                 Comparative condition = columnMap.get(parameter.getKey());
-	                                 if (condition != null) {
-	                                     // 如果规则忽略 数组的 参数，并且参数有array 参数，则忽略该规则
-	                                     if (rule.ignoreArray && condition instanceof ComparativeBaseList) {
-	                                         matched = false;
-	                                         break;
-	                                     }
-	
-	                                     comparables[parameter.getValue()] = (Comparative) condition.clone();
-	                                 } else {
-	                                     matched = false;
-	                                     break;
-	                                 }
-	                             }
-	
-	                             // 如果不匹配将继续下一条规则
-	                             if (!matched) {
-	                                 continue;
-	                             }
-	                             
-	                             try {
-	                                 Comparable<?> result = rule.rowJep.getValue(comparables);
-	                                 Integer i = 0;
-	                                 if (result instanceof Comparative) {
-	                                     if (rule.result == RuleResult.INDEX) {
-	                                         i = (Integer) ((Comparative) result).getValue();
-	                                         if (i < 0) {
-	                                             continue;
-	                                         }
-	                                         matched = true;
-	                                     } else if(rule.result == RuleResult.POOLNAME){
-	                                     	String matchedPoolsString = ((Comparative) result).getValue().toString();
-	                                     	String[] poolNamesMatched = matchedPoolsString.split(",");
-	                                     	
-	                                     	if(poolNamesMatched != null && poolNamesMatched.length >0){
-	                                        	for(String poolName : poolNamesMatched){
-	                                            	if (!poolNames.contains(poolName)) {
-	                                                    poolNames.add(poolName);
-	                                                }
-	                                        	}
-	                                        	
-	                                        	if (logger.isDebugEnabled()) {
-	                                        		loggerBuffer.append(", matched table:" + tableRule.table.getName() + ", rule:" + rule.name);
-	                                            }
-	                                     	}
-	                                     	continue;
-	                                     }else{
-	                                         matched = (Boolean) ((Comparative) result).getValue();
-	                                     }
-	                                 } else {
-	                                 	
-	                                 	if (rule.result == RuleResult.INDEX) {
-	                                         i = (Integer) Integer.valueOf(result.toString());
-	                                         if (i < 0) {
-	                                             continue;
-	                                         }
-	                                         matched = true;
-	                                     } else if(rule.result == RuleResult.POOLNAME){
-	                                     	String matchedPoolsString = result.toString();
-	                                     	String[] poolNamesMatched = StringUtil.split(matchedPoolsString,";,");
-	                                     	if(poolNamesMatched != null && poolNamesMatched.length >0){
-	                                        	for(String poolName : poolNamesMatched){
-	                                            	if (!poolNames.contains(poolName)) {
-	                                                    poolNames.add(poolName);
-	                                                }
-	                                        	}
-	                                        	
-	                                        	if (logger.isDebugEnabled()) {
-	                                        		loggerBuffer.append(", matched table:" + tableRule.table.getName() + ", rule:" + rule.name);
-	                                            }
-	                                     	}
-	                                     	continue;
-	                                     }else{
-	                                     	matched = (Boolean) result;
-	                                     }
-	                                 }
-	
-	                                 if (matched) {
-	                                     if (rule.group != null) {
-	                                         groupMatched.add(rule.group);
-	                                     }
-	                                     String[] pools = (isRead ? rule.readPools : rule.writePools);
-	                                     if (pools == null || pools.length == 0) {
-	                                         pools = rule.defaultPools;
-	                                     }
-	                                     if (pools != null && pools.length > 0) {
-	                                         if (rule.isSwitch) {
-	                                             if (!poolNames.contains(pools[i])) {
-	                                                 poolNames.add(pools[i]);
-	                                             }
-	                                         } else {
-	                                             for (String poolName : pools) {
-	                                                 if (!poolNames.contains(poolName)) {
-	                                                     poolNames.add(poolName);
-	                                                 }
-	                                             }
-	                                         }
-	                                     } else {
-	                                         logger.error("rule:" + rule.name + " matched, but pools is null");
-	                                     }
-	
-	                                     if (logger.isDebugEnabled()) {
-	                                    	 loggerBuffer.append(", matched table:" + tableRule.table.getName() + ", rule:" + rule.name);
-	                                     }
-	                                 }
-	                             } catch (com.meidusa.amoeba.sqljep.ParseException e) {
-	                                 // logger.error("parse rule error:"+rule.expression,e);
-	                             }
-	                         }
-	                     }
-	
-	                     // 如果所有规则都无法匹配，则默认采用TableRule中的pool设置。
-	                     if (poolNames.size() == 0) {
-	                         String[] pools = (isRead ? tableRule.readPools : tableRule.writePools);
-	                         if (pools == null || pools.length == 0) {
-	                             pools = tableRule.defaultPools;
-	                         }
-	                         
-	                         if(!isPrepared){
-	                         	if(tableRule.ruleList != null && tableRule.ruleList.size()>0){
-	                         		if (logger.isDebugEnabled()) {
-	                         			loggerBuffer.append(", no rule matched, using tableRule:[" + tableRule.table.getName() + "] defaultPools");
-	                         		}
-	                         	}else{
-	                         		if(logger.isDebugEnabled()){
-	                         			if(pools != null){
-	                         				StringBuffer buffer = new StringBuffer();
-	                            			for(String pool : pools){
-	                            				buffer.append(pool).append(",");
-	                            			}
-	                            			loggerBuffer.append(", using tableRule:[" + tableRule.table.getName() + "] defaultPools="+buffer.toString());
-	                         			}
-	                         		}
-	                         	}
-	                         }
-	                         for (String poolName : pools) {
-	                             if (!poolNames.contains(poolName)) {
-	                                 poolNames.add(poolName);
-	                             }
-	                         }
-	                     }
-	                 }
-	             }
-	         }
+	    	 poolNames = evaluate(loggerBuffer,connection,queryObject);
 	     }
-
          ObjectPool[] pools = new ObjectPool[poolNames.size()];
          int i = 0;
          for (String name : poolNames) {

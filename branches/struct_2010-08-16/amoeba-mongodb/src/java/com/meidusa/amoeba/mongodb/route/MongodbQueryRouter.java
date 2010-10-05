@@ -23,6 +23,7 @@ import org.bson.JSON;
 import org.bson.types.BSONTimestamp;
 import org.bson.types.BasicBSONList;
 
+import com.meidusa.amoeba.mongodb.io.MongodbPacketConstant;
 import com.meidusa.amoeba.mongodb.net.MongodbClientConnection;
 import com.meidusa.amoeba.mongodb.packet.DeleteMongodbPacket;
 import com.meidusa.amoeba.mongodb.packet.InsertMongodbPacket;
@@ -37,6 +38,7 @@ import com.meidusa.amoeba.sqljep.function.Comparative;
 import com.meidusa.amoeba.sqljep.function.ComparativeAND;
 import com.meidusa.amoeba.sqljep.function.ComparativeBaseList;
 import com.meidusa.amoeba.sqljep.function.ComparativeOR;
+import com.meidusa.amoeba.util.StringUtil;
 
 /**
  * 
@@ -136,7 +138,25 @@ public class MongodbQueryRouter extends AbstractQueryRouter<MongodbClientConnect
 						break _tableName;
 					}
 					
+					//db.getSisterDB(\"schema\").getCollection(\"collectionName\").stats();
+					if(query.query.get("$eval") != null){
+						Object object = query.query.get("$eval");
+						if(object instanceof BSONObject){
+							BSONObject eval = (BSONObject) object;
+							for(String name : eval.keySet()){
+								if(name.startsWith("db.getSisterDB")){
+									String[] tmps = StringUtil.split(name, "\"'");
+									if(tmps.length>3){
+										tableName = tmps[3];
+										schema.setName(tmps[1]);
+									}
+									break _tableName;
+								}
+							}
+						}
+					}
 				}
+				
 				if(tableName != null){
 					table.setName(tableName);
 				}else{

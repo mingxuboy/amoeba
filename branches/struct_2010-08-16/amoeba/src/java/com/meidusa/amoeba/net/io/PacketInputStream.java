@@ -26,8 +26,7 @@ import com.meidusa.amoeba.util.StringUtil;
  * @author <a href=mailto:piratebase@sina.com>Struct chen</a>
  *
  */
-public abstract class PacketInputStream extends InputStream
-{
+public abstract class PacketInputStream {
 	
 	/**
      * 用于读取可读通道的缓存对象，初始化容量={@link #INITIAL_BUFFER_CAPACITY}，不够时候每次增长上一次的一倍
@@ -141,36 +140,20 @@ public abstract class PacketInputStream extends InputStream
      * @return
      * @throws IOException
      */
-    public boolean readPacket (InputStream source)
+    public byte[] readPacket (InputStream source)
     throws IOException
 	{
-	    // flush data from any previous frame from the buffer
-	    if (_buffer.limit() == _length) {
-	        // this will remove the old frame's bytes from the buffer,
-	        // shift our old data to the start of the buffer, position the
-	        // buffer appropriately for appending new data onto the end of
-	        // our existing data, and set the limit to the capacity
-	        _buffer.limit(_have);
-	        _buffer.position(_length);
-	        _buffer.compact();
-	        _have -= _length;
-	
-	        // we may have picked up the next frame in a previous read, so
-	        // try decoding the length straight away
-	        _length = decodeLength();
-	    }
-	
 	    // we may already have the next frame entirely in the buffer from
 	    // a previous read
 	    if (checkForCompletePacket()) {
-	        return true;
+	    	return readPacket();
 	    }
 	   
 	    // read whatever data we can from the source
 	    do {
 	    	int got = source.read(tmp);
 	    	expandCapacity(got);
-	    	if(got ==0) return false;
+	    	if(got ==0) return null;
 	    	if(got >0){
 	    		
 	    		//got = source.read(byt);
@@ -192,10 +175,12 @@ public abstract class PacketInputStream extends InputStream
 	        // don't let things grow without bounds
 	    } while (_buffer.capacity() < MAX_BUFFER_CAPACITY &&  !checkForCompletePacket());
 	
-	    // finally check to see if there's a complete frame in the buffer
-	    // and prepare to serve it up if there is
+	    if (checkForCompletePacket()) {
+            return readPacket();
+        }else{
+        	return null;
+        }
 	    
-	    return true;
 	}
     
     private void expandCapacity(int needSize){
@@ -226,114 +211,7 @@ public abstract class PacketInputStream extends InputStream
         return true;
     }
 
-    /**
-     * Reads the next byte of data from this input stream. The value byte
-     * is returned as an <code>int</code> in the range <code>0</code> to
-     * <code>255</code>. If no byte is available because the end of the
-     * stream has been reached, the value <code>-1</code> is returned.
-     *
-     * <p>This <code>read</code> method cannot block.
-     *
-     * @return the next byte of data, or <code>-1</code> if the end of the
-     * stream has been reached.
-     */
-    public int read ()
-    {
-        return (_buffer.remaining() > 0) ? (_buffer.get() & 0xFF) : -1;
-    }
 
-    /**
-     * Reads up to <code>len</code> bytes of data into an array of bytes
-     * from this input stream. If <code>pos</code> equals
-     * <code>count</code>, then <code>-1</code> is returned to indicate
-     * end of file. Otherwise, the number <code>k</code> of bytes read is
-     * equal to the smaller of <code>len</code> and
-     * <code>count-pos</code>. If <code>k</code> is positive, then bytes
-     * <code>buf[pos]</code> through <code>buf[pos+k-1]</code> are copied
-     * into <code>b[off]</code> through <code>b[off+k-1]</code> in the
-     * manner performed by <code>System.arraycopy</code>. The value
-     * <code>k</code> is added into <code>pos</code> and <code>k</code> is
-     * returned.
-     *
-     * <p>This <code>read</code> method cannot block.
-     *
-     * @param b the buffer into which the data is read.
-     * @param off the start offset of the data.
-     * @param len the maximum number of bytes read.
-     *
-     * @return the total number of bytes read into the buffer, or
-     * <code>-1</code> if there is no more data because the end of the
-     * stream has been reached.
-     */
-    public int read (byte[] b, int off, int len)
-    {
-        // if they want no bytes, we give them no bytes; this is
-        // purportedly the right thing to do regardless of whether we're
-        // at EOF or not
-        if (len == 0) {
-            return 0;
-        }
-
-        // trim the amount to be read to what is available; if they wanted
-        // bytes and we have none, return -1 to indicate EOF
-        if ((len = Math.min(len, _buffer.remaining())) == 0) {
-            return -1;
-        }
-
-        _buffer.get(b, off, len);
-        return len;
-    }
-
-    /**
-     * Skips <code>n</code> bytes of input from this input stream. Fewer
-     * bytes might be skipped if the end of the input stream is reached.
-     * The actual number <code>k</code> of bytes to be skipped is equal to
-     * the smaller of <code>n</code> and <code>count-pos</code>. The value
-     * <code>k</code> is added into <code>pos</code> and <code>k</code> is
-     * returned.
-     *
-     * @param n the number of bytes to be skipped.
-     *
-     * @return the actual number of bytes skipped.
-     */
-    public long skip (long n)
-    {
-        throw new UnsupportedOperationException();
-    }
-
-    public int available ()
-    {
-        return _buffer.remaining();
-    }
-
-    /**
-     * Always returns false as framed input streams do not support
-     * marking.
-     */
-    public boolean markSupported ()
-    {
-        return false;
-    }
-
-    public int getLength(){
-    	return _length;
-    }
-    /**
-     * Does nothing, as marking is not supported.
-     */
-    public void mark (int readAheadLimit)
-    {
-        // not supported; do nothing
-    }
-
-    /**
-     * Resets the buffer to the beginning of the buffered frames.
-     */
-    public void reset ()
-    {
-        // position our buffer at the beginning of the frame data
-        _buffer.position(getHeaderSize());
-    }
     public String toString(){
     	StringBuffer buffer = new StringBuffer();
     	buffer.append("buffer:").append(_buffer).append(",length:").append(_length).append(",have:").append(_have);
