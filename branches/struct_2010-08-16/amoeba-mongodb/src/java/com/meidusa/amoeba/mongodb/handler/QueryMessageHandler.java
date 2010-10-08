@@ -83,7 +83,7 @@ public class QueryMessageHandler extends AbstractSessionHandler<QueryMongodbPack
 							BSONObject bson = (BSONObject) object;
 							for(String name : bson.keySet()){
 								if(name.startsWith("db.getSisterDB")){
-									this.cmd = MongodbPacketConstant.CMD_LISTDATABASES;
+									this.cmd = MongodbPacketConstant.CMD_GETCOLLECTION;
 									break;
 								}
 							}
@@ -111,14 +111,24 @@ public class QueryMessageHandler extends AbstractSessionHandler<QueryMongodbPack
 		MongodbServerConnection[] conns = new MongodbServerConnection[pools.length];
 		int index =0;
 		for(ObjectPool pool: pools){
-			MongodbServerConnection serverConn = (MongodbServerConnection)pool.borrowObject();
-			handlerMap.put(serverConn, serverConn.getMessageHandler());
-			serverConn.setSessionMessageHandler(this);
-			conns[index++] = serverConn;
+			try{
+				MongodbServerConnection serverConn = (MongodbServerConnection)pool.borrowObject();
+				serverConn.setSessionMessageHandler(this);
+				conns[index++] = serverConn;
+				handlerMap.put(serverConn, serverConn.getMessageHandler());
+			}catch(Exception e){
+				handlerLogger.error("poolName="+pool.getName()+" borrow object error",e);
+			}
+		}
+		
+		if(index == 0){
+			throw new Exception("no pool to query,queryObject="+this.requestPacket);
 		}
 		
 		for(MongodbServerConnection serverConn : conns){
-			serverConn.postMessage(message);
+			if(serverConn != null){
+				serverConn.postMessage(message);
+			}
 		}
 	}
 

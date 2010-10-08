@@ -23,7 +23,6 @@ import org.bson.JSON;
 import org.bson.types.BSONTimestamp;
 import org.bson.types.BasicBSONList;
 
-import com.meidusa.amoeba.mongodb.io.MongodbPacketConstant;
 import com.meidusa.amoeba.mongodb.net.MongodbClientConnection;
 import com.meidusa.amoeba.mongodb.packet.DeleteMongodbPacket;
 import com.meidusa.amoeba.mongodb.packet.InsertMongodbPacket;

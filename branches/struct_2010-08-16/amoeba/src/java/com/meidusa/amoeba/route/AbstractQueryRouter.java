@@ -53,7 +53,6 @@ import com.meidusa.amoeba.parser.dbobject.Column;
 import com.meidusa.amoeba.parser.dbobject.Schema;
 import com.meidusa.amoeba.parser.dbobject.Table;
 import com.meidusa.amoeba.parser.function.Function;
-import com.meidusa.amoeba.parser.statement.DMLStatement;
 import com.meidusa.amoeba.parser.statement.Statement;
 import com.meidusa.amoeba.sqljep.RowJEP;
 import com.meidusa.amoeba.sqljep.function.Abs;
@@ -190,7 +189,6 @@ public abstract class  AbstractQueryRouter<T extends Connection,V> implements Qu
         ruleFunTab.put("hash", new Hash()); //
         ruleFunTab.put("range", new Range()); //
     }
-    
     
 	Map<String,Variable> variableMap = new HashMap<String,Variable>();
 	{
