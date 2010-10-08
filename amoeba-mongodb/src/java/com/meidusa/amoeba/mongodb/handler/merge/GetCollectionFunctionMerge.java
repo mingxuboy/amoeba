@@ -4,16 +4,12 @@
 package com.meidusa.amoeba.mongodb.handler.merge;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.bson.BSONObject;
-import org.bson.types.BasicBSONList;
 
 import com.meidusa.amoeba.mongodb.packet.RequestMongodbPacket;
 import com.meidusa.amoeba.mongodb.packet.ResponseMongodbPacket;
-import com.meidusa.amoeba.util.StringUtil;
 
 /**
  * 
@@ -22,13 +18,18 @@ import com.meidusa.amoeba.util.StringUtil;
  */
 public class GetCollectionFunctionMerge implements FunctionMerge{
 	
-	public static void merge(BSONObject source, BSONObject info){
-		if(StringUtil.equals((String)source.get("name"), (String)info.get("name"))){
-			double sizeOndisk1 = Double.valueOf((Double)source.get("sizeOndisk"));
-			double sizeOndisk2 = Double.valueOf((Double)info.get("sizeOndisk"));
-			source.put("sizeOndisk", (sizeOndisk1 + sizeOndisk2));
-			source.put("empty", ((Boolean)source.get("empty") || (Boolean)info.get("empty")));
+	public static Number addNumber(BSONObject source, BSONObject info,String name){
+		Number sourceNumber = (Number)source.get(name);
+		Number infoNumber = (Number)source.get(name);
+		if(sourceNumber != null && infoNumber != null){
+			sourceNumber = MergeMath.add(sourceNumber,infoNumber);
+		}else{
+			if(sourceNumber == null){
+				sourceNumber = infoNumber;
+			}
 		}
+		source.put(name, sourceNumber);
+		return sourceNumber;
 	}
 	
 	@Override
@@ -36,32 +37,32 @@ public class GetCollectionFunctionMerge implements FunctionMerge{
 			List<ResponseMongodbPacket> multiResponsePacket) {
 		ResponseMongodbPacket result = new ResponseMongodbPacket();
 		BSONObject cmdResult = null;
-		Map<String,BSONObject> dbMap = new HashMap<String,BSONObject>();
+		
+		BSONObject source = null;
 		for(ResponseMongodbPacket response :multiResponsePacket){
 			
 			if(response.numberReturned > 0){
+				
 				BSONObject nextResult = response.documents.get(0);
-				
-				BasicBSONList databases = (BasicBSONList)nextResult.get("databases");
-				for(Object object: databases){
-					BSONObject info = (BSONObject)object;
-					BSONObject source = dbMap.get("name");
-					if(source == null){
-						dbMap.put((String)info.get("name"), info);
-					}else{
-						merge(source,info);
-					}
-				}
-				
 				if(cmdResult == null){
 					cmdResult = nextResult;
+				}
+				
+				BSONObject collection = (BSONObject)nextResult.get("retval");
+				if(source == null){
+					source = collection;
 				}else{
-					double totalSize = (Double)cmdResult.get("totalSize");
-					double totalSize1 = totalSize + (Double)nextResult.get("totalSize");
-					cmdResult.put("totalSize", totalSize1);
+					Number count = addNumber(source, collection, "count");
+					Number size = addNumber(source, collection, "size");
+					addNumber(source, collection, "storageSize");
+					addNumber(source, collection, "totalIndexSize");
+					source.put("paddingFactor",MergeMath.div(addNumber(source, collection, "paddingFactor"), 2));
+					source.put("avgObjSize",MergeMath.div(size,count));
 				}
 			}
 		}
+		
+		cmdResult.put("retval", source);
 		
 		result.documents = new ArrayList<BSONObject>();
 		if(cmdResult != null){
