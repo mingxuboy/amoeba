@@ -23,6 +23,8 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.commons.pool.PoolableObjectFactory;
 
+import com.meidusa.amoeba.heartbeat.HeartbeatManager;
+import com.meidusa.amoeba.heartbeat.Status;
 import com.meidusa.amoeba.util.Initialisable;
 import com.meidusa.amoeba.util.InitialisationException;
 
@@ -38,13 +40,8 @@ import com.meidusa.amoeba.util.InitialisationException;
  * </pre>
  */
 public class MultipleLoadBalanceObjectPool implements ObjectPool,Initialisable {
-
-    public static final int LOADBALANCING_ROUNDROBIN  = 1;
-    public static final int LOADBALANCING_WEIGHTBASED = 2;
-    public static final int LOADBALANCING_HA          = 3;
-    private boolean         enable;
-    private String name;
-    public class ObjectPoolWrapper implements ObjectPool{
+	
+	public class ObjectPoolWrapper implements ObjectPool{
     	ObjectPool source;
     	public ObjectPoolWrapper(ObjectPool objectPool){
     		this.source = objectPool;
@@ -120,6 +117,14 @@ public class MultipleLoadBalanceObjectPool implements ObjectPool,Initialisable {
 		}
     	
     }
+	
+    public static final int LOADBALANCING_ROUNDROBIN  = 1;
+    public static final int LOADBALANCING_WEIGHTBASED = 2;
+    public static final int LOADBALANCING_HA          = 3;
+    private boolean         enable;
+    private String name;
+    
+    
     protected static class ActiveNumComparator implements Comparator<ObjectPool> {
 
         public int compare(ObjectPool o1, ObjectPool o2) {
@@ -204,16 +209,18 @@ public class MultipleLoadBalanceObjectPool implements ObjectPool,Initialisable {
     }
 
     public void clear() throws Exception, UnsupportedOperationException {
-        for (ObjectPool pool : objectPools) {
+    	//do not clear internal pools
+    	/*for (ObjectPool pool : objectPools) {
             pool.clear();
-        }
+        }*/
 
     }
 
     public void close() throws Exception {
-        for (ObjectPool pool : objectPools) {
+    	//do not close internal pools
+        /*for (ObjectPool pool : objectPools) {
             pool.close();
-        }
+        }*/
     }
 
     public int getNumActive() throws UnsupportedOperationException {
@@ -264,7 +271,7 @@ public class MultipleLoadBalanceObjectPool implements ObjectPool,Initialisable {
 		this.valid = valid;
 	}
 
-	public static class MultipleHeartbeatDelayed extends HeartbeatDelayed {
+	public static class MultipleHeartbeatDelayed extends ObjectPoolHeartbeatDelayed {
 
 		public MultipleHeartbeatDelayed(long nsTime, TimeUnit timeUnit,
 				MultipleLoadBalanceObjectPool pool) {
@@ -275,7 +282,7 @@ public class MultipleLoadBalanceObjectPool implements ObjectPool,Initialisable {
 			return true;
 		}
 		
-		public STATUS doCheck() {
+		public Status doCheck() {
 			return super.doCheck();
 		}
 	}

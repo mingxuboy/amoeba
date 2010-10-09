@@ -33,6 +33,8 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.pool.PoolableObjectFactory;
 
+import com.meidusa.amoeba.heartbeat.HeartbeatManager;
+import com.meidusa.amoeba.heartbeat.Status;
 import com.meidusa.amoeba.util.Initialisable;
 import com.meidusa.amoeba.util.InitialisationException;
 
@@ -389,18 +391,19 @@ public class GenericObjectPool extends org.apache.commons.pool.impl.GenericObjec
 		this.isValid = valid;
 	}
 
+	private GenericHeartbeatDelayed delay = new GenericHeartbeatDelayed(3, TimeUnit.SECONDS, this);
 	@Override
 	public void init() throws InitialisationException {
-		HeartbeatManager.addHeartbeat(new GenericHeartbeatDelayed(3, TimeUnit.SECONDS, this));
+		HeartbeatManager.addHeartbeat(delay);
 	}
 
-	public static class GenericHeartbeatDelayed extends HeartbeatDelayed{
+	public static class GenericHeartbeatDelayed extends ObjectPoolHeartbeatDelayed{
 		public GenericHeartbeatDelayed(long nsTime, TimeUnit timeUnit,
 				ObjectPool pool) {
 			super(nsTime, timeUnit, pool);
 		}
 
-		 public STATUS doCheck() {
+		 public Status doCheck() {
 			return super.doCheck();
 		 }
 		
@@ -409,6 +412,11 @@ public class GenericObjectPool extends org.apache.commons.pool.impl.GenericObjec
 		}
 	}
 
+	public void close() throws Exception{
+		super.close();
+		HeartbeatManager.removeHeartbeat(delay);
+	}
+	
 	@Override
 	public boolean validate() {
 		Object object = null;
