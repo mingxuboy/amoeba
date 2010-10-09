@@ -29,7 +29,7 @@ public class ProxyServerConfig {
     private int                                 readThreadPoolSize       = 16;
     private int                                 clientSideThreadPoolSize = 16;
     private int                                 serverSideThreadPoolSize = 16;
-    private boolean                             tcpNoDelay               = false;
+    private boolean                             tcpNoDelay               = true;
     private int                                 netBufferSize            = 16;
     private int 								queryTimeout			 = 60; //default per query timeout (time unit: second) 
     
