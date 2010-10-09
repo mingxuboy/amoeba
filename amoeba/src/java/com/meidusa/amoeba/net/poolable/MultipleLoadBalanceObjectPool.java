@@ -245,7 +245,7 @@ public class MultipleLoadBalanceObjectPool implements ObjectPool,Initialisable {
     }
 
     public void setFactory(PoolableObjectFactory factory) throws IllegalStateException, UnsupportedOperationException {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("setFactory is not supported in class="+ this.getClass().getName());
     }
 
     public boolean isEnable() {

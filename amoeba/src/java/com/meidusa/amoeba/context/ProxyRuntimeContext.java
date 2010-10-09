@@ -187,7 +187,7 @@ public abstract class ProxyRuntimeContext implements Reporter {
      * @param dest
      * @return
      */
-    private void inheritDBServerConfig(DBServerConfig parent ,DBServerConfig dest){
+    protected void inheritDBServerConfig(DBServerConfig parent ,DBServerConfig dest){
     	BeanObjectEntityConfig destBeanConfig = dest.getFactoryConfig();
 		BeanObjectEntityConfig parentBeanConfig = parent.getFactoryConfig();
 		
@@ -220,7 +220,7 @@ public abstract class ProxyRuntimeContext implements Reporter {
 		
     }
     
-    void inheritBeanObjectEntityConfig(BeanObjectEntityConfig parent,BeanObjectEntityConfig dest){
+    protected  void inheritBeanObjectEntityConfig(BeanObjectEntityConfig parent,BeanObjectEntityConfig dest){
     	BeanObjectEntityConfig parentCloned = (BeanObjectEntityConfig)parent.clone();
     	if(dest.getClassName() != null){
     		parentCloned.setClassName(dest.getClassName());
@@ -294,7 +294,7 @@ public abstract class ProxyRuntimeContext implements Reporter {
                 }
                 poolMap.put(entry.getKey(), pool);
             } catch (Exception e) {
-                throw new ConfigurationException("manager instance error", e);
+                throw new ConfigurationException("createBean error", e);
             }
         }
 
