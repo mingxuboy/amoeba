@@ -45,6 +45,7 @@ import org.xml.sax.SAXParseException;
 import com.meidusa.amoeba.config.BeanObjectEntityConfig;
 import com.meidusa.amoeba.config.ConfigurationException;
 import com.meidusa.amoeba.config.DocumentUtil;
+import com.meidusa.amoeba.context.ContextChangedListener;
 import com.meidusa.amoeba.context.ProxyRuntimeContext;
 import com.meidusa.amoeba.net.Connection;
 import com.meidusa.amoeba.net.poolable.ObjectPool;
@@ -122,7 +123,7 @@ import com.meidusa.amoeba.util.Tuple;
  * @author struct
  */
 @SuppressWarnings("deprecation")
-public abstract class  AbstractQueryRouter<T extends Connection,V> implements QueryRouter<T,V>, Initialisable {
+public abstract class  AbstractQueryRouter<T extends Connection,V> implements QueryRouter<T,V>, Initialisable ,ContextChangedListener {
 	protected static final String _CURRENT_QUERY_OBJECT_ = "_CURRENT_STATEMENT_";
 	protected static Logger logger = Logger.getLogger(AbstractQueryRouter.class);
 
@@ -554,6 +555,17 @@ public abstract class  AbstractQueryRouter<T extends Connection,V> implements Qu
          return pools;
     }
   
+    public void doChange(){
+    	defaultPools = new ObjectPool[] { ProxyRuntimeContext.getInstance().getPoolMap().get(defaultPool) };
+
+    	if (readPool != null && !StringUtil.isEmpty(readPool)) {
+            readPools = new ObjectPool[] { ProxyRuntimeContext.getInstance().getPoolMap().get(readPool) };
+        }
+        if (writePool != null && !StringUtil.isEmpty(writePool)) {
+            writePools = new ObjectPool[] { ProxyRuntimeContext.getInstance().getPoolMap().get(writePool) };
+        }
+    }
+    
     public void init() throws InitialisationException {
         defaultPools = new ObjectPool[] { ProxyRuntimeContext.getInstance().getPoolMap().get(defaultPool) };
 
@@ -566,6 +578,7 @@ public abstract class  AbstractQueryRouter<T extends Connection,V> implements Qu
         if (writePool != null && !StringUtil.isEmpty(writePool)) {
             writePools = new ObjectPool[] { ProxyRuntimeContext.getInstance().getPoolMap().get(writePool) };
         }
+        
         map = new LRUMap(LRUMapSize);
 
         class ConfigCheckTread extends Thread {

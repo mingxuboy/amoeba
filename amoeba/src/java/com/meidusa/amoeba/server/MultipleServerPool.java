@@ -13,6 +13,7 @@ package com.meidusa.amoeba.server;
 
 import java.util.StringTokenizer;
 
+import com.meidusa.amoeba.context.ContextChangedListener;
 import com.meidusa.amoeba.context.ProxyRuntimeContext;
 import com.meidusa.amoeba.net.poolable.MultipleLoadBalanceObjectPool;
 import com.meidusa.amoeba.net.poolable.ObjectPool;
@@ -25,7 +26,7 @@ import com.meidusa.amoeba.util.StringUtil;
  * @author <a href=mailto:piratebase@sina.com>Struct chen</a>
  *
  */
-public class MultipleServerPool extends MultipleLoadBalanceObjectPool implements Initialisable {
+public class MultipleServerPool extends MultipleLoadBalanceObjectPool implements Initialisable,ContextChangedListener {
 	private String poolNames;
 	public String getPoolNames() {
 		return poolNames;
@@ -51,5 +52,14 @@ public class MultipleServerPool extends MultipleLoadBalanceObjectPool implements
 			this.setObjectPools(objectPools);
 		}
 		super.init();
+	}
+
+	@Override
+	public void doChange() {
+		try {
+			init();
+		} catch (InitialisationException e) {
+			e.printStackTrace();
+		}
 	}
 }
