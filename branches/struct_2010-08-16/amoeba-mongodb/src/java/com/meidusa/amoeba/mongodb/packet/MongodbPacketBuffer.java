@@ -51,14 +51,15 @@ public class MongodbPacketBuffer extends AbstractPacketBuffer {
 
 	public int readInt() {
 		byte[] b = this.buffer; // a little bit optimization
-		return (b[this.position++] & 0xff) | ((b[this.position++] & 0xff) << 8)
+		return 	   (b[this.position++] & 0xff) 
+				| ((b[this.position++] & 0xff) << 8)
 				| ((b[this.position++] & 0xff) << 16)
 				| ((b[this.position++] & 0xff) << 24);
 	}
 
 	public void writeInt(int x) {
 		ensureCapacity(4);
-		writeByte((byte) (0xFF & (x >> 0)));
+		writeByte((byte) (0xFF & x ));
 		writeByte((byte) (0xFF & (x >> 8)));
 		writeByte((byte) (0xFF & (x >> 16)));
 		writeByte((byte) (0xFF & (x >> 24)));

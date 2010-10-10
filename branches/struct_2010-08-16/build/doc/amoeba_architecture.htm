@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html lang="zh-cn" xml:lang="zh-cn">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="copyright" content="(C) Meidusa Amoeba 2008" />
+<meta name="DC.rights.owner" content="(C) Meidusa Amoeba 2008" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="concept" />
+<meta name="DC.Title" content="Amoeba Architecture" />
+<meta name="abstract" content="Amoeba 作为DataBase Proxy的开发框架。致力于解决数据切分、读写分离。以下将为您介绍Amoeba 框架" />
+<meta name="description" content="Amoeba 作为DataBase Proxy的开发框架。致力于解决数据切分、读写分离。以下将为您介绍Amoeba 框架" />
+<meta name="DC.Relation" content="what_is_amoeba.htm" scheme="URI" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="Architecture" />
+<meta name="DC.Language" content="zh-cn" />
+<link rel="stylesheet" type="text/css" href="images/ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="images/bip4.css" />
+<title>Amoeba Architecture</title>
+</head>
+<body>
+<h1 class="topictitle1">Amoeba Architecture</h1>
+<div> 
+  <p>Amoeba 作为DataBase Proxy的开发框架。致力于解决数据切分、读写分离。以下将为您介绍Amoeba 框架<br />
+  </p>
+  <ul class="ullinks">
+    <li class="ulchildlink"><strong>Built on Java NIO</strong><br/>
+      <ul>
+        <br/>
+        <li> NIO 框架采用无阻塞模式，不像传统的Socket编程在大量并发的情况非常浪费系统资源、而且可扩展性也较差<br />
+        </li>
+      </ul>
+    </li>
+    <li class="ulchildlink"><strong>Reusable Server Connection</strong><br />
+      <ul>
+        <br/>
+        <li> Amoeba 提供与数据库连接的可重用度非常高，在Amoeba系统内所有Database Connection同时共享给所有连接到Amoeba的客户端<br />
+        </li>
+      </ul>
+    </li>
+    <li class="ulchildlink"><strong>提供读写分离、数据切分</strong><br />
+      <ul>
+        <br/>
+        <li> 传统的读写分离技术需要通过客户端或者相关的Database Driver技术才能解决，而且客户端的配置也比较复杂<br />
+        </li>
+        <li> 单台Database 性能总是有限制的，基于Amoeba上面可以寻找一种可线性扩展的多数据支持。Amoeba为DBA提供一种非常友好的类似SQL语法的数据切分规则。<br />
+          同时客户端不用担心过多的DataBase Server会给应用带来更多的配置。 </li>
+      </ul>
+    </li>
+    <li class="ulchildlink"><strong>支持高可用性、负责均衡</strong><br />
+      <ul>
+        <br/>
+        <li> Amoeba 提供Database 连接的异常检测与连接恢复功能。<br />
+        </li>
+        <li> 用户可节省使用其他昂贵的负载均衡的硬件设备，Amoeba提供多台Database Server负载均衡策略（轮询、当前活动连接数量）。<br />
+        </li>
+      </ul>
+    </li>
+  </ul>
+</div>
+<div> 
+  <ul class="ullinks">
+    <li class="ulchildlink"><strong>Amoeba Sequence</strong><br />
+    </li>
+    <li class="ulchildlink"><img src="images/amoebasequence.png" /><br />
+    </li>
+    <li class="ulchildlink"><img src="images/architecture.png" /><br />
+    </li>
+ </ul>
+
+<div class="familylinks">
+<div class="parentlink"><strong>父主题：</strong> <a href="what_is_amoeba.htm" title="">Amoeba 是什么</a></div>
+</div>
+</div><div>
+<table class="footer">
+<tr>
+      <td class="footerleft" width="99%"> <a href="notices.htm">声明</a> | <a href="http://sourceforge.net/projects/amoeba" target="_blank">下载</a> 
+        | <a href="http://amoeba.sourceforge.net/phpbb2" target="_blank">论坛</a> 
+        | <a href="http://amoeba.sourceforge.net/phpbb2">反馈</a> 
+        <br />
+<img src="images/copyright.gif" alt="Copyright Meidusa Amoeba 2008" />
+<img src="images/timestamp.gif" alt="最近一次更新时间：2008 年 4 月" />
+</td>
+</tr>
+</table>
+</div>
+</body>
+</html>

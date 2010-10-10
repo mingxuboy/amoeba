@@ -1,0 +1,542 @@
+@import url(swg_info_common.css);
+
+/*
+ *                  Hursley XHTML stylesheet V4.0 
+ *                  =============================
+ *
+ *  2 Nov 2004  pmh  Added explicit body b/g color; font sizes for IE/Mozilla; header sizes
+ * 30 Nov 2004  pmh  Added msg formats; changed pblklblbox color & spacing
+ * 12 Jan 2005  pmh  Changed style of tip boxes for Mozilla/Firefox
+ * 31 Jan 2005  pmh  'tip' boxes not rendering correctly in Mozilla/Firefox
+ * 08 Feb 2005  pmh  added .comment classes and images inside anchors
+ *
+ */
+
+/*************************************************************************
+ * Selectors imported from IBM IDWB XHTML Stylesheet (ibmdita.css).      *
+ * Selectors in swg_info_common.css are not repeated unless different.   *
+ * N.B. Styles added to support .NET output are not included.            *
+ *************************************************************************/
+
+ /* following defined in swg_info_common.css but have no effect there */
+
+.unresolved { background-color: skyblue; }
+.noTemplate { background-color: yellow; }
+
+.fignone {margin-top: 1em}
+.figborder { border-style: solid; padding-left : 3px; border-width : 2px; padding-right : 3px; margin-top: 1em; border-color : Silver;}
+.figsides { border-left : 2px solid; padding-left : 3px; border-right : 2px solid; padding-right : 3px; margin-top: 1em; border-color : Silver;}
+.figtop { border-top : 2px solid; margin-top: 1em; border-color : Silver;}
+.figbottom { border-bottom : 2px solid; border-color : Silver;}
+.figtopbot { border-top : 2px solid; border-bottom : 2px solid; margin-top: 1em; border-color : Silver;}
+
+.synnone {margin-top: 1em}
+.synborder { border-style: solid; padding-left : 3px; border-width : 2px; padding-right : 3px; margin-top: 1em; border-color : Silver;}
+.synsides { border-left : 2px solid; padding-left : 3px; border-right : 2px solid; padding-right : 3px; margin-top: 1em; border-color : Silver;}
+.syntop { border-top : 2px solid; margin-top: 1em; border-color : Silver;}
+.synbottom { border-bottom : 2px solid; border-color : Silver;}
+.syntopbot { border-top : 2px solid; border-bottom : 2px solid; margin-top: 1em; border-color : Silver;}
+
+
+ /* following defined in swg_info_common.css to have no margins */
+
+.skipspace { margin-top: 1em; margin-bottom: 1em }
+
+
+/*************************************************************************
+ * Changed IDWB selectors and selectors specific to Endeavour.           *
+ *************************************************************************/
+
+
+/********************************************************
+ * Font families extracted here to make global
+ * changes for translation etc easier.
+ ********************************************************/
+
+BODY {
+   font-family          : Verdana, Geneva, Arial, Helvetica, sans-serif;
+}
+H1, H2, H3, H4, H5, H6 {
+   font-family          : Arial, Helvetica, sans-serif;
+}
+span.pblktitle {
+   font-family          : Arial, Helvetica, sans-serif;
+}
+PRE, TT {
+   font-family          : "Andale Mono", "Courier New", Courier, monospace;
+}
+.cgraphic, .mv, .xmp, .xph, .pk, .pkdef, .pv, .bin, .hex, .oct, .msgph {
+   font-family          : "Andale Mono", "Courier New", Courier, monospace;
+}
+ .status, .statusl, .statusr {
+   font-family          : "Courier New", Courier, monospace;
+}
+
+/********************************************************
+ * Headers
+ ********************************************************/
+
+h1, h2, h3, h4, h5, h6 { font-style : normal;}  
+h1, h2, h3, h5         { font-weight: bold;}
+h4, h6                 { font-weight: normal;}
+h2 {
+   background-image     : url(helpbanner2.gif);
+   background-repeat    : no-repeat;
+   background-position  : top left;
+   margin-top           : 1em;
+   margin-bottom        : 1em;
+   margin-left          : 0em;
+   margin-right         : 0em;
+   padding-top          : 0.2em;
+   padding-left         : 0em;
+}
+H1, .title, .pagetitle, .topictitle1 {
+	font-size: 1.7em;
+}
+H2, .subtitle, .pagesubtitle, .topictitle2 {
+   font-size: 1.5em;
+ }
+H3, .boldtitle, .topictitle3 {	
+   font-size: 1.3em;
+}
+H4, .topictitle4 {
+   font-size: 1.3em;
+}
+h5, .topictitle5 {
+   font-size: 1.1em;
+}
+h6, .topictitle6 {
+   font-size: 1.1em;
+}
+
+/********************************************************
+ * Q & A list
+ ********************************************************/
+LI.question {
+   font-weight          : bold;
+   background-image     : url(query3.gif);
+   background-repeat    : no-repeat;
+   background-position  : top left;
+   margin-bottom        : 0em;
+   margin-right         : 0em;
+   padding-top          : 10px;
+   padding-bottom       : 1em;
+   padding-left         : 40px;
+   padding-right        : 4em;
+}
+.answer {
+   font-weight          : normal;
+   list-style-type      : none;
+   margin-top           : 0.5em;
+   margin-bottom        : 0em;
+   padding-top          : 0em;
+   padding-bottom       : 0em;
+   padding-left         : 0em;
+}
+SPAN.yes {
+   font-weight          : bold;
+   color                : "green";
+   margin-top           : 0em;
+   margin-bottom        : 0em;
+   padding-top          : 0em;
+   padding-bottom       : 0em;
+}
+SPAN.no {
+   font-weight          : bold;
+   color                : "red";
+   margin-top           : 0em;
+   margin-bottom        : 0em;
+   padding-top          : 0em;
+   padding-bottom       : 0em;
+}
+.more {
+   font-weight          : normal;
+   list-style-type      : none;
+   margin-top           : 0em;
+   margin-bottom        : 0em;
+   padding-top          : 0em;
+   padding-bottom       : 0em;
+   padding-left         : 2em;
+}
+
+/********************************************************
+ * Tables
+ ********************************************************/
+
+TABLE {
+   font-size            : 100%;
+   color                : black;  /* V2: darkblue */
+   width                : 100%;
+   background           : white;  /* V2: #eceff7 */
+   border-collapse : collapse;
+   margin-top           : 1em;
+   margin-bottom        : 1em;
+   margin-left          : 0em;
+   margin-right         : 0em;
+} 
+TD {
+	font-size            : 95%;
+   color                : black;  /* V2: darkblue */
+   background           : white;  /* V2: #eceff7 */
+   vertical-align       : top;
+   padding-top          : 0.1em;
+   padding-bottom       : 0.3em;
+   padding-left         : 1em;
+   padding-right        : 1em;
+} 
+TH {
+   font-size            : 105%;
+   color                : black;  /* V2: darkblue */
+   background           : #eceff7;  /* V2: #e3e8f0 */
+   vertical-align       : top;
+   padding-top          : 0.1em;
+   padding-bottom       : 0.3em;
+   padding-left         : 1em;
+   padding-right        : 1em;
+} 
+
+/********************************************************
+ * footer
+ ********************************************************/
+
+.footer {
+   background           : #ffffff;
+   border               : 0px  solid #dddddd;
+   margin-top           : 4em;
+   margin-bottom        : 1em;
+}
+.footerright, .footerleft {
+   border               : 0px  solid #dddddd;
+   font-size            : 0.9em;
+   padding-top          : 1em;
+}
+.footerleft {
+   background-image     : url(helpbanner2.gif);
+   background-repeat    : no-repeat;
+   background-position  : top left;
+   padding-left         : 0em;
+	vertical-align       : top;
+	text-align           : left;
+}
+.footerright {
+	vertical-align       : top;
+	text-align           : right;
+}
+
+/********************************************************
+ * highlighting
+ ********************************************************/
+
+/*******************
+ * IDWB styles     *
+ *******************/
+.mv, .xmp, .xph, .pk, .pkdef, .pv, .bin, .hex, .oct {
+   color                : black;  /* V2: darkblue */
+   font-size            : 105%;
+}
+.pk, span.pk {
+   font-weight          : bold;
+   text-decoration      : none;
+}
+
+.xmp {
+   padding-top          : 0.2em;
+   padding-bottom       : 0.3em;
+   padding-left         : 2em;
+   padding-right        : 0em;
+   margin-bottom        : 1em;
+	border-left          : none;
+	border-width         : 1px;
+}
+
+.pkdef {
+   text-decoration      : underline;
+}
+.pv {
+   font-style           : italic;
+}
+
+.IBMCommand, .IBMFilepath, .IBMGuiControl, .emphasis, .inlinedef {
+   color                : black;  /* V2: darkblue */
+}
+.IBMCommand {
+   font-weight          : bold;
+}
+.IBMFilepath { 
+/*
+   background-color     : #ffcccc;
+	text-decoration      : line-through;
+*/
+}
+.IBMGuiControl {
+   font-weight          : bold;
+}
+.emphasis {
+   font-style           : italic;
+}
+.inlinedef {
+   font-style           : italic;
+}
+
+
+/*******************
+ * DITA styles     *
+ *******************/
+
+.cmdname, .syscmd, .envar, .menucascade, .msgnum, .softcopy, .q, .wintitle, .wizard { }
+
+.apiname {
+   font-family          : "Andale Mono", "Courier New", Courier, monospace;
+}
+.keyword, .syscmdval, .envarval, .mfnodepropval, .msobjpropval, .cmdval {
+   font-family          : "Andale Mono", "Courier New", Courier, monospace;
+}
+.codeph {
+   font-family          : "Andale Mono", "Courier New", Courier, monospace;
+}
+.filepath {
+   font-family          : "Andale Mono", "Courier New", Courier, monospace;
+}
+
+.wmqsecgrp {
+   font-weight          : bold;
+}
+.parmname {
+   font-weight          : bold;
+}
+.uicontrol {
+   font-weight          : bold;
+}
+.shortcut {
+   text-decoration      : underline;
+}
+
+.option, .syscmdopt, .mfnodeprop, .msobjprop, .cmdopt {
+   font-style           : italic;
+}
+.varname, .syscmdvar, .msgvar, .cmdvar {
+   font-style           : italic;
+}
+.term {
+   font-style           : italic;
+}
+.emphasis {
+   font-style           : italic;
+}
+
+cite, .hardcopy {
+   font-style           : italic;
+}
+
+
+/*******************
+ * concept         *
+ *  definition box *
+ *******************/
+.definition {
+   border-top           : solid;
+   border-bottom        : solid;
+   border-width         : 1px;
+   margin-left          : 7em;
+   margin-right         : 7em;
+   padding-top          : 0.2em;
+   padding-bottom       : 0.2em;
+   padding-left         : 1em;
+   padding-right        : 1em;
+}
+
+/*******************
+ * tip boxes       *
+ *******************/
+
+.tip        { background-image: url(tip3.gif);}
+.warning    { background-image: url(warning3.gif);}
+.problem    { background-image: url(problem3.gif);}
+.diagnostic { background-image: url(diagnostic3.gif);}
+.bearings   { background-image: url(bearings3.gif);}
+.query      { background-image: url(query3.gif);}
+
+.tip, .warning, .problem, .diagnostic, .query, .bearings {
+   background-color     : #f0f0f0;
+   background-repeat    : no-repeat;
+   background-position  : top left;
+   margin-top           : 1em;
+   margin-bottom        : 1em;
+   padding              : 10px 4em 1em 40px;
+}
+
+
+
+/********************************************************
+ * Misc.
+ ********************************************************/
+body {
+	font-size            : 75%;
+   background-color     : #ffffff;
+}
+*>body { /* ignored by IE; applied by Mozilla */
+	font-size            : 100%;
+}
+
+
+.p {
+   margin-top           : 1em
+}
+
+dt {
+   font-weight          : bold;
+}
+
+
+pre, pre.cgraphic {
+   margin-top           : 0.2em;
+   margin-bottom        : 0.4em;
+   margin-left          : 0em;
+   margin-right         : 0em;
+   text-align           : left;
+   padding              : 0;
+   background-color     : #ffffff;
+}
+
+/*******************
+ * mmobj           *
+ *******************/
+div.mmobj {
+   margin-top           : 1em;
+   margin-bottom        : 1em;
+   text-align           : center
+}
+
+/*******************
+ * figure caption  *
+ *******************/
+.figcap {
+   font-style           : italic
+}
+
+/*******************
+ * images as links *
+ *******************/
+a img {
+   border               : 0;
+   margin               : 10px;
+   vertical-align       : middle;
+}
+
+/*******************
+ * diagnostic msg  *
+ *******************/
+.bipinsert {
+   background-color     : #dddddd;
+}
+
+/*******************
+ * label box       *
+ *******************/
+div.pblklblbox {
+   background-color     : #f2f2f2;
+   border               : gray solid 1px;
+   margin-left          : 4em;
+   margin-right         : 4em;
+   margin-top           : 1em;
+   margin-bottom        : 1em;
+}
+
+.prereq {
+/*
+   background-color     : #f0f0f0;
+*/
+   margin-left          : 0em;
+   padding-top          : 0.5em;
+   padding-bottom       : 0.1em;
+   padding-left         : 1em;
+   padding-right        : 0.5em;
+   border-left-color    : gray;
+	border-left-style    : solid;
+	border-left-width    : 1px;
+}
+
+/*******************
+ * rev bar stuff   *
+ *******************/
+#changed {
+    position: absolute;
+    left: 2px;
+    color: red;
+    background-color: white;
+    font-style: normal;
+    font-weight: normal;
+}
+
+/*******************
+ * messages        *
+ *******************/
+div.msg {
+   background-image     : url(helpbanner2.gif);
+   background-repeat    : no-repeat;
+   background-position  : top left;
+   margin-top           : 0em;
+   margin-bottom        : 1em;
+   margin-left          : 0em;
+   margin-right         : 0em;
+   padding-top          : 0.2em;
+   padding-left         : 0em;
+}
+
+div.msgnum, div.msgtext {
+   margin-top           : .5em;
+}
+
+
+/********************************************************
+ * Status box:
+ * Expectation is that the following is only present
+ * in internal builds - could therefore delete this
+ * section for shipping
+ ********************************************************/
+
+.status, .statusl, .statusr {
+   position             : relative;
+   font-size            : 95%;
+   text-align           : left;
+   color                : #EEE8AA;
+   background-color     : black;
+   border               : 0px;
+   margin-top           : 0em;
+   margin-bottom        : 0em;
+   margin-left          : 0em;
+   margin-right         : 0em;
+   padding-top          : 0em;
+   padding-bottom       : 0em;
+   padding-left         : 0.5em;
+   padding-right        : 0.5em;
+}
+.statusl {
+   text-align           : left;
+}
+.statusr {
+   text-align           : right;
+}
+
+#revised {
+   background-color     : #880000;
+   color                : #EEE8AA;
+}
+
+.red {
+   color                : #ff0000;
+}
+
+/*******************
+ * comments        *
+ *******************/
+.comment, .commentblk {
+   color                : #0000dd;
+}
+.commentblk {
+   margin               : .5em 3em .5em 3em;
+   padding              : .5em 1.5em .5em 1.5em;
+   background-color     : #eeeeff;
+   border               : 2px solid #000099;
+}
+

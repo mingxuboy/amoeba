@@ -1,0 +1,420 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3c.org/TR/1999/REC-html401-19991224/loose.dtd">
+
+<HTML xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>Amoeba For Mysql</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="copyright" content="(C) Meidusa Amoeba 2008" />
+<meta name="DC.rights.owner" content="(C) IMeidusa Amoeba 2008" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="concept" />
+<meta name="DC.Title" content="Amoeba For Mysql" />
+<meta name="abstract" content="Amoeba For Mysql 是 Amoeba项目的子项目" />
+<meta name="description" content="Amoeba For Mysql 是 Amoeba项目的子项目" />
+<meta name="DC.Relation" content="index.htm" scheme="URI" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="amoeba_for_mysql" />
+<meta name="DC.Language" content="zh-cn" />
+<link rel="stylesheet" type="text/css" href="images/ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="images/bip4.css" />
+
+<LINK media=screen href="images/forum.css" type=text/css rel=Stylesheet>
+
+<LINK media=screen href="images/application.css" type=text/css rel=Stylesheet>
+<LINK media=screen href="images/highlight.css" type=text/css rel=Stylesheet>
+<SCRIPT src="images/shCore.js" type=text/javascript></SCRIPT>
+<SCRIPT src="images/application.js" type=text/javascript></SCRIPT>
+
+</head>
+<body id="amoeba_for_mysql">
+
+<h1 class="topictitle1">Amoeba For Mysql</h1>
+<div> 
+  <p>Amoeba For Mysql 是 Amoeba项目的子项目。要使用Amoeba For Mysql您必须确保您已符合所有先决条件：</p>
+  <p><strong>先决条件：</strong></p>
+  <ol>
+    <li class="stepexpand"><span><a href="http://java.sun.com/javase/downloads/index.jsp" target="_blank">Java 
+      SE 1.5或者以上</a></span> Amoeba 框架是基于JDK1.5开发的，采用了JDK1.5的特性。</li>
+    <li class="stepexpand">支持<a href="http://dev.mysql.com/downloads/">Mysql</a>协议版本10（mysql 
+      4.1以后的版本）。</li>
+    <li class="stepexpand">您的网络环境至少运行有一个<a href="http://dev.mysql.com/downloads/">mysql</a> 
+      4.1以上的服务</li>
+  </ol>
+  <p><strong>如何快速配置：</strong></p>
+  <ol>
+    <li class="stepexpand"><strong>配置Server(以下是双核CPU配置，调整线程数可优化性能),配置说明：</strong><br/>
+	<div class="tablenoborder"> 
+        <table cellpadding="4" cellspacing="0" summary="" frame="border" border="1" rules="all">
+          <thead align="left">
+            <tr valign="bottom"> 
+              <th width="14%" valign="bottom" id="d0e41">配置项</th>
+              <th width="9%" valign="bottom" id="d0e43">是否必选</th>
+              <th width="8%" valign="bottom" id="d0e45">默认值</th>
+              <th width="69%" valign="bottom" id="d0e45">说明</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr> 
+              <td valign="top" headers="d0e41 ">port</td>
+              <td valign="top" headers="d0e43 ">否</td>
+              <td valign="top" headers="d0e43 ">8066</td>
+              <td valign="top" headers="d0e45 ">Amoeba Server绑定的对外端口</td>
+            </tr>
+            <tr> 
+              <td valign="top" headers="d0e41 ">ipAddress</td>
+              <td valign="top" headers="d0e43 ">否</td>
+              <td valign="top" headers="d0e43 ">空</td>
+              <td valign="top" headers="d0e45 ">Amoeba绑定的IP</td>
+            </tr>
+            <tr> 
+              <td valign="top" headers="d0e41 ">user</td>
+              <td valign="top" headers="d0e43 "><font color=red>是</font></td>
+              <td valign="top" headers="d0e43 ">空</td>
+              <td valign="top" headers="d0e45 ">客户端连接到Amoeba的用户名</td>
+            </tr>
+            <tr> 
+              <td valign="top" headers="d0e41 ">password</td>
+              <td valign="top" headers="d0e43 ">否</td>
+              <td valign="top" headers="d0e43 ">空</td>
+              <td valign="top" headers="d0e45 ">客户端连接到Amoeba所用的密码</td>
+            </tr>
+            <tr> 
+              <td valign="top" headers="d0e41 ">readThreadPoolSize</td>
+              <td valign="top" headers="d0e43 ">否</td>
+              <td valign="top" headers="d0e43 ">16</td>
+              <td valign="top" headers="d0e45 ">负责读客户端、databa seserver 端网络数据包线程数</td>
+            </tr>
+            <tr> 
+              <td valign="top" headers="d0e41 ">clientSideThreadPoolSize</td>
+              <td valign="top" headers="d0e43 ">否</td>
+              <td valign="top" headers="d0e43 ">16</td>
+              <td valign="top" headers="d0e45 ">负责读执行客户端请求的线程数</td>
+            </tr>
+          </tbody>
+          <tr> 
+            <td valign="top" headers="d0e41 ">serverSideThreadPoolSize</td>
+            <td valign="top" headers="d0e43 ">否</td>
+            <td valign="top" headers="d0e43 ">16</td>
+            <td valign="top" headers="d0e45 ">负责处理服务端返回数据包的线程数</td>
+          </tr>
+        </table>
+    	</div>
+      
+    </li>
+    <DIV class=code_title>Server Tag Configuration</div>
+    <DIV class=code_div> 
+      <textarea name="code" cols="100" class="Xml">	<server>
+		<!-- proxy server绑定的端口 -->
+		<property name="port">2066</property>
+		
+		<!-- proxy server绑定的IP -->
+		<property name="ipAddress">127.0.0.1</property>
+		
+		<!-- proxy server net IO Read thread size -->
+		<property name="readThreadPoolSize">100</property>
+		
+		<!-- proxy server client process thread size -->
+		<property name="clientSideThreadPoolSize">80</property>
+		
+		<!-- mysql server data packet process thread size -->
+		<property name="serverSideThreadPoolSize">100</property>
+		
+		<!-- 对外验证的用户名 -->
+		<property name="user">root</property>
+		
+		<!-- 对外验证的密码 -->
+		<property name="password">password</property>
+	</server></textarea>
+    </DIV>
+    <li class="stepexpand"><strong>配置 ConnectionManager</strong><br/>
+      需要至少配置一个ConnectionManager，每个ConnectionManager将作为一个线程启动，ConnectionManager负责管理所注册在自身的Conneciton、负责他们的空闲检测，死亡检测、IO 
+      Event </li>
+    <DIV class=code_title>connectionManagerList Tag Configuration</div>
+    <DIV class=code_div> 
+      <textarea name="code" cols="100" class="Xml"><!-- 
+		每个ConnectionManager都将作为一个线程启动。
+		manager负责Connection IO读写/死亡检测
+	-->
+	<connectionManagerList>
+		<connectionManager name="defaultManager">
+			<className>com.meidusa.amoeba.net.AuthingableConnectionManager</className>
+		</connectionManager>
+	</connectionManagerList></textarea>
+    </DIV>
+    <li class="stepexpand"><strong>配置 dbServer ，需要至少配置一个dbServer，每个dbServer将是物理数据库Server的衍射 
+      </strong> 
+      <p>factoryConfig --目标物理数据库衍射配置情况：</p>
+	   <div class="tablenoborder"> 
+        <table cellpadding="4" cellspacing="0" summary="" frame="border" border="1" rules="all">
+          <thead align="left">
+            <tr valign="bottom"> 
+              <th width="14%" valign="bottom" id="d0e41">配置项</th>
+              <th width="9%" valign="bottom" id="d0e43">是否必选</th>
+              <th width="8%" valign="bottom" id="d0e45">默认值</th>
+              <th width="69%" valign="bottom" id="d0e45">说明</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr> 
+              <td valign="top" headers="d0e41 ">manager</td>
+              <td valign="top" headers="d0e43 "><font color=red>是</font></td>
+              <td valign="top" headers="d0e43 ">空</td>
+              <td valign="top" headers="d0e45 ">表示该dbServer 将注册到指定的ConnectionManager</td>
+            </tr>
+            <tr> 
+              <td valign="top" headers="d0e41 ">port</td>
+              <td valign="top" headers="d0e43 ">否</td>
+              <td valign="top" headers="d0e43 ">3306</td>
+              <td valign="top" headers="d0e45 ">目标数据库端口</td>
+            </tr>
+            <tr> 
+              <td valign="top" headers="d0e41 ">ipAddress</td>
+              <td valign="top" headers="d0e43 ">否</td>
+              <td valign="top" headers="d0e43 ">127.0.0.1</td>
+              <td valign="top" headers="d0e45 ">目标数据库IP</td>
+            </tr>
+            <tr> 
+              <td valign="top" headers="d0e41 ">schema</td>
+              <td valign="top" headers="d0e43 ">否</td>
+              <td valign="top" headers="d0e43 ">空</td>
+              <td valign="top" headers="d0e45 ">连接初始化的Schema</td>
+            </tr>
+            <tr> 
+              <td valign="top" headers="d0e41 ">user</td>
+              <td valign="top" headers="d0e43 "><font color=red>是</font></td>
+              <td valign="top" headers="d0e43 ">空</td>
+              <td valign="top" headers="d0e45 ">用于登陆目标数据库的用户名</td>
+            </tr>
+            <tr> 
+              <td valign="top" headers="d0e41 ">password</td>
+              <td valign="top" headers="d0e43 ">否</td>
+              <td valign="top" headers="d0e43 ">空</td>
+              <td valign="top" headers="d0e45 ">用于登陆目标数据库的密码</td>
+            </tr>
+          </tbody>
+          <tr> 
+            <td valign="top" headers="d0e41 ">className</td>
+            <td valign="top" headers="d0e43 "><font color=red>是</font></td>
+            <td valign="top" headers="d0e43 ">空</td>
+            <td valign="top" headers="d0e45 ">连接工厂实现类(com.meidusa.amoeba.mysql.net.MysqlServerConnectionFactory)</td>
+          </tr>
+        </table>
+    	</div>
+        <p>poolConfig -- 连接池配置情况：</p>
+		 <div class="tablenoborder"> 
+		 <table border="1" cellpadding="4" cellspacing="0" frame="border" rules="all" summary="">
+          <thead align="left">
+            <tr valign="bottom"> 
+              <th width="14%" valign="bottom" id="d0e41">配置项</th>
+              <th width="9%" valign="bottom" id="d0e43">是否必选</th>
+              <th width="8%" valign="bottom" id="d0e45">默认值</th>
+              <th width="69%" valign="bottom" id="d0e45">说明</th>
+            </tr>
+            <tr> 
+              <td valign="top" headers="d0e41 ">className</td>
+              <td valign="top" headers="d0e43 ">否</td>
+              <td valign="top" headers="d0e43 ">&nbsp;</td>
+              <td valign="top" headers="d0e45 ">连接池实现类。默认：com.meidusa.amoeba.net.poolable.PoolableObjectPool</td>
+            </tr>
+          </thead>
+          <tbody>
+            <tr> 
+              <td valign="top" headers="d0e41 ">maxActive</td>
+              <td valign="top" headers="d0e43 ">否</td>
+              <td valign="top" headers="d0e43 ">8</td>
+              <td valign="top" headers="d0e45 ">最大活动连接数，如果达到最大活动连接数，则会等待</td>
+            </tr>
+            <tr> 
+              <td valign="top" headers="d0e41 ">maxIdle</td>
+              <td valign="top" headers="d0e43 ">否</td>
+              <td valign="top" headers="d0e43 ">8</td>
+              <td valign="top" headers="d0e45 ">最大的空闲连接数，如果超过则将会关闭多余的空闲连接</td>
+            </tr>
+            <tr> 
+              <td valign="top" headers="d0e41 ">minIdle</td>
+              <td valign="top" headers="d0e43 ">否</td>
+              <td valign="top" headers="d0e43 ">0</td>
+              <td valign="top" headers="d0e45 ">最小的空闲连接，连接池将保持最小空闲连接，即使这些连接长久不用</td>
+            </tr>
+            <tr> 
+              <td valign="top" headers="d0e41 ">testOnBorrow</td>
+              <td valign="top" headers="d0e43 ">否</td>
+              <td valign="top" headers="d0e43 ">false</td>
+              <td valign="top" headers="d0e45 ">当连接在使用前是否检查连接可用 </td>
+            </tr>
+            <tr> 
+              <td valign="top" headers="d0e41 ">testWhileIdle</td>
+              <td valign="top" headers="d0e43 ">否</td>
+              <td valign="top" headers="d0e43 ">fale</td>
+              <td valign="top" headers="d0e45 ">是否检测空闲连接，这个参数启动的时候下列2个参数才有效 </td>
+            </tr>
+            <tr> 
+              <td valign="top" headers="d0e41 ">minEvictableIdleTimeMillis</td>
+              <td valign="top" headers="d0e43 ">否</td>
+              <td valign="top" headers="d0e43 ">30分钟</td>
+              <td valign="top" headers="d0e45 ">连接空闲多少时间将被驱逐（关闭）(time Unit:ms) 
+              </td>
+            </tr>
+          </tbody>
+          <tr> 
+            <td valign="top" headers="d0e41 ">timeBetweenEvictionRunsMillis</td>
+            <td valign="top" headers="d0e43 ">否</td>
+            <td valign="top" headers="d0e43 ">-1</td>
+            <td valign="top" headers="d0e45 ">用于驱逐空闲连接没间隔多少时间检查一次空闲连接(time Unit:ms)</td>
+          </tr>
+        </table>
+	  </div>
+
+    </li>
+    <DIV class=code_title>dbServer Tag Configuration</div>
+    <DIV class=code_div> 
+      <textarea name="code" cols="100" class="Xml">	<dbServerList>
+		<!-- 
+			一台mysqlServer 需要配置一个pool，
+			如果多台 平等的mysql需要进行loadBalance， 
+			平台已经提供一个具有负载均衡能力的objectPool：com.meidusa.amoeba.mysql.server.MultipleServerPool
+			简单的配置是属性加上 virtual="true",该Pool 不允许配置factoryConfig 、poolConfig
+			
+		-->
+		<dbServer name="server1">
+			
+			<!-- PoolableObjectFactory实现类 -->
+			<factoryConfig>
+				<className>com.meidusa.amoeba.mysql.net.MysqlServerConnectionFactory</className>
+				<property name="manager">defaultManager</property>
+				
+				<!-- 真实mysql数据库端口 -->
+				<property name="port">3301</property>
+				
+				<!-- 真实mysql数据库IP -->
+				<property name="ipAddress">127.0.0.1</property>
+				
+				<!-- 用于登陆mysql的用户名 -->
+				<property name="user">test</property>
+				
+				<!-- 用于登陆mysql的密码 -->
+				<property name="password">test</property>
+				<property name="schema">testSchema</property>
+			</factoryConfig>
+			
+			<!-- ObjectPool实现类 -->
+			<poolConfig>
+				<className>com.meidusa.amoeba.net.poolable.PoolableObjectPool</className>
+				<property name="maxActive">200</property>
+				<property name="maxIdle">200</property>
+				<property name="minIdle">10</property>
+				<property name="minEvictableIdleTimeMillis">600000</property>
+				<property name="timeBetweenEvictionRunsMillis">600000</property>
+				<property name="testOnBorrow">true</property>
+				<property name="testWhileIdle">true</property>
+			</poolConfig>
+		</dbServer>
+ </dbServerList></textarea>
+    </DIV>
+    <li class="stepexpand"><strong>QueryRouter 查询路由配置</strong></li>
+    <div class="tablenoborder"> 
+      <table cellpadding="4" cellspacing="0" summary="" frame="border" border="1" rules="all">
+        <thead align="left">
+          <tr valign="bottom"> 
+            <th width="14%" valign="bottom" id="d0e41">配置项</th>
+            <th width="9%" valign="bottom" id="d0e43">是否必选</th>
+            <th width="8%" valign="bottom" id="d0e45">默认值</th>
+            <th width="69%" valign="bottom" id="d0e45">说明</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr> 
+            <td valign="top" headers="d0e41 ">className</td>
+            <td valign="top" headers="d0e43 "><font color=red>是</font></td>
+            <td valign="top" headers="d0e43 ">空</td>
+            <td valign="top" headers="d0e45 ">QueryRouter实现类，Amoeba For Mysql（com.meidusa.amoeba.mysql.parser.MysqlQueryRouter）。</td>
+          </tr>
+          <tr> 
+            <td valign="top" headers="d0e41 ">functionConfig</td>
+            <td valign="top" headers="d0e43 ">否</td>
+            <td valign="top" headers="d0e43 ">空</td>
+            <td valign="top" headers="d0e45 ">用于解析sql 函数的配置文件，如果不配置则将不解析包含函数sql或者解析的不完整。</td>
+          </tr>
+          <tr> 
+            <td valign="top" headers="d0e41 ">ruleConfig</td>
+            <td valign="top" headers="d0e43 ">否</td>
+            <td valign="top" headers="d0e43 ">空</td>
+            <td valign="top" headers="d0e45 ">数据切分规则配置文件，如果不配置则sql数据切分功能将不能用</td>
+          </tr>
+          <tr> 
+            <td valign="top" headers="d0e41 ">needParse</td>
+            <td valign="top" headers="d0e43 ">否</td>
+            <td valign="top" headers="d0e43 ">true</td>
+            <td valign="top" headers="d0e45 ">是否对 sql进行parse，如果false 则将不能使用数据切分、读写分离等功能 
+            </td>
+          </tr>
+          <tr> 
+            <td valign="top" headers="d0e41 ">defaultPool</td>
+            <td valign="top" headers="d0e43 "><font color=red>是</font></td>
+            <td valign="top" headers="d0e43 ">空</td>
+            <td valign="top" headers="d0e45 ">needParse=false、无法解析query、不满足切分规则的、writePool|readPool 
+              == null情况。 所有sql 将在默认得dbServer上面执行。(<font color=red>必选</font>)</td>
+          </tr>
+          <tr> 
+            <td valign="top" headers="d0e41 ">writePool</td>
+            <td valign="top" headers="d0e43 ">否</td>
+            <td valign="top" headers="d0e43 ">空</td>
+            <td valign="top" headers="d0e45 ">启用needParse 功能，并且没有匹配到数据切分规则，则 update、insert、delete 
+              语句将在这个pool中执行</td>
+          </tr>
+        </tbody>
+        <tr> 
+          <td valign="top" headers="d0e41 ">readPool</td>
+          <td valign="top" headers="d0e43 ">否</td>
+          <td valign="top" headers="d0e43 ">空</td>
+          <td valign="top" headers="d0e45 ">启用needParse 功能，并且没有匹配到数据切分规则，则 select 
+            语句将在这个pool中执行 </td>
+        </tr>
+        <tr> 
+          <td valign="top" headers="d0e41 ">LRUMapSize</td>
+          <td valign="top" headers="d0e43 ">否</td>
+          <td valign="top" headers="d0e43 ">1000</td>
+          <td valign="top" headers="d0e45 ">statment cache ，存放 sql 解析后得到的statment</td>
+        </tr>
+      </table>
+    </div>
+    <DIV class=code_title>queryRouter Tag Configuration</div>
+    <DIV class=code_div> 
+      <textarea name="code" cols="100" class="Xml">	<queryRouter>
+		<className>com.meidusa.amoeba.mysql.parser.MysqlQueryRouter</className>
+		<!--
+		<property name="ruleConfig">./src/conf/rule.xml</property>
+		<property name="functionConfig">./src/conf/functionMap.xml</property>
+		-->
+		<property name="needParse">false</property>
+		<property name="LRUMapSize">1500</property>
+		<property name="defaultPool">server1</property>
+		<!--
+		<property name="writePool">server1</property>
+		<property name="readPool">server1</property>
+		-->
+	</queryRouter></textarea>
+    </DIV>
+  </ol>
+</div>
+<div> <strong><a href="images/doc/i_comp_wiz.htm"></a></strong><br />
+  <div class="familylinks">
+<div class="parentlink"><strong>父主题：</strong> <a href="index.htm" title="">开发、使用 Amoeba 指南</a></div>
+</div>
+</div><div>
+<table class="footer">
+<tr>
+      <td class="footerleft" width="99%"> <a href="notices.htm">声明</a> | <a href="http://sourceforge.net/projects/amoeba" target="_blank">下载</a> 
+        | <a href="http://amoeba.sourceforge.net/phpbb2" target="_blank">论坛</a> 
+        | <a href="http://amoeba.sourceforge.net/phpbb2">反馈</a> 
+        <br />
+<img src="images/copyright.gif" alt="Copyright Meidusa Amoeba 2008" />
+<img src="images/timestamp.gif" alt="最近一次更新时间：2008 年 4 月" />
+</td>
+</tr>
+</table>
+</div>
+<SCRIPT>render_code();</SCRIPT> 
+</body>
+</html>/
