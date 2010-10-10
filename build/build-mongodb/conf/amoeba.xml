@@ -61,21 +61,13 @@
 			简单的配置是属性加上 virtual="true",该Pool 不允许配置factoryConfig
 			或者自己写一个ObjectPool。
 		-->
-		<dbServer name="server1">
+		<dbServer name="abstractServer" abstractive="true">
 			
 			<!-- PoolableObjectFactory实现类 -->
 			<factoryConfig class="com.meidusa.amoeba.mongodb.net.MongodbServerConnectionFactory">
 				<property name="manager">defaultManager</property>
-				
-				<!-- 真实mysql数据库端口 -->
-				<property name="port">12338</property>
-				
-				<!-- 真实mysql数据库IP -->
-				<property name="ipAddress">10.241.14.41</property>
-				
+				<property name="ipAddress">127.0.0.1</property>
 			</factoryConfig>
-			
-			<!-- ObjectPool实现类 -->
 			<poolConfig class="com.meidusa.amoeba.net.poolable.PoolableObjectPool">
 				<property name="maxActive">200</property>
 				<property name="maxIdle">200</property>
@@ -86,40 +78,32 @@
 				<property name="testWhileIdle">true</property>
 			</poolConfig>
 		</dbServer>
-		
-		<dbServer name="server2">
-			
-			<!-- PoolableObjectFactory实现类 -->
+		<dbServer name="server0" parent="abstractServer">
 			<factoryConfig class="com.meidusa.amoeba.mongodb.net.MongodbServerConnectionFactory">
 				<property name="manager">defaultManager</property>
-				
-				<!-- 真实mysql数据库端口 -->
-				<property name="port">12338</property>
-				
-				<!-- 真实mysql数据库IP -->
-				<property name="ipAddress">10.241.14.43</property>
-				
+				<property name="port">27017</property>
 			</factoryConfig>
-			
-			<!-- ObjectPool实现类 -->
-			<poolConfig class="com.meidusa.amoeba.net.poolable.PoolableObjectPool">
-				<property name="maxActive">200</property>
-				<property name="maxIdle">200</property>
-				<property name="minIdle">10</property>
-				<property name="minEvictableIdleTimeMillis">600000</property>
-				<property name="timeBetweenEvictionRunsMillis">600000</property>
-				<property name="testOnBorrow">true</property>
-				<property name="testWhileIdle">true</property>
-			</poolConfig>
+		</dbServer>
+		<!--<dbServer name="server1" parent="abstractServer">
+			<factoryConfig class="com.meidusa.amoeba.mongodb.net.MongodbServerConnectionFactory">
+				<property name="manager">defaultManager</property>
+				<property name="port">12338</property>
+			</factoryConfig>
+		</dbServer>
+		<dbServer name="server2" parent="abstractServer">
+			<factoryConfig class="com.meidusa.amoeba.mongodb.net.MongodbServerConnectionFactory">
+				<property name="manager">defaultManager</property>
+				<property name="port">12339</property>
+			</factoryConfig>
 		</dbServer>
 		
-		<dbServer name="multiPool" virtual="true">
+		--><dbServer name="multiPool" virtual="true">
 			<poolConfig class="com.meidusa.amoeba.server.MultipleServerPool">
 				<!-- 负载均衡参数 1=ROUNDROBIN , 2=WEIGHTBASED , 3=HA-->
 				<property name="loadbalance">1</property>
 				
 				<!-- 参与该pool负载均衡的poolName列表以逗号分割 -->
-				<property name="poolNames">server1</property>
+				<property name="poolNames">server0</property>
 			</poolConfig>
 		</dbServer>
 		
@@ -130,7 +114,7 @@
 		<property name="functionConfig">${amoeba.home}/conf/functionMap.xml</property>
 		<property name="ruleFunctionConfig">${amoeba.home}/conf/ruleFunctionMap.xml</property>
 		<property name="LRUMapSize">1500</property>
-		<property name="defaultPool">server1</property>
+		<property name="defaultPool">server0</property>
 		
 		<!--
 		<property name="writePool">server1</property>

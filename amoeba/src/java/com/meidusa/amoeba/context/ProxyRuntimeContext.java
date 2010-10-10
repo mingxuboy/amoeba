@@ -696,7 +696,7 @@ public abstract class ProxyRuntimeContext implements Reporter {
 
 		if(tryUpdate){
 		
-			//check can create ObjectPool with this config
+			//try to create ObjectPool with this sourceConfig
 			if(!abstractive){
 				DBServerConfig config = (DBServerConfig)sourceConfig.clone();
 				if (sourceConfig.getParent() != null) {
@@ -737,7 +737,7 @@ public abstract class ProxyRuntimeContext implements Reporter {
 			/**
 			 * close old objectPool
 			 * if this configuration is abstractive then close all children's objectPools 
-			 * else only the old ObjectPool with the same name will be closed
+			 * else the old ObjectPool will be closed
 			 * 
 			 */
 			this.getConfig().addServer(sourceConfig.getName(),sourceConfig);

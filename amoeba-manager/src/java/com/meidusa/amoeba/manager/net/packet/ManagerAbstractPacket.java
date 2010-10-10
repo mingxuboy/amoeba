@@ -31,9 +31,7 @@ public class ManagerAbstractPacket extends AbstractPacket implements ManagerCons
         int position = buffer.getPosition();
         lenght = position;
         buffer.setPosition(0);
-        buffer.writeByte((byte) (lenght & 0xff));
-        buffer.writeByte((byte) (lenght >>> 8));
-        buffer.writeByte((byte) (lenght >>> 16));
+        //TODO
         buffer.writeByte((byte) funType);
         buffer.setPosition(position);
     }
