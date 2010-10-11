@@ -1,4 +1,4 @@
-package com.meidusa.amoeba.bean.shutdown;
+package com.meidusa.amoeba.shutdown;
 
 import java.io.BufferedReader;
 import java.io.File;
