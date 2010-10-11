@@ -11,6 +11,16 @@ public class ConsistentHash<T> {
 	public static class Entry<T>{
 		T object;
 		int replicas;
+		Entry(){}
+		Entry(T obj,int replicas){
+			this.object = obj;
+			this.replicas = replicas;
+		}
+		
+		Entry(T obj){
+			this.object = obj;
+			this.replicas = 1;
+		}
 	}
 	private final HashFunction hashFunction;
 	private final SortedMap<Long, T> circle = new TreeMap<Long, T>();
@@ -60,19 +70,19 @@ public class ConsistentHash<T> {
 	}
 
 	public static void main(String[] args){
-		Collection<Object> coll = new ArrayList<Object>();
-		coll.add("asdfqwer");
-		coll.add("b");
-		coll.add("c");
-		coll.add("d");
-		coll.add("e");
-		coll.add("f");
-		coll.add("g");
-		coll.add("h");
-		coll.add("i");
-		coll.add("j");
-		coll.add("k");
-		coll.add("l");
+		Collection<Entry<Object>> coll = new ArrayList<Entry<Object>>();
+		coll.add(new Entry("asdfqwer"));
+		coll.add(new Entry("b"));
+		coll.add(new Entry("c"));
+		coll.add(new Entry("d"));
+		coll.add(new Entry("e"));
+		coll.add(new Entry("f"));
+		coll.add(new Entry("g"));
+		coll.add(new Entry("h"));
+		coll.add(new Entry("i"));
+		coll.add(new Entry("j"));
+		coll.add(new Entry("k"));
+		coll.add(new Entry("l"));
 		
 		ConsistentHash<Object> hash = new ConsistentHash<Object>(new HashFunction(){
 
@@ -81,10 +91,13 @@ public class ConsistentHash<T> {
 			}
 			
 		});
-		long start = System.nanoTime();
+		
+		hash.addAll(coll);
+		long start = System.currentTimeMillis();
 		for(int i=0;i<1000000;i++){
-			System.out.println(hash.get(i));
+			//System.out.println(hash.get(i));
+			hash.get(i);
 		}
-		System.out.println(System.nanoTime() - start);
+		System.out.println(System.currentTimeMillis() - start);
 	}
 }
