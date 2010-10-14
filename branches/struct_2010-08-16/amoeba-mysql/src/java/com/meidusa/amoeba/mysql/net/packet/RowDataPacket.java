@@ -42,7 +42,7 @@ public class RowDataPacket extends AbstractPacket {
         }
 
         while (buffer.getPosition() < this.packetLength + HEADER_SIZE) {
-            columns.add(buffer.readLengthCodedString(ProxyRuntimeContext.getInstance().getServerCharset()));
+            columns.add(buffer.readLengthCodedString(ProxyRuntimeContext.getInstance().getRuntimeContext().getServerCharset()));
         }
 
     }
@@ -58,7 +58,7 @@ public class RowDataPacket extends AbstractPacket {
             Iterator<Object> it = columns.iterator();
             while (it.hasNext()) {
                 Object obj = it.next();
-                buffer.writeLengthCodedString(obj != null ? obj.toString() : null, ProxyRuntimeContext.getInstance().getServerCharset());
+                buffer.writeLengthCodedString(obj != null ? obj.toString() : null, ProxyRuntimeContext.getInstance().getRuntimeContext().getServerCharset());
             }
         } else {
             myBuffer.writeByte((byte) 0);

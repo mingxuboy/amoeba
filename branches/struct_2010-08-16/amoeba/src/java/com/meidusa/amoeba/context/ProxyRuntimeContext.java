@@ -23,8 +23,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executor;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -56,6 +54,7 @@ import com.meidusa.amoeba.heartbeat.HeartbeatDelayed;
 import com.meidusa.amoeba.heartbeat.HeartbeatManager;
 import com.meidusa.amoeba.heartbeat.Status;
 import com.meidusa.amoeba.net.ConnectionManager;
+import com.meidusa.amoeba.net.ServerableConnectionManager;
 import com.meidusa.amoeba.net.poolable.MultipleLoadBalanceObjectPool;
 import com.meidusa.amoeba.net.poolable.ObjectPool;
 import com.meidusa.amoeba.net.poolable.PoolableObject;
@@ -68,7 +67,7 @@ import com.meidusa.amoeba.util.StringUtil;
 /**
  * @author <a href=mailto:piratebase@sina.com>Struct chen</a>
  */
-public abstract class ProxyRuntimeContext implements Reporter {
+public class ProxyRuntimeContext implements Reporter {
 
     public static final String             DEFAULT_SERVER_CONNECTION_MANAGER_CLASS = "com.meidusa.amoeba.net.AuthingableConnectionManager";
     public static final String             DEFAULT_REAL_POOL_CLASS                 = "com.meidusa.amoeba.net.poolable.PoolableObjectPool";
@@ -76,7 +75,7 @@ public abstract class ProxyRuntimeContext implements Reporter {
 
     protected static Logger                logger                                  = Logger.getLogger(ProxyRuntimeContext.class);
 
-    private static ProxyRuntimeContext     context;
+    private static ProxyRuntimeContext     context = null;
 
     private ProxyServerConfig              config;
 
@@ -91,17 +90,29 @@ public abstract class ProxyRuntimeContext implements Reporter {
 
     private List<ContextChangedListener> listeners = new ArrayList<ContextChangedListener>();
     private QueryRouter                    queryRouter;
-    private String                         serverCharset;
+    private RuntimeContext runtimeContext;
 
-    public static ProxyRuntimeContext getInstance() {
+    public ServerableConnectionManager server;
+    
+    public ServerableConnectionManager getServer() {
+		return server;
+	}
+
+	public void setServer(ServerableConnectionManager server) {
+		this.server = server;
+	}
+	
+	public RuntimeContext getRuntimeContext() {
+		return runtimeContext;
+	}
+
+	public static ProxyRuntimeContext getInstance() {
         return context;
     }
 
-    protected static void setInstance(ProxyRuntimeContext context) {
+    public static void setInstance(ProxyRuntimeContext context) {
         ProxyRuntimeContext.context = context;
     }
-
-    protected abstract String getDefaultServerConnectionFactoryClassName();
 
     protected String getDefaultServerConnectionManagerClassName() {
         return DEFAULT_SERVER_CONNECTION_MANAGER_CLASS;
@@ -115,14 +126,6 @@ public abstract class ProxyRuntimeContext implements Reporter {
         return DEFAULT_VIRTUAL_POOL_CLASS;
     }
 
-    public String getServerCharset() {
-        return serverCharset;
-    }
-
-    public void setServerCharset(String serverCharset) {
-        this.serverCharset = serverCharset;
-    }
-
     public ProxyServerConfig getConfig() {
         return config;
     }
@@ -131,52 +134,11 @@ public abstract class ProxyRuntimeContext implements Reporter {
         return queryRouter;
     }
 
-    static class ReNameableThreadExecutor extends ThreadPoolExecutor {
-
-        // Map<Thread,String> threadNameMap = new HashMap<Thread,String>();
-
-        public ReNameableThreadExecutor(int poolSize){
-            super(poolSize, poolSize, Long.MAX_VALUE, TimeUnit.NANOSECONDS, new LinkedBlockingQueue<Runnable>());
-        }
-
-        // protected void beforeExecute(Thread t, Runnable r) {
-        // if (r instanceof NameableRunner) {
-        // NameableRunner nameableRunner = (NameableRunner) r;
-        // String name = t.getName();
-        // if (name != null) {
-        // threadNameMap.put(t, t.getName());
-        // t.setName(nameableRunner.getRunnerName() + ":" + t.getName());
-        // }
-        // }
-        // };
-        //
-        // protected void afterExecute(Runnable r, Throwable t) {
-        // if (r instanceof NameableRunner) {
-        // String name = threadNameMap.remove(Thread.currentThread());
-        // if (name != null) {
-        // Thread.currentThread().setName(name);
-        // }
-        // }
-        // };
-    }
-
-    protected ProxyRuntimeContext(){
+    public ProxyRuntimeContext(){
     }
 
     public Map<String, ConnectionManager> getConnectionManagerList() {
         return readOnlyConMgrMap;
-    }
-
-    public Executor getClientSideExecutor() {
-        return clientSideExecutor;
-    }
-
-    public Executor getReadExecutor() {
-        return readExecutor;
-    }
-
-    public Executor getServerSideExecutor() {
-        return serverSideExecutor;
     }
 
     public Map<String, ObjectPool> getPoolMap() {
@@ -243,13 +205,13 @@ public abstract class ProxyRuntimeContext implements Reporter {
     
     protected  void inheritBeanObjectEntityConfig(BeanObjectEntityConfig parent,BeanObjectEntityConfig dest){
     	BeanObjectEntityConfig parentCloned = (BeanObjectEntityConfig)parent.clone();
-    	if(dest.getClassName() != null){
+    	if(!StringUtil.isEmpty(dest.getClassName())){
     		parentCloned.setClassName(dest.getClassName());
     	}
     	
-    	if(dest.getName() != null){
+    	/*if(!StringUtil.isEmpty(dest.getName())){
     		parentCloned.setName(dest.getName());
-    	}
+    	}*/
     	
     	if(dest.getParams() != null){
     		if(parentCloned.getParams() == null){
@@ -260,17 +222,16 @@ public abstract class ProxyRuntimeContext implements Reporter {
     	}
     	
     	dest.setClassName(parentCloned.getClassName());
-    	dest.setName(parentCloned.getName());
+    	//dest.setName(parentCloned.getName());
     	dest.setParams(parentCloned.getParams());
     }
     
+    
+    
     public void init(String file) {
         config = loadConfig(file);
-        readExecutor = new ReNameableThreadExecutor(config.getReadThreadPoolSize());
-        serverSideExecutor = new ReNameableThreadExecutor(config.getServerSideThreadPoolSize());
-        clientSideExecutor = new ReNameableThreadExecutor(config.getClientSideThreadPoolSize());
-        serverCharset = config.getServerCharset();
-
+        this.runtimeContext = (RuntimeContext)config.getRuntimeConfig().createBeanObject(true);
+        
         for (Map.Entry<String, BeanObjectEntityConfig> entry : config.getManagers().entrySet()) {
             BeanObjectEntityConfig beanObjectEntityConfig = entry.getValue();
             try {
@@ -315,7 +276,7 @@ public abstract class ProxyRuntimeContext implements Reporter {
                 }
                 poolMap.put(entry.getKey(), pool);
             } catch (Exception e) {
-                throw new ConfigurationException("createBean error", e);
+                throw new ConfigurationException("createBean error dbServer="+dbServerConfig.getName(), e);
             }
         }
 
@@ -468,8 +429,8 @@ public abstract class ProxyRuntimeContext implements Reporter {
                 Element child = (Element) childNode;
 
                 final String nodeName = child.getNodeName();
-                if (nodeName.equals("server")) {
-                    loadServerConfig(child, config);
+                if (nodeName.equals("proxy")) {
+                	loadProxyConfig(child, config);
                 } else if (nodeName.equals("connectionManagerList")) {
                     loadConnectionManagers(child, config);
                 } else if (nodeName.equals("dbServerList")) {
@@ -513,11 +474,11 @@ public abstract class ProxyRuntimeContext implements Reporter {
                     }
                 }
 
-                if (serverConfig.getFactoryConfig() != null) {
+                /*if (serverConfig.getFactoryConfig() != null) {
                     if (StringUtil.isEmpty(serverConfig.getFactoryConfig().getClassName())) {
-                        serverConfig.getFactoryConfig().setClassName(getDefaultServerConnectionFactoryClassName());
+                    	throw new ConfigurationException("DBServer Config name=" + serverConfig.getName()+" factory class must not be null!");
                     }
-                }
+                }*/
                 config.addServer(serverConfig.getName(), serverConfig);
             }
         }
@@ -535,7 +496,7 @@ public abstract class ProxyRuntimeContext implements Reporter {
             }
         }
 
-        ParameterMapping.mappingObject(serverConfig, map);
+        ParameterMapping.mappingObject(serverConfig, map,null);
 
         BeanObjectEntityConfig factory = DocumentUtil.loadBeanConfig(DocumentUtil.getTheOnlyElement(current, "factoryConfig"));
         BeanObjectEntityConfig pool = DocumentUtil.loadBeanConfig(DocumentUtil.getTheOnlyElement(current, "poolConfig"));
@@ -566,6 +527,37 @@ public abstract class ProxyRuntimeContext implements Reporter {
         }
     }
 
+    private void loadProxyConfig(Element current, ProxyServerConfig config) {
+        NodeList children = current.getChildNodes();
+        int childSize = children.getLength();
+        Map<String, Object> map = new HashMap<String, Object>();
+        for (int i = 0; i < childSize; i++) {
+            Node childNode = children.item(i);
+            if (childNode instanceof Element) {
+                Element child = (Element) childNode;
+                final String nodeName = child.getNodeName();
+                if (nodeName.equals("property")) {
+                    String key = child.getAttribute("name");
+                    String value = child.getTextContent();
+                    map.put(key, value);
+                }else if(nodeName.equals("server")){
+                	BeanObjectEntityConfig server = DocumentUtil.loadBeanConfig(child);
+                	config.setServerConfig(server);
+                }else if(nodeName.equals("authenticator")){
+                	BeanObjectEntityConfig authenticator = DocumentUtil.loadBeanConfig(child);
+                	config.setAuthenticatorConfig(authenticator);
+                }else if(nodeName.equals("connectionFactory")){
+                	BeanObjectEntityConfig connectionFactory = DocumentUtil.loadBeanConfig(child);
+                	config.setConnectionFactoryConfig(connectionFactory);
+                }else if(nodeName.equals("runtime")){
+                	BeanObjectEntityConfig runtime = DocumentUtil.loadBeanConfig(child);
+                	config.setRuntimeConfig(runtime);
+                }
+            }
+        }
+        ParameterMapping.mappingObject(config, map,null);
+    }
+    
     private void loadServerConfig(Element current, ProxyServerConfig config) {
         NodeList children = current.getChildNodes();
         int childSize = children.getLength();
@@ -582,7 +574,7 @@ public abstract class ProxyRuntimeContext implements Reporter {
                 }
             }
         }
-        ParameterMapping.mappingObject(config, map);
+        ParameterMapping.mappingObject(config, map,null);
     }
 
     public void appendReport(StringBuilder buffer, long now, long sinceLast, boolean reset, Level level) {

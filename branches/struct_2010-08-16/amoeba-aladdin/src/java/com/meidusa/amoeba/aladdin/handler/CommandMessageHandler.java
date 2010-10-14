@@ -100,7 +100,7 @@ public abstract class CommandMessageHandler implements MessageHandler, Sessionab
                 connPoolMap.put(conn, pool);
                 QueryRunnable runnable = newQueryRunnable(latch, conn, query, parameter, packet);
                 runnable.init(this);
-                ProxyRuntimeContext.getInstance().getClientSideExecutor().execute(runnable);
+                ProxyRuntimeContext.getInstance().getRuntimeContext().getClientSideExecutor().execute(runnable);
             }
             started = true;
             if (timeout > 0) {

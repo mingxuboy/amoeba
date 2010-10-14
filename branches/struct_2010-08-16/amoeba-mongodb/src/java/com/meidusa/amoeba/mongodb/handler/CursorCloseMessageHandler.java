@@ -86,6 +86,6 @@ public class CursorCloseMessageHandler implements SessionMessageHandler{
 	}
 	
 	public boolean checkIdle(long now){
-		return (now - startTime) > ProxyRuntimeContext.getInstance().getConfig().getQueryTimeout() * 1000; 
+		return (now - startTime) > ProxyRuntimeContext.getInstance().getRuntimeContext().getQueryTimeout() * 1000; 
 	}
 }

@@ -18,7 +18,9 @@ import org.apache.log4j.Logger;
 
 import com.meidusa.amoeba.net.poolable.ObjectPool;
 import com.meidusa.amoeba.net.poolable.PoolableObject;
-import com.meidusa.amoeba.mysql.context.MysqlProxyRuntimeContext;
+import com.meidusa.amoeba.context.ProxyRuntimeContext;
+import com.meidusa.amoeba.context.RuntimeContext;
+import com.meidusa.amoeba.mysql.context.MysqlRuntimeContext;
 import com.meidusa.amoeba.mysql.io.MySqlPacketConstant;
 import com.meidusa.amoeba.mysql.net.packet.AuthenticationPacket;
 import com.meidusa.amoeba.mysql.net.packet.ErrorPacket;
@@ -96,7 +98,7 @@ public class MysqlServerConnection extends MysqlConnection implements MySqlPacke
 					if(logger.isDebugEnabled()){
 						logger.debug("2. receive HandshakePacket packet from server:"+this.host +":"+this.port);
 					}
-					MysqlProxyRuntimeContext context = ((MysqlProxyRuntimeContext)MysqlProxyRuntimeContext.getInstance());
+					MysqlRuntimeContext context = (MysqlRuntimeContext)ProxyRuntimeContext.getInstance().getRuntimeContext();
 					if(context.getServerCharset() == null && handpacket.serverCharsetIndex > 0){
 						context.setServerCharsetIndex(handpacket.serverCharsetIndex);
 						logger.info("mysql server Handshake= "+handpacket.toString());

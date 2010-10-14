@@ -7,8 +7,9 @@ import java.util.ArrayList;
 
 import org.apache.log4j.Logger;
 
+import com.meidusa.amoeba.context.ProxyRuntimeContext;
 import com.meidusa.amoeba.jdbc.ResultSetHandler;
-import com.meidusa.amoeba.mysql.context.MysqlProxyRuntimeContext;
+import com.meidusa.amoeba.mysql.context.MysqlRuntimeContext;
 import com.meidusa.amoeba.mysql.jdbc.MysqlDefs;
 import com.meidusa.amoeba.mysql.net.MysqlClientConnection;
 import com.meidusa.amoeba.mysql.net.packet.BindValue;
@@ -55,7 +56,7 @@ public class ResultSetUtil {
 				packet.resulthead = new ResultSetHeaderPacket();
 				packet.resulthead.columns = colunmCount;
 			}
-			MysqlProxyRuntimeContext context = (MysqlProxyRuntimeContext)MysqlProxyRuntimeContext.getInstance();
+			MysqlRuntimeContext context = (MysqlRuntimeContext)ProxyRuntimeContext.getInstance().getRuntimeContext();
 			String charset = ((MysqlClientConnection)source).getCharset();
 			if(charset ==null){
 				charset = context.getServerCharset();

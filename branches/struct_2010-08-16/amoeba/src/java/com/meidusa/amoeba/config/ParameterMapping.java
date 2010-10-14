@@ -79,7 +79,7 @@ public class ParameterMapping {
         return (mDescriptors);
     }
 
-    public static void mappingObject(Object object, Map<String, Object> parameter) {
+    public static void mappingObject(Object object, Map<String, Object> parameter,Map<String,Object> context) {
         PropertyDescriptor[] descriptors = getDescriptors(object.getClass());
 
         for (int i = 0; i < descriptors.length; i++) {
@@ -88,23 +88,36 @@ public class ParameterMapping {
             Object value = obj;
             Class<?> cls = descriptors[i].getPropertyType();
             if (obj instanceof String) {
-                String string = (String) obj;
-                if (!StringUtil.isEmpty(string)) {
-                    string = ConfigUtil.filter(string);
-                }
+                
 
                 if (isPrimitiveType(cls)) {
+                	String string = (String) obj;
+                    if (!StringUtil.isEmpty(string)) {
+                        string = ConfigUtil.filter(string);
+                    }
                     value = deStringize(cls, string);
+                }else{
+                	if(context != null){
+                		if(obj != null){
+                			String key = StringUtil.split(((String)obj).trim(), "${}")[0];
+                			value =  context.get(key);
+                			if(value == null){
+                				if (logger.isInfoEnabled()) {
+                                    logger.info(object.getClass() + "@" + descriptors[i].getName() + ", bean name="+key+" not found! ");
+                                }
+                			}
+                		}
+                	}
                 }
             } else if (obj instanceof BeanObjectEntityConfig) {
 
-                value = newBean((BeanObjectEntityConfig) obj);
+                value = newBean((BeanObjectEntityConfig) obj,context);
 
             } else if (obj instanceof BeanObjectEntityConfig[]) {
                 List<Object> list = new ArrayList<Object>();
 
                 for (BeanObjectEntityConfig beanconfig : (BeanObjectEntityConfig[]) obj) {
-                    list.add(newBean(beanconfig));
+                    list.add(newBean(beanconfig,context));
                 }
                 value = list.toArray();
             }
@@ -132,7 +145,7 @@ public class ParameterMapping {
     }
 
     @SuppressWarnings("unchecked")
-    public static Object newBean(BeanObjectEntityConfig beanConfig) {
+    public static Object newBean(BeanObjectEntityConfig beanConfig,Map<String,Object> context) {
         Object beanvalue = beanConfig.createBeanObject(true);
         // Map bean
         if (beanvalue instanceof Map) {
@@ -143,7 +156,7 @@ public class ParameterMapping {
                 if (mapValue instanceof BeanObjectEntityConfig) {
                     BeanObjectEntityConfig mapBeanConfig = (BeanObjectEntityConfig) entry.getValue();
                     mapValue = mapBeanConfig.createBeanObject(true);
-                    mappingObject(mapValue, mapBeanConfig.getParams());
+                    mappingObject(mapValue, mapBeanConfig.getParams(),context);
                 }
                 map.put(key, mapValue);
             }
@@ -152,7 +165,7 @@ public class ParameterMapping {
         }
         // other bean
         else {
-            mappingObject(beanvalue, beanConfig.getParams());
+            mappingObject(beanvalue, beanConfig.getParams(),context);
         }
 
         return beanvalue;

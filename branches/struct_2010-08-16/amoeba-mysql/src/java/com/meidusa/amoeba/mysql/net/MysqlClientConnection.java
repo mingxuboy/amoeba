@@ -27,19 +27,26 @@ import org.apache.commons.collections.map.LRUMap;
 import org.apache.log4j.Logger;
 
 import com.meidusa.amoeba.context.ProxyRuntimeContext;
+import com.meidusa.amoeba.mysql.context.MysqlRuntimeContext;
 import com.meidusa.amoeba.mysql.filter.IOFilter;
 import com.meidusa.amoeba.mysql.filter.PacketIOFilter;
+import com.meidusa.amoeba.mysql.handler.MySqlCommandDispatcher;
 import com.meidusa.amoeba.mysql.handler.PreparedStatmentInfo;
+import com.meidusa.amoeba.mysql.io.MySqlPacketConstant;
 import com.meidusa.amoeba.mysql.jdbc.MysqlDefs;
+import com.meidusa.amoeba.mysql.net.packet.ErrorPacket;
 import com.meidusa.amoeba.mysql.net.packet.FieldPacket;
+import com.meidusa.amoeba.mysql.net.packet.HandshakePacket;
 import com.meidusa.amoeba.mysql.net.packet.MysqlPacketBuffer;
 import com.meidusa.amoeba.mysql.net.packet.OkPacket;
 import com.meidusa.amoeba.mysql.net.packet.QueryCommandPacket;
 import com.meidusa.amoeba.mysql.net.packet.ResultSetHeaderPacket;
 import com.meidusa.amoeba.mysql.net.packet.result.MysqlResultSetPacket;
+import com.meidusa.amoeba.net.AuthResponseData;
 import com.meidusa.amoeba.net.AuthingableConnectionManager;
 import com.meidusa.amoeba.net.Connection;
 import com.meidusa.amoeba.parser.ParseException;
+import com.meidusa.amoeba.util.StringUtil;
 import com.meidusa.amoeba.util.ThreadLocalMap;
 
 /**
@@ -47,7 +54,7 @@ import com.meidusa.amoeba.util.ThreadLocalMap;
  * 
  * @author <a href=mailto:piratebase@sina.com>Struct chen</a>
  */
-public class MysqlClientConnection extends MysqlConnection {
+public class MysqlClientConnection extends MysqlConnection implements MySqlPacketConstant{
 	
 	private static Logger logger = Logger
 			.getLogger(MysqlClientConnection.class);
@@ -58,6 +65,17 @@ public class MysqlClientConnection extends MysqlConnection {
 		filterList.add(new PacketIOFilter());
 	}
 	
+	private static byte[] AUTHENTICATEOKPACKETDATA;
+    static {
+            OkPacket ok = new OkPacket();
+            ok.packetId = 2;
+            ok.affectedRows = 0;
+            ok.insertId = 0;
+            ok.serverStatus = 2;
+            ok.warningCount = 0;
+            AUTHENTICATEOKPACKETDATA = ok.toByteBuffer(null).array();
+    }
+	    
 	private long createTime = System.currentTimeMillis();
 	public void afterAuth(){
 		if(authLogger.isDebugEnabled()){
@@ -189,11 +207,54 @@ public class MysqlClientConnection extends MysqlConnection {
 			// 在未验证通过的时候
 			/** 此时接收到的应该是认证数据，保存数据为认证提供数据 */
 			this.authenticationMessage = message;
-			((AuthingableConnectionManager) _cmgr).getAuthenticator()
-					.authenticateConnection(this);
+			this.getAuthenticator().authenticateConnection(this,message);
 		}
 	}
 
+	
+	protected void beforeAuthing() {
+        HandshakePacket handshakePacket = new HandshakePacket();
+        handshakePacket.packetId = 0;
+        handshakePacket.protocolVersion = 0x0a;// 协议版本10
+        handshakePacket.seed = StringUtil.getRandomString(8);
+        handshakePacket.restOfScrambleBuff = StringUtil.getRandomString(12);
+
+        handshakePacket.serverStatus = 2;
+        handshakePacket.serverVersion = MysqlRuntimeContext.SERVER_VERSION;
+    	
+        //handshakePacket.serverCapabilities = 41516 & (~32);
+        handshakePacket.serverCapabilities = CLIENT_LONG_FLAG | CLIENT_CONNECT_WITH_DB
+        									| CLIENT_PROTOCOL_41 | CLIENT_SECURE_CONNECTION ;
+        
+        MysqlRuntimeContext context = (MysqlRuntimeContext) ProxyRuntimeContext.getInstance().getRuntimeContext();
+        handshakePacket.serverCharsetIndex = (byte) (context.getServerCharsetIndex() & 0xff);
+        handshakePacket.threadId = Thread.currentThread().hashCode();
+        this.setSeed(handshakePacket.seed + handshakePacket.restOfScrambleBuff);
+        this.postMessage(handshakePacket.toByteBuffer(this).array());
+    }
+	
+    protected void connectionAuthenticateSuccess(AuthResponseData data) {
+    	 super.connectionAuthenticateSuccess( data);
+         
+         setMessageHandler(new MySqlCommandDispatcher());
+         postMessage(AUTHENTICATEOKPACKETDATA);
+         this.afterAuth();
+    }
+
+    protected void connectionAuthenticateFaild(AuthResponseData data) {
+    	super.connectionAuthenticateFaild(data);
+        ErrorPacket error = new ErrorPacket();
+        error.resultPacketType = ErrorPacket.PACKET_TYPE_ERROR;
+        error.packetId = 2;
+        error.serverErrorMessage = data.message;
+        error.sqlstate = "42S02";
+        error.errno = 1000;
+        postMessage(error.toByteBuffer(this).array());
+        this.afterAuth();
+    }
+    
+	
+	
     protected void doReceiveMessage(byte[] message){
     	if(MysqlPacketBuffer.isPacketType(message, QueryCommandPacket.COM_QUIT)){
     		postClose(null);
@@ -220,9 +281,9 @@ public class MysqlClientConnection extends MysqlConnection {
 		
 		Executor executor = null;
 		if(isAuthenticatedSeted()){
-			executor = ProxyRuntimeContext.getInstance().getClientSideExecutor();
+			executor = ProxyRuntimeContext.getInstance().getRuntimeContext().getClientSideExecutor();
 		}else{
-			executor = ProxyRuntimeContext.getInstance().getServerSideExecutor();
+			executor = ProxyRuntimeContext.getInstance().getRuntimeContext().getServerSideExecutor();
 		}
 		
 		executor.execute(new Runnable() {

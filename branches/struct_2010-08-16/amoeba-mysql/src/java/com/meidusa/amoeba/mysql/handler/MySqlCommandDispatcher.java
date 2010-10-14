@@ -21,7 +21,7 @@ import java.util.Map;
 import org.apache.log4j.Logger;
 
 import com.meidusa.amoeba.context.ProxyRuntimeContext;
-import com.meidusa.amoeba.mysql.context.MysqlProxyRuntimeContext;
+import com.meidusa.amoeba.mysql.context.MysqlRuntimeContext;
 import com.meidusa.amoeba.mysql.jdbc.MysqlDefs;
 import com.meidusa.amoeba.mysql.net.MysqlClientConnection;
 import com.meidusa.amoeba.mysql.net.packet.BindValue;
@@ -54,7 +54,7 @@ public class MySqlCommandDispatcher implements MessageHandler {
 
     protected static Logger logger  = Logger.getLogger(MySqlCommandDispatcher.class);
     private static Logger lastInsertID = Logger.getLogger("lastInsertId");
-    private long timeout = ProxyRuntimeContext.getInstance().getConfig().getQueryTimeout() * 1000;
+    private long timeout = ProxyRuntimeContext.getInstance().getRuntimeContext().getQueryTimeout() * 1000;
 
     private static byte[]   STATIC_OK_BUFFER;
     static {
@@ -257,7 +257,7 @@ public class MySqlCommandDispatcher implements MessageHandler {
 				||  "'$version'".equalsIgnoreCase(entry.getValue().getName())){
 				BindValue value = new BindValue();
 				value.bufferType = MysqlDefs.FIELD_TYPE_VARCHAR;
-				value.value = MysqlProxyRuntimeContext.SERVER_VERSION;
+				value.value = MysqlRuntimeContext.SERVER_VERSION;
 				value.scale = 20;
 				value.isSet = true;
 				row.columns.add(value);

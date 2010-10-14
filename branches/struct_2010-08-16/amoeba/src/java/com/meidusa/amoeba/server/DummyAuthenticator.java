@@ -31,7 +31,7 @@ public class DummyAuthenticator extends Authenticator {
 	
 	// from abstract Authenticator
 	protected void processAuthentication(AuthingableConnection conn,
-			AuthResponseData rdata) {
+			byte[] message,AuthResponseData rdata) {
 		logger.info("Accepting request: conn=" + conn);
 		rdata.code = AuthResponseData.SUCCESS;
 	}

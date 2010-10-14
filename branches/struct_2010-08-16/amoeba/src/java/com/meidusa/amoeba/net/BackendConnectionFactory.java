@@ -110,7 +110,7 @@ public abstract class BackendConnectionFactory extends AuthingableConnectionFact
 		}
 	}
 	
-	protected void initConnection(Connection connection){
+	protected void initConnection(Connection connection) throws IOException{
 		super.initConnection(connection);
 		if(connection instanceof  DatabaseConnection){
 			DatabaseConnection conn = (DatabaseConnection) connection;
@@ -118,9 +118,6 @@ public abstract class BackendConnectionFactory extends AuthingableConnectionFact
 			if(!StringUtil.isEmpty(user)){
 				conn.setUser(user);
 				conn.setPassword(password);
-			}else{
-				conn.setUser(ProxyRuntimeContext.getInstance().getConfig().getUser());
-				conn.setPassword(ProxyRuntimeContext.getInstance().getConfig().getPassword());
 			}
 		}
 		ProxyRuntimeContext.getInstance().getConnectionManagerList().get(manager).postRegisterNetEventHandler(connection, SelectionKey.OP_READ);

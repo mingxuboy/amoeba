@@ -23,7 +23,6 @@ import java.io.IOException;
 public class AuthingableConnectionManager extends ConnectionManager {
     protected Authenticator _author;
     
-    protected boolean authenticated = false;
     public AuthingableConnectionManager() throws IOException{
     }
 
@@ -33,49 +32,10 @@ public class AuthingableConnectionManager extends ConnectionManager {
 
     public void setAuthenticator(Authenticator author) {
         _author = author;
-        _author.setConnectionManager(this);
     }
 
     public Authenticator getAuthenticator() {
         return _author;
-    }
-
-    public boolean registerConnection(Connection connection, int key) {
-       boolean result = super.registerConnection(connection, key);
-        if(result){
-        	beforeAuthing(connection);
-        }
-        return result;
-    }
-
-    protected void beforeAuthing(Connection authing) {
-    }
-
-    protected void afterAuthing(Connection conn, AuthResponseData data) {
-        AuthingableConnection auconn = (AuthingableConnection) conn;
-        if (AuthResponseData.SUCCESS.equalsIgnoreCase(data.code)) {
-            auconn.setAuthenticated(true);
-            // and let our observers know about our new connection
-            notifyObservers(CONNECTION_ESTABLISHED, conn, null);
-            connectionAuthenticateSuccess(conn, data);
-        } else {
-            auconn.setAuthenticated(false);
-            connectionAuthenticateFaild(conn, data);
-        }
-        
-        authenticated = true;
-    }
-
-    protected void connectionAuthenticateSuccess(Connection conn, AuthResponseData data) {
-        if (logger.isInfoEnabled()) {
-            logger.info("Connection Authenticate success [ conn=" + conn + "].");
-        }
-    }
-
-    protected void connectionAuthenticateFaild(Connection conn, AuthResponseData data) {
-        if (logger.isInfoEnabled()) {
-            logger.info("Connection Authenticate faild [ conn=" + conn + "].");
-        }
     }
 
 }

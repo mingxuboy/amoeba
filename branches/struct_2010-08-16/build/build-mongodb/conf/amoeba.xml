@@ -3,46 +3,69 @@
 <!DOCTYPE amoeba:configuration SYSTEM "amoeba.dtd">
 <amoeba:configuration xmlns:amoeba="http://amoeba.meidusa.com/">
 
-	<server>
-		<!-- proxy server绑定的端口 -->
-		<property name="port">8066</property>
+	<proxy>
 		
-		<!-- proxy server绑定的IP -->
+		<!-- server class must be extend java.lang.Thread -->
+		<server class="com.meidusa.amoeba.net.ServerableConnectionManager">
+			<!-- proxy server绑定的端口 -->
+			<property name="port">8066</property>
+			
+			<!-- proxy server绑定的IP -->
+			<!-- 
+			<property name="ipAddress">127.0.0.1</property>
+			 -->
+			
+			<!-- query timeout( default: 60 second , TimeUnit:second) -->
+			
+			<property name="manager">${serverSideManager}</property>
+			<property name="connectionFactory">
+				<bean class="com.meidusa.amoeba.mongodb.net.MongodbClientConnectionFactory"></bean>
+			</property>
+			
+			<!-- 
+			<property name="authenticator">
+				<bean class="com.meidusa.amoeba.mongodb.net.MongodbClientConnectionFactory"></bean>
+			</property>
+			 -->
+			
+		</server>
+		
 		<!-- 
-		<property name="ipAddress">127.0.0.1</property>
+		<authenticator class="">
+			<property name="user">root</property>
+			<property name="password">password</property>
+		</authenticator>
 		 -->
-		<!-- proxy server net IO Read thread size -->
-		<property name="readThreadPoolSize">20</property>
-		
-		<!-- proxy server client process thread size -->
-		<property name="clientSideThreadPoolSize">30</property>
-		
-		<!-- mysql server data packet process thread size -->
-		<property name="serverSideThreadPoolSize">30</property>
-		
-		<!-- socket Send and receive BufferSize(unit:K)  -->
-		<property name="netBufferSize">128</property>
-		
-		<!-- Enable/disable TCP_NODELAY (disable/enable Nagle's algorithm). -->
-		<property name="tcpNoDelay">true</property>
-		
-		<!-- 对外验证的用户名 -->
-		<property name="user">root</property>
-		
-		<!-- 对外验证的密码 -->
-		<!--
-		<property name="password">password</property>
-		-->
-		
-		<!-- query timeout( default: 60 second , TimeUnit:second) -->
-		<property name="queryTimeout">60</property>
-	</server>
+		 
+		<runtime class="com.meidusa.amoeba.context.RuntimeContext">
+			<!-- proxy server net IO Read thread size -->
+			<property name="readThreadPoolSize">20</property>
+			
+			<!-- proxy server client process thread size -->
+			<property name="clientSideThreadPoolSize">30</property>
+			
+			<!-- mysql server data packet process thread size -->
+			<property name="serverSideThreadPoolSize">30</property>
+			
+			<property name="queryTimeout">60</property>
+		</runtime>
+	
+	</proxy>
 	
 	<!-- 
 		每个ConnectionManager都将作为一个线程启动。
 		manager负责Connection IO读写/死亡检测
 	-->
 	<connectionManagerList>
+	
+		<connectionManager name="serverSideManager" class="com.meidusa.amoeba.net.MultiConnectionManagerWrapper">
+			<property name="subManagerClassName">com.meidusa.amoeba.net.ConnectionManager</property>
+			<!-- 
+			  default value is avaliable Processors 
+			<property name="processors">5</property>
+			 -->
+		</connectionManager>
+		
 		<connectionManager name="defaultManager" class="com.meidusa.amoeba.net.MultiConnectionManagerWrapper">
 			<property name="subManagerClassName">com.meidusa.amoeba.net.ConnectionManager</property>
 			
@@ -78,26 +101,15 @@
 				<property name="testWhileIdle">true</property>
 			</poolConfig>
 		</dbServer>
+		
 		<dbServer name="server0" parent="abstractServer">
 			<factoryConfig class="com.meidusa.amoeba.mongodb.net.MongodbServerConnectionFactory">
 				<property name="manager">defaultManager</property>
 				<property name="port">27017</property>
 			</factoryConfig>
 		</dbServer>
-		<!--<dbServer name="server1" parent="abstractServer">
-			<factoryConfig class="com.meidusa.amoeba.mongodb.net.MongodbServerConnectionFactory">
-				<property name="manager">defaultManager</property>
-				<property name="port">12338</property>
-			</factoryConfig>
-		</dbServer>
-		<dbServer name="server2" parent="abstractServer">
-			<factoryConfig class="com.meidusa.amoeba.mongodb.net.MongodbServerConnectionFactory">
-				<property name="manager">defaultManager</property>
-				<property name="port">12339</property>
-			</factoryConfig>
-		</dbServer>
 		
-		--><dbServer name="multiPool" virtual="true">
+		<dbServer name="multiPool" virtual="true">
 			<poolConfig class="com.meidusa.amoeba.server.MultipleServerPool">
 				<!-- 负载均衡参数 1=ROUNDROBIN , 2=WEIGHTBASED , 3=HA-->
 				<property name="loadbalance">1</property>
