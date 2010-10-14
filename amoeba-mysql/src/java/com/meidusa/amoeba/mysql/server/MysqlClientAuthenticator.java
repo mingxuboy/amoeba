@@ -25,8 +25,8 @@ import com.meidusa.amoeba.mysql.net.packet.AuthenticationPacket;
 import com.meidusa.amoeba.mysql.util.CharsetMapping;
 import com.meidusa.amoeba.mysql.util.Security;
 import com.meidusa.amoeba.net.AuthResponseData;
+import com.meidusa.amoeba.net.Authenticator;
 import com.meidusa.amoeba.net.AuthingableConnection;
-import com.meidusa.amoeba.server.DummyAuthenticator;
 import com.meidusa.amoeba.util.StringUtil;
 
 /**
@@ -34,7 +34,7 @@ import com.meidusa.amoeba.util.StringUtil;
  * @author <a href=mailto:piratebase@sina.com>Struct chen</a>
  */
 @SuppressWarnings("unchecked")
-public class MysqlClientAuthenticator extends DummyAuthenticator implements MySqlPacketConstant{
+public class MysqlClientAuthenticator extends Authenticator<AuthenticationPacket> implements MySqlPacketConstant{
 	protected static Logger logger = Logger.getLogger(MysqlClientAuthenticator.class);
 	private Map map = new LRUMap(100);
 	
@@ -42,7 +42,7 @@ public class MysqlClientAuthenticator extends DummyAuthenticator implements MySq
 		
 	}
 
-	protected void processAuthentication(AuthingableConnection conn,byte[] message,
+	protected void processAuthentication(AuthingableConnection conn,AuthenticationPacket autheticationPacket,
 			AuthResponseData rdata) {
 		MysqlClientConnection mysqlConn = (MysqlClientConnection)conn;
 		
@@ -52,8 +52,6 @@ public class MysqlClientAuthenticator extends DummyAuthenticator implements MySq
 		String errorMessage = "";
 
 		try{
-			AuthenticationPacket autheticationPacket = new AuthenticationPacket();
-			autheticationPacket.init(message,conn);
 			mysqlConn.setCharset(CharsetMapping.INDEX_TO_CHARSET[autheticationPacket.charsetNumber & 0xff]);
 			boolean passwordchecked = false;
 			if(logger.isDebugEnabled()){
