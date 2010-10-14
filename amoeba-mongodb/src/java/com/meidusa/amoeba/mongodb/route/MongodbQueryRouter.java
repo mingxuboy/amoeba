@@ -177,16 +177,18 @@ public class MongodbQueryRouter extends AbstractQueryRouter<MongodbClientConnect
 			bson = query.selector;
 		}
 		
+		Map<Table, Map<Column, Comparative>> tableMap = new HashMap<Table, Map<Column, Comparative>>();
 		if(bson != null){
 			Map<Column, Comparative> parameterMap = new HashMap<Column, Comparative>();
-			Map<Table, Map<Column, Comparative>> tableMap = new HashMap<Table, Map<Column, Comparative>>();
 			tableMap.put(table, parameterMap);
 			Stack<Comparative> stack = threadLocal.get();
 			stack.clear();
 			toComparative(parameterMap,stack,bson,table);
 			return tableMap;
+		}else{
+			tableMap.put(table, null);
 		}
-		return null;
+		return tableMap;
 	}
 	
 	private static void putToColumnMap(Map<Column, Comparative> parameterMap,Column column,Comparative comparative){
