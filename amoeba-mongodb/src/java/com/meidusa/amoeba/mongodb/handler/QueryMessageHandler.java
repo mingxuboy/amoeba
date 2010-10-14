@@ -49,7 +49,7 @@ public class QueryMessageHandler extends AbstractSessionHandler<QueryMongodbPack
 					byte[] msg = clientConn.getLastErrorMessage();
 					ResponseMongodbPacket packet = new ResponseMongodbPacket();
 					if(msg == null){
-						packet.responseTo = this.requestPacket.requestID;
+						
 						packet.numberReturned = 1;
 						packet.documents = new ArrayList<BSONObject>(1);
 						packet.documents.add(BSON_OK);
@@ -57,10 +57,13 @@ public class QueryMessageHandler extends AbstractSessionHandler<QueryMongodbPack
 					}else{
 						packet.init(msg, conn);
 					}
+					packet.numberReturned = 1;
+					packet.responseTo = this.requestPacket.requestID;
+					
 					if(PACKET_LOGGER.isDebugEnabled()){
 						PACKET_LOGGER.debug("<<----@ReponsePacket="+packet+", " +clientConn.getSocketId());
 					}
-					clientConn.postMessage(msg);
+					clientConn.postMessage(packet.toByteBuffer(conn));
 					return;
 				}else{
 					if(requestPacket.query.get("group") != null){

@@ -46,7 +46,9 @@ public class OKFunctionMerge implements FunctionMerge{
 					}
 					
 					if(bsObj.get("errmsg") != null){
-						cmdResult.put("errmsg", cmdResult.get("errmsg")+" | " + bsObj.get("errmsg"));
+						if(!"ns not found".equalsIgnoreCase(bsObj.get("errmsg").toString())){
+							cmdResult.put("errmsg", cmdResult.get("errmsg")+" | " + bsObj.get("errmsg"));
+						}
 					}
 				}
 			}

@@ -144,9 +144,10 @@ public class ParameterMapping {
         }
     }
 
+    //TODO 
     @SuppressWarnings("unchecked")
     public static Object newBean(BeanObjectEntityConfig beanConfig,Map<String,Object> context) {
-        Object beanvalue = beanConfig.createBeanObject(true);
+        Object beanvalue = beanConfig.createBeanObject(true,context);
         // Map bean
         if (beanvalue instanceof Map) {
             Map map = (Map) beanvalue;
@@ -163,10 +164,10 @@ public class ParameterMapping {
         } else if (beanvalue instanceof List) {
 
         }
-        // other bean
+       /* // other bean
         else {
             mappingObject(beanvalue, beanConfig.getParams(),context);
-        }
+        }*/
 
         return beanvalue;
     }

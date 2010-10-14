@@ -20,9 +20,9 @@ public class PerformaceTest {
 	 * @throws Exception 
 	 */
 	public static void main(String[] args) throws Exception {
-		int threadCount = 10;
-		int totleQuery = 100000;
-		int count = 10;
+		int threadCount = 1;
+		int totleQuery = 1;
+		int count = 1;
 		if(args.length>=2){
 			threadCount = Integer.parseInt(args[0]);
 			totleQuery = Integer.parseInt(args[1]);
@@ -30,11 +30,11 @@ public class PerformaceTest {
 				count = Integer.parseInt(args[2]);
 			}
 		}
-		final String ip = System.getProperty("ip","127.0.0.1");
-		final String port = System.getProperty("port","8066");
-		final String password = System.getProperty("password","sdfriend");
-		final String user = System.getProperty("user","sdfriend");
-		String sql = System.getProperty("sql","SELECT ID, UUID, SDID, APP_ID, CATEGORY_ID, CREATE_TIME, CONTENT,    SOURCE_SDID,  SOURCE_UUID,  DEL_FLAG   FROM SD_FEED.FRIEND_FEED     LIMIT 1");
+		final String ip = System.getProperty("ip","10.241.14.43");
+		final String port = System.getProperty("port","3306");
+		final String password = null;// = System.getProperty("password","sdfriend");
+		final String user = System.getProperty("user","root");
+		String sql = System.getProperty("sql","SELECT * FROM snda_relation_ex.t_user t where ptnum_id in (884018121,520206926)");
 		if(sql.startsWith("\"")){
 			sql = sql.substring(1, sql.length() -1);
 		}
@@ -69,7 +69,7 @@ public class PerformaceTest {
 					ResultSet result = null;
 					try{
 						if(conn == null){
-							conn = DriverManager.getConnection("jdbc:mysql://"+ip+":"+port+"/test?useUnicode=true&characterEncoding=utf-8&useServerPrepStmts=true&autoReconnect=true&socketTimeout=100000000&&zeroDateTimeBehavior=convertToNull",user,password);
+							conn = DriverManager.getConnection("jdbc:mysql://"+ip+":"+port+"/test?useUnicode=true&characterEncoding=utf8&useServerPrepStmts=true&autoReconnect=true&socketTimeout=100000000&&zeroDateTimeBehavior=convertToNull",user,password);
 							threadLocal.set(conn);
 						}
 						for(int i=0;i<runcount;i++){
@@ -79,6 +79,10 @@ public class PerformaceTest {
 								//statment.setLong(2, 1108391525L);
 								//statment.setInt(3, 6);
 								result = statment.executeQuery();
+								while(result.next()){
+									System.out.println(new String(result.getString("PLAYER_NAME").getBytes("ISO8859-1")));
+									System.out.println(new String(result.getString("PLAYER_NAME").getBytes("ISO8859-1")));
+								}
 							}finally{
 								if(result != null){
 									try{
