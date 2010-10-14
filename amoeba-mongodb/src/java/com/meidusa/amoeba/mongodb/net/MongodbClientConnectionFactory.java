@@ -13,19 +13,17 @@
  */
 package com.meidusa.amoeba.mongodb.net;
 
-import java.io.IOException;
 import java.nio.channels.SocketChannel;
 
+import com.meidusa.amoeba.net.AbstractConnectionFactory;
 import com.meidusa.amoeba.net.Connection;
-import com.meidusa.amoeba.net.ConnectionFactory;
 
-public class MongodbClientConnectionFactory implements ConnectionFactory{
+public class MongodbClientConnectionFactory extends AbstractConnectionFactory{
 
 	@Override
-	public Connection createConnection(SocketChannel channel, long createStamp)
-			throws IOException {
-		MongodbClientConnection conn =  new MongodbClientConnection(channel,createStamp);
-		return conn;
+	protected Connection newConnectionInstance(SocketChannel channel,
+			long createStamp) {
+		return new MongodbClientConnection(channel,createStamp);
 	}
 
 }

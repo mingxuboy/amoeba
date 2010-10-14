@@ -356,7 +356,9 @@ public abstract class Connection implements NetEventHandler {
                 }
             }else{
             	if(key == null){
-            		logger.debug("writeMessage socketId="+this.getSocketId()+" hascode="+hashCode()+" but key="+key);
+            		if(logger.isDebugEnabled()){
+            			logger.debug("writeMessage socketId="+this.getSocketId()+" hascode="+hashCode()+" but key="+key);
+            		}
             	}
             }
         } catch (IOException ioe) {

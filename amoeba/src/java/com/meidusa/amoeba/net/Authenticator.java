@@ -15,7 +15,6 @@ package com.meidusa.amoeba.net;
 
 import org.apache.log4j.Logger;
 
-import com.meidusa.amoeba.context.ProxyRuntimeContext;
 import com.meidusa.amoeba.data.AuthCodes;
 import com.meidusa.amoeba.server.AuthenticateFilter;
 
@@ -26,24 +25,41 @@ public abstract class Authenticator {
 
     protected static Logger                log = Logger.getLogger(Authenticator.class);
     private AuthenticateFilter             filter;
-    protected AuthingableConnectionManager _conmgr;
+	protected String user;
+	protected String password;
+	
+	public String getUser() {
+		return user;
+	}
 
-    public void setConnectionManager(AuthingableConnectionManager conmgr) {
-        _conmgr = conmgr;
-    }
+	public void setUser(String user) {
+		this.user = user;
+	}
 
-    public void authenticateConnection(final AuthingableConnection conn) {
+	public String getPassword() {
+		return password;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
+	}
+	
+    public boolean authenticateConnection(final AuthingableConnection conn,byte[] authenMessage) {
         final AuthResponseData rdata = createResponseData();
         try {
             if (doFilte(conn, rdata)) {
-                processAuthentication(conn, rdata);
+                processAuthentication(conn, authenMessage,rdata);
+                return true;
+            }else{
+            	return false;
             }
         } catch (Exception e) {
             log.warn("Error authenticating", e);
             rdata.code = AuthCodes.SERVER_ERROR;
             rdata.message = e.getMessage();
+            return false;
         } finally {
-            _conmgr.afterAuthing(conn, rdata);
+        	conn.afterAuthing(rdata);
         }
     }
 
@@ -69,5 +85,5 @@ public abstract class Authenticator {
      * @param conn 需要身份验证的连接
      * @param rdata 需要反馈的数据
      */
-    protected abstract void processAuthentication(AuthingableConnection conn, AuthResponseData rdata);
+    protected abstract void processAuthentication(AuthingableConnection conn, byte[] authenMessage,AuthResponseData rdata);
 }

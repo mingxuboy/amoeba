@@ -22,17 +22,12 @@ import java.util.Map;
  */
 public class ProxyServerConfig {
 
-    private String                              ipAddress;
-    private int                                 port                     = 8066;
-    private String                              user;
-    private String                              password;
-    private int                                 readThreadPoolSize       = 16;
-    private int                                 clientSideThreadPoolSize = 16;
-    private int                                 serverSideThreadPoolSize = 16;
-    private boolean                             tcpNoDelay               = true;
-    private int                                 netBufferSize            = 16;
-    private int 								queryTimeout			 = 60; //default per query timeout (time unit: second) 
-    
+	private BeanObjectEntityConfig serverConfig;
+	private BeanObjectEntityConfig threadPoolConfig;
+	private BeanObjectEntityConfig authenticatorConfig;
+	private BeanObjectEntityConfig connectionFactoryConfig;
+	private BeanObjectEntityConfig runtimeConfig;
+	
     /**
      * 默认是没有值的
      */
@@ -46,7 +41,48 @@ public class ProxyServerConfig {
 
     private BeanObjectEntityConfig              queryRouterConfig;
 
-    public void addManager(String name, BeanObjectEntityConfig managerConfig) {
+    public BeanObjectEntityConfig getServerConfig() {
+		return serverConfig;
+	}
+
+	public void setServerConfig(BeanObjectEntityConfig serverConfig) {
+		this.serverConfig = serverConfig;
+	}
+
+	public BeanObjectEntityConfig getThreadPoolConfig() {
+		return threadPoolConfig;
+	}
+
+	public void setThreadPoolConfig(BeanObjectEntityConfig threadPoolConfig) {
+		this.threadPoolConfig = threadPoolConfig;
+	}
+
+	public BeanObjectEntityConfig getAuthenticatorConfig() {
+		return authenticatorConfig;
+	}
+
+	public void setAuthenticatorConfig(BeanObjectEntityConfig authenticatorConfig) {
+		this.authenticatorConfig = authenticatorConfig;
+	}
+
+	public BeanObjectEntityConfig getConnectionFactoryConfig() {
+		return connectionFactoryConfig;
+	}
+
+	public void setConnectionFactoryConfig(
+			BeanObjectEntityConfig connectionFactoryConfig) {
+		this.connectionFactoryConfig = connectionFactoryConfig;
+	}
+	
+    public BeanObjectEntityConfig getRuntimeConfig() {
+		return runtimeConfig;
+	}
+
+	public void setRuntimeConfig(BeanObjectEntityConfig runtimeConfig) {
+		this.runtimeConfig = runtimeConfig;
+	}
+
+	public void addManager(String name, BeanObjectEntityConfig managerConfig) {
         managers.put(name, managerConfig);
     }
 
@@ -62,100 +98,12 @@ public class ProxyServerConfig {
         dbServers.put(name, serverConfig);
     }
 
-    public String getIpAddress() {
-        return ipAddress;
-    }
-
-    public void setIpAddress(String ipAddress) {
-        this.ipAddress = ipAddress;
-    }
-
-    public int getPort() {
-        return port;
-    }
-
-    public void setPort(int port) {
-        this.port = port;
-    }
-
-    public int getReadThreadPoolSize() {
-        return readThreadPoolSize;
-    }
-
-    public int getQueryTimeout() {
-		return queryTimeout;
-	}
-
-	public void setQueryTimeout(int queryTimeout) {
-		this.queryTimeout = queryTimeout;
-	}
-
-	public void setReadThreadPoolSize(int readThreadPoolSize) {
-        this.readThreadPoolSize = readThreadPoolSize;
-    }
-
-    public int getServerSideThreadPoolSize() {
-        return serverSideThreadPoolSize;
-    }
-
-    public void setServerSideThreadPoolSize(int serverSideThreadPoolSize) {
-        this.serverSideThreadPoolSize = serverSideThreadPoolSize;
-    }
-
-    public int getClientSideThreadPoolSize() {
-        return clientSideThreadPoolSize;
-    }
-
-    public void setClientSideThreadPoolSize(int clientSideThreadPoolSize) {
-        this.clientSideThreadPoolSize = clientSideThreadPoolSize;
-    }
-
-    public String getUser() {
-        return user;
-    }
-
-    public void setUser(String user) {
-        this.user = user;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
     public BeanObjectEntityConfig getQueryRouterConfig() {
         return queryRouterConfig;
     }
 
     public void setQueryRouterConfig(BeanObjectEntityConfig queryRouterConfig) {
         this.queryRouterConfig = queryRouterConfig;
-    }
-
-    public int getNetBufferSize() {
-        return netBufferSize;
-    }
-
-    public void setNetBufferSize(int netBufferSize) {
-        this.netBufferSize = netBufferSize;
-    }
-
-    public boolean isTcpNoDelay() {
-        return tcpNoDelay;
-    }
-
-    public void setTcpNoDelay(boolean tcpNoDelay) {
-        this.tcpNoDelay = tcpNoDelay;
-    }
-
-    public String getServerCharset() {
-        return serverCharset;
-    }
-
-    public void setServerCharset(String serverCharset) {
-        this.serverCharset = serverCharset;
     }
 
 }

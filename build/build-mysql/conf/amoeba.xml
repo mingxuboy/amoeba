@@ -3,40 +3,30 @@
 <!DOCTYPE amoeba:configuration SYSTEM "amoeba.dtd">
 <amoeba:configuration xmlns:amoeba="http://amoeba.meidusa.com/">
 
-	<server>
-		<!-- proxy server绑定的端口 -->
-		<property name="port">8066</property>
-		
-		<!-- proxy server绑定的IP -->
-		<!-- 
-		<property name="ipAddress">127.0.0.1</property>
-		 -->
-		<!-- proxy server net IO Read thread size -->
-		<property name="readThreadPoolSize">20</property>
-		
-		<!-- proxy server client process thread size -->
-		<property name="clientSideThreadPoolSize">30</property>
-		
-		<!-- mysql server data packet process thread size -->
-		<property name="serverSideThreadPoolSize">30</property>
-		
-		<!-- socket Send and receive BufferSize(unit:K)  -->
-		<property name="netBufferSize">128</property>
-		
-		<!-- Enable/disable TCP_NODELAY (disable/enable Nagle's algorithm). -->
-		<property name="tcpNoDelay">true</property>
-		
-		<!-- 对外验证的用户名 -->
-		<property name="user">root</property>
-		
-		<!-- 对外验证的密码 -->
-		<!--
-		<property name="password">password</property>
-		-->
-		
-		<!-- query timeout( default: 60 second , TimeUnit:second) -->
-		<property name="queryTimeout">60</property>
-	</server>
+	<proxy>
+		<server>
+			<!-- proxy server绑定的端口 -->
+			<property name="port">8066</property>
+			
+			<!-- proxy server绑定的IP -->
+			<!-- 
+			<property name="ipAddress">127.0.0.1</property>
+			 -->
+		 </server>
+		 
+		<runtime class="com.meidusa.amoeba.mysql.context.MysqlRuntimeContext">
+			<!-- proxy server net IO Read thread size -->
+			<property name="readThreadPoolSize">20</property>
+			
+			<!-- proxy server client process thread size -->
+			<property name="clientSideThreadPoolSize">30</property>
+			
+			<!-- mysql server data packet process thread size -->
+			<property name="serverSideThreadPoolSize">30</property>
+			
+			<property name="queryTimeout">60</property>
+		</runtime>
+	</proxy>
 	
 	<!-- 
 		每个ConnectionManager都将作为一个线程启动。

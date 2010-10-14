@@ -38,7 +38,7 @@ public class QueryResponseObjectFactory implements PoolableObjectFactory,Initial
 		QueryResponse object = new QueryResponse();
 		MessageHandlerRunner runner = messageHandlerRunner.newInstance();
 		
-		ParameterMapping.mappingObject(runner, runnerParameters);
+		ParameterMapping.mappingObject(runner, runnerParameters,null);
 		
 		if(runner instanceof Initialisable){
 			((Initialisable)runner).init();

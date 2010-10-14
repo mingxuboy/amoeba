@@ -45,12 +45,12 @@ public class ConnectionManager extends LoopingThread implements Reporter, Initia
     protected static final int                       SELECT_LOOP_TIME                = 100;
 
     // codes for notifyObservers()
-    protected static final int                       CONNECTION_ESTABLISHED          = 0;
+    public static final int                       CONNECTION_ESTABLISHED          = 0;
 
-    protected static final int                       CONNECTION_FAILED               = 1;
-    protected static final int                       CONNECTION_CLOSED               = 2;
-    protected static final int                       CONNECTION_AUTHENTICATE_SUCCESS = 3;
-    protected static final int                       CONNECTION_AUTHENTICATE_FAILD   = 4;
+    public static final int                       CONNECTION_FAILED               = 1;
+    public static final int                       CONNECTION_CLOSED               = 2;
+    public static final int                       CONNECTION_AUTHENTICATE_SUCCESS = 3;
+    public static final int                       CONNECTION_AUTHENTICATE_FAILD   = 4;
 
     protected Selector                               _selector;
 
@@ -322,7 +322,6 @@ public class ConnectionManager extends LoopingThread implements Reporter, Initia
             selkey = selchan.register(_selector, key, connection);
             connection.setConnectionManager(this);
             connection.setSelectionKey(selkey);
-            configConnection(connection);
             _stats.connects.incrementAndGet();
             connection.init();
             _selector.wakeup();
@@ -347,13 +346,6 @@ public class ConnectionManager extends LoopingThread implements Reporter, Initia
         return false;
     }
 
-    protected void configConnection(Connection connection) throws SocketException {
-    	if(ProxyRuntimeContext.getInstance() != null){
-	        connection.getChannel().socket().setSendBufferSize(ProxyRuntimeContext.getInstance().getConfig().getNetBufferSize() * 1024);
-	        connection.getChannel().socket().setReceiveBufferSize(ProxyRuntimeContext.getInstance().getConfig().getNetBufferSize() * 1024);
-	        connection.getChannel().socket().setTcpNoDelay(ProxyRuntimeContext.getInstance().getConfig().isTcpNoDelay());
-    	}
-    }
 
     /**
      * 当 Connection 关闭以后

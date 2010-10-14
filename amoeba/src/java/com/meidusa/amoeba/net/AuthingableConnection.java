@@ -26,10 +26,20 @@ public abstract class AuthingableConnection extends Connection implements Messag
 	private boolean authenticatedSeted = false;
 	private String user;
 	private String password;
+	private Object authenticatLock = new Object();
+	private Authenticator authenticator;
 	
 	public AuthingableConnection(SocketChannel channel, long createStamp){
 		super(channel, createStamp);
 		setMessageHandler(this);
+	}
+
+	public Authenticator getAuthenticator() {
+		return authenticator;
+	}
+
+	public void setAuthenticator(Authenticator authenticator) {
+		this.authenticator = authenticator;
 	}
 
 	public boolean isAuthenticated(){
@@ -40,30 +50,62 @@ public abstract class AuthingableConnection extends Connection implements Messag
 		return authenticatedSeted;
 	}
 	
-	public synchronized void setAuthenticated(boolean authenticated){
-		authenticatedSeted = true;
-		this.authenticated = authenticated;
-		this.notifyAll();
-		if(logger.isDebugEnabled()){
-			try{
-			logger.debug(this.toString()+" , authenticated: "+ authenticated +" (" + toString()+")");
-			}catch(Exception e){};
+	public void setAuthenticated(boolean authenticated){
+		synchronized (authenticatLock) {
+			authenticatedSeted = true;
+			this.authenticated = authenticated;
+			authenticatLock.notifyAll();
+			if(logger.isDebugEnabled()){
+				try{
+				logger.debug(this.toString()+" , authenticated: "+ authenticated +" (" + toString()+")");
+				}catch(Exception e){};
+			}
+		
 		}
 	}
 	
-	public synchronized boolean isAuthenticatedWithBlocked(long timeout) {
-		if (authenticatedSeted){
+	protected void beforeAuthing() {
+    }
+	
+    protected void afterAuthing(AuthResponseData data) {
+        if (AuthResponseData.SUCCESS.equalsIgnoreCase(data.code)) {
+            setAuthenticated(true);
+            // and let our observers know about our new connection
+            this._cmgr.notifyObservers(ConnectionManager.CONNECTION_ESTABLISHED, this, null);
+            connectionAuthenticateSuccess(data);
+        } else {
+            setAuthenticated(false);
+            connectionAuthenticateFaild(data);
+        }
+    }
+	
+    protected void connectionAuthenticateSuccess(AuthResponseData data) {
+        if (logger.isInfoEnabled()) {
+            logger.info("Connection Authenticate success [ conn=" + this + "].");
+        }
+    }
+
+    protected void connectionAuthenticateFaild(AuthResponseData data) {
+        if (logger.isInfoEnabled()) {
+            logger.info("Connection Authenticate faild [ conn=" + this + "].");
+        }
+    }
+
+    public boolean isAuthenticatedWithBlocked(long timeout) {
+		synchronized (authenticatLock) {
+			if (authenticatedSeted){
+				return authenticated;
+			}
+			try {
+				authenticatLock.wait(timeout);
+			} catch (InterruptedException e) {
+			}
+	
+			if (!authenticatedSeted) {
+				logger.warn("authenticate to server:" + toString() + " time out");
+			}
 			return authenticated;
 		}
-		try {
-			this.wait(timeout);
-		} catch (InterruptedException e) {
-		}
-
-		if (!authenticatedSeted) {
-			logger.warn("authenticate to server:" + toString() + " time out");
-		}
-		return authenticated;
 	}
 	
 	public String getUser() {

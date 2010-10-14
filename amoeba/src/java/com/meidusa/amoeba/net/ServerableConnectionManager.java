@@ -29,34 +29,27 @@ import org.apache.log4j.Logger;
  * 
  * @author <a href=mailto:piratebase@sina.com>Struct chen</a>
  */
-public class ServerableConnectionManager extends ConnectionManager {
+public class ServerableConnectionManager extends AuthingableConnectionManager {
 
     protected static Logger       log = Logger.getLogger(ServerableConnectionManager.class);
-
+    
+    
     protected int                 port;
     protected ServerSocketChannel ssocket;
     protected String              ipAddress;
     protected ConnectionFactory   connFactory;
-    private ConnectionManager connMgr;
+    private ConnectionManager manager;
 
-    public ServerableConnectionManager(ConnectionManager connMgr) throws IOException{
-    	this.connMgr = connMgr;
+    public ConnectionManager getManager() {
+		return manager;
+	}
+
+	public void setManager(ConnectionManager manager) {
+		this.manager = manager;
+	}
+
+	public ServerableConnectionManager() throws IOException{
     	this.setDaemon(false);
-    }
-
-    public ServerableConnectionManager(String name, int port,ConnectionManager connMgr) throws IOException{
-    	super(name);
-    	this.port = port;
-    	this.connMgr = connMgr;
-    	this.setDaemon(false);
-    }
-
-    public ServerableConnectionManager(String name, String ipAddress, int port,ConnectionManager connMgr) throws IOException{
-        super(name);
-        this.port = port;
-        this.ipAddress = ipAddress;
-        this.connMgr = connMgr;
-        this.setDaemon(false);
     }
 
     public void setConnectionFactory(ConnectionFactory connFactory) {
@@ -88,6 +81,8 @@ public class ServerableConnectionManager extends ConnectionManager {
 
         } catch (IOException ioe) {
             log.error("Failure listening to socket on port '" + port + "'.", ioe);
+            System.err.println("Failure listening to socket on port '" + port + "'.");
+            ioe.printStackTrace();
             System.exit(-1);
         }
     }
@@ -126,7 +121,7 @@ public class ServerableConnectionManager extends ConnectionManager {
         serverNetEvent.setSelectionKey(sk);
         postRegisterNetEventHandler(serverNetEvent, SelectionKey.OP_ACCEPT);
     }
-
+    
     protected void acceptConnection(ServerSocketChannel listener) {
         SocketChannel channel = null;
         try {
@@ -147,7 +142,12 @@ public class ServerableConnectionManager extends ConnectionManager {
                 return;
             }
             Connection connection = connFactory.createConnection(channel, System.currentTimeMillis());
-            connMgr.postRegisterNetEventHandler(connection,SelectionKey.OP_READ);
+            if(connection instanceof AuthingableConnection){
+            	((AuthingableConnection)connection).setAuthenticator(this.getAuthenticator());
+            	((AuthingableConnection)connection).beforeAuthing();
+            }
+            manager.postRegisterNetEventHandler(connection,SelectionKey.OP_READ);
+            
         } catch (Exception e) {
             if (channel != null) {
                 try {

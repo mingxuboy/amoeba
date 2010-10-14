@@ -80,9 +80,13 @@ public class BeanObjectEntityConfig extends ConfigEntity implements Cloneable {
     }
 
     public Object createBeanObject(boolean initEarly) throws ConfigurationException {
+    	return createBeanObject(initEarly,null);
+    }
+    
+    public Object createBeanObject(boolean initEarly,Map context) throws ConfigurationException {
         try {
             Object object = reflectionProvider.newInstance(Class.forName(className));
-            ParameterMapping.mappingObject(object, getParams());
+            ParameterMapping.mappingObject(object, getParams(),context);
             if (initEarly) {
                 if (object instanceof Initialisable) {
                     ((Initialisable) object).init();

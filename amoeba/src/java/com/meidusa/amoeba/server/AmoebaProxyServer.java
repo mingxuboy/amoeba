@@ -19,16 +19,12 @@ import java.util.ArrayList;
 
 import org.apache.log4j.Logger;
 
+import com.meidusa.amoeba.config.BeanObjectEntityConfig;
 import com.meidusa.amoeba.config.ConfigUtil;
 import com.meidusa.amoeba.context.ProxyRuntimeContext;
 import com.meidusa.amoeba.log4j.DOMConfigurator;
-import com.meidusa.amoeba.mongodb.context.MongodbProxyRuntimeContext;
-import com.meidusa.amoeba.mongodb.net.MongodbClientConnectionFactory;
 import com.meidusa.amoeba.net.ConnectionManager;
-import com.meidusa.amoeba.net.MultiConnectionManagerWrapper;
 import com.meidusa.amoeba.net.ServerableConnectionManager;
-import com.meidusa.amoeba.server.IPAccessController;
-import com.meidusa.amoeba.util.InitialisationException;
 import com.meidusa.amoeba.util.Reporter;
 import com.meidusa.amoeba.util.StringUtil;
 
@@ -120,8 +116,12 @@ public class AmoebaProxyServer {
 		final Logger logger = Logger.getLogger(AmoebaProxyServer.class);
 		String config = System.getProperty("amoeba.conf","${amoeba.home}/conf/amoeba.xml");
 		String contextClass = System.getProperty("amoeba.context.class",ProxyRuntimeContext.class.getName());
-		ProxyRuntimeContext context = (ProxyRuntimeContext)Class.forName(contextClass).newInstance();
 		
+		if(contextClass != null){
+			ProxyRuntimeContext context = (ProxyRuntimeContext)Class.forName(contextClass).newInstance();
+			ProxyRuntimeContext.setInstance(context);
+		}
+
 		config = ConfigUtil.filter(config);
 		File configFile = new File(config);
 		
@@ -132,43 +132,19 @@ public class AmoebaProxyServer {
 			ProxyRuntimeContext.getInstance().init(configFile.getAbsolutePath());
 		}
 		
-		registerReporter(context);
-		for(ConnectionManager connMgr :context.getConnectionManagerList().values()){
+		registerReporter(ProxyRuntimeContext.getInstance());
+		for(ConnectionManager connMgr :ProxyRuntimeContext.getInstance().getConnectionManagerList().values()){
 			registerReporter(connMgr);
 		}
 		
+		BeanObjectEntityConfig serverConfig = ProxyRuntimeContext.getInstance().getConfig().getServerConfig();
 		
-		String accessConf = System.getProperty("access.conf","${amoeba.home}/conf/access_list.conf");
-		accessConf = ConfigUtil.filter(accessConf);
-		IPAccessController ipfilter = new IPAccessController();
-		ipfilter.setIpFile(accessConf);
-		try {
-			ipfilter.init();
-		} catch (InitialisationException e1) {
-			logger.error("init IPAccessController error:",e1);
-			System.exit(-1);
-		}
+		ServerableConnectionManager serverManager = (ServerableConnectionManager)serverConfig.createBeanObject(false,ProxyRuntimeContext.getInstance().getConnectionManagerList());
 		
-		
-		
-        int maxsubManager = Integer.valueOf(System.getProperty("maxSubManager","32"));
-        int processors = Runtime.getRuntime().availableProcessors();
-        ConnectionManager[] managers = new ConnectionManager[processors>=maxsubManager?maxsubManager:processors+1];
-        for(int i=0;i<managers.length;i++){
-        	ConnectionManager subManager = new ConnectionManager("sub manager-"+i);
-    		registerReporter(subManager);
-    		subManager.start();
-	        managers[i] = subManager;
-        }
-        MultiConnectionManagerWrapper wrapper = new MultiConnectionManagerWrapper(managers);
-        wrapper.start();
-		ServerableConnectionManager serverManager = new ServerableConnectionManager("Mongodb proxy Server",context.getConfig().getIpAddress(),context.getConfig().getPort(),wrapper);
-		
-		registerReporter(serverManager);
-		MongodbClientConnectionFactory factory = new MongodbClientConnectionFactory();
-		serverManager.setConnectionFactory(factory);
-		
+		ProxyRuntimeContext.getInstance().setServer(serverManager);
+		serverManager.init();
 		serverManager.start();
+		registerReporter(serverManager);
 		new Thread(){
 			{
 				this.setDaemon(true);
