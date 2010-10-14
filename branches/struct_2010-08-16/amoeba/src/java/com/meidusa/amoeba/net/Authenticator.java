@@ -16,12 +16,14 @@ package com.meidusa.amoeba.net;
 import org.apache.log4j.Logger;
 
 import com.meidusa.amoeba.data.AuthCodes;
+import com.meidusa.amoeba.net.packet.AbstractPacket;
 import com.meidusa.amoeba.server.AuthenticateFilter;
 
 /**
  * @author <a href=mailto:piratebase@sina.com>Struct chen</a>
  */
-public abstract class Authenticator {
+@SuppressWarnings("unchecked")
+public abstract class Authenticator<T extends AbstractPacket> {
 
     protected static Logger                log = Logger.getLogger(Authenticator.class);
     private AuthenticateFilter             filter;
@@ -44,11 +46,11 @@ public abstract class Authenticator {
 		this.password = password;
 	}
 	
-    public boolean authenticateConnection(final AuthingableConnection conn,byte[] authenMessage) {
+    public boolean authenticateConnection(final AuthingableConnection conn,T authenPacket) {
         final AuthResponseData rdata = createResponseData();
         try {
             if (doFilte(conn, rdata)) {
-                processAuthentication(conn, authenMessage,rdata);
+                processAuthentication(conn, authenPacket,rdata);
                 return true;
             }else{
             	return false;
@@ -85,5 +87,5 @@ public abstract class Authenticator {
      * @param conn 需要身份验证的连接
      * @param rdata 需要反馈的数据
      */
-    protected abstract void processAuthentication(AuthingableConnection conn, byte[] authenMessage,AuthResponseData rdata);
+    protected abstract void processAuthentication(AuthingableConnection conn,T authenPacket,AuthResponseData rdata);
 }

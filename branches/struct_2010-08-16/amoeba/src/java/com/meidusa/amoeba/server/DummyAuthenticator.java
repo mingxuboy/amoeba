@@ -16,22 +16,23 @@ import org.apache.log4j.Logger;
 import com.meidusa.amoeba.net.AuthResponseData;
 import com.meidusa.amoeba.net.Authenticator;
 import com.meidusa.amoeba.net.AuthingableConnection;
+import com.meidusa.amoeba.net.packet.AbstractPacket;
 
 /**
  * 一个相当简单的身份验证者.
  * @author <a href=mailto:piratebase@sina.com>Struct chen</a>
  *
  */
-public class DummyAuthenticator extends Authenticator {
+public  class DummyAuthenticator<T extends AbstractPacket> extends Authenticator<T> {
 	protected static Logger logger = Logger.getLogger(DummyAuthenticator.class);
 	
 	public DummyAuthenticator() {
 		
 	}
-	
-	// from abstract Authenticator
+
+	@Override
 	protected void processAuthentication(AuthingableConnection conn,
-			byte[] message,AuthResponseData rdata) {
+			AbstractPacket authenPacket, AuthResponseData rdata) {
 		logger.info("Accepting request: conn=" + conn);
 		rdata.code = AuthResponseData.SUCCESS;
 	}

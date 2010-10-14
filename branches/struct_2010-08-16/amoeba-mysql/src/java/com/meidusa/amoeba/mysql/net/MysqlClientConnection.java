@@ -34,6 +34,7 @@ import com.meidusa.amoeba.mysql.handler.MySqlCommandDispatcher;
 import com.meidusa.amoeba.mysql.handler.PreparedStatmentInfo;
 import com.meidusa.amoeba.mysql.io.MySqlPacketConstant;
 import com.meidusa.amoeba.mysql.jdbc.MysqlDefs;
+import com.meidusa.amoeba.mysql.net.packet.AuthenticationPacket;
 import com.meidusa.amoeba.mysql.net.packet.ErrorPacket;
 import com.meidusa.amoeba.mysql.net.packet.FieldPacket;
 import com.meidusa.amoeba.mysql.net.packet.HandshakePacket;
@@ -196,18 +197,15 @@ public class MysqlClientConnection extends MysqlConnection implements MySqlPacke
 		this.seed = seed;
 	}
 
-	public byte[] getAuthenticationMessage() {
-		return authenticationMessage;
-	}
-
 	public void handleMessage(Connection conn) {
 		
 		byte[] message = this.getInQueue().getNonBlocking();
 		if(message != null){
 			// 在未验证通过的时候
 			/** 此时接收到的应该是认证数据，保存数据为认证提供数据 */
-			this.authenticationMessage = message;
-			this.getAuthenticator().authenticateConnection(this,message);
+			AuthenticationPacket autheticationPacket = new AuthenticationPacket();
+			autheticationPacket.init(message,conn);
+			this.getAuthenticator().authenticateConnection(this,autheticationPacket);
 		}
 	}
 
