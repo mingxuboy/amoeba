@@ -64,6 +64,20 @@ public class MongodbQueryRouter extends AbstractQueryRouter<MongodbClientConnect
 		operatorMap.put("$or", Comparative.Equivalent);
 		
 	}
+	
+	private void fillTableAndSchema(String fullCollectionName,Table table,Schema schema){
+		int	index = fullCollectionName.indexOf(".");
+		if(index >0){
+			String schemaName = fullCollectionName.substring(0,index);
+			String tableName =  fullCollectionName.substring(index +1);
+			table.setName(tableName);
+			schema.setName(schemaName);
+			table.setSchema(schema);
+		}else{
+			table.setName(fullCollectionName);
+		}
+	}
+	
 	@Override
 	protected Map<Table, Map<Column, Comparative>> evaluateTable(MongodbClientConnection connection,RequestMongodbPacket queryObject) {
 		Table table = new Table();
@@ -77,16 +91,7 @@ public class MongodbQueryRouter extends AbstractQueryRouter<MongodbClientConnect
 				schema.setName(schemaName);
 				table.setSchema(schema);
 			}else{
-				int	index = queryObject.fullCollectionName.indexOf(".");
-				if(index >0){
-					String schemaName = queryObject.fullCollectionName.substring(0,index);
-					String tableName =  queryObject.fullCollectionName.substring(index +1);
-					table.setName(tableName);
-					schema.setName(schemaName);
-					table.setSchema(schema);
-				}else{
-					table.setName(queryObject.fullCollectionName);
-				}
+				fillTableAndSchema(queryObject.fullCollectionName,table,schema);
 			}
 		}
 		BSONObject bson = null;
@@ -166,8 +171,13 @@ public class MongodbQueryRouter extends AbstractQueryRouter<MongodbClientConnect
 			}
 		}else if(queryObject  instanceof InsertMongodbPacket){
 			InsertMongodbPacket query = (InsertMongodbPacket)queryObject;
-			if(query.documents != null && query.documents.length>0){
-				bson = query.documents[0];
+			if(query.fullCollectionName.endsWith("system.indexes")){
+				String tableName = (String)query.documents[0].get("ns");
+				fillTableAndSchema(tableName,table,schema);
+			}else{
+				if(query.documents != null && query.documents.length>0){
+					bson = query.documents[0];
+				}
 			}
 		}else if(queryObject  instanceof DeleteMongodbPacket){
 			DeleteMongodbPacket query = (DeleteMongodbPacket)queryObject;
