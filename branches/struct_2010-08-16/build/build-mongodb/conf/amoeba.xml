@@ -7,36 +7,21 @@
 		
 		<!-- server class must be extend java.lang.Thread -->
 		<server class="com.meidusa.amoeba.net.ServerableConnectionManager">
-			<!-- proxy server绑定的端口 -->
+			<!-- port -->
 			<property name="port">8066</property>
 			
-			<!-- proxy server绑定的IP -->
+			<!-- bind ipAddress -->
 			<!-- 
 			<property name="ipAddress">127.0.0.1</property>
 			 -->
 			
-			<!-- query timeout( default: 60 second , TimeUnit:second) -->
-			
-			<property name="manager">${serverSideManager}</property>
+			<property name="manager">${clientConnectioneManager}</property>
 			<property name="connectionFactory">
 				<bean class="com.meidusa.amoeba.mongodb.net.MongodbClientConnectionFactory"></bean>
 			</property>
 			
-			<!-- 
-			<property name="authenticator">
-				<bean class="com.meidusa.amoeba.mongodb.net.MongodbClientConnectionFactory"></bean>
-			</property>
-			 -->
-			
 		</server>
 		
-		<!-- 
-		<authenticator class="">
-			<property name="user">root</property>
-			<property name="password">password</property>
-		</authenticator>
-		 -->
-		 
 		<runtime class="com.meidusa.amoeba.context.RuntimeContext">
 			<!-- proxy server net IO Read thread size -->
 			<property name="readThreadPoolSize">20</property>
@@ -47,6 +32,7 @@
 			<!-- mysql server data packet process thread size -->
 			<property name="serverSideThreadPoolSize">30</property>
 			
+			<!-- query timeout( default: 60 second , TimeUnit:second) -->
 			<property name="queryTimeout">60</property>
 		</runtime>
 	
@@ -58,7 +44,7 @@
 	-->
 	<connectionManagerList>
 	
-		<connectionManager name="serverSideManager" class="com.meidusa.amoeba.net.MultiConnectionManagerWrapper">
+		<connectionManager name="clientConnectioneManager" class="com.meidusa.amoeba.net.MultiConnectionManagerWrapper">
 			<property name="subManagerClassName">com.meidusa.amoeba.net.ConnectionManager</property>
 			<!-- 
 			  default value is avaliable Processors 
@@ -68,13 +54,14 @@
 		
 		<connectionManager name="defaultManager" class="com.meidusa.amoeba.net.MultiConnectionManagerWrapper">
 			<property name="subManagerClassName">com.meidusa.amoeba.net.ConnectionManager</property>
-			
 			<!-- 
 			  default value is avaliable Processors 
 			<property name="processors">5</property>
 			 -->
 		</connectionManager>
 	</connectionManagerList>
+	
+	
 	
 	<dbServerList>
 		<!-- 
@@ -135,6 +122,3 @@
 		<property name="needParse">true</property>
 	</queryRouter>
 </amoeba:configuration>
-
-
-
