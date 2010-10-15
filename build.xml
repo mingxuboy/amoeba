@@ -34,6 +34,7 @@
   <filelist dir="." id="bin.files">
     <file name="build/bin/amoeba"/>
     <file name="build/bin/amoeba.bat"/>
+  	<file name="build/bin/amoeba.classworlds"/>
   </filelist>
   
   <filelist dir="." id="etc.files">
@@ -174,6 +175,7 @@
 		    	<exclude name="*/.svn/*"/>
 		    	<exclude name="bin/*"/>
 		    	<include name="*.*"/>
+		    	<exclude name="**/*/amoeba-mongodb*"/>
 		    </tarfileset>
 	        <tarfileset dir="amoeba">
 	        	<exclude name="*/.svn/*"/>
@@ -207,6 +209,7 @@
 		    	<include name="src/**"/>
 		    	<exclude name="*/.svn/*"/>
 		    	<exclude name="bin/*"/>
+		    	<exclude name="**/*/amoeba-mongodb*"/>
 		    	<include name="*.*"/>
 		    </zipfileset>
 			
@@ -250,7 +253,7 @@
 			    	<exclude name="*/.svn/*"/>
 			    	<exclude name="bin/*"/>
 			    	<exclude name="**/*/amoeba-aladdin*"/>
-			    	
+			    	<exclude name="**/*/amoeba-mysql*"/>
 			    	<include name="*.*"/>
 			    </tarfileset>
 		        <tarfileset dir="amoeba">
@@ -282,7 +285,7 @@
 			    	<exclude name="bin/*"/>
 			    	<include name="*.*"/>
 			    	<exclude name="**/*/amoeba-aladdin*"/>
-			    	
+			    	<exclude name="**/*/amoeba-mysql*"/>
 			    </zipfileset>
 			     <zipfileset dir="amoeba">
 		        	<exclude name="*/.svn/*"/>
