@@ -16,6 +16,7 @@ package com.meidusa.amoeba.mongodb.net;
 import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -33,6 +34,7 @@ import com.meidusa.amoeba.mongodb.handler.InsertMessageHandler;
 import com.meidusa.amoeba.mongodb.handler.KillCursorMessageHandler;
 import com.meidusa.amoeba.mongodb.handler.QueryMessageHandler;
 import com.meidusa.amoeba.mongodb.handler.UpdateMessageHandler;
+import com.meidusa.amoeba.mongodb.interceptor.PacketInterceptor;
 import com.meidusa.amoeba.mongodb.io.MongodbPacketConstant;
 import com.meidusa.amoeba.mongodb.packet.AbstractMongodbPacket;
 import com.meidusa.amoeba.mongodb.packet.CursorEntry;
@@ -57,6 +59,7 @@ import com.meidusa.amoeba.util.Tuple;
 public class MongodbClientConnection extends AbstractMongodbConnection{
 	protected  static Logger logger = Logger.getLogger(MongodbClientConnection.class);
 	private LinkedBlockingQueue<byte[]> lastErrorQueue = new LinkedBlockingQueue<byte[]>(1);
+	private Map<String,PacketInterceptor<AbstractMongodbPacket>> interceptors;
 	private AtomicInteger LastErrorrequestId = new AtomicInteger(0);
 	private AtomicLong currentCursorID = new AtomicLong(0x10001L);
 	private LRUMap cursorMap = new LRUMap(10){
@@ -166,9 +169,17 @@ public class MongodbClientConnection extends AbstractMongodbConnection{
 	
 
 
+	public Map<String, PacketInterceptor<AbstractMongodbPacket>> getInterceptors() {
+		return interceptors;
+	}
+
+	public void setInterceptors(
+			Map<String, PacketInterceptor<AbstractMongodbPacket>> interceptors) {
+		this.interceptors = interceptors;
+	}
+
 	public MongodbClientConnection(SocketChannel channel, long createStamp) {
 		super(channel, createStamp);
-		//this.setMessageHandler(new CommandMessageHandler(this));
 	}
 
 	protected synchronized void doReceiveMessage(byte[] message){
@@ -204,7 +215,6 @@ public class MongodbClientConnection extends AbstractMongodbConnection{
 			packet = new MessageMongodbPacket();
 			break;
 		}
-		packet.init(message, this);
 		
 		//debug packet info
 		if(AbstractSessionHandler.PACKET_LOGGER.isDebugEnabled()){
@@ -214,6 +224,17 @@ public class MongodbClientConnection extends AbstractMongodbConnection{
 				AbstractSessionHandler.PACKET_LOGGER.debug("ERROR --->>>"+this.getSocketId()+"  unknow type="+type);
 			}
 		}
+		
+		packet.init(message, this);
+		if(this.interceptors != null){
+			PacketInterceptor<AbstractMongodbPacket> interceptor = interceptors.get(packet.getClass().getName());
+			if(interceptor != null){
+				if(interceptor.doIntercept(packet)){
+					message = packet.toByteBuffer(this).array();
+				}
+			}
+		}
+		
 		handler.handleMessage(this,message);
 	}
 	
