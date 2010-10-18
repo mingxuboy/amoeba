@@ -61,53 +61,10 @@
 		</connectionManager>
 	</connectionManagerList>
 	
-	
-	
-	<dbServerList>
-		<!-- 
-			一台mysqlServer 需要配置一个pool，
-			如果多台 平等的mysql需要进行loadBalance， 
-			平台已经提供一个具有负载均衡能力的objectPool：com.meidusa.amoeba.mysql.server.MultipleServerPool
-			简单的配置是属性加上 virtual="true",该Pool 不允许配置factoryConfig
-			或者自己写一个ObjectPool。
-		-->
-		<dbServer name="abstractServer" abstractive="true">
-			
-			<!-- PoolableObjectFactory实现类 -->
-			<factoryConfig class="com.meidusa.amoeba.mongodb.net.MongodbServerConnectionFactory">
-				<property name="manager">defaultManager</property>
-				<property name="ipAddress">127.0.0.1</property>
-			</factoryConfig>
-			<poolConfig class="com.meidusa.amoeba.net.poolable.PoolableObjectPool">
-				<property name="maxActive">200</property>
-				<property name="maxIdle">200</property>
-				<property name="minIdle">10</property>
-				<property name="minEvictableIdleTimeMillis">600000</property>
-				<property name="timeBetweenEvictionRunsMillis">600000</property>
-				<property name="testOnBorrow">true</property>
-				<property name="testWhileIdle">true</property>
-			</poolConfig>
-		</dbServer>
+	<dbServerLoader class="com.meidusa.amoeba.context.DBServerConfigFileLoader">
+		<property name="configFile">${amoeba.home}/conf/dbServers.xml</property>
+	</dbServerLoader>
 		
-		<dbServer name="server0" parent="abstractServer">
-			<factoryConfig class="com.meidusa.amoeba.mongodb.net.MongodbServerConnectionFactory">
-				<property name="manager">defaultManager</property>
-				<property name="port">27017</property>
-			</factoryConfig>
-		</dbServer>
-		
-		<dbServer name="multiPool" virtual="true">
-			<poolConfig class="com.meidusa.amoeba.server.MultipleServerPool">
-				<!-- 负载均衡参数 1=ROUNDROBIN , 2=WEIGHTBASED , 3=HA-->
-				<property name="loadbalance">1</property>
-				
-				<!-- 参与该pool负载均衡的poolName列表以逗号分割 -->
-				<property name="poolNames">server0</property>
-			</poolConfig>
-		</dbServer>
-		
-	</dbServerList>
-	
 	<queryRouter class="com.meidusa.amoeba.mongodb.route.MongodbQueryRouter">
 		<property name="ruleConfig">${amoeba.home}/conf/rule.xml</property>
 		<property name="functionConfig">${amoeba.home}/conf/functionMap.xml</property>
