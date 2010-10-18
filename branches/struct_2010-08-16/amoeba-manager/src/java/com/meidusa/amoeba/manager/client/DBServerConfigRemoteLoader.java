@@ -1,4 +1,4 @@
-package com.meidusa.amoeba.context;
+package com.meidusa.amoeba.manager.client;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
