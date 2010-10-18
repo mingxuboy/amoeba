@@ -13,17 +13,36 @@
  */
 package com.meidusa.amoeba.mongodb.net;
 
+import java.io.IOException;
 import java.nio.channels.SocketChannel;
+import java.util.Map;
 
+import com.meidusa.amoeba.mongodb.interceptor.PacketInterceptor;
+import com.meidusa.amoeba.mongodb.packet.AbstractMongodbPacket;
 import com.meidusa.amoeba.net.AbstractConnectionFactory;
 import com.meidusa.amoeba.net.Connection;
 
 public class MongodbClientConnectionFactory extends AbstractConnectionFactory{
-
+	private Map<String,PacketInterceptor<AbstractMongodbPacket>> interceptors;
+	
+	public Map<String, PacketInterceptor<AbstractMongodbPacket>> getInterceptors() {
+		return interceptors;
+	}
+	
+	public void setInterceptors(
+			Map<String, PacketInterceptor<AbstractMongodbPacket>> interceptors) {
+		this.interceptors = interceptors;
+	}
+	
 	@Override
 	protected Connection newConnectionInstance(SocketChannel channel,
 			long createStamp) {
-		return new MongodbClientConnection(channel,createStamp);
+		MongodbClientConnection conn = new MongodbClientConnection(channel,createStamp);
+		conn.setInterceptors(interceptors);
+		return conn;
 	}
 
+	protected void initConnection(Connection connection) throws IOException{
+		super.initConnection(connection);
+	}
 }
