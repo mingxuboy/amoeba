@@ -98,7 +98,11 @@ public class ProxyServerConfig {
         dbServers.put(name, serverConfig);
     }
 
-    public BeanObjectEntityConfig getQueryRouterConfig() {
+    public void putAllServers(Map<String, DBServerConfig> dbServers) {
+		this.dbServers.putAll(dbServers);
+	}
+
+	public BeanObjectEntityConfig getQueryRouterConfig() {
         return queryRouterConfig;
     }
 

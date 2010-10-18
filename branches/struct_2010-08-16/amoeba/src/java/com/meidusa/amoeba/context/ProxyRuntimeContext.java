@@ -232,7 +232,7 @@ public class ProxyRuntimeContext implements Reporter {
         config = loadConfig(file);
         this.runtimeContext = (RuntimeContext)config.getRuntimeConfig().createBeanObject(true);
         
-        for (Map.Entry<String, BeanObjectEntityConfig> entry : config.getManagers().entrySet()) {
+        /*for (Map.Entry<String, BeanObjectEntityConfig> entry : config.getManagers().entrySet()) {
             BeanObjectEntityConfig beanObjectEntityConfig = entry.getValue();
             try {
                 ConnectionManager manager = (ConnectionManager) beanObjectEntityConfig.createBeanObject(false);
@@ -242,7 +242,7 @@ public class ProxyRuntimeContext implements Reporter {
             } catch (Exception e) {
                 throw new ConfigurationException("manager instance error", e);
             }
-        }
+        }*/
 
         for (Map.Entry<String, DBServerConfig> entry : config.getDbServers().entrySet()) {
             DBServerConfig dbServerConfig = (DBServerConfig)entry.getValue().clone();
@@ -433,8 +433,8 @@ public class ProxyRuntimeContext implements Reporter {
                 	loadProxyConfig(child, config);
                 } else if (nodeName.equals("connectionManagerList")) {
                     loadConnectionManagers(child, config);
-                } else if (nodeName.equals("dbServerList")) {
-                    loadServers(child, config);
+                } else if (nodeName.equals("dbServerLoader")) {
+                    loadDbServerLoader(rootElement, config);
                 } else if (nodeName.equals("queryRouter")) {
                     loadQueryRouter(rootElement, config);
                 }
@@ -452,63 +452,10 @@ public class ProxyRuntimeContext implements Reporter {
         config.setQueryRouterConfig(queryRouter);
     }
 
-    private void loadServers(Element current, ProxyServerConfig config) {
-        NodeList children = current.getChildNodes();
-        int childSize = children.getLength();
-        for (int i = 0; i < childSize; i++) {
-            Node childNode = children.item(i);
-            if (childNode instanceof Element) {
-                Element child = (Element) childNode;
-                DBServerConfig serverConfig = loadServer(child);
-                if (serverConfig.getVirtual() != null && serverConfig.getVirtual().booleanValue()) {
-                    if (serverConfig.getPoolConfig() != null) {
-                        if (StringUtil.isEmpty(serverConfig.getPoolConfig().getClassName())) {
-                            serverConfig.getPoolConfig().setClassName(getDefaultVirtualPoolClassName());
-                        }
-                    }
-                } else {
-                    if (serverConfig.getPoolConfig() != null) {
-                        if (StringUtil.isEmpty(serverConfig.getPoolConfig().getClassName())) {
-                            serverConfig.getPoolConfig().setClassName(getDefaultRealPoolClassName());
-                        }
-                    }
-                }
-
-                /*if (serverConfig.getFactoryConfig() != null) {
-                    if (StringUtil.isEmpty(serverConfig.getFactoryConfig().getClassName())) {
-                    	throw new ConfigurationException("DBServer Config name=" + serverConfig.getName()+" factory class must not be null!");
-                    }
-                }*/
-                config.addServer(serverConfig.getName(), serverConfig);
-            }
-        }
-    }
-
-    private DBServerConfig loadServer(Element current) {
-        DBServerConfig serverConfig = new DBServerConfig();
-        NamedNodeMap nodeMap = current.getAttributes();
-        Map<String, Object> map = new HashMap<String, Object>();
-        for (int i = 0; i < nodeMap.getLength(); i++) {
-            Node node = nodeMap.item(i);
-            if (node instanceof org.w3c.dom.Attr) {
-                Attr attr = (Attr) node;
-                map.put(attr.getName(), attr.getNodeValue());
-            }
-        }
-
-        ParameterMapping.mappingObject(serverConfig, map,null);
-
-        BeanObjectEntityConfig factory = DocumentUtil.loadBeanConfig(DocumentUtil.getTheOnlyElement(current, "factoryConfig"));
-        BeanObjectEntityConfig pool = DocumentUtil.loadBeanConfig(DocumentUtil.getTheOnlyElement(current, "poolConfig"));
-        if (pool != null) {
-            serverConfig.setPoolConfig(pool);
-        }
-
-        if (factory != null) {
-            serverConfig.setFactoryConfig(factory);
-        }
-
-        return serverConfig;
+    private void loadDbServerLoader(Element current, ProxyServerConfig config) {
+    	BeanObjectEntityConfig dbserverLoader = DocumentUtil.loadBeanConfig(DocumentUtil.getTheOnlyElement(current, "dbServerLoader"));
+    	DBServerConfigLoader loader = (DBServerConfigLoader)dbserverLoader.createBeanObject(true, this.getConnectionManagerList());
+    	config.putAllServers(loader.loadConfig());
     }
 
     private void loadConnectionManagers(Element current, ProxyServerConfig config) {
@@ -523,6 +470,18 @@ public class ProxyRuntimeContext implements Reporter {
                     managerConfig.setClassName(getDefaultServerConnectionManagerClassName());
                 }
                 config.addManager(managerConfig.getName(), managerConfig);
+            }
+        }
+        
+        //create bean and init
+        for (Map.Entry<String, BeanObjectEntityConfig> entry : config.getManagers().entrySet()) {
+            BeanObjectEntityConfig beanObjectEntityConfig = entry.getValue();
+            try {
+                ConnectionManager manager = (ConnectionManager) beanObjectEntityConfig.createBeanObject(true);
+                manager.setName(entry.getKey());
+                conMgrMap.put(manager.getName(), manager);
+            } catch (Exception e) {
+                throw new ConfigurationException("manager instance error", e);
             }
         }
     }
