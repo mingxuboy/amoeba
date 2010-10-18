@@ -4,34 +4,33 @@ import java.io.UnsupportedEncodingException;
 
 import com.meidusa.amoeba.manager.ManagerConstant;
 import com.meidusa.amoeba.net.packet.AbstractPacket;
-import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
 
 /**
  * @author struct
  */
-public class ManagerAbstractPacket extends AbstractPacket implements ManagerConstant {
+public class ManagerAbstractPacket extends AbstractPacket<ManagerPacketBuffer> implements ManagerConstant {
 
     public int  lenght;
     public byte funType;
 
     @Override
-    protected void init(AbstractPacketBuffer buffer) {
+    protected void init(ManagerPacketBuffer buffer) {
         buffer.setPosition(0);
-        lenght = (buffer.readByte() & 0xff) + ((buffer.readByte() & 0xff) << 8) + ((buffer.readByte() & 0xff) << 16);
+        lenght = buffer.readInt();
         funType = buffer.readByte();
     }
 
     @Override
-    protected void write2Buffer(AbstractPacketBuffer buffer) throws UnsupportedEncodingException {
+    protected void write2Buffer(ManagerPacketBuffer buffer) throws UnsupportedEncodingException {
         buffer.setPosition(HEADER_SIZE);
     }
 
     @Override
-    protected void afterPacketWritten(AbstractPacketBuffer buffer) {
+    protected void afterPacketWritten(ManagerPacketBuffer buffer) {
         int position = buffer.getPosition();
         lenght = position;
         buffer.setPosition(0);
-        //TODO
+        buffer.writeInt(lenght);
         buffer.writeByte((byte) funType);
         buffer.setPosition(position);
     }
@@ -41,13 +40,14 @@ public class ManagerAbstractPacket extends AbstractPacket implements ManagerCons
         return 12;
     }
 
-    @Override
-    protected Class<? extends AbstractPacketBuffer> getPacketBufferClass() {
-        return ManagerPacketBuffer.class;
-    }
 
     @Override
-    protected void afterInit(AbstractPacketBuffer buffer) {
+    protected void afterInit(ManagerPacketBuffer buffer) {
         buffer.setPosition(HEADER_SIZE);
     }
+
+	@Override
+	protected Class<ManagerPacketBuffer> getPacketBufferClass() {
+		return ManagerPacketBuffer.class;
+	}
 }
