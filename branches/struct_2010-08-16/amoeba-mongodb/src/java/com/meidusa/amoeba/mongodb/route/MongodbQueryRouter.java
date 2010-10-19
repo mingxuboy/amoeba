@@ -142,6 +142,12 @@ public class MongodbQueryRouter extends AbstractQueryRouter<MongodbClientConnect
 						break _tableName;
 					}
 					
+					if(query.query.get("listDatabases")!= null){
+						tableName = "listDatabases";
+						schema.setName("admin");
+						break _tableName;
+					}
+					
 					//db.getSisterDB(\"schema\").getCollection(\"collectionName\").stats();
 					if(query.query.get("$eval") != null){
 						Object object = query.query.get("$eval");

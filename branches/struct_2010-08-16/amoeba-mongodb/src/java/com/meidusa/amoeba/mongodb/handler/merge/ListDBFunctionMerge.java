@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.bson.BSONObject;
-import org.bson.BasicBSONObject;
+import org.bson.BasicDBList;
 import org.bson.types.BasicBSONList;
 
 import com.meidusa.amoeba.mongodb.packet.RequestMongodbPacket;
@@ -25,9 +25,9 @@ public class ListDBFunctionMerge implements FunctionMerge{
 	
 	public static void merge(BSONObject source, BSONObject info){
 		if(StringUtil.equals((String)source.get("name"), (String)info.get("name"))){
-			double sizeOndisk1 = Double.valueOf((Double)source.get("sizeOndisk"));
-			double sizeOndisk2 = Double.valueOf((Double)info.get("sizeOndisk"));
-			source.put("sizeOndisk", (sizeOndisk1 + sizeOndisk2));
+			double sizeOndisk1 = Double.valueOf((Double)source.get("sizeOnDisk"));
+			double sizeOndisk2 = Double.valueOf((Double)info.get("sizeOnDisk"));
+			source.put("sizeOnDisk", (sizeOndisk1 + sizeOndisk2));
 			source.put("empty", ((Boolean)source.get("empty") || (Boolean)info.get("empty")));
 		}
 	}
@@ -46,9 +46,10 @@ public class ListDBFunctionMerge implements FunctionMerge{
 				BasicBSONList databases = (BasicBSONList)nextResult.get("databases");
 				for(Object object: databases){
 					BSONObject info = (BSONObject)object;
-					BSONObject source = dbMap.get("name");
+					String name = (String)info.get("name");
+					BSONObject source = dbMap.get(name);
 					if(source == null){
-						dbMap.put((String)info.get("name"), info);
+						dbMap.put(name, info);
 					}else{
 						merge(source,info);
 					}
@@ -66,6 +67,11 @@ public class ListDBFunctionMerge implements FunctionMerge{
 		
 		result.documents = new ArrayList<BSONObject>();
 		if(cmdResult != null){
+			BasicDBList listDB = new BasicDBList();
+			for(BSONObject bson : dbMap.values()){
+				listDB.add(bson);
+			}
+			cmdResult.put("databases", listDB);
 			result.documents.add(cmdResult);
 		}
 		

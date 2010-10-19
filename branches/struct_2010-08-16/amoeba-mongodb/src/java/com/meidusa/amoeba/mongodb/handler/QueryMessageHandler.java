@@ -152,6 +152,7 @@ public class QueryMessageHandler extends AbstractSessionHandler<QueryMongodbPack
 			packet = new SimpleResponseMongodbPacket();
 		}
 		packet.init(message, conn);
+		
 		if(PACKET_TRACE.isDebugEnabled()){
 			putDebugInfoToResponsePacket((ResponseMongodbPacket)packet,conn);
 		}
@@ -193,7 +194,13 @@ public class QueryMessageHandler extends AbstractSessionHandler<QueryMongodbPack
 				clientConn.addCursorItem(packet.cursorID, tuple);
 			}
 			endQuery(conn);
-			clientConn.postMessage(message);
+			
+			
+			if(PACKET_TRACE.isDebugEnabled()){
+				clientConn.postMessage(packet.toByteBuffer(serverConn));
+			}else{
+				clientConn.postMessage(message);
+			}
 		}
 	}
 }
