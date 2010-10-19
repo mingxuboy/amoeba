@@ -34,13 +34,15 @@
 		</rule>
 		-->
 		<rule name="rule1" ruleResult="POOLNAME">
-       <parameters>s</parameters>
-       <expression><![CDATA[
-         var hashid = abs(hash(s)) % 1; 
-         'server'||hashid
-        
-       ]]></expression>
-           </rule>
+			<parameters>s</parameters>
+			<expression><![CDATA[
+		         var hashid = abs(hash(s)) % 1; 
+		         'server'||hashid
+		        
+		       ]]></expression>
+		</rule>
 	</tableRule>
 	
+	<!-- list database command will be matcher this rule -->	
+	<tableRule name="listDatabases" schema="admin" defaultPools="server0,server1"/>
 </amoeba:rule>
