@@ -67,7 +67,12 @@
         </layout>
     </appender>
     
-    <logger name="PACKETLOGGER" additivity="true">
+    <logger name="PACKET_TRACE" additivity="true">
+        <level value="debug"/>
+        <appender-ref ref="packetLogger"/>
+    </logger>
+    
+    <logger name="PACKET_LOGGER" additivity="true">
         <level value="error"/>
         <appender-ref ref="packetLogger"/>
     </logger>

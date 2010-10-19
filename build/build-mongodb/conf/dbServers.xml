@@ -34,13 +34,20 @@
 			</factoryConfig>
 		</dbServer>
 		
+		<dbServer name="server1" parent="abstractServer">
+			<factoryConfig class="com.meidusa.amoeba.mongodb.net.MongodbServerConnectionFactory">
+				<property name="manager">defaultManager</property>
+				<property name="port">27017</property>
+			</factoryConfig>
+		</dbServer>
+		
 		<dbServer name="multiPool" virtual="true">
 			<poolConfig class="com.meidusa.amoeba.server.MultipleServerPool">
 				<!-- 负载均衡参数 1=ROUNDROBIN , 2=WEIGHTBASED , 3=HA-->
 				<property name="loadbalance">1</property>
 				
-				<!-- 参与该pool负载均衡的poolName列表以逗号分割 -->
-				<property name="poolNames">server0</property>
+				<!-- 参与该pool负载均衡的poolName列表以逗号(,)分割 -->
+				<property name="poolNames">server0,server1</property>
 			</poolConfig>
 		</dbServer>
 </amoeba:dbServers>
