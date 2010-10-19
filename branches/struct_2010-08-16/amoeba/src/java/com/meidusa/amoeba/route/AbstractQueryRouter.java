@@ -229,8 +229,17 @@ public abstract class  AbstractQueryRouter<T extends Connection,V> implements Qu
 
     private boolean                                 needParse       = true;
     private boolean                                 needEvaluate    = true;
+    private TableRuleLoader ruleLoader;
+    
+    public TableRuleLoader getRuleLoader() {
+		return ruleLoader;
+	}
 
-    public AbstractQueryRouter(){
+	public void setRuleLoader(TableRuleLoader ruleLoader) {
+		this.ruleLoader = ruleLoader;
+	}
+
+	public AbstractQueryRouter(){
         ruleFunctionMap.putAll(ruleFunTab);
     }
 
@@ -583,10 +592,8 @@ public abstract class  AbstractQueryRouter<T extends Connection,V> implements Qu
 
         class ConfigCheckTread extends Thread {
 
-            long lastRuleModified;
             long lastFunFileModified;
             long lastRuleFunctionFileModified;
-            File ruleFile;
             File funFile;
             File ruleFunctionFile;
 
@@ -594,9 +601,7 @@ public abstract class  AbstractQueryRouter<T extends Connection,V> implements Qu
 
                 this.setDaemon(true);
                 this.setName("ruleConfigCheckThread");
-                ruleFile = new File(AbstractQueryRouter.this.ruleConfig);
                 funFile = new File(AbstractQueryRouter.this.functionConfig);
-                lastRuleModified = ruleFile.lastModified();
                 lastFunFileModified = funFile.lastModified();
                 if (AbstractQueryRouter.this.ruleFunctionConfig != null) {
                     ruleFunctionFile = new File(AbstractQueryRouter.this.ruleFunctionConfig);
@@ -629,11 +634,12 @@ public abstract class  AbstractQueryRouter<T extends Connection,V> implements Qu
                                 }
                             }
 
-                            if (AbstractQueryRouter.this.ruleConfig != null) {
-                                if (ruleFile.lastModified() != lastRuleModified || (AbstractQueryRouter.this.ruleFunctionConfig != null && ruleFunctionFile.lastModified() != lastRuleFunctionFileModified)) {
-                                    tableRuleMap = loadConfig(AbstractQueryRouter.this.ruleConfig);
-                                    logger.info("loading ruleConfig from File="+ruleConfig);
-                                }
+                            if(ruleLoader.needLoad()){
+                            	tableRuleMap = ruleLoader.loadRule();
+                            }
+                            
+                            if(ruleLoader.needLoad()){
+                                tableRuleMap = ruleLoader.loadRule();
                             }
 
                             if (funMap != null) {
@@ -655,9 +661,6 @@ public abstract class  AbstractQueryRouter<T extends Connection,V> implements Qu
                             if (ruleFunctionFile != null && ruleFunctionFile.exists()) {
                                 lastRuleFunctionFileModified = ruleFunctionFile.lastModified();
                             }
-                            if (ruleFile != null && ruleFile.exists()) {
-                                lastRuleModified = ruleFile.lastModified();
-                            }
                         }
                     } catch (InterruptedException e) {
                     }
@@ -666,30 +669,20 @@ public abstract class  AbstractQueryRouter<T extends Connection,V> implements Qu
         }
 
         if (needParse) {
-            boolean configNeedCheck = false;
 
             if (AbstractQueryRouter.this.functionConfig != null) {
                 this.functionMap = loadFunctionMap(AbstractQueryRouter.this.functionConfig);
-                configNeedCheck = true;
             } else {
                 needEvaluate = false;
             }
 
             if (AbstractQueryRouter.this.ruleFunctionConfig != null) {
                 AbstractQueryRouter.this.ruleFunctionMap = loadRuleFunctionMap(AbstractQueryRouter.this.ruleFunctionConfig);
-                configNeedCheck = true;
             }
+            
+            this.tableRuleMap = ruleLoader.loadRule();
 
-            if (AbstractQueryRouter.this.ruleConfig != null) {
-                this.tableRuleMap = loadConfig(this.ruleConfig);
-                configNeedCheck = true;
-            } else {
-                needEvaluate = false;
-            }
-
-            if (configNeedCheck) {
-                new ConfigCheckTread().start();
-            }
+            new ConfigCheckTread().start();
         }
     }
 
@@ -738,250 +731,6 @@ public abstract class  AbstractQueryRouter<T extends Connection,V> implements Qu
         tempRuleFunMap.putAll(ruleFunTab);
         tempRuleFunMap.putAll(defindMap);
         return tempRuleFunMap;
-    }
-
-    private Map<Table, TableRule> loadConfig(String configFileName) {
-        DocumentBuilder db;
-        logger.info("loading tableRule from File="+configFileName);
-        try {
-            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-            dbf.setValidating(true);
-            dbf.setNamespaceAware(false);
-            db = dbf.newDocumentBuilder();
-            db.setEntityResolver(new EntityResolver() {
-
-                public InputSource resolveEntity(String publicId, String systemId) {
-                    if (systemId.endsWith("rule.dtd")) {
-                        InputStream in = AbstractQueryRouter.class.getResourceAsStream("/com/meidusa/amoeba/xml/rule.dtd");
-                        if (in == null) {
-                            LogLog.error("Could not find [rule.dtd]. Used [" + AbstractQueryRouter.class.getClassLoader() + "] class loader in the search.");
-                            return null;
-                        } else {
-                            return new InputSource(in);
-                        }
-                    } else {
-                        return null;
-                    }
-                }
-            });
-
-            db.setErrorHandler(new ErrorHandler() {
-
-                public void warning(SAXParseException exception) {
-                }
-
-                public void error(SAXParseException exception) throws SAXException {
-                    logger.error(exception.getMessage() + " at (" + exception.getLineNumber() + ":" + exception.getColumnNumber() + ")");
-                    throw exception;
-                }
-
-                public void fatalError(SAXParseException exception) throws SAXException {
-                    logger.fatal(exception.getMessage() + " at (" + exception.getLineNumber() + ":" + exception.getColumnNumber() + ")");
-                    throw exception;
-                }
-            });
-            return loadConfigurationFile(configFileName, db);
-        } catch (Exception e) {
-            logger.fatal("Could not load configuration file, failing", e);
-            throw new ConfigurationException("Error loading configuration file " + configFileName, e);
-        }
-    }
-
-    private Map<Table, TableRule> loadConfigurationFile(String fileName, DocumentBuilder db)
-                                                                                            throws InitialisationException {
-        Document doc = null;
-        InputStream is = null;
-        Map<Table, TableRule> tableRuleMap = new HashMap<Table, TableRule>();
-        try {
-            is = new FileInputStream(new File(fileName));
-            doc = db.parse(is);
-        } catch (Exception e) {
-            final String s = "Caught exception while loading file " + fileName;
-            logger.error(s, e);
-            throw new ConfigurationException(s, e);
-        } finally {
-            if (is != null) {
-                try {
-                    is.close();
-                } catch (IOException e) {
-                    logger.error("Unable to close input stream", e);
-                }
-            }
-        }
-        Element rootElement = doc.getDocumentElement();
-        NodeList children = rootElement.getChildNodes();
-        int childSize = children.getLength();
-
-        for (int i = 0; i < childSize; i++) {
-            Node childNode = children.item(i);
-
-            if (childNode instanceof Element) {
-                Element child = (Element) childNode;
-
-                final String nodeName = child.getNodeName();
-                if (nodeName.equals("tableRule")) {
-                    List <TableRule> list = loadTableRule(child);
-                    for(TableRule rule:list){
-                    	tableRuleMap.put(rule.table.getName() == null ? null : rule.table, rule);
-                    }
-                }
-            }
-        }
-
-        if (logger.isInfoEnabled()) {
-            logger.info("Loaded rule configuration from: " + fileName);
-        }
-        return tableRuleMap;
-    }
-
-    private List<TableRule> loadTableRule(Element current) throws InitialisationException {
-        
-        String name = current.getAttribute("name");
-        String schemaName = current.getAttribute("schema");
-        List<TableRule> list = new ArrayList<TableRule>();
-        
-        String[] names = new String[]{name};
-        if(name != null){
-        	names = name.split(",");
-        }
-        
-        String defaultPools = current.getAttribute("defaultPools");
-        String[] arrayDefaultPools = null;
-        
-        if (defaultPools != null) {
-        	arrayDefaultPools = readTokenizedString(defaultPools, " ,");
-        }
-        
-        String readPools = current.getAttribute("readPools");
-        String[] arrayReadPools = null;
-        if (readPools != null) {
-        	arrayReadPools = readTokenizedString(readPools, " ,");
-        }
-       
-        String writePools = current.getAttribute("writePools");
-        String[] arrayWritePools = null;
-        if (writePools != null) {
-        	arrayWritePools = readTokenizedString(writePools, " ,");
-        }
-        for(String tableName : names){
-        	TableRule tableRule = new TableRule();
-	        Table table = new Table();
-	        String[] tableSchema = StringUtil.split(tableName,".");
-	        if(tableSchema.length==2){
-	        	table.setName(tableSchema[1]);
-	            Schema schema = new Schema();
-	            schema.setName(tableSchema[0]);
-	            table.setSchema(schema);
-	        }else{
-	        	table.setName(tableName);
-	        	 if (!StringUtil.isEmpty(schemaName)) {
-		            Schema schema = new Schema();
-		            schema.setName(schemaName);
-		            table.setSchema(schema);
-			     }
-	        }
-	        tableRule.defaultPools = arrayDefaultPools;
-            tableRule.readPools = arrayReadPools;
-            tableRule.writePools = arrayWritePools;
-	        tableRule.table = table;
-	        list.add(tableRule);
-        }
-       
-        NodeList children = current.getChildNodes();
-        int childSize = children.getLength();
-
-        for (int i = 0; i < childSize; i++) {
-            Node childNode = children.item(i);
-
-            if (childNode instanceof Element) {
-                Element child = (Element) childNode;
-
-                final String nodeName = child.getNodeName();
-                if (nodeName.equals("rule")) {
-                	for(TableRule tableRule :list){
-                        tableRule.ruleList.add(loadRule(child, tableRule.table));
-                    }
-            	}
-            }
-        }
-        return list;
-    }
-
-    private Rule loadRule(Element current, Table table) throws InitialisationException {
-        Rule rule = new Rule();
-
-        // root
-        rule.name = current.getAttribute("name");
-        String group = current.getAttribute("group");
-        rule.group = StringUtil.isEmpty(group) ? null : group;
-        String ignoreArray = current.getAttribute("ignoreArray");
-        rule.ignoreArray = Boolean.parseBoolean(ignoreArray);
-        String isSwitch = current.getAttribute("isSwitch");
-        rule.isSwitch = Boolean.parseBoolean(isSwitch);
-        String result = current.getAttribute("ruleResult");
-        if(!StringUtil.isEmpty(result)){
-        	result = result.toUpperCase();
-        	rule.result = Enum.valueOf(RuleResult.class, result);
-        }
-        // parameters
-        Element parametersNode = DocumentUtil.getTheOnlyElement(current, "parameters");
-        if (parametersNode != null) {
-            String[] tokens = readTokenizedString(parametersNode.getTextContent(), " ,");
-            int index = 0;
-            for (String parameter : tokens) {
-                rule.parameterMap.put(parameter, index);
-                Column column = new Column();
-                column.setName(parameter);
-                column.setTable(table);
-                rule.cloumnMap.put(column, index);
-                index++;
-            }
-
-            tokens = readTokenizedString(parametersNode.getAttribute("excludes"), " ,");
-            if (tokens != null) {
-                for (String parameter : tokens) {
-                    Column column = new Column();
-                    column.setName(parameter);
-                    column.setTable(table);
-                    rule.excludes.add(column);
-                }
-            }
-        }
-
-        // expression
-        Element expression = DocumentUtil.getTheOnlyElement(current, "expression");
-        rule.expression = expression.getTextContent();
-        rule.rowJep = new RowJEP(rule.expression);
-        try {
-            rule.rowJep.parseExpression(rule.parameterMap, variableMap, this.ruleFunctionMap);
-        } catch (com.meidusa.amoeba.sqljep.ParseException e) {
-            throw new InitialisationException("parser expression:" + rule.expression + " error", e);
-        }
-
-        // defaultPools
-        Element defaultPoolsNode = DocumentUtil.getTheOnlyElement(current, "defaultPools");
-        if (defaultPoolsNode != null) {
-            String defaultPools = defaultPoolsNode.getTextContent();
-            rule.defaultPools = readTokenizedString(defaultPools, " ,");
-        }
-
-        // readPools
-        Element readPoolsNode = DocumentUtil.getTheOnlyElement(current, "readPools");
-        if (readPoolsNode != null) {
-            rule.readPools = readTokenizedString(readPoolsNode.getTextContent(), " ,");
-        }
-
-        // writePools
-        Element writePoolsNode = DocumentUtil.getTheOnlyElement(current, "writePools");
-        if (writePoolsNode != null) {
-            rule.writePools = readTokenizedString(writePoolsNode.getTextContent(), " ,");
-        }
-
-        return rule;
-    }
-
-    public static String[] readTokenizedString(String string, String delim) {
-        return StringUtil.split(string, delim);
     }
 
     public int getLRUMapSize() {
@@ -1042,5 +791,6 @@ public abstract class  AbstractQueryRouter<T extends Connection,V> implements Qu
     	for(String aaaaa : aaa){
     		System.out.println(aaaaa);
     	}
+    	System.out.println(System.currentTimeMillis());
     }
 }
