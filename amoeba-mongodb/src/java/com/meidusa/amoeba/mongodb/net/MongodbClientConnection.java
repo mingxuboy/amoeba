@@ -216,6 +216,8 @@ public class MongodbClientConnection extends AbstractMongodbConnection{
 			break;
 		}
 		
+		packet.init(message, this);
+		
 		//debug packet info
 		if(AbstractSessionHandler.PACKET_LOGGER.isDebugEnabled()){
 			if(packet != null){
@@ -225,7 +227,6 @@ public class MongodbClientConnection extends AbstractMongodbConnection{
 			}
 		}
 		
-		packet.init(message, this);
 		if(this.interceptors != null){
 			PacketInterceptor<AbstractMongodbPacket> interceptor = interceptors.get(packet.getClass().getName());
 			if(interceptor != null){
