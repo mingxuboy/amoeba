@@ -57,12 +57,15 @@ public class ModifyOperateMessageHandler<T extends RequestMongodbPacket> extends
 			conns[index++] = serverConn;
 		}
 		
+		byte[] array = new byte[message.length+bts.length];
+		System.arraycopy(message, 0, array, 0, message.length);
+		System.arraycopy(bts, 0, array, message.length, bts.length);
+		
 		for(MongodbServerConnection serverConn : conns){
 			if(PACKET_LOGGER.isDebugEnabled()){
 				PACKET_LOGGER.debug("--->>>@errorRequestPakcet="+lastErrorRequest+"," +clientConn.getSocketId()+" send packet --->"+serverConn.getSocketId());
 			}
-			serverConn.postMessage(message);
-			serverConn.postMessage(bts);
+			serverConn.postMessage(array);
 		}
 	}
 
