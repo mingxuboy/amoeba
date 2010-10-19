@@ -61,12 +61,18 @@
 		</connectionManager>
 	</connectionManagerList>
 	
+	<!-- default using file loader -->
 	<dbServerLoader class="com.meidusa.amoeba.context.DBServerConfigFileLoader">
 		<property name="configFile">${amoeba.home}/conf/dbServers.xml</property>
 	</dbServerLoader>
-		
+	
+	
 	<queryRouter class="com.meidusa.amoeba.mongodb.route.MongodbQueryRouter">
-		<property name="ruleConfig">${amoeba.home}/conf/rule.xml</property>
+		<property name="ruleLoader">
+			<bean class="com.meidusa.amoeba.route.TableRuleFileLoader">
+				<property name="configFile">${amoeba.home}/conf/rule.xml</property>
+			</bean>
+		</property>
 		<property name="functionConfig">${amoeba.home}/conf/functionMap.xml</property>
 		<property name="ruleFunctionConfig">${amoeba.home}/conf/ruleFunctionMap.xml</property>
 		<property name="LRUMapSize">1500</property>

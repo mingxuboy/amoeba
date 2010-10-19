@@ -72,7 +72,7 @@ public class ModifyOperateMessageHandler<T extends RequestMongodbPacket> extends
 	
 		ResponseMongodbPacket lastResponsePacket = new ResponseMongodbPacket();
 		lastResponsePacket.init(message, clientConn);
-		if(PACKET_LOGGER.isDebugEnabled()){
+		if(PACKET_TRACE.isDebugEnabled()){
 			putDebugInfoToResponsePacket(lastResponsePacket,conn);
 		}
 		

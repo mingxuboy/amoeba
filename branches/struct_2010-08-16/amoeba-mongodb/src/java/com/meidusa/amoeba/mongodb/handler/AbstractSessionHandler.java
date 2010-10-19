@@ -40,7 +40,8 @@ import com.meidusa.amoeba.net.MessageHandler;
 import com.meidusa.amoeba.net.SessionMessageHandler;
 
 public abstract class AbstractSessionHandler<T extends AbstractMongodbPacket> implements SessionMessageHandler {
-	public static Logger PACKET_LOGGER = Logger.getLogger("PACKETLOGGER");
+	public static Logger PACKET_LOGGER = Logger.getLogger("PACKET_LOGGER");
+	public static Logger PACKET_TRACE = Logger.getLogger("PACKET_TRACE");
 	protected  static Logger handlerLogger = Logger.getLogger(AbstractSessionHandler.class);
 	public static final BSONObject BSON_OK = new BasicBSONObject();
 	protected static Map<Integer,FunctionMerge> FUNCTION_MERGE_MAP = new HashMap<Integer,FunctionMerge>();
@@ -124,7 +125,7 @@ public abstract class AbstractSessionHandler<T extends AbstractMongodbPacket> im
 	protected void putDebugInfoToResponsePacket(ResponseMongodbPacket packet,MongodbServerConnection conn){
 		if(packet.numberReturned>0){
 			for(BSONObject bson :packet.documents){
-				bson.put("_pool_name_", conn.getObjectPool().getName());
+				bson.put("_pool_name_", conn.getObjectPool().getName()+"@"+conn.getSocketId());
 			}
 		}
 		if(PACKET_LOGGER.isDebugEnabled()){
