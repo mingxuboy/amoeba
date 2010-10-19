@@ -177,7 +177,14 @@ public class QueryMessageHandler extends AbstractSessionHandler<QueryMongodbPack
 					FunctionMerge merge = FUNCTION_MERGE_MAP.get(this.cmd);
 					result = merge.mergeResponse(this.requestPacket, multiResponsePacket);
 				}else{
-					result = this.mergeResponse(this.requestPacket.numberToReturn == -1);
+					if(this.requestPacket.fullCollectionName.indexOf("system.namespaces")>0){
+						
+						//merge name spaces
+						FunctionMerge merge = FUNCTION_MERGE_MAP.get(MongodbPacketConstant.CMD_NAMESPACES);
+						result = merge.mergeResponse(requestPacket, multiResponsePacket);
+					}else{
+						result = this.mergeResponse(this.requestPacket.numberToReturn == -1);
+					}
 				}
 				result.cursorID = cursrID;
 				clientConn.postMessage(result.toByteBuffer(this.clientConn));
