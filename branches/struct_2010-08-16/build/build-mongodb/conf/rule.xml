@@ -43,6 +43,6 @@
 		</rule>
 	</tableRule>
 	
-	<!-- list database command will be matcher this rule -->	
+	<!-- list database command will be matcher this rule -->
 	<tableRule name="listDatabases" schema="admin" defaultPools="server0,server1"/>
 </amoeba:rule>
