@@ -173,6 +173,9 @@ public class MongodbQueryRouter extends AbstractQueryRouter<MongodbClientConnect
 					bson = (BSONObject)query.query.get("query");
 				}
 			}else{
+				/*if("system.namespaces".equalsIgnoreCase(table.getName())){
+					//schema.setName("*");
+				}*/
 				bson = query.query;
 			}
 		}else if(queryObject  instanceof InsertMongodbPacket){

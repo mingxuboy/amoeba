@@ -39,4 +39,5 @@ public interface MongodbPacketConstant {
 	public static int CMD_GETLASTERROR = 1<<7;
 	public static int CMD_LISTDATABASES = 1<<8;
 	public static int CMD_GETCOLLECTION = 1<<9;
+	public static int CMD_NAMESPACES = 1<<10;
 }
