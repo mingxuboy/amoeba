@@ -120,7 +120,7 @@ public class QueryMessageHandler extends AbstractSessionHandler<QueryMongodbPack
 				conns[index++] = serverConn;
 				handlerMap.put(serverConn, serverConn.getMessageHandler());
 			}catch(Exception e){
-				handlerLogger.error("poolName="+pool.getName()+" borrow object error",e);
+				handlerLogger.error("poolName=["+pool.getName()+"] borrow Connection error",e);
 			}
 		}
 		
