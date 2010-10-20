@@ -73,6 +73,7 @@ public abstract class AbstractSessionHandler<T extends AbstractMongodbPacket> im
 	protected List<ResponseMongodbPacket> multiResponsePacket = null;
 	protected int cmd  = 0;
 	protected final long startTime = System.currentTimeMillis();
+	private boolean isEnd = false;
 	public AbstractSessionHandler(MongodbClientConnection clientConn,T t){
 		this.clientConn = clientConn;
 		this.requestPacket = t;
@@ -114,6 +115,7 @@ public abstract class AbstractSessionHandler<T extends AbstractMongodbPacket> im
 	 * @return boolean -- return true if all serverConnction response 
 	 */
 	public synchronized boolean endQuery(Connection conn){
+		if(isEnd) return true;
 		MongodbServerConnection serverConn = (MongodbServerConnection) conn;
 		serverConn.setSessionMessageHandler(null);
 		serverConn.setMessageHandler(handlerMap.remove(serverConn));
@@ -122,8 +124,7 @@ public abstract class AbstractSessionHandler<T extends AbstractMongodbPacket> im
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
-		return handlerMap.size() == 0;
+		return isEnd = (handlerMap.size() == 0);
 	}
 	
 	protected void putDebugInfoToResponsePacket(ResponseMongodbPacket packet,MongodbServerConnection conn){
@@ -184,6 +185,14 @@ public abstract class AbstractSessionHandler<T extends AbstractMongodbPacket> im
 	}
 	
 	public boolean checkIdle(long now){
-		return (now - startTime) > ProxyRuntimeContext.getInstance().getRuntimeContext().getQueryTimeout() * 1000; 
+		if(isEnd){
+			return false;
+		}
+
+		if(ProxyRuntimeContext.getInstance().getRuntimeContext().getQueryTimeout() >0){
+			return (now - startTime) > ProxyRuntimeContext.getInstance().getRuntimeContext().getQueryTimeout() * 1000;
+		}else{
+			return false;
+		}
 	}
 }
