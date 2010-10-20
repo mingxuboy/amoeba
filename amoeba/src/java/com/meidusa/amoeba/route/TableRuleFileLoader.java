@@ -318,8 +318,8 @@ public class TableRuleFileLoader implements TableRuleLoader,Initialisable {
         	TableRule tableRule = new TableRule();
 	        Table table = new Table();
 	        String[] tableSchema = StringUtil.split(tableName,".");
-	        if(tableSchema.length==2){
-	        	table.setName(tableSchema[1]);
+	        if(tableSchema.length>=2){
+	        	table.setName(tableName.substring(tableSchema[0].length()+1));
 	            Schema schema = new Schema();
 	            schema.setName(tableSchema[0]);
 	            table.setSchema(schema);
