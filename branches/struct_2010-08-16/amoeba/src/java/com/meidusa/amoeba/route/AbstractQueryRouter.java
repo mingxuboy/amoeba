@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.regex.Pattern;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -126,7 +127,8 @@ import com.meidusa.amoeba.util.Tuple;
 public abstract class  AbstractQueryRouter<T extends Connection,V> implements QueryRouter<T,V>, Initialisable ,ContextChangedListener {
 	protected static final String _CURRENT_QUERY_OBJECT_ = "_CURRENT_STATEMENT_";
 	protected static Logger logger = Logger.getLogger(AbstractQueryRouter.class);
-
+	private Map<String,Pattern> patternMap = new HashMap<String,Pattern>();
+	
     public final static Map<String, PostfixCommand> ruleFunTab      = new HashMap<String, PostfixCommand>();
     static {
         ruleFunTab.put("abs", new Abs());
@@ -212,6 +214,7 @@ public abstract class  AbstractQueryRouter<T extends Connection,V> implements Qu
     protected Lock                                    mapLock         = new ReentrantLock(false);
 
     private Map<Table, TableRule>                   tableRuleMap    = new HashMap<Table, TableRule>();
+    private Map<Table, TableRule>                   regexTableRuleMap    = new HashMap<Table, TableRule>();
     protected Map<String, Function>                   functionMap     = new HashMap<String, Function>();
     private Map<String, PostfixCommand>             ruleFunctionMap = new HashMap<String, PostfixCommand>();
 
@@ -303,8 +306,36 @@ public abstract class  AbstractQueryRouter<T extends Connection,V> implements Qu
             Set<Map.Entry<Table, Map<Column, Comparative>>> entrySet = tables.entrySet();
             for (Map.Entry<Table, Map<Column, Comparative>> entry : entrySet) {
                 Map<Column, Comparative> columnMap = entry.getValue();
+                
                 TableRule tableRule = this.tableRuleMap.get(entry.getKey());
-
+                
+                Table table = entry.getKey();
+                
+                if(tableRule == null){
+                	for(Map.Entry<Table, TableRule> ruleEntry:this.regexTableRuleMap.entrySet()){
+                		Table ruleTable = ruleEntry.getKey();
+                		boolean tableMatched = false;
+                		boolean schemaMatched = false;
+            			
+                		Pattern pattern = this.getPattern(ruleTable.getName());
+            			java.util.regex.Matcher matcher = pattern.matcher(table.getName());
+            			if(matcher.find()){
+            				tableMatched = true;
+            			}
+                		
+            			pattern = this.getPattern(ruleTable.getSchema().getName());
+            			matcher = pattern.matcher(table.getSchema().getName());
+            			if(matcher.find()){
+            				schemaMatched = true;
+            			}
+                		
+                		if(tableMatched && schemaMatched){
+                			tableRule = ruleEntry.getValue();
+                			break;
+                		}
+                	}
+                }
+                
                 // 如果存在table Rule 则需要看是否有Rule
                 if (tableRule != null) {
                     // 没有列的sql语句，使用默认的tableRule
@@ -313,6 +344,7 @@ public abstract class  AbstractQueryRouter<T extends Connection,V> implements Qu
                         if (pools == null || pools.length == 0) {
                             pools = tableRule.defaultPools;
                         }
+                        
                         for (String poolName : pools) {
                             if (!poolNames.contains(poolName)) {
                                 poolNames.add(poolName);
@@ -635,11 +667,19 @@ public abstract class  AbstractQueryRouter<T extends Connection,V> implements Qu
                             }
 
                             if(ruleLoader.needLoad()){
-                            	tableRuleMap = ruleLoader.loadRule();
-                            }
-                            
-                            if(ruleLoader.needLoad()){
                                 tableRuleMap = ruleLoader.loadRule();
+                                if(tableRuleMap != null){
+                                	for(Map.Entry<Table, TableRule> ruleEntry:tableRuleMap.entrySet()){
+                                		Table ruleTable = ruleEntry.getKey();
+                                		if(ruleTable.getName().indexOf("*")>=0 
+                                				|| (ruleTable.getSchema().getName() != null && ruleTable.getSchema().getName().indexOf("*")>=0)
+                                				|| ruleTable.getName().indexOf("^")>=0 
+                                				|| (ruleTable.getSchema().getName() != null && ruleTable.getSchema().getName().indexOf("^")>=0)){
+                                			getPattern(ruleTable.getName());
+                                			regexTableRuleMap.put(ruleTable, ruleEntry.getValue());
+                                		}
+                                	}
+                                }
                             }
 
                             if (funMap != null) {
@@ -681,7 +721,19 @@ public abstract class  AbstractQueryRouter<T extends Connection,V> implements Qu
             }
             
             this.tableRuleMap = ruleLoader.loadRule();
-
+            if(tableRuleMap != null){
+            	for(Map.Entry<Table, TableRule> ruleEntry:this.tableRuleMap.entrySet()){
+            		Table ruleTable = ruleEntry.getKey();
+            		if(ruleTable.getName().indexOf("*")>=0 
+            				|| (ruleTable.getSchema().getName() != null && ruleTable.getSchema().getName().indexOf("*")>=0)
+            				|| ruleTable.getName().indexOf("^")>=0 
+            				|| (ruleTable.getSchema().getName() != null && ruleTable.getSchema().getName().indexOf("^")>=0)){
+            			this.getPattern(ruleTable.getName());
+            			regexTableRuleMap.put(ruleTable, ruleEntry.getValue());
+            		}
+            	}
+            }
+            
             new ConfigCheckTread().start();
         }
     }
@@ -786,6 +838,19 @@ public abstract class  AbstractQueryRouter<T extends Connection,V> implements Qu
     	return this.defaultPools;
     }
     
+    public Pattern getPattern(String source){
+    	Pattern pattern = this.patternMap.get(source);
+    	if(pattern == null){
+    		synchronized (patternMap) {
+    			pattern = this.patternMap.get(source);
+    			if(pattern == null){
+    				pattern = Pattern.compile(source);
+    			}
+    			patternMap.put(source, pattern);
+			}
+    	}
+    	return pattern;
+    }
     public static void main(String[] aa){
     	String[] aaa = StringUtil.split("asdfasdf,asdf;aqwer",";,");
     	for(String aaaaa : aaa){

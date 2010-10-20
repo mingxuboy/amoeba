@@ -130,10 +130,16 @@ public class MongodbBenchmarkClientConnection extends AbstractBenchmarkClientCon
 		}else{
 			isLastModifyOperation = false;
 		}
-		postMessage(packet.toByteBuffer(this));
 		
 		if(isLastModifyOperation){
-			postMessage(getLastErrorPacket().toByteBuffer(this));
+			byte[] packetMessage = packet.toByteBuffer(this).array();
+			byte[] lastError = getLastErrorPacket().toByteBuffer(this).array();
+			byte[] message = new byte[packetMessage.length+lastError.length];
+			System.arraycopy(packetMessage, 0, message, 0, packetMessage.length);
+			System.arraycopy(lastError, 0, message, packetMessage.length,lastError.length);
+			postMessage(message);
+		}else{
+			postMessage(packet.toByteBuffer(this));
 		}
 	}
 	
@@ -151,9 +157,16 @@ public class MongodbBenchmarkClientConnection extends AbstractBenchmarkClientCon
 		if(task.running){
 			if(requestLatcher.getCount()>0){
 				requestLatcher.countDown();
-				postMessage(createRequestPacket().toByteBuffer(this));
+				
 				if(isLastModifyOperation){
-					postMessage(getLastErrorPacket().toByteBuffer(this));
+					byte[] packetMessage = createRequestPacket().toByteBuffer(this).array();
+					byte[] lastError = getLastErrorPacket().toByteBuffer(this).array();
+					byte[] message = new byte[packetMessage.length+lastError.length];
+					System.arraycopy(packetMessage, 0, message, 0, packetMessage.length);
+					System.arraycopy(lastError, 0, message, packetMessage.length,lastError.length);
+					postMessage(message);
+				}else{
+					postMessage(createRequestPacket().toByteBuffer(this));
 				}
 			}
 		}
