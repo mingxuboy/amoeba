@@ -311,7 +311,8 @@ public abstract class  AbstractQueryRouter<T extends Connection,V> implements Qu
                 
                 Table table = entry.getKey();
                 
-                if(tableRule == null){
+                if(tableRule == null && table.getName() != null){
+                	
                 	for(Map.Entry<Table, TableRule> ruleEntry:this.regexTableRuleMap.entrySet()){
                 		Table ruleTable = ruleEntry.getKey();
                 		boolean tableMatched = false;
