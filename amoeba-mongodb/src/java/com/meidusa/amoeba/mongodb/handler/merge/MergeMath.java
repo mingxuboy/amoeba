@@ -22,7 +22,11 @@ public class MergeMath {
 		if (param instanceof Double || param instanceof Float) {
 			return new BigDecimal(param.doubleValue());
 		}
-		return new BigDecimal(param.longValue());
+		if(param == null){
+			return new BigDecimal(0);
+		}else{
+			return new BigDecimal(param.longValue());
+		}
 	}
 	
 	public static Number add(Number param1,Number param2){
