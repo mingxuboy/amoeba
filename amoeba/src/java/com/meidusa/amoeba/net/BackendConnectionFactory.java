@@ -96,6 +96,9 @@ public abstract class BackendConnectionFactory extends AuthingableConnectionFact
 						socketChannel = SocketChannel.open(new InetSocketAddress(ipAddress, port));
 					}
 					socketChannel.configureBlocking(false);
+					if(logger.isInfoEnabled()){
+						logger.info("open socket channel to server["+ipAddress+":"+port+"] success!");
+					}
 				}catch(IOException e){
 					logger.error("could not connect to server["+ipAddress+":"+port+"]",e);
 					throw e;

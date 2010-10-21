@@ -14,9 +14,6 @@
 package com.meidusa.amoeba.route;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -27,36 +24,20 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.regex.Pattern;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-
 import org.apache.commons.collections.map.LRUMap;
 import org.apache.log4j.Logger;
-import org.apache.log4j.helpers.LogLog;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax.EntityResolver;
-import org.xml.sax.ErrorHandler;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-import org.xml.sax.SAXParseException;
 
 import com.meidusa.amoeba.config.BeanObjectEntityConfig;
 import com.meidusa.amoeba.config.ConfigurationException;
-import com.meidusa.amoeba.config.DocumentUtil;
 import com.meidusa.amoeba.context.ContextChangedListener;
 import com.meidusa.amoeba.context.ProxyRuntimeContext;
 import com.meidusa.amoeba.net.Connection;
 import com.meidusa.amoeba.net.poolable.ObjectPool;
 import com.meidusa.amoeba.parser.ParseException;
 import com.meidusa.amoeba.parser.dbobject.Column;
-import com.meidusa.amoeba.parser.dbobject.Schema;
 import com.meidusa.amoeba.parser.dbobject.Table;
 import com.meidusa.amoeba.parser.function.Function;
 import com.meidusa.amoeba.parser.statement.Statement;
-import com.meidusa.amoeba.sqljep.RowJEP;
 import com.meidusa.amoeba.sqljep.function.Abs;
 import com.meidusa.amoeba.sqljep.function.AddDate;
 import com.meidusa.amoeba.sqljep.function.AddMonths;
