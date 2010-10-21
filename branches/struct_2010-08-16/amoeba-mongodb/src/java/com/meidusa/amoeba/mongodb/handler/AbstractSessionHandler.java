@@ -95,8 +95,10 @@ public abstract class AbstractSessionHandler<T extends AbstractMongodbPacket> im
 					BSONObject error = new BasicBSONObject();
 					error.put("err", e.getMessage());
 					error.put("errmsg", e.getMessage());
+					error.put("ok", 0.0);
 					error.put("n", 1);
 					result.documents.add(error);
+					result.responseTo = requestPacket.requestID;
 					conn.postMessage(result.toByteBuffer(conn));
 				}
 			}else{
