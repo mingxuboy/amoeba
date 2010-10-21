@@ -155,7 +155,6 @@ public abstract class Connection implements NetEventHandler {
     protected void close(Exception exception) {
             // we shouldn't be closed twice
         if (isClosed()) {
-            logger.warn("Attempted to re-close connection ["+ toString() + "]");
             return;
         }
         

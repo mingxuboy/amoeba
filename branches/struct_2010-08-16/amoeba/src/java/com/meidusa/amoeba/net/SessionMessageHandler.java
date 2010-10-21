@@ -31,5 +31,7 @@ public interface SessionMessageHandler extends IdleChecker{
 	 */
 	public void handleMessage(Connection conn,byte[] message);
 	
+	public void forceEndSession(String cause);
+	
 	
 }

@@ -19,6 +19,8 @@ import org.apache.log4j.Logger;
 
 import com.meidusa.amoeba.net.Connection;
 import com.meidusa.amoeba.net.MessageHandler;
+import com.meidusa.amoeba.net.SessionMessageHandler;
+import com.meidusa.amoeba.net.Sessionable;
 import com.meidusa.amoeba.net.poolable.ObjectPool;
 import com.meidusa.amoeba.net.poolable.PoolableObject;
 
@@ -76,6 +78,42 @@ public class MongodbServerConnection extends AbstractMongodbConnection implement
 	@Override
 	public void handleMessage(Connection conn) {
 		logger.error("raw message handler");
+	}
+	
+	protected void close(Exception exception){
+		if (isClosed()) {
+            return;
+        }
+		super.close(exception);
+		final ObjectPool tmpPool = objectPool;
+		objectPool = null;
+		try {
+			if(tmpPool != null){
+				
+				/**
+				 * 处于active 状态的 poolableObject，可以用ObjectPool.invalidateObject 方式从pool中销毁
+				 * 否则只能等待被borrow 或者 idle time out
+				 */
+				if(isActive()){
+					tmpPool.invalidateObject(this);
+				}
+				
+				if(_handler instanceof Sessionable){
+					/**
+					 * 该处在高并发的情况下可能会发生ClassCastException 异常,为了提升性能,这儿将忽略这种异常.
+					 */
+					Sessionable session = (Sessionable)_handler;
+					if(!session.isEnded()){
+						session.endSession(true);
+					}
+				}
+				SessionMessageHandler handler = this.getSessionMessageHandler();
+				if(handler != null){
+					handler.forceEndSession("server response timeout");
+				}
+			}
+		} catch (Exception e) {
+		}
 	}
 
 }

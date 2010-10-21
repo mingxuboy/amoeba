@@ -195,4 +195,18 @@ public abstract class AbstractSessionHandler<T extends AbstractMongodbPacket> im
 			return false;
 		}
 	}
+	
+	public void forceEndSession(String cause){
+		BSONObject errObject = new BasicBSONObject();
+		errObject.put("err", cause);
+		errObject.put("errmsg", cause);
+		errObject.put("n", 0);
+		errObject.put("ok", 0.0);
+		ResponseMongodbPacket packet = new ResponseMongodbPacket();
+		packet.numberReturned = 1;
+		packet.documents = new ArrayList<BSONObject>(1);
+		packet.documents.add(errObject);
+		packet.responseTo = requestPacket.requestID;
+		this.clientConn.postMessage(packet.toByteBuffer(this.clientConn));
+	}
 }
