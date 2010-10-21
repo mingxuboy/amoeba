@@ -182,7 +182,7 @@ public class MongodbClientConnection extends AbstractMongodbConnection{
 		super(channel, createStamp);
 	}
 
-	protected synchronized void doReceiveMessage(byte[] message){
+	protected void doReceiveMessage(byte[] message){
 		int type = MongodbPacketBuffer.getOPMessageType(message);
 		AbstractMongodbPacket packet = null;
 		AbstractSessionHandler<?> handler = null;
