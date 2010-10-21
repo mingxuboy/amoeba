@@ -319,9 +319,17 @@ public class TableRuleFileLoader implements TableRuleLoader,Initialisable {
 	        Table table = new Table();
 	        String[] tableSchema = StringUtil.split(tableName,".");
 	        if(tableSchema.length>=2){
-	        	table.setName(tableName.substring(tableSchema[0].length()+1));
+	        	String tbName = tableName.substring(tableSchema[0].length()+1);
+	        	if("*".equals(tbName)){
+	        		tbName = "^*";
+	        	}
+	        	table.setName(tbName);
 	            Schema schema = new Schema();
-	            schema.setName(tableSchema[0]);
+	            String sName = tableSchema[0];
+	            if("*".equals(sName)){
+	            	sName = "^*";
+	            }
+	            schema.setName(sName);
 	            table.setSchema(schema);
 	        }else{
 	        	table.setName(tableName);
