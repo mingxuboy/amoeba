@@ -23,13 +23,15 @@ import java.nio.channels.SocketChannel;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
+import com.meidusa.amoeba.runtime.Shutdowner;
+
 /**
  * 指定一个端口,创建一个serverSocket. 将该ServerSocket所创建的Connection加入管理
  * 该manager只负责socket accept netEvent,socket的 IO netEvent 由 {@link ServerableConnectionManager#connMgr} 负责
  * 
  * @author <a href=mailto:piratebase@sina.com>Struct chen</a>
  */
-public class ServerableConnectionManager extends AuthingableConnectionManager {
+public class ServerableConnectionManager extends AuthingableConnectionManager implements Shutdowner {
 
     protected static Logger       log = Logger.getLogger(ServerableConnectionManager.class);
     
@@ -56,9 +58,7 @@ public class ServerableConnectionManager extends AuthingableConnectionManager {
         this.connFactory = connFactory;
     }
 
-    // documentation inherited
-    protected void willStart() {
-        super.willStart();
+    protected void initServerSocket(){
         try {
             // create a listening socket and add it to the select set
             ssocket = ServerSocketChannel.open();
@@ -85,6 +85,12 @@ public class ServerableConnectionManager extends AuthingableConnectionManager {
             ioe.printStackTrace();
             System.exit(-1);
         }
+    }
+    
+    // documentation inherited
+    protected void willStart() {
+        super.willStart();
+        initServerSocket();
     }
 
     protected void registerServerChannel(final ServerSocketChannel listener) throws IOException {
@@ -146,7 +152,12 @@ public class ServerableConnectionManager extends AuthingableConnectionManager {
             	((AuthingableConnection)connection).setAuthenticator(this.getAuthenticator());
             	((AuthingableConnection)connection).beforeAuthing();
             }
-            manager.postRegisterNetEventHandler(connection,SelectionKey.OP_READ);
+            
+            if(manager != null){
+            	manager.postRegisterNetEventHandler(connection,SelectionKey.OP_READ);
+            }else{
+            	this.postRegisterNetEventHandler(connection,SelectionKey.OP_READ);
+            }
             
         } catch (Exception e) {
             if (channel != null) {
@@ -182,5 +193,11 @@ public class ServerableConnectionManager extends AuthingableConnectionManager {
     public void setIpAddress(String ipAddress) {
         this.ipAddress = ipAddress;
     }
-
+    public void shutdown(){
+    	try {
+			ssocket.close();
+		} catch (IOException e) {
+		}
+    	super.shutdown();
+    }
 }

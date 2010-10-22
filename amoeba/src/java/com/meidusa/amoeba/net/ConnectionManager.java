@@ -14,7 +14,6 @@
 package com.meidusa.amoeba.net;
 
 import java.io.IOException;
-import java.net.SocketException;
 import java.nio.channels.SelectableChannel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
@@ -27,7 +26,6 @@ import java.util.Set;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
-import com.meidusa.amoeba.context.ProxyRuntimeContext;
 import com.meidusa.amoeba.data.ConMgrStats;
 import com.meidusa.amoeba.util.Initialisable;
 import com.meidusa.amoeba.util.InitialisationException;

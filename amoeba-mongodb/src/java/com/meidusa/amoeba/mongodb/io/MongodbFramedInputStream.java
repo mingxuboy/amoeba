@@ -50,7 +50,7 @@ public class MongodbFramedInputStream extends PacketInputStream implements Mongo
 		 * mysql 数据部分＋包头=整个数据包长度
 		 */
 		int length = (_buffer.get(0) & 0xff)
-					| ((_buffer.get(1) & 0xff) << 8)	
+					| ((_buffer.get(1) & 0xff) << 8)
 					| ((_buffer.get(2) & 0xff) << 16)
 					| ((_buffer.get(3) & 0xff) << 24);
 		

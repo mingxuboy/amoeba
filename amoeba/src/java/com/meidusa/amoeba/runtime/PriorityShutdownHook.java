@@ -1,4 +1,4 @@
-package com.meidusa.amoeba.shutdown;
+package com.meidusa.amoeba.runtime;
 
 import java.util.ArrayList;
 import java.util.Collections;
