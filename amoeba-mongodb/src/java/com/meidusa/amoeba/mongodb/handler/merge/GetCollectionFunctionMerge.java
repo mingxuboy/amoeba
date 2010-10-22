@@ -20,7 +20,7 @@ public class GetCollectionFunctionMerge implements FunctionMerge{
 	
 	public static Number addNumber(BSONObject source, BSONObject info,String name){
 		Number sourceNumber = (Number)source.get(name);
-		Number infoNumber = (Number)source.get(name);
+		Number infoNumber = (Number)info.get(name);
 		if(sourceNumber != null && infoNumber != null){
 			sourceNumber = MergeMath.add(sourceNumber,infoNumber);
 		}else{
@@ -43,12 +43,12 @@ public class GetCollectionFunctionMerge implements FunctionMerge{
 			
 			if(response.numberReturned > 0){
 				
-				BSONObject nextResult = response.documents.get(0);
+				BSONObject responseResult = response.documents.get(0);
 				if(cmdResult == null){
-					cmdResult = nextResult;
+					cmdResult = responseResult;
 				}
 				
-				BSONObject collection = (BSONObject)nextResult.get("retval");
+				BSONObject collection = (BSONObject)responseResult.get("retval");
 				if(source == null){
 					source = collection;
 				}else{

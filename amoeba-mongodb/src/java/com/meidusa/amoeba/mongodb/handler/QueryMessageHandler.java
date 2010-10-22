@@ -146,14 +146,14 @@ public class QueryMessageHandler extends AbstractSessionHandler<QueryMongodbPack
 			PACKET_LOGGER.error("unkown response packet type="+type+" , request="+this.requestPacket);
 		}
 		
-		if(PACKET_TRACE.isDebugEnabled() || isMulti){
+		if(ROUTER_TRACE.isDebugEnabled() || isMulti){
 			packet = new ResponseMongodbPacket();
 		}else{
 			packet = new SimpleResponseMongodbPacket();
 		}
 		packet.init(message, conn);
 		
-		if(PACKET_TRACE.isDebugEnabled()){
+		if(ROUTER_TRACE.isDebugEnabled()){
 			putDebugInfoToResponsePacket((ResponseMongodbPacket)packet,conn);
 		}
 		if(isMulti){
@@ -203,7 +203,7 @@ public class QueryMessageHandler extends AbstractSessionHandler<QueryMongodbPack
 			endQuery(conn);
 			
 			
-			if(PACKET_TRACE.isDebugEnabled()){
+			if(ROUTER_TRACE.isDebugEnabled()){
 				clientConn.postMessage(packet.toByteBuffer(serverConn));
 			}else{
 				clientConn.postMessage(message);

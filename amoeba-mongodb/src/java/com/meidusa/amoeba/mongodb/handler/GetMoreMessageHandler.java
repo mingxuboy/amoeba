@@ -91,7 +91,7 @@ public class GetMoreMessageHandler extends AbstractSessionHandler<GetMoreMongodb
 			packet = new SimpleResponseMongodbPacket();
 		}
 		packet.init(message, conn);
-		if(PACKET_TRACE.isDebugEnabled()){
+		if(ROUTER_TRACE.isDebugEnabled()){
 			putDebugInfoToResponsePacket((ResponseMongodbPacket)packet,conn);
 		}
 		if(packet.cursorID <= 0){
