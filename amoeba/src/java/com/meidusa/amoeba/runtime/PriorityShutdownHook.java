@@ -54,7 +54,7 @@ public class PriorityShutdownHook extends Thread{
 		
 		Collections.sort(shutDownTmp, new Comparator<Shutdowner>(){
 			public int compare(final Shutdowner o1, final Shutdowner o2) {
-				return  o2.getPriority() - o1.getPriority();
+				return  o2.getShutdownPriority() - o1.getShutdownPriority();
 			}
 		});
 		

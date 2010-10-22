@@ -79,6 +79,10 @@ public class DocumentUtil {
 	            }
             }
         }
+        
+        if(map.get("name")== null){
+        	map.put("name",beanConfig.getName());
+        }
         beanConfig.setParams(map);
 		return beanConfig;
 	}

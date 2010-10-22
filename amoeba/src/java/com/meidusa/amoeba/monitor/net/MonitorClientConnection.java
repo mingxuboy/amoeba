@@ -37,7 +37,6 @@ public class MonitorClientConnection extends Connection {
 			this.postMessage(packet.toByteBuffer(this));
 			break;
 		case MonitorConstant.FUN_TYPE_AMOEBA_SHUTDOWN:{
-			System.out.println("shutdown command from IP="+this.getSocketId()+" , amoeba shutting down....");
 			logger.warn("shutdown command from IP="+this.getSocketId()+" , amoeba shutting down....");
 			this.postMessage(packet.toByteBuffer(this));
 			try {

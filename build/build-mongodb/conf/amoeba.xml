@@ -5,8 +5,8 @@
 
 	<proxy>
 		
-		<!-- server class must be extend java.lang.Thread -->
-		<server class="com.meidusa.amoeba.net.ServerableConnectionManager">
+		<!-- server class must be extend com.meidusa.amoeba.net.ServerableConnectionManager -->
+		<server name="Amoeba for mongodDB" class="com.meidusa.amoeba.net.ServerableConnectionManager">
 			<!-- port -->
 			<property name="port">8066</property>
 			
