@@ -23,8 +23,13 @@ import com.meidusa.amoeba.config.BeanObjectEntityConfig;
 import com.meidusa.amoeba.config.ConfigUtil;
 import com.meidusa.amoeba.context.ProxyRuntimeContext;
 import com.meidusa.amoeba.log4j.DOMConfigurator;
+import com.meidusa.amoeba.monitor.MonitorServer;
+import com.meidusa.amoeba.monitor.ShutdownClient;
+import com.meidusa.amoeba.monitor.net.MonitorClientConnectionFactory;
+import com.meidusa.amoeba.monitor.packet.MonitorCommandPacket;
 import com.meidusa.amoeba.net.ConnectionManager;
 import com.meidusa.amoeba.net.ServerableConnectionManager;
+import com.meidusa.amoeba.runtime.PriorityShutdownHook;
 import com.meidusa.amoeba.util.Reporter;
 import com.meidusa.amoeba.util.StringUtil;
 
@@ -106,6 +111,28 @@ public class AmoebaProxyServer {
 	 * @throws InstantiationException 
 	 */
 	public static void main(String[] args) throws Exception {
+		if(args.length>=1){
+			ShutdownClient client = new ShutdownClient("amoeba");
+			MonitorCommandPacket packet = new MonitorCommandPacket();
+			if("start".equalsIgnoreCase(args[0])){
+				packet.funType = MonitorCommandPacket.FUN_TYPE_PING;
+				if(client.run(packet)){
+					System.out.println("amoeba server is running with port="+client.getPort());
+					System.exit(-1);
+				}
+			}else{
+				packet.funType = MonitorCommandPacket.FUN_TYPE_AMOEBA_SHUTDOWN;
+				if(client.run(packet)){
+					System.out.println("amoeba server shutting down with port="+client.getPort());
+				}else{
+					System.out.println("amoeba server not running with port="+client.getPort());
+				}
+				System.exit(0);
+			}
+		}else{
+			System.out.println("amoeba start|stop");
+			System.exit(0);
+		}
 		String log4jConf = System.getProperty("log4j.conf","${amoeba.home}/conf/log4j.xml");
 		log4jConf = ConfigUtil.filter(log4jConf);
 		File logconf = new File(log4jConf);
@@ -144,6 +171,7 @@ public class AmoebaProxyServer {
 		ProxyRuntimeContext.getInstance().setServer(serverManager);
 		serverManager.init();
 		serverManager.start();
+		PriorityShutdownHook.addShutdowner(serverManager);
 		registerReporter(serverManager);
 		new Thread(){
 			{
@@ -163,5 +191,12 @@ public class AmoebaProxyServer {
 				}
 			}
 		}.start();
+		
+		ServerableConnectionManager shutdownServer = new MonitorServer("amoeba");
+		shutdownServer.setConnectionFactory(new MonitorClientConnectionFactory());
+		shutdownServer.setDaemon(true);
+		shutdownServer.init();
+		shutdownServer.start();
+		PriorityShutdownHook.addShutdowner(shutdownServer);
 	}
 }

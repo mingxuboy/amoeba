@@ -1,4 +1,4 @@
-package com.meidusa.amoeba.shutdown;
+package com.meidusa.amoeba.monitor;
 
 import java.io.Serializable;
 
