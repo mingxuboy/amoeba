@@ -67,7 +67,11 @@
         </layout>
     </appender>
     
-    <logger name="PACKET_TRACE" additivity="true">
+    <!-- Named '_pool_name_' column will appear in result documents per row, 
+    the column indicates that the row is coming from the dbServer, if debug enable.
+    only for amoeba for mongodb
+     -->
+    <logger name="ROUTER_TRACE" additivity="true">
         <level value="debug"/>
         <appender-ref ref="packetLogger"/>
     </logger>

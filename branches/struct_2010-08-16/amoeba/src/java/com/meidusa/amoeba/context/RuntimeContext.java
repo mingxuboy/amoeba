@@ -17,13 +17,22 @@ public class RuntimeContext implements Initialisable {
 	private int clientSideThreadPoolSize = 16;
 	private int serverSideThreadPoolSize = 16;
 	private int queryTimeout;
-
+	public boolean useMultipleThread = true;
+	
 	public int getQueryTimeout() {
 		return queryTimeout;
 	}
 
 	public void setQueryTimeout(int queryTimeout) {
 		this.queryTimeout = queryTimeout;
+	}
+
+	public boolean isUseMultipleThread() {
+		return useMultipleThread;
+	}
+
+	public void setUseMultipleThread(boolean useMultipleThread) {
+		this.useMultipleThread = useMultipleThread;
 	}
 
 	public String getServerCharset() {

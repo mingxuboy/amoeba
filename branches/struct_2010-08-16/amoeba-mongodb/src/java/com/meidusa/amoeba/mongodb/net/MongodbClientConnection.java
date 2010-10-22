@@ -26,6 +26,7 @@ import org.apache.commons.collections.map.LRUMap;
 import org.apache.log4j.Logger;
 import org.bson.BasicBSONObject;
 
+import com.meidusa.amoeba.context.ProxyRuntimeContext;
 import com.meidusa.amoeba.mongodb.handler.AbstractSessionHandler;
 import com.meidusa.amoeba.mongodb.handler.CursorCloseMessageHandler;
 import com.meidusa.amoeba.mongodb.handler.DeleteMessageHandler;
@@ -182,7 +183,20 @@ public class MongodbClientConnection extends AbstractMongodbConnection{
 		super(channel, createStamp);
 	}
 
-	protected void doReceiveMessage(byte[] message){
+	protected void doReceiveMessage(final byte[] message){
+		if(ProxyRuntimeContext.getInstance().getRuntimeContext().isUseMultipleThread()){
+			ProxyRuntimeContext.getInstance().getRuntimeContext().getClientSideExecutor().execute(new Runnable(){
+				public void run(){
+					doReceiveMessage0(message);
+				}
+			});
+		}else{
+			doReceiveMessage0(message);
+		}
+	}
+	
+	private void doReceiveMessage0(byte[] message){
+		
 		int type = MongodbPacketBuffer.getOPMessageType(message);
 		AbstractMongodbPacket packet = null;
 		AbstractSessionHandler<?> handler = null;

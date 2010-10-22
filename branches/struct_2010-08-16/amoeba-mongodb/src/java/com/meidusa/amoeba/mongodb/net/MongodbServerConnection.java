@@ -80,7 +80,7 @@ public class MongodbServerConnection extends AbstractMongodbConnection implement
 		logger.error("raw message handler");
 	}
 	
-	protected void close(Exception exception){
+	public void close(Exception exception){
 		if (isClosed()) {
             return;
         }

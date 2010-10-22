@@ -15,6 +15,9 @@ package com.meidusa.amoeba.mongodb.handler;
 
 import java.util.ArrayList;
 
+import org.bson.BSONObject;
+import org.bson.BasicBSONObject;
+
 import com.meidusa.amoeba.context.ProxyRuntimeContext;
 import com.meidusa.amoeba.mongodb.handler.merge.FunctionMerge;
 import com.meidusa.amoeba.mongodb.io.MongodbPacketConstant;
@@ -75,7 +78,7 @@ public class ModifyOperateMessageHandler<T extends RequestMongodbPacket> extends
 	
 		ResponseMongodbPacket lastResponsePacket = new ResponseMongodbPacket();
 		lastResponsePacket.init(message, clientConn);
-		if(PACKET_TRACE.isDebugEnabled()){
+		if(ROUTER_TRACE.isDebugEnabled()){
 			putDebugInfoToResponsePacket(lastResponsePacket,conn);
 		}
 		
@@ -92,6 +95,24 @@ public class ModifyOperateMessageHandler<T extends RequestMongodbPacket> extends
 			endQuery(conn);
 		}
 		
+	}
+	
+	public synchronized void forceEndSession(String cause){
+		if(isEnd){
+			return;
+		}
+		closeAllServerConnection();
+		BSONObject errObject = new BasicBSONObject();
+		errObject.put("err", cause);
+		errObject.put("errmsg", cause);
+		errObject.put("n", 0);
+		errObject.put("ok", 0.0);
+		ResponseMongodbPacket packet = new ResponseMongodbPacket();
+		packet.numberReturned = 1;
+		packet.documents = new ArrayList<BSONObject>(1);
+		packet.documents.add(errObject);
+		packet.responseTo = this.lastRequestId;
+		clientConn.setLastErrorMessage(packet.toByteBuffer(this.clientConn).array());
 	}
 
 }

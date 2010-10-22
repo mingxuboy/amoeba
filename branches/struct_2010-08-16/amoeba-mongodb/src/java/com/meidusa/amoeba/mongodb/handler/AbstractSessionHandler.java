@@ -42,19 +42,18 @@ import com.meidusa.amoeba.net.SessionMessageHandler;
 
 public abstract class AbstractSessionHandler<T extends AbstractMongodbPacket> implements SessionMessageHandler {
 	public static Logger PACKET_LOGGER = Logger.getLogger("PACKET_LOGGER");
-	public static Logger PACKET_TRACE = Logger.getLogger("PACKET_TRACE");
+	public static Logger ROUTER_TRACE = Logger.getLogger("ROUTER_TRACE");
 	protected  static Logger handlerLogger = Logger.getLogger(AbstractSessionHandler.class);
 	public static final BSONObject BSON_OK = new BasicBSONObject();
 	protected static Map<Integer,FunctionMerge> FUNCTION_MERGE_MAP = new HashMap<Integer,FunctionMerge>();
 	static{
-		FUNCTION_MERGE_MAP.put(MongodbPacketConstant.CMD_GROUP, new GroupFunctionMerge());
 		FUNCTION_MERGE_MAP.put(MongodbPacketConstant.CMD_COUNT, new CountFunctionMerge());
+		FUNCTION_MERGE_MAP.put(MongodbPacketConstant.CMD_GROUP, new GroupFunctionMerge());
 		FUNCTION_MERGE_MAP.put(MongodbPacketConstant.CMD_DROP, new OKFunctionMerge());
 		FUNCTION_MERGE_MAP.put(MongodbPacketConstant.CMD_DROP_INDEXES, new OKFunctionMerge());
 		FUNCTION_MERGE_MAP.put(MongodbPacketConstant.CMD_DISTINCT, new DistinctFunctionMerge());
 		FUNCTION_MERGE_MAP.put(MongodbPacketConstant.CMD_GETLASTERROR, new OKFunctionMerge());
 		FUNCTION_MERGE_MAP.put(MongodbPacketConstant.CMD_LISTDATABASES, new ListDBFunctionMerge());
-		FUNCTION_MERGE_MAP.put(MongodbPacketConstant.CMD_GETCOLLECTION,new GetCollectionFunctionMerge());
 		FUNCTION_MERGE_MAP.put(MongodbPacketConstant.CMD_GETCOLLECTION,new GetCollectionFunctionMerge());
 		FUNCTION_MERGE_MAP.put(MongodbPacketConstant.CMD_NAMESPACES,new NameSpacesFunctionMerge());
 		
@@ -73,7 +72,7 @@ public abstract class AbstractSessionHandler<T extends AbstractMongodbPacket> im
 	protected List<ResponseMongodbPacket> multiResponsePacket = null;
 	protected int cmd  = 0;
 	protected final long startTime = System.currentTimeMillis();
-	private boolean isEnd = false;
+	protected boolean isEnd = false;
 	public AbstractSessionHandler(MongodbClientConnection clientConn,T t){
 		this.clientConn = clientConn;
 		this.requestPacket = t;
@@ -188,7 +187,7 @@ public abstract class AbstractSessionHandler<T extends AbstractMongodbPacket> im
 	
 	public boolean checkIdle(long now){
 		if(isEnd){
-			return false;
+			return true;
 		}
 
 		if(ProxyRuntimeContext.getInstance().getRuntimeContext().getQueryTimeout() >0){
@@ -198,7 +197,19 @@ public abstract class AbstractSessionHandler<T extends AbstractMongodbPacket> im
 		}
 	}
 	
-	public void forceEndSession(String cause){
+	protected void closeAllServerConnection(){
+		for(Connection conn : this.handlerMap.keySet()){
+			if(conn instanceof MongodbServerConnection){
+				((MongodbServerConnection) conn).close(new Exception()); 
+			}
+		}
+	}
+	
+	public synchronized void forceEndSession(String cause){
+		if(isEnd){
+			return;
+		}
+		closeAllServerConnection();
 		BSONObject errObject = new BasicBSONObject();
 		errObject.put("err", cause);
 		errObject.put("errmsg", cause);
