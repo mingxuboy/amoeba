@@ -25,7 +25,7 @@ public interface Shutdowner {
 	 * 
 	 * @return
 	 */
-	public int getPriority();
+	public int getShutdownPriority();
 	
 	/**
 	 * Called when the server is shutting down.

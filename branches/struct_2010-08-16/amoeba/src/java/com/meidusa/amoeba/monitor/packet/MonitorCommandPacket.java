@@ -19,15 +19,24 @@ public class MonitorCommandPacket extends AbstractPacket<MonitorPacketBuffer> im
         buffer.setPosition(0);
         lenght = buffer.readInt();
         funType = buffer.readByte();
+        int count = buffer.readInt();
+        objects = new Object[count];
+        for(int i=0;i<count;i++){
+        	objects[i] = buffer.readObject();
+        }
     }
 
     @Override
     protected void write2Buffer(MonitorPacketBuffer buffer) throws UnsupportedEncodingException {
         buffer.setPosition(HEADER_SIZE);
+        
         if(objects != null && objects.length >0){
+        	buffer.writeInt(objects.length);
         	for(Object object : objects){
         		buffer.writeObject(object);
         	}
+        }else{
+        	buffer.writeInt(0);
         }
     }
 
@@ -44,12 +53,6 @@ public class MonitorCommandPacket extends AbstractPacket<MonitorPacketBuffer> im
     @Override
     protected int calculatePacketSize() {
         return 12;
-    }
-
-
-    @Override
-    protected void afterInit(MonitorPacketBuffer buffer) {
-        buffer.setPosition(HEADER_SIZE);
     }
 
 	@Override

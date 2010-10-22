@@ -5,8 +5,7 @@ import com.meidusa.amoeba.net.io.PacketInputStream;
 
 public class MonitorPacketInputStream extends PacketInputStream implements MonitorConstant{
 
-protected int decodeLength() {
-		
+	protected int decodeLength() {
 		/**
 		 * 判断一下我们当前已经读取的数据包的数据是否比包头长,如果是:则可以计算整个包的长度,否则返回-1
 		 */
@@ -14,17 +13,16 @@ protected int decodeLength() {
 			return -1;
 		}
 
-		_buffer.rewind();
+		//_buffer.rewind();
 		
 		/**
-		 * manager 数据部分＋包头=整个数据包长度
+		 * mysql 数据部分＋包头=整个数据包长度
 		 */
-		int length = (_buffer.get() & 0xff)
-					| ((_buffer.get() & 0xff) << 8)	
-					| ((_buffer.get() & 0xff) << 16)
-					| ((_buffer.get() & 0xff) << 24);
-					
-		_buffer.position(_have);
+		int length = (_buffer.get(0) & 0xff)
+					| ((_buffer.get(1) & 0xff) << 8)
+					| ((_buffer.get(2) & 0xff) << 16)
+					| ((_buffer.get(3) & 0xff) << 24);
+		
 		return length;
 	}
 
@@ -32,18 +30,6 @@ protected int decodeLength() {
 		return HEADER_SIZE;
 	}
 	
-	protected boolean checkForCompletePacket ()
-    {
-        if (_length == -1 || _have < _length) {
-            return false;
-        }
-        //将buffer 包含整个数据包，包括包头内容
-    	_buffer.position(0);
-        
-        _buffer.limit(_length);
-        return true;
-    }
-
 	protected byte[] readPacket(){
         byte[] msg = new byte[_length];
         int position = _buffer.position();

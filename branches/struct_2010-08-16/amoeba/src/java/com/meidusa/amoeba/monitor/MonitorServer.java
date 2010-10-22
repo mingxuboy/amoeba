@@ -24,7 +24,7 @@ public class MonitorServer extends ServerableConnectionManager{
 	
 	public MonitorServer(String appplicationName) throws IOException {
 		super();
-		this.setName("Amoeba Monitor Connection Manager");
+		this.setName("Amoeba Monitor");
 		this.appplicationName = appplicationName;
 	}
 
@@ -65,7 +65,7 @@ public class MonitorServer extends ServerableConnectionManager{
 
             Level level = log.getLevel();
             log.setLevel(Level.INFO);
-            log.info("monitor Server listening on " + isa + ".");
+            log.info(this.getName()+" listening on " + isa + ".");
             
             log.setLevel(level);
     		} catch (IOException ioe) {

@@ -35,7 +35,6 @@ public class ServerableConnectionManager extends AuthingableConnectionManager im
 
     protected static Logger       log = Logger.getLogger(ServerableConnectionManager.class);
     
-    
     protected int                 port;
     protected ServerSocketChannel ssocket;
     protected String              ipAddress;
@@ -76,7 +75,7 @@ public class ServerableConnectionManager extends AuthingableConnectionManager im
 
             Level level = log.getLevel();
             log.setLevel(Level.INFO);
-            log.info("Server listening on " + isa + ".");
+            log.info(this.getName()+" listening on " + isa + ".");
             log.setLevel(level);
 
         } catch (IOException ioe) {
@@ -193,11 +192,21 @@ public class ServerableConnectionManager extends AuthingableConnectionManager im
     public void setIpAddress(String ipAddress) {
         this.ipAddress = ipAddress;
     }
+    
     public void shutdown(){
+    	Level level = log.getLevel();
+        log.setLevel(Level.INFO);
+    	super.shutdown();
     	try {
 			ssocket.close();
 		} catch (IOException e) {
 		}
-    	super.shutdown();
+    	log.warn(this.getName()+" shutdown completed!");
+    	log.setLevel(level);
     }
+
+	@Override
+	public int getShutdownPriority() {
+		return 10;
+	}
 }

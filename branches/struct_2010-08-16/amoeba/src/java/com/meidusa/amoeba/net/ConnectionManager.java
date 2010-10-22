@@ -196,23 +196,30 @@ public class ConnectionManager extends LoopingThread implements Reporter, Initia
                 selkey.cancel();
                 continue;
             }
-
-            if (selkey.isWritable()) {
-                try {
-                    boolean finished = handler.doWrite();
-                    if (finished) {
-                        selkey.interestOps(selkey.interestOps() & ~SelectionKey.OP_WRITE);
-                    }
-                } catch (Exception e) {
-                    logger.warn("Error processing network data: " + handler + ".", e);
-                    if (handler != null && handler instanceof Connection) {
-                        closeConnection((Connection) handler, e);
-                    }
-                }
+            
+            if(!selkey.isValid()){
+            	 if (handler != null && handler instanceof Connection) {
+                     closeConnection((Connection) handler,null);
+                     continue;
+                 }
             }
             
-            if (selkey.isReadable() || selkey.isAcceptable()) {
-            	handler.handleEvent(iterStamp);
+            try {
+	            if (selkey.isWritable()) {
+	                    boolean finished = handler.doWrite();
+	                    if (finished) {
+	                        selkey.interestOps(selkey.interestOps() & ~SelectionKey.OP_WRITE);
+	                    }
+	            }
+	            
+	            if (selkey.isReadable() || selkey.isAcceptable()) {
+	            	handler.handleEvent(iterStamp);
+	            }
+            } catch (Exception e) {
+                logger.warn("Error processing network data: " + handler + ".", e);
+                if (handler != null && handler instanceof Connection) {
+                    closeConnection((Connection) handler, e);
+                }
             }
         }
 
