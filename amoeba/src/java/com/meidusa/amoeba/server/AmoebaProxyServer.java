@@ -192,11 +192,11 @@ public class AmoebaProxyServer {
 			}
 		}.start();
 		
-		ServerableConnectionManager shutdownServer = new MonitorServer("amoeba");
-		shutdownServer.setConnectionFactory(new MonitorClientConnectionFactory());
-		shutdownServer.setDaemon(true);
-		shutdownServer.init();
-		shutdownServer.start();
-		PriorityShutdownHook.addShutdowner(shutdownServer);
+		ServerableConnectionManager monitorServer = new MonitorServer("amoeba");
+		monitorServer.setConnectionFactory(new MonitorClientConnectionFactory());
+		monitorServer.setDaemon(true);
+		monitorServer.init();
+		monitorServer.start();
+		PriorityShutdownHook.addShutdowner(monitorServer);
 	}
 }
