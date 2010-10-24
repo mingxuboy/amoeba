@@ -16,6 +16,7 @@ package com.meidusa.amoeba.server;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.log4j.Logger;
 
@@ -23,6 +24,7 @@ import com.meidusa.amoeba.config.BeanObjectEntityConfig;
 import com.meidusa.amoeba.config.ConfigUtil;
 import com.meidusa.amoeba.context.ProxyRuntimeContext;
 import com.meidusa.amoeba.log4j.DOMConfigurator;
+import com.meidusa.amoeba.monitor.MonitorConstant;
 import com.meidusa.amoeba.monitor.MonitorServer;
 import com.meidusa.amoeba.monitor.ShutdownClient;
 import com.meidusa.amoeba.monitor.net.MonitorClientConnectionFactory;
@@ -112,7 +114,7 @@ public class AmoebaProxyServer {
 	 */
 	public static void main(String[] args) throws Exception {
 		if(args.length>=1){
-			ShutdownClient client = new ShutdownClient("amoeba");
+			ShutdownClient client = new ShutdownClient(MonitorConstant.APPLICATION_NAME);
 			MonitorCommandPacket packet = new MonitorCommandPacket();
 			if("start".equalsIgnoreCase(args[0])){
 				packet.funType = MonitorCommandPacket.FUN_TYPE_PING;
@@ -164,15 +166,17 @@ public class AmoebaProxyServer {
 			registerReporter(connMgr);
 		}
 		
-		BeanObjectEntityConfig serverConfig = ProxyRuntimeContext.getInstance().getConfig().getServerConfig();
+		List<BeanObjectEntityConfig> serverConfigList = ProxyRuntimeContext.getInstance().getConfig().getServerConfigList();
 		
-		ServerableConnectionManager serverManager = (ServerableConnectionManager)serverConfig.createBeanObject(false,ProxyRuntimeContext.getInstance().getConnectionManagerList());
-		
-		ProxyRuntimeContext.getInstance().setServer(serverManager);
-		serverManager.init();
-		serverManager.start();
-		PriorityShutdownHook.addShutdowner(serverManager);
-		registerReporter(serverManager);
+		for(BeanObjectEntityConfig serverConfig : serverConfigList){
+			ServerableConnectionManager serverManager = (ServerableConnectionManager)serverConfig.createBeanObject(false,ProxyRuntimeContext.getInstance().getConnectionManagerList());
+			
+			ProxyRuntimeContext.getInstance().setServer(serverManager);
+			serverManager.init();
+			serverManager.start();
+			PriorityShutdownHook.addShutdowner(serverManager);
+			registerReporter(serverManager);
+		}
 		new Thread(){
 			{
 				this.setDaemon(true);
@@ -192,11 +196,12 @@ public class AmoebaProxyServer {
 			}
 		}.start();
 		
-		ServerableConnectionManager monitorServer = new MonitorServer("amoeba");
+		/*ServerableConnectionManager monitorServer = new MonitorServer("amoeba");
 		monitorServer.setConnectionFactory(new MonitorClientConnectionFactory());
 		monitorServer.setDaemon(true);
+		monitorServer.setIpAddress("127.0.0.1");
 		monitorServer.init();
 		monitorServer.start();
-		PriorityShutdownHook.addShutdowner(monitorServer);
+		PriorityShutdownHook.addShutdowner(monitorServer);*/
 	}
 }

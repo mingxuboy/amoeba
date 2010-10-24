@@ -501,13 +501,7 @@ public class ProxyRuntimeContext implements Reporter {
                     map.put(key, value);
                 }else if(nodeName.equals("server")){
                 	BeanObjectEntityConfig server = DocumentUtil.loadBeanConfig(child);
-                	config.setServerConfig(server);
-                }else if(nodeName.equals("authenticator")){
-                	BeanObjectEntityConfig authenticator = DocumentUtil.loadBeanConfig(child);
-                	config.setAuthenticatorConfig(authenticator);
-                }else if(nodeName.equals("connectionFactory")){
-                	BeanObjectEntityConfig connectionFactory = DocumentUtil.loadBeanConfig(child);
-                	config.setConnectionFactoryConfig(connectionFactory);
+                	config.addServerConfig(server);
                 }else if(nodeName.equals("runtime")){
                 	BeanObjectEntityConfig runtime = DocumentUtil.loadBeanConfig(child);
                 	config.setRuntimeConfig(runtime);

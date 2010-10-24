@@ -22,6 +22,22 @@
 			
 		</server>
 		
+		<!-- server class must be extend com.meidusa.amoeba.net.ServerableConnectionManager -->
+		<server name="Amoeba Monitor Server" class="com.meidusa.amoeba.monitor.MonitorServer">
+			<!-- port -->
+			<!--  
+			<property name="port">8066</property>
+			-->
+			<!-- bind ipAddress -->
+			<property name="ipAddress">127.0.0.1</property>
+			<property name="daemon">true</property>
+			<property name="manager">${clientConnectioneManager}</property>
+			<property name="connectionFactory">
+				<bean class="com.meidusa.amoeba.monitor.net.MonitorClientConnectionFactory"></bean>
+			</property>
+			
+		</server>
+		
 		<runtime class="com.meidusa.amoeba.context.RuntimeContext">
 			<!-- proxy server net IO Read thread size -->
 			<property name="readThreadPoolSize">20</property>

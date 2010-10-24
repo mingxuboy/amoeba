@@ -302,6 +302,31 @@
 		        </zipfileset>
 			    
 		    </zip>
+		    
+		     <tar longfile="gnu" destfile="amoeba-mongodb-binary-${amoeba.mongodb.version}.tar.gz" compression="gzip">
+			    <tarfileset dir="${deploy.dir}" mode="755">
+			        <include name="bin/**"/>
+			    		<exclude name="*/.svn/*"/>
+			    </tarfileset>
+		    	
+			    <tarfileset dir="${deploy.dir}">
+			        <include name="lib/**"/>
+				    	<include name="doc/**"/>
+				    	<include name="conf/**"/>
+				    	<exclude name="src/**"/>
+				    	<exclude name="*/.svn/*"/>
+				    	<exclude name="bin/*"/>
+				    	<exclude name="**/*/amoeba-aladdin*"/>
+				    	<exclude name="**/*/amoeba-mysql*"/>
+				    	<include name="*.*"/>
+			    </tarfileset>
+	        <tarfileset dir="build/build-mongodb">
+	        		<exclude name="*/.svn/*"/>
+	        		<exclude name="logs/*"/>
+	        		<exclude name="build.xml"/>
+	        		<exclude name="build.properties"/>
+	        </tarfileset>
+		    </tar>
 	   </target>
 	
 </project>
