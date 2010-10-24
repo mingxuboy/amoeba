@@ -41,3 +41,4 @@ set MAIN_CLASS="org.codehaus.classworlds.Launcher"
 
 :END
 if "%OS%"=="Windows_NT" endlocal
+pause
