@@ -11,6 +11,7 @@ import com.meidusa.amoeba.config.ConfigUtil;
 import com.meidusa.amoeba.monitor.io.MonitorPacketInputStream;
 import com.meidusa.amoeba.monitor.packet.MonitorCommandPacket;
 import com.meidusa.amoeba.net.io.PacketInputStream;
+import com.meidusa.amoeba.util.StringUtil;
 
 public class ShutdownClient implements MonitorConstant {
 	private File socketInfoFile;
@@ -52,7 +53,9 @@ public class ShutdownClient implements MonitorConstant {
 			try {
 				BufferedReader reader = new BufferedReader(new FileReader(socketInfoFile));
 				String sport = reader.readLine();
-				this.port = Integer.parseInt(sport);
+				String tmp[] = StringUtil.split(sport, ":");
+				this.port = Integer.parseInt(tmp[1]);
+				this.host = tmp[0];
 				reader.close();
 			}catch (Exception e) {
 				e.printStackTrace();
