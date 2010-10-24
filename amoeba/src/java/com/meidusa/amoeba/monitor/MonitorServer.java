@@ -15,19 +15,17 @@ import com.meidusa.amoeba.util.InitialisationException;
 
 public class MonitorServer extends ServerableConnectionManager{
 
+	public MonitorServer() throws IOException {
+		super();
+	}
+
 	protected File socketInfoFile;
-	protected String appplicationName;
+	protected String appplicationName = MonitorConstant.APPLICATION_NAME;
 	public void init() throws InitialisationException {
 		super.init();
 		socketInfoFile = new File(ConfigUtil.filter("${amoeba.home}"),appplicationName+".shutdown.port");
 	}
 	
-	public MonitorServer(String appplicationName) throws IOException {
-		super();
-		this.setName("Amoeba Monitor");
-		this.appplicationName = appplicationName;
-	}
-
 	protected void initServerSocket(){
 		Random random = new Random();
         try {
@@ -86,10 +84,4 @@ public class MonitorServer extends ServerableConnectionManager{
 				System.exit(-1);
     		}
     }
-	
-	public static void main(String[] args) throws Exception{
-		MonitorServer server = new MonitorServer("amoeba");
-		server.init();
-		server.run();
-	}
 }

@@ -13,8 +13,10 @@
  */
 package com.meidusa.amoeba.config;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -22,7 +24,7 @@ import java.util.Map;
  */
 public class ProxyServerConfig {
 
-	private BeanObjectEntityConfig serverConfig;
+	private List<BeanObjectEntityConfig> serverConfigList = new ArrayList<BeanObjectEntityConfig>();
 	private BeanObjectEntityConfig threadPoolConfig;
 	private BeanObjectEntityConfig authenticatorConfig;
 	private BeanObjectEntityConfig connectionFactoryConfig;
@@ -31,8 +33,6 @@ public class ProxyServerConfig {
     /**
      * 默认是没有值的
      */
-    private String                              serverCharset            = null;
-
     private Map<String, BeanObjectEntityConfig> managers                 = new HashMap<String, BeanObjectEntityConfig>();
     private Map<String, BeanObjectEntityConfig> unmodifiableManagers     = Collections.unmodifiableMap(managers);
 
@@ -41,12 +41,12 @@ public class ProxyServerConfig {
 
     private BeanObjectEntityConfig              queryRouterConfig;
 
-    public BeanObjectEntityConfig getServerConfig() {
-		return serverConfig;
+    public List<BeanObjectEntityConfig> getServerConfigList() {
+		return serverConfigList;
 	}
 
-	public void setServerConfig(BeanObjectEntityConfig serverConfig) {
-		this.serverConfig = serverConfig;
+	public void addServerConfig(BeanObjectEntityConfig serverConfig) {
+		this.serverConfigList.add(serverConfig);
 	}
 
 	public BeanObjectEntityConfig getThreadPoolConfig() {
