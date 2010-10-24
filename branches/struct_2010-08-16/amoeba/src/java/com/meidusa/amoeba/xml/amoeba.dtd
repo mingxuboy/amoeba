@@ -36,8 +36,8 @@
 <!ATTLIST proxy class NMTOKEN #IMPLIED >
 <!ELEMENT proxy ( server+,runtime ) >
 
-<!ATTLIST server class NMTOKEN #IMPLIED >
-<!ATTLIST server name CDATA #IMPLIED >
+<!ATTLIST server class NMTOKEN #REQUIRED >
+<!ATTLIST server name CDATA #REQUIRED >
 <!ELEMENT server (property*) >
 
 <!ATTLIST runtime class NMTOKEN #IMPLIED >
