@@ -75,7 +75,7 @@ public class MonitorServer extends ServerableConnectionManager{
     		
     		try {
 	    		FileWriter writer = new FileWriter(socketInfoFile);
-				writer.write(""+port);
+				writer.write((ipAddress==null?"0.0.0.0":ipAddress)+":"+port);
 				writer.flush();
 				writer.close();
     		} catch (IOException e) {
