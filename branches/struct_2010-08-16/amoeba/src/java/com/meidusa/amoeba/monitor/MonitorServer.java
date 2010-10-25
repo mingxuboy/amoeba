@@ -35,27 +35,27 @@ public class MonitorServer extends ServerableConnectionManager{
             InetSocketAddress isa = null;
             int times = 0;
     		do{
-    		try {
-    			if(port <=0){
-    				port = random.nextInt(65535);
-    			}
-    			
-	            
-	            if (ipAddress != null) {
-	                isa = new InetSocketAddress(ipAddress, port);
-	            } else {
-	                isa = new InetSocketAddress(port);
-	            }
-	
-	            ssocket.socket().bind(isa);
-	            break;
-    		} catch (IOException e) {
-	    			if(times >100){
-	    				System.out.println("cannot create shutdownServer socket,System exit now!");
-	    				e.printStackTrace();
-	    				System.exit(-1);
+	    		try {
+	    			if(port <=0){
+	    				port = random.nextInt(65535);
 	    			}
-	    		}
+	    			
+		            
+		            if (ipAddress != null) {
+		                isa = new InetSocketAddress(ipAddress, port);
+		            } else {
+		                isa = new InetSocketAddress(port);
+		            }
+		
+		            ssocket.socket().bind(isa);
+		            break;
+	    		} catch (IOException e) {
+		    			if(times >100){
+		    				System.out.println("cannot create shutdownServer socket,System exit now!");
+		    				e.printStackTrace();
+		    				System.exit(-1);
+		    			}
+		    	}
     		}while(true);
             
             
