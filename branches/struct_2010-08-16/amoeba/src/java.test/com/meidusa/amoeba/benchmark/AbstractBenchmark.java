@@ -23,6 +23,8 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
 import com.meidusa.amoeba.net.MultiConnectionManagerWrapper;
+import com.meidusa.amoeba.util.CmdLineParser;
+import com.meidusa.amoeba.util.OptionType;
 
 @SuppressWarnings("unchecked")
 public abstract class AbstractBenchmark {
@@ -96,13 +98,23 @@ public abstract class AbstractBenchmark {
 		public boolean running = true;
 	}
 	public static void main(String[] args) throws Exception {
-	/*	final CountDownLatch my = new CountDownLatch(10);
-		int j = 13;
-		while(j-->0){
-			System.out.println(my.countDownAndAvailable()+".."+my.getCount()+"...");
-		}
-		
-		System.exit(1);*/
+		CmdLineParser parser = new CmdLineParser(System.getProperty("application", "BenchMark"));
+    	CmdLineParser.Option debugOption = parser.addOption(OptionType.Boolean,'d', "debug", false,"show the interaction with the server-side information");
+        CmdLineParser.Option portOption = parser.addOption(OptionType.String,'p', "port",true,"server port");
+        CmdLineParser.Option hostOption = parser.addOption(OptionType.String,'h', "host",true,"server host");
+        CmdLineParser.Option connOption = parser.addOption(OptionType.String,'c', "conn",true,"The number of concurrent connections");
+        CmdLineParser.Option totleOption = parser.addOption(OptionType.Long,'n', "totle",true,"totle request");
+        CmdLineParser.Option helpOption = parser.addOption(OptionType.String,'h', "help",false,"Show this help message");
+        
+        try {
+            parser.parse(args);
+        }
+        catch ( CmdLineParser.OptionException e ) {
+            System.err.println(e.getMessage());
+            parser.printUsage();
+            System.exit(2);
+        }
+        
 		Logger logger = Logger.getLogger("rootLogger");
 		logger.addAppender(new ConsoleAppender());
 		logger.setLevel(Level.DEBUG);
@@ -115,14 +127,14 @@ public abstract class AbstractBenchmark {
 			return;
 		}
 
-		int conn = Integer.parseInt(System.getProperty("conn", "1"));
-		final int totle = Integer.parseInt(System.getProperty("totle", "1"));
-		String ip = System.getProperty("ip", "127.0.0.1");
+		int conn = (Integer)parser.getOptionValue(connOption);
+		final int totle = (Integer)parser.getOptionValue(totleOption);
+		String ip = parser.getOptionValue(hostOption).toString();
 		
 		final CountDownLatch requestLatcher = new CountDownLatch(totle);
 		final CountDownLatch responseLatcher = new CountDownLatch(totle);
 		final TaskRunnable task = new TaskRunnable();
-		int port = Integer.parseInt(System.getProperty("port", "8066"));
+		int port = (Integer)parser.getOptionValue(portOption);
 		
 		MultiConnectionManagerWrapper manager = new MultiConnectionManagerWrapper();
 		manager.init();
