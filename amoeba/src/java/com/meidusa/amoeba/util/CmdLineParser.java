@@ -163,7 +163,7 @@ public class CmdLineParser {
 		}
 
 		protected Option(char shortForm, String longForm, boolean wantsValue) {
-			this(new String(new char[] { shortForm }), longForm, wantsValue);
+			this((shortForm>0?String.valueOf(shortForm):null), longForm, wantsValue);
 		}
 
 		private Option(String shortForm, String longForm, boolean wantsValue) {
@@ -552,7 +552,7 @@ public class CmdLineParser {
 			writer.newLine();
 			for (Option option : optionList) {
 				writer.write("    ");
-				writer.write("-" + option.shortForm() + ",--"
+				writer.write((!StringUtil.isEmpty(option.shortForm())?("-" + option.shortForm()+","):"") + "--"
 						+ option.longForm()
 						+ (option.wantsValue() ? "=value [required]" : "=value")
 						+ "");

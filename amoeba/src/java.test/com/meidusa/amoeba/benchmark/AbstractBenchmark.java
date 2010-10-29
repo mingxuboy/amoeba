@@ -103,16 +103,25 @@ public abstract class AbstractBenchmark {
         CmdLineParser.Option portOption = parser.addOption(OptionType.String,'p', "port",true,"server port");
         CmdLineParser.Option hostOption = parser.addOption(OptionType.String,'h', "host",true,"server host");
         CmdLineParser.Option connOption = parser.addOption(OptionType.String,'c', "conn",true,"The number of concurrent connections");
-        CmdLineParser.Option totleOption = parser.addOption(OptionType.Long,'n', "totle",true,"totle request");
-        CmdLineParser.Option helpOption = parser.addOption(OptionType.String,'h', "help",false,"Show this help message");
+        CmdLineParser.Option totleOption = parser.addOption(OptionType.Long,'t', "totle",true,"totle requests");
+        CmdLineParser.Option helpOption = parser.addOption(OptionType.String,'?', "help",false,"Show this help message");
         
         try {
             parser.parse(args);
-        }
-        catch ( CmdLineParser.OptionException e ) {
-            System.err.println(e.getMessage());
-            parser.printUsage();
-            System.exit(2);
+            Boolean value = (Boolean)parser.getOptionValue(helpOption);
+        	if(value != null && value.booleanValue()){
+        		parser.printUsage();
+        		System.exit(2);
+        	}
+        }catch ( CmdLineParser.OptionException e ) {
+        	Boolean value = (Boolean)parser.getOptionValue(helpOption);
+        	if(value != null && value.booleanValue()){
+        		parser.printUsage();
+        	}else{
+        		System.err.println(e.getMessage());
+            	parser.printUsage();
+        	}
+        	System.exit(2);
         }
         
 		Logger logger = Logger.getLogger("rootLogger");
