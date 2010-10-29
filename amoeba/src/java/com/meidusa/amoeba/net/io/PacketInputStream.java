@@ -48,7 +48,17 @@ public abstract class PacketInputStream {
 
     /** ×î´óÈÝÁ¿ */
     protected static final int MAX_BUFFER_CAPACITY = 1024 * 1024 * 2;
-    private byte[] tmp = new byte[4096]; 
+    private int maxPacketSize = MAX_BUFFER_CAPACITY;
+    
+    
+    public int getMaxPacketSize() {
+		return maxPacketSize;
+	}
+
+	public void setMaxPacketSize(int maxPacketSize) {
+		this.maxPacketSize = maxPacketSize;
+	}
+	private byte[] tmp = new byte[4096]; 
     /**
      * Creates a new framed input stream.
      */
@@ -116,7 +126,7 @@ public abstract class PacketInputStream {
             // read, expand it and try reading some more
             int newSize = _buffer.capacity() << 1;
             newSize = newSize>_length ? newSize:_length+16;
-            if(newSize > MAX_BUFFER_CAPACITY){
+            if(newSize > maxPacketSize){
             	throw new IOException("packet over MAX_BUFFER_CAPACITY size="+newSize);
             }
             ByteBuffer newbuf = ByteBuffer.allocate(newSize);
@@ -124,7 +134,7 @@ public abstract class PacketInputStream {
             _buffer = newbuf;
 
             // don't let things grow without bounds
-        } while (_buffer.capacity() < MAX_BUFFER_CAPACITY);
+        } while (_buffer.capacity() < maxPacketSize);
 
         if (checkForCompletePacket()) {
             return readPacket();
