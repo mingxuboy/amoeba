@@ -14,7 +14,7 @@ public class CmdLineParserTest {
         CmdLineParser.Option size = parser.addOption(OptionType.Int,'s', "size",true,"The extent of the thing");
         CmdLineParser.Option name = parser.addOption(OptionType.String,'n', "name",true,"Name given to the widget");
         CmdLineParser.Option fraction = parser.addOption(OptionType.Double,'f', "fraction",true,"What percentage should be discarded");
-        CmdLineParser.Option help = parser.addOption(OptionType.Boolean,'h', "help",true,"Show this help message");
+        CmdLineParser.Option help = parser.addOption(OptionType.Boolean,'?', "help",true,"Show this help message");
         try {
             parser.parse(args);
         }
