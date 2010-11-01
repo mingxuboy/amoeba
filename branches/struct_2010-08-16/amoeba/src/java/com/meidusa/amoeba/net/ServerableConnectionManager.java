@@ -40,7 +40,7 @@ public class ServerableConnectionManager extends AuthingableConnectionManager im
     protected String              ipAddress;
     protected ConnectionFactory   connFactory;
     private ConnectionManager manager;
-
+    private int backlog = 128;
     public ConnectionManager getManager() {
 		return manager;
 	}
@@ -70,7 +70,7 @@ public class ServerableConnectionManager extends AuthingableConnectionManager im
                 isa = new InetSocketAddress(port);
             }
 
-            ssocket.socket().bind(isa);
+            ssocket.socket().bind(isa,this.backlog);
             registerServerChannel(ssocket);
 
             Level level = log.getLevel();
@@ -102,7 +102,10 @@ public class ServerableConnectionManager extends AuthingableConnectionManager im
             private SelectionKey key;
 
             public int handleEvent(long when) {
-                acceptConnection(listener);
+            	Connection conn = null;
+                do{
+                	conn = acceptConnection(listener);
+                }while(conn != null);
                 return 0;
             }
 
@@ -127,15 +130,18 @@ public class ServerableConnectionManager extends AuthingableConnectionManager im
         postRegisterNetEventHandler(serverNetEvent, SelectionKey.OP_ACCEPT);
     }
     
-    protected void acceptConnection(ServerSocketChannel listener) {
+    protected Connection acceptConnection(ServerSocketChannel listener) {
         SocketChannel channel = null;
+        int i=0;
         try {
             channel = listener.accept();
             if (channel == null) {
-                log.info("Psych! Got ACCEPT_READY, but no connection.");
-                return;
+            	if(i ==0){
+            		log.info("Psych! Got ACCEPT_READY, but no connection.");
+            	}
+                return null;
             }
-
+            i++;
             if (!(channel instanceof SelectableChannel)) {
                 try {
                     log.warn("Provided with un-selectable socket as result of accept(), can't " + "cope [channel=" + channel + "].");
@@ -144,7 +150,7 @@ public class ServerableConnectionManager extends AuthingableConnectionManager im
                 }
                 // stick a fork in the socket
                 channel.socket().close();
-                return;
+                return null;
             }
             Connection connection = connFactory.createConnection(channel, System.currentTimeMillis());
             if(connection instanceof AuthingableConnection){
@@ -157,7 +163,7 @@ public class ServerableConnectionManager extends AuthingableConnectionManager im
             }else{
             	this.postRegisterNetEventHandler(connection,SelectionKey.OP_READ);
             }
-            
+            return connection;
         } catch (Exception e) {
             if (channel != null) {
                 try {
@@ -166,6 +172,7 @@ public class ServerableConnectionManager extends AuthingableConnectionManager im
                     log.warn("Failed closing aborted connection: " + ioe);
                 }
             }
+            return null;
         }
     }
 
@@ -193,6 +200,14 @@ public class ServerableConnectionManager extends AuthingableConnectionManager im
         this.ipAddress = ipAddress;
     }
     
+    public int getBacklog() {
+		return backlog;
+	}
+
+	public void setBacklog(int backlog) {
+		this.backlog = backlog;
+	}
+
     public void shutdown(){
     	Level level = log.getLevel();
         log.setLevel(Level.INFO);
