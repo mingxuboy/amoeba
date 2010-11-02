@@ -596,10 +596,20 @@ public abstract class  AbstractQueryRouter<T extends Connection,V> implements Qu
             throw new InitialisationException("default pool required!,defaultPool="+defaultPool +" invalid");
         }
         if (readPool != null && !StringUtil.isEmpty(readPool)) {
-            readPools = new ObjectPool[] { ProxyRuntimeContext.getInstance().getPoolMap().get(readPool) };
+        	ObjectPool pool = ProxyRuntimeContext.getInstance().getPoolMap().get(readPool);
+        	if(pool == null){
+         		logger.error("cannot found Pool="+readPool);
+         		throw new InitialisationException("cannot found Pool="+readPool);
+         	}
+            readPools = new ObjectPool[] { pool };
         }
         if (writePool != null && !StringUtil.isEmpty(writePool)) {
-            writePools = new ObjectPool[] { ProxyRuntimeContext.getInstance().getPoolMap().get(writePool) };
+        	ObjectPool pool = ProxyRuntimeContext.getInstance().getPoolMap().get(writePool);
+        	if(pool == null){
+         		logger.error("cannot found Pool="+writePool);
+         		throw new InitialisationException("cannot found Pool="+writePool);
+         	}
+            writePools = new ObjectPool[] { pool };
         }
         
         map = new LRUMap(LRUMapSize);
