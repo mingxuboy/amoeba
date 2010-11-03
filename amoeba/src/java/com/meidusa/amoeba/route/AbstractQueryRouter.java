@@ -286,6 +286,7 @@ public abstract class  AbstractQueryRouter<T extends Connection,V> implements Qu
         if (tables != null && tables.size() > 0) {
             Set<Map.Entry<Table, Map<Column, Comparative>>> entrySet = tables.entrySet();
             for (Map.Entry<Table, Map<Column, Comparative>> entry : entrySet) {
+            	boolean regexMatched = false;
                 Map<Column, Comparative> columnMap = entry.getValue();
                 
                 TableRule tableRule = this.tableRuleMap.get(entry.getKey());
@@ -294,17 +295,26 @@ public abstract class  AbstractQueryRouter<T extends Connection,V> implements Qu
                 
                 if(tableRule == null && table.getName() != null){
                 	
+                	/**
+                	 * foreach regex table rule
+                	 */
                 	for(Map.Entry<Table, TableRule> ruleEntry:this.regexTableRuleMap.entrySet()){
                 		Table ruleTable = ruleEntry.getKey();
                 		boolean tableMatched = false;
                 		boolean schemaMatched = false;
             			
+                		/**
+                		 * check table name matched or not.
+                		 */
                 		Pattern pattern = this.getPattern(ruleTable.getName());
             			java.util.regex.Matcher matcher = pattern.matcher(table.getName());
             			if(matcher.find()){
             				tableMatched = true;
             			}
-                		
+            			
+            			/**
+                		 * check table schema matched or not.
+                		 */
             			pattern = this.getPattern(ruleTable.getSchema().getName());
             			matcher = pattern.matcher(table.getSchema().getName());
             			if(matcher.find()){
@@ -313,6 +323,7 @@ public abstract class  AbstractQueryRouter<T extends Connection,V> implements Qu
                 		
                 		if(tableMatched && schemaMatched){
                 			tableRule = ruleEntry.getValue();
+                			regexMatched = true;
                 			break;
                 		}
                 	}
@@ -371,7 +382,16 @@ public abstract class  AbstractQueryRouter<T extends Connection,V> implements Qu
                             Comparable<?>[] comparables = new Comparable[rule.parameterMap.size()];
                             // 规则中的参数必须在dmlstatement中存在，否则这个规则将不启作用
                             for (Map.Entry<Column, Integer> parameter : rule.cloumnMap.entrySet()) {
-                                Comparative condition = columnMap.get(parameter.getKey());
+                            	Comparative condition = null;
+                            	if(regexMatched){
+	                            	Column column = new Column();
+	                            	column.setName(parameter.getKey().getName());
+	                            	column.setTable(table);
+	                                condition = columnMap.get(column);
+                            	}else{
+                            		condition = columnMap.get(parameter.getKey());
+                            	}
+                            	
                                 if (condition != null) {
                                     // 如果规则忽略 数组的 参数，并且参数有array 参数，则忽略该规则
                                     if (rule.ignoreArray && condition instanceof ComparativeBaseList) {
@@ -413,7 +433,7 @@ public abstract class  AbstractQueryRouter<T extends Connection,V> implements Qu
                                        	}
                                        	
                                        	if (logger.isDebugEnabled()) {
-                                       		loggerBuffer.append(", matched table:" + tableRule.table.getName() + ", rule:" + rule.name);
+                                       		loggerBuffer.append(", matched table:" + tableRule.table + ", rule:" + rule.name);
                                            }
                                     	}
                                     	continue;
@@ -439,7 +459,7 @@ public abstract class  AbstractQueryRouter<T extends Connection,V> implements Qu
                                        	}
                                        	
                                        	if (logger.isDebugEnabled()) {
-                                       		loggerBuffer.append(", matched table:" + tableRule.table.getName() + ", rule:" + rule.name);
+                                       		loggerBuffer.append(", matched table:" + tableRule.table + ", rule:" + rule.name);
                                            }
                                     	}
                                     	continue;
@@ -473,7 +493,7 @@ public abstract class  AbstractQueryRouter<T extends Connection,V> implements Qu
                                     }
 
                                     if (logger.isDebugEnabled()) {
-                                   	 loggerBuffer.append(", matched table:" + tableRule.table.getName() + ", rule:" + rule.name);
+                                   	 loggerBuffer.append(", matched table:" + tableRule.table + ", rule:" + rule.name);
                                     }
                                 }
                             } catch (com.meidusa.amoeba.sqljep.ParseException e) {
@@ -492,7 +512,7 @@ public abstract class  AbstractQueryRouter<T extends Connection,V> implements Qu
                         if(!isPrepared){
                         	if(tableRule.ruleList != null && tableRule.ruleList.size()>0){
                         		if (logger.isDebugEnabled()) {
-                        			loggerBuffer.append(", no rule matched, using tableRule:[" + tableRule.table.getName() + "] defaultPools");
+                        			loggerBuffer.append(", no rule matched, using tableRule:[" + tableRule.table + "] defaultPools");
                         		}
                         	}else{
                         		if(logger.isDebugEnabled()){
@@ -501,7 +521,7 @@ public abstract class  AbstractQueryRouter<T extends Connection,V> implements Qu
                            			for(String pool : pools){
                            				buffer.append(pool).append(",");
                            			}
-                           			loggerBuffer.append(", using tableRule:[" + tableRule.table.getName() + "] defaultPools="+buffer.toString());
+                           			loggerBuffer.append(", using tableRule:[" + tableRule.table + "] defaultPools="+buffer.toString());
                         			}
                         		}
                         	}
