@@ -12,7 +12,8 @@ import com.meidusa.amoeba.net.packet.Packet;
 
 public abstract class AbstractBenchmarkClientConnection<T extends Packet>
 		extends Connection {
-	private static boolean debug = Boolean.getBoolean("debug");
+	private boolean debug = Boolean.getBoolean("debug");
+	private int timeout = Integer.getInteger("timeout",-1);
 	private Properties properties;
 	long min = System.nanoTime();
 	long start = 0;
@@ -24,6 +25,23 @@ public abstract class AbstractBenchmarkClientConnection<T extends Packet>
 	protected CountDownLatch responseLatcher;
 	protected TaskRunnable task;
 	private Map contextMap; 
+	
+	public boolean isDebug() {
+		return debug;
+	}
+
+	public void setDebug(boolean debug) {
+		this.debug = debug;
+	}
+
+	public int getTimeout() {
+		return timeout;
+	}
+
+	public void setTimeout(int timeout) {
+		this.timeout = timeout;
+	}
+
 	public void putAllRequestProperties(Properties source){
 		if(properties == null){
 			properties = new Properties();
@@ -82,6 +100,22 @@ public abstract class AbstractBenchmarkClientConnection<T extends Packet>
 				requestLatcher.countDown();
 				postMessage(createRequestPacket().toByteBuffer(this));
 			}
+		}
+	}
+	
+	public boolean checkIdle(long now) {
+		if(timeout>0){
+			if (isClosed()) {
+	            return true;
+	        }
+			long idleMillis = now - _lastEvent;
+	        if (idleMillis < timeout) {
+	            return false;
+	        }else{
+	        	return true;
+	        }
+		}else{
+			return false;
 		}
 	}
 	

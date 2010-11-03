@@ -103,7 +103,8 @@ public abstract class AbstractBenchmark {
         CmdLineParser.Option portOption = parser.addOption(OptionType.String,'p', "port",true,"server port");
         CmdLineParser.Option hostOption = parser.addOption(OptionType.String,'h', "host",true,"server host");
         CmdLineParser.Option connOption = parser.addOption(OptionType.String,'c', "conn",true,"The number of concurrent connections");
-        CmdLineParser.Option totleOption = parser.addOption(OptionType.Long,'t', "totle",true,"totle requests");
+        CmdLineParser.Option totleOption = parser.addOption(OptionType.Long,'n', "totle",true,"totle requests");
+        CmdLineParser.Option timeoutOption = parser.addOption(OptionType.Int,'t', "timeout",false,"query timeout, default value=-1 ");
         CmdLineParser.Option helpOption = parser.addOption(OptionType.String,'?', "help",false,"Show this help message");
         
         try {
@@ -127,14 +128,6 @@ public abstract class AbstractBenchmark {
 		Logger logger = Logger.getLogger("rootLogger");
 		logger.addAppender(new ConsoleAppender());
 		logger.setLevel(Level.DEBUG);
-		if(args != null && args.length ==1 && "-h".equalsIgnoreCase(args[0])){
-			System.out.println("-Dconn=<int> ;Concurrency connection size\r\n");
-			System.out.println("-Dip=<String> ;remote ip\r\n");
-			System.out.println("-Dport=<int> ;remote port\r\n");
-			System.out.println("-Dtotle=<int> ;totle request\r\n");
-			System.out.println("-Ddebug=<Boolean> ;enable debug\r\n");
-			return;
-		}
 
 		int conn = (Integer)parser.getOptionValue(connOption);
 		final int totle = (Integer)parser.getOptionValue(totleOption);
@@ -176,6 +169,11 @@ public abstract class AbstractBenchmark {
 			InetSocketAddress address = new InetSocketAddress(ip,port);
 			try{
 				AbstractBenchmarkClientConnection<?> connection = benckmark.newBenchmarkClientConnection(SocketChannel.open(address),System.currentTimeMillis(),requestLatcher,responseLatcher,task);
+				Boolean value = (Boolean)parser.getOptionValue(debugOption,false);
+				Integer timeout = (Integer)parser.getOptionValue(timeoutOption,-1);
+				connection.setTimeout(timeout.intValue());
+				connection.setDebug(value.booleanValue());
+				
 				connection.putAllRequestProperties(properties);
 				connection.setContextMap(benckmark.getContextMap());
 				manager.postRegisterNetEventHandler(connection, SelectionKey.OP_READ);
