@@ -22,7 +22,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -32,10 +31,8 @@ import org.apache.commons.pool.PoolableObjectFactory;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.log4j.helpers.LogLog;
-import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.EntityResolver;
@@ -79,9 +76,6 @@ public class ProxyRuntimeContext implements Reporter {
 
     private ProxyServerConfig              config;
 
-    private Executor                       readExecutor;
-    private Executor                       clientSideExecutor;
-    private Executor                       serverSideExecutor;
     private Map<String, ConnectionManager> conMgrMap                               = new HashMap<String, ConnectionManager>();
     private Map<String, ConnectionManager> readOnlyConMgrMap                       = Collections.unmodifiableMap(conMgrMap);
 
@@ -89,7 +83,9 @@ public class ProxyRuntimeContext implements Reporter {
     private Map<String, ObjectPool>        readOnlyPoolMap                         = Collections.unmodifiableMap(poolMap);
 
     private List<ContextChangedListener> listeners = new ArrayList<ContextChangedListener>();
-    private QueryRouter                    queryRouter;
+    
+    @SuppressWarnings("unchecked")
+	private QueryRouter                    queryRouter;
     private RuntimeContext runtimeContext;
 
     public ServerableConnectionManager server;
@@ -505,25 +501,6 @@ public class ProxyRuntimeContext implements Reporter {
                 }else if(nodeName.equals("runtime")){
                 	BeanObjectEntityConfig runtime = DocumentUtil.loadBeanConfig(child);
                 	config.setRuntimeConfig(runtime);
-                }
-            }
-        }
-        ParameterMapping.mappingObject(config, map,null);
-    }
-    
-    private void loadServerConfig(Element current, ProxyServerConfig config) {
-        NodeList children = current.getChildNodes();
-        int childSize = children.getLength();
-        Map<String, Object> map = new HashMap<String, Object>();
-        for (int i = 0; i < childSize; i++) {
-            Node childNode = children.item(i);
-            if (childNode instanceof Element) {
-                Element child = (Element) childNode;
-                final String nodeName = child.getNodeName();
-                if (nodeName.equals("property")) {
-                    String key = child.getAttribute("name");
-                    String value = child.getTextContent();
-                    map.put(key, value);
                 }
             }
         }
