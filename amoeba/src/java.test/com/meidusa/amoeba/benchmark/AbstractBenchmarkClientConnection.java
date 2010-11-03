@@ -6,14 +6,17 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
 
+import org.apache.log4j.Logger;
+
 import com.meidusa.amoeba.benchmark.AbstractBenchmark.TaskRunnable;
 import com.meidusa.amoeba.net.Connection;
 import com.meidusa.amoeba.net.packet.Packet;
 
 public abstract class AbstractBenchmarkClientConnection<T extends Packet>
 		extends Connection {
-	private boolean debug = Boolean.getBoolean("debug");
-	private int timeout = Integer.getInteger("timeout",-1);
+	private static Logger       logger        = Logger.getLogger(AbstractBenchmarkClientConnection.class);
+	private boolean debug = false;
+	private int timeout = -1;
 	private Properties properties;
 	long min = System.nanoTime();
 	long start = 0;
@@ -104,19 +107,27 @@ public abstract class AbstractBenchmarkClientConnection<T extends Packet>
 	}
 	
 	public boolean checkIdle(long now) {
+		boolean isTimeOut = false;
 		if(timeout>0){
 			if (isClosed()) {
-	            return true;
+				isTimeOut = true;
 	        }
 			long idleMillis = now - _lastEvent;
 	        if (idleMillis < timeout) {
-	            return false;
+	        	isTimeOut = false;
 	        }else{
-	        	return true;
+	        	isTimeOut = true;
 	        }
 		}else{
-			return false;
+			isTimeOut = false;
 		}
+		
+		if(isTimeOut){
+			if(logger.isInfoEnabled()){
+				logger.info("socket id="+this.getSocketId()+" receive time out="+(now - _lastEvent));			
+			}
+		}
+		return isTimeOut;
 	}
 	
 	public void postMessage(ByteBuffer msg) {
