@@ -548,7 +548,7 @@ public class CmdLineParser {
 			BufferedWriter writer = new BufferedWriter(new PrintWriter(
 					System.out));
 			writer.write(this.name);
-			writer.write(" [-option value/--option==value]");
+			writer.write(" [-option value/--option=value]");
 			writer.newLine();
 			for (Option option : optionList) {
 				writer.write("    ");

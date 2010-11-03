@@ -54,6 +54,9 @@ public class ShutdownClient implements MonitorConstant {
 				BufferedReader reader = new BufferedReader(new FileReader(socketInfoFile));
 				String sport = reader.readLine();
 				String tmp[] = StringUtil.split(sport, ":");
+				if(tmp.length <=1){
+					return false;
+				}
 				this.port = Integer.parseInt(tmp[1]);
 				this.host = tmp[0];
 				reader.close();

@@ -39,9 +39,8 @@ public class MonitorServer extends ServerableConnectionManager{
 	    			if(port <=0){
 	    				port = random.nextInt(65535);
 	    			}
-	    			
-		            
-		            if (ipAddress != null) {
+
+	    			if (ipAddress != null) {
 		                isa = new InetSocketAddress(ipAddress, port);
 		            } else {
 		                isa = new InetSocketAddress(port);
