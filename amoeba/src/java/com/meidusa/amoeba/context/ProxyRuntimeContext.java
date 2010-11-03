@@ -442,7 +442,7 @@ public class ProxyRuntimeContext implements Reporter {
         }
 
         if (logger.isInfoEnabled()) {
-            logger.info("Loaded Engine configuration from: " + fileName);
+            logger.info("Loaded Amoeba Proxy configuration from: " + fileName);
         }
         return config;
     }
