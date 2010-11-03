@@ -144,6 +144,7 @@ public class MultipleLoadBalanceObjectPool implements ObjectPool,Initialisable {
 
     private ObjectPool[]                      runtimeObjectPools;
 
+    private int index = 0;
     private ActiveNumComparator               comparator    = new ActiveNumComparator();
 	private boolean valid;
 
@@ -192,7 +193,11 @@ public class MultipleLoadBalanceObjectPool implements ObjectPool,Initialisable {
             }
         } else if (loadbalance == LOADBALANCING_HA) {
             // HA,只要有效的pool
-            pool = poolsTemp[0];
+        	if(index < poolsTemp.length){
+        		pool = poolsTemp[index];
+        	}else{
+        		pool = poolsTemp[0];
+        	}
         } else {
             throw new Exception("poolName="+name+" loadbalance parameter error,parameter loadbalance in [1,2,3]");
         }
@@ -255,7 +260,15 @@ public class MultipleLoadBalanceObjectPool implements ObjectPool,Initialisable {
         throw new UnsupportedOperationException("setFactory is not supported in class="+ this.getClass().getName());
     }
 
-    public boolean isEnable() {
+    public int getIndex() {
+		return index;
+	}
+
+	public void setIndex(int index) {
+		this.index = index;
+	}
+
+	public boolean isEnable() {
         return enable;
     }
 
