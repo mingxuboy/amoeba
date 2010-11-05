@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 
 <!ELEMENT className ( #PCDATA ) >
-<!ELEMENT amoeba:configuration ( proxy, connectionManagerList, dbServerList, queryRouter ) >
+<!ELEMENT amoeba:configuration ( proxy, connectionManagerList, dbServerLoader, queryRouter ) >
 <!ATTLIST amoeba:configuration
   xmlns:amoeba CDATA #FIXED "http://amoeba.meidusa.com/" 
 >
@@ -18,7 +18,8 @@
 <!ATTLIST dbServer abstractive NMTOKEN #IMPLIED >
 <!ATTLIST dbServer parent NMTOKEN #IMPLIED >
 
-<!ELEMENT dbServerList ( dbServer+ ) >
+<!ELEMENT dbServerLoader ( property*) >
+<!ATTLIST dbServerLoader class NMTOKEN #IMPLIED >
 
 <!ELEMENT factoryConfig (property* ) >
 <!ATTLIST factoryConfig class NMTOKEN #IMPLIED >
@@ -39,9 +40,10 @@
 <!ELEMENT queryRouter (property*) >
 
 <!ATTLIST proxy class NMTOKEN #IMPLIED >
-<!ELEMENT proxy ( server,runtime ) >
+<!ELEMENT proxy ( server+,runtime ) >
 
-<!ATTLIST server class NMTOKEN #IMPLIED >
+<!ATTLIST server class NMTOKEN #REQUIRED >
+<!ATTLIST server name CDATA #REQUIRED >
 <!ELEMENT server (property*) >
 
 <!ATTLIST runtime class NMTOKEN #IMPLIED >
