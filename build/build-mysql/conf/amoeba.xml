@@ -101,9 +101,13 @@
 	</dbServerList>
 	
 	<queryRouter class="com.meidusa.amoeba.mysql.parser.MysqlQueryRouter">
-		<property name="ruleConfig">${amoeba.home}/conf/rule.xml</property>
+		<property name="ruleLoader">
+			<bean class="com.meidusa.amoeba.route.TableRuleFileLoader">
+				<property name="ruleFile">${amoeba.home}/conf/rule.xml</property>
+				<property name="functionFile">${amoeba.home}/conf/ruleFunctionMap.xml</property>
+			</bean>
+		</property>
 		<property name="functionConfig">${amoeba.home}/conf/functionMap.xml</property>
-		<property name="ruleFunctionConfig">${amoeba.home}/conf/ruleFunctionMap.xml</property>
 		<property name="LRUMapSize">1500</property>
 		<property name="defaultPool">server1</property>
 		

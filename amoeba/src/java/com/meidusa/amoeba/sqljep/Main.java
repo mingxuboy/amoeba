@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.meidusa.amoeba.route.AbstractQueryRouter;
+import com.meidusa.amoeba.route.TableRuleFileLoader;
 import com.meidusa.amoeba.sqljep.function.Comparative;
 import com.meidusa.amoeba.sqljep.function.ComparativeAND;
 import com.meidusa.amoeba.sqljep.function.ComparativeBaseList;
@@ -70,7 +71,7 @@ public class Main {
 	  			"	WHEN range(1,2,1,0) THEN 'server1' ;" +
 	  			"	WHEN range(2,3,1,0) THEN 'server2' ;" +
 	  			"END CASE;)");	
-		sqljep.parseExpression(columnMapping,valMap,AbstractQueryRouter.ruleFunTab);
+		sqljep.parseExpression(columnMapping,valMap,TableRuleFileLoader.ruleFunTab);
 		result = sqljep.getValue(row);
 		for(int j=0;j<0;j++){
 		new Thread(){

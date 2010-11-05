@@ -38,62 +38,8 @@ import com.meidusa.amoeba.parser.dbobject.Column;
 import com.meidusa.amoeba.parser.dbobject.Table;
 import com.meidusa.amoeba.parser.function.Function;
 import com.meidusa.amoeba.parser.statement.Statement;
-import com.meidusa.amoeba.sqljep.function.Abs;
-import com.meidusa.amoeba.sqljep.function.AddDate;
-import com.meidusa.amoeba.sqljep.function.AddMonths;
-import com.meidusa.amoeba.sqljep.function.AddTime;
-import com.meidusa.amoeba.sqljep.function.Ceil;
 import com.meidusa.amoeba.sqljep.function.Comparative;
 import com.meidusa.amoeba.sqljep.function.ComparativeBaseList;
-import com.meidusa.amoeba.sqljep.function.Concat;
-import com.meidusa.amoeba.sqljep.function.Datediff;
-import com.meidusa.amoeba.sqljep.function.Day;
-import com.meidusa.amoeba.sqljep.function.DayName;
-import com.meidusa.amoeba.sqljep.function.DayOfWeek;
-import com.meidusa.amoeba.sqljep.function.DayOfYear;
-import com.meidusa.amoeba.sqljep.function.Decode;
-import com.meidusa.amoeba.sqljep.function.Floor;
-import com.meidusa.amoeba.sqljep.function.Hash;
-import com.meidusa.amoeba.sqljep.function.Hour;
-import com.meidusa.amoeba.sqljep.function.IndistinctMatching;
-import com.meidusa.amoeba.sqljep.function.Initcap;
-import com.meidusa.amoeba.sqljep.function.Instr;
-import com.meidusa.amoeba.sqljep.function.LastDay;
-import com.meidusa.amoeba.sqljep.function.Length;
-import com.meidusa.amoeba.sqljep.function.Lower;
-import com.meidusa.amoeba.sqljep.function.Lpad;
-import com.meidusa.amoeba.sqljep.function.Ltrim;
-import com.meidusa.amoeba.sqljep.function.MakeDate;
-import com.meidusa.amoeba.sqljep.function.MakeTime;
-import com.meidusa.amoeba.sqljep.function.Microsecond;
-import com.meidusa.amoeba.sqljep.function.Minute;
-import com.meidusa.amoeba.sqljep.function.Modulus;
-import com.meidusa.amoeba.sqljep.function.Month;
-import com.meidusa.amoeba.sqljep.function.MonthName;
-import com.meidusa.amoeba.sqljep.function.MonthsBetween;
-import com.meidusa.amoeba.sqljep.function.NextDay;
-import com.meidusa.amoeba.sqljep.function.Nvl;
-import com.meidusa.amoeba.sqljep.function.PostfixCommand;
-import com.meidusa.amoeba.sqljep.function.Power;
-import com.meidusa.amoeba.sqljep.function.Range;
-import com.meidusa.amoeba.sqljep.function.Replace;
-import com.meidusa.amoeba.sqljep.function.Round;
-import com.meidusa.amoeba.sqljep.function.Rpad;
-import com.meidusa.amoeba.sqljep.function.Rtrim;
-import com.meidusa.amoeba.sqljep.function.Second;
-import com.meidusa.amoeba.sqljep.function.Sign;
-import com.meidusa.amoeba.sqljep.function.SubDate;
-import com.meidusa.amoeba.sqljep.function.SubTime;
-import com.meidusa.amoeba.sqljep.function.Substring;
-import com.meidusa.amoeba.sqljep.function.ToChar;
-import com.meidusa.amoeba.sqljep.function.ToDate;
-import com.meidusa.amoeba.sqljep.function.ToNumber;
-import com.meidusa.amoeba.sqljep.function.Translate;
-import com.meidusa.amoeba.sqljep.function.Trim;
-import com.meidusa.amoeba.sqljep.function.Trunc;
-import com.meidusa.amoeba.sqljep.function.Upper;
-import com.meidusa.amoeba.sqljep.function.WeekOfYear;
-import com.meidusa.amoeba.sqljep.function.Year;
 import com.meidusa.amoeba.sqljep.variable.Variable;
 import com.meidusa.amoeba.util.Initialisable;
 import com.meidusa.amoeba.util.InitialisationException;
@@ -104,76 +50,11 @@ import com.meidusa.amoeba.util.Tuple;
 /**
  * @author struct
  */
-@SuppressWarnings("deprecation")
 public abstract class  AbstractQueryRouter<T extends Connection,V> implements QueryRouter<T,V>, Initialisable ,ContextChangedListener {
 	protected static final String _CURRENT_QUERY_OBJECT_ = "_CURRENT_STATEMENT_";
 	protected static Logger logger = Logger.getLogger(AbstractQueryRouter.class);
 	private Map<String,Pattern> patternMap = new HashMap<String,Pattern>();
 	
-    public final static Map<String, PostfixCommand> ruleFunTab      = new HashMap<String, PostfixCommand>();
-    static {
-        ruleFunTab.put("abs", new Abs());
-        ruleFunTab.put("power", new Power());
-        ruleFunTab.put("mod", new Modulus());
-        ruleFunTab.put("substr", new Substring());
-        ruleFunTab.put("sign", new Sign());
-        ruleFunTab.put("ceil", new Ceil());
-        ruleFunTab.put("floor", new Floor());
-        ruleFunTab.put("trunc", new Trunc());
-        ruleFunTab.put("round", new Round());
-        ruleFunTab.put("length", new Length());
-        ruleFunTab.put("concat", new Concat());
-        ruleFunTab.put("instr", new Instr());
-        ruleFunTab.put("trim", new Trim());
-        ruleFunTab.put("rtrim", new Rtrim());
-        ruleFunTab.put("ltrim", new Ltrim());
-        ruleFunTab.put("rpad", new Rpad());
-        ruleFunTab.put("lpad", new Lpad());
-        ruleFunTab.put("lower", new Lower());
-        ruleFunTab.put("upper", new Upper());
-        ruleFunTab.put("translate", new Translate());
-        ruleFunTab.put("replace", new Replace());
-        ruleFunTab.put("initcap", new Initcap());
-        ruleFunTab.put("value", new Nvl());
-        ruleFunTab.put("decode", new Decode());
-        ruleFunTab.put("to_char", new ToChar());
-        ruleFunTab.put("to_number", new ToNumber());
-        ruleFunTab.put("imatch", new IndistinctMatching()); // replacement for of Oracle's SOUNDEX
-        ruleFunTab.put("months_between", new MonthsBetween());
-        ruleFunTab.put("add_months", new AddMonths());
-        ruleFunTab.put("last_day", new LastDay());
-        ruleFunTab.put("next_day", new NextDay());
-        ruleFunTab.put("to_date", new ToDate());
-        //ruleFunTab.put("case", new Case()); // replacement for CASE WHEN digit = 0 THEN ...;WHEN digit = 1
-        // THEN...;ELSE... END CASE
-        ruleFunTab.put("index", new Instr()); // maxdb
-        ruleFunTab.put("num", new ToNumber()); // maxdb
-        ruleFunTab.put("chr", new ToChar()); // maxdb
-        ruleFunTab.put("dayname", new DayName()); // maxdb
-        ruleFunTab.put("adddate", new AddDate()); // maxdb
-        ruleFunTab.put("subdate", new SubDate()); // maxdb
-        ruleFunTab.put("addtime", new AddTime()); // maxdb
-        ruleFunTab.put("subtime", new SubTime()); // maxdb
-        ruleFunTab.put("year", new Year()); // maxdb
-        ruleFunTab.put("month", new Month()); // maxdb
-        ruleFunTab.put("day", new Day()); // maxdb
-        ruleFunTab.put("dayofmonth", new Day()); // maxdb
-        ruleFunTab.put("hour", new Hour()); // maxdb
-        ruleFunTab.put("minute", new Minute()); // maxdb
-        ruleFunTab.put("second", new Second()); // maxdb
-        ruleFunTab.put("microsecond", new Microsecond()); // maxdb
-        ruleFunTab.put("datediff", new Datediff()); // maxdb
-        ruleFunTab.put("dayofweek", new DayOfWeek()); // maxdb
-        ruleFunTab.put("weekofyear", new WeekOfYear()); // maxdb
-        ruleFunTab.put("dayofyear", new DayOfYear()); // maxdb
-        ruleFunTab.put("dayname", new DayName()); // maxdb
-        ruleFunTab.put("monthname", new MonthName()); // maxdb
-        ruleFunTab.put("makedate", new MakeDate()); // maxdb
-        ruleFunTab.put("maketime", new MakeTime()); // maxdb
-        ruleFunTab.put("hash", new Hash()); //
-        ruleFunTab.put("range", new Range()); //
-    }
-    
 	Map<String,Variable> variableMap = new HashMap<String,Variable>();
 	{
 		variableMap.put("isReadStatement",new Variable(){
@@ -197,7 +78,6 @@ public abstract class  AbstractQueryRouter<T extends Connection,V> implements Qu
     private Map<Table, TableRule>                   tableRuleMap    = new HashMap<Table, TableRule>();
     private Map<Table, TableRule>                   regexTableRuleMap    = new HashMap<Table, TableRule>();
     protected Map<String, Function>                   functionMap     = new HashMap<String, Function>();
-    private Map<String, PostfixCommand>             ruleFunctionMap = new HashMap<String, PostfixCommand>();
 
     protected ObjectPool[]                          defaultPools;
     protected ObjectPool[]                          readPools;
@@ -205,7 +85,6 @@ public abstract class  AbstractQueryRouter<T extends Connection,V> implements Qu
     protected Tuple<Statement,ObjectPool[]> tuple;
     private String                                  ruleConfig;
     private String                                  functionConfig;
-    private String                                  ruleFunctionConfig;
 
     private String                                  defaultPool;
     private String                                  readPool;
@@ -224,7 +103,6 @@ public abstract class  AbstractQueryRouter<T extends Connection,V> implements Qu
 	}
 
 	public AbstractQueryRouter(){
-        ruleFunctionMap.putAll(ruleFunTab);
     }
 
     public String getRuleConfig() {
@@ -637,9 +515,7 @@ public abstract class  AbstractQueryRouter<T extends Connection,V> implements Qu
         class ConfigCheckTread extends Thread {
 
             long lastFunFileModified;
-            long lastRuleFunctionFileModified;
             File funFile;
-            File ruleFunctionFile;
 
             private ConfigCheckTread(){
 
@@ -647,10 +523,6 @@ public abstract class  AbstractQueryRouter<T extends Connection,V> implements Qu
                 this.setName("ruleConfigCheckThread");
                 funFile = new File(AbstractQueryRouter.this.functionConfig);
                 lastFunFileModified = funFile.lastModified();
-                if (AbstractQueryRouter.this.ruleFunctionConfig != null) {
-                    ruleFunctionFile = new File(AbstractQueryRouter.this.ruleFunctionConfig);
-                    lastRuleFunctionFileModified = ruleFunctionFile.lastModified();
-                }
             }
 
             public void run() {
@@ -658,7 +530,6 @@ public abstract class  AbstractQueryRouter<T extends Connection,V> implements Qu
                     try {
                         Thread.sleep(5000l);
                         Map<String, Function> funMap = null;
-                        Map<String, PostfixCommand> ruleFunMap = null;
                         Map<Table, TableRule> tableRuleMap = null;
                         try {
                             if (AbstractQueryRouter.this.functionConfig != null) {
@@ -669,12 +540,6 @@ public abstract class  AbstractQueryRouter<T extends Connection,V> implements Qu
                                     } catch (ConfigurationException exception) {
                                     }
 
-                                }
-                            }
-                            if (AbstractQueryRouter.this.ruleFunctionConfig != null) {
-                                if (ruleFunctionFile.lastModified() != lastRuleFunctionFileModified) {
-                                    ruleFunMap = loadRuleFunctionMap(AbstractQueryRouter.this.ruleFunctionConfig);
-                                    logger.info("loading ruleFunMap from File="+ruleFunctionConfig);
                                 }
                             }
 
@@ -698,10 +563,6 @@ public abstract class  AbstractQueryRouter<T extends Connection,V> implements Qu
                                 AbstractQueryRouter.this.functionMap = funMap;
                             }
 
-                            if (ruleFunMap != null) {
-                                AbstractQueryRouter.this.ruleFunctionMap = ruleFunMap;
-                            }
-
                             if (tableRuleMap != null) {
                                 AbstractQueryRouter.this.tableRuleMap = tableRuleMap;
                             }
@@ -709,9 +570,6 @@ public abstract class  AbstractQueryRouter<T extends Connection,V> implements Qu
                         } finally {
                             if (funFile != null && funFile.exists()) {
                                 lastFunFileModified = funFile.lastModified();
-                            }
-                            if (ruleFunctionFile != null && ruleFunctionFile.exists()) {
-                                lastRuleFunctionFileModified = ruleFunctionFile.lastModified();
                             }
                         }
                     } catch (InterruptedException e) {
@@ -726,10 +584,6 @@ public abstract class  AbstractQueryRouter<T extends Connection,V> implements Qu
                 this.functionMap = loadFunctionMap(AbstractQueryRouter.this.functionConfig);
             } else {
                 needEvaluate = false;
-            }
-
-            if (AbstractQueryRouter.this.ruleFunctionConfig != null) {
-                AbstractQueryRouter.this.ruleFunctionMap = loadRuleFunctionMap(AbstractQueryRouter.this.ruleFunctionConfig);
             }
             
             this.tableRuleMap = ruleLoader.loadRule();
@@ -771,32 +625,6 @@ public abstract class  AbstractQueryRouter<T extends Connection,V> implements Qu
         return loader.loadFunctionMap(configFileName);
     }
 
-    public static Map<String, PostfixCommand> loadRuleFunctionMap(String configFileName) {
-        FunctionLoader<String, PostfixCommand> loader = new FunctionLoader<String, PostfixCommand>() {
-
-            @Override
-            public void initBeanObject(BeanObjectEntityConfig config, PostfixCommand bean) {
-                bean.setName(config.getName());
-            }
-
-            @Override
-            public void putToMap(Map<String, PostfixCommand> map, PostfixCommand value) {
-                map.put(value.getName(), value);
-            }
-
-        };
-
-        loader.setDTD("/com/meidusa/amoeba/xml/function.dtd");
-        loader.setDTDSystemID("function.dtd");
-
-        Map<String, PostfixCommand> tempRuleFunMap = new HashMap<String, PostfixCommand>();
-        logger.info("loading RuleFunctionMap from File="+configFileName);
-        Map<String, PostfixCommand> defindMap = loader.loadFunctionMap(configFileName);
-        tempRuleFunMap.putAll(ruleFunTab);
-        tempRuleFunMap.putAll(defindMap);
-        return tempRuleFunMap;
-    }
-
     public int getLRUMapSize() {
         return LRUMapSize;
     }
@@ -827,10 +655,6 @@ public abstract class  AbstractQueryRouter<T extends Connection,V> implements Qu
 
     public void setNeedParse(boolean needParse) {
         this.needParse = needParse;
-    }
-
-    public void setRuleFunctionConfig(String ruleFunctionConfig) {
-        this.ruleFunctionConfig = ruleFunctionConfig;
     }
 
     public ObjectPool getObjectPool(Object key) {

@@ -16,6 +16,7 @@ package com.meidusa.amoeba.config;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
+import java.io.File;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -96,7 +97,13 @@ public class ParameterMapping {
                         string = ConfigUtil.filter(string);
                     }
                     value = deStringize(cls, string);
-                }else{
+                }else if(cls.equals(File.class)){
+                	String string = (String) obj;
+                    if (!StringUtil.isEmpty(string)) {
+                        string = ConfigUtil.filter(string);
+                    }
+                	value = new File(string);
+                }else {
                 	if(context != null){
                 		if(obj != null){
                 			String key = StringUtil.split(((String)obj).trim(), "${}")[0];

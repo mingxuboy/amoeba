@@ -86,11 +86,11 @@
 	<queryRouter class="com.meidusa.amoeba.mongodb.route.MongodbQueryRouter">
 		<property name="ruleLoader">
 			<bean class="com.meidusa.amoeba.route.TableRuleFileLoader">
-				<property name="configFile">${amoeba.home}/conf/rule.xml</property>
+				<property name="ruleFile">${amoeba.home}/conf/rule.xml</property>
+				<property name="ruleFunctionFile">${amoeba.home}/conf/ruleFunctionMap.xml</property>
 			</bean>
 		</property>
 		<property name="functionConfig">${amoeba.home}/conf/functionMap.xml</property>
-		<property name="ruleFunctionConfig">${amoeba.home}/conf/ruleFunctionMap.xml</property>
 		<property name="LRUMapSize">1500</property>
 		<property name="defaultPool">server0</property>
 		
