@@ -24,6 +24,7 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
+import com.meidusa.amoeba.config.BeanObjectEntityConfig;
 import com.meidusa.amoeba.config.ConfigurationException;
 import com.meidusa.amoeba.config.DocumentUtil;
 import com.meidusa.amoeba.parser.dbobject.Column;
@@ -77,6 +78,7 @@ import com.meidusa.amoeba.sqljep.function.SubTime;
 import com.meidusa.amoeba.sqljep.function.Substring;
 import com.meidusa.amoeba.sqljep.function.ToChar;
 import com.meidusa.amoeba.sqljep.function.ToDate;
+import com.meidusa.amoeba.sqljep.function.ToLong;
 import com.meidusa.amoeba.sqljep.function.ToNumber;
 import com.meidusa.amoeba.sqljep.function.Translate;
 import com.meidusa.amoeba.sqljep.function.Trim;
@@ -94,7 +96,7 @@ public class TableRuleFileLoader implements TableRuleLoader,Initialisable {
 	protected static Logger logger = Logger.getLogger(AbstractQueryRouter.class);
 	private Map<String, PostfixCommand>             ruleFunctionMap = new HashMap<String, PostfixCommand>();
 	public final static Map<String, PostfixCommand> ruleFunTab      = new HashMap<String, PostfixCommand>();
-    static {
+	static {
         ruleFunTab.put("abs", new Abs());
         ruleFunTab.put("power", new Power());
         ruleFunTab.put("mod", new Modulus());
@@ -121,6 +123,8 @@ public class TableRuleFileLoader implements TableRuleLoader,Initialisable {
         ruleFunTab.put("decode", new Decode());
         ruleFunTab.put("to_char", new ToChar());
         ruleFunTab.put("to_number", new ToNumber());
+        ruleFunTab.put("long", new ToLong());
+        ruleFunTab.put("to_long", new ToLong());
         ruleFunTab.put("imatch", new IndistinctMatching()); // replacement for of Oracle's SOUNDEX
         ruleFunTab.put("months_between", new MonthsBetween());
         ruleFunTab.put("add_months", new AddMonths());
@@ -172,28 +176,55 @@ public class TableRuleFileLoader implements TableRuleLoader,Initialisable {
 	});
     }
 	
-	private String configFile;
+	private File ruleFile;
 	private long lastRuleModified;
-	private File ruleConfigFile;
+	private long lastRuleFunctionFileModified;
+	private File functionFile;
+	public File getRuleFile() {
+		return ruleFile;
+	}
 	
-	public String getConfigFile() {
-		return configFile;
+	public void setRuleFile(File configFile) {
+		this.ruleFile = configFile;
 	}
-	public void setConfigFile(String configFile) {
-		this.configFile = configFile;
+	
+	public File getFunctionFile() {
+		return functionFile;
 	}
+
+	public void setFunctionFile(File functionConfigFile) {
+		this.functionFile = functionConfigFile;
+	}
+
 	@Override
 	public void init() throws InitialisationException {
-		ruleConfigFile = new File(configFile);
+		
 	}
 	public TableRuleFileLoader(){
 		ruleFunctionMap.putAll(ruleFunTab);
 	}
+	
 	@Override
 	public synchronized Map<Table, TableRule> loadRule() {
-		lastRuleModified = ruleConfigFile.lastModified();
+		
+		if (functionFile != null && functionFile.exists()) {
+            lastRuleFunctionFileModified = functionFile.lastModified();
+        }
+		Map<String, PostfixCommand> ruleFunMap = null;
+		ruleFunMap = loadRuleFunctionMap(functionFile.getAbsolutePath());
+		
+		if (ruleFunMap != null) {
+			Map<String, PostfixCommand> temp = new HashMap<String, PostfixCommand>();
+			temp.putAll(ruleFunTab);
+			ruleFunTab.putAll(ruleFunMap);
+			this.ruleFunctionMap = ruleFunMap;
+        }
+		
+        logger.info("loading ruleFunMap from File="+functionFile);
+        
+		lastRuleModified = ruleFile.lastModified();
         DocumentBuilder db;
-        logger.info("loading tableRule from File="+ruleConfigFile.getAbsolutePath());
+        logger.info("loading tableRule from File="+ruleFile.getAbsolutePath());
         try {
             DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
             dbf.setValidating(true);
@@ -231,10 +262,10 @@ public class TableRuleFileLoader implements TableRuleLoader,Initialisable {
                     throw exception;
                 }
             });
-            return loadConfigurationFile(ruleConfigFile, db);
+            return loadConfigurationFile(ruleFile, db);
         } catch (Exception e) {
             logger.fatal("Could not load configuration file, failing", e);
-            throw new ConfigurationException("Error loading configuration file " + configFile, e);
+            throw new ConfigurationException("Error loading configuration file " + ruleFile, e);
         }
     }
 
@@ -445,10 +476,41 @@ public class TableRuleFileLoader implements TableRuleLoader,Initialisable {
     
 	@Override
 	public boolean needLoad() {
-		 if (ruleConfigFile.lastModified() != lastRuleModified) {
+		 if (ruleFile.lastModified() != lastRuleModified) {
 			 return true;
 		 }
+		 
+		 if (functionFile != null && functionFile.exists() 
+				 && functionFile.lastModified() != lastRuleFunctionFileModified ) {
+	         return true;
+	     }
 		 return false;
 	}
+	
+	public static Map<String, PostfixCommand> loadRuleFunctionMap(String configFileName) {
+        FunctionLoader<String, PostfixCommand> loader = new FunctionLoader<String, PostfixCommand>() {
+
+            @Override
+            public void initBeanObject(BeanObjectEntityConfig config, PostfixCommand bean) {
+                bean.setName(config.getName());
+            }
+
+            @Override
+            public void putToMap(Map<String, PostfixCommand> map, PostfixCommand value) {
+                map.put(value.getName(), value);
+            }
+
+        };
+
+        loader.setDTD("/com/meidusa/amoeba/xml/function.dtd");
+        loader.setDTDSystemID("function.dtd");
+
+        Map<String, PostfixCommand> tempRuleFunMap = new HashMap<String, PostfixCommand>();
+        logger.info("loading RuleFunctionMap from File="+configFileName);
+        Map<String, PostfixCommand> defindMap = loader.loadFunctionMap(configFileName);
+        tempRuleFunMap.putAll(ruleFunTab);
+        tempRuleFunMap.putAll(defindMap);
+        return tempRuleFunMap;
+    }
 	
 }

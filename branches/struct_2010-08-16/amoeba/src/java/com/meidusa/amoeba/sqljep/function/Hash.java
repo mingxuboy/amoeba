@@ -33,5 +33,14 @@ public class Hash extends PostfixCommand {
 			throws ParseException {
 		return hash(comparables[0]);
 	}
+	
+	public static void main(String[] args){
+		Double dd = 8650690750000000E0;
+		try {
+			System.out.println(hash((dd)));
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+	}
 }
 

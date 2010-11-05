@@ -38,6 +38,7 @@ import com.meidusa.amoeba.sqljep.function.ComparativeAND;
 import com.meidusa.amoeba.sqljep.function.ComparativeBaseList;
 import com.meidusa.amoeba.sqljep.function.ComparativeOR;
 import com.meidusa.amoeba.util.StringUtil;
+import com.meidusa.amoeba.util.ThreadLocalMap;
 
 /**
  * 
@@ -64,7 +65,12 @@ public class MongodbQueryRouter extends AbstractQueryRouter<MongodbClientConnect
 		operatorMap.put("$or", Comparative.Equivalent);
 		
 	}
-	
+    
+	protected void beforeSelectPool(MongodbClientConnection connection, RequestMongodbPacket queryObject){
+		super.beforeSelectPool(connection, queryObject);
+		ThreadLocalMap.put(_CURRENT_QUERY_OBJECT_, queryObject);
+    }
+    
 	private void fillTableAndSchema(String fullCollectionName,Table table,Schema schema){
 		int	index = fullCollectionName.indexOf(".");
 		if(index >0){
