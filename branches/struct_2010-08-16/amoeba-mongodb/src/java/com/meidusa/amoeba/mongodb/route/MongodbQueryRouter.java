@@ -154,6 +154,12 @@ public class MongodbQueryRouter extends AbstractQueryRouter<MongodbClientConnect
 						break _tableName;
 					}
 					
+					if(query.query.get("findandmodify")!= null){
+						tableName = (String)query.query.get("findandmodify");
+						bson = (BSONObject)query.query.get("query");
+						break _tableName;
+					}
+					
 					//db.getSisterDB(\"schema\").getCollection(\"collectionName\").stats();
 					if(query.query.get("$eval") != null){
 						Object object = query.query.get("$eval");

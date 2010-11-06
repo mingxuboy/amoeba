@@ -20,6 +20,8 @@ public interface MongodbPacketConstant {
 	public static final int HEADER_SIZE = 24;
 	public static final byte[] HEADER_PAD = new byte[HEADER_SIZE];
 	
+	public static String AMOEBA_SEQUENCE = "AMOEBA.SEQUENCE";
+	
 	public static int OP_REPLY =  1;//  Reply to a client request. responseTo is set  
 	public static int OP_MSG = 1000;//  generic msg command followed by a string  
 	public static int OP_UPDATE = 2001;//  update document  
