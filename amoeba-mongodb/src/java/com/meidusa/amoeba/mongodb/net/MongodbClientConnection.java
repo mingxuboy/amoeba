@@ -28,6 +28,7 @@ import org.bson.BasicBSONObject;
 
 import com.meidusa.amoeba.context.ProxyRuntimeContext;
 import com.meidusa.amoeba.mongodb.handler.AbstractSessionHandler;
+import com.meidusa.amoeba.mongodb.handler.AmoebaSequenceHandler;
 import com.meidusa.amoeba.mongodb.handler.CursorCloseMessageHandler;
 import com.meidusa.amoeba.mongodb.handler.DeleteMessageHandler;
 import com.meidusa.amoeba.mongodb.handler.GetMoreMessageHandler;
@@ -62,6 +63,7 @@ public class MongodbClientConnection extends AbstractMongodbConnection{
 	private LinkedBlockingQueue<byte[]> lastErrorQueue = new LinkedBlockingQueue<byte[]>(1);
 	private Map<String,PacketInterceptor<AbstractMongodbPacket>> interceptors;
 	private AtomicInteger LastErrorrequestId = new AtomicInteger(0);
+	private AtomicInteger sequeceRequestId = new AtomicInteger(0);
 	private AtomicLong currentCursorID = new AtomicLong(0x10001L);
 	private LRUMap cursorMap = new LRUMap(10){
 		private static final long serialVersionUID = 1L;
@@ -168,7 +170,9 @@ public class MongodbClientConnection extends AbstractMongodbConnection{
 		return packet;
 	}
 	
-
+	public int getNextRequestId(){
+		return sequeceRequestId.incrementAndGet();
+	}
 
 	public Map<String, PacketInterceptor<AbstractMongodbPacket>> getInterceptors() {
 		return interceptors;
@@ -203,34 +207,43 @@ public class MongodbClientConnection extends AbstractMongodbConnection{
 		switch(type){
 		case MongodbPacketConstant.OP_QUERY:
 			packet = new QueryMongodbPacket();
-			handler = new QueryMessageHandler(this,(QueryMongodbPacket)packet);
+			packet.init(message, this);
+			if(MongodbPacketConstant.AMOEBA_SEQUENCE.equalsIgnoreCase(((QueryMongodbPacket)packet).fullCollectionName)){
+				handler = new AmoebaSequenceHandler(this,(QueryMongodbPacket)packet);
+			}else{
+				handler = new QueryMessageHandler(this,(QueryMongodbPacket)packet);
+			}
 			break;
 		case MongodbPacketConstant.OP_GET_MORE:
 			packet = new GetMoreMongodbPacket();
+			packet.init(message, this);
 			handler = new GetMoreMessageHandler(this,(GetMoreMongodbPacket)packet);
 			break;
 		case MongodbPacketConstant.OP_DELETE:
 			packet = new DeleteMongodbPacket();
+			packet.init(message, this);
 			handler = new DeleteMessageHandler(this,(DeleteMongodbPacket)packet);
 			break;
 		case MongodbPacketConstant.OP_KILL_CURSORS:
 			packet = new KillCursorsMongodbPacket();
+			packet.init(message, this);
 			handler = new KillCursorMessageHandler(this,(KillCursorsMongodbPacket)packet);
 			break;
 		case MongodbPacketConstant.OP_UPDATE:
 			packet = new UpdateMongodbPacket();
+			packet.init(message, this);
 			handler = new UpdateMessageHandler(this,(UpdateMongodbPacket)packet);
 			break;
 		case MongodbPacketConstant.OP_INSERT:
 			packet = new InsertMongodbPacket();
+			packet.init(message, this);
 			handler = new InsertMessageHandler(this,(InsertMongodbPacket)packet);
 			break;
 		case MongodbPacketConstant.OP_MSG:
 			packet = new MessageMongodbPacket();
+			packet.init(message, this);
 			break;
 		}
-		
-		packet.init(message, this);
 		
 		//debug packet info
 		if(AbstractSessionHandler.PACKET_LOGGER.isDebugEnabled()){
