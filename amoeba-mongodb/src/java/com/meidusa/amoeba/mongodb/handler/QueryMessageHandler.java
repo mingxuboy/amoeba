@@ -154,7 +154,7 @@ public class QueryMessageHandler extends AbstractSessionHandler<QueryMongodbPack
 		packet.init(message, conn);
 		
 		if(PACKET_LOGGER.isDebugEnabled()){
-			PACKET_LOGGER.debug("<<---pakcet="+packet+"," +conn.getSocketId());
+			PACKET_LOGGER.debug("<<---["+this.requestPacket.requestID+"]--pakcet="+packet+"," +conn.getSocketId());
 		}
 		
 		if(ROUTER_TRACE.isDebugEnabled()){
