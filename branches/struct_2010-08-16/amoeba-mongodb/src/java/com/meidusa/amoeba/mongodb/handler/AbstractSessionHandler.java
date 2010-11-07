@@ -134,9 +134,6 @@ public abstract class AbstractSessionHandler<T extends AbstractMongodbPacket> im
 				bson.put("_pool_name_", conn.getObjectPool().getName()+"@"+conn.getSocketId());
 			}
 		}
-		if(PACKET_LOGGER.isDebugEnabled()){
-			PACKET_LOGGER.debug("<<----ReponsePacket="+packet+", requestHandler="+this.hashCode()+", " +conn.getSocketId() +"-->"+this.clientConn.getSocketId()+"\r\n");
-		}
 	}
 	
 	/**
