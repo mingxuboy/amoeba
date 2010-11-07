@@ -20,12 +20,14 @@ import com.meidusa.amoeba.mongodb.route.MongodbQueryRouter;
 import com.meidusa.amoeba.net.poolable.ObjectPool;
 import com.meidusa.amoeba.util.Tuple;
 
-public class AmoebaSequenceHandler extends AbstractSessionHandler<QueryMongodbPacket> {
+public class AmoebaSequenceHandler extends QueryMessageHandler {
 	private static Map SEQUENCE_MAP = Collections.synchronizedMap(new LRUMap(50000));
 	private static long SIZE = 1000;
 	private static String SEQ_NAME="seq_name";
 	private static String VALUE = "value";
+	private static String NEXT = "$next";
 	private String key = null;
+	private boolean nextValue = false;
 	private static boolean inProgress = false;
 	public AmoebaSequenceHandler(MongodbClientConnection clientConn,
 			QueryMongodbPacket t) {
@@ -37,6 +39,19 @@ public class AmoebaSequenceHandler extends AbstractSessionHandler<QueryMongodbPa
 			throws Exception {
 		if(this.requestPacket.query != null){
 			key = (String)this.requestPacket.query.get(SEQ_NAME);
+		}
+		
+		if(this.requestPacket.returnFieldSelector != null){
+			Object n = (Object)this.requestPacket.returnFieldSelector.get(NEXT);
+			if(n != null){
+				nextValue = true;
+			}
+		}
+		
+		if(key == null || !nextValue){
+			super.doClientRequest(conn, message);
+			return;
+		}else{
 			Tuple<Boolean,Long> nextSequenceTuple = getNextSequenceTuple(key);
 			int time = 10;
 			if(nextSequenceTuple.left){
@@ -107,25 +122,12 @@ public class AmoebaSequenceHandler extends AbstractSessionHandler<QueryMongodbPa
 					return;
 				}
 			}while(nextSequenceTuple.left);
-				conn.postMessage(createResponse(nextSequenceTuple.right).toByteBuffer(conn));
+			conn.postMessage(createResponse(nextSequenceTuple.right).toByteBuffer(conn));
 				
-			}else{
-				conn.postMessage(createResponse(nextSequenceTuple.right).toByteBuffer(conn));
-			}
-			
 		}else{
-			ResponseMongodbPacket result = new ResponseMongodbPacket();
-			result.numberReturned = 1;
-			result.responseFlags = 1;
-			result.documents = new ArrayList<BSONObject>();
-			BSONObject error = new BasicBSONObject();
-			error.put("err", "SEQUENCE key not found");
-			error.put("errmsg", "SEQUENCE key not found");
-			error.put("ok", 0.0);
-			error.put("n", 1);
-			result.documents.add(error);
-			result.responseTo = requestPacket.requestID;
-			conn.postMessage(result.toByteBuffer(conn));
+			conn.postMessage(createResponse(nextSequenceTuple.right).toByteBuffer(conn));
+		}
+			
 		}
 	}
 
@@ -149,6 +151,11 @@ public class AmoebaSequenceHandler extends AbstractSessionHandler<QueryMongodbPa
 	
 	@Override
 	protected void doServerResponse(MongodbServerConnection conn, byte[] message) {
+		if(key == null || !nextValue){
+			super.doServerResponse(conn, message);
+			return;
+		}
+		
 		ResponseMongodbPacket packet = new ResponseMongodbPacket();
 		MongodbServerConnection serverConn = (MongodbServerConnection) conn;
 		int type = MongodbPacketBuffer.getOPMessageType(message);
@@ -193,11 +200,15 @@ public class AmoebaSequenceHandler extends AbstractSessionHandler<QueryMongodbPa
 		BSONObject value = new BasicBSONObject();
 		
 		if(this.requestPacket.returnFieldSelector == null || this.requestPacket.returnFieldSelector.toMap().size() ==0){
-			value.put(VALUE, number);
+			value.put(NEXT, number);
 			value.put(SEQ_NAME, key);
 		}else{
 			if(this.requestPacket.returnFieldSelector.containsField(VALUE)){
 				value.put(VALUE, number);
+			}
+			
+			if(this.requestPacket.returnFieldSelector.containsField(NEXT)){
+				value.put(NEXT, number);
 			}
 			
 			if(this.requestPacket.returnFieldSelector.containsField(SEQ_NAME)){
@@ -235,7 +246,15 @@ public class AmoebaSequenceHandler extends AbstractSessionHandler<QueryMongodbPa
 		
 		packet.query.put("update",update);
 		
-		packet.query.put("fields", this.requestPacket.returnFieldSelector);
+		BSONObject returnFieldSelector = null;
+		if(this.requestPacket.returnFieldSelector !=null){
+			returnFieldSelector = new BasicBSONObject();
+			returnFieldSelector.putAll(this.requestPacket.returnFieldSelector);
+			returnFieldSelector.removeField(NEXT);
+			returnFieldSelector.put(VALUE, 1);
+		}
+		
+		packet.query.put("fields", returnFieldSelector);
 		//upsert
 		packet.query.put("upsert", true);
 		

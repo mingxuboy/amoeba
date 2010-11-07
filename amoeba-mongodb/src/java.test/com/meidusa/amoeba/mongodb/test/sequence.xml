@@ -8,6 +8,6 @@
 	<entry key="requestFlags">0</entry>
 	<entry key="requestID">${#atomicInteger.getAndIncrement()+1}</entry>
 	<entry key="query"><![CDATA[
-		{"key":"mykey12"}
+		{"seq_name":"abcde"}
 		]]></entry>
 </properties>
