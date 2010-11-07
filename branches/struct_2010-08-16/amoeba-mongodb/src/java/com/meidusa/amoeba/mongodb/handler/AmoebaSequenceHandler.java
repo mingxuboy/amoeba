@@ -164,6 +164,11 @@ public class AmoebaSequenceHandler extends QueryMessageHandler {
 			PACKET_LOGGER.error("unkown response packet type="+type+" , request="+this.requestPacket);
 		}
 		packet.init(message, conn);
+		
+		if(PACKET_LOGGER.isDebugEnabled()){
+			PACKET_LOGGER.debug("<<---pakcet="+packet+"," +conn.getSocketId());
+		}
+		
 		Tuple<Long,AtomicLong> tuple = null;
 		synchronized (key.intern()){
 			if(packet.documents != null && packet.documents.size() >0){
