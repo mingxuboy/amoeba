@@ -248,7 +248,7 @@ public class MongodbClientConnection extends AbstractMongodbConnection{
 		//debug packet info
 		if(AbstractSessionHandler.PACKET_LOGGER.isDebugEnabled()){
 			if(packet != null){
-				AbstractSessionHandler.PACKET_LOGGER.debug("--->>>pakcet="+packet+"," +this.getSocketId());
+				AbstractSessionHandler.PACKET_LOGGER.debug(">>>---["+packet.requestID+"]--pakcet="+packet+"," +this.getSocketId());
 			}else{
 				AbstractSessionHandler.PACKET_LOGGER.debug("ERROR --->>>"+this.getSocketId()+"  unknow type="+type);
 			}
