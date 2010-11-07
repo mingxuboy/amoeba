@@ -1,6 +1,8 @@
 package com.meidusa.amoeba.mongodb.handler;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.commons.collections.map.LRUMap;
@@ -19,8 +21,10 @@ import com.meidusa.amoeba.net.poolable.ObjectPool;
 import com.meidusa.amoeba.util.Tuple;
 
 public class AmoebaSequenceHandler extends AbstractSessionHandler<QueryMongodbPacket> {
-	private static LRUMap SEQUENCE_MAP = new LRUMap(50000);
+	private static Map SEQUENCE_MAP = Collections.synchronizedMap(new LRUMap(50000));
 	private static long SIZE = 1000;
+	private static String SEQ_NAME="seq_name";
+	private static String VALUE = "value";
 	private String key = null;
 	private static boolean inProgress = false;
 	public AmoebaSequenceHandler(MongodbClientConnection clientConn,
@@ -32,20 +36,17 @@ public class AmoebaSequenceHandler extends AbstractSessionHandler<QueryMongodbPa
 	protected void doClientRequest(MongodbClientConnection conn, byte[] message)
 			throws Exception {
 		if(this.requestPacket.query != null){
-			key = (String)this.requestPacket.query.get("key");
-			Tuple<Long,AtomicLong> tuple = (Tuple<Long,AtomicLong>)SEQUENCE_MAP.get(key);
-			boolean need = false;
-			long number = 0;
-			if(tuple == null){
-				need = true;
-			}else{
-				number = tuple.right.addAndGet(1);
-				if(number > tuple.left+SIZE){
-					need = true;
-				}
-			}
-			if(need){
-				synchronized (key.intern()) {
+			key = (String)this.requestPacket.query.get(SEQ_NAME);
+			Tuple<Boolean,Long> nextSequenceTuple = getNextSequenceTuple(key);
+			int time = 10;
+			if(nextSequenceTuple.left){
+				do{
+					synchronized (key.intern()) {
+					nextSequenceTuple = getNextSequenceTuple(key);
+					
+					if(!nextSequenceTuple.left){
+						break;
+					}
 					if(!inProgress){
 						inProgress = true;
 						
@@ -86,14 +87,30 @@ public class AmoebaSequenceHandler extends AbstractSessionHandler<QueryMongodbPa
 							}
 						}
 					}
-					
-					key.intern().wait();
-					
-					tuple = (Tuple<Long,AtomicLong>)SEQUENCE_MAP.get(key);
-					conn.postMessage(createResponse(tuple.right.addAndGet(1)).toByteBuffer(conn));
+					key.intern().wait(2*1000);
+					nextSequenceTuple =  getNextSequenceTuple(key);
 				}
+				time ++;
+				if(nextSequenceTuple.left && time >5){
+					ResponseMongodbPacket result = new ResponseMongodbPacket();
+					result.numberReturned = 1;
+					result.responseFlags = 1;
+					result.documents = new ArrayList<BSONObject>();
+					BSONObject error = new BasicBSONObject();
+					error.put("err", "SEQUENCE key not found");
+					error.put("errmsg", "SEQUENCE key not found");
+					error.put("ok", 0.0);
+					error.put("n", 1);
+					result.documents.add(error);
+					result.responseTo = requestPacket.requestID;
+					conn.postMessage(result.toByteBuffer(conn));
+					return;
+				}
+			}while(nextSequenceTuple.left);
+				conn.postMessage(createResponse(nextSequenceTuple.right).toByteBuffer(conn));
+				
 			}else{
-				conn.postMessage(createResponse(number).toByteBuffer(conn));
+				conn.postMessage(createResponse(nextSequenceTuple.right).toByteBuffer(conn));
 			}
 			
 		}else{
@@ -112,6 +129,24 @@ public class AmoebaSequenceHandler extends AbstractSessionHandler<QueryMongodbPa
 		}
 	}
 
+	private Tuple<Boolean,Long> getNextSequenceTuple(String key){
+		boolean need = false;
+		long number = 0;
+		Tuple<Long,AtomicLong> tuple = (Tuple<Long,AtomicLong>)SEQUENCE_MAP.get(key);
+		if(tuple == null){
+			need = true;
+		}else{
+			number = tuple.right.addAndGet(1);
+			if(number > tuple.left+SIZE){
+				need = true;
+			}else{
+				need = false;
+			}
+		}
+		
+		return new Tuple<Boolean,Long>(need,number);
+	}
+	
 	@Override
 	protected void doServerResponse(MongodbServerConnection conn, byte[] message) {
 		ResponseMongodbPacket packet = new ResponseMongodbPacket();
@@ -125,8 +160,12 @@ public class AmoebaSequenceHandler extends AbstractSessionHandler<QueryMongodbPa
 		Tuple<Long,AtomicLong> tuple = null;
 		synchronized (key.intern()){
 			if(packet.documents != null && packet.documents.size() >0){
-				 BSONObject  bsValue = (BSONObject)packet.documents.get(0).get("value");
-				 long value = (Long) bsValue.get("value");
+				 BSONObject  bsValue = (BSONObject)packet.documents.get(0).get(VALUE);
+				 Object object = bsValue.get(VALUE);
+				 long value = 0;
+				 if(object != null){
+					 value = (Long)object;
+				 }
 				 tuple = (Tuple<Long,AtomicLong>)SEQUENCE_MAP.get(key);
 				 if(tuple == null){
 					 tuple = new Tuple<Long,AtomicLong>(value,new AtomicLong(value));
@@ -152,8 +191,19 @@ public class AmoebaSequenceHandler extends AbstractSessionHandler<QueryMongodbPa
 		result.responseFlags = 0;
 		result.documents = new ArrayList<BSONObject>();
 		BSONObject value = new BasicBSONObject();
-		value.put("value", number);
-		value.put("key", key);
+		
+		if(this.requestPacket.returnFieldSelector == null || this.requestPacket.returnFieldSelector.toMap().size() ==0){
+			value.put(VALUE, number);
+			value.put(SEQ_NAME, key);
+		}else{
+			if(this.requestPacket.returnFieldSelector.containsField(VALUE)){
+				value.put(VALUE, number);
+			}
+			
+			if(this.requestPacket.returnFieldSelector.containsField(SEQ_NAME)){
+				value.put(SEQ_NAME, key);
+			}
+		}
 		result.documents.add(value);
 		result.responseTo = requestPacket.requestID;
 		return result;
@@ -169,22 +219,23 @@ public class AmoebaSequenceHandler extends AbstractSessionHandler<QueryMongodbPa
 		
 		//query
 		BSONObject queryKey = new BasicBSONObject();
-		queryKey.put("key", key);
+		queryKey.put(SEQ_NAME, key);
 		
 		packet.query.put("query",queryKey);
 		
 		//update
 		BSONObject update = new BasicBSONObject();
 		BSONObject value = new BasicBSONObject();
-		value.put("value", SIZE);
+		value.put(VALUE, SIZE);
 		update.put("$inc", value);
 		
 		BSONObject set = new BasicBSONObject();
-		set.put("key", key);
+		set.put(SEQ_NAME, key);
 		update.put("$set", set);
-
+		
 		packet.query.put("update",update);
 		
+		packet.query.put("fields", this.requestPacket.returnFieldSelector);
 		//upsert
 		packet.query.put("upsert", true);
 		

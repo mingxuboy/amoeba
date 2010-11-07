@@ -35,15 +35,27 @@ public abstract class AbstractBenchmark {
 	
 	private static Map contextMap = new HashMap();
 	private static Properties properties = new Properties();
+	protected static CmdLineParser parser = new CmdLineParser(System.getProperty("application", "BenchMark"));
+	protected static CmdLineParser.Option debugOption = parser.addOption(OptionType.Boolean,'d', "debug", false,"show the interaction with the server-side information");
+	protected static CmdLineParser.Option portOption = parser.addOption(OptionType.Int,'p', "port",true,"server port");
+	protected static CmdLineParser.Option hostOption = parser.addOption(OptionType.String,'h', "host",true,"server host","127.0.0.1");
+	protected static CmdLineParser.Option connOption = parser.addOption(OptionType.Int,'c', "conn",true,"The number of concurrent connections");
+	protected static CmdLineParser.Option totleOption = parser.addOption(OptionType.Long,'n', "totle",true,"totle requests");
+	protected static CmdLineParser.Option timeoutOption = parser.addOption(OptionType.Int,'t', "timeout",false,"query timeout, default value=-1 ");
+	protected static CmdLineParser.Option helpOption = parser.addOption(OptionType.String,'?', "help",false,"Show this help message");
+    
+	protected static CmdLineParser.Option contextOption = parser.addOption(OptionType.String,'C', "context",false,"Context xml File");
+	protected static CmdLineParser.Option requestOption = parser.addOption(OptionType.String,'f', "file",true,"request xml File");
+    
 	public AbstractBenchmark(){
 		Random random = new Random();
 		contextMap.put("random",random);
 		contextMap.put("atomicInteger",new AtomicInteger());
 		contextMap.put("atomicLong",new AtomicLong());
-		String reqestXml = System.getProperty("requestFile");
 		
-		if(reqestXml != null){
-			File reqestXmlFile = new File(reqestXml);
+		String requestXml = (String)parser.getOptionValue(requestOption);
+		if(requestXml != null){
+			File reqestXmlFile = new File(requestXml);
 			if(reqestXmlFile.exists() && reqestXmlFile.isFile()){
 				try {
 					properties.loadFromXML(new FileInputStream(reqestXmlFile));
@@ -56,11 +68,11 @@ public abstract class AbstractBenchmark {
 				System.exit(-1);
 			}
 		}else{
-			System.err.println("system property named 'requestFile' not set");
+			System.err.println("--file="+requestXml+" not found");
 			System.exit(-1);
 		}
 		
-		String contextFile = System.getProperty("contextFile");
+		String contextFile = (String)parser.getOptionValue(contextOption);
 		
 		if(contextFile != null){
 			Properties properties = new Properties();
@@ -98,43 +110,16 @@ public abstract class AbstractBenchmark {
 		public boolean running = true;
 	}
 	public static void main(String[] args) throws Exception {
-		CmdLineParser parser = new CmdLineParser(System.getProperty("application", "BenchMark"));
-    	CmdLineParser.Option debugOption = parser.addOption(OptionType.Boolean,'d', "debug", false,"show the interaction with the server-side information");
-        CmdLineParser.Option portOption = parser.addOption(OptionType.String,'p', "port",true,"server port");
-        CmdLineParser.Option hostOption = parser.addOption(OptionType.String,'h', "host",true,"server host");
-        CmdLineParser.Option connOption = parser.addOption(OptionType.String,'c', "conn",true,"The number of concurrent connections");
-        CmdLineParser.Option totleOption = parser.addOption(OptionType.Long,'n', "totle",true,"totle requests");
-        CmdLineParser.Option timeoutOption = parser.addOption(OptionType.Int,'t', "timeout",false,"query timeout, default value=-1 ");
-        CmdLineParser.Option helpOption = parser.addOption(OptionType.String,'?', "help",false,"Show this help message");
-        
-        try {
-            parser.parse(args);
-            Boolean value = (Boolean)parser.getOptionValue(helpOption);
-        	if(value != null && value.booleanValue()){
-        		parser.printUsage();
-        		System.exit(2);
-        	}
-        }catch ( CmdLineParser.OptionException e ) {
-        	Boolean value = (Boolean)parser.getOptionValue(helpOption);
-        	if(value != null && value.booleanValue()){
-        		parser.printUsage();
-        	}else{
-        		System.err.println(e.getMessage());
-            	parser.printUsage();
-        	}
-        	System.exit(2);
-        }
-        
 		Logger logger = Logger.getLogger("rootLogger");
 		logger.addAppender(new ConsoleAppender());
 		logger.setLevel(Level.DEBUG);
 
 		int conn = (Integer)parser.getOptionValue(connOption);
-		final int totle = (Integer)parser.getOptionValue(totleOption);
+		final long totle = (Long)parser.getOptionValue(totleOption);
 		String ip = parser.getOptionValue(hostOption).toString();
 		
-		final CountDownLatch requestLatcher = new CountDownLatch(totle);
-		final CountDownLatch responseLatcher = new CountDownLatch(totle);
+		final CountDownLatch requestLatcher = new CountDownLatch((int)totle);
+		final CountDownLatch responseLatcher = new CountDownLatch((int)totle);
 		final TaskRunnable task = new TaskRunnable();
 		int port = (Integer)parser.getOptionValue(portOption);
 		
