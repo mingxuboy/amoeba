@@ -82,6 +82,10 @@ public class ModifyOperateMessageHandler<T extends RequestMongodbPacket> extends
 			putDebugInfoToResponsePacket(lastResponsePacket,conn);
 		}
 		
+		if(PACKET_LOGGER.isDebugEnabled()){
+			PACKET_LOGGER.debug("<<---pakcet="+lastResponsePacket+"," +conn.getSocketId());
+		}
+
 		if(isMulti){
 			multiResponsePacket.add(lastResponsePacket);
 			if(endQuery(conn)){
