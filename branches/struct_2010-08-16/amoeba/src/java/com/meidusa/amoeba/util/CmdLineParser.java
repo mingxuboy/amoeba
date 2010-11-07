@@ -149,13 +149,21 @@ public class CmdLineParser {
 		private String longForm = null;
 		private boolean wantsValue = false;
 		private String description;
-
+		private String defaultValue = null;
 		public String getDescription() {
 			return description;
 		}
 
 		public void setDescription(String description) {
 			this.description = description;
+		}
+
+		public String getDefaultValue() {
+			return defaultValue;
+		}
+
+		public void setDefaultValue(String defaultValue) {
+			this.defaultValue = defaultValue;
 		}
 
 		protected Option(String longForm, boolean wantsValue) {
@@ -343,6 +351,10 @@ public class CmdLineParser {
 	public List<Option> getOptions() {
 		return optionList;
 	}
+	
+	public Option getOption(String name){
+		return this.options.get("--"+name);
+	}
 
 	public final Option addOption(OptionType type, char shortForm,
 			String longForm, boolean need, String description) {
@@ -368,13 +380,20 @@ public class CmdLineParser {
 		option.wantsValue = need;
 		return addOption(option);
 	}
+	
+	public final Option addOption(OptionType type, char shortForm,
+			String longForm, boolean need, String description,String defaultValue) {
+		Option option =  addOption(type,shortForm,longForm,need,description);
+		option.setDefaultValue(defaultValue);
+		return option;
+	}
 
 	/**
 	 * Equivalent to {@link #getOptionValue(Option, Object) getOptionValue(o,
 	 * null)}.
 	 */
 	public final Object getOptionValue(Option o) {
-		return getOptionValue(o, null);
+		return getOptionValue(o, o.getDefaultValue());
 	}
 
 	/**

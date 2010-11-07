@@ -14,10 +14,28 @@ import com.meidusa.amoeba.benchmark.AbstractBenchmarkClientConnection;
 import com.meidusa.amoeba.config.ConfigUtil;
 import com.meidusa.amoeba.config.ParameterMapping;
 import com.meidusa.amoeba.config.PropertyTransfer;
+import com.meidusa.amoeba.util.CmdLineParser;
 
 public class MongoDBBenchmark extends AbstractBenchmark{
 	private static Logger logger = Logger.getLogger(MongoDBBenchmark.class);
 	public static void main(String[] args) throws Exception {
+        try {
+            parser.parse(args);
+            Boolean value = (Boolean)parser.getOptionValue(helpOption);
+        	if(value != null && value.booleanValue()){
+        		parser.printUsage();
+        		System.exit(2);
+        	}
+        }catch ( CmdLineParser.OptionException e ) {
+        	Boolean value = (Boolean)parser.getOptionValue(helpOption);
+        	if(value != null && value.booleanValue()){
+        		parser.printUsage();
+        	}else{
+        		System.err.println(e.getMessage());
+            	parser.printUsage();
+        	}
+        	System.exit(2);
+        }
 		ParameterMapping.registerTransfer(BSONObject.class, new PropertyTransfer<BSONObject>(){
 			@Override
 			public BSONObject transfer(String inputString) {
