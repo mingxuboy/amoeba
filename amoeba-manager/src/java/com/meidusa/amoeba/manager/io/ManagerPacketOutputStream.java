@@ -50,10 +50,11 @@ public class ManagerPacketOutputStream extends PacketOutputStream implements Man
 	        /**
 	         *  包头信息：长度－－是不包含包头长度
 	         */
-	        int count = _buffer.limit();
+	        int count = _buffer.limit()-HEADER_PAD.length;
 	        _buffer.put((byte)(count & 0xff));
-	        _buffer.put((byte) (count >>> 8));
-	        _buffer.put((byte) (count >>> 16));
+	        _buffer.put((byte) (count >> 8));
+	        _buffer.put((byte) (count >> 16));
+	        _buffer.put((byte) (count >> 24));
         }
         _buffer.rewind();
         return _buffer;
