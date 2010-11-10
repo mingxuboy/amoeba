@@ -244,7 +244,7 @@ public abstract class Connection implements NetEventHandler {
     }
 
     public int handleEvent(long when) {
-        int bytesInTotle = 0;
+        int bytesInTotal = 0;
         try {
             if (_fin == null) {
                 _fin = createPacketInputStream();
@@ -253,7 +253,7 @@ public abstract class Connection implements NetEventHandler {
             while (_channel != null && _channel.isOpen() && (msg = _fin.readPacket(_channel)) != null) {
                 // 记录最后一次发生时间
                 _lastEvent = when;
-                bytesInTotle +=msg.length;
+                bytesInTotal +=msg.length;
                 doReceiveMessage(msg);
             }
         	messageProcess();
@@ -275,7 +275,7 @@ public abstract class Connection implements NetEventHandler {
             handleFailure(exception);
         }
 
-        return bytesInTotle;
+        return bytesInTotal;
     }
 
     

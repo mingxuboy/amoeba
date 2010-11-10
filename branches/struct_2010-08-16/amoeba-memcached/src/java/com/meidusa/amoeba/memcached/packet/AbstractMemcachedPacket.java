@@ -40,7 +40,7 @@ public class AbstractMemcachedPacket extends com.meidusa.amoeba.net.packet.Abstr
 	/**
 	 * Length in bytes of extra + key + value.
 	 */
-	public int totleBodyLength;
+	public int totalBodyLength;
 	
 	/**
 	 * Will be copied back to you in the response
@@ -77,7 +77,7 @@ public class AbstractMemcachedPacket extends com.meidusa.amoeba.net.packet.Abstr
 		extrasLength = bufferTemp.readByte();
 		dateType = bufferTemp.readByte();
 		status = bufferTemp.readShort();
-		totleBodyLength = bufferTemp.readInt();
+		totalBodyLength = bufferTemp.readInt();
 		opaque = bufferTemp.readInt();
 		cas = bufferTemp.readInt();
 	}
@@ -93,7 +93,7 @@ public class AbstractMemcachedPacket extends com.meidusa.amoeba.net.packet.Abstr
 		bufferTemp.writeByte(extrasLength);
 		bufferTemp.writeByte(dateType);
 		bufferTemp.writeShort(status);
-		bufferTemp.writeInt(totleBodyLength);
+		bufferTemp.writeInt(totalBodyLength);
 		bufferTemp.writeInt(opaque);
 		bufferTemp.writeInt(cas);
 	}

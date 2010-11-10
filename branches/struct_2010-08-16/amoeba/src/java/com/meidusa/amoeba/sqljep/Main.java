@@ -89,7 +89,7 @@ public class Main {
 				}
 				}
 				
-				 System.out.println("totle:"+(System.currentTimeMillis() -start));	
+				 System.out.println("total:"+(System.currentTimeMillis() -start));	
 			}
 		}.start();
 		
@@ -98,7 +98,7 @@ public class Main {
 		final long start = System.currentTimeMillis();
 		for(int i=0;i<1;i++)
 		result = sqljep.getValue(row);
-		System.out.println(result+"\n"+"...totle:"+(System.currentTimeMillis() -start));
+		System.out.println(result+"\n"+"...total:"+(System.currentTimeMillis() -start));
 		
 	}
 }

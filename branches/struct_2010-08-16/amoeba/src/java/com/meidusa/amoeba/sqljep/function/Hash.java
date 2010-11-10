@@ -34,8 +34,17 @@ public class Hash extends PostfixCommand {
 		return hash(comparables[0]);
 	}
 	
+	
 	public static void main(String[] args){
-		Double dd = 8650690750000000E0;
+		String dd = "624265432";
+		    int off = 0;
+		    char val[] = dd.toCharArray();
+		    int len = val.length;
+		    int h = 0;
+            for (int i = 0; i < len; i++) {
+                h = 31*h + val[off++];
+            }
+		
 		try {
 			System.out.println(hash((dd)));
 		} catch (ParseException e) {

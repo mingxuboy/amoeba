@@ -36,6 +36,7 @@ public class ManagerPacketInputStream extends PacketInputStream implements Manag
 	public ManagerPacketInputStream(boolean readPackedWithHead){
 		this.readPackedWithHead = readPackedWithHead;
 	}
+	
 	protected int decodeLength() {
 		
 		/**
@@ -45,38 +46,24 @@ public class ManagerPacketInputStream extends PacketInputStream implements Manag
 			return -1;
 		}
 
-		_buffer.rewind();
+		//_buffer.rewind();
 		
 		/**
-		 * manager 数据部分＋包头=整个数据包长度
+		 * mysql 数据部分＋包头=整个数据包长度
 		 */
-		int length = (_buffer.get() & 0xff)
-					+ ((_buffer.get() & 0xff) << 8)	
-					+ ((_buffer.get() & 0xff) << 16);
-					
-		_buffer.position(_have);
+		int length = (_buffer.get(0) & 0xff)
+					| ((_buffer.get(1) & 0xff) << 8)
+					| ((_buffer.get(2) & 0xff) << 16)
+					| ((_buffer.get(3) & 0xff) << 24);
+		
 		return length;
 	}
+
 
 	public int getHeaderSize() {
 		return HEADER_SIZE;
 	}
 	
-	protected boolean checkForCompletePacket ()
-    {
-        if (_length == -1 || _have < _length) {
-            return false;
-        }
-        //将buffer 包含整个数据包，包括包头内容
-        if(readPackedWithHead){
-        	_buffer.position(0);
-        }else{
-        	_buffer.position(this.getHeaderSize());
-        }
-        _buffer.limit(_length);
-        return true;
-    }
-
 	protected byte[] readPacket(){
         byte[] msg = new byte[_length];
         int position = _buffer.position();

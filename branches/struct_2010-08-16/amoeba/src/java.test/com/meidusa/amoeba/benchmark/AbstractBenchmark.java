@@ -40,7 +40,7 @@ public abstract class AbstractBenchmark {
 	protected static CmdLineParser.Option portOption = parser.addOption(OptionType.Int,'p', "port",true,"server port");
 	protected static CmdLineParser.Option hostOption = parser.addOption(OptionType.String,'h', "host",true,"server host","127.0.0.1");
 	protected static CmdLineParser.Option connOption = parser.addOption(OptionType.Int,'c', "conn",true,"The number of concurrent connections");
-	protected static CmdLineParser.Option totleOption = parser.addOption(OptionType.Long,'n', "totle",true,"totle requests");
+	protected static CmdLineParser.Option totalOption = parser.addOption(OptionType.Long,'n', "total",true,"total requests");
 	protected static CmdLineParser.Option timeoutOption = parser.addOption(OptionType.Int,'t', "timeout",false,"query timeout, default value=-1 ");
 	protected static CmdLineParser.Option helpOption = parser.addOption(OptionType.String,'?', "help",false,"Show this help message");
     
@@ -115,11 +115,11 @@ public abstract class AbstractBenchmark {
 		logger.setLevel(Level.DEBUG);
 
 		int conn = (Integer)parser.getOptionValue(connOption);
-		final long totle = (Long)parser.getOptionValue(totleOption);
+		final long total = (Long)parser.getOptionValue(totalOption);
 		String ip = parser.getOptionValue(hostOption).toString();
 		
-		final CountDownLatch requestLatcher = new CountDownLatch((int)totle);
-		final CountDownLatch responseLatcher = new CountDownLatch((int)totle);
+		final CountDownLatch requestLatcher = new CountDownLatch((int)total);
+		final CountDownLatch responseLatcher = new CountDownLatch((int)total);
 		final TaskRunnable task = new TaskRunnable();
 		int port = (Integer)parser.getOptionValue(portOption);
 		
@@ -136,18 +136,18 @@ public abstract class AbstractBenchmark {
 					long current = responseLatcher.getCount();
 					long tps = lastCount - current;
 					lastCount = current;
-					System.out.println(new Date() +"     compeleted="+(totle - lastCount)+ " TPS="+tps);
+					System.out.println(new Date() +"     compeleted="+(total - lastCount)+ " TPS="+tps);
 					try {
 						Thread.sleep(1000);
 					} catch (InterruptedException e) {
 					}
 				}
-				System.out.println(new Date() +"     compeleted="+(totle));
+				System.out.println(new Date() +"     compeleted="+(total));
 			}
 			
 		}.start();
 		
-		System.out.println("\r\nconnect to ip="+ip+",port="+port+",connection size="+conn+",totle request="+totle);
+		System.out.println("\r\nconnect to ip="+ip+",port="+port+",connection size="+conn+",total request="+total);
 		AbstractBenchmark benckmark = AbstractBenchmark.getInstance();
 		List<AbstractBenchmarkClientConnection<?>> connList = new ArrayList<AbstractBenchmarkClientConnection<?>>();
 		for(int i=0;i<conn;i++){
@@ -198,9 +198,9 @@ public abstract class AbstractBenchmark {
 				maxend = Math.max(maxend, connection.end);
 			}
 		}
-		average = cost / totle;
+		average = cost / total;
 		long time = TimeUnit.MILLISECONDS.convert((maxend - minStart),TimeUnit.NANOSECONDS);
-		System.out.println("completed requests totle="+totle+", cost="+TimeUnit.MILLISECONDS.convert((maxend - minStart), TimeUnit.NANOSECONDS)+"ms , TPS="+ (time>0?((long)totle*1000)/time:totle)+"/s");
+		System.out.println("completed requests total="+total+", cost="+TimeUnit.MILLISECONDS.convert((maxend - minStart), TimeUnit.NANOSECONDS)+"ms , TPS="+ (time>0?((long)total*1000)/time:total)+"/s");
 		System.out.println("min="+TimeUnit.MILLISECONDS.convert(min, TimeUnit.NANOSECONDS)+"ms");
 		System.out.println("max="+TimeUnit.MILLISECONDS.convert(max, TimeUnit.NANOSECONDS)+"ms");
 		System.out.println("average="+TimeUnit.MILLISECONDS.convert(average, TimeUnit.NANOSECONDS)+"ms");

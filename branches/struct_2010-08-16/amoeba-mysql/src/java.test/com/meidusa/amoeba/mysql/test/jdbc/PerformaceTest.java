@@ -21,11 +21,11 @@ public class PerformaceTest {
 	 */
 	public static void main(String[] args) throws Exception {
 		int threadCount = 1;
-		int totleQuery = 1;
+		int totalQuery = 1;
 		int count = 1;
 		if(args.length>=2){
 			threadCount = Integer.parseInt(args[0]);
-			totleQuery = Integer.parseInt(args[1]);
+			totalQuery = Integer.parseInt(args[1]);
 			if(args.length>2){
 				count = Integer.parseInt(args[2]);
 			}
@@ -54,7 +54,7 @@ public class PerformaceTest {
 		props.put("user", "root"); 
 		props.put("password", "hello"); 
 		//props.put("password", "...."); 
-		int testCount = totleQuery;
+		int testCount = totalQuery;
 		Class.forName("com.mysql.jdbc.Driver");
 		ThreadPoolExecutor executor = new ThreadPoolExecutor(threadCount, threadCount, Long.MAX_VALUE, TimeUnit.NANOSECONDS,new LinkedBlockingQueue<Runnable>());
 		long start = System.currentTimeMillis();
@@ -114,7 +114,7 @@ public class PerformaceTest {
 		}
 		latch.await();
 		long end = System.currentTimeMillis();
-		System.out.println("totle:"+(end-start));
+		System.out.println("total:"+(end-start));
 		executor.shutdownNow();
 	}
 }
