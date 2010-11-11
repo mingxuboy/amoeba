@@ -47,10 +47,6 @@ public class MongodbBenchmarkClientConnection extends AbstractBenchmarkClientCon
 		return false;
 	}
 
-	public boolean checkIdle(long now) {
-		return false;
-	}
-
 	public AbstractMongodbPacket createPacketWithBytes(byte[] message) {
 		int type = MongodbPacketBuffer.getOPMessageType(message);
 		AbstractMongodbPacket packet = null;

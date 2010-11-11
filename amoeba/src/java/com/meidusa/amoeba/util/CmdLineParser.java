@@ -676,7 +676,7 @@ public class CmdLineParser {
 				writer.write("    ");
 				writer.write((!StringUtil.isEmpty(option.shortForm())?("-" + option.shortForm()+","):"") + "--"
 						+ option.longForm()
-						+ (option.wantsValue() ? "=value [required]" : "=value")
+						+ (option.isRequired() ? "=value [required]" : "=value")
 						+ "");
 				if (option.getDescription() != null) {
 					BufferedReader read = new BufferedReader(new StringReader(

@@ -25,9 +25,7 @@ import com.meidusa.amoeba.config.ConfigUtil;
 import com.meidusa.amoeba.context.ProxyRuntimeContext;
 import com.meidusa.amoeba.log4j.DOMConfigurator;
 import com.meidusa.amoeba.monitor.MonitorConstant;
-import com.meidusa.amoeba.monitor.MonitorServer;
 import com.meidusa.amoeba.monitor.ShutdownClient;
-import com.meidusa.amoeba.monitor.net.MonitorClientConnectionFactory;
 import com.meidusa.amoeba.monitor.packet.MonitorCommandPacket;
 import com.meidusa.amoeba.net.ConnectionManager;
 import com.meidusa.amoeba.net.ServerableConnectionManager;
@@ -113,6 +111,8 @@ public class AmoebaProxyServer {
 	 * @throws InstantiationException 
 	 */
 	public static void main(String[] args) throws Exception {
+		String level = System.getProperty("benchmark.level", "warn");
+		System.setProperty("benchmark.level", level);
 		if(args.length>=1){
 			ShutdownClient client = new ShutdownClient(MonitorConstant.APPLICATION_NAME);
 			MonitorCommandPacket packet = new MonitorCommandPacket();

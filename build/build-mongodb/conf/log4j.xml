@@ -136,6 +136,18 @@
         <appender-ref ref="PROJECT"/>
     </logger>
     
+    <logger name="com.meidusa.amoeba.mongodb.test" additivity="false">
+        <level value="${benchmark.level}"/>
+        <!-- for debug -->
+        <appender-ref ref="PROJECT-CONSOLE"/>
+    </logger>
+    <logger name="com.meidusa.amoeba.benchmark" additivity="false">
+        <level value="${benchmark.level}"/>
+        
+        <!-- for debug -->
+        <appender-ref ref="PROJECT-CONSOLE"/>
+    </logger>
+    
     <!-- ===================================================================== -->
     <!--  Root loggerµÄ¶¨Òå                                                    -->
     <!-- ===================================================================== -->
