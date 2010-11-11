@@ -35,10 +35,6 @@ public class MongoDBBenchmark extends AbstractBenchmark{
 			@Override
 			public BSONObject transfer(String inputString) {
 				String json = ConfigUtil.filterWtihOGNL(inputString, AbstractBenchmark.getInstance().getContextMap());
-				if(logger.isDebugEnabled()){
-					logger.debug("output="+json);
-				}
-				
 				return (BSONObject)JSON.parse(json);
 			}
 		});
@@ -50,9 +46,6 @@ public class MongoDBBenchmark extends AbstractBenchmark{
 				BSONObject[] list = new BSONObject[items.length];
 				for(int i=0;i<items.length;i++){
 					String json = ConfigUtil.filterWtihOGNL(items[i].trim(), AbstractBenchmark.getInstance().getContextMap());
-					if(logger.isDebugEnabled()){
-						logger.debug("output="+json);
-					}
 					list[i] = (BSONObject)JSON.parse(json);
 				}
 				return list;

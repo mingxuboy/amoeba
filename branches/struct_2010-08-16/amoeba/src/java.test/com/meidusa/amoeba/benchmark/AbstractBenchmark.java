@@ -18,10 +18,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.apache.log4j.ConsoleAppender;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-
 import com.meidusa.amoeba.config.ConfigUtil;
 import com.meidusa.amoeba.log4j.DOMConfigurator;
 import com.meidusa.amoeba.net.MultiConnectionManagerWrapper;
@@ -40,7 +36,7 @@ public abstract class AbstractBenchmark {
 	
 	private static Map contextMap = new HashMap();
 	private static Properties properties = new Properties();
-	protected static CmdLineParser parser = new CmdLineParser(System.getProperty("application", "BenchMark"));
+	protected static CmdLineParser parser = new CmdLineParser(System.getProperty("application", "benchmark"));
 	protected static CmdLineParser.Option debugOption = parser.addOption(new BooleanOption('d', "debug", false,false,true,"show the interaction with the server-side information"));
 	protected static CmdLineParser.Option portOption = parser.addOption(new IntegerOption('p', "port",true,true,"server port"));
 	protected static CmdLineParser.Option hostOption = parser.addOption(new StringOption('h', "host",true,true,"server host","127.0.0.1"));
@@ -51,7 +47,8 @@ public abstract class AbstractBenchmark {
     
 	protected static CmdLineParser.Option contextOption = parser.addOption(new StringOption('C', "context",true,false,"Context xml File"));
 	protected static CmdLineParser.Option requestOption = parser.addOption(new StringOption('f', "file",true,true,"request xml File"));
-    
+	
+	protected static CmdLineParser.Option log4jOption = parser.addOption(new StringOption('l', "log4j",true,false,"warn","log4j level[debug,info,warn,error]"));
 	public AbstractBenchmark(){
 		Random random = new Random();
 		contextMap.put("random",random);
@@ -115,6 +112,13 @@ public abstract class AbstractBenchmark {
 		public boolean running = true;
 	}
 	public static void main(String[] args) throws Exception {
+		
+		String level = (String)parser.getOptionValue(log4jOption);
+		if(level != null){
+			System.setProperty("benchmark.level", level);
+		}else{
+			System.setProperty("benchmark.level", "warn");
+		}
 		String log4jConf = System.getProperty("log4j.conf","${amoeba.home}/conf/log4j.xml");
 		log4jConf = ConfigUtil.filter(log4jConf);
 		File logconf = new File(log4jConf);
@@ -132,6 +136,8 @@ public abstract class AbstractBenchmark {
 		int port = (Integer)parser.getOptionValue(portOption);
 		
 		MultiConnectionManagerWrapper manager = new MultiConnectionManagerWrapper();
+		Integer timeout = (Integer)parser.getOptionValue(timeoutOption,-1);
+		manager.setIdleCheckTime(timeout);
 		manager.init();
 		manager.start();
 		Thread.sleep(100L);
@@ -163,7 +169,7 @@ public abstract class AbstractBenchmark {
 			try{
 				AbstractBenchmarkClientConnection<?> connection = benckmark.newBenchmarkClientConnection(SocketChannel.open(address),System.currentTimeMillis(),requestLatcher,responseLatcher,task);
 				Boolean value = (Boolean)parser.getOptionValue(debugOption,false);
-				Integer timeout = (Integer)parser.getOptionValue(timeoutOption,-1);
+				
 				connection.setTimeout(timeout.intValue());
 				connection.setDebug(value.booleanValue());
 				
