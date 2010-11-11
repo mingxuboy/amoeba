@@ -123,9 +123,7 @@ public abstract class AbstractBenchmarkClientConnection<T extends Packet>
 		}
 		
 		if(isTimeOut){
-			if(logger.isInfoEnabled()){
-				logger.info("socket id="+this.getSocketId()+" receive time out="+(now - _lastEvent));			
-			}
+			logger.warn("socket id="+this.getSocketId()+" receive time out="+(now - _lastEvent));			
 		}
 		return isTimeOut;
 	}
