@@ -43,12 +43,13 @@ public abstract class AbstractBenchmark {
 	protected static CmdLineParser.Option connOption = parser.addOption(new IntegerOption('c', "conn",true,true,"The number of concurrent connections"));
 	protected static CmdLineParser.Option totalOption = parser.addOption(new LongOption('n', "total",true,true,"total requests"));
 	protected static CmdLineParser.Option timeoutOption = parser.addOption(new IntegerOption('t', "timeout",true,false,-1,"query timeout, default value=-1 "));
-	protected static CmdLineParser.Option helpOption = parser.addOption(new BooleanOption('?', "help",false,false,true,"Show this help message"));
     
 	protected static CmdLineParser.Option contextOption = parser.addOption(new StringOption('C', "context",true,false,"Context xml File"));
 	protected static CmdLineParser.Option requestOption = parser.addOption(new StringOption('f', "file",true,true,"request xml File"));
 	
 	protected static CmdLineParser.Option log4jOption = parser.addOption(new StringOption('l', "log4j",true,false,"warn","log4j level[debug,info,warn,error]"));
+	
+	protected static CmdLineParser.Option helpOption = parser.addOption(new BooleanOption('?', "help",false,false,true,"Show this help message"));
 	public AbstractBenchmark(){
 		Random random = new Random();
 		contextMap.put("random",random);
