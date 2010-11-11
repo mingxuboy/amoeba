@@ -137,7 +137,9 @@ public abstract class AbstractBenchmark {
 		
 		MultiConnectionManagerWrapper manager = new MultiConnectionManagerWrapper();
 		Integer timeout = (Integer)parser.getOptionValue(timeoutOption,-1);
-		manager.setIdleCheckTime(timeout);
+		if(timeout >0){
+			manager.setIdleCheckTime(timeout);
+		}
 		manager.init();
 		manager.start();
 		Thread.sleep(100L);
