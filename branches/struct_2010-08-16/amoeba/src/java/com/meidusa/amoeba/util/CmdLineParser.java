@@ -633,10 +633,9 @@ public class CmdLineParser {
 
 		this.remainingArgs = new String[otherArgs.size()];
 		otherArgs.copyInto(remainingArgs);
-		checkRequired();
 	}
 
-	private void checkRequired() throws NotFlagException{
+	public void checkRequired() throws NotFlagException{
 		for(Option option : optionList){
 			if(option.isRequired()){
 				Object obj = values.get(option.longForm);
