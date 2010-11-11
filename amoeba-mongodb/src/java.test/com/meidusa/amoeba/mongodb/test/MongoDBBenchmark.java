@@ -26,6 +26,7 @@ public class MongoDBBenchmark extends AbstractBenchmark{
         		parser.printUsage();
         		System.exit(2);
         	}
+        	parser.checkRequired();
         }catch ( CmdLineParser.OptionException e ) {
         	System.err.println(e.getMessage());
         	parser.printUsage();
