@@ -13,6 +13,8 @@ import java.util.List;
 import java.util.Vector;
 import java.util.Locale;
 
+import com.meidusa.amoeba.config.ConfigUtil;
+
 public class CmdLineParser {
 
 	/**
@@ -143,13 +145,14 @@ public class CmdLineParser {
 	/**
 	 * Representation of a command-line option
 	 */
-	public static abstract class Option {
+	public static abstract class Option<T> {
 
 		private String shortForm = null;
 		private String longForm = null;
-		private boolean wantsValue = false;
+		private boolean wantsValue = true;
+		private boolean required = false;
 		private String description;
-		private String defaultValue = null;
+		private T defaultValue = null;
 		public String getDescription() {
 			return description;
 		}
@@ -158,11 +161,11 @@ public class CmdLineParser {
 			this.description = description;
 		}
 
-		public String getDefaultValue() {
+		public T getDefaultValue() {
 			return defaultValue;
 		}
 
-		public void setDefaultValue(String defaultValue) {
+		public void setDefaultValue(T defaultValue) {
 			this.defaultValue = defaultValue;
 		}
 
@@ -190,6 +193,14 @@ public class CmdLineParser {
 			return this.longForm;
 		}
 
+		public boolean isRequired() {
+			return required;
+		}
+
+		public void setRequired(boolean required) {
+			this.required = required;
+		}
+
 		/**
 		 * Tells whether or not this option wants a value
 		 */
@@ -197,126 +208,218 @@ public class CmdLineParser {
 			return this.wantsValue;
 		}
 
-		public final Object getValue(String arg, Locale locale)
+		public final T getValue(String arg, Locale locale)
 				throws IllegalOptionValueException {
 			if (this.wantsValue) {
 				if (arg == null) {
 					throw new IllegalOptionValueException(this, "");
 				}
-				return this.parseValue(arg, locale);
-			} else {
-				return Boolean.TRUE;
+			}else{
+				if(arg == null){
+					return this.getDefaultValue();
+				}
 			}
+			if(arg != null){
+				arg = ConfigUtil.filter(arg);
+			}
+			return this.parseValue(arg, locale);
 		}
 
 		/**
 		 * Override to extract and convert an option value passed on the
 		 * command-line
 		 */
-		protected Object parseValue(String arg, Locale locale)
+		protected T parseValue(String arg, Locale locale)
 				throws IllegalOptionValueException {
 			return null;
 		}
+	}
+	
+	public static class BooleanOption extends Option<Boolean> {
+		public BooleanOption(char shortForm, String longForm,boolean wantsValue,boolean requried,boolean defaultValue,String description) {
+			super(shortForm, longForm, wantsValue);
+			this.setDefaultValue(defaultValue);
+			this.setDescription(description);
+			this.setRequired(requried);
+		}
 
-		public static class BooleanOption extends Option {
-			public BooleanOption(char shortForm, String longForm) {
-				super(shortForm, longForm, false);
+		public BooleanOption(char shortForm, String longForm,boolean wantsValue,boolean requried,String description) {
+			this(shortForm, longForm, wantsValue,requried,false,description);
+		}
+		
+		public BooleanOption(char shortForm, String longForm,boolean wantsValue,boolean requried){
+			this(shortForm,longForm,wantsValue, requried,null);
+		}
+
+		public BooleanOption(char shortForm, String longForm,boolean wantsValue){
+			this(shortForm,longForm, wantsValue,true);
+		}
+		
+		public BooleanOption(String longForm) {
+			super(longForm, true);
+		}
+		
+		 protected Boolean parseValue(String arg, Locale locale)
+				throws IllegalOptionValueException {
+			return Boolean.parseBoolean(arg);
+		}
+	}
+
+	/**
+	 * An option that expects an integer value
+	 */
+	public static class IntegerOption extends Option<Integer> {
+		public IntegerOption(char shortForm, String longForm,boolean wantsValue,boolean requried,Integer defaultValue,String description) {
+			super(shortForm, longForm, wantsValue);
+			this.setDefaultValue(defaultValue);
+			this.setDescription(description);
+			this.setRequired(requried);
+		}
+
+		public IntegerOption(char shortForm, String longForm,boolean wantsValue,boolean requried,String description) {
+			this(shortForm, longForm, wantsValue,requried,null,description);
+		}
+		
+		public IntegerOption(char shortForm, String longForm,boolean wantsValue,boolean requried){
+			this(shortForm,longForm, wantsValue,requried,null);
+		}
+		
+		public IntegerOption(char shortForm, String longForm,boolean wantsValue) {
+			this(shortForm, longForm, wantsValue,true);
+		}
+
+		public IntegerOption(String longForm) {
+			super(longForm, true);
+		}
+		
+		protected Integer parseValue(String arg, Locale locale)
+				throws IllegalOptionValueException {
+			try {
+				return new Integer(arg);
+			} catch (NumberFormatException e) {
+				throw new IllegalOptionValueException(this, arg);
 			}
+		}
+	}
 
-			public BooleanOption(String longForm) {
-				super(longForm, false);
+	/**
+	 * An option that expects a long integer value
+	 */
+	public static class LongOption extends Option<Long> {
+		
+		public LongOption(char shortForm, String longForm,boolean wantsValue,boolean required,Long defaultValue,String description) {
+			super(shortForm, longForm, wantsValue);
+			this.setDefaultValue(defaultValue);
+			this.setDescription(description);
+			this.setRequired(required);
+		}
+
+		public LongOption(char shortForm, String longForm,boolean wantsValue,boolean required,String description) {
+			this(shortForm, longForm, wantsValue,required,null,description);
+		}
+		
+		public LongOption(char shortForm, String longForm,boolean wantsValue,boolean required){
+			this(shortForm,longForm, wantsValue,required,null);
+		}
+		
+		public LongOption(char shortForm, String longForm,boolean wantsValue) {
+			this(shortForm, longForm,wantsValue,true);
+		}
+
+		public LongOption(String longForm) {
+			super(longForm, true);
+		}
+		
+		protected Long parseValue(String arg, Locale locale)
+				throws IllegalOptionValueException {
+			try {
+				return new Long(arg);
+			} catch (NumberFormatException e) {
+				throw new IllegalOptionValueException(this, arg);
 			}
+		}
+	}
 
-			protected Object parseValue(String arg, Locale locale)
-					throws IllegalOptionValueException {
-				return Boolean.parseBoolean(arg);
+	/**
+	 * An option that expects a floating-point value
+	 */
+	public static class DoubleOption extends Option<Double> {
+		
+		public DoubleOption(char shortForm, String longForm,boolean wantsValue,boolean required,Double defaultValue,String description) {
+			super(shortForm, longForm, wantsValue);
+			this.setDefaultValue(defaultValue);
+			this.setDescription(description);
+			this.setRequired(required);
+		}
+
+		public DoubleOption(char shortForm, String longForm,boolean wantsValue,boolean required,String description) {
+			this(shortForm, longForm,wantsValue, required,null,description);
+		}
+		
+		public DoubleOption(char shortForm, String longForm,boolean wantsValue,boolean required){
+			this(shortForm,longForm,wantsValue, required,null);
+		}
+		
+		public DoubleOption(char shortForm, String longForm,boolean wantsValue) {
+			this(shortForm, longForm,wantsValue, true);
+		}
+		
+
+		public DoubleOption(String longForm) {
+			super(longForm, true);
+		}
+
+		protected Double parseValue(String arg, Locale locale)
+				throws IllegalOptionValueException {
+			try {
+				NumberFormat format = NumberFormat
+						.getNumberInstance(locale);
+				Number num = (Number) format.parse(arg);
+				return new Double(num.doubleValue());
+			} catch (ParseException e) {
+				throw new IllegalOptionValueException(this, arg);
+			}
+		}
+	}
+
+	/**
+	 * An option that expects a string value
+	 */
+	public static class StringOption extends Option<String> {
+		
+		public StringOption(char shortForm, String longForm,boolean wantsValue,boolean required,String defaultValue,String description) {
+			super(shortForm, longForm, wantsValue);
+			this.setDefaultValue(defaultValue);
+			this.setDescription(description);
+			this.setRequired(required);
+		}
+
+		public StringOption(char shortForm, String longForm,boolean wantsValue,boolean required,String description) {
+			this(shortForm, longForm, wantsValue,required,null,description);
+		}
+		
+		public StringOption(char shortForm, String longForm,boolean wantsValue,boolean required){
+			this(shortForm,longForm,wantsValue, required,null);
+		}
+		
+		public StringOption(char shortForm, String longForm,boolean wantsValue) {
+			this(shortForm, longForm,wantsValue, true);
+		}
+
+		public StringOption(String longForm) {
+			super(longForm, true);
+		}
+		
+		public String getDefaultValue() {
+			if(super.getDefaultValue() != null){
+				return ConfigUtil.filter(super.getDefaultValue());
+			}else{
+				return super.getDefaultValue();
 			}
 		}
 
-		/**
-		 * An option that expects an integer value
-		 */
-		public static class IntegerOption extends Option {
-			public IntegerOption(char shortForm, String longForm) {
-				super(shortForm, longForm, true);
-			}
-
-			public IntegerOption(String longForm) {
-				super(longForm, true);
-			}
-
-			protected Object parseValue(String arg, Locale locale)
-					throws IllegalOptionValueException {
-				try {
-					return new Integer(arg);
-				} catch (NumberFormatException e) {
-					throw new IllegalOptionValueException(this, arg);
-				}
-			}
-		}
-
-		/**
-		 * An option that expects a long integer value
-		 */
-		public static class LongOption extends Option {
-			public LongOption(char shortForm, String longForm) {
-				super(shortForm, longForm, true);
-			}
-
-			public LongOption(String longForm) {
-				super(longForm, true);
-			}
-
-			protected Object parseValue(String arg, Locale locale)
-					throws IllegalOptionValueException {
-				try {
-					return new Long(arg);
-				} catch (NumberFormatException e) {
-					throw new IllegalOptionValueException(this, arg);
-				}
-			}
-		}
-
-		/**
-		 * An option that expects a floating-point value
-		 */
-		public static class DoubleOption extends Option {
-			public DoubleOption(char shortForm, String longForm) {
-				super(shortForm, longForm, true);
-			}
-
-			public DoubleOption(String longForm) {
-				super(longForm, true);
-			}
-
-			protected Object parseValue(String arg, Locale locale)
-					throws IllegalOptionValueException {
-				try {
-					NumberFormat format = NumberFormat
-							.getNumberInstance(locale);
-					Number num = (Number) format.parse(arg);
-					return new Double(num.doubleValue());
-				} catch (ParseException e) {
-					throw new IllegalOptionValueException(this, arg);
-				}
-			}
-		}
-
-		/**
-		 * An option that expects a string value
-		 */
-		public static class StringOption extends Option {
-			public StringOption(char shortForm, String longForm) {
-				super(shortForm, longForm, true);
-			}
-
-			public StringOption(String longForm) {
-				super(longForm, true);
-			}
-
-			protected Object parseValue(String arg, Locale locale) {
-				return arg;
-			}
+		protected String parseValue(String arg, Locale locale) {
+			return arg;
 		}
 	}
 
@@ -329,7 +432,7 @@ public class CmdLineParser {
 	/**
 	 * Add the specified Option to the list of accepted options
 	 */
-	public final Option addOption(Option opt) {
+	public final Option<?> addOption(Option<?> opt) {
 		if (opt.shortForm() != null) {
 			this.options.put("-" + opt.shortForm(), opt);
 		}
@@ -348,42 +451,42 @@ public class CmdLineParser {
 		return opt;
 	}
 
-	public List<Option> getOptions() {
+	public List<Option<?>> getOptions() {
 		return optionList;
 	}
 	
-	public Option getOption(String name){
+	public Option<?> getOption(String name){
 		return this.options.get("--"+name);
 	}
 
 	public final Option addOption(OptionType type, char shortForm,
-			String longForm, boolean need, String description) {
+			String longForm, boolean requried, String description) {
 		Option option = null;
 		switch (type) {
 		case String:
-			option = new Option.StringOption(shortForm, longForm);
+			option = new StringOption(shortForm, longForm,true);
 			break;
 		case Int:
-			option = new Option.IntegerOption(shortForm, longForm);
+			option = new IntegerOption(shortForm, longForm,true);
 			break;
 		case Long:
-			option = new Option.LongOption(shortForm, longForm);
+			option = new LongOption(shortForm, longForm,true);
 			break;
 		case Double:
-			option = new Option.DoubleOption(shortForm, longForm);
+			option = new DoubleOption(shortForm, longForm,true);
 			break;
 		case Boolean:
-			option = new Option.BooleanOption(shortForm, longForm);
+			option = new BooleanOption(shortForm, longForm,true);
 			break;
 		}
 		option.setDescription(description);
-		option.wantsValue = need;
+		option.wantsValue = requried;
 		return addOption(option);
 	}
 	
 	public final Option addOption(OptionType type, char shortForm,
-			String longForm, boolean need, String description,String defaultValue) {
-		Option option =  addOption(type,shortForm,longForm,need,description);
+			String longForm, boolean requried, String description,String defaultValue) {
+		Option option =  addOption(type,shortForm,longForm,requried,description);
 		option.setDefaultValue(defaultValue);
 		return option;
 	}
@@ -400,17 +503,17 @@ public class CmdLineParser {
 	 * @return the parsed value of the given Option, or null if the option was
 	 *         not set
 	 */
-	public final Object getOptionValue(Option o, Object def) {
+	public Object getOptionValue(Option o, Object def) {
 		Vector v = (Vector) values.get(o.longForm());
 
 		if (v == null) {
 			return def;
 		} else if (v.isEmpty()) {
-			return null;
+			return o.getDefaultValue();
 		} else {
 			Object result = v.elementAt(0);
 			v.removeElementAt(0);
-			return result;
+			return result == null?def : result;
 		}
 	}
 
@@ -535,7 +638,7 @@ public class CmdLineParser {
 
 	private void checkRequired() throws NotFlagException{
 		for(Option option : optionList){
-			if(option.wantsValue()){
+			if(option.isRequired()){
 				Object obj = values.get(option.longForm);
 				if(obj == null){
 					throw new NotFlagException(option.longForm,option.shortForm);
@@ -596,7 +699,7 @@ public class CmdLineParser {
 
 	private Format format = new Format();
 	private String[] remainingArgs = null;
-	private List<Option> optionList = new ArrayList<Option>();
+	private List<Option<?>> optionList = new ArrayList<Option<?>>();
 	private Hashtable<String, Option> options = new Hashtable<String, Option>(
 			10);
 	private Hashtable values = new Hashtable(10);

@@ -24,7 +24,10 @@ import org.apache.log4j.Logger;
 
 import com.meidusa.amoeba.net.MultiConnectionManagerWrapper;
 import com.meidusa.amoeba.util.CmdLineParser;
-import com.meidusa.amoeba.util.OptionType;
+import com.meidusa.amoeba.util.CmdLineParser.BooleanOption;
+import com.meidusa.amoeba.util.CmdLineParser.IntegerOption;
+import com.meidusa.amoeba.util.CmdLineParser.LongOption;
+import com.meidusa.amoeba.util.CmdLineParser.StringOption;
 
 @SuppressWarnings("unchecked")
 public abstract class AbstractBenchmark {
@@ -36,16 +39,16 @@ public abstract class AbstractBenchmark {
 	private static Map contextMap = new HashMap();
 	private static Properties properties = new Properties();
 	protected static CmdLineParser parser = new CmdLineParser(System.getProperty("application", "BenchMark"));
-	protected static CmdLineParser.Option debugOption = parser.addOption(OptionType.Boolean,'d', "debug", false,"show the interaction with the server-side information");
-	protected static CmdLineParser.Option portOption = parser.addOption(OptionType.Int,'p', "port",true,"server port");
-	protected static CmdLineParser.Option hostOption = parser.addOption(OptionType.String,'h', "host",true,"server host","127.0.0.1");
-	protected static CmdLineParser.Option connOption = parser.addOption(OptionType.Int,'c', "conn",true,"The number of concurrent connections");
-	protected static CmdLineParser.Option totalOption = parser.addOption(OptionType.Long,'n', "total",true,"total requests");
-	protected static CmdLineParser.Option timeoutOption = parser.addOption(OptionType.Int,'t', "timeout",false,"query timeout, default value=-1 ");
-	protected static CmdLineParser.Option helpOption = parser.addOption(OptionType.String,'?', "help",false,"Show this help message");
+	protected static CmdLineParser.Option debugOption = parser.addOption(new BooleanOption('d', "debug", false,false,"show the interaction with the server-side information"));
+	protected static CmdLineParser.Option portOption = parser.addOption(new IntegerOption('p', "port",true,true,"server port"));
+	protected static CmdLineParser.Option hostOption = parser.addOption(new StringOption('h', "host",true,true,"server host","127.0.0.1"));
+	protected static CmdLineParser.Option connOption = parser.addOption(new IntegerOption('c', "conn",true,true,"The number of concurrent connections"));
+	protected static CmdLineParser.Option totalOption = parser.addOption(new LongOption('n', "total",true,true,"total requests"));
+	protected static CmdLineParser.Option timeoutOption = parser.addOption(new IntegerOption('t', "timeout",true,false,-1,"query timeout, default value=-1 "));
+	protected static CmdLineParser.Option helpOption = parser.addOption(new BooleanOption('?', "help",false,false,true,"Show this help message"));
     
-	protected static CmdLineParser.Option contextOption = parser.addOption(OptionType.String,'C', "context",false,"Context xml File");
-	protected static CmdLineParser.Option requestOption = parser.addOption(OptionType.String,'f', "file",true,"request xml File");
+	protected static CmdLineParser.Option contextOption = parser.addOption(new StringOption('C', "context",true,false,"Context xml File"));
+	protected static CmdLineParser.Option requestOption = parser.addOption(new StringOption('f', "file",true,true,"request xml File"));
     
 	public AbstractBenchmark(){
 		Random random = new Random();

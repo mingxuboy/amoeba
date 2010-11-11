@@ -10,7 +10,7 @@ public class CmdLineParserTest {
 
     public static void main( String[] args ) {
     	CmdLineParser parser = new CmdLineParser("test");
-    	CmdLineParser.Option verbose = parser.addOption(OptionType.Boolean,'v', "verbose",true,"Print extra information.\r\nother informations");
+    	CmdLineParser.Option<Boolean> verbose = parser.addOption(OptionType.Boolean,'v', "verbose",true,"Print extra information.\r\nother informations");
         CmdLineParser.Option size = parser.addOption(OptionType.Int,'s', "size",true,"The extent of the thing");
         CmdLineParser.Option name = parser.addOption(OptionType.String,'n', "name",true,"Name given to the widget");
         CmdLineParser.Option fraction = parser.addOption(OptionType.Double,'f', "fraction",true,"What percentage should be discarded");
