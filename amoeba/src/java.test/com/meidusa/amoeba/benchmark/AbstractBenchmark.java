@@ -22,6 +22,8 @@ import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
+import com.meidusa.amoeba.config.ConfigUtil;
+import com.meidusa.amoeba.log4j.DOMConfigurator;
 import com.meidusa.amoeba.net.MultiConnectionManagerWrapper;
 import com.meidusa.amoeba.util.CmdLineParser;
 import com.meidusa.amoeba.util.CmdLineParser.BooleanOption;
@@ -113,9 +115,12 @@ public abstract class AbstractBenchmark {
 		public boolean running = true;
 	}
 	public static void main(String[] args) throws Exception {
-		Logger logger = Logger.getLogger("rootLogger");
-		logger.addAppender(new ConsoleAppender());
-		logger.setLevel(Level.DEBUG);
+		String log4jConf = System.getProperty("log4j.conf","${amoeba.home}/conf/log4j.xml");
+		log4jConf = ConfigUtil.filter(log4jConf);
+		File logconf = new File(log4jConf);
+		if(logconf.exists() && logconf.isFile()){
+			DOMConfigurator.configureAndWatch(logconf.getAbsolutePath(), System.getProperties());
+		}
 
 		int conn = (Integer)parser.getOptionValue(connOption);
 		final long total = (Long)parser.getOptionValue(totalOption);
