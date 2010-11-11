@@ -148,7 +148,7 @@ public abstract class  AbstractQueryRouter<T extends Connection,V> implements Qu
      */
     
     protected void beforeSelectPool(T connection, V queryObject){
-    	
+    	ThreadLocalMap.put(_CURRENT_QUERY_OBJECT_, queryObject);
     }
     
     protected List<String> evaluate(StringBuffer loggerBuffer,T connection, V queryObject){

@@ -21,19 +21,14 @@ public class MongoDBBenchmark extends AbstractBenchmark{
 	public static void main(String[] args) throws Exception {
         try {
             parser.parse(args);
-            Boolean value = (Boolean)parser.getOptionValue(helpOption);
+            Boolean value = (Boolean)parser.getOptionValue(helpOption,false);
         	if(value != null && value.booleanValue()){
         		parser.printUsage();
         		System.exit(2);
         	}
         }catch ( CmdLineParser.OptionException e ) {
-        	Boolean value = (Boolean)parser.getOptionValue(helpOption);
-        	if(value != null && value.booleanValue()){
-        		parser.printUsage();
-        	}else{
-        		System.err.println(e.getMessage());
-            	parser.printUsage();
-        	}
+        	System.err.println(e.getMessage());
+        	parser.printUsage();
         	System.exit(2);
         }
 		ParameterMapping.registerTransfer(BSONObject.class, new PropertyTransfer<BSONObject>(){
