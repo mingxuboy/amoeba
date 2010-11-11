@@ -39,7 +39,7 @@ public abstract class AbstractBenchmark {
 	private static Map contextMap = new HashMap();
 	private static Properties properties = new Properties();
 	protected static CmdLineParser parser = new CmdLineParser(System.getProperty("application", "BenchMark"));
-	protected static CmdLineParser.Option debugOption = parser.addOption(new BooleanOption('d', "debug", false,false,"show the interaction with the server-side information"));
+	protected static CmdLineParser.Option debugOption = parser.addOption(new BooleanOption('d', "debug", false,false,true,"show the interaction with the server-side information"));
 	protected static CmdLineParser.Option portOption = parser.addOption(new IntegerOption('p', "port",true,true,"server port"));
 	protected static CmdLineParser.Option hostOption = parser.addOption(new StringOption('h', "host",true,true,"server host","127.0.0.1"));
 	protected static CmdLineParser.Option connOption = parser.addOption(new IntegerOption('c', "conn",true,true,"The number of concurrent connections"));
