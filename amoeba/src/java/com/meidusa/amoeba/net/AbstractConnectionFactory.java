@@ -13,6 +13,7 @@ public abstract class AbstractConnectionFactory implements ConnectionFactory {
 	private int sendBufferSize = 64;
 	private int receiveBufferSize = 64;
 	private boolean tcpNoDelay = true;
+	private boolean keepAlive = true;
 	/**
 	 * 创建一个连接,初始化连接,注册到连接管理器,
 	 * 
@@ -32,6 +33,7 @@ public abstract class AbstractConnectionFactory implements ConnectionFactory {
 		connection.getChannel().socket().setSendBufferSize(sendBufferSize * 1024);
         connection.getChannel().socket().setReceiveBufferSize(receiveBufferSize * 1024);
         connection.getChannel().socket().setTcpNoDelay(tcpNoDelay);
+        connection.getChannel().socket().setKeepAlive(keepAlive);
 	}
 	
 	public int getSendBufferSize() {
@@ -56,6 +58,14 @@ public abstract class AbstractConnectionFactory implements ConnectionFactory {
 
 	public void setTcpNoDelay(boolean tcpNoDelay) {
 		this.tcpNoDelay = tcpNoDelay;
+	}
+
+	public boolean isKeepAlive() {
+		return keepAlive;
+	}
+
+	public void setKeepAlive(boolean keepAlive) {
+		this.keepAlive = keepAlive;
 	}
 
 	/**
