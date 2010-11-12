@@ -12,12 +12,6 @@
 <!ATTLIST connectionManager name NMTOKEN #REQUIRED >
 <!ATTLIST connectionManager class NMTOKEN #IMPLIED >
 
-<!ELEMENT dbServer ( factoryConfig?, poolConfig* ) >
-<!ATTLIST dbServer name NMTOKEN #REQUIRED >
-<!ATTLIST dbServer virtual NMTOKEN #IMPLIED >
-<!ATTLIST dbServer abstractive NMTOKEN #IMPLIED >
-<!ATTLIST dbServer parent NMTOKEN #IMPLIED >
-
 <!ELEMENT dbServerLoader ( property*) >
 <!ATTLIST dbServerLoader class NMTOKEN #IMPLIED >
 
