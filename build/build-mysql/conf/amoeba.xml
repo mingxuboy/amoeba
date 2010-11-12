@@ -28,8 +28,8 @@
 		<!-- server class must be extend com.meidusa.amoeba.net.ServerableConnectionManager -->
 		<server name="Amoeba Monitor Server" class="com.meidusa.amoeba.monitor.MonitorServer">
 			<!-- port -->
-			<!--  
-			<property name="port">8066</property>
+			<!--  default value: random number
+			<property name="port">9066</property>
 			-->
 			<!-- bind ipAddress -->
 			<property name="ipAddress">127.0.0.1</property>
