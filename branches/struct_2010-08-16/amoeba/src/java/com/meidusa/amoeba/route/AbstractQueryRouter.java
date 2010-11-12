@@ -77,21 +77,19 @@ public abstract class  AbstractQueryRouter<T extends Connection,V> implements Qu
 
     private Map<Table, TableRule>                   tableRuleMap    = new HashMap<Table, TableRule>();
     private Map<Table, TableRule>                   regexTableRuleMap    = new HashMap<Table, TableRule>();
-    protected Map<String, Function>                   functionMap     = new HashMap<String, Function>();
+    protected Map<String, Function>                 functionMap     = new HashMap<String, Function>();
 
     protected ObjectPool[]                          defaultPools;
     protected ObjectPool[]                          readPools;
     protected ObjectPool[]                          writePools;
     protected Tuple<Statement,ObjectPool[]> tuple;
-    private String                                  ruleConfig;
-    private String                                  functionConfig;
+    private File                                  	sqlFunctionFile;
 
     private String                                  defaultPool;
     private String                                  readPool;
     private String                                  writePool;
 
     private boolean                                 needParse       = true;
-    private boolean                                 needEvaluate    = true;
     private TableRuleLoader ruleLoader;
     
     public TableRuleLoader getRuleLoader() {
@@ -103,14 +101,6 @@ public abstract class  AbstractQueryRouter<T extends Connection,V> implements Qu
 	}
 
 	public AbstractQueryRouter(){
-    }
-
-    public String getRuleConfig() {
-        return ruleConfig;
-    }
-
-    public void setRuleConfig(String ruleConfig) {
-        this.ruleConfig = ruleConfig;
     }
 
     public void setReadPool(String readPool) {
@@ -431,9 +421,7 @@ public abstract class  AbstractQueryRouter<T extends Connection,V> implements Qu
 			loggerBuffer.append(queryObject);
 		}
 		List<String> poolNames = new ArrayList<String>();
-	     if (needEvaluate) {
-	    	 poolNames = evaluate(loggerBuffer,connection,queryObject);
-	     }
+    	 poolNames = evaluate(loggerBuffer,connection,queryObject);
          ObjectPool[] pools = new ObjectPool[poolNames.size()];
          int i = 0;
          for (String name : poolNames) {
@@ -515,14 +503,14 @@ public abstract class  AbstractQueryRouter<T extends Connection,V> implements Qu
         class ConfigCheckTread extends Thread {
 
             long lastFunFileModified;
-            File funFile;
 
             private ConfigCheckTread(){
 
                 this.setDaemon(true);
                 this.setName("ruleConfigCheckThread");
-                funFile = new File(AbstractQueryRouter.this.functionConfig);
-                lastFunFileModified = funFile.lastModified();
+                if(sqlFunctionFile != null){
+                	lastFunFileModified = sqlFunctionFile.lastModified();
+                }
             }
 
             public void run() {
@@ -532,11 +520,11 @@ public abstract class  AbstractQueryRouter<T extends Connection,V> implements Qu
                         Map<String, Function> funMap = null;
                         Map<Table, TableRule> tableRuleMap = null;
                         try {
-                            if (AbstractQueryRouter.this.functionConfig != null) {
-                                if (funFile.lastModified() != lastFunFileModified) {
+                            if (AbstractQueryRouter.this.sqlFunctionFile != null) {
+                                if (sqlFunctionFile.lastModified() != lastFunFileModified) {
                                     try {
-                                        funMap = loadFunctionMap(AbstractQueryRouter.this.functionConfig);
-                                        logger.info("loading FunctionMap from File="+functionConfig);
+                                        funMap = loadFunctionMap(AbstractQueryRouter.this.sqlFunctionFile.getAbsolutePath());
+                                        logger.info("loading FunctionMap from File="+sqlFunctionFile);
                                     } catch (ConfigurationException exception) {
                                     }
 
@@ -568,8 +556,8 @@ public abstract class  AbstractQueryRouter<T extends Connection,V> implements Qu
                             }
                         } catch (ConfigurationException e) {
                         } finally {
-                            if (funFile != null && funFile.exists()) {
-                                lastFunFileModified = funFile.lastModified();
+                            if (sqlFunctionFile != null && sqlFunctionFile.exists()) {
+                                lastFunFileModified = sqlFunctionFile.lastModified();
                             }
                         }
                     } catch (InterruptedException e) {
@@ -579,11 +567,9 @@ public abstract class  AbstractQueryRouter<T extends Connection,V> implements Qu
         }
 
         if (needParse) {
-
-            if (AbstractQueryRouter.this.functionConfig != null) {
-                this.functionMap = loadFunctionMap(AbstractQueryRouter.this.functionConfig);
-            } else {
-                needEvaluate = false;
+        	
+            if (AbstractQueryRouter.this.sqlFunctionFile != null) {
+                this.functionMap = loadFunctionMap(AbstractQueryRouter.this.sqlFunctionFile.getAbsolutePath());
             }
             
             this.tableRuleMap = ruleLoader.loadRule();
@@ -641,12 +627,12 @@ public abstract class  AbstractQueryRouter<T extends Connection,V> implements Qu
         LRUMapSize = mapSize;
     }
 
-    public String getFunctionConfig() {
-        return functionConfig;
+    public File getSqlFunctionFile() {
+        return sqlFunctionFile;
     }
 
-    public void setFunctionConfig(String functionConfig) {
-        this.functionConfig = functionConfig;
+    public void setSqlFunctionFile(File sqlFunctionFile) {
+        this.sqlFunctionFile = sqlFunctionFile;
     }
 
     public boolean isNeedParse() {

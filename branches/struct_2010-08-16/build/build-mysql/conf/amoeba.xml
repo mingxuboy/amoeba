@@ -91,7 +91,7 @@
 				<property name="functionFile">${amoeba.home}/conf/ruleFunctionMap.xml</property>
 			</bean>
 		</property>
-		<property name="functionConfig">${amoeba.home}/conf/functionMap.xml</property>
+		<property name="sqlFunctionFile">${amoeba.home}/conf/functionMap.xml</property>
 		<property name="LRUMapSize">1500</property>
 		<property name="defaultPool">server1</property>
 		

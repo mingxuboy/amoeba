@@ -90,7 +90,6 @@
 				<property name="ruleFunctionFile">${amoeba.home}/conf/ruleFunctionMap.xml</property>
 			</bean>
 		</property>
-		<property name="functionConfig">${amoeba.home}/conf/functionMap.xml</property>
 		<property name="LRUMapSize">1500</property>
 		<property name="defaultPool">server0</property>
 		
