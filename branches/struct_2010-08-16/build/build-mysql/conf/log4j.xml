@@ -49,17 +49,26 @@
         </layout>
     </appender>
     
+    <appender name="NET" class="org.apache.log4j.DailyRollingFileAppender">
+        <param name="file" value="${amoeba.home}/logs/net.log"/>
+        <param name="append" value="true"/>
+        <param name="encoding" value="GBK"/>
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="%d %-5p %c{2} - %m%n"/>
+        </layout>
+    </appender>
+    
 	<logger name="report" additivity="true">
         <level value="info"/>
         <appender-ref ref="reportAppender"/>
     </logger>
     
-    <logger name="com.meidusa.amoeba" additivity="false">
+    <logger name="com.meidusa.amoeba" additivity="true">
         <level value="info"/>
         <appender-ref ref="PROJECT"/>
     </logger>
     
-    <logger name="com.meidusa.amoeba.mysql" additivity="false">
+    <logger name="com.meidusa.amoeba.mysql" additivity="true">
         <level value="warn"/>
         <appender-ref ref="PROJECT"/>
         
@@ -67,39 +76,44 @@
         <appender-ref ref="PROJECT-CONSOLE"/>
     </logger>
     
-    <logger name="com.meidusa.amoeba.net" additivity="false">
+    <logger name="com.meidusa.amoeba.net" additivity="true">
         <level value="warn"/>
-        <appender-ref ref="PROJECT"/>
+        <appender-ref ref="NET"/>
     </logger>
     
-    <logger name="com.meidusa.amoeba.net.ServerableConnectionManager" additivity="false">
+    <logger name="com.meidusa.amoeba.mysql.net" additivity="true">
+        <level value="warn"/>
+        <appender-ref ref="NET"/>
+    </logger>
+    
+    <logger name="com.meidusa.amoeba.net.ServerableConnectionManager" additivity="true">
         <level value="warn"/>
         <appender-ref ref="PROJECT"/>
         <!-- for debug -->
         <appender-ref ref="PROJECT-CONSOLE"/>
     </logger>
     
-    <logger name="com.meidusa.amoeba.route" additivity="false">
+    <logger name="com.meidusa.amoeba.route" additivity="true">
         <level value="warn"/>
         <appender-ref ref="ROUTER"/>
     </logger>
     
-    <logger name="com.meidusa.amoeba.parser.statment" additivity="false">
+    <logger name="com.meidusa.amoeba.parser.statment" additivity="true">
         <level value="warn"/>
         <appender-ref ref="PROJECT"/>
     </logger>
     
-    <logger name="com.meidusa.amoeba.mysql.handler" additivity="false">
+    <logger name="com.meidusa.amoeba.mysql.handler" additivity="true">
         <level value="warn"/>
         <appender-ref ref="PROJECT"/>
     </logger>
     
-     <logger name="com.meidusa.amoeba.net.poolable" additivity="false">
+     <logger name="com.meidusa.amoeba.net.poolable" additivity="true">
         <level value="warn"/>
         <appender-ref ref="POOL"/>
     </logger>
     
-	<logger name="com.meidusa.amoeba.mysql.server" additivity="false">
+	<logger name="com.meidusa.amoeba.mysql.server" additivity="true">
         <level value="info"/>
         <appender-ref ref="PROJECT"/>
     </logger>
