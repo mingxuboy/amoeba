@@ -259,6 +259,7 @@ public abstract class Connection implements NetEventHandler {
         	messageProcess();
         } catch (EOFException eofe) {
             // close down the socket gracefully
+    		messageProcess();
             handleFailure(eofe);
         } catch (IOException ioe) {
             // don't log a warning for the ever-popular "the client dropped the

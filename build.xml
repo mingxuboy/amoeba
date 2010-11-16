@@ -30,13 +30,18 @@
   	<file name="build/etc/lib/javassist-3.7.ga.jar" />
   	<file name="build/etc/lib/ognl-2.7.2.jar" />
   </filelist>
-  
+
   <filelist dir="." id="bin.files">
     <file name="build/bin/amoeba"/>
     <file name="build/bin/amoeba.bat"/>
   	<file name="build/bin/amoeba.classworlds"/>
   </filelist>
-  
+
+  <filelist dir="." id="amoeba.executable.files">
+  	<file name="build/bin/amoeba"/>
+  	<file name="build/bin/amoeba.bat"/>
+  </filelist>
+
   <filelist dir="." id="etc.files">
     <file name="build/LICENSE.txt"/>
     <file name="build/README.html"/>
@@ -96,7 +101,7 @@
 		
 	    <tar longfile="gnu" destfile="amoeba-mysql-${amoeba.mysql.version}.tar.gz" compression="gzip">
 	    	
-		    <tarfileset dir="${deploy.dir}" mode="755">
+		    <tarfileset dir="build" mode="755">
 		        <include name="bin/**"/>
 		    	<exclude name="*/.svn/*"/>
 		    </tarfileset>
@@ -158,6 +163,33 @@
 	        </zipfileset>
 		    
 	    </zip>
+   	
+   		<tar longfile="gnu" destfile="amoeba-mysql-binary-${amoeba.mysql.version}.tar.gz" compression="gzip">
+		    <tarfileset dir="${deploy.dir}" mode="755">
+		        <include name="bin/**"/>
+		    	<exclude name="*/.svn/*"/>
+		    </tarfileset>
+	    	
+		    <tarfileset dir="${deploy.dir}">
+	        	<include name="lib/**"/>
+		    	<include name="doc/**"/>
+		    	<exclude name="conf/**"/>
+		    	<exclude name="src/**"/>
+		    	<exclude name="*/.svn/*"/>
+		    	<exclude name="bin/*"/>
+		    	<exclude name="**/*/amoeba-aladdin*"/>
+		    	<exclude name="**/*/amoeba-mongodb*"/>
+		    	<include name="*.*"/>
+		    </tarfileset>
+        	<tarfileset dir="build/build-mysql">
+        		<exclude name="*/.svn/*"/>
+        		<exclude name="logs/*"/>
+        		<include name="conf/**"/>
+        		<exclude name="build.xml"/>
+        		<exclude name="build.properties"/>
+        	</tarfileset>
+	    </tar>
+	
    </target>
    
    <target name="aladdin" depends="distclean,prepare,distcleanprojects,distprojects">
@@ -168,10 +200,10 @@
 		    	<exclude name="*/.svn/*"/>
 		    </tarfileset>
 	    	
-		    <tarfileset dir="${deploy.dir}">
-		        <include name="lib/**"/>
-		    	<include name="doc/**"/>
-		    	<include name="conf/**"/>
+		    <tarfileset dir="${deploy.dir}" >
+		    	<patternset refid="dist.libs" />
+		    	<include name="amoeba-mysql/dist/*.jar" />
+		    	<include name="build/build-mysql/conf/**"/>
 		    	<include name="src/**"/>
 		    	<exclude name="*/.svn/*"/>
 		    	<exclude name="bin/*"/>
