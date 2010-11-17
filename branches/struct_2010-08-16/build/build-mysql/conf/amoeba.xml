@@ -41,7 +41,7 @@
 			
 		</server>
 		
-		<runtime class="com.meidusa.amoeba.context.RuntimeContext">
+		<runtime class="com.meidusa.amoeba.mysql.context.MysqlRuntimeContext">
 			<!-- proxy server net IO Read thread size -->
 			<property name="readThreadPoolSize">20</property>
 			
