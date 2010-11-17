@@ -7,7 +7,6 @@ import java.nio.channels.SocketChannel;
 
 import org.apache.log4j.Logger;
 
-import com.meidusa.amoeba.context.ProxyRuntimeContext;
 import com.meidusa.amoeba.util.Initialisable;
 import com.meidusa.amoeba.util.InitialisationException;
 import com.meidusa.amoeba.util.StringUtil;
@@ -19,7 +18,7 @@ import com.meidusa.amoeba.util.StringUtil;
  */
 public abstract class BackendConnectionFactory extends AuthingableConnectionFactory  implements Initialisable{
 	private static Logger logger = Logger.getLogger(BackendConnectionFactory.class);
-	protected String manager;
+	protected ConnectionManager manager;
 	protected int port;
 	protected String ipAddress;
 	protected String user;
@@ -36,11 +35,11 @@ public abstract class BackendConnectionFactory extends AuthingableConnectionFact
 		this.socketChannelFactory = socketChannelFactory;
 	}
 
-	public String getManager() {
+	public ConnectionManager getManager() {
 		return manager;
 	}
 
-	public void setManager(String manager) {
+	public void setManager(ConnectionManager manager) {
 		this.manager = manager;
 	}
 
@@ -107,8 +106,8 @@ public abstract class BackendConnectionFactory extends AuthingableConnectionFact
 			}
 		});
 		
-		ConnectionManager conMgr = ProxyRuntimeContext.getInstance().getConnectionManagerList().get(manager);
-		if(conMgr == null){
+		//ConnectionManager conMgr = ProxyRuntimeContext.getInstance().getConnectionManagerList().get(manager);
+		if(manager == null){
 			throw new InitialisationException("can not found connectionManager by name="+manager);
 		}
 	}
@@ -123,7 +122,7 @@ public abstract class BackendConnectionFactory extends AuthingableConnectionFact
 				conn.setPassword(password);
 			}
 		}
-		ProxyRuntimeContext.getInstance().getConnectionManagerList().get(manager).postRegisterNetEventHandler(connection, SelectionKey.OP_READ);
+		manager.postRegisterNetEventHandler(connection, SelectionKey.OP_READ);
 	}
 	
 }

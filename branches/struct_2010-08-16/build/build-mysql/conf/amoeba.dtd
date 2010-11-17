@@ -34,11 +34,11 @@
 <!ELEMENT queryRouter (property*) >
 
 <!ATTLIST proxy class NMTOKEN #IMPLIED >
-<!ELEMENT proxy ( server+,runtime ) >
+<!ELEMENT proxy ( service+,runtime ) >
 
-<!ATTLIST server class NMTOKEN #REQUIRED >
-<!ATTLIST server name CDATA #REQUIRED >
-<!ELEMENT server (property*) >
+<!ATTLIST service class NMTOKEN #REQUIRED >
+<!ATTLIST service name CDATA #REQUIRED >
+<!ELEMENT service (property*) >
 
 <!ATTLIST runtime class NMTOKEN #IMPLIED >
 <!ELEMENT runtime (property*) >

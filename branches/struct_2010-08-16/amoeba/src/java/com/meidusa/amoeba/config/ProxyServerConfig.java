@@ -24,7 +24,7 @@ import java.util.Map;
  */
 public class ProxyServerConfig {
 
-	private List<BeanObjectEntityConfig> serverConfigList = new ArrayList<BeanObjectEntityConfig>();
+	private List<BeanObjectEntityConfig> serviceConfigList = new ArrayList<BeanObjectEntityConfig>();
 	private BeanObjectEntityConfig threadPoolConfig;
 	private BeanObjectEntityConfig authenticatorConfig;
 	private BeanObjectEntityConfig connectionFactoryConfig;
@@ -41,12 +41,12 @@ public class ProxyServerConfig {
 
     private BeanObjectEntityConfig              queryRouterConfig;
 
-    public List<BeanObjectEntityConfig> getServerConfigList() {
-		return serverConfigList;
+    public List<BeanObjectEntityConfig> getServiceConfigList() {
+		return serviceConfigList;
 	}
 
 	public void addServerConfig(BeanObjectEntityConfig serverConfig) {
-		this.serverConfigList.add(serverConfig);
+		this.serviceConfigList.add(serverConfig);
 	}
 
 	public BeanObjectEntityConfig getThreadPoolConfig() {

@@ -12,7 +12,7 @@
 			
 			<!-- PoolableObjectFactory -->
 			<factoryConfig class="com.meidusa.amoeba.mongodb.net.MongodbServerConnectionFactory">
-				<property name="manager">defaultManager</property>
+				<property name="manager">${defaultManager}</property>
 				<property name="ipAddress">127.0.0.1</property>
 			</factoryConfig>
 			<poolConfig class="com.meidusa.amoeba.net.poolable.PoolableObjectPool">
@@ -28,14 +28,12 @@
 		
 		<dbServer name="server0" parent="abstractServer">
 			<factoryConfig class="com.meidusa.amoeba.mongodb.net.MongodbServerConnectionFactory">
-				<property name="manager">defaultManager</property>
 				<property name="port">27017</property>
 			</factoryConfig>
 		</dbServer>
 		
 		<dbServer name="server1" parent="abstractServer">
 			<factoryConfig class="com.meidusa.amoeba.mongodb.net.MongodbServerConnectionFactory">
-				<property name="manager">defaultManager</property>
 				<property name="port">27017</property>
 			</factoryConfig>
 		</dbServer>
