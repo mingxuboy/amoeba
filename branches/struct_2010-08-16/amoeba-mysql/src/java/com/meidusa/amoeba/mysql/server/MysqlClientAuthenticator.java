@@ -48,7 +48,7 @@ public class MysqlClientAuthenticator extends Authenticator<AuthenticationPacket
 		MysqlClientConnection mysqlConn = (MysqlClientConnection)conn;
 		
 		if(logger.isInfoEnabled()){
-			logger.info("Accepting request: conn=" + conn);
+			logger.info("Accepting conn=" + conn);
 		}
 		String errorMessage = "";
 
