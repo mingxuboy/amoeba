@@ -5,7 +5,7 @@
 
 	<proxy>
 	
-		<!-- server class must be extend com.meidusa.amoeba.net.ServerableConnectionManager -->
+		<!-- server class must implements com.meidusa.amoeba.service.Service -->
 		<server name="Amoeba for mongodDB" class="com.meidusa.amoeba.net.ServerableConnectionManager">
 			<!-- port -->
 			<property name="port">8066</property>
@@ -25,7 +25,7 @@
 			
 		</server>
 		
-		<!-- server class must be extend com.meidusa.amoeba.net.ServerableConnectionManager -->
+		<!-- server class must implements com.meidusa.amoeba.service.Service -->
 		<server name="Amoeba Monitor Server" class="com.meidusa.amoeba.monitor.MonitorServer">
 			<!-- port -->
 			<!--  default value: random number
