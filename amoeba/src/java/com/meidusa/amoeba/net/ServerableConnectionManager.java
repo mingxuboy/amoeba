@@ -133,16 +133,14 @@ public class ServerableConnectionManager extends AuthingableConnectionManager im
     
     protected Connection acceptConnection(ServerSocketChannel listener) {
         SocketChannel channel = null;
-        int i=0;
         try {
             channel = listener.accept();
             if (channel == null) {
-            	if(i ==0){
-            		log.info("Psych! Got ACCEPT_READY, but no connection.");
-            	}
+        		if(log.isDebugEnabled()){
+        			log.debug("Psych! Got ACCEPT_READY, but no connection.");
+        		}
                 return null;
             }
-            i++;
             if (!(channel instanceof SelectableChannel)) {
                 try {
                     log.warn("Provided with un-selectable socket as result of accept(), can't " + "cope [channel=" + channel + "].");
