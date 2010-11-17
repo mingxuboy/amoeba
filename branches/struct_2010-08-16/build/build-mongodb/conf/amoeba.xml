@@ -55,8 +55,8 @@
 	</proxy>
 	
 	<!-- 
-		每个ConnectionManager都将作为一个线程启动。
-		manager负责Connection IO读写/死亡检测
+		Each ConnectionManager will start as thread
+		manager responsible for the Connection IO read , Death Detection
 	-->
 	<connectionManagerList>
 	

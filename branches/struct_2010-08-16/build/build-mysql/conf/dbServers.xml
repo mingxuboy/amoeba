@@ -2,6 +2,14 @@
 
 <!DOCTYPE amoeba:dbServers SYSTEM "dbserver.dtd">
 <amoeba:dbServers xmlns:amoeba="http://amoeba.meidusa.com/">
+
+		<!-- 
+			Each dbServer needs to be configured into a Pool,
+			If you need to configure multiple dbServer with load balancing that can be simplified by the following configuration:
+			 add attribute with name virtual = "true" in dbServer, but the configuration does not allow the element with name factoryConfig
+			 such as 'multiPool' dbServer   
+		-->
+		
 	<dbServer name="abstractServer" abstractive="true">
 		<factoryConfig class="com.meidusa.amoeba.mysql.net.MysqlServerConnectionFactory">
 			<property name="manager">defaultManager</property>
@@ -43,10 +51,10 @@
 	
 	<dbServer name="multiPool" virtual="true">
 		<poolConfig class="com.meidusa.amoeba.server.MultipleServerPool">
-			<!-- 负载均衡参数 1=ROUNDROBIN , 2=WEIGHTBASED , 3=HA-->
+			<!-- Load balancing strategy: 1=ROUNDROBIN , 2=WEIGHTBASED , 3=HA-->
 			<property name="loadbalance">1</property>
 			
-			<!-- 参与该pool负载均衡的poolName列表以逗号分割 -->
+			<!-- Separated by commas,such as: server1,server2,server1 -->
 			<property name="poolNames">server1</property>
 		</poolConfig>
 	</dbServer>

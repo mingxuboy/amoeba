@@ -3,15 +3,14 @@
 <!DOCTYPE amoeba:dbServers SYSTEM "dbserver.dtd">
 <amoeba:dbServers xmlns:amoeba="http://amoeba.meidusa.com/">
 		<!-- 
-			一台mysqlServer 需要配置一个pool，
-			如果多台 平等的mysql需要进行loadBalance， 
-			平台已经提供一个具有负载均衡能力的objectPool：com.meidusa.amoeba.mysql.server.MultipleServerPool
-			简单的配置是属性加上 virtual="true",该Pool 不允许配置factoryConfig
-			或者自己写一个ObjectPool。
+			Each dbServer needs to be configured into a Pool,
+			If you need to configure multiple dbServer with load balancing that can be simplified by the following configuration:
+			 add attribute with name virtual = "true" in dbServer, but the configuration does not allow the element with name factoryConfig
+			 such as 'multiPool' dbServer   
 		-->
 		<dbServer name="abstractServer" abstractive="true">
 			
-			<!-- PoolableObjectFactory实现类 -->
+			<!-- PoolableObjectFactory -->
 			<factoryConfig class="com.meidusa.amoeba.mongodb.net.MongodbServerConnectionFactory">
 				<property name="manager">defaultManager</property>
 				<property name="ipAddress">127.0.0.1</property>
@@ -43,10 +42,10 @@
 		
 		<dbServer name="multiPool" virtual="true">
 			<poolConfig class="com.meidusa.amoeba.server.MultipleServerPool">
-				<!-- 负载均衡参数 1=ROUNDROBIN , 2=WEIGHTBASED , 3=HA-->
+				<!-- Load balancing strategy: 1=ROUNDROBIN , 2=WEIGHTBASED , 3=HA-->
 				<property name="loadbalance">1</property>
 				
-				<!-- 参与该pool负载均衡的poolName列表以逗号(,)分割 -->
+				<!-- Separated by commas,such as: server1,server2,server1 -->
 				<property name="poolNames">server0,server1</property>
 			</poolConfig>
 		</dbServer>
