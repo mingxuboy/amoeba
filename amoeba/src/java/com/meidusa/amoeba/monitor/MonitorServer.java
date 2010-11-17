@@ -11,6 +11,7 @@ import org.apache.log4j.Level;
 
 import com.meidusa.amoeba.config.ConfigUtil;
 import com.meidusa.amoeba.net.ServerableConnectionManager;
+import com.meidusa.amoeba.service.Service;
 import com.meidusa.amoeba.util.InitialisationException;
 
 public class MonitorServer extends ServerableConnectionManager{

@@ -20,6 +20,9 @@ import java.util.Random;
 
 public class StringUtil {
 
+	public static String LINE_SEPARATOR =	(String) java.security.AccessController.doPrivileged(
+            new sun.security.action.GetPropertyAction("line.separator"));
+
     private static final String[] EMPTY_STRING_ARRAY = new String[0];
 
     private final static char[]   c                  = { '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', 'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p', 'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'z', 'x', 'c', 'v', 'b', 'n', 'm', 'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', 'A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', 'Z', 'X', 'C', 'V', 'B', 'N', 'M' };

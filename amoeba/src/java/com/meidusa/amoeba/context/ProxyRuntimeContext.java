@@ -51,7 +51,6 @@ import com.meidusa.amoeba.heartbeat.HeartbeatDelayed;
 import com.meidusa.amoeba.heartbeat.HeartbeatManager;
 import com.meidusa.amoeba.heartbeat.Status;
 import com.meidusa.amoeba.net.ConnectionManager;
-import com.meidusa.amoeba.net.ServerableConnectionManager;
 import com.meidusa.amoeba.net.poolable.MultipleLoadBalanceObjectPool;
 import com.meidusa.amoeba.net.poolable.ObjectPool;
 import com.meidusa.amoeba.net.poolable.PoolableObject;
@@ -88,16 +87,6 @@ public class ProxyRuntimeContext implements Reporter {
 	private QueryRouter                    queryRouter;
     private RuntimeContext runtimeContext;
 
-    public ServerableConnectionManager server;
-    
-    public ServerableConnectionManager getServer() {
-		return server;
-	}
-
-	public void setServer(ServerableConnectionManager server) {
-		this.server = server;
-	}
-	
 	public RuntimeContext getRuntimeContext() {
 		return runtimeContext;
 	}
