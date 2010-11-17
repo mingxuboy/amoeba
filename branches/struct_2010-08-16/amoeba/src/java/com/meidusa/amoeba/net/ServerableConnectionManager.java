@@ -24,6 +24,7 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
 import com.meidusa.amoeba.runtime.Shutdowner;
+import com.meidusa.amoeba.service.Service;
 
 /**
  * 指定一个端口,创建一个serverSocket. 将该ServerSocket所创建的Connection加入管理
@@ -31,7 +32,7 @@ import com.meidusa.amoeba.runtime.Shutdowner;
  * 
  * @author <a href=mailto:piratebase@sina.com>Struct chen</a>
  */
-public class ServerableConnectionManager extends AuthingableConnectionManager implements Shutdowner {
+public class ServerableConnectionManager extends AuthingableConnectionManager implements Shutdowner, Service{
 
     protected static Logger       log = Logger.getLogger(ServerableConnectionManager.class);
     

@@ -16,7 +16,9 @@ package com.meidusa.amoeba.server;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.log4j.Logger;
 
@@ -28,8 +30,8 @@ import com.meidusa.amoeba.monitor.MonitorConstant;
 import com.meidusa.amoeba.monitor.ShutdownClient;
 import com.meidusa.amoeba.monitor.packet.MonitorCommandPacket;
 import com.meidusa.amoeba.net.ConnectionManager;
-import com.meidusa.amoeba.net.ServerableConnectionManager;
 import com.meidusa.amoeba.runtime.PriorityShutdownHook;
+import com.meidusa.amoeba.service.Service;
 import com.meidusa.amoeba.util.Reporter;
 import com.meidusa.amoeba.util.StringUtil;
 
@@ -67,12 +69,10 @@ public class AmoebaProxyServer {
 	protected static String generateReport(long now, boolean reset) {
 		long sinceLast = now - lastReportStamp;
 		long uptime = now - serverStartTime;
-		StringBuilder report = new StringBuilder(" State of server report:\n");
+		StringBuilder report = new StringBuilder(" State of server report:"+StringUtil.LINE_SEPARATOR);
 
-		report.append("- Uptime: ");
-		report.append(StringUtil.intervalToString(uptime)).append("\n");
-		report.append("- Report period: ");
-		report.append(StringUtil.intervalToString(sinceLast)).append("\n");
+		report.append("- Uptime: ").append(StringUtil.intervalToString(uptime)).append(StringUtil.LINE_SEPARATOR);
+		report.append("- Report period: ").append(StringUtil.intervalToString(sinceLast)).append(StringUtil.LINE_SEPARATOR);
 
 		// report on the state of memory
 		Runtime rt = Runtime.getRuntime();
@@ -80,7 +80,7 @@ public class AmoebaProxyServer {
 		long used = (total - rt.freeMemory());
 		report.append("- Memory: ").append(used / 1024).append("k used, ");
 		report.append(total / 1024).append("k total, ");
-		report.append(max / 1024).append("k max\n");
+		report.append(max / 1024).append("k max").append(StringUtil.LINE_SEPARATOR);
 		
 		for (int ii = 0; ii < reporters.size(); ii++) {
 			Reporter rptr = reporters.get(ii);
@@ -166,20 +166,23 @@ public class AmoebaProxyServer {
 			registerReporter(connMgr);
 		}
 		
+		Map<String,Object> context = new HashMap<String,Object>();
+		context.putAll(ProxyRuntimeContext.getInstance().getConnectionManagerList());
+		
 		List<BeanObjectEntityConfig> serverConfigList = ProxyRuntimeContext.getInstance().getConfig().getServerConfigList();
 		
 		for(BeanObjectEntityConfig serverConfig : serverConfigList){
-			ServerableConnectionManager serverManager = (ServerableConnectionManager)serverConfig.createBeanObject(false,ProxyRuntimeContext.getInstance().getConnectionManagerList());
+			Service service = (Service)serverConfig.createBeanObject(false,context);
 			
-			ProxyRuntimeContext.getInstance().setServer(serverManager);
-			serverManager.init();
-			serverManager.start();
-			PriorityShutdownHook.addShutdowner(serverManager);
-			registerReporter(serverManager);
+			service.init();
+			service.start();
+			PriorityShutdownHook.addShutdowner(service);
+			registerReporter(service);
 		}
 		new Thread(){
 			{
 				this.setDaemon(true);
+				this.setName("Amoeba Report Thread");
 			}
 			public void run(){
 				while(true){
@@ -195,13 +198,5 @@ public class AmoebaProxyServer {
 				}
 			}
 		}.start();
-		
-		/*ServerableConnectionManager monitorServer = new MonitorServer("amoeba");
-		monitorServer.setConnectionFactory(new MonitorClientConnectionFactory());
-		monitorServer.setDaemon(true);
-		monitorServer.setIpAddress("127.0.0.1");
-		monitorServer.init();
-		monitorServer.start();
-		PriorityShutdownHook.addShutdowner(monitorServer);*/
 	}
 }

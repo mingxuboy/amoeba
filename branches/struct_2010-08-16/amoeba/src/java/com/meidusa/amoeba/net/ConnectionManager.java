@@ -32,6 +32,7 @@ import com.meidusa.amoeba.util.InitialisationException;
 import com.meidusa.amoeba.util.LoopingThread;
 import com.meidusa.amoeba.util.Queue;
 import com.meidusa.amoeba.util.Reporter;
+import com.meidusa.amoeba.util.StringUtil;
 import com.meidusa.amoeba.util.Tuple;
 
 /**
@@ -80,10 +81,10 @@ public class ConnectionManager extends LoopingThread implements Reporter, Initia
 	}
 
 	public void appendReport(StringBuilder report, long now, long sinceLast, boolean reset, Level level) {
-        report.append("* ").append(this.getName()).append("\n");
-        report.append("- Registed Connection size: ").append(_selector.keys().size()).append("\n");
-        report.append("- created Connection size: ").append(_stats.connects.get()).append("\n");
-        report.append("- disconnect Connection size: ").append(_stats.disconnects.get()).append("\n");
+        report.append("* ").append(this.getName()).append(StringUtil.LINE_SEPARATOR);
+        report.append("- Registed Connection size: ").append(_selector.keys().size()).append(StringUtil.LINE_SEPARATOR);
+        report.append("- created Connection size: ").append(_stats.connects.get()).append(StringUtil.LINE_SEPARATOR);
+        report.append("- disconnect Connection size: ").append(_stats.disconnects.get()).append(StringUtil.LINE_SEPARATOR);
         if (reset) {
             _stats = new ConMgrStats();
         }
