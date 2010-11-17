@@ -26,8 +26,11 @@
 			
 			<property name="authenticator">
 				<bean class="com.meidusa.amoeba.mysql.server.MysqlClientAuthenticator">
+					
 					<property name="user">root</property>
+					
 					<property name="password"></property>
+					
 					<property name="filter">
 						<bean class="com.meidusa.amoeba.server.IPAccessController">
 							<property name="ipFile">${amoeba.home}/conf/access_list.conf</property>
