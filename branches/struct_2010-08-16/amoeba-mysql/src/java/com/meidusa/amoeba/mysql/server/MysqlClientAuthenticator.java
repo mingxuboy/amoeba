@@ -13,6 +13,7 @@ package com.meidusa.amoeba.mysql.server;
 
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
+import java.util.Collections;
 import java.util.Map;
 
 import org.apache.commons.collections.map.LRUMap;
@@ -36,7 +37,7 @@ import com.meidusa.amoeba.util.StringUtil;
 @SuppressWarnings("unchecked")
 public class MysqlClientAuthenticator extends Authenticator<AuthenticationPacket> implements MySqlPacketConstant{
 	protected static Logger logger = Logger.getLogger(MysqlClientAuthenticator.class);
-	private Map map = new LRUMap(100);
+	private Map map = Collections.synchronizedMap(new LRUMap(1000));
 	
 	public MysqlClientAuthenticator() {
 		
