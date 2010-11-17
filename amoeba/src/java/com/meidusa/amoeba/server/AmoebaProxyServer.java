@@ -169,9 +169,9 @@ public class AmoebaProxyServer {
 		Map<String,Object> context = new HashMap<String,Object>();
 		context.putAll(ProxyRuntimeContext.getInstance().getConnectionManagerList());
 		
-		List<BeanObjectEntityConfig> serverConfigList = ProxyRuntimeContext.getInstance().getConfig().getServerConfigList();
+		List<BeanObjectEntityConfig> serviceConfigList = ProxyRuntimeContext.getInstance().getConfig().getServiceConfigList();
 		
-		for(BeanObjectEntityConfig serverConfig : serverConfigList){
+		for(BeanObjectEntityConfig serverConfig : serviceConfigList){
 			Service service = (Service)serverConfig.createBeanObject(false,context);
 			
 			service.init();

@@ -12,10 +12,9 @@
 		
 	<dbServer name="abstractServer" abstractive="true">
 		<factoryConfig class="com.meidusa.amoeba.mysql.net.MysqlServerConnectionFactory">
-			<property name="manager">defaultManager</property>
+			<property name="manager">${defaultManager}</property>
 			<property name="sendBufferSize">64</property>
 			<property name="receiveBufferSize">128</property>
-			<property name="manager">defaultManager</property>
 				
 			<!-- mysql port -->
 			<property name="port">3306</property>

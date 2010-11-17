@@ -247,13 +247,13 @@ public class ProxyRuntimeContext implements Reporter {
             
             try {
                 BeanObjectEntityConfig poolConfig = dbServerConfig.getPoolConfig();
-                ObjectPool pool = (ObjectPool) poolConfig.createBeanObject(false);
+                ObjectPool pool = (ObjectPool) poolConfig.createBeanObject(false,conMgrMap);
                 pool.setName(StringUtil.isEmpty(poolConfig.getName())?dbServerConfig.getName():poolConfig.getName());
                 if (pool instanceof Initialisable) {
                     initialisableList.add((Initialisable) pool);
                 }
                 if (dbServerConfig.getFactoryConfig() != null) {
-                    PoolableObjectFactory factory = (PoolableObjectFactory) dbServerConfig.getFactoryConfig().createBeanObject(false);
+                    PoolableObjectFactory factory = (PoolableObjectFactory) dbServerConfig.getFactoryConfig().createBeanObject(false,conMgrMap);
                     if (factory instanceof Initialisable) {
                         initialisableList.add((Initialisable) factory);
                     }
@@ -268,7 +268,7 @@ public class ProxyRuntimeContext implements Reporter {
         if (config.getQueryRouterConfig() != null) {
             BeanObjectEntityConfig queryRouterConfig = config.getQueryRouterConfig();
             try {
-                queryRouter = (QueryRouter) queryRouterConfig.createBeanObject(false);
+                queryRouter = (QueryRouter) queryRouterConfig.createBeanObject(false,conMgrMap);
                 if (queryRouter instanceof Initialisable) {
                     initialisableList.add((Initialisable) queryRouter);
                 }
@@ -484,7 +484,7 @@ public class ProxyRuntimeContext implements Reporter {
                     String key = child.getAttribute("name");
                     String value = child.getTextContent();
                     map.put(key, value);
-                }else if(nodeName.equals("server")){
+                }else if(nodeName.equals("service")){
                 	BeanObjectEntityConfig server = DocumentUtil.loadBeanConfig(child);
                 	config.addServerConfig(server);
                 }else if(nodeName.equals("runtime")){

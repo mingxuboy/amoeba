@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 
 <!ELEMENT className ( #PCDATA ) >
-<!ELEMENT amoeba:configuration ( proxy, connectionManagerList, dbServerList, queryRouter ) >
+<!ELEMENT amoeba:configuration ( proxy, connectionManagerList, dbServerLoader, queryRouter ) >
 <!ATTLIST amoeba:configuration
   xmlns:amoeba CDATA #FIXED "http://amoeba.meidusa.com/" 
 >
@@ -12,13 +12,8 @@
 <!ATTLIST connectionManager name NMTOKEN #REQUIRED >
 <!ATTLIST connectionManager class NMTOKEN #IMPLIED >
 
-<!ELEMENT dbServer ( factoryConfig?, poolConfig* ) >
-<!ATTLIST dbServer name NMTOKEN #REQUIRED >
-<!ATTLIST dbServer virtual NMTOKEN #IMPLIED >
-<!ATTLIST dbServer abstractive NMTOKEN #IMPLIED >
-<!ATTLIST dbServer parent NMTOKEN #IMPLIED >
-
-<!ELEMENT dbServerList ( dbServer+ ) >
+<!ELEMENT dbServerLoader ( property*) >
+<!ATTLIST dbServerLoader class NMTOKEN #IMPLIED >
 
 <!ELEMENT factoryConfig (property* ) >
 <!ATTLIST factoryConfig class NMTOKEN #IMPLIED >
@@ -39,10 +34,11 @@
 <!ELEMENT queryRouter (property*) >
 
 <!ATTLIST proxy class NMTOKEN #IMPLIED >
-<!ELEMENT proxy ( server,runtime ) >
+<!ELEMENT proxy ( service+,runtime ) >
 
-<!ATTLIST server class NMTOKEN #IMPLIED >
-<!ELEMENT server (property*) >
+<!ATTLIST service class NMTOKEN #REQUIRED >
+<!ATTLIST service name CDATA #REQUIRED >
+<!ELEMENT service (property*) >
 
 <!ATTLIST runtime class NMTOKEN #IMPLIED >
 <!ELEMENT runtime (property*) >
