@@ -1,7 +1,7 @@
 package com.meidusa.amoeba.monitor;
 
 public interface MonitorConstant {
-	String APPLICATION_NAME = "Amoeba";
+	String APPLICATION_NAME = ".Amoeba";
     int    HEADER_SIZE               = 5;
     
     byte   FUN_TYPE_OBJECT           = 1;
