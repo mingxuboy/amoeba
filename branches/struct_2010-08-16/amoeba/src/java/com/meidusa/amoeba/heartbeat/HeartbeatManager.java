@@ -29,7 +29,7 @@ public class HeartbeatManager {
 						delayed = HEART_BEAT_QUEUE.take();
 						Status status = delayed.doCheck();
 						if (logger.isDebugEnabled()) {
-							logger.debug("checked Pool poolName="
+							logger.debug("checked task taskName="
 									+ delayed.getName() + " ,Status="
 									+ status);
 						}
@@ -47,7 +47,7 @@ public class HeartbeatManager {
 							}
 						}
 					} catch (Exception e) {
-						logger.error("check pool error", e);
+						logger.error("check task error", e);
 					}
 				}
 			}

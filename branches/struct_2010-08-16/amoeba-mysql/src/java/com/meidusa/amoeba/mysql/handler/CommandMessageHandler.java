@@ -172,6 +172,11 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 			}
 		}
 	}
+	
+	/**
+	 * this method will be invoked after main command response completed 
+	 * @param conn
+	 */
 	protected void afterMainCommand(MysqlServerConnection conn){
 		
 	}
@@ -331,6 +336,7 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 	}
 	
 	/**
+	 * <pre>
 	 * 任何在handler里面需要发送到目标连接的数据包，都调用该方法发送出去。
 	 * 从服务器端发送过来的消息到客户端，或者从客户端发送命令到各个mysql server。
 	 * 
@@ -340,7 +346,7 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 	 * 以上2种数据包通过dispatchMessage 方法发送出去的。
 	 * 由内部产生的命令数据包可以在 afterCommandCompleted()之后 根据ConnectionStatus.buffers中保存。
 	 * commandQueue.clearAllBuffer() 以后buffers 将被清空
-	 * 
+	 * </pre>
 	 * @param fromServer 是否是从mysql server 端发送过来的
 	 * @param message 消息内容
 	 */

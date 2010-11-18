@@ -28,8 +28,6 @@ import org.apache.log4j.Logger;
 
 import com.meidusa.amoeba.context.ProxyRuntimeContext;
 import com.meidusa.amoeba.mysql.context.MysqlRuntimeContext;
-import com.meidusa.amoeba.mysql.filter.IOFilter;
-import com.meidusa.amoeba.mysql.filter.PacketIOFilter;
 import com.meidusa.amoeba.mysql.handler.MySqlCommandDispatcher;
 import com.meidusa.amoeba.mysql.handler.PreparedStatmentInfo;
 import com.meidusa.amoeba.mysql.io.MySqlPacketConstant;
@@ -60,10 +58,6 @@ public class MysqlClientConnection extends MysqlConnection implements MySqlPacke
 			.getLogger(MysqlClientConnection.class);
 	private static Logger authLogger = Logger.getLogger("auth");
 	private static Logger lastInsertID = Logger.getLogger("lastInsertId");
-	static List<IOFilter> filterList = new ArrayList<IOFilter>();
-	static {
-		filterList.add(new PacketIOFilter());
-	}
 	
 	private static byte[] AUTHENTICATEOKPACKETDATA;
     static {
