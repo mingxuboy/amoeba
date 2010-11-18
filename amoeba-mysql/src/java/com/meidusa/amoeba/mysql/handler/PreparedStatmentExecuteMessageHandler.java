@@ -19,7 +19,6 @@ import com.meidusa.amoeba.mysql.net.MysqlClientConnection;
 import com.meidusa.amoeba.mysql.net.MysqlServerConnection;
 import com.meidusa.amoeba.mysql.net.packet.CommandPacket;
 import com.meidusa.amoeba.mysql.net.packet.ExecutePacket;
-import com.meidusa.amoeba.mysql.net.packet.MysqlPacketBuffer;
 import com.meidusa.amoeba.mysql.net.packet.PreparedStatmentClosePacket;
 import com.meidusa.amoeba.mysql.net.packet.QueryCommandPacket;
 import com.meidusa.amoeba.net.Connection;
@@ -32,44 +31,6 @@ import com.meidusa.amoeba.parser.statement.Statement;
  *
  */
 public class PreparedStatmentExecuteMessageHandler extends PreparedStatmentMessageHandler{
-	
-	static class PreparedStatmentExecuteConnectionStatuts extends PreparedStatmentMessageHandler.PreparedStatmentConnectionStatuts{
-		public PreparedStatmentExecuteConnectionStatuts(Connection conn,PreparedStatmentInfo preparedStatmentInfo){
-			super(conn,preparedStatmentInfo);
-		}
-		
-		@Override
-		public boolean isCompleted(byte[] buffer) {
-			if(this.commandType == QueryCommandPacket.COM_STMT_EXECUTE){
-				if(MysqlPacketBuffer.isEofPacket(buffer)){
-					if((this.statusCode & PreparedStatmentSessionStatus.EOF_FIELDS)==0){
-						this.statusCode |= PreparedStatmentSessionStatus.EOF_FIELDS;
-						return false;
-					}else{
-						this.statusCode |= PreparedStatmentSessionStatus.EOF_ROWS;
-						this.statusCode |= PreparedStatmentSessionStatus.COMPLETED;
-						return true;
-					}
-				}else if(packetIndex == 0 && MysqlPacketBuffer.isErrorPacket(buffer)){
-					this.statusCode |= PreparedStatmentSessionStatus.ERROR;
-					this.statusCode |= PreparedStatmentSessionStatus.COMPLETED;
-					this.setErrorPacket(buffer);
-					return true;
-				}else if(packetIndex == 0 && MysqlPacketBuffer.isOkPacket(buffer)){
-					this.statusCode |= PreparedStatmentSessionStatus.OK;
-					this.statusCode |= PreparedStatmentSessionStatus.COMPLETED;
-					return true;
-				}
-				return false;
-			}else if(this.commandType == QueryCommandPacket.COM_STMT_SEND_LONG_DATA){
-				return true;
-			}else{
-				return super.isCompleted(buffer);
-			}
-		}
-	}
-	
-	/** 当前的请求数据包 */
 	
 	public PreparedStatmentExecuteMessageHandler(MysqlClientConnection source,PreparedStatmentInfo preparedStatmentInfo,Statement statment,byte[] query,ObjectPool[] pools,long timeout){
 		super(source,preparedStatmentInfo,statment,query,pools,timeout,true);
@@ -85,10 +46,12 @@ public class PreparedStatmentExecuteMessageHandler extends PreparedStatmentMessa
 	}
 	protected void appendPreMainCommand(){
 		super.appendPreMainCommand();
+		
 		QueryCommandPacket preparedCommandPacket = new QueryCommandPacket();
 		preparedCommandPacket.command = CommandPacket.COM_STMT_PREPARE;
 		preparedCommandPacket.query = preparedStatmentInfo.getPreparedStatment();
 		byte[] buffer = preparedCommandPacket.toByteBuffer(source).array();
+		
 		CommandInfo info = new CommandInfo();
 		info.setBuffer(buffer);
 		info.setMain(false);
