@@ -39,6 +39,25 @@ public class MysqlClientAuthenticator extends Authenticator<AuthenticationPacket
 	protected static Logger logger = Logger.getLogger(MysqlClientAuthenticator.class);
 	private Map map = Collections.synchronizedMap(new LRUMap(1000));
 	
+	protected String user;
+	protected String password;
+	
+	public String getUser() {
+		return user;
+	}
+
+	public void setUser(String user) {
+		this.user = user;
+	}
+
+	public String getPassword() {
+		return password;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
+	}
+	
 	public MysqlClientAuthenticator() {
 		
 	}
@@ -92,7 +111,7 @@ public class MysqlClientAuthenticator extends Authenticator<AuthenticationPacket
 				return;
 			}
 
-			if(getPassword() != null){
+			if(!StringUtil.isEmpty(getPassword())){
 				String encryptPassword = new String(Security.scramble411(getPassword(),mysqlConn.getSeed()),AuthenticationPacket.CODE_PAGE_1252);
 			
 				passwordchecked = StringUtils.equals(new String(autheticationPacket.encryptedPassword,AuthenticationPacket.CODE_PAGE_1252), encryptPassword);

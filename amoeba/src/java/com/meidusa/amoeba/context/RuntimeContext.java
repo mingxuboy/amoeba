@@ -16,8 +16,17 @@ public class RuntimeContext implements Initialisable {
 	private int readThreadPoolSize = 16;
 	private int clientSideThreadPoolSize = 16;
 	private int serverSideThreadPoolSize = 16;
+	
+	/**
+	 * query time out
+	 */
 	private int queryTimeout;
-	public boolean useMultipleThread = true;
+	private boolean useMultipleThread = true;
+	
+	/**
+	 * max result --Overload protection , query session was killed , results returned size exceed
+	 */
+	private int maxResult = -1;
 	
 	public int getQueryTimeout() {
 		return queryTimeout;
@@ -89,6 +98,14 @@ public class RuntimeContext implements Initialisable {
 
 	public void setServerCharset(String serverCharset) {
 		this.serverCharset = serverCharset;
+	}
+
+	public int getMaxResult() {
+		return maxResult;
+	}
+
+	public void setMaxResult(int maxResult) {
+		this.maxResult = maxResult;
 	}
 
 	static class ReNameableThreadExecutor extends ThreadPoolExecutor {

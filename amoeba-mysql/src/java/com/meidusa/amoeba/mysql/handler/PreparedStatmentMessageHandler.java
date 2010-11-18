@@ -28,6 +28,7 @@ import com.meidusa.amoeba.mysql.net.MysqlServerConnection;
 import com.meidusa.amoeba.mysql.net.packet.CommandPacket;
 import com.meidusa.amoeba.mysql.net.packet.MysqlPacketBuffer;
 import com.meidusa.amoeba.mysql.net.packet.OKforPreparedStatementPacket;
+import com.meidusa.amoeba.mysql.net.packet.PreparedStatmentClosePacket;
 import com.meidusa.amoeba.mysql.net.packet.QueryCommandPacket;
 import com.meidusa.amoeba.net.Connection;
 import com.meidusa.amoeba.net.poolable.ObjectPool;
@@ -163,6 +164,14 @@ public class PreparedStatmentMessageHandler extends QueryCommandMessageHandler {
             			ok.init(message,fromConn);
             			ok.statementHandlerId = preparedStatmentInfo.getStatmentId();
             			message = ok.toByteBuffer(fromConn).array();
+            			
+            			/*PreparedStatmentClosePacket preparedCloseCommandPacket = new PreparedStatmentClosePacket();
+            	        preparedCloseCommandPacket.command = CommandPacket.COM_STMT_CLOSE;
+            	        preparedCloseCommandPacket.statementId = statmentIdMap.get(fromConn);
+            	        fromConn.postMessage(preparedCloseCommandPacket.toByteBuffer(fromConn));
+            	        if(logger.isInfoEnabled()){
+            	        	logger.info("conn="+fromConn.getSocketId()+", close statement id="+preparedCloseCommandPacket.statementId);
+            	        }*/
             		}
     				preparedStatmentInfo.addPacket(message);
     			}
@@ -172,6 +181,7 @@ public class PreparedStatmentMessageHandler extends QueryCommandMessageHandler {
     }
     /**
      * 替换相应的 prepared Statment id，保存相应的数据包,并且填充 preparedStatmentInfo 的一些信息
+     * 如果当前是执行并且当前阶段是prepared，则将不发送到给客户端
      */
     protected void dispatchMessageTo(Connection toConn, byte[] message) {
     	if(message != null){

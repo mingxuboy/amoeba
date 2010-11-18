@@ -123,12 +123,19 @@ public class MySqlCommandDispatcher implements MessageHandler {
 	                }
 	            } else if (MysqlPacketBuffer.isPacketType(message, QueryCommandPacket.COM_STMT_PREPARE)) {
 	            	
+	            	/**
+	            	 * 获取之前prepared过的数据，直接返回给客户端，如果没有则需要往后端mysql发起请求，
+	            	 * 然后数据以后填充PreparedStatmentInfo，并且给客户端
+	            	 */
 	                PreparedStatmentInfo preparedInf = conn.getPreparedStatmentInfo(command.query);
 	                if(preparedInf.getByteBuffer() != null && preparedInf.getByteBuffer().length >0){
 	                	conn.postMessage(preparedInf.getByteBuffer());
 	                	return;
 	                }
 	                
+	                /**
+	                 * 无命中情况
+	                 */
 	                SqlBaseQueryRouter router = (SqlBaseQueryRouter)ProxyRuntimeContext.getInstance().getQueryRouter();
 	                SqlQueryObject queryObject = new SqlQueryObject();
 	                queryObject.isPrepared = true;

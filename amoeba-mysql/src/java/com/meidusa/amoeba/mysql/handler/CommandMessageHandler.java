@@ -69,9 +69,9 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 	private long lastTimeMillis = System.currentTimeMillis();
 	private ErrorPacket errorPacket;
 	protected Statement statment;
+	private QueryCommandPacket command = new QueryCommandPacket();
 	public CommandMessageHandler(final MysqlClientConnection source,byte[] query,Statement statment, ObjectPool[] pools,long timeout){
 		commandQueue = new CommandQueue(source,statment);
-		QueryCommandPacket command = new QueryCommandPacket();
 		command.init(query,source);
 		this.pools = pools;
 		info.setBuffer(query);
@@ -563,7 +563,9 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 	
 	public synchronized void startSession() throws Exception {
 		if(logger.isInfoEnabled()){
-			logger.info(this+" session start");
+			logger.info("session start[type="+this.command.command+"]:ip="+this.source.getSocketId()+",handlerId="+this.hashCode()
+					+",time="+(System.currentTimeMillis()-createTime)
+					+",sql="+(this.statment ==null?null:this.statment.getSql()));
 		}
 		
 		for(ObjectPool pool:pools){
@@ -646,7 +648,9 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 			source.postClose(null);
 		}else{
 			if(logger.isInfoEnabled()){
-				logger.info(this+" session ended.");
+				logger.info("session end[type="+this.command.command+"]:ip="+this.source.getSocketId()
+						+",handlerId="+this.hashCode()
+						+",sql="+(this.statment ==null?null:this.statment.getSql()));
 			}
 		}
 		this.dispatchMessageTo(source,null);

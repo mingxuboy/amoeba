@@ -109,6 +109,9 @@ public class PreparedStatmentExecuteMessageHandler extends PreparedStatmentMessa
 	        preparedCloseCommandPacket.command = CommandPacket.COM_STMT_CLOSE;
 	        preparedCloseCommandPacket.statementId = statmentIdMap.get(conn);
 	        conn.postMessage(preparedCloseCommandPacket.toByteBuffer(conn));
+	        if(logger.isInfoEnabled()){
+	        	logger.info("conn="+conn.getSocketId()+", close statement id="+preparedCloseCommandPacket.statementId);
+	        }
 		}
 	}
 	
