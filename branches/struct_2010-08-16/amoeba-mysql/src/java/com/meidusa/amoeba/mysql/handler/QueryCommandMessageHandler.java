@@ -31,7 +31,7 @@ import com.meidusa.amoeba.parser.statement.Statement;
  */
 public class QueryCommandMessageHandler extends CommandMessageHandler {
 
-    private static Logger logger = Logger.getLogger(QueryCommandMessageHandler.class);
+    public static Logger logger = Logger.getLogger(QueryCommandMessageHandler.class);
 
     static class QueryConnectionStatus extends ConnectionStatuts {
 

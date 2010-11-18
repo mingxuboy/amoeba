@@ -27,25 +27,6 @@ public abstract class Authenticator<T extends AbstractPacket> {
 
     protected static Logger                log = Logger.getLogger(Authenticator.class);
     private AuthenticateFilter             filter;
-	protected String user;
-	protected String password;
-	
-	public String getUser() {
-		return user;
-	}
-
-	public void setUser(String user) {
-		this.user = user;
-	}
-
-	public String getPassword() {
-		return password;
-	}
-
-	public void setPassword(String password) {
-		this.password = password;
-	}
-	
     public boolean authenticateConnection(final AuthingableConnection conn,T authenPacket) {
         final AuthResponseData rdata = createResponseData();
         try {
