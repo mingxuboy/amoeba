@@ -13,7 +13,7 @@ public class PreparedStatmentTest {
 	 * @throws Exception
 	 */
 	public static void main(String[] args) throws Exception {
-		for (int j = 0; j < 1; j++) {
+		for (int j = 0; j < 100; j++) {
 			Thread thread =new Thread() {
 				public void run() {
 					Connection conn = null;
@@ -41,7 +41,7 @@ public class PreparedStatmentTest {
 								.getConnection(
 										"jdbc:mysql://127.0.0.1:8066/test?useUnicode=true&characterEncoding=utf-8&useServerPrepStmts=true&useCompression=true",
 										"root", null);
-						for (int i = 0; i < 1; i++) {
+						for (int i = 0; i < 100; i++) {
 							statment = conn
 									.prepareStatement("SELECT ID, SDID, F_SDID, APP_ID, RESERVE1, RESERVE2, RESERVE3 FROM SD_RELATION.RELATION_ORIGIN WHERE SDID =? AND F_SDID=? AND APP_ID = ?");
 							statment.setLong(1, 1);

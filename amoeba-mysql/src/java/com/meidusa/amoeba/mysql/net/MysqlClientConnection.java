@@ -119,20 +119,20 @@ public class MysqlClientConnection extends MysqlConnection implements MySqlPacke
 				protected boolean removeLRU(LinkEntry entry) {
 					PreparedStatmentInfo info = (PreparedStatmentInfo) entry
 							.getValue();
-					sql_statment_id_map.remove(info.getPreparedStatment());
+					sql_statment_id_map.remove(info.getSql());
 					return true;
 				}
 
 				public PreparedStatmentInfo remove(Object key) {
 					PreparedStatmentInfo info = (PreparedStatmentInfo) super
 							.remove(key);
-					sql_statment_id_map.remove(info.getPreparedStatment());
+					sql_statment_id_map.remove(info.getSql());
 					return info;
 				}
 
 				public Object put(Object key, Object value) {
 					PreparedStatmentInfo info = (PreparedStatmentInfo) value;
-					sql_statment_id_map.put(info.getPreparedStatment(),
+					sql_statment_id_map.put(info.getSql(),
 							(Long) key);
 					return super.put(key, value);
 				}
@@ -142,7 +142,7 @@ public class MysqlClientConnection extends MysqlConnection implements MySqlPacke
 						Map.Entry<Long, PreparedStatmentInfo> entry = (Map.Entry<Long, PreparedStatmentInfo>) it
 								.next();
 						sql_statment_id_map.put(entry.getValue()
-								.getPreparedStatment(), entry.getKey());
+								.getSql(), entry.getKey());
 					}
 					super.putAll(map);
 				}
@@ -169,7 +169,7 @@ public class MysqlClientConnection extends MysqlConnection implements MySqlPacke
 		return info;
 	}
 	
-	public PreparedStatmentInfo getPreparedStatmentInfo(String preparedSql,List<byte[]> byts) throws ParseException{
+	public PreparedStatmentInfo createStatementInfo(String preparedSql,List<byte[]> byts) throws ParseException{
 		Long id = sql_statment_id_map.get(preparedSql);
 		PreparedStatmentInfo info = null;
 		if (id == null) {

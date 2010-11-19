@@ -177,7 +177,7 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 	 * this method will be invoked after main command response completed 
 	 * @param conn
 	 */
-	protected void afterMainCommand(MysqlServerConnection conn){
+	protected void afterCommand(MysqlServerConnection conn,CommandStatus commStatus){
 		
 	}
 	
@@ -204,7 +204,7 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 				if(CommandStatus.AllCompleted == commStatus || CommandStatus.ConnectionCompleted == commStatus){
 					
 					//¼ÇÂ¼ prepared statement ID »òÕß close statement
-					afterMainCommand((MysqlServerConnection)fromConn);
+					afterCommand((MysqlServerConnection)fromConn,commStatus);
 					
 					if(commandQueue.currentCommand.isMain() || this.ended){
 						//mysqlServer connection return to pool

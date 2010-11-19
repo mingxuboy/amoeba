@@ -142,7 +142,7 @@ public class AladdinMessageDispatcher implements MessageHandler {
 	                    error.serverErrorMessage = "Unknown prepared statment id=" + statmentId;
 	                    conn.postMessage(error.toByteBuffer(connection).array());
 	                } else {
-	                    String sql = pInfo.getPreparedStatment();
+	                    String sql = pInfo.getSql();
 	                    if (logger.isDebugEnabled()) {
 	                        logger.debug(StringFillFormat.format("COM_STMT_EXECUTE:", fillLength) + "sql[" + sql.trim() + "]");
 	                        logger.debug(StringFillFormat.format("COM_STMT_EXECUTE:", fillLength) + "params[" + pInfo.getParameterCount() + "]");
