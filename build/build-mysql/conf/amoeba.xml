@@ -20,7 +20,7 @@
 			<property name="connectionFactory">
 				<bean class="com.meidusa.amoeba.mysql.net.MysqlClientConnectionFactory">
 					<property name="sendBufferSize">128</property>
-                    <property name="receiveBufferSize">64</property>
+					<property name="receiveBufferSize">64</property>
 				</bean>
 			</property>
 			
