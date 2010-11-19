@@ -81,6 +81,7 @@ public class MysqlClientConnection extends MysqlConnection implements MySqlPacke
 	
 	private long lastInsertId;
 	
+	private int statementCacheSize = 500;
 	// 保存客户端返回的加密过的字符串
 	protected byte[] authenticationMessage;
 	public MysqlResultSetPacket lastPacketResult = new MysqlResultSetPacket(null);
@@ -106,13 +107,20 @@ public class MysqlClientConnection extends MysqlConnection implements MySqlPacke
 			.synchronizedMap(new HashMap<String, Long>(256));
 	private AtomicLong atomicLong = new AtomicLong(1);
 
+	public int getStatementCacheSize() {
+		return statementCacheSize;
+	}
+
+	public void setStatementCacheSize(int statementCacheSize) {
+		this.statementCacheSize = statementCacheSize;
+	}
 	/**
 	 * 采用LRU缓存这些preparedStatment信息 key=statmentId value=PreparedStatmentInfo
 	 * object
 	 */
 	@SuppressWarnings("unchecked")
 	private final Map<Long, PreparedStatmentInfo> prepared_statment_map = Collections
-			.synchronizedMap(new LRUMap(256) {
+			.synchronizedMap(new LRUMap(((MysqlRuntimeContext)ProxyRuntimeContext.getInstance().getRuntimeContext()).getStatementCacheSize()) {
 
 				private static final long serialVersionUID = 1L;
 
