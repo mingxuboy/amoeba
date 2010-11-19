@@ -53,7 +53,6 @@ import com.meidusa.amoeba.route.SqlQueryObject;
 public class MySqlCommandDispatcher implements MessageHandler {
 
     protected static Logger logger  = Logger.getLogger(MySqlCommandDispatcher.class);
-    private static Logger lastInsertID = Logger.getLogger("lastInsertId");
     private long timeout = ProxyRuntimeContext.getInstance().getRuntimeContext().getQueryTimeout() * 1000;
 
     private static byte[]   STATIC_OK_BUFFER;
@@ -144,7 +143,7 @@ public class MySqlCommandDispatcher implements MessageHandler {
 	                ObjectPool[] pools = router.doRoute(conn, queryObject);
 	                Statement statment = router.parseStatement(conn, command.query);
 	                
-	            	PreparedStatmentMessageHandler handler = new PreparedStatmentMessageHandler(conn,preparedInf,statment, message , new ObjectPool[]{pools[0]}, timeout,false);
+	            	PreparedStatmentMessageHandler handler = new PreparedStatmentMessageHandler(conn,preparedInf,statment, message , new ObjectPool[]{pools[0]}, timeout);
 	            	if (handler instanceof Sessionable) {
 	                    Sessionable session = (Sessionable) handler;
 	                    try {
@@ -190,7 +189,7 @@ public class MySqlCommandDispatcher implements MessageHandler {
 		                    SqlBaseQueryRouter router = (SqlBaseQueryRouter)ProxyRuntimeContext.getInstance().getQueryRouter();
 			                SqlQueryObject queryObject = new SqlQueryObject();
 			                queryObject.isPrepared = false;
-			                queryObject.sql = preparedInf.getPreparedStatment();
+			                queryObject.sql = preparedInf.getSql();
 			                queryObject.parameters = executePacket.getParameters();
 			                ObjectPool[] pools = router.doRoute(conn, queryObject);
 		

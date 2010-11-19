@@ -39,7 +39,7 @@ public class PreparedStatmentMessageHandler extends CommandMessageHandler {
 
     public PreparedStatmentMessageHandler(MysqlClientConnection conn, PreparedStatmentInfo preparedInf,
                                           ObjectPool[] pools, long timeout){
-        super(conn, preparedInf.getPreparedStatment(), preparedInf, pools, timeout);
+        super(conn, preparedInf.getSql(), preparedInf, pools, timeout);
     }
 
     @Override

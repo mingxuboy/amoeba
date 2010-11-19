@@ -20,8 +20,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.meidusa.amoeba.mysql.handler.session.CommandStatus;
 import com.meidusa.amoeba.mysql.handler.session.ConnectionStatuts;
-import com.meidusa.amoeba.mysql.net.CommandInfo;
 import com.meidusa.amoeba.mysql.net.MysqlClientConnection;
 import com.meidusa.amoeba.mysql.net.MysqlServerConnection;
 import com.meidusa.amoeba.mysql.net.packet.CommandPacket;
@@ -34,28 +34,23 @@ import com.meidusa.amoeba.net.poolable.ObjectPool;
 import com.meidusa.amoeba.parser.statement.Statement;
 
 /**
+ * 
+ * only for prepared
  * @author <a href=mailto:piratebase@sina.com>Struct chen</a>
  */
 public class PreparedStatmentMessageHandler extends QueryCommandMessageHandler {
 	
-	private List<byte[]> preparedStatmentBytes = new ArrayList<byte[]>();
-    
-
     protected PreparedStatmentInfo preparedStatmentInfo = null;
     /** 当前的请求数据包 */
     protected Map<Connection, Long>  statmentIdMap        = Collections.synchronizedMap(new HashMap<Connection, Long>());
-	private boolean isExecute;
 
     public PreparedStatmentMessageHandler(MysqlClientConnection source, PreparedStatmentInfo preparedStatmentInfo,Statement statment,
-                                          byte[] query, ObjectPool[] pools, long timeout,boolean isExecute){
+                                          byte[] query, ObjectPool[] pools, long timeout){
         super(source, query,statment, pools, timeout);
         this.preparedStatmentInfo = preparedStatmentInfo;
-        this.isExecute = isExecute;
+        this.preparedStatmentInfo.clearBuffer();
     }
 
-    protected void afterCommandCompleted(CommandInfo currentCommand) {
-        super.afterCommandCompleted(currentCommand);
-    }
 
     @Override
     protected List<byte[]> mergeMessages() {
@@ -76,69 +71,36 @@ public class PreparedStatmentMessageHandler extends QueryCommandMessageHandler {
      */
     protected void dispatchMessageFrom(Connection fromConn,byte[] message){
     	if(fromConn != source){
+    		//from mysql server
+    		//cache and buffered prepared messages , send merged messages
     		if (commandType == QueryCommandPacket.COM_STMT_PREPARE) {
-    			if(!isExecute){
-    				if(MysqlPacketBuffer.isOkPacket(message)){
-            			OKforPreparedStatementPacket ok = new OKforPreparedStatementPacket(); 
-            			ok.init(message,fromConn);
-            			ok.statementHandlerId = preparedStatmentInfo.getStatmentId();
-            			message = ok.toByteBuffer(fromConn).array();
-            		}
-    				preparedStatmentInfo.addPacket(message);
-    			}
+				preparedStatmentInfo.addPacket(message);
+				if(MysqlPacketBuffer.isEofPacket(message) && commandQueue.connStatusMap.get(fromConn).isCompleted()){
+					 this.source.postMessage(preparedStatmentInfo.getByteBuffer());
+				}
     		}
+    	}else{
+    		//from client
+    		super.dispatchMessageFrom(fromConn, message);
     	}
-    	super.dispatchMessageFrom(fromConn, message);
-    }
-    /**
-     * 替换相应的 prepared Statment id，保存相应的数据包,并且填充 preparedStatmentInfo 的一些信息
-     * 如果当前是执行并且当前阶段是prepared，则将不发送到给客户端
-     */
-    protected void dispatchMessageTo(Connection toConn, byte[] message) {
-    	if(message != null){
-	        if (toConn == source) {
-	            if (commandType == QueryCommandPacket.COM_STMT_PREPARE) {
-	            	if(isExecute){
-	            		return;
-	            	}else{
-	            		if(MysqlPacketBuffer.isOkPacket(message)){
-	            			OKforPreparedStatementPacket ok = new OKforPreparedStatementPacket(); 
-	            			ok.init(message,toConn);
-	            			ok.statementHandlerId = preparedStatmentInfo.getStatmentId();
-	            			message = ok.toByteBuffer(toConn).array();
-	            		}
-	            	}
-	            }
-	        } else {
-	            if (commandType == CommandPacket.COM_STMT_EXECUTE || commandType == CommandPacket.COM_STMT_SEND_LONG_DATA || commandType == CommandPacket.COM_STMT_CLOSE) {
-	                Long id = statmentIdMap.get(toConn);
-	                message[5] = (byte) (id & 0xff);
-	                message[6] = (byte) (id >>> 8);
-	                message[7] = (byte) (id >>> 16);
-	                message[8] = (byte) (id >>> 24);
-	            }
-	        }
-    	}
-        super.dispatchMessageTo(toConn, message);
     }
 
-    protected void afterMainCommand(MysqlServerConnection conn) {
-        super.afterMainCommand(conn);
+    protected void afterCommand(MysqlServerConnection conn,CommandStatus commStatus) {
+        super.afterCommand(conn,commStatus);
         if (commandType == QueryCommandPacket.COM_STMT_PREPARE) {
         	ConnectionStatuts status = this.commandQueue.connStatusMap.get(conn);
             byte[] buffer = status.buffers.get(0);
             OKforPreparedStatementPacket ok = new OKforPreparedStatementPacket();
             ok.init(buffer, source);
-            statmentIdMap.put(status.conn, ok.statementHandlerId);
-        }
-        
-        //TODO 
-        PreparedStatmentClosePacket preparedCloseCommandPacket = new PreparedStatmentClosePacket();
-        preparedCloseCommandPacket.command = CommandPacket.COM_STMT_CLOSE;
-        preparedCloseCommandPacket.statementId = statmentIdMap.get(conn);
-        conn.postMessage(preparedCloseCommandPacket.toByteBuffer(conn));
-        if(logger.isInfoEnabled()){
-        	logger.info("conn="+conn.getSocketId()+", close statement id="+preparedCloseCommandPacket.statementId);
+            
+            //send close statement packet to mysql
+            PreparedStatmentClosePacket preparedCloseCommandPacket = new PreparedStatmentClosePacket();
+            preparedCloseCommandPacket.command = CommandPacket.COM_STMT_CLOSE;
+            preparedCloseCommandPacket.statementId = ok.statementId;
+            conn.postMessage(preparedCloseCommandPacket.toByteBuffer(conn));
+            if(logger.isDebugEnabled()){
+            	logger.debug("conn="+conn.getSocketId()+", close server statement id="+preparedCloseCommandPacket.statementId);
+            }
         }
     }
 
@@ -147,7 +109,4 @@ public class PreparedStatmentMessageHandler extends QueryCommandMessageHandler {
         return new PreparedStatmentConnectionStatuts(conn, this.preparedStatmentInfo);
     }
 
-    public List<byte[]> getPreparedStatmentBytes(){
-    	return this.preparedStatmentBytes;
-    }
 }

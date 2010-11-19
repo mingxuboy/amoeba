@@ -19,6 +19,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import com.meidusa.amoeba.context.ProxyRuntimeContext;
+import com.meidusa.amoeba.mysql.net.packet.MysqlPacketBuffer;
 import com.meidusa.amoeba.mysql.net.packet.OKforPreparedStatementPacket;
 import com.meidusa.amoeba.net.DatabaseConnection;
 import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
@@ -35,7 +36,7 @@ public class PreparedStatmentInfo {
     /**
      * 客户端发送过来的 prepared statment sql语句
      */
-    private String preparedStatment;
+    private String sql;
     private Statement statment;
 
     private int    parameterCount;
@@ -50,14 +51,14 @@ public class PreparedStatmentInfo {
 
     private long   statmentId;
 
-    public List<byte[]> preparedPackets = new ArrayList<byte[]>();
+    private List<byte[]> preparedPackets = new ArrayList<byte[]>();
     private Lock   typesLock = new ReentrantLock(false);
 
     public PreparedStatmentInfo(DatabaseConnection conn, long id, String preparedSql)throws ParseException{
     	SqlBaseQueryRouter router = (SqlBaseQueryRouter)ProxyRuntimeContext.getInstance().getQueryRouter();
     	statment = router.parseStatement(conn, preparedSql);
         statmentId = id;
-        this.preparedStatment = preparedSql;
+        this.sql = preparedSql;
         parameterCount = router.parseParameterCount(conn, preparedSql);
     }
     
@@ -66,10 +67,10 @@ public class PreparedStatmentInfo {
     	statment = router.parseStatement(conn, preparedSql);
     	PacketBuffer buffer = new AbstractPacketBuffer(2048);
         statmentId = id;
-        this.preparedStatment = preparedSql;
+        this.sql = preparedSql;
         OKforPreparedStatementPacket okPaket = new OKforPreparedStatementPacket();
         okPaket.init(messageList.get(0),conn);
-        okPaket.statementHandlerId = id;
+        okPaket.statementId = id;
         parameterCount = router.parseParameterCount(conn, preparedSql);
         messageList.remove(0);
         messageList.add(0, okPaket.toByteBuffer(conn).array());
@@ -117,17 +118,27 @@ public class PreparedStatmentInfo {
         return statmentId;
     }
 
+    public void clearBuffer(){
+    	packetBuffer = null;
+    	preparedPackets.clear();
+    }
     public Statement getStatment(){
     	return statment;
     }
-    public String getPreparedStatment() {
-        return preparedStatment;
+    public String getSql() {
+        return sql;
     }
 
-    public void addPacket(byte[] packet){
-    	preparedPackets.add(packet);
+    public void addPacket(byte[] message){
+    	if(MysqlPacketBuffer.isOkPacket(message)){
+			OKforPreparedStatementPacket ok = new OKforPreparedStatementPacket(); 
+			ok.init(message,null);
+			ok.statementId = this.getStatmentId();
+			message = ok.toByteBuffer(null).array();
+		}
+    	preparedPackets.add(message);
     }
-    public void setPreparedStatment(String preparedStatment) {
-        this.preparedStatment = preparedStatment;
+    public void setSql(String preparedStatment) {
+        this.sql = preparedStatment;
     }
 }

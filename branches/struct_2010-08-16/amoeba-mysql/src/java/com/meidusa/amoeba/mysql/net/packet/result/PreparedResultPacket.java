@@ -35,7 +35,7 @@ public class PreparedResultPacket extends ErrorResultPacket{
 			okPaket.packetId = 1;
 			byte packetId = 1;
 			okPaket.parameters = parameterCount;
-			okPaket.statementHandlerId = statementId;
+			okPaket.statementId = statementId;
 			conn.postMessage(okPaket.toByteBuffer(conn));
 			if(parameterCount>0){
 				for(int i=0;i<parameterCount;i++){

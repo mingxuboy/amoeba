@@ -23,7 +23,7 @@ import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
 public class OKforPreparedStatementPacket extends AbstractPacket {
 
     public byte flag = 0;
-    public long statementHandlerId;
+    public long statementId;
     public int  columns;
     public int  parameters;
 
@@ -32,7 +32,7 @@ public class OKforPreparedStatementPacket extends AbstractPacket {
         super.init(myBuffer);
         MysqlPacketBuffer buffer = (MysqlPacketBuffer) myBuffer;
         flag = buffer.readByte();
-        statementHandlerId = buffer.readLong();
+        statementId = buffer.readLong();
         columns = buffer.readInt();
         parameters = buffer.readInt();
     }
@@ -42,7 +42,7 @@ public class OKforPreparedStatementPacket extends AbstractPacket {
         super.write2Buffer(myBuffer);
         MysqlPacketBuffer buffer = (MysqlPacketBuffer) myBuffer;
         buffer.writeByte(flag);
-        buffer.writeLong(statementHandlerId);
+        buffer.writeLong(statementId);
         buffer.writeInt(columns);
         buffer.writeInt(parameters);
     }

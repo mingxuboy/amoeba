@@ -136,7 +136,7 @@ public class PreparedStatmentExecuteMessageHandler extends CommandMessageHandler
 
     public PreparedStatmentExecuteMessageHandler(MysqlClientConnection conn, PreparedStatmentInfo pInfo,
                                                  ExecutePacket packet, ObjectPool[] pools, long timeout){
-        super(conn, pInfo.getPreparedStatment(), pInfo, pools, timeout);
+        super(conn, pInfo.getSql(), pInfo, pools, timeout);
         this.packet = packet;
     }
 

@@ -38,6 +38,10 @@ public abstract class ConnectionStatuts{
 		packetIndex = 0; 
 		isMerged = false;
 	}
+	
+	public boolean isCompleted(){
+		return (statusCode & SessionStatus.COMPLETED) == SessionStatus.COMPLETED;
+	}
 	/**
 	 * 判断从服务器端返回得数据包是否表示当前请求的结束。
 	 * @param buffer
