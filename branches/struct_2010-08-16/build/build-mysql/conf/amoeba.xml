@@ -6,7 +6,7 @@
 	<proxy>
 	
 		<!-- server class must implements com.meidusa.amoeba.service.Service -->
-		<service name="Amoeba for mongodDB" class="com.meidusa.amoeba.net.ServerableConnectionManager">
+		<service name="Amoeba for Mysql" class="com.meidusa.amoeba.net.ServerableConnectionManager">
 			<!-- port -->
 			<property name="port">8066</property>
 			
@@ -66,6 +66,9 @@
 			
 			<!-- mysql server data packet process thread size -->
 			<property name="serverSideThreadPoolSize">30</property>
+			
+			<!-- per connection cache prepared statement size  -->
+			<property name="statementCacheSize">500</property>
 			
 			<!-- query timeout( default: 60 second , TimeUnit:second) -->
 			<property name="queryTimeout">60</property>

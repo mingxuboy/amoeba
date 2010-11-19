@@ -13,12 +13,13 @@ public class PreparedStatmentTest {
 	 * @throws Exception
 	 */
 	public static void main(String[] args) throws Exception {
-		for (int j = 0; j < 100; j++) {
+		for (int j = 0; j < 10; j++) {
 			Thread thread =new Thread() {
 				public void run() {
 					Connection conn = null;
 					PreparedStatement statment = null;
 					ResultSet result = null;
+					for (int i = 0; i < 10000; i++) {
 					try {
 						Properties props = new Properties();
 
@@ -36,12 +37,12 @@ public class PreparedStatmentTest {
 							// TODO Auto-generated catch block
 							e1.printStackTrace();
 						}
-
+						
 						conn = DriverManager
 								.getConnection(
 										"jdbc:mysql://127.0.0.1:8066/test?useUnicode=true&characterEncoding=utf-8&useServerPrepStmts=true&useCompression=true",
 										"root", null);
-						for (int i = 0; i < 100; i++) {
+						
 							statment = conn
 									.prepareStatement("SELECT ID, SDID, F_SDID, APP_ID, RESERVE1, RESERVE2, RESERVE3 FROM SD_RELATION.RELATION_ORIGIN WHERE SDID =? AND F_SDID=? AND APP_ID = ?");
 							statment.setLong(1, 1);
@@ -49,8 +50,11 @@ public class PreparedStatmentTest {
 							statment.setLong(3, 1);
 							ResultSet rs = statment.executeQuery();
 							statment.getResultSet();
+							
 							while (rs.next()) {
-								System.out.println(rs.getString("ID"));
+								if(i % 100 ==0){
+									System.out.println(i);
+								}
 							}
 
 							if (result != null) {
@@ -87,7 +91,6 @@ public class PreparedStatmentTest {
 							 * (statment != null) { try { statment.close(); }
 							 * catch (Exception e) { } }
 							 */
-						}
 					} catch (Exception e) {
 						e.printStackTrace();
 					} finally {
@@ -97,6 +100,8 @@ public class PreparedStatmentTest {
 							} catch (SQLException e) {
 							}
 						}
+					}
+					
 					}
 				}
 			};
