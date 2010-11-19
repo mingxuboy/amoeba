@@ -17,7 +17,10 @@
 			
 			<property name="manager">${clientConnectioneManager}</property>
 			<property name="connectionFactory">
-				<bean class="com.meidusa.amoeba.mongodb.net.MongodbClientConnectionFactory"></bean>
+				<bean class="com.meidusa.amoeba.mongodb.net.MongodbClientConnectionFactory">
+					<property name="sendBufferSize">128</property>
+					<property name="receiveBufferSize">64</property>
+				</bean>
 			</property>
 			
 		</service>
