@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="GB2312"?>
 <project default="dist" name="amoeba-mysql" basedir=".">
-  	<property name="version"     value="2.0.0-BETA"/>
+  	<property name="version"     value="2.0.1-BETA"/>
   	<property name="app.name"     value="amoeba-mysql"/>
   	<property name="deploy.dir"   value="dist"/>
   	<property name="savedoc.dir"  value="docs"/>
