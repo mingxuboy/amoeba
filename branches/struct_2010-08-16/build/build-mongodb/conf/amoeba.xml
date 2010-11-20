@@ -90,7 +90,7 @@
 		<property name="ruleLoader">
 			<bean class="com.meidusa.amoeba.route.TableRuleFileLoader">
 				<property name="ruleFile">${amoeba.home}/conf/rule.xml</property>
-				<property name="ruleFunctionFile">${amoeba.home}/conf/ruleFunctionMap.xml</property>
+				<property name="functionFile">${amoeba.home}/conf/ruleFunctionMap.xml</property>
 			</bean>
 		</property>
 		<property name="LRUMapSize">1500</property>

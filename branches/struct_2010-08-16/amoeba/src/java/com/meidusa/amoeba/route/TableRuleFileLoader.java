@@ -198,6 +198,9 @@ public class TableRuleFileLoader implements TableRuleLoader,Initialisable {
 
 	@Override
 	public void init() throws InitialisationException {
+		if (functionFile == null || !functionFile.exists()) {
+			throw new InitialisationException("rule function File not found with name="+functionFile);
+		}
 		
 	}
 	public TableRuleFileLoader(){
