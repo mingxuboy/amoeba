@@ -1,0 +1,288 @@
+.dp-highlighter {
+	BORDER-RIGHT: #d1d7dc 1px solid; BORDER-TOP: #d1d7dc 1px solid; FONT-SIZE: 12px; MARGIN: 0px; OVERFLOW: auto; BORDER-LEFT: #d1d7dc 1px solid; WIDTH: 99%; BORDER-BOTTOM: #d1d7dc 1px solid; FONT-FAMILY: "Courier New" , Courier, mono; BACKGROUND-COLOR: #fafafa
+}
+.dp-highlighter .bar {
+	PADDING-RIGHT: 2px; PADDING-LEFT: 2px; PADDING-BOTTOM: 2px; PADDING-TOP: 2px
+}
+.collapsed .bar {
+	PADDING-LEFT: 0px
+}
+.nogutter .bar {
+	PADDING-LEFT: 0px
+}
+.dp-highlighter OL {
+	PADDING-RIGHT: 2px; PADDING-LEFT: 2px; PADDING-BOTTOM: 2px; MARGIN: 0px 0px 1px 38px; COLOR: #2b91af; PADDING-TOP: 2px
+}
+.nogutter OL {
+	MARGIN-LEFT: 0px; LIST-STYLE-TYPE: none
+}
+.dp-highlighter OL LI {
+	PADDING-LEFT: 10px; BORDER-LEFT: #d1d7dc 1px solid; LINE-HEIGHT: 18px
+}
+.dp-highlighter .columns DIV {
+	PADDING-LEFT: 10px; BORDER-LEFT: #d1d7dc 1px solid; LINE-HEIGHT: 18px
+}
+.nogutter OL LI {
+	BORDER-TOP-WIDTH: 0px; BORDER-LEFT-WIDTH: 0px; BORDER-BOTTOM-WIDTH: 0px; BORDER-RIGHT-WIDTH: 0px
+}
+.nogutter .columns DIV {
+	BORDER-TOP-WIDTH: 0px; BORDER-LEFT-WIDTH: 0px; BORDER-BOTTOM-WIDTH: 0px; BORDER-RIGHT-WIDTH: 0px
+}
+.dp-highlighter .columns {
+	OVERFLOW: hidden; WIDTH: 100%; COLOR: gray
+}
+.dp-highlighter .columns DIV {
+	PADDING-BOTTOM: 5px
+}
+.dp-highlighter OL LI.alt {
+	
+}
+.dp-highlighter OL LI SPAN {
+	COLOR: black
+}
+.collapsed OL {
+	MARGIN: 0px
+}
+.collapsed OL LI {
+	DISPLAY: none
+}
+.printing {
+	BORDER-TOP-STYLE: none; BORDER-RIGHT-STYLE: none; BORDER-LEFT-STYLE: none; BORDER-BOTTOM-STYLE: none
+}
+.printing .tools {
+	DISPLAY: none! important
+}
+.printing LI {
+	DISPLAY: list-item! important
+}
+.dp-highlighter .tools {
+	PADDING-RIGHT: 8px; PADDING-LEFT: 15px; PADDING-BOTTOM: 3px; FONT: 9pt Verdana, Geneva, Arial, Helvetica, sans-serif; COLOR: silver; PADDING-TOP: 3px; BORDER-BOTTOM: #2b91af 1px solid
+}
+.collapsed .tools {
+	BORDER-BOTTOM-WIDTH: 0px
+}
+.dp-highlighter .tools A {
+	FONT-SIZE: 9pt; COLOR: gray; MARGIN-RIGHT: 10px; TEXT-DECORATION: none
+}
+.dp-highlighter .tools A:hover {
+	COLOR: red; TEXT-DECORATION: underline
+}
+.dp-about {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; PADDING-BOTTOM: 0px; MARGIN: 0px; PADDING-TOP: 0px; BACKGROUND-COLOR: #fff
+}
+.dp-about TABLE {
+	FONT-SIZE: 11px; WIDTH: 100%; FONT-FAMILY: Tahoma, Verdana, Arial, sans-serif! important; HEIGHT: 100%
+}
+.dp-about TD {
+	PADDING-RIGHT: 10px; PADDING-LEFT: 10px; PADDING-BOTTOM: 10px; VERTICAL-ALIGN: top; PADDING-TOP: 10px
+}
+.dp-about .copy {
+	BORDER-BOTTOM: #aca899 1px solid; HEIGHT: 95%
+}
+.dp-about .title {
+	FONT-WEIGHT: bold; COLOR: red
+}
+.dp-about .para {
+	MARGIN: 0px 0px 4px
+}
+.dp-about .footer {
+	BORDER-TOP: #fff 1px solid; BACKGROUND-COLOR: #eceadb; TEXT-ALIGN: right
+}
+.dp-about .close {
+	FONT-SIZE: 11px; WIDTH: 60px; FONT-FAMILY: Tahoma, Verdana, Arial, sans-serif! important; HEIGHT: 22px; BACKGROUND-COLOR: #eceadb
+}
+.dp-c {
+	
+}
+.dp-c .comment {
+	COLOR: green
+}
+.dp-c .string {
+	COLOR: blue
+}
+.dp-c .preprocessor {
+	COLOR: gray
+}
+.dp-c .keyword {
+	COLOR: blue
+}
+.dp-c .vars {
+	COLOR: #d00
+}
+.dp-vb {
+	
+}
+.dp-vb .comment {
+	COLOR: green
+}
+.dp-vb .string {
+	COLOR: blue
+}
+.dp-vb .preprocessor {
+	COLOR: gray
+}
+.dp-vb .keyword {
+	COLOR: blue
+}
+.dp-sql {
+	
+}
+.dp-sql .comment {
+	COLOR: green
+}
+.dp-sql .string {
+	COLOR: red
+}
+.dp-sql .keyword {
+	COLOR: rgb(127,0,85)
+}
+.dp-sql .func {
+	COLOR: #ff1493
+}
+.dp-sql .op {
+	COLOR: blue
+}
+.dp-xml {
+	
+}
+.dp-xml .cdata {
+	COLOR: #ff1493
+}
+.dp-xml .comments {
+	COLOR: green
+}
+.dp-xml .tag {
+	FONT-WEIGHT: bold; COLOR: blue
+}
+.dp-xml .tag-name {
+	FONT-WEIGHT: bold; COLOR: rgb(127,0,85)
+}
+.dp-xml .attribute {
+	COLOR: red
+}
+.dp-xml .attribute-value {
+	COLOR: blue
+}
+.dp-delphi {
+	
+}
+.dp-delphi .comment {
+	COLOR: #008200; FONT-STYLE: italic
+}
+.dp-delphi .string {
+	COLOR: blue
+}
+.dp-delphi .number {
+	COLOR: blue
+}
+.dp-delphi .directive {
+	COLOR: #008284
+}
+.dp-delphi .keyword {
+	FONT-WEIGHT: bold; COLOR: navy
+}
+.dp-delphi .vars {
+	COLOR: #000
+}
+.dp-py {
+	
+}
+.dp-py .comment {
+	COLOR: green
+}
+.dp-py .string {
+	COLOR: red
+}
+.dp-py .docstring {
+	COLOR: green
+}
+.dp-py .keyword {
+	FONT-WEIGHT: bold; COLOR: blue
+}
+.dp-py .builtins {
+	COLOR: #ff1493
+}
+.dp-py .magicmethods {
+	COLOR: #808080
+}
+.dp-py .exceptions {
+	COLOR: brown
+}
+.dp-py .types {
+	COLOR: brown; FONT-STYLE: italic
+}
+.dp-py .commonlibs {
+	COLOR: #8a2be2; FONT-STYLE: italic
+}
+.dp-rb {
+	
+}
+.dp-rb .comment {
+	COLOR: #c00
+}
+.dp-rb .string {
+	COLOR: #f0c
+}
+.dp-rb .symbol {
+	COLOR: #02b902
+}
+.dp-rb .keyword {
+	COLOR: #069
+}
+.dp-rb .variable {
+	COLOR: #6cf
+}
+.dp-css {
+	
+}
+.dp-css .comment {
+	COLOR: green
+}
+.dp-css .string {
+	COLOR: red
+}
+.dp-css .keyword {
+	COLOR: blue
+}
+.dp-css .colors {
+	COLOR: darkred
+}
+.dp-css .vars {
+	COLOR: #d00
+}
+.dp-j {
+	
+}
+.dp-j .comment {
+	COLOR: rgb(63,127,95)
+}
+.dp-j .string {
+	COLOR: rgb(42,0,255)
+}
+.dp-j .keyword {
+	FONT-WEIGHT: bold; COLOR: rgb(127,0,85)
+}
+.dp-j .annotation {
+	COLOR: #646464
+}
+.dp-j .number {
+	COLOR: #c00000
+}
+.dp-cpp {
+	
+}
+.dp-cpp .comment {
+	COLOR: #e00
+}
+.dp-cpp .string {
+	COLOR: red
+}
+.dp-cpp .preprocessor {
+	FONT-WEIGHT: bold; COLOR: #cd00cd
+}
+.dp-cpp .keyword {
+	FONT-WEIGHT: bold; COLOR: #5697d9
+}
+.dp-cpp .datatypes {
+	FONT-WEIGHT: bold; COLOR: #2e8b57
+}

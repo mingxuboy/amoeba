@@ -1,0 +1,75 @@
+.overlay_dialog {
+	FILTER: alpha(opacity=60); BACKGROUND-COLOR: #666666; moz-opacity: 0.6; opacity: 0.6
+}
+.overlay___invisible__ {
+	FILTER: alpha(opacity=0); BACKGROUND-COLOR: #666666; moz-opacity: 0; opacity: 0
+}
+.dialog_nw {
+	BACKGROUND: url(default/top_left.gif) no-repeat 0px 0px; WIDTH: 9px; HEIGHT: 23px
+}
+.dialog_n {
+	BACKGROUND: url(default/top_mid.gif) repeat-x 0px 0px; HEIGHT: 23px
+}
+.dialog_ne {
+	BACKGROUND: url(default/top_right.gif) no-repeat 0px 0px; WIDTH: 9px; HEIGHT: 23px
+}
+.dialog_e {
+	BACKGROUND: url(default/center_right.gif) repeat-y 0px 0px; WIDTH: 2px
+}
+.dialog_w {
+	BACKGROUND: url(default/center_left.gif) repeat-y 0px 0px; WIDTH: 2px
+}
+.dialog_sw {
+	BACKGROUND: url(default/bottom_left.gif) no-repeat 0px 0px; WIDTH: 9px; HEIGHT: 19px
+}
+.dialog_s {
+	BACKGROUND: url(default/bottom_mid.gif) repeat-x 0px 0px; HEIGHT: 19px
+}
+.dialog_se {
+	BACKGROUND: url(default/bottom_right.gif) no-repeat 0px 0px; WIDTH: 9px; HEIGHT: 19px
+}
+.dialog_sizer {
+	BACKGROUND: url(default/sizer.gif) no-repeat 0px 0px; WIDTH: 9px; CURSOR: se-resize; HEIGHT: 19px
+}
+.dialog_close {
+	Z-INDEX: 2000; BACKGROUND: url(default/close.gif) no-repeat 0px 0px; LEFT: 8px; WIDTH: 14px; CURSOR: pointer; POSITION: absolute; TOP: 5px; HEIGHT: 14px
+}
+.dialog_minimize {
+	Z-INDEX: 2000; BACKGROUND: url(default/minimize.gif) no-repeat 0px 0px; LEFT: 28px; WIDTH: 14px; CURSOR: pointer; POSITION: absolute; TOP: 5px; HEIGHT: 15px
+}
+.dialog_maximize {
+	Z-INDEX: 2000; BACKGROUND: url(default/maximize.gif) no-repeat 0px 0px; LEFT: 49px; WIDTH: 14px; CURSOR: pointer; POSITION: absolute; TOP: 5px; HEIGHT: 15px
+}
+.dialog_title {
+	FONT-SIZE: 12px; FLOAT: left; WIDTH: 100%; COLOR: #000; HEIGHT: 14px; TEXT-ALIGN: center
+}
+.dialog_content {
+	FONT-SIZE: 10px; OVERFLOW: auto; COLOR: #ddd; FONT-FAMILY: Tahoma, Arial, Sans Serif; BACKGROUND-COLOR: #123
+}
+.top_draggable {
+	CURSOR: move
+}
+.bottom_draggable {
+	CURSOR: move
+}
+.status_bar {
+	FONT-SIZE: 12px
+}
+.status_bar INPUT {
+	FONT-SIZE: 12px
+}
+.dialog {
+	DISPLAY: block; POSITION: absolute
+}
+.dialog TABLE.table_window {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; PADDING-BOTTOM: 0px; MARGIN: 0px; WIDTH: 100%; PADDING-TOP: 0px; BORDER-COLLAPSE: collapse; border-spacing: 0
+}
+.dialog TABLE.table_window TD {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; PADDING-BOTTOM: 0px; PADDING-TOP: 0px
+}
+.dialog TABLE.table_window TH {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; PADDING-BOTTOM: 0px; PADDING-TOP: 0px
+}
+.dialog .title_window {
+	moz-user-select: none
+}
