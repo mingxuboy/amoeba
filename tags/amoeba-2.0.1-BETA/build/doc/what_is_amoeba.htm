@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html lang="zh-cn" xml:lang="zh-cn">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="copyright" content="(C) Meidusa Amoeba 2008" />
+<meta name="DC.rights.owner" content="(C) Meidusa Amoeba 2008" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="concept" />
+<meta name="DC.Title" content="Amoeba 是什么" />
+<meta name="abstract" content="Amoeba(变形虫)项目，专注 数据库 proxy 开发。座落与Client、DB Server(s)之间。对客户端透明。具有负载均衡、高可用性、sql过滤、读写分离、可路由相关的query到目标数据库、可并发请求多台数据库合并结果" />
+<meta name="description" content="Amoeba(变形虫)项目，专注 数据库 proxy 开发。座落与Client、DB Server(s)之间。对客户端透明。具有负载均衡、高可用性、sql过滤、读写分离、可路由相关的query到目标数据库、可并发请求多台数据库合并结果" />
+<meta name="DC.Relation" scheme="URI" content="./amoeba_architecture.htm" />
+<meta name="DC.Relation" scheme="URI" content="./index.htm" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="waht_is_amoeba" />
+<meta name="DC.Language" content="zh-cn" />
+<link rel="stylesheet" type="text/css" href="images/ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="images/bip4.css" />
+<title>Amoeba 是什么</title>
+</head>
+<body>
+
+<h1 class="topictitle1">Amoeba 是什么</h1>
+<div> 
+  <p>Amoeba(变形虫)项目，专注 数据库 proxy 开发。座落与Client、DB Server(s)之间。对客户端透明。具有负载均衡、高可用性、sql过滤、读写分离、可路由相关的query到目标数据库、可并发请求多台数据库合并结果。<br />
+	假如有一条sql： select * from test.account  as t where  t.id = 1990000002; 假设account表的那些id从1-1990000002 都有数据，那么你的account表将会多么庞大.
+	你已经不可能将所有的数据存放到一台数据库上面，这样的数据库执行sql性能将受到严重的影响。假设你将这些数据切分成100台数据库，每台存放20,000,000数据。<br/>
+	只要能够制定一个恰当的数据切分规则，那么amoeba 将轻易解决数据切分并且可以将query语句路由到目标数据库上面执行。
+  </p>
+  <p>主要解决： 
+  <ul class="ullinks">
+    <li class="ulchildlink">降低 数据切分带来的复杂多数据库结构</strong><br /></li>
+	<li class="ulchildlink">降低 数据切分规则 给应用带来的影响</li>
+	<li class="ulchildlink">降低db 与客户端的连接数<br /></li>
+	<li class="ulchildlink">读写分离<br />
+    </li>
+</ul>
+</div>
+<div>
+<ul class="ullinks">
+    <li class="ulchildlink"><strong><a href="amoeba_architecture.htm">Amoeba Architecture</a></strong><br />
+</li>
+</ul>
+
+<div class="familylinks">
+<div class="parentlink"><strong>父主题：</strong> <a href="./index.htm" title="">开发、使用 Amoeba 指南</a></div>
+</div>
+</div><div>
+<table class="footer">
+<tr>
+      <td class="footerleft" width="99%"> <a href="notices.htm">声明</a> | <a href="http://sourceforge.net/projects/amoeba" target="_blank">下载</a> 
+        | <a href="http://amoeba.sourceforge.net/phpbb2" target="_blank">论坛</a> 
+        | <a href="http://amoeba.sourceforge.net/phpbb2">反馈</a> 
+        <br />
+<img src="images/copyright.gif" alt="Copyright Meidusa Amoeba 2008" />
+<img src="images/timestamp.gif" alt="最近一次更新时间：2008 年 4 月" />
+</td>
+</tr>
+</table>
+</div>
+</body>
+</html>

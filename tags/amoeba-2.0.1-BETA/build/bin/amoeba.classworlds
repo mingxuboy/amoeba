@@ -1,0 +1,5 @@
+main is com.meidusa.amoeba.server.AmoebaProxyServer from amoeba
+
+[amoeba]
+load ${amoeba.home}/lib/*.jar
+load ${amoeba.home}/lib/classes

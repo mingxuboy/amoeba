@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties version="1.0">
+	<entry key="class">com.meidusa.amoeba.mongodb.packet.QueryMongodbPacket</entry>
+	<entry key="fullCollectionName">AMOEBA.SEQUENCE</entry>
+	<entry key="numberToSkip">0</entry>
+	<entry key="numberToReturn">3</entry>
+	<entry key="requestFlags">0</entry>
+	<entry key="requestID">${#atomicInteger.getAndIncrement()+1}</entry>
+	<entry key="query"><![CDATA[
+		{"seq_name":"abcde"}
+		]]></entry>
+</properties>
