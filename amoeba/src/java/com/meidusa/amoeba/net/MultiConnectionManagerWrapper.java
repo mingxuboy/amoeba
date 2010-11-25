@@ -102,7 +102,7 @@ public class MultiConnectionManagerWrapper extends ConnectionManager{
     }
     
     public int getSize(){
-    	int size = this.getSize();
+    	int size = super.getSize();
     	if(connMgrs != null){
 	    	for(ConnectionManager manager : connMgrs){
 	    		size += manager.getSize();
