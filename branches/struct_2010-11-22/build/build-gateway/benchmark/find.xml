@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties version="1.0">
+	<entry key="class">com.meidusa.amoeba.gateway.packet.GatewayRequestPacket</entry>
+	<entry key="version">1</entry>
+	<entry key="contentType">0</entry>
+	<entry key="clientId">0</entry>
+	<entry key="clientTransId">0</entry>
+	<entry key="clientUserID">0</entry>
+	<entry key="apiName">snda.chuanshi.Relation.getRelation</entry>
+	<entry key="parameterMap.sdid">1</entry>
+	<entry key="parameterMap.startIndex">0</entry>
+	<entry key="parameterMap.count">100</entry>
+</properties>

@@ -1,0 +1,5 @@
+main is com.meidusa.amoeba.gateway.benchmark.GatewayBenchmark from benchmark
+
+[benchmark]
+load ${amoeba.home}/lib/*.jar
+load ${amoeba.home}/lib/classes

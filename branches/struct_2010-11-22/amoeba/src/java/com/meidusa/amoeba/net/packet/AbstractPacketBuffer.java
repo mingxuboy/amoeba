@@ -19,6 +19,7 @@ package com.meidusa.amoeba.net.packet;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 
 import com.meidusa.amoeba.net.Connection;
 
@@ -45,6 +46,11 @@ public class AbstractPacketBuffer implements PacketBuffer {
         setPacketLength(buffer.length);
         position = 0;
     }
+    
+    public ByteOrder getByteOrder(){
+    	return ByteOrder.BIG_ENDIAN;
+    }
+    /*
 
     /**
      * 将从0到当前位置的所有字节写入到ByteBuffer中,并且将ByteBuffer.position设置到0.

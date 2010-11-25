@@ -187,7 +187,7 @@ public class ParameterMapping {
      * @return An object suitable for assignment that has the implied value of the string, or <code>null</code> if no
      * conversion was possible.
      */
-    private static Object deStringize(Class<?> cls, String string) {
+    public static Object deStringize(Class<?> cls, String string) {
         Method method;
         Object value = null;
 
@@ -227,7 +227,7 @@ public class ParameterMapping {
         return (value);
     }
 
-    private static boolean isPrimitiveType(Class<?> cls) {
+    public static boolean isPrimitiveType(Class<?> cls) {
         if (cls.equals(String.class) || cls.equals(Boolean.TYPE) || cls.equals(Byte.TYPE) || cls.equals(Short.TYPE) || cls.equals(Integer.TYPE) || cls.equals(Long.TYPE) || cls.equals(Double.TYPE) || cls.equals(Float.TYPE) || cls.equals(Boolean.class) || cls.equals(Byte.class) || cls.equals(Short.class) || cls.equals(Integer.class) || cls.equals(Long.class) || cls.equals(Float.class) || cls.equals(Double.class) || cls.equals(Class.class)) {
             return true;
         } else {

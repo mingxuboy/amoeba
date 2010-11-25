@@ -20,6 +20,8 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import com.meidusa.amoeba.config.ConfigUtil;
 import com.meidusa.amoeba.log4j.DOMConfigurator;
+import com.meidusa.amoeba.net.Connection;
+import com.meidusa.amoeba.net.ConnectionObserver;
 import com.meidusa.amoeba.net.MultiConnectionManagerWrapper;
 import com.meidusa.amoeba.util.CmdLineParser;
 import com.meidusa.amoeba.util.CmdLineParser.BooleanOption;
@@ -120,6 +122,9 @@ public abstract class AbstractBenchmark {
 		}else{
 			System.setProperty("benchmark.level", "warn");
 		}
+		
+		final Boolean value = (Boolean)parser.getOptionValue(debugOption,false);
+		
 		String log4jConf = System.getProperty("log4j.conf","${amoeba.home}/conf/log4j.xml");
 		log4jConf = ConfigUtil.filter(log4jConf);
 		File logconf = new File(log4jConf);
@@ -136,7 +141,32 @@ public abstract class AbstractBenchmark {
 		final TaskRunnable task = new TaskRunnable();
 		int port = (Integer)parser.getOptionValue(portOption);
 		
-		MultiConnectionManagerWrapper manager = new MultiConnectionManagerWrapper();
+		final MultiConnectionManagerWrapper manager = new MultiConnectionManagerWrapper();
+		manager.addConnectionObserver(new ConnectionObserver(){
+
+			@Override
+			public void connectionClosed(Connection conn) {
+				if(value.booleanValue()){
+					System.out.println(new Date() +"     client conn="+conn.getSocketId()+" closed!");
+				}
+			}
+
+			@Override
+			public void connectionEstablished(Connection conn) {
+				if(value.booleanValue()){
+					System.out.println(new Date() +"     client conn="+conn.getSocketId()+" connected!");
+				}
+				
+			}
+
+			@Override
+			public void connectionFailed(Connection conn, Exception fault) {
+				if(value.booleanValue()){
+					System.out.println(new Date() +"     client conn="+conn.getSocketId()+ " faild!! "+(fault!= null? (" fault="+fault.getMessage()):""));
+				}
+			}
+			
+		});
 		Integer timeout = (Integer)parser.getOptionValue(timeoutOption,-1);
 		if(timeout >0){
 			manager.setIdleCheckTime(timeout);
@@ -153,7 +183,7 @@ public abstract class AbstractBenchmark {
 					long current = responseLatcher.getCount();
 					long tps = lastCount - current;
 					lastCount = current;
-					System.out.println(new Date() +"     compeleted="+(total - lastCount)+ " TPS="+tps);
+					System.out.println(new Date() +"     compeleted="+(total - lastCount)+ " TPS="+tps +" ,conns="+manager.getSize());
 					try {
 						Thread.sleep(1000);
 					} catch (InterruptedException e) {
@@ -171,7 +201,7 @@ public abstract class AbstractBenchmark {
 			InetSocketAddress address = new InetSocketAddress(ip,port);
 			try{
 				AbstractBenchmarkClientConnection<?> connection = benckmark.newBenchmarkClientConnection(SocketChannel.open(address),System.currentTimeMillis(),requestLatcher,responseLatcher,task);
-				Boolean value = (Boolean)parser.getOptionValue(debugOption,false);
+				
 				
 				connection.setTimeout(timeout.intValue());
 				connection.setDebug(value.booleanValue());

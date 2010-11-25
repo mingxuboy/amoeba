@@ -31,18 +31,29 @@ public abstract class AbstractPacket<T extends AbstractPacketBuffer> implements 
         T packetBuffer = constractorBuffer(buffer);
         packetBuffer.init(conn);
         init(packetBuffer);
-        afterInit(packetBuffer);
+        afterRead(packetBuffer);
     }
 
     /**
-     * 分析数据包(分析包头+数据区域,分析完包头以后应该将Buffer的postion设置到数据区)
-     */
-    protected abstract void init(T buffer);
+	 * 分析数据包(分析包头+数据区域,分析完包头以后应该将Buffer的postion设置到数据区)
+	 */
+	protected void init(T buffer){
+		readHead(buffer);
+		readBody(buffer);
+	}
+	
+	protected void readHead(T buffer){
+		
+	}
 
+	protected void readBody(T buffer){
+		
+	}
+	
     /**
      * 做完初始化以后
      */
-    protected void afterInit(T buffer) {
+    protected void afterRead(T buffer) {
     }
 
     public ByteBuffer toByteBuffer(Connection conn) {
@@ -82,7 +93,17 @@ public abstract class AbstractPacket<T extends AbstractPacketBuffer> implements 
     /**
      * 包含头的消息封装
      */
-    protected abstract void write2Buffer(T buffer) throws UnsupportedEncodingException;
+    protected void write2Buffer(T buffer) throws UnsupportedEncodingException{
+    	writeHead(buffer);
+    	writeBody(buffer);
+	}
+
+    protected void writeBody(T buffer) throws UnsupportedEncodingException {
+    	
+    }
+    protected void writeHead(T buffer){
+    	
+    }
 
     /**
      * <pre>

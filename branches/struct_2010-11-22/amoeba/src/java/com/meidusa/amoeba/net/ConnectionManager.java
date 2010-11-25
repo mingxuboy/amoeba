@@ -388,4 +388,11 @@ public class ConnectionManager extends LoopingThread implements Reporter, Initia
         logger.error("iterate error:", e);
     }
 
+    /**
+     * get Current registered connections size
+     * @return
+     */
+    public int getSize(){
+    	return _handlers.size();
+    }
 }
