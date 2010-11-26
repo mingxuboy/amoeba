@@ -12,6 +12,7 @@ import com.meidusa.amoeba.util.Reporter;
  */
 public interface Service extends Initialisable,Shutdowner,Reporter{
 	
+	public int getPriority();
 	/**
 	 * after Properties setted 
 	 */
