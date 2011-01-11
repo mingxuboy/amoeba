@@ -11,13 +11,13 @@ import com.meidusa.amoeba.net.packet.AbstractPacket;
 public class ManagerAbstractPacket extends AbstractPacket<ManagerPacketBuffer> implements ManagerConstant {
 
     public int  lenght;
-    public int funType;
+    public byte funType;
 
     @Override
     protected void init(ManagerPacketBuffer buffer) {
         buffer.setPosition(0);
         lenght = buffer.readInt();
-        funType = buffer.readInt();
+        funType = buffer.readByte();
     }
 
     @Override
@@ -31,13 +31,13 @@ public class ManagerAbstractPacket extends AbstractPacket<ManagerPacketBuffer> i
         lenght = position;
         buffer.setPosition(0);
         buffer.writeInt(lenght);
-        buffer.writeInt(funType);
+        buffer.writeByte(funType);
         buffer.setPosition(position);
     }
 
     @Override
     protected int calculatePacketSize() {
-        return 12;
+        return 5;
     }
 
 
