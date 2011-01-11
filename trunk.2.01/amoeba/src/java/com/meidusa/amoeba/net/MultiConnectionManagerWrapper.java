@@ -100,4 +100,15 @@ public class MultiConnectionManagerWrapper extends ConnectionManager{
     	}
     	super.shutdown();
     }
+    
+    public int getSize(){
+    	int size = super.getSize();
+    	if(connMgrs != null){
+	    	for(ConnectionManager manager : connMgrs){
+	    		size += manager.getSize();
+	    	}
+    	}
+    	return size;
+    }
 }
+

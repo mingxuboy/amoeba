@@ -12,13 +12,17 @@ public class ObjectPacket extends ManagerAbstractPacket {
     protected void init(ManagerPacketBuffer buffer) {
         super.init(buffer);
         ManagerPacketBuffer mBuffer = (ManagerPacketBuffer) buffer;
-        object = mBuffer.readObject();
+        if(mBuffer.hasRemaining()){
+        	object = mBuffer.readObject();
+        }
     }
 
     @Override
     protected void write2Buffer(ManagerPacketBuffer buffer) throws UnsupportedEncodingException {
         super.write2Buffer(buffer);
         ManagerPacketBuffer mBuffer = (ManagerPacketBuffer) buffer;
-        mBuffer.writeObject(object);
+        if(object != null){
+        	mBuffer.writeObject(object);
+        }
     }
 }

@@ -86,7 +86,9 @@ public class ProxyRuntimeContext implements Reporter {
     @SuppressWarnings("unchecked")
 	private QueryRouter                    queryRouter;
     private RuntimeContext runtimeContext;
-
+    
+    private Map<String, Object> beanContext = new HashMap<String, Object>();
+    
 	public RuntimeContext getRuntimeContext() {
 		return runtimeContext;
 	}
@@ -212,11 +214,17 @@ public class ProxyRuntimeContext implements Reporter {
     }
     
     
+    private Object createBeanObjectEntity(BeanObjectEntityConfig config,boolean initEarly){
+    	Object object = config.createBeanObject(initEarly);
+    	if(!StringUtil.isEmpty(config.getName())){
+    		beanContext.put(config.getName(), object);
+    	}
+    	return object; 
+    }
     
     public void init(String file) {
         config = loadConfig(file);
-        this.runtimeContext = (RuntimeContext)config.getRuntimeConfig().createBeanObject(true);
-        
+        this.runtimeContext = (RuntimeContext)createBeanObjectEntity(config.getRuntimeConfig(),true);
         /*for (Map.Entry<String, BeanObjectEntityConfig> entry : config.getManagers().entrySet()) {
             BeanObjectEntityConfig beanObjectEntityConfig = entry.getValue();
             try {
@@ -462,7 +470,7 @@ public class ProxyRuntimeContext implements Reporter {
         for (Map.Entry<String, BeanObjectEntityConfig> entry : config.getManagers().entrySet()) {
             BeanObjectEntityConfig beanObjectEntityConfig = entry.getValue();
             try {
-                ConnectionManager manager = (ConnectionManager) beanObjectEntityConfig.createBeanObject(true);
+                ConnectionManager manager = (ConnectionManager) createBeanObjectEntity(beanObjectEntityConfig,true);
                 manager.setName(entry.getKey());
                 conMgrMap.put(manager.getName(), manager);
             } catch (Exception e) {
@@ -556,11 +564,11 @@ public class ProxyRuntimeContext implements Reporter {
 		ObjectPool pool = null;
 		try {
             BeanObjectEntityConfig poolConfig = config.getPoolConfig();
-            pool = (ObjectPool) poolConfig.createBeanObject(true);
+            pool = (ObjectPool) createBeanObjectEntity(poolConfig,true);
             pool.setName(StringUtil.isEmpty(poolConfig.getName())?config.getName():poolConfig.getName());
             
             if (config.getFactoryConfig() != null) {
-                PoolableObjectFactory factory = (PoolableObjectFactory) config.getFactoryConfig().createBeanObject(true);
+                PoolableObjectFactory factory = (PoolableObjectFactory) createBeanObjectEntity(config.getFactoryConfig(),true);
                 pool.setFactory(factory);
             }
         } catch (Exception e) {
