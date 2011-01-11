@@ -11,14 +11,13 @@ import org.apache.commons.lang.math.RandomUtils;
 import com.meidusa.amoeba.util.Initialisable;
 import com.meidusa.amoeba.util.InitialisationException;
 import com.meidusa.amoeba.util.MappedByteBufferUtil;
-import com.meidusa.amoeba.util.StringUtil;
 
 /**
  * 文件不宜过大
  * @author Struct
  *
  */
-public class RandomLineDataFile implements RandomData<String[]>,Initialisable{
+public class RandomLineDataFile implements RandomData<String>,Initialisable{
 	private File file ;
 	private RandomAccessFile raf = null;
 	private MappedByteBuffer buffer = null;
@@ -49,15 +48,10 @@ public class RandomLineDataFile implements RandomData<String[]>,Initialisable{
 	
 	
 	@Override
-	public String[] nextData() {
+	public String nextData() {
 		int position = RandomUtils.nextInt(size);
 		goNextNewLineHead(position);
-		String line = readLine();
-		if(line != null){
-			return StringUtil.split(line);
-		}else{
-			return null;
-		}
+		return readLine();
 	}
 	
 	private void goNextNewLineHead(int position){
