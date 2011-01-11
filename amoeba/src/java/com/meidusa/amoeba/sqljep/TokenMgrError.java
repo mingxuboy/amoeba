@@ -13,7 +13,7 @@ public class TokenMgrError extends Error
    static final int LEXICAL_ERROR = 0;
 
    /**
-    * An attempt wass made to create a second instance of a static token manager.
+    * An attempt wass made to create a second instance of a static token landscape.
     */
    static final int STATIC_LEXER_ERROR = 1;
 
@@ -23,7 +23,7 @@ public class TokenMgrError extends Error
    static final int INVALID_LEXICAL_STATE = 2;
 
    /**
-    * Detected (and bailed out of) an infinite loop in the token manager.
+    * Detected (and bailed out of) an infinite loop in the token landscape.
     */
    static final int LOOP_DETECTED = 3;
 
@@ -84,7 +84,7 @@ public class TokenMgrError extends Error
 
    /**
     * Returns a detailed message for the Error when it is thrown by the
-    * token manager to indicate a lexical error.
+    * token landscape to indicate a lexical error.
     * Parameters : 
     *    EOFSeen     : indicates if EOF caused the lexicl error
     *    curLexState : lexical state in which this error occured

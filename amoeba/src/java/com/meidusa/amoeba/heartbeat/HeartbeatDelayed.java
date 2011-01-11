@@ -37,7 +37,7 @@ public abstract class HeartbeatDelayed implements Delayed {
         }
         
         /**
-         * this method will be invoked when cancel from heart beat manager
+         * this method will be invoked when cancel from heart beat landscape
          */
         public void cancel(){
         	

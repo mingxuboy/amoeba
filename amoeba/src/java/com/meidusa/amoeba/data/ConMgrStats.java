@@ -15,7 +15,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 
 /**
- * Used to track and report stats on the connection manager.
+ * Used to track and report stats on the connection landscape.
  * @author <a href=mailto:piratebase@sina.com>Struct chen</a>
  */
 public class ConMgrStats implements Cloneable

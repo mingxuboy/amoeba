@@ -27,8 +27,8 @@ import com.meidusa.amoeba.runtime.Shutdowner;
 import com.meidusa.amoeba.service.Service;
 
 /**
- * Ö¸¶¨Ò»¸ö¶Ë¿Ú,´´½¨Ò»¸öserverSocket. ½«¸ÃServerSocketËù´´½¨µÄConnection¼ÓÈë¹ÜÀí
- * ¸ÃmanagerÖ»¸ºÔðsocket accept netEvent,socketµÄ IO netEvent ÓÉ {@link ServerableConnectionManager#connMgr} ¸ºÔð
+ * Ö¸ï¿½ï¿½Ò»ï¿½ï¿½ï¿½Ë¿ï¿½,ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½serverSocket. ï¿½ï¿½ï¿½ï¿½ServerSocketï¿½ï¿½ï¿½ï¿½Connectionï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+ * ï¿½ï¿½managerÖ»ï¿½ï¿½ï¿½ï¿½socket accept netEvent,socketï¿½ï¿½ IO netEvent ï¿½ï¿½ {@link ServerableConnectionManager#manager} ï¿½ï¿½ï¿½ï¿½
  * 
  * @author <a href=mailto:piratebase@sina.com>Struct chen</a>
  */

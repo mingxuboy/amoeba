@@ -144,7 +144,7 @@ public abstract class AbstractBenchmark {
 		manager.init();
 		manager.start();
 		Thread.sleep(100L);
-		System.out.println("Connection manager started....");
+		System.out.println("Connection landscape started....");
 		new Thread(){
 			long lastCount = responseLatcher.getCount();
 			{this.setDaemon(true);}
