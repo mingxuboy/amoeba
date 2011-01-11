@@ -86,7 +86,7 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 		return commandQueue.isMultiple();
 	}
 	/**
-	 * ÅĞ¶Ï±»handledµÄConnection ÏûÏ¢´«ËÍÊÇ·ñ¶¼Íê³É
+	 * ï¿½Ğ¶Ï±ï¿½handledï¿½ï¿½Connection ï¿½ï¿½Ï¢ï¿½ï¿½ï¿½ï¿½ï¿½Ç·ï¿½ï¿½ï¿½ï¿½
 	 * @return
 	 */
 	public boolean isCompleted(){
@@ -94,15 +94,15 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 	}
 	
 	/**
-	 * Ö÷ÒªÊÇÎªÁË·şÎñ¶ËÁ¬½Ó Óë ¿Í»§¶ËÁ¬½ÓµÄ»·¾³Ò»ÖÂ£¨±ÈÈç£¬µ±Ç°µÄschema ¡¢charsetµÈ£©
+	 * ï¿½ï¿½Òªï¿½ï¿½Îªï¿½Ë·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½Í»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ÓµÄ»ï¿½ï¿½ï¿½Ò»ï¿½Â£ï¿½ï¿½ï¿½ï¿½ç£¬ï¿½ï¿½Ç°ï¿½ï¿½schema ï¿½ï¿½charsetï¿½È£ï¿½
 	 * 
-	 * ÔÚ·¢ËÍÖ÷ÃüÁîÖ®Ç°£¬Ô¤ÏÈĞèÒª·¢ËÍÒ»Ğ©¶îÍâµÄÃüÁî£¬±ÈÈçsourceConnection¡¢destConnection µ±Ç°µÄdatabase²»Ò»ÖÂ£¬ĞèÒª·¢ËÍinit_db Command
-	 * ÎªÁË¼õÉÙ¸´ÔÓ¶È£¬Ö»ÒªÒ»¸öConnectionĞèÒª·¢ËÍÃüÁî£¬ÄÇÃ´ËùÓĞÁ¬½Ó¶¼±ØĞë·¢ËÍÒ»´ÎÏàÍ¬µÄÃüÁî¡£
+	 * ï¿½Ú·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö®Ç°ï¿½ï¿½Ô¤ï¿½ï¿½ï¿½ï¿½Òªï¿½ï¿½ï¿½ï¿½Ò»Ğ©ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½î£¬ï¿½ï¿½ï¿½ï¿½sourceConnectionï¿½ï¿½destConnection ï¿½ï¿½Ç°ï¿½ï¿½databaseï¿½ï¿½Ò»ï¿½Â£ï¿½ï¿½ï¿½Òªï¿½ï¿½ï¿½ï¿½init_db Command
+	 * Îªï¿½Ë¼ï¿½ï¿½Ù¸ï¿½ï¿½Ó¶È£ï¿½Ö»ÒªÒ»ï¿½ï¿½Connectionï¿½ï¿½Òªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½î£¬ï¿½ï¿½Ã´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ó¶ï¿½ï¿½ï¿½ï¿½ë·¢ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½Í¬ï¿½ï¿½ï¿½ï¿½ï¿½î¡£
 	 * 
 	 * @param sourceMysql
 	 * @param destMysqlConn
 	 */
-	//TODO ĞèÒª½øĞĞÓÅ»¯
+	//TODO ï¿½ï¿½Òªï¿½ï¿½ï¿½ï¿½ï¿½Å»ï¿½
 	protected void appendPreMainCommand(){
 		Set<MysqlServerConnection> connSet = commandQueue.connStatusMap.keySet();
 		final MysqlConnection sourceMysql =(MysqlConnection) source;
@@ -198,12 +198,12 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 			
 		}else{
 			while((message = fromConn.getInQueue().getNonBlocking()) != null){
-				//ÅĞ¶ÏÃüÁîÊÇ·ñÍê³ÉÁË
+				//ï¿½Ğ¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 				CommandStatus commStatus = commandQueue.checkResponseCompleted(fromConn, message);
 				
 				if(CommandStatus.AllCompleted == commStatus || CommandStatus.ConnectionCompleted == commStatus){
 					
-					//¼ÇÂ¼ prepared statement ID »òÕß close statement
+					//ï¿½ï¿½Â¼ prepared statement ID ï¿½ï¿½ï¿½ï¿½ close statement
 					afterCommand((MysqlServerConnection)fromConn,commStatus);
 					
 					if(commandQueue.currentCommand.isMain() || this.ended){
@@ -220,9 +220,9 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 					try{
 						
 						/**
-						 * Èç¹ûÊÇ¿Í»§¶ËÇëÇóµÄÃüÁîÔò:
-						 * 1¡¢ÇëÇóÊÇ¶àÌ¨serverµÄ£¬ĞèÒª½øĞĞºÏ²¢Êı¾İ
-						 * 2¡¢µ¥Ì¨serverÖ±½ÓĞ´³öµ½¿Í»§¶Ë
+						 * ï¿½ï¿½ï¿½ï¿½Ç¿Í»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½:
+						 * 1ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç¶ï¿½Ì¨serverï¿½Ä£ï¿½ï¿½ï¿½Òªï¿½ï¿½ï¿½ĞºÏ²ï¿½ï¿½ï¿½ï¿½
+						 * 2ï¿½ï¿½ï¿½ï¿½Ì¨serverÖ±ï¿½ï¿½Ğ´ï¿½ï¿½ï¿½ï¿½ï¿½Í»ï¿½ï¿½ï¿½
 						 */
 						
 						if(commandQueue.currentCommand.isMain()){
@@ -240,10 +240,10 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 								dispatchMessageFrom(fromConn,message);
 							}
 						}else{
-							//·ÇÖ÷ÃüÁî·¢ËÍÒÔºó·µ»Ø³ö´íĞÅÏ¢£¬Ôò½áÊøµ±Ç°µÄsession
+							//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½î·¢ï¿½ï¿½ï¿½Ôºó·µ»Ø³ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç°ï¿½ï¿½session
 							Collection<ConnectionStatuts> connectionStatutsSet = commandQueue.connStatusMap.values();
 							for(ConnectionStatuts connStatus : connectionStatutsSet){
-								//¿´ÊÇ·ñÃ¿¸ö·şÎñÆ÷·µ»ØµÄÊı¾İ°ü¶¼Ã»ÓĞÒì³£ĞÅÏ¢¡£
+								//ï¿½ï¿½ï¿½Ç·ï¿½Ã¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Øµï¿½ï¿½ï¿½İ°ï¿½Ã»ï¿½ï¿½ï¿½ì³£ï¿½ï¿½Ï¢ï¿½ï¿½
 								if(connStatus.errorPacket != null){
 									this.commandQueue.currentCommand.setStatusCode(connStatus.statusCode);
 									if(!commandQueue.mainCommandExecuted){
@@ -283,9 +283,9 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 	}
 	
 	/**
-	 * µ±Ò»¸öÃüÁî½áÊøµÄÊ±ºò£¬ÇåÀí»º´æµÄÊı¾İ°ü¡£²¢ÇÒ³¢ÊÔ·¢ËÍÏÂÒ»¸öcommand
-	 * Èç¹û¶ÓÁĞÖĞÃ»ÓĞÃüÁî£¬Ôò½áÊøµ±Ç°»Ø»°
-	 * @param oldCommand µ±Ç°µÄcommand
+	 * ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½ï¿½?ï¿½ï¿½ï¿½ï¿½ï¿½İ°ï¿½ï¿½Ò³ï¿½ï¿½Ô·ï¿½ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½command
+	 * ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ã»ï¿½ï¿½ï¿½ï¿½ï¿½î£¬ï¿½ï¿½ï¿½ï¿½ï¿½Ç°ï¿½Ø»ï¿½
+	 * @param oldCommand ï¿½ï¿½Ç°ï¿½ï¿½command
 	 */
 	protected synchronized void afterCommandCompleted(CommandInfo oldCommand){
 		if(this.commandQueue.currentCommand != oldCommand){
@@ -296,15 +296,15 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 		}
 		commandQueue.clearAllBuffer();
 
-		//µ±Ò»¸öÃüÁîµÄ×îºóÒ»¸öÊı¾İ°üµ½´ï£¬Ôò½«µ±Ç°µÄÃüÁî´Ó¶ÓÁĞÖĞÉ¾³ı¡£
+		//ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½İ°ï¿½ï£¬ï¿½ò½«µï¿½Ç°ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ó¶ï¿½ï¿½ï¿½ï¿½ï¿½É¾ï¿½ï¿½
 		commandQueue.sessionInitQueryQueue.remove(0);
 		if(!ended){
 			startNextCommand();
 		}
 	}
 	
-	//ÅĞ¶ÏÊÇ·ñĞèÒª¼ÌĞø·¢ËÍÏÂÒ»Ìõ¿Í»§¶ËÃüÁî
-	//·¢ËÍÏÂÒ»ÌõÃüÁî
+	//ï¿½Ğ¶ï¿½ï¿½Ç·ï¿½ï¿½ï¿½Òªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½Í»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	protected synchronized void startNextCommand(){
 		if(commandQueue.currentCommand != null && (commandQueue.currentCommand.getStatusCode() & SessionStatus.ERROR) >0){
 			if(source.isAutoCommit()){
@@ -337,18 +337,18 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 	
 	/**
 	 * <pre>
-	 * ÈÎºÎÔÚhandlerÀïÃæĞèÒª·¢ËÍµ½Ä¿±êÁ¬½ÓµÄÊı¾İ°ü£¬¶¼µ÷ÓÃ¸Ã·½·¨·¢ËÍ³öÈ¥¡£
-	 * ´Ó·şÎñÆ÷¶Ë·¢ËÍ¹ıÀ´µÄÏûÏ¢µ½¿Í»§¶Ë£¬»òÕß´Ó¿Í»§¶Ë·¢ËÍÃüÁîµ½¸÷¸ömysql server¡£
+	 * ï¿½Îºï¿½ï¿½ï¿½handlerï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Òªï¿½ï¿½ï¿½Íµï¿½Ä¿ï¿½ï¿½ï¿½ï¿½ï¿½Óµï¿½ï¿½ï¿½İ°ï¿½ï¿½ï¿½Ã¸Ã·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í³ï¿½È¥ï¿½ï¿½
+	 * ï¿½Ó·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ë·ï¿½ï¿½Í¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢ï¿½ï¿½ï¿½Í»ï¿½ï¿½Ë£ï¿½ï¿½ï¿½ï¿½ß´Ó¿Í»ï¿½ï¿½Ë·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½îµ½ï¿½ï¿½ï¿½ï¿½mysql serverï¿½ï¿½
 	 * 
-	 * Õâ¶ùÖ÷Òª·¢ËÍµÄÏûÏ¢ÓĞ2ÖÖ£º
-	 * 1¡¢´Ó¿Í»§¶Ë·¢ËÍ¹ıÀ´µÄÏûÏ¢
-	 * 2¡¢reponseµ±Ç°µÄÖ÷ÒªÃüÁî£¨ÊÇ¿Í»§¶Ë·¢³öÀ´µÄÃüÁî¶ø²»ÊÇ¸ÃproxyÄÚ²¿²úÉúµÄÃüÁî£©µÄÊı¾İ°ü
-	 * ÒÔÉÏ2ÖÖÊı¾İ°üÍ¨¹ıdispatchMessage ·½·¨·¢ËÍ³öÈ¥µÄ¡£
-	 * ÓÉÄÚ²¿²úÉúµÄÃüÁîÊı¾İ°ü¿ÉÒÔÔÚ afterCommandCompleted()Ö®ºó ¸ù¾İConnectionStatus.buffersÖĞ±£´æ¡£
-	 * commandQueue.clearAllBuffer() ÒÔºóbuffers ½«±»Çå¿Õ
+	 * ï¿½ï¿½ï¿½ï¿½ï¿½Òªï¿½ï¿½ï¿½Íµï¿½ï¿½ï¿½Ï¢ï¿½ï¿½2ï¿½Ö£ï¿½
+	 * 1ï¿½ï¿½ï¿½Ó¿Í»ï¿½ï¿½Ë·ï¿½ï¿½Í¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢
+	 * 2ï¿½ï¿½reponseï¿½ï¿½Ç°ï¿½ï¿½ï¿½ï¿½Òªï¿½ï¿½ï¿½î£¨ï¿½Ç¿Í»ï¿½ï¿½Ë·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç¸ï¿½proxyï¿½Ú²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½î£©ï¿½ï¿½ï¿½ï¿½İ°ï¿½
+	 * ï¿½ï¿½ï¿½ï¿½2ï¿½ï¿½ï¿½ï¿½İ°ï¿½Í¨ï¿½ï¿½dispatchMessage ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í³ï¿½È¥ï¿½Ä¡ï¿½
+	 * ï¿½ï¿½ï¿½Ú²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½İ°ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ afterCommandCompleted()Ö®ï¿½ï¿½ ï¿½ï¿½ï¿½ConnectionStatus.buffersï¿½Ğ±ï¿½ï¿½æ¡£
+	 * commandQueue.clearAllBuffer() ï¿½Ôºï¿½buffers ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	 * </pre>
-	 * @param fromServer ÊÇ·ñÊÇ´Ómysql server ¶Ë·¢ËÍ¹ıÀ´µÄ
-	 * @param message ÏûÏ¢ÄÚÈİ
+	 * @param fromServer ï¿½Ç·ï¿½ï¿½Ç´ï¿½mysql server ï¿½Ë·ï¿½ï¿½Í¹ï¿½ï¿½ï¿½ï¿½ï¿½
+	 * @param message ï¿½ï¿½Ï¢ï¿½ï¿½ï¿½ï¿½
 	 */
 	protected void dispatchMessageFrom(Connection fromConn,byte[] message){
 		if(fromConn != source){
@@ -362,7 +362,7 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 	}
 	
 	/**
-	 * Õâ¶ù½«Æô¶¯Ò»Ğ©»º´æ»úÖÆ£¬±ÜÃâĞ¡Êı¾İ°üÆµ·±µ÷ÓÃ ÏµÍ³write, CommandMessageHandlerÀà»òÕßÆä×ÓÀà±ØĞëÍ¨¹ı¸Ã·½·¨·¢ËÍÊı¾İ°ü
+	 * ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò»Ğ©ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ£ï¿½ï¿½ï¿½ï¿½ï¿½Ğ¡ï¿½ï¿½İ°ï¿½Æµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ÏµÍ³write, CommandMessageHandlerï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í¨ï¿½ï¿½Ã·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½İ°ï¿½
 	 * @param toConn
 	 * @param message
 	 */
@@ -381,7 +381,7 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 	}
 	
 	/**
-	 * »º³åĞ´Êı¾İµ½Ä¿µÄµØ
+	 * ï¿½ï¿½ï¿½ï¿½Ğ´ï¿½ï¿½İµï¿½Ä¿ï¿½Äµï¿½
 	 * @param byts
 	 * @param buffer
 	 * @param conn
@@ -434,7 +434,7 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 	}
 	
 	/**
-	 * ¹Ø±Õ¸ÃmessageHandler ²¢ÇÒ»Ö¸´ËùÓĞÕâ¸ömessageHandlerËùhandleµÄConnection
+	 * ï¿½Ø±Õ¸ï¿½messageHandler ï¿½ï¿½ï¿½Ò»Ö¸ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½messageHandlerï¿½ï¿½handleï¿½ï¿½Connection
 	 */
 	protected void releaseAllCompletedConnection(){
 		Set<Map.Entry<Connection,MessageHandler>> handlerSet = handlerMap.entrySet();
@@ -463,9 +463,9 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 	}
 	
 	/**
-	 * ºÏ²¢¶à·şÎñ¶ËµÄÏûÏ¢£¬·¢ËÍµ½¿Í»§¶Ë
-	 * Ö»ÓĞÔÚ¶àÁ¬½ÓµÄÇé¿öÏÂĞèÒª½øĞĞÊı¾İ°ü¾ÛºÏ£¬¾ÛºÏÒÔºóÖğÒ»½«Êı¾İ°üÍ¨¹ı {@link #dispatchMessageFrom(Connection, byte[])}·½·¨·¢ËÍ³öÈ¥,
-	 * Ò»¶ÔÒ»µÄÁ¬½ÓÖ±½ÓÍ¨¹ı{@link #dispatchMessageFrom(Connection, byte[])} ·½·¨ Ö±½Ó·¢ËÍ³öÈ¥,¶ø²»ĞèÒªmerge¡£
+	 * ï¿½Ï²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ëµï¿½ï¿½ï¿½Ï¢ï¿½ï¿½ï¿½ï¿½ï¿½Íµï¿½ï¿½Í»ï¿½ï¿½ï¿½
+	 * Ö»ï¿½ï¿½ï¿½Ú¶ï¿½ï¿½ï¿½ï¿½Óµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Òªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½İ°ï¿½ÛºÏ£ï¿½ï¿½Ûºï¿½ï¿½Ôºï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½İ°ï¿½Í¨ï¿½ï¿½ {@link #dispatchMessageFrom(Connection, byte[])}ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í³ï¿½È¥,
+	 * Ò»ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö±ï¿½ï¿½Í¨ï¿½ï¿½{@link #dispatchMessageFrom(Connection, byte[])} ï¿½ï¿½ï¿½ï¿½ Ö±ï¿½Ó·ï¿½ï¿½Í³ï¿½È¥,ï¿½ï¿½ï¿½ï¿½Òªmergeï¿½ï¿½
 	 * @return
 	 */
 	protected synchronized List<byte[]> mergeMessages(){
@@ -478,7 +478,7 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 		List<byte[]> buffers = null;
 		List<byte[]> returnList = new ArrayList<byte[]>();
 		for(ConnectionStatuts connStatus : connectionStatutsSet){
-			//¿´ÊÇ·ñÃ¿¸ö·şÎñÆ÷·µ»ØµÄÊı¾İ°ü¶¼Ã»ÓĞÒì³£ĞÅÏ¢¡£
+			//ï¿½ï¿½ï¿½Ç·ï¿½Ã¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Øµï¿½ï¿½ï¿½İ°ï¿½Ã»ï¿½ï¿½ï¿½ì³£ï¿½ï¿½Ï¢ï¿½ï¿½
 			if(connStatus.buffers.size() ==0){
 				for(ConnectionStatuts connStatus1 : connectionStatutsSet){
 					
@@ -504,10 +504,10 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 		}
 		
 		if(isSelectQuery){
-			//µ±Ç°µÄpacketId
+			//ï¿½ï¿½Ç°ï¿½ï¿½packetId
 			byte paketId = 0;
 			
-			//·¢ËÍfieldĞÅÏ¢
+			//ï¿½ï¿½ï¿½ï¿½fieldï¿½ï¿½Ï¢
 			for(byte[] buffer : buffers){
 				if(MysqlPacketBuffer.isEofPacket(buffer)){
 					returnList.add(buffer);
@@ -519,7 +519,7 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 				}
 			}
 			paketId += 1;
-			//·¢ËÍrowsÊı¾İ°ü
+			//ï¿½ï¿½ï¿½ï¿½rowsï¿½ï¿½İ°ï¿½
 			for(ConnectionStatuts connStatus : connectionStatutsSet){
 				boolean rowStart = false;;
 				for(byte[] buffer : connStatus.buffers){
@@ -597,8 +597,8 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 		}else{
 			if(ended){
 				/**
-				 * Èç¹û¸ÃsessionÒÑ¾­½áÊø£¬´ËÊ±Èç¹ûserverConnection¶Ë»¹ÔÚµÈ´ıËùÓĞÊı¾İ·ÃÎÊ¡£²¢ÇÒ³¬¹ı15s,ÔòĞèÒªµ±¿ÕÏĞµÄ»á»°
-				 * ±ÜÃâÓÉÓÚ¸÷ÖÖÔ­ÒòÔì³É·şÎñÆ÷¶ËÃ»ÓĞ·¢ËÍÊı¾İ»òÕßÒÑ¾­½áÊøµÄ»á»°¶øServerConnectionÎŞ·¨·µ»ØPoolÖĞ¡£
+				 * ï¿½ï¿½ï¿½ï¿½sessionï¿½Ñ¾ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½serverConnectionï¿½Ë»ï¿½ï¿½ÚµÈ´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½İ·ï¿½ï¿½Ê¡ï¿½ï¿½ï¿½ï¿½Ò³ï¿½ï¿½ï¿½15s,ï¿½ï¿½ï¿½ï¿½Òªï¿½ï¿½ï¿½ï¿½ï¿½ĞµÄ»á»°
+				 * ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ú¸ï¿½ï¿½ï¿½Ô­ï¿½ï¿½ï¿½ï¿½É·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ã»ï¿½Ğ·ï¿½ï¿½ï¿½ï¿½ï¿½İ»ï¿½ï¿½ï¿½ï¿½Ñ¾ï¿½ï¿½ï¿½ï¿½ï¿½Ä»á»°ï¿½ï¿½ServerConnectionï¿½Ş·ï¿½ï¿½ï¿½ï¿½ï¿½Poolï¿½Ğ¡ï¿½
 				 */
 				return (now - endTime)>15000;
 			}else{
@@ -628,7 +628,7 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 				if((entry.getValue().statusCode & SessionStatus.COMPLETED) == 0){
 					buffer.append("<----start-connection="+entry.getKey().getSocketId()
 							+",queueSize="+entry.getKey().getInQueueSize()
-							+",manager="+entry.getKey().getConnectionManager().getName() 
+							+",landscape="+entry.getKey().getConnectionManager().getName()
 							+",managerRunning="+entry.getKey().getConnectionManager().isRunning()
 							+",selectorOpened="+entry.getKey().getConnectionManager().getSelector().isOpen()+"-------\n");
 					for(byte[] buf : entry.getValue().buffers){

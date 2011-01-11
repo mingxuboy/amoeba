@@ -59,7 +59,7 @@ public class ConnectionManager extends LoopingThread implements Reporter, Initia
     /** Our current runtime stats. */
     protected ConMgrStats                            _stats;
 
-    /** Á¬½ÓÒÑ¾­Ê§Ð§»òÕßÍøÂç¶Ï¿ªµÄ¶ÓÁÐ */
+    /** ï¿½ï¿½ï¿½ï¿½ï¿½Ñ¾ï¿½Ê§Ð§ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¿ï¿½ï¿½Ä¶ï¿½ï¿½ï¿½ */
     protected Queue<Tuple<Connection, Exception>>    _deathq                         = new Queue<Tuple<Connection, Exception>>();
 
     protected Queue<Tuple<NetEventHandler, Integer>> _registerQueue                  = new Queue<Tuple<NetEventHandler, Integer>>();
@@ -111,7 +111,7 @@ public class ConnectionManager extends LoopingThread implements Reporter, Initia
     protected void iterate() {
         final long iterStamp = System.currentTimeMillis();
 
-        // ¹Ø±ÕÒÑ¾­¶Ï¿ª»òÕßÐû²¼ËÀÍöµÄConnection
+        // ï¿½Ø±ï¿½ï¿½Ñ¾ï¿½ï¿½Ï¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Connection
         Tuple<Connection, Exception> deathTuple;
         while ((deathTuple = _deathq.getNonBlocking()) != null) {
         	try{
@@ -123,7 +123,7 @@ public class ConnectionManager extends LoopingThread implements Reporter, Initia
 
         if (idleCheckTime > 0 && iterStamp - lastIdleCheckTime >= idleCheckTime) {
             lastIdleCheckTime = iterStamp;
-            // ¹Ø±Õ¿ÕÏÐÊ±¼ä¹ý³¤µÄÁ¬½Ó
+            // ï¿½Ø±Õ¿ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
             for (NetEventHandler handler : _handlers) {
                 if (handler.checkIdle(iterStamp)) {
                 	
@@ -131,7 +131,7 @@ public class ConnectionManager extends LoopingThread implements Reporter, Initia
                     if (handler instanceof Connection) {
                     	Connection conn = (Connection) handler;
                     	long idlesecond = (iterStamp - conn._lastEvent);
-                    	logger.warn("Disconnecting non-communicative server [manager=" + this + " conn="+conn.toString()+", socket closed!" +", idle=" + idlesecond + " ms]. life="+((System.currentTimeMillis()-conn._createTime)) +" ms");
+                    	logger.warn("Disconnecting non-communicative server [landscape=" + this + " conn="+conn.toString()+", socket closed!" +", idle=" + idlesecond + " ms]. life="+((System.currentTimeMillis()-conn._createTime)) +" ms");
                     	
                         closeConnection((Connection) handler, null);
                     }
@@ -139,7 +139,7 @@ public class ConnectionManager extends LoopingThread implements Reporter, Initia
             }
         }
 
-        // ½«×¢²áµÄÁ¬½Ó¼ÓÈëhandler mapÖÐ
+        // ï¿½ï¿½×¢ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ó¼ï¿½ï¿½ï¿½handler mapï¿½ï¿½
         Tuple<NetEventHandler, Integer> registerHandler = null;
         while ((registerHandler = _registerQueue.getNonBlocking()) != null) {
             if (registerHandler.left instanceof Connection) {
@@ -152,7 +152,7 @@ public class ConnectionManager extends LoopingThread implements Reporter, Initia
             }
         }
 
-        // ¼ì²éÍøÂçÊÂ¼þ
+        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Â¼ï¿½
         Set<SelectionKey> ready = null;
         try {
             // check for incoming network events
@@ -188,7 +188,7 @@ public class ConnectionManager extends LoopingThread implements Reporter, Initia
         // clear the runtime error count
         _runtimeExceptionCount = 0;
 
-        // ´¦ÀíÊÂ¼þ£¨ÍøÂçÊý¾ÝÁ÷½»»¥µÈ£©
+        // ï¿½ï¿½ï¿½ï¿½ï¿½Â¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½È£ï¿½
         for (SelectionKey selkey : ready) {
             NetEventHandler handler = null;
             handler = (NetEventHandler) selkey.attachment();
@@ -228,7 +228,7 @@ public class ConnectionManager extends LoopingThread implements Reporter, Initia
     }
 
     /**
-     * ²ÉÓÃÒì²½·½Ê½¹Ø±ÕÒ»¸öÁ¬½Ó¡£ ½«¼´½«¹Ø±ÕµÄÁ¬½Ó·ÅÈëdeathQueueÖÐ
+     * ï¿½ï¿½ï¿½ï¿½ï¿½ì²½ï¿½ï¿½Ê½ï¿½Ø±ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½Ó¡ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ø±Õµï¿½ï¿½ï¿½ï¿½Ó·ï¿½ï¿½ï¿½deathQueueï¿½ï¿½
      */
     void closeConnection(Connection conn, Exception exception) {
     	_deathq.append(new Tuple<Connection, Exception>(conn, exception));
@@ -248,7 +248,7 @@ public class ConnectionManager extends LoopingThread implements Reporter, Initia
     }
 
     /**
-     * Ôö¼Ó ConnectionObserver¡£¼àÌýConnection Ïà¹ØµÄÍøÂçÊÂ¼þ
+     * ï¿½ï¿½ï¿½ï¿½ ConnectionObserverï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Connection ï¿½ï¿½Øµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Â¼ï¿½
      */
     public void addConnectionObserver(ConnectionObserver observer) {
         synchronized (_observers) {
@@ -257,7 +257,7 @@ public class ConnectionManager extends LoopingThread implements Reporter, Initia
     }
 
     /**
-     * ´Ó Observer ÁÐ±íÖÐÉ¾³ýÒ»¸öObserver¶ÔÏó
+     * ï¿½ï¿½ Observer ï¿½Ð±ï¿½ï¿½ï¿½É¾ï¿½ï¿½Ò»ï¿½ï¿½Observerï¿½ï¿½ï¿½ï¿½
      */
     public void removeConnectionObserver(ConnectionObserver observer) {
         synchronized (_observers) {
@@ -286,12 +286,12 @@ public class ConnectionManager extends LoopingThread implements Reporter, Initia
     }
 
     /**
-     * Òì²½×¢²áÒ»¸öNetEventHandler
+     * ï¿½ì²½×¢ï¿½ï¿½Ò»ï¿½ï¿½NetEventHandler
      */
     public void postRegisterNetEventHandler(NetEventHandler handler, int key) {
         _registerQueue.append(new Tuple<NetEventHandler, Integer>(handler, key));
         /**
-         * »½ÐÑConnectionManagerÕýÔÚµÈ´ýselectµÄÏß³Ì£¬ÈÃÆäÄÜ¹»¸ü¿ìËÙµÄ´¦ÀíregisterQueue¶ÓÁÐÖÐµÄ¶ÔÏó
+         * ï¿½ï¿½ï¿½ï¿½ConnectionManagerï¿½ï¿½ï¿½ÚµÈ´ï¿½selectï¿½ï¿½ï¿½ß³Ì£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ü¹ï¿½ï¿½ï¿½ï¿½ï¿½ÙµÄ´ï¿½ï¿½ï¿½registerQueueï¿½ï¿½ï¿½ï¿½ï¿½ÐµÄ¶ï¿½ï¿½ï¿½
          */
         _selector.wakeup();
     }
@@ -301,7 +301,7 @@ public class ConnectionManager extends LoopingThread implements Reporter, Initia
     	return this._selector;
     }
     /**
-     * ÍùConnectionManager Ôö¼ÓÒ»¸öSocketChannel
+     * ï¿½ï¿½ConnectionManager ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½SocketChannel
      */
     protected boolean registerConnection(Connection connection, int key) {
         SocketChannel channel = connection.getChannel();
@@ -354,29 +354,29 @@ public class ConnectionManager extends LoopingThread implements Reporter, Initia
 
 
     /**
-     * µ± Connection ¹Ø±ÕÒÔºó
+     * ï¿½ï¿½ Connection ï¿½Ø±ï¿½ï¿½Ôºï¿½
      */
     protected void connectionClosed(Connection conn) {
         /**
-         * É¾³ý¼´½«±»¹Ø±ÕµÄÏà¹Ø¶ÔÏó
+         * É¾ï¿½ï¿½ï¿½ï¿½Ø±Õµï¿½ï¿½ï¿½Ø¶ï¿½ï¿½ï¿½
          */
         _handlers.remove(conn);
         _stats.disconnects.incrementAndGet();
         /**
-         * Í¨ÖªËùÓÐObserverÁÐ±í£¬Á¬½ÓÒÑ¾­¹Ø±Õ
+         * Í¨Öªï¿½ï¿½ï¿½ï¿½Observerï¿½Ð±?ï¿½ï¿½ï¿½ï¿½ï¿½Ñ¾ï¿½ï¿½Ø±ï¿½
          */
         notifyObservers(CONNECTION_CLOSED, conn, null);
     }
 
     /**
-     * µ± Connection ³öÏÖÒì³£ÒÔºó
+     * ï¿½ï¿½ Connection ï¿½ï¿½ï¿½ï¿½ï¿½ì³£ï¿½Ôºï¿½
      */
     protected void connectionFailed(Connection conn, Exception ioe) {
         _handlers.remove(conn);
         _stats.disconnects.incrementAndGet();
 
         /**
-         * µ±·¢ÉúÁ¬½ÓÒì³£Ê±£¬Í¨ÖªËùÓÐObservers
+         * ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ì³£Ê±ï¿½ï¿½Í¨Öªï¿½ï¿½ï¿½ï¿½Observers
          */
         notifyObservers(CONNECTION_FAILED, conn, ioe);
     }

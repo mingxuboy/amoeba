@@ -66,7 +66,7 @@ public class MultiConnectionManagerWrapper extends ConnectionManager{
     			connMgrs[i].setIdleCheckTime(this.getIdleCheckTime());
     			connMgrs[i]._observers.addAll(this._observers);
 				} catch (Exception e) {
-					log.error("create sub manager error",e);
+					log.error("create sub landscape error",e);
 					e.printStackTrace();
 					System.exit(-1);
 				}

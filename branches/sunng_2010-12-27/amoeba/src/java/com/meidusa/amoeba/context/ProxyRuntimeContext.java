@@ -220,12 +220,12 @@ public class ProxyRuntimeContext implements Reporter {
         /*for (Map.Entry<String, BeanObjectEntityConfig> entry : config.getManagers().entrySet()) {
             BeanObjectEntityConfig beanObjectEntityConfig = entry.getValue();
             try {
-                ConnectionManager manager = (ConnectionManager) beanObjectEntityConfig.createBeanObject(false);
-                manager.setName(entry.getKey());
-                initialisableList.add(manager);
-                conMgrMap.put(manager.getName(), manager);
+                ConnectionManager landscape = (ConnectionManager) beanObjectEntityConfig.createBeanObject(false);
+                landscape.setName(entry.getKey());
+                initialisableList.add(landscape);
+                conMgrMap.put(landscape.getName(), landscape);
             } catch (Exception e) {
-                throw new ConfigurationException("manager instance error", e);
+                throw new ConfigurationException("landscape instance error", e);
             }
         }*/
 
@@ -466,7 +466,7 @@ public class ProxyRuntimeContext implements Reporter {
                 manager.setName(entry.getKey());
                 conMgrMap.put(manager.getName(), manager);
             } catch (Exception e) {
-                throw new ConfigurationException("manager instance error", e);
+                throw new ConfigurationException("landscape instance error", e);
             }
         }
     }

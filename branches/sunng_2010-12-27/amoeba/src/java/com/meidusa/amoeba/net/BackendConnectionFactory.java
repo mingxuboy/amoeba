@@ -12,7 +12,7 @@ import com.meidusa.amoeba.util.InitialisationException;
 import com.meidusa.amoeba.util.StringUtil;
 
 /**
- * ºó¶ËÁ¬½Ó¹¤³§,¸ºÔðÓëºó¶ËÊý¾Ý¿â½»»¥µÄÁ¬½Ó¹¤³§
+ * ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ó¹ï¿½ï¿½ï¿½,ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ý¿â½»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ó¹ï¿½ï¿½ï¿½
  * @author struct
  *
  */
@@ -106,7 +106,7 @@ public abstract class BackendConnectionFactory extends AuthingableConnectionFact
 			}
 		});
 		
-		//ConnectionManager conMgr = ProxyRuntimeContext.getInstance().getConnectionManagerList().get(manager);
+		//ConnectionManager conMgr = ProxyRuntimeContext.getInstance().getConnectionManagerList().get(landscape);
 		if(manager == null){
 			throw new InitialisationException("can not found connectionManager by name="+manager);
 		}
