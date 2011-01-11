@@ -42,7 +42,7 @@ public class ManagerAbstractPacket extends AbstractPacket<ManagerPacketBuffer> i
 
 
     @Override
-    protected void afterInit(ManagerPacketBuffer buffer) {
+    protected void afterRead(ManagerPacketBuffer buffer) {
         buffer.setPosition(HEADER_SIZE);
     }
 
