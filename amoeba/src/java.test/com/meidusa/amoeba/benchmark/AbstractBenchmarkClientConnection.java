@@ -45,7 +45,7 @@ public abstract class AbstractBenchmarkClientConnection<T extends Packet>
 		this.timeout = timeout;
 	}
 
-	public void putAllRequestProperties(Properties source){
+	public void putAllRequestProperties(Map source){
 		if(properties == null){
 			properties = new Properties();
 		}

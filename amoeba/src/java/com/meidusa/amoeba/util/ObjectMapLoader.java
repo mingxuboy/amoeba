@@ -5,58 +5,63 @@
  * SUN PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
  */
 
-package com.meidusa.amoeba.benchmark;
+package com.meidusa.amoeba.util;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.StringReader;
 import java.util.HashMap;
 import java.util.InvalidPropertiesFormatException;
 import java.util.Map;
 
-import org.xml.sax.*;
-import org.xml.sax.helpers.*;
-import org.w3c.dom.*;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.EntityResolver;
+import org.xml.sax.ErrorHandler;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
 
 import com.meidusa.amoeba.config.DocumentUtil;
 
-import javax.xml.parsers.*;
-import javax.xml.transform.*;
-import javax.xml.transform.dom.*;
-import javax.xml.transform.stream.*;
-
 /**
- * A class used to aid in Properties load and save in XML. Keeping this
- * code outside of Properties helps reduce the number of classes loaded
- * when Properties is loaded.
- *
- * @version 1.9, 01/23/03
- * @author  Michael McCloskey
- * @since   1.3
  */
-class XMLUtils {
+public class ObjectMapLoader {
 
     // XML loading and saving methods for Properties
 
     // The required DTD URI for exported properties
     private static final String PROPS_DTD_URI =
-    "http://java.sun.com/dtd/properties.dtd";
+    "http://amoeba.meidusa.com/objectMap.dtd";
 
     private static final String PROPS_DTD =
     "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
     "<!-- DTD for properties -->"                +
-    "<!ELEMENT properties ( comment?, entry* ) >"+
-    "<!ATTLIST properties"                       +
-        " version CDATA #FIXED \"1.0\">"         +
-    "<!ELEMENT comment (#PCDATA) >"              +
-    "<!ELEMENT entry (#PCDATA) >"                +
-    "<!ATTLIST entry "                           +
-        " key CDATA #REQUIRED>";
+    "<!ELEMENT bean ( property* ) >"                +
+    "<!ATTLIST bean class NMTOKEN #REQUIRED >"                +
+
+    "<!ELEMENT entry ( #PCDATA | bean )* >"                +
+    "<!ATTLIST entry key NMTOKEN #REQUIRED >"                +
+
+    "<!ELEMENT objectMap ( entry+ ) >"                +
+    "<!ATTLIST objectMap version NMTOKEN #REQUIRED >"                +
+
+    "<!ELEMENT property ( #PCDATA ) >"                +
+    "<!ATTLIST property name NMTOKEN #REQUIRED >";            
 
     /**
      * Version number for the format of exported properties files.
      */
-    private static final String EXTERNAL_XML_VERSION = "1.0";
 
-    static void load(Map<String,Object> props, InputStream in)
+    public static void load(Map<String,Object> props, InputStream in)
         throws IOException, InvalidPropertiesFormatException
     {
         Document doc = null;
@@ -66,13 +71,6 @@ class XMLUtils {
             throw new InvalidPropertiesFormatException(saxe);
         }
         Element propertiesElement = (Element)doc.getChildNodes().item(1);
-        String xmlVersion = propertiesElement.getAttribute("version");
-        if (xmlVersion.compareTo(EXTERNAL_XML_VERSION) > 0)
-            throw new InvalidPropertiesFormatException(
-                "Exported Properties file format version " + xmlVersion +
-                " is not supported. This java installation can read" +
-                " versions " + EXTERNAL_XML_VERSION + " or older. You" +
-                " may need to install a newer version of JDK.");
         importMap(props, propertiesElement);
     }
 
@@ -86,7 +84,7 @@ class XMLUtils {
         dbf.setIgnoringComments(true);
 	try {
 	    DocumentBuilder db = dbf.newDocumentBuilder();
-	    //db.setEntityResolver(new Resolver());
+	    db.setEntityResolver(new Resolver());
 	    db.setErrorHandler(new EH());
             InputSource is = new InputSource(in);
 	    return db.parse(is);
@@ -95,7 +93,7 @@ class XMLUtils {
 	}
     }
 
-    static void importMap(Map<String,Object> props, Element propertiesElement) {
+    private static void importMap(Map<String,Object> props, Element propertiesElement) {
         NodeList entries = propertiesElement.getChildNodes();
         int numEntries = entries.getLength();
         int start = numEntries > 0 && 
@@ -118,14 +116,15 @@ class XMLUtils {
     
     private static Object loadBean(Element keyElement) throws Exception{
     	NodeList entries = keyElement.getChildNodes();
-    	 Node node = entries.item(0);
-    	 if(node instanceof Element){
-    		 Element entry = (Element)node;
-    		 return  DocumentUtil.loadBeanConfig(entry).createBeanObject(true,System.getProperties());
-    	 }else{
-    		 String value = node.getTextContent().trim();
-    		return Class.forName(value).newInstance();
-    	 }
+    	for(int i=0;i<entries.getLength();i++){
+    		Node node = entries.item(i);
+       	 	if(node instanceof Element){
+       	 		Element entry = (Element)node;
+       	 		return  DocumentUtil.loadBeanConfig(entry).createBeanObject(true,System.getProperties());
+       	 	}
+    	}
+  		String value = keyElement.getTextContent().trim();
+  		return Class.forName(value).newInstance();
     	
     }
 
@@ -158,6 +157,9 @@ class XMLUtils {
     public static void main(String[] args) throws Exception{
     	HashMap<String,Object> map = new HashMap<String,Object>();
     	load(map, new FileInputStream(new File("c:/1.xml")));
+    	for(Map.Entry<String, Object> entry: map.entrySet()){
+    		System.out.println("key="+entry.getKey()+",value="+entry.getValue());
+    	}
     }
 
 }
