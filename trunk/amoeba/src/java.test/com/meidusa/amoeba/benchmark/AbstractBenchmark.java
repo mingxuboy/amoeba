@@ -25,7 +25,6 @@ import com.meidusa.amoeba.net.ConnectionObserver;
 import com.meidusa.amoeba.net.MultiConnectionManagerWrapper;
 import com.meidusa.amoeba.util.CmdLineParser;
 import com.meidusa.amoeba.util.ObjectMapLoader;
-import com.meidusa.amoeba.util.StringUtil;
 import com.meidusa.amoeba.util.CmdLineParser.BooleanOption;
 import com.meidusa.amoeba.util.CmdLineParser.IntegerOption;
 import com.meidusa.amoeba.util.CmdLineParser.LongOption;
@@ -50,27 +49,12 @@ public abstract class AbstractBenchmark {
 	protected static CmdLineParser.Option contextOption = parser.addOption(new StringOption('C', "context",true,false,"Context xml File"));
 	protected static CmdLineParser.Option requestOption = parser.addOption(new StringOption('f', "file",true,true,"request xml File"));
 	
-	protected static CmdLineParser.Option splitOption = parser.addOption(new StringOption('s', "split",true,false,null,"split char"));
-	
 	protected static CmdLineParser.Option log4jOption = parser.addOption(new StringOption('l', "log4j",true,false,"warn","log4j level[debug,info,warn,error]"));
 	
 	protected static CmdLineParser.Option helpOption = parser.addOption(new BooleanOption('?', "help",false,false,true,"Show this help message"));
-	private static String split = null;
 	private static Map<String,RandomData> randomMap = new HashMap<String,RandomData>();
 	private static Map contextMap = new HashMap(){
-		public Object get(Object key){
-			Object value =super.get(key);
-			if(value instanceof RandomData){
-				String line = (String)((RandomData) value).nextData();
-				if(split == null){
-					return StringUtil.split(line);
-				}else{
-					return StringUtil.split(line,split);
-				}
-			}
-			return value;
-		}
-		
+
 		public Object put(Object key,Object value){
 			if(value instanceof RandomData){
 				randomMap.put((String)key, (RandomData)value);
@@ -126,13 +110,13 @@ public abstract class AbstractBenchmark {
 	
 	public Map getNextRequestContextMap(){
 		for(Map.Entry<String, RandomData> entry : randomMap.entrySet()){
-			String line = (String)entry.getValue().nextData();
-			Object obj = null;
+			Object obj = entry.getValue().nextData();
+			/*Object obj = null;
 			if(split == null){
 				obj = StringUtil.split(line);
 			}else{
 				obj = StringUtil.split(line,split);
-			}
+			}*/
 			contextMap.put(entry.getKey(), obj);
 		}
 		return contextMap;
@@ -153,8 +137,6 @@ public abstract class AbstractBenchmark {
 		}else{
 			System.setProperty("benchmark.level", "warn");
 		}
-		
-		split = (String)parser.getOptionValue(splitOption);
 		
 		final Boolean value = (Boolean)parser.getOptionValue(debugOption,false);
 		
