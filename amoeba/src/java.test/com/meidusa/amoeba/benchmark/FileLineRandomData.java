@@ -19,7 +19,7 @@ import com.meidusa.amoeba.util.StringUtil;
  * @author Struct
  *
  */
-public class RandomLineDataFile implements RandomData<String[]>,Initialisable{
+public class FileLineRandomData implements RandomData<String[]>,Initialisable{
 	private File file ;
 	private RandomAccessFile raf = null;
 	private MappedByteBuffer buffer = null;
@@ -134,7 +134,7 @@ public class RandomLineDataFile implements RandomData<String[]>,Initialisable{
 	}
 	
 	public static void main(String[] args) throws Exception{
-		RandomLineDataFile mapping = new RandomLineDataFile();
+		FileLineRandomData mapping = new FileLineRandomData();
 		mapping.setFile(new File("c:/1.txt"));
 		mapping.init();
 		

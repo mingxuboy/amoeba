@@ -5,7 +5,7 @@
         <entry key="atomicInteger">java.util.concurrent.atomic.AtomicInteger</entry>
         <entry key="atomicLong">java.util.concurrent.atomic.AtomicLong</entry>
         <entry key="randomRow">
-        	<bean class="com.meidusa.amoeba.benchmark.RandomLineDataFile">
+        	<bean class="com.meidusa.amoeba.benchmark.FileLineRandomData">
         		<property name="file">${amoeba.home}/benchmark/1.txt</property>
         	</bean>
         </entry>
