@@ -27,8 +27,16 @@ public abstract class AbstractBenchmarkClientConnection<T extends Packet>
 	protected CountDownLatch requestLatcher;
 	protected CountDownLatch responseLatcher;
 	protected TaskRunnable task;
-	private Map contextMap; 
+	private AbstractBenchmark benchmark;
 	
+	public AbstractBenchmark getBenchmark() {
+		return benchmark;
+	}
+
+	public void setBenchmark(AbstractBenchmark benchmark) {
+		this.benchmark = benchmark;
+	}
+
 	public boolean isDebug() {
 		return debug;
 	}
@@ -64,15 +72,9 @@ public abstract class AbstractBenchmarkClientConnection<T extends Packet>
 		this.responseLatcher = responseLatcher;
 		this.task = task;
 	}
-
 	
-	
-	public void setContextMap(Map contextMap) {
-		this.contextMap = contextMap;
-	}
-
-	public Map getContextMap(){
-		return this.contextMap;
+	public Map getNextRequestContextMap(){
+		return this.benchmark.getNextRequestContextMap();
 	}
 	
 	public abstract T createRequestPacket();

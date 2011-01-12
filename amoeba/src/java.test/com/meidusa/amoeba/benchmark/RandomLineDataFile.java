@@ -13,6 +13,7 @@ import com.meidusa.amoeba.util.InitialisationException;
 import com.meidusa.amoeba.util.MappedByteBufferUtil;
 
 /**
+ * 采用文件内存映射，文件的所有数据将会到缓存中
  * 文件不宜过大
  * @author Struct
  *
@@ -39,6 +40,10 @@ public class RandomLineDataFile implements RandomData<String>,Initialisable{
 			Runtime.getRuntime().addShutdownHook(new Thread(){
 				public void run(){
 					MappedByteBufferUtil.unmap(buffer);
+					try {
+						raf.close();
+					} catch (IOException e) {
+					}
 				}
 			});
 		} catch (IOException e) {
@@ -72,10 +77,12 @@ public class RandomLineDataFile implements RandomData<String>,Initialisable{
 			}
 			break;
 		    }
-		    if(position >0){
-		    	buffer.position(position--);
-		    }else{
-		    	eol = true;
+		    if(!eol){
+			    if(position >0){
+			    	buffer.position(--position);
+			    }else{
+			    	eol = true;
+			    }
 		    }
 		}
 	}
@@ -116,8 +123,8 @@ public class RandomLineDataFile implements RandomData<String>,Initialisable{
 		mapping.init();
 		
 		long start = System.currentTimeMillis();
-		for(int i=0;i<1000000;i++){
-			mapping.nextData();
+		for(int i=0;i<100;i++){
+			System.out.println(mapping.nextData());
 		}
 		
 		System.out.println("time="+(System.currentTimeMillis()-start));

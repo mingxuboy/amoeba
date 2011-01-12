@@ -56,20 +56,25 @@ public abstract class AbstractBenchmark {
 	
 	protected static CmdLineParser.Option helpOption = parser.addOption(new BooleanOption('?', "help",false,false,true,"Show this help message"));
 	private static String split = null;
+	private static Map<String,RandomData> randomMap = new HashMap<String,RandomData>();
 	private static Map contextMap = new HashMap(){
 		public Object get(Object key){
 			Object value =super.get(key);
 			if(value instanceof RandomData){
+				String line = (String)((RandomData) value).nextData();
 				if(split == null){
-					return StringUtil.split((String)((RandomData) value).nextData());
+					return StringUtil.split(line);
 				}else{
-					return StringUtil.split((String)((RandomData) value).nextData(),split);
+					return StringUtil.split(line,split);
 				}
 			}
 			return value;
 		}
 		
 		public Object put(Object key,Object value){
+			if(value instanceof RandomData){
+				randomMap.put((String)key, (RandomData)value);
+			}
 			super.put(key, value);
 			return value;
 		}
@@ -119,7 +124,17 @@ public abstract class AbstractBenchmark {
 	}
 	
 	
-	public Map getContextMap(){
+	public Map getNextRequestContextMap(){
+		for(Map.Entry<String, RandomData> entry : randomMap.entrySet()){
+			String line = (String)entry.getValue().nextData();
+			Object obj = null;
+			if(split == null){
+				obj = StringUtil.split(line);
+			}else{
+				obj = StringUtil.split(line,split);
+			}
+			contextMap.put(entry.getKey(), obj);
+		}
 		return contextMap;
 	}
 	
@@ -219,13 +234,11 @@ public abstract class AbstractBenchmark {
 			InetSocketAddress address = new InetSocketAddress(ip,port);
 			try{
 				AbstractBenchmarkClientConnection<?> connection = benckmark.newBenchmarkClientConnection(SocketChannel.open(address),System.currentTimeMillis(),requestLatcher,responseLatcher,task);
-				
-				
+				connection.setBenchmark(benckmark);
 				connection.setTimeout(timeout.intValue());
 				connection.setDebug(value.booleanValue());
 				
 				connection.putAllRequestProperties(properties);
-				connection.setContextMap(benckmark.getContextMap());
 				manager.postRegisterNetEventHandler(connection, SelectionKey.OP_READ);
 				connList.add(connection);
 			}catch(Exception e){
