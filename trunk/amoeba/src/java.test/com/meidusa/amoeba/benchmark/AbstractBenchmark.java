@@ -24,6 +24,8 @@ import com.meidusa.amoeba.net.Connection;
 import com.meidusa.amoeba.net.ConnectionObserver;
 import com.meidusa.amoeba.net.MultiConnectionManagerWrapper;
 import com.meidusa.amoeba.util.CmdLineParser;
+import com.meidusa.amoeba.util.ObjectMapLoader;
+import com.meidusa.amoeba.util.StringUtil;
 import com.meidusa.amoeba.util.CmdLineParser.BooleanOption;
 import com.meidusa.amoeba.util.CmdLineParser.IntegerOption;
 import com.meidusa.amoeba.util.CmdLineParser.LongOption;
@@ -36,7 +38,6 @@ public abstract class AbstractBenchmark {
 		AbstractBenchmark.benckmark = benckmark;
 	}
 	
-	private static Map contextMap = new HashMap();
 	private static Properties properties = new Properties();
 	protected static CmdLineParser parser = new CmdLineParser(System.getProperty("application", "benchmark"));
 	protected static CmdLineParser.Option debugOption = parser.addOption(new BooleanOption('d', "debug", false,false,true,"show the interaction with the server-side information"));
@@ -49,9 +50,30 @@ public abstract class AbstractBenchmark {
 	protected static CmdLineParser.Option contextOption = parser.addOption(new StringOption('C', "context",true,false,"Context xml File"));
 	protected static CmdLineParser.Option requestOption = parser.addOption(new StringOption('f', "file",true,true,"request xml File"));
 	
+	protected static CmdLineParser.Option splitOption = parser.addOption(new StringOption('s', "split",true,false,null,"split char"));
+	
 	protected static CmdLineParser.Option log4jOption = parser.addOption(new StringOption('l', "log4j",true,false,"warn","log4j level[debug,info,warn,error]"));
 	
 	protected static CmdLineParser.Option helpOption = parser.addOption(new BooleanOption('?', "help",false,false,true,"Show this help message"));
+	private static String split = null;
+	private static Map contextMap = new HashMap(){
+		public Object get(Object key){
+			Object value =super.get(key);
+			if(value instanceof RandomData){
+				if(split == null){
+					return StringUtil.split((String)((RandomData) value).nextData());
+				}else{
+					return StringUtil.split((String)((RandomData) value).nextData(),split);
+				}
+			}
+			return value;
+		}
+		
+		public Object put(Object key,Object value){
+			super.put(key, value);
+			return value;
+		}
+	};
 	public AbstractBenchmark(){
 		Random random = new Random();
 		contextMap.put("random",random);
@@ -80,16 +102,10 @@ public abstract class AbstractBenchmark {
 		String contextFile = (String)parser.getOptionValue(contextOption);
 		
 		if(contextFile != null){
-			Properties properties = new Properties();
 			File contextXmlFile = new File(contextFile);
 			if(contextXmlFile.exists() && contextXmlFile.isFile()){
 				try {
-					properties.loadFromXML(new FileInputStream(contextXmlFile));
-					for(Map.Entry entry : properties.entrySet()){
-						String name = (String)entry.getKey();
-						Object obj = Class.forName(((String)entry.getValue()).trim()).newInstance();
-						contextMap.put(name, obj);
-					}
+					ObjectMapLoader.load(contextMap,new FileInputStream(contextXmlFile));
 				} catch (Exception e) {
 					e.printStackTrace();
 					System.exit(-1);
@@ -122,6 +138,8 @@ public abstract class AbstractBenchmark {
 		}else{
 			System.setProperty("benchmark.level", "warn");
 		}
+		
+		split = (String)parser.getOptionValue(splitOption);
 		
 		final Boolean value = (Boolean)parser.getOptionValue(debugOption,false);
 		
