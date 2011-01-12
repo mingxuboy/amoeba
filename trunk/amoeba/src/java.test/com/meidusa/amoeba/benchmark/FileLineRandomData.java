@@ -19,18 +19,29 @@ import com.meidusa.amoeba.util.StringUtil;
  * @author Struct
  *
  */
-public class FileLineRandomData implements RandomData<String[]>,Initialisable{
+public class FileLineRandomData implements RandomData<Object>,Initialisable{
 	private File file ;
 	private RandomAccessFile raf = null;
 	private MappedByteBuffer buffer = null;
 	private int size;
 	private String lineSplit;
+	private boolean needSplit = true;
 	
+	public boolean isNeedSplit() {
+		return needSplit;
+	}
+	public void setNeedSplit(boolean needSplit) {
+		this.needSplit = needSplit;
+	}
 	public String getLineSplit() {
 		return lineSplit;
 	}
 	public void setLineSplit(String lineSplit) {
-		this.lineSplit = lineSplit;
+		if(StringUtil.isEmpty(lineSplit)){
+			lineSplit = null;
+		}else{
+			this.lineSplit = lineSplit;
+		}
 	}
 	public File getFile() {
 		return file;
@@ -62,17 +73,21 @@ public class FileLineRandomData implements RandomData<String[]>,Initialisable{
 	
 	
 	@Override
-	public String[] nextData() {
+	public Object nextData() {
 		int position = RandomUtils.nextInt(size);
 		goNextNewLineHead(position);
 		String[] obj = null;
 		String line = readLine();
-		if(lineSplit == null){
-			obj = StringUtil.split(line);
+		if(needSplit){
+			if(lineSplit == null){
+				obj = StringUtil.split(line);
+			}else{
+				obj = StringUtil.split(line,lineSplit);
+			}
+			return obj;
 		}else{
-			obj = StringUtil.split(line,lineSplit);
+			return line;
 		}
-		return obj;
 	}
 	
 	private void goNextNewLineHead(int position){
