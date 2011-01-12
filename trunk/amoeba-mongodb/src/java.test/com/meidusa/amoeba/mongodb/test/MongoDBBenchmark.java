@@ -35,7 +35,7 @@ public class MongoDBBenchmark extends AbstractBenchmark{
 		ParameterMapping.registerTransfer(BSONObject.class, new PropertyTransfer<BSONObject>(){
 			@Override
 			public BSONObject transfer(String inputString) {
-				String json = ConfigUtil.filterWtihOGNL(inputString, AbstractBenchmark.getInstance().getContextMap());
+				String json = ConfigUtil.filterWtihOGNL(inputString, AbstractBenchmark.getInstance().getNextRequestContextMap());
 				return (BSONObject)JSON.parse(json);
 			}
 		});
@@ -46,7 +46,7 @@ public class MongoDBBenchmark extends AbstractBenchmark{
 				String[] items = StringUtils.splitByWholeSeparator(inputString,"//--");
 				BSONObject[] list = new BSONObject[items.length];
 				for(int i=0;i<items.length;i++){
-					String json = ConfigUtil.filterWtihOGNL(items[i].trim(), AbstractBenchmark.getInstance().getContextMap());
+					String json = ConfigUtil.filterWtihOGNL(items[i].trim(), AbstractBenchmark.getInstance().getNextRequestContextMap());
 					list[i] = (BSONObject)JSON.parse(json);
 				}
 				return list;

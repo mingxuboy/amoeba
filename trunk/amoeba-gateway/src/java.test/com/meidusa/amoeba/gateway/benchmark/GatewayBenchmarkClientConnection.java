@@ -76,14 +76,14 @@ public class GatewayBenchmarkClientConnection extends AbstractBenchmarkClientCon
 			e.printStackTrace();
 			System.exit(-1);
 		}
-		
-		ParameterMapping.mappingObjectField(packet, beanParameterMap,this.getContextMap(),this, AbstractPacket.class);
+		Map<String,Object> map = this.getNextRequestContextMap();
+		ParameterMapping.mappingObjectField(packet, beanParameterMap,map,this, AbstractPacket.class);
 		
 		if(packet instanceof GatewayRequestPacket){
 			
 			Map<String ,String > _parameterMap_ = new HashMap<String,String>(); 
 			for(Map.Entry<String, String> entry : parameterMap.entrySet()){
-				String value = ConfigUtil.filterWtihOGNL(entry.getValue(), this.getContextMap(),this);
+				String value = ConfigUtil.filterWtihOGNL(entry.getValue(), map,this);
 				_parameterMap_.put(entry.getKey(), value);
 			}
 			GatewayRequestPacket request = (GatewayRequestPacket)packet;

@@ -91,7 +91,7 @@ public class MongodbBenchmarkClientConnection extends AbstractBenchmarkClientCon
 			e.printStackTrace();
 			System.exit(-1);
 		}
-		ParameterMapping.mappingObjectField(packet, properties,this.getContextMap(),this, AbstractPacket.class);
+		ParameterMapping.mappingObjectField(packet, properties,this.getNextRequestContextMap(),this, AbstractPacket.class);
 		return packet;
 	}
 	
