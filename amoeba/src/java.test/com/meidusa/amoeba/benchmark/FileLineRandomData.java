@@ -3,8 +3,11 @@ package com.meidusa.amoeba.benchmark;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.nio.ByteBuffer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel.MapMode;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.commons.lang.math.RandomUtils;
 
@@ -22,11 +25,11 @@ import com.meidusa.amoeba.util.StringUtil;
 public class FileLineRandomData implements RandomData<Object>,Initialisable{
 	private File file ;
 	private RandomAccessFile raf = null;
-	private MappedByteBuffer buffer = null;
 	private int size;
 	private String lineSplit;
 	private boolean needSplit = true;
 	private boolean closed = false;
+	private MappedByteBuffer buffer = null;
 	public boolean isNeedSplit() {
 		return needSplit;
 	}
@@ -50,13 +53,22 @@ public class FileLineRandomData implements RandomData<Object>,Initialisable{
 		this.file = file;
 	}
 	
+	private ThreadLocal<ByteBuffer> localBuffer = new ThreadLocal<ByteBuffer> (){
+        protected ByteBuffer initialValue() {
+        	return buffer.duplicate();
+        }
+    };
+	
+	
 	@Override
 	public void init() throws InitialisationException {
 		try {
 			raf = new RandomAccessFile(file,"r");
 			size = raf.length() > Integer.MAX_VALUE ? Integer.MAX_VALUE: Long.valueOf(raf.length()).intValue();
+			System.out.println("file size ="+size);
 			buffer = raf.getChannel().map(MapMode.READ_ONLY, 0, size);
 			buffer.load();
+
 			Runtime.getRuntime().addShutdownHook(new Thread(){
 				public void run(){
 					closed = true;
@@ -72,14 +84,15 @@ public class FileLineRandomData implements RandomData<Object>,Initialisable{
 		} 
 	}
 	
-	
 	@Override
-	public Object nextData() {
+	public  Object  nextData() {
 		if(closed) throw new IllegalStateException("file closed..");
-		int position = RandomUtils.nextInt(size);
-		goNextNewLineHead(position);
+		int position = RandomUtils.nextInt(size -1);
+		ByteBuffer buffer = localBuffer.get();
+		
+		goNextNewLineHead(buffer,position);
 		String[] obj = null;
-		String line = readLine();
+		String line = readLine(buffer);
 		if(needSplit){
 			if(lineSplit == null){
 				obj = StringUtil.split(line);
@@ -92,7 +105,7 @@ public class FileLineRandomData implements RandomData<Object>,Initialisable{
 		}
 	}
 	
-	private void goNextNewLineHead(int position){
+	private void goNextNewLineHead(ByteBuffer buffer,int position){
 		if(closed) throw new IllegalStateException("file closed..");
 		buffer.position(position);
 		boolean eol = false;
@@ -121,12 +134,11 @@ public class FileLineRandomData implements RandomData<Object>,Initialisable{
 		}
 	}
 	
-	private final String readLine() {
+	private final String readLine(ByteBuffer buffer) {
 		if(closed) throw new IllegalStateException("file closed..");
 		StringBuffer input = new StringBuffer();
 		int c = -1;
 		boolean eol = false;
-
 		while (!eol) {
 		    switch (c = buffer.get()) {
 		    case -1:
@@ -149,17 +161,31 @@ public class FileLineRandomData implements RandomData<Object>,Initialisable{
 		if ((c == -1) && (input.length() == 0)) {
 		    return null;
 		}
+
+			
 		return input.toString();
 	}
 	
 	public static void main(String[] args) throws Exception{
-		FileLineRandomData mapping = new FileLineRandomData();
-		mapping.setFile(new File("c:/1.txt"));
+		final FileLineRandomData mapping = new FileLineRandomData();
+		mapping.setFile(new File("c:/role.txt"));
 		mapping.init();
-		
+		List<Thread> list = new ArrayList<Thread>();
 		long start = System.currentTimeMillis();
-		for(int i=0;i<100;i++){
-			System.out.println(mapping.nextData());
+		for(int j=0;j<1000;j++){
+			Thread thread = new Thread(){
+				public void run(){
+					for(int i=0;i<1000;i++){
+						mapping.nextData();
+					}
+				}
+			};
+			list.add(thread);
+			thread.start();
+		}
+		
+		for(int i=0;i<list.size();i++){
+			list.get(i).join();
 		}
 		
 		System.out.println("time="+(System.currentTimeMillis()-start));
