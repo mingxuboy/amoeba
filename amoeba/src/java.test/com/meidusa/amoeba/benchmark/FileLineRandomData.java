@@ -26,7 +26,7 @@ public class FileLineRandomData implements RandomData<Object>,Initialisable{
 	private int size;
 	private String lineSplit;
 	private boolean needSplit = true;
-	
+	private boolean closed = false;
 	public boolean isNeedSplit() {
 		return needSplit;
 	}
@@ -59,6 +59,7 @@ public class FileLineRandomData implements RandomData<Object>,Initialisable{
 			buffer.load();
 			Runtime.getRuntime().addShutdownHook(new Thread(){
 				public void run(){
+					closed = true;
 					MappedByteBufferUtil.unmap(buffer);
 					try {
 						raf.close();
@@ -74,6 +75,7 @@ public class FileLineRandomData implements RandomData<Object>,Initialisable{
 	
 	@Override
 	public Object nextData() {
+		if(closed) throw new IllegalStateException("file closed..");
 		int position = RandomUtils.nextInt(size);
 		goNextNewLineHead(position);
 		String[] obj = null;
@@ -91,6 +93,7 @@ public class FileLineRandomData implements RandomData<Object>,Initialisable{
 	}
 	
 	private void goNextNewLineHead(int position){
+		if(closed) throw new IllegalStateException("file closed..");
 		buffer.position(position);
 		boolean eol = false;
 		int c = -1;
@@ -119,6 +122,7 @@ public class FileLineRandomData implements RandomData<Object>,Initialisable{
 	}
 	
 	private final String readLine() {
+		if(closed) throw new IllegalStateException("file closed..");
 		StringBuffer input = new StringBuffer();
 		int c = -1;
 		boolean eol = false;
