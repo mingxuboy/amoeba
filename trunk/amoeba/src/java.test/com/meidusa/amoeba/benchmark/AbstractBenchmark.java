@@ -109,22 +109,22 @@ public abstract class AbstractBenchmark {
 	
 	
 	public Map getNextRequestContextMap(){
+		Map temp = new HashMap();
+		temp.putAll(contextMap);
 		for(Map.Entry<String, RandomData> entry : randomMap.entrySet()){
-			Object obj = entry.getValue().nextData();
-			/*Object obj = null;
-			if(split == null){
-				obj = StringUtil.split(line);
-			}else{
-				obj = StringUtil.split(line,split);
-			}*/
-			contextMap.put(entry.getKey(), obj);
+			Object obj = null;
+			do{
+				obj = entry.getValue().nextData();
+			}while(obj == null);
+			temp.put(entry.getKey(), obj);
 		}
-		return contextMap;
+		return temp;
 	}
 	
 	public static AbstractBenchmark getInstance(){
 		return AbstractBenchmark.benckmark;
 	}
+	
 	public abstract AbstractBenchmarkClientConnection<?> newBenchmarkClientConnection(SocketChannel channel,long time,CountDownLatch requestLatcher,CountDownLatch responseLatcher,TaskRunnable task);
 	public static class TaskRunnable{
 		public boolean running = true;
