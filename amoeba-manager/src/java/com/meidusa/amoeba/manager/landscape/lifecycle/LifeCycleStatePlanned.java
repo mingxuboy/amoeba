@@ -11,9 +11,15 @@ public class LifeCycleStatePlanned implements LifeCycleState {
 
     private String hostName;
 
-    private String username;
+    private int sshPort;
 
-    private String password;
+    public int getSshPort() {
+        return sshPort;
+    }
+
+    public void setSshPort(int sshPort) {
+        this.sshPort = sshPort;
+    }
 
     public String getHostName() {
         return hostName;
@@ -21,22 +27,6 @@ public class LifeCycleStatePlanned implements LifeCycleState {
 
     public void setHostName(String hostName) {
         this.hostName = hostName;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
     }
 
     @Override
