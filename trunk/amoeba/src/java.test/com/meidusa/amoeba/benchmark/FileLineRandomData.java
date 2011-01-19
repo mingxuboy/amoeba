@@ -3,6 +3,7 @@ package com.meidusa.amoeba.benchmark;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel.MapMode;
@@ -30,6 +31,20 @@ public class FileLineRandomData implements RandomData<Object>,Initialisable{
 	private boolean needSplit = true;
 	private boolean closed = false;
 	private MappedByteBuffer buffer = null;
+	private String encoding = "gbk";
+	private int lineMaxLength = 10 * 1024;
+	public int getLineMaxLength() {
+		return lineMaxLength;
+	}
+	public void setLineMaxLength(int lineMaxLength) {
+		this.lineMaxLength = lineMaxLength;
+	}
+	public String getEncoding() {
+		return encoding;
+	}
+	public void setEncoding(String encoding) {
+		this.encoding = encoding;
+	}
 	public boolean isNeedSplit() {
 		return needSplit;
 	}
@@ -46,9 +61,11 @@ public class FileLineRandomData implements RandomData<Object>,Initialisable{
 			this.lineSplit = lineSplit;
 		}
 	}
+	
 	public File getFile() {
 		return file;
 	}
+	
 	public void setFile(File file) {
 		this.file = file;
 	}
@@ -59,6 +76,11 @@ public class FileLineRandomData implements RandomData<Object>,Initialisable{
         }
     };
 	
+    private ThreadLocal<ByteBuffer> localTempBuffer = new ThreadLocal<ByteBuffer> (){
+        protected ByteBuffer initialValue() {
+        	return ByteBuffer.allocate(lineMaxLength);
+        }
+    };
 	
 	@Override
 	public void init() throws InitialisationException {
@@ -136,8 +158,10 @@ public class FileLineRandomData implements RandomData<Object>,Initialisable{
 	
 	private final String readLine(ByteBuffer buffer) {
 		if(closed) throw new IllegalStateException("file closed..");
-		StringBuffer input = new StringBuffer();
-		int c = -1;
+		ByteBuffer tempbuffer = localTempBuffer.get();
+		tempbuffer.position(0);
+		tempbuffer.limit(tempbuffer.capacity());
+		byte c = -1;
 		boolean eol = false;
 		while (!eol) {
 		    switch (c = buffer.get()) {
@@ -153,17 +177,22 @@ public class FileLineRandomData implements RandomData<Object>,Initialisable{
 			}
 			break;
 		    default:
-			input.append((char)c);
+		    	tempbuffer.put(c);
 			break;
 		    }
 		}
 
-		if ((c == -1) && (input.length() == 0)) {
+		if ((c == -1) && (tempbuffer.position() == 0)) {
 		    return null;
 		}
-
-			
-		return input.toString();
+		tempbuffer.flip();
+		
+		try {
+			return new String(tempbuffer.array(),encoding);
+		} catch (UnsupportedEncodingException e) {
+			return new String(tempbuffer.array());
+		}
+		
 	}
 	
 	public static void main(String[] args) throws Exception{
@@ -172,11 +201,11 @@ public class FileLineRandomData implements RandomData<Object>,Initialisable{
 		mapping.init();
 		List<Thread> list = new ArrayList<Thread>();
 		long start = System.currentTimeMillis();
-		for(int j=0;j<1000;j++){
+		for(int j=0;j<1;j++){
 			Thread thread = new Thread(){
 				public void run(){
 					for(int i=0;i<1000;i++){
-						mapping.nextData();
+						System.out.println(((String[])mapping.nextData())[1]);
 					}
 				}
 			};
