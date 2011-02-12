@@ -241,7 +241,6 @@ TOKEN: /* SQL Keywords. prefixed with K_ to avoid name clashes */
 |   <K_FULL:"FULL">
 |   <K_GROUP:"GROUP">
 |   <K_HAVING:"HAVING">
-|   <K_IF:"IF">
 |   <K_IN:"IN">
 |   <K_IS:"IS">
 |   <K_INTO:"INTO">
