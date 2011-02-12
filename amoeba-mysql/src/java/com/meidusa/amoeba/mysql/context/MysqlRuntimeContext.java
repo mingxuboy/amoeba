@@ -4,7 +4,7 @@ import com.meidusa.amoeba.context.RuntimeContext;
 import com.meidusa.amoeba.mysql.util.CharsetMapping;
 
 public class MysqlRuntimeContext extends RuntimeContext {
-	public final static String SERVER_VERSION = "5.1.45-mysql-amoeba-proxy-2.0.1-BETA";
+	public final static String SERVER_VERSION = "5.1.45-mysql-amoeba-proxy-2.0.2-BETA";
 	private byte               serverCharsetIndex;
 	private int statementCacheSize = 500;
 	private long statementExpiredTime = 5;
