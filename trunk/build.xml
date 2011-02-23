@@ -192,81 +192,29 @@
 	</target>
 
 	<target name="aladdin" depends="distclean,prepare,distcleanprojects,distprojects">
-
-		<tar longfile="gnu" destfile="amoeba-aladdin-${amoeba.aladdin.version}.tar.gz" compression="gzip">
+		<tar longfile="gnu" destfile="amoeba-aladdin-binary-${amoeba.aladdin.version}.tar.gz" compression="gzip">
 			<tarfileset dir="${deploy.dir}" mode="755">
 				<include name="bin/**" />
 				<exclude name="*/.svn/*" />
 			</tarfileset>
 
 			<tarfileset dir="${deploy.dir}">
-				<patternset refid="dist.libs" />
-				<include name="amoeba-mysql/dist/*.jar" />
-				<include name="build/build-mysql/conf/**" />
-				<include name="src/**" />
-				<exclude name="*/.svn/*" />
-				<exclude name="bin/*" />
-				<include name="*.*" />
-				<exclude name="**/*/amoeba-mongodb*" />
-			</tarfileset>
-			<tarfileset dir="amoeba">
-				<exclude name="*/.svn/*" />
-				<include name="src/java/**" />
-			</tarfileset>
-			<tarfileset dir="amoeba-mysql">
-				<exclude name="*/.svn/*" />
-				<include name="src/java/**" />
-			</tarfileset>
-			<tarfileset dir="amoeba-aladdin">
-				<exclude name="*/.svn/*" />
-				<include name="src/java/**" />
-			</tarfileset>
-
-			<tarfileset dir="build/build-aladdin">
-				<exclude name="*/.svn/*" />
-				<exclude name="logs" />
-			</tarfileset>
-		</tar>
-
-		<zip destfile="amoeba-aladdin-${amoeba.aladdin.version}.zip">
-			<zipfileset dir="${deploy.dir}">
-				<include name="bin/**" />
-				<exclude name="*/.svn/*" />
-			</zipfileset>
-
-			<zipfileset dir="${deploy.dir}">
 				<include name="lib/**" />
 				<include name="doc/**" />
 				<include name="conf/**" />
-				<include name="src/**" />
+				<exclude name="src/**" />
 				<exclude name="*/.svn/*" />
 				<exclude name="bin/*" />
 				<exclude name="**/*/amoeba-mongodb*" />
 				<include name="*.*" />
-			</zipfileset>
-
-			<zipfileset dir="amoeba">
+			</tarfileset>
+			<tarfileset dir="build/build-aladdin">
 				<exclude name="*/.svn/*" />
-				<include name="src/java/**" />
-			</zipfileset>
-
-			<zipfileset dir="amoeba-mysql">
-				<exclude name="*/.svn/*" />
-				<include name="src/java/**" />
-			</zipfileset>
-
-			<zipfileset dir="amoeba-aladdin">
-				<exclude name="*/.svn/*" />
-				<include name="src/java/**" />
-			</zipfileset>
-
-
-			<zipfileset dir="build/build-aladdin">
-				<exclude name="*/.svn/*" />
-				<exclude name="logs" />
-			</zipfileset>
-
-		</zip>
+				<exclude name="logs/*" />
+				<exclude name="build.xml" />
+				<exclude name="build.properties" />
+			</tarfileset>
+		</tar>
 	</target>
 
 	<target name="mongodb" depends="distclean,prepare,distcleanprojects,distprojects">

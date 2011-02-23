@@ -59,7 +59,7 @@ public class MysqlClientConnection extends MysqlConnection implements MySqlPacke
 	private static Logger authLogger = Logger.getLogger("auth");
 	private static Logger lastInsertID = Logger.getLogger("lastInsertId");
 	
-	private static byte[] AUTHENTICATEOKPACKETDATA;
+	protected static byte[] AUTHENTICATEOKPACKETDATA;
     static {
             OkPacket ok = new OkPacket();
             ok.packetId = 2;
