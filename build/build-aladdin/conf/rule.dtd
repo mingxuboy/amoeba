@@ -1,12 +1,13 @@
-﻿<?xml version="1.0" encoding="UTF-8" ?>
+<?xml version="1.0" encoding="UTF-8" ?>
 <!ENTITY % Boolean "(true|false)">
+<!ENTITY % RuleResult "(INDEX|BOOLEAN|POOLNAME)">
 <!ELEMENT amoeba:rule ( tableRule+ ) >
 <!ATTLIST amoeba:rule
   xmlns:amoeba CDATA #FIXED "http://amoeba.meidusa.com/" 
 >
 <!ELEMENT tableRule ( rule )* >
 <!ATTLIST tableRule defaultPools CDATA #IMPLIED >
-<!ATTLIST tableRule name NMTOKEN #IMPLIED >
+<!ATTLIST tableRule name CDATA #IMPLIED >
 <!ATTLIST tableRule readPools CDATA #IMPLIED >
 <!ATTLIST tableRule schema NMTOKEN #IMPLIED >
 <!ATTLIST tableRule writePools CDATA #IMPLIED >
@@ -15,6 +16,7 @@
 <!ATTLIST rule name NMTOKEN #REQUIRED >
 <!ATTLIST rule group CDATA #IMPLIED >
 <!ATTLIST rule ignoreArray  %Boolean; #IMPLIED >
+<!ATTLIST rule ruleResult  %RuleResult; #IMPLIED >
 <!ATTLIST rule isSwitch %Boolean; #IMPLIED >
 
 <!ELEMENT readPools ( #PCDATA ) >
@@ -27,4 +29,3 @@
 
 <!ELEMENT parameters ( #PCDATA ) >
 <!ATTLIST parameters excludes CDATA #IMPLIED >
-com.snda.ums.propagator.pipeline.Matchercom.snda.ums.propagator.pipeline.Matchercom.snda.ums.propagator.pipeline.Matcher
