@@ -21,6 +21,7 @@ import com.meidusa.amoeba.net.Connection;
 import com.meidusa.amoeba.net.MessageHandler;
 import com.meidusa.amoeba.net.Sessionable;
 import com.meidusa.amoeba.net.poolable.ObjectPool;
+import com.meidusa.amoeba.parser.statement.PropertyStatement;
 import com.meidusa.amoeba.parser.statement.SelectStatement;
 import com.meidusa.amoeba.parser.statement.Statement;
 import com.meidusa.amoeba.route.SqlBaseQueryRouter;
@@ -95,7 +96,7 @@ public class AladdinMessageDispatcher implements MessageHandler {
             			return;
 	                }
 	                
-	                if(pools == null){
+	                if(pools == null || statment instanceof PropertyStatement){
 	                	conn.postMessage(STATIC_OK_BUFFER);
 	                	return;
 	                }
