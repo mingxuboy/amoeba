@@ -72,6 +72,8 @@
 			
 			<!-- query timeout( default: 60 second , TimeUnit:second) -->
 			<property name="queryTimeout">60</property>
+			
+			<property name="serverCharset">utf8</property>
 		</runtime>
 		
 	</proxy>
