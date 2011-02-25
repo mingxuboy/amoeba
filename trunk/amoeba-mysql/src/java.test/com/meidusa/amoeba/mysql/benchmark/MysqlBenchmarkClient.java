@@ -9,24 +9,20 @@ import org.apache.log4j.Logger;
 
 import com.meidusa.amoeba.benchmark.AbstractBenchmarkClient;
 import com.meidusa.amoeba.benchmark.AbstractBenchmark.TaskRunnable;
-import com.meidusa.amoeba.config.ConfigUtil;
 import com.meidusa.amoeba.config.ParameterMapping;
-import com.meidusa.amoeba.gateway.packet.AbstractGatewayPacket;
-import com.meidusa.amoeba.gateway.packet.GatewayPacketConstant;
-import com.meidusa.amoeba.gateway.packet.GatewayPingPacket;
-import com.meidusa.amoeba.gateway.packet.GatewayPongPacket;
-import com.meidusa.amoeba.gateway.packet.GatewayRequestPacket;
-import com.meidusa.amoeba.gateway.packet.GatewayResponsePacket;
+import com.meidusa.amoeba.mysql.handler.session.SessionStatus;
+import com.meidusa.amoeba.mysql.net.packet.AbstractPacket;
+import com.meidusa.amoeba.mysql.net.packet.CommandPacket;
+import com.meidusa.amoeba.mysql.net.packet.MysqlPacketBuffer;
+import com.meidusa.amoeba.mysql.net.packet.QueryCommandPacket;
 import com.meidusa.amoeba.net.Connection;
-import com.meidusa.amoeba.net.packet.AbstractPacket;
-import com.meidusa.amoeba.util.StringUtil;
 
 /**
  * 
  * @author Struct
  *
  */
-public class MysqlBenchmarkClient extends AbstractBenchmarkClient<AbstractGatewayPacket> {
+public class MysqlBenchmarkClient extends AbstractBenchmarkClient<AbstractPacket> {
 	private static Logger	logger        = Logger.getLogger(MysqlBenchmarkClient.class);
 	public MysqlBenchmarkClient(Connection connection,CountDownLatch requestLatcher,CountDownLatch responseLatcher,TaskRunnable task) {
 		super(connection,requestLatcher,responseLatcher,task);
@@ -36,55 +32,34 @@ public class MysqlBenchmarkClient extends AbstractBenchmarkClient<AbstractGatewa
 		return false;
 	}
 
-	public AbstractGatewayPacket createPacketWithBytes(byte[] message) {
-		int type = AbstractGatewayPacket.getType(message);
-		AbstractGatewayPacket packet = null;
-		switch(type){
-		case GatewayPacketConstant.PACKET_TYPE_PING:
-			packet = new GatewayPingPacket();
-			break;
-		case GatewayPacketConstant.PACKET_TYPE_PONG:
-			packet = new GatewayPongPacket();
-			break;
-		case GatewayPacketConstant.PACKET_TYPE_SERVICE_REQUEST:
-			packet = new GatewayRequestPacket();
-			break;
-		case GatewayPacketConstant.PACKET_TYPE_SERVICE_RESPONSE:
-			packet = new GatewayResponsePacket();
-			break;
-		default:
-			logger.error("error type="+type+"\r\n"+StringUtil.dumpAsHex(message, message.length));
-		}
+	public AbstractPacket createPacketWithBytes(byte[] message) {
+		AbstractPacket packet = new AbstractPacket();
 		packet.init(message, this.getConnection());
 		return packet;
 	}
 
 	final Map<String ,String > parameterMap = new HashMap<String,String>(); 
-	final Map<String ,Object > beanParameterMap = new HashMap<String,Object>(); 
+	final Map<String ,Object > beanParameterMap = new HashMap<String,Object>();
+	private byte commandType;
+	private int packetIndex;
+	private int statusCode; 
 	
-	public AbstractGatewayPacket createRequestPacket() {
+	public AbstractPacket createRequestPacket() {
 		Properties properties = this.getRequestProperties();
-		AbstractGatewayPacket packet = null;
+		AbstractPacket packet = null;
 		try {
-			packet = (AbstractGatewayPacket)Class.forName((String)properties.get("class")).newInstance();
+			packet = (AbstractPacket)Class.forName((String)properties.get("class")).newInstance();
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.exit(-1);
 		}
 		Map<String,Object> map = this.getNextRequestContextMap();
 		ParameterMapping.mappingObjectField(packet, beanParameterMap,map,this, AbstractPacket.class);
-		
-		if(packet instanceof GatewayRequestPacket){
-			
-			Map<String ,String > _parameterMap_ = new HashMap<String,String>(); 
-			for(Map.Entry<String, String> entry : parameterMap.entrySet()){
-				String value = ConfigUtil.filterWtihOGNL(entry.getValue(), map,this);
-				_parameterMap_.put(entry.getKey(), value);
-			}
-			GatewayRequestPacket request = (GatewayRequestPacket)packet;
-			request.parameterMap = _parameterMap_;
+		if(packet instanceof CommandPacket){
+			commandType = ((CommandPacket)packet).command;
 		}
-		
+		packetIndex = 0;
+		statusCode = 0;
 		return packet;
 	}
 	
@@ -99,11 +74,51 @@ public class MysqlBenchmarkClient extends AbstractBenchmarkClient<AbstractGatewa
 			}
 		}
 	}
-
-	@Override
-	public void startBenchmark() {
-		AbstractGatewayPacket packet = this.createRequestPacket();
-		this.getConnection().postMessage(packet.toByteBuffer(this.getConnection()));
+	
+	protected boolean responseIsCompleted(byte[] buffer){
+		if (this.commandType == QueryCommandPacket.COM_QUERY) {
+            boolean isCompleted = false;
+            if (packetIndex == 0 && MysqlPacketBuffer.isErrorPacket(buffer)) {
+                statusCode |= SessionStatus.ERROR;
+                statusCode |= SessionStatus.COMPLETED;
+                isCompleted = true;
+            } else if (packetIndex == 0 && MysqlPacketBuffer.isOkPacket(buffer)) {
+                statusCode |= SessionStatus.OK;
+                statusCode |= SessionStatus.COMPLETED;
+                isCompleted = true;
+            } else if (MysqlPacketBuffer.isEofPacket(buffer)) {
+                if ((statusCode & SessionStatus.EOF_FIELDS) > 0) {
+                    statusCode |= SessionStatus.EOF_ROWS;
+                    statusCode |= SessionStatus.COMPLETED;
+                    isCompleted = true;
+                } else {
+                    statusCode |= SessionStatus.EOF_FIELDS;
+                    isCompleted = false;
+                }
+            } else {
+                if (statusCode == SessionStatus.QUERY) {
+                    statusCode |= SessionStatus.RESULT_HEAD;
+                }
+            }
+            return isCompleted;
+        } else {
+        	if(this.commandType == QueryCommandPacket.COM_INIT_DB){
+    			boolean isCompleted = false; 
+    			if(packetIndex == 0 && MysqlPacketBuffer.isErrorPacket(buffer)){
+    				statusCode |= SessionStatus.ERROR;
+    				statusCode |= SessionStatus.COMPLETED;
+    				isCompleted = true;
+    			}else if(packetIndex == 0 && MysqlPacketBuffer.isOkPacket(buffer)){
+    				statusCode |= SessionStatus.OK;
+    				statusCode |= SessionStatus.COMPLETED;
+    				isCompleted = true;
+    			}
+    			return isCompleted;
+    		}else{
+    			return false;
+    		}
+        }
+		
 	}
 	
 }

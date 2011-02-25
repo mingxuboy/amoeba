@@ -20,8 +20,10 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import com.meidusa.amoeba.config.ConfigUtil;
 import com.meidusa.amoeba.log4j.DOMConfigurator;
+import com.meidusa.amoeba.net.BackendConnectionFactory;
 import com.meidusa.amoeba.net.Connection;
 import com.meidusa.amoeba.net.ConnectionFactory;
+import com.meidusa.amoeba.net.ConnectionManager;
 import com.meidusa.amoeba.net.ConnectionObserver;
 import com.meidusa.amoeba.net.MultiConnectionManagerWrapper;
 import com.meidusa.amoeba.util.CmdLineParser;
@@ -110,6 +112,16 @@ public abstract class AbstractBenchmark {
 	
 	public abstract ConnectionFactory getConnectionFactory();
 	
+	private ConnectionManager connManager; 
+	
+	public ConnectionManager getConnManager() {
+		return connManager;
+	}
+
+	public void setConnManager(ConnectionManager connManager) {
+		this.connManager = connManager;
+	}
+
 	public Map getNextRequestContextMap(){
 		Map temp = new HashMap();
 		temp.putAll(contextMap);
@@ -213,8 +225,17 @@ public abstract class AbstractBenchmark {
 		
 		System.out.println("\r\nconnect to ip="+ip+",port="+port+",connection size="+conn+",total request="+total);
 		AbstractBenchmark benckmark = AbstractBenchmark.getInstance();
+		benckmark.setConnManager(manager);
 		List<AbstractBenchmarkClient<?>> connList = new ArrayList<AbstractBenchmarkClient<?>>();
 		ConnectionFactory factory = benckmark.getConnectionFactory();
+		if(factory instanceof BackendConnectionFactory)
+		{
+			((BackendConnectionFactory)factory).setManager(manager);
+			((BackendConnectionFactory)factory).setIpAddress(ip);
+			((BackendConnectionFactory)factory).setPort(port);
+			((BackendConnectionFactory)factory).init();
+		}
+		
 		for(int i=0;i<conn;i++){
 			InetSocketAddress address = new InetSocketAddress(ip,port);
 			try{
@@ -227,7 +248,9 @@ public abstract class AbstractBenchmark {
 				
 				client.putAllRequestProperties(properties);
 				client.init();
-				manager.postRegisterNetEventHandler(client.getConnection(), SelectionKey.OP_READ);
+				if(!(factory instanceof BackendConnectionFactory)){
+					manager.postRegisterNetEventHandler(client.getConnection(), SelectionKey.OP_READ);
+				}
 				connList.add(client);
 			}catch(Exception e){
 				System.err.println("connect to "+address+" error:");
