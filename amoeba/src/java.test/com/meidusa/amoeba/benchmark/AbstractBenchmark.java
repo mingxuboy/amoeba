@@ -21,6 +21,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import com.meidusa.amoeba.config.ConfigUtil;
 import com.meidusa.amoeba.log4j.DOMConfigurator;
 import com.meidusa.amoeba.net.Connection;
+import com.meidusa.amoeba.net.ConnectionFactory;
 import com.meidusa.amoeba.net.ConnectionObserver;
 import com.meidusa.amoeba.net.MultiConnectionManagerWrapper;
 import com.meidusa.amoeba.util.CmdLineParser;
@@ -107,6 +108,7 @@ public abstract class AbstractBenchmark {
 		
 	}
 	
+	public abstract ConnectionFactory getConnectionFactory();
 	
 	public Map getNextRequestContextMap(){
 		Map temp = new HashMap();
@@ -125,7 +127,7 @@ public abstract class AbstractBenchmark {
 		return AbstractBenchmark.benckmark;
 	}
 	
-	public abstract AbstractBenchmarkClientConnection<?> newBenchmarkClientConnection(SocketChannel channel,long time,CountDownLatch requestLatcher,CountDownLatch responseLatcher,TaskRunnable task);
+	public abstract AbstractBenchmarkClient<?> newBenchmarkClient(Connection conn,CountDownLatch requestLatcher,CountDownLatch responseLatcher,TaskRunnable task);
 	public static class TaskRunnable{
 		public boolean running = true;
 	}
@@ -211,18 +213,22 @@ public abstract class AbstractBenchmark {
 		
 		System.out.println("\r\nconnect to ip="+ip+",port="+port+",connection size="+conn+",total request="+total);
 		AbstractBenchmark benckmark = AbstractBenchmark.getInstance();
-		List<AbstractBenchmarkClientConnection<?>> connList = new ArrayList<AbstractBenchmarkClientConnection<?>>();
+		List<AbstractBenchmarkClient<?>> connList = new ArrayList<AbstractBenchmarkClient<?>>();
+		ConnectionFactory factory = benckmark.getConnectionFactory();
 		for(int i=0;i<conn;i++){
 			InetSocketAddress address = new InetSocketAddress(ip,port);
 			try{
-				AbstractBenchmarkClientConnection<?> connection = benckmark.newBenchmarkClientConnection(SocketChannel.open(address),System.currentTimeMillis(),requestLatcher,responseLatcher,task);
-				connection.setBenchmark(benckmark);
-				connection.setTimeout(timeout.intValue());
-				connection.setDebug(value.booleanValue());
+				Connection connection = factory.createConnection(SocketChannel.open(address),System.currentTimeMillis());
 				
-				connection.putAllRequestProperties(properties);
-				manager.postRegisterNetEventHandler(connection, SelectionKey.OP_READ);
-				connList.add(connection);
+				AbstractBenchmarkClient<?> client = benckmark.newBenchmarkClient(connection,requestLatcher,responseLatcher,task);
+				client.setBenchmark(benckmark);
+				client.setTimeout(timeout.intValue());
+				client.setDebug(value.booleanValue());
+				
+				client.putAllRequestProperties(properties);
+				client.init();
+				manager.postRegisterNetEventHandler(client.getConnection(), SelectionKey.OP_READ);
+				connList.add(client);
 			}catch(Exception e){
 				System.err.println("connect to "+address+" error:");
 				e.printStackTrace();
@@ -231,7 +237,7 @@ public abstract class AbstractBenchmark {
 		}
 		
 		
-		for(AbstractBenchmarkClientConnection<?> connection: connList){
+		for(AbstractBenchmarkClient<?> connection: connList){
 			if(requestLatcher.getCount()>0){
 				requestLatcher.countDown();
 				connection.startBenchmark();
@@ -248,7 +254,7 @@ public abstract class AbstractBenchmark {
 		long count = 0;
 		long minStart = connList.get(0).start;
 		long maxend = 0;
-		for(AbstractBenchmarkClientConnection<?> connection: connList){
+		for(AbstractBenchmarkClient<?> connection: connList){
 			if(connection.count>0){
 				min = Math.min(min, connection.min);
 				max = Math.max(max, connection.max);

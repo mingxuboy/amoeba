@@ -1,7 +1,5 @@
 package com.meidusa.amoeba.benchmark;
 
-import java.nio.ByteBuffer;
-import java.nio.channels.SocketChannel;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
@@ -12,9 +10,8 @@ import com.meidusa.amoeba.benchmark.AbstractBenchmark.TaskRunnable;
 import com.meidusa.amoeba.net.Connection;
 import com.meidusa.amoeba.net.packet.Packet;
 
-public abstract class AbstractBenchmarkClientConnection<T extends Packet>
-		extends Connection {
-	private static Logger       logger        = Logger.getLogger(AbstractBenchmarkClientConnection.class);
+public abstract class AbstractBenchmarkClient<T extends Packet> {
+	private static Logger       logger        = Logger.getLogger(AbstractBenchmarkClient.class);
 	private boolean debug = false;
 	private int timeout = -1;
 	private Properties properties;
@@ -28,6 +25,7 @@ public abstract class AbstractBenchmarkClientConnection<T extends Packet>
 	protected CountDownLatch responseLatcher;
 	protected TaskRunnable task;
 	private AbstractBenchmark benchmark;
+	private Connection connection;
 	
 	public AbstractBenchmark getBenchmark() {
 		return benchmark;
@@ -37,6 +35,14 @@ public abstract class AbstractBenchmarkClientConnection<T extends Packet>
 		this.benchmark = benchmark;
 	}
 
+	public Connection getConnection() {
+		return connection;
+	}
+	
+	public void setConnection(Connection connection) {
+		this.connection = connection;
+	}
+	
 	public boolean isDebug() {
 		return debug;
 	}
@@ -64,9 +70,8 @@ public abstract class AbstractBenchmarkClientConnection<T extends Packet>
 		return properties;
 	}
 	
-	public AbstractBenchmarkClientConnection(SocketChannel channel,
-			long createStamp, CountDownLatch requestLatcher,CountDownLatch responseLatcher,TaskRunnable task) {
-		super(channel, createStamp);
+	public AbstractBenchmarkClient(Connection connection, CountDownLatch requestLatcher,CountDownLatch responseLatcher,TaskRunnable task) {
+		this.connection = connection;
 		start = System.nanoTime();
 		this.requestLatcher = requestLatcher;
 		this.responseLatcher = responseLatcher;
@@ -95,6 +100,17 @@ public abstract class AbstractBenchmarkClientConnection<T extends Packet>
 			T t = createPacketWithBytes(message);
 			System.out.println("<<--" + t);
 		}
+		
+		if(responseIsCompleted(message)){
+			doAfterResponse();
+		}
+	}
+	
+	protected boolean responseIsCompleted(byte[] message){
+		return true;
+	}
+	
+	protected void doAfterResponse(){
 		responseLatcher.countDown();
 		postPacketToServer();
 	}
@@ -103,18 +119,23 @@ public abstract class AbstractBenchmarkClientConnection<T extends Packet>
 		if(task.running){
 			if(requestLatcher.getCount()>0){
 				requestLatcher.countDown();
-				postMessage(createRequestPacket().toByteBuffer(this));
+				connection.postMessage(createRequestPacket().toByteBuffer(connection));
 			}
 		}
 	}
+
+	public void init() {
+		// TODO Auto-generated method stub
+		
+	}
 	
-	public boolean checkIdle(long now) {
+	/*public boolean checkIdle(long now) {
 		boolean isTimeOut = false;
 		if(timeout>0){
-			if (isClosed()) {
+			if (connection.isClosed()) {
 				isTimeOut = true;
 	        }
-			long idleMillis = now - _lastEvent;
+			long idleMillis = now - connection._lastEvent;
 	        if (idleMillis < timeout) {
 	        	isTimeOut = false;
 	        }else{
@@ -128,9 +149,9 @@ public abstract class AbstractBenchmarkClientConnection<T extends Packet>
 			logger.warn("socket id="+this.getSocketId()+" receive time out="+(now - _lastEvent));			
 		}
 		return isTimeOut;
-	}
+	}*/
 	
-	public void postMessage(ByteBuffer msg) {
+	/*public void postMessage(ByteBuffer msg) {
 		next = System.nanoTime();
 		if (debug) {
 			T t = createPacketWithBytes(msg.array());
@@ -138,5 +159,5 @@ public abstract class AbstractBenchmarkClientConnection<T extends Packet>
 		}
 		super.postMessage(msg);
 
-	}
+	}*/
 }

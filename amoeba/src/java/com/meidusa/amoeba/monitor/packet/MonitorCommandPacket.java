@@ -19,6 +19,12 @@ public class MonitorCommandPacket extends AbstractPacket<MonitorPacketBuffer> im
         buffer.setPosition(0);
         lenght = buffer.readInt();
         funType = buffer.readByte();
+        if(funType<100 ){
+        	
+        }else{
+        	//
+        	return ;
+        }
         int count = buffer.readInt();
         objects = new Object[count];
         for(int i=0;i<count;i++){

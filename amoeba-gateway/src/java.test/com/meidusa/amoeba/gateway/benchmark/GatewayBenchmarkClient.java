@@ -1,7 +1,5 @@
 package com.meidusa.amoeba.gateway.benchmark;
 
-import java.nio.ByteBuffer;
-import java.nio.channels.SocketChannel;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -9,20 +7,17 @@ import java.util.concurrent.CountDownLatch;
 
 import org.apache.log4j.Logger;
 
-import com.meidusa.amoeba.benchmark.AbstractBenchmarkClientConnection;
+import com.meidusa.amoeba.benchmark.AbstractBenchmarkClient;
 import com.meidusa.amoeba.benchmark.AbstractBenchmark.TaskRunnable;
 import com.meidusa.amoeba.config.ConfigUtil;
 import com.meidusa.amoeba.config.ParameterMapping;
-import com.meidusa.amoeba.gateway.io.GatewayInputStream;
-import com.meidusa.amoeba.gateway.io.GatewayOutputStream;
 import com.meidusa.amoeba.gateway.packet.AbstractGatewayPacket;
 import com.meidusa.amoeba.gateway.packet.GatewayPacketConstant;
 import com.meidusa.amoeba.gateway.packet.GatewayPingPacket;
 import com.meidusa.amoeba.gateway.packet.GatewayPongPacket;
 import com.meidusa.amoeba.gateway.packet.GatewayRequestPacket;
 import com.meidusa.amoeba.gateway.packet.GatewayResponsePacket;
-import com.meidusa.amoeba.net.io.PacketInputStream;
-import com.meidusa.amoeba.net.io.PacketOutputStream;
+import com.meidusa.amoeba.net.Connection;
 import com.meidusa.amoeba.net.packet.AbstractPacket;
 import com.meidusa.amoeba.util.StringUtil;
 
@@ -31,10 +26,10 @@ import com.meidusa.amoeba.util.StringUtil;
  * @author Struct
  *
  */
-public class GatewayBenchmarkClientConnection extends AbstractBenchmarkClientConnection<AbstractGatewayPacket> {
-	private static Logger	logger        = Logger.getLogger(GatewayBenchmarkClientConnection.class);
-	public GatewayBenchmarkClientConnection(SocketChannel channel, long createStamp,CountDownLatch requestLatcher,CountDownLatch responseLatcher,TaskRunnable task) {
-		super(channel, createStamp,requestLatcher,responseLatcher,task);
+public class GatewayBenchmarkClient extends AbstractBenchmarkClient<AbstractGatewayPacket> {
+	private static Logger	logger        = Logger.getLogger(GatewayBenchmarkClient.class);
+	public GatewayBenchmarkClient(Connection connection,CountDownLatch requestLatcher,CountDownLatch responseLatcher,TaskRunnable task) {
+		super(connection,requestLatcher,responseLatcher,task);
 	}
 
 	public boolean needPing(long now) {
@@ -60,7 +55,7 @@ public class GatewayBenchmarkClientConnection extends AbstractBenchmarkClientCon
 		default:
 			logger.error("error type="+type+"\r\n"+StringUtil.dumpAsHex(message, message.length));
 		}
-		packet.init(message, this);
+		packet.init(message, this.getConnection());
 		return packet;
 	}
 
@@ -105,26 +100,10 @@ public class GatewayBenchmarkClientConnection extends AbstractBenchmarkClientCon
 		}
 	}
 	
-    protected void messageProcess() {
-		//_handler.handleMessage(this);
-    }
-    
-	public void postMessage(byte[] msg) {
-		postMessage(ByteBuffer.wrap(msg));
-	}
-	
-	protected PacketInputStream createPacketInputStream() {
-		return new GatewayInputStream(true);
-	}
-
-	protected PacketOutputStream createPacketOutputStream() {
-		return new GatewayOutputStream(true);
-	}
-	
 	@Override
 	public void startBenchmark() {
 		AbstractGatewayPacket packet = this.createRequestPacket();
-		postMessage(packet.toByteBuffer(this));
+		getConnection().postMessage(packet.toByteBuffer(this.getConnection()));
 	}
 	
 }
