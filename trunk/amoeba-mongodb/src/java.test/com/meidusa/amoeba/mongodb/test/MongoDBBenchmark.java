@@ -1,7 +1,6 @@
 package com.meidusa.amoeba.mongodb.test;
 
 
-import java.nio.channels.SocketChannel;
 import java.util.concurrent.CountDownLatch;
 
 import org.apache.commons.lang.StringUtils;
@@ -10,10 +9,13 @@ import org.bson.BSONObject;
 import org.bson.JSON;
 
 import com.meidusa.amoeba.benchmark.AbstractBenchmark;
-import com.meidusa.amoeba.benchmark.AbstractBenchmarkClientConnection;
+import com.meidusa.amoeba.benchmark.AbstractBenchmarkClient;
 import com.meidusa.amoeba.config.ConfigUtil;
 import com.meidusa.amoeba.config.ParameterMapping;
 import com.meidusa.amoeba.config.PropertyTransfer;
+import com.meidusa.amoeba.mongodb.net.MongodbClientConnectionFactory;
+import com.meidusa.amoeba.net.Connection;
+import com.meidusa.amoeba.net.ConnectionFactory;
 import com.meidusa.amoeba.util.CmdLineParser;
 
 public class MongoDBBenchmark extends AbstractBenchmark{
@@ -57,10 +59,17 @@ public class MongoDBBenchmark extends AbstractBenchmark{
 		AbstractBenchmark.main(args);
 	}
 
-	public AbstractBenchmarkClientConnection<?> newBenchmarkClientConnection(
-			SocketChannel channel, long time,CountDownLatch requestLatcher,CountDownLatch responseLatcher,TaskRunnable task) {
-		AbstractBenchmarkClientConnection conn = new MongodbBenchmarkClientConnection(channel,time,requestLatcher,responseLatcher,task);
-		return conn;
+	private ConnectionFactory factory = new MongodbClientConnectionFactory();
+	@Override
+	public ConnectionFactory getConnectionFactory() {
+		return factory;
+	}
+
+	@Override
+	public AbstractBenchmarkClient<?> newBenchmarkClient(Connection conn,
+			CountDownLatch requestLatcher, CountDownLatch responseLatcher,
+			TaskRunnable task) {
+		return new MongodbBenchmarkClient(conn,requestLatcher,responseLatcher,task);
 	}
 	
 }

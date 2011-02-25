@@ -29,6 +29,7 @@ public class MysqlParserTest {
 	public static void main(String[] args) throws Exception{
 		Map<String,Function> funMap = AbstractQueryRouter.loadFunctionMap("./build/build-mysql/conf/functionMap.xml");
 		parser(funMap,"delete from aa where id=11 limit 100,?");
+		parser(funMap,"insert into xxx(id, name) values(1, '\\\\aaa')");
 		parser(funMap, "SELECT c.*, sum(c.goods_price), c.goods_number As subtotal, IF(c.parent_id, c.parent_id, c.goods_id) AS pid, g.give_integral, g.goods_number AS gds_num,g.goods_thumb,g.goods_id FROM `shopdev`.`ecs_cart` AS c, `shopdev`.`ecs_goods` AS g  WHERE c.goods_id = g.goods_id AND c.session_id = '8a05969835e712e8dea7569862cc02ba' AND c.rec_type = '0' ORDER BY pid, c.parent_id, g.give_integral");
 		parser(funMap,"select ID, SDID, APP_ID, PHOTO_ID, ALBUM_ID, IMAGE_NAME, DESCRIPTION, BROWSE_COUNT, SHARE_COUNT,       REVIEW_COUNT, IMPRESSION_COUNT, SHAREABLE, REVIEWABLE, AUDIT_RESULT, HAS_EXIF, CAPACITY, SIZE,       UPLOAD_IP, LOCATION, CREATE_TIME, LAST_MODIFY_TIME, TAG1, IMAGE_PATH_VERSION, IMAGE_BASE_URL,       FORMAL ,FILE_TYPE ,PRIVILEGE,\"\" as EXIF,DEL_FLAG     from SD_PHOTO.IMAGE     where SDID=1250873924 AND DEL_FLAG = 0                      AND          PRIVILEGE & 1 =1                    AND APP_ID IN (    '8'      )                   ORDER BY  CREATE_TIME DESC                   LIMIT 0,30");
 		parser(funMap,"select i.id,i.title,i.img_url,i.link,i.`order`,i.type_id from imgdemo AS i where display_type=1 and type_id=9 order by i.`order`");

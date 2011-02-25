@@ -1,15 +1,12 @@
 package com.meidusa.amoeba.mongodb.test;
 
-import java.nio.ByteBuffer;
-import java.nio.channels.SocketChannel;
 import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.log4j.Logger;
 import org.bson.BasicBSONObject;
 
-import com.meidusa.amoeba.benchmark.AbstractBenchmarkClientConnection;
+import com.meidusa.amoeba.benchmark.AbstractBenchmarkClient;
 import com.meidusa.amoeba.benchmark.AbstractBenchmark.TaskRunnable;
 import com.meidusa.amoeba.config.ParameterMapping;
 import com.meidusa.amoeba.mongodb.io.MongodbFramedInputStream;
@@ -25,6 +22,7 @@ import com.meidusa.amoeba.mongodb.packet.MongodbPacketBuffer;
 import com.meidusa.amoeba.mongodb.packet.QueryMongodbPacket;
 import com.meidusa.amoeba.mongodb.packet.ResponseMongodbPacket;
 import com.meidusa.amoeba.mongodb.packet.UpdateMongodbPacket;
+import com.meidusa.amoeba.net.Connection;
 import com.meidusa.amoeba.net.io.PacketInputStream;
 import com.meidusa.amoeba.net.io.PacketOutputStream;
 import com.meidusa.amoeba.net.packet.AbstractPacket;
@@ -36,11 +34,11 @@ import com.meidusa.amoeba.util.StringUtil;
  * @author Struct
  *
  */
-public class MongodbBenchmarkClientConnection extends AbstractBenchmarkClientConnection<AbstractMongodbPacket> {
-	private static Logger	logger        = Logger.getLogger(MongodbBenchmarkClientConnection.class);
+public class MongodbBenchmarkClient extends AbstractBenchmarkClient<AbstractMongodbPacket> {
+	private static Logger	logger        = Logger.getLogger(MongodbBenchmarkClient.class);
 	private boolean isLastModifyOperation = false;
-	public MongodbBenchmarkClientConnection(SocketChannel channel, long createStamp,CountDownLatch requestLatcher,CountDownLatch responseLatcher,TaskRunnable task) {
-		super(channel, createStamp,requestLatcher,responseLatcher,task);
+	public MongodbBenchmarkClient(Connection conn, CountDownLatch requestLatcher,CountDownLatch responseLatcher,TaskRunnable task) {
+		super(conn,requestLatcher,responseLatcher,task);
 	}
 
 	public boolean needPing(long now) {
@@ -78,7 +76,7 @@ public class MongodbBenchmarkClientConnection extends AbstractBenchmarkClientCon
 		default:
 			logger.error("error type="+type+"\r\n"+StringUtil.dumpAsHex(message, message.length));
 		}
-		packet.init(message, this);
+		packet.init(message, this.getConnection());
 		return packet;
 	}
 
@@ -93,14 +91,6 @@ public class MongodbBenchmarkClientConnection extends AbstractBenchmarkClientCon
 		}
 		ParameterMapping.mappingObjectField(packet, properties,this.getNextRequestContextMap(),this, AbstractPacket.class);
 		return packet;
-	}
-	
-    protected void messageProcess() {
-		//_handler.handleMessage(this);
-    }
-    
-	public void postMessage(byte[] msg) {
-		postMessage(ByteBuffer.wrap(msg));
 	}
 	
 	protected PacketInputStream createPacketInputStream() {
@@ -128,14 +118,14 @@ public class MongodbBenchmarkClientConnection extends AbstractBenchmarkClientCon
 		}
 		
 		if(isLastModifyOperation){
-			byte[] packetMessage = packet.toByteBuffer(this).array();
-			byte[] lastError = getLastErrorPacket().toByteBuffer(this).array();
+			byte[] packetMessage = packet.toByteBuffer(this.getConnection()).array();
+			byte[] lastError = getLastErrorPacket().toByteBuffer(this.getConnection()).array();
 			byte[] message = new byte[packetMessage.length+lastError.length];
 			System.arraycopy(packetMessage, 0, message, 0, packetMessage.length);
 			System.arraycopy(lastError, 0, message, packetMessage.length,lastError.length);
-			postMessage(message);
+			getConnection().postMessage(message);
 		}else{
-			postMessage(packet.toByteBuffer(this));
+			getConnection().postMessage(packet.toByteBuffer(this.getConnection()));
 		}
 	}
 	
@@ -155,14 +145,14 @@ public class MongodbBenchmarkClientConnection extends AbstractBenchmarkClientCon
 				requestLatcher.countDown();
 				
 				if(isLastModifyOperation){
-					byte[] packetMessage = createRequestPacket().toByteBuffer(this).array();
-					byte[] lastError = getLastErrorPacket().toByteBuffer(this).array();
+					byte[] packetMessage = createRequestPacket().toByteBuffer(this.getConnection()).array();
+					byte[] lastError = getLastErrorPacket().toByteBuffer(this.getConnection()).array();
 					byte[] message = new byte[packetMessage.length+lastError.length];
 					System.arraycopy(packetMessage, 0, message, 0, packetMessage.length);
 					System.arraycopy(lastError, 0, message, packetMessage.length,lastError.length);
-					postMessage(message);
+					getConnection().postMessage(message);
 				}else{
-					postMessage(createRequestPacket().toByteBuffer(this));
+					getConnection().postMessage(createRequestPacket().toByteBuffer(this.getConnection()));
 				}
 			}
 		}
