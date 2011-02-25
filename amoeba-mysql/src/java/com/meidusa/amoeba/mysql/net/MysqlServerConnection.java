@@ -100,13 +100,14 @@ public class MysqlServerConnection extends MysqlConnection implements MySqlPacke
 					if(logger.isDebugEnabled()){
 						logger.debug("2. receive HandshakePacket packet from server:"+this.getSocketId()+",hashCode="+this.hashCode());
 					}
-					MysqlRuntimeContext context = (MysqlRuntimeContext)ProxyRuntimeContext.getInstance().getRuntimeContext();
-					if(context.getServerCharset() == null && handpacket.serverCharsetIndex > 0){
-						context.setServerCharsetIndex(handpacket.serverCharsetIndex);
-						logger.info("mysql server Handshake= "+handpacket.toString());
+					
+					if(ProxyRuntimeContext.getInstance() != null){
+						MysqlRuntimeContext context = (MysqlRuntimeContext)ProxyRuntimeContext.getInstance().getRuntimeContext();
+						if(context!=null && context.getServerCharset() == null && handpacket.serverCharsetIndex > 0){
+							context.setServerCharsetIndex(handpacket.serverCharsetIndex);
+							logger.info("mysql server Handshake= "+handpacket.toString());
+						}
 					}
-					
-					
 					AuthenticationPacket authing = new AuthenticationPacket();
 					authing.password = this.getPassword();
 					this.seed = authing.seed = handpacket.seed+handpacket.restOfScrambleBuff;

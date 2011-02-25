@@ -1,5 +1,6 @@
 package com.meidusa.amoeba.benchmark;
 
+import java.nio.ByteBuffer;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
@@ -7,10 +8,12 @@ import java.util.concurrent.CountDownLatch;
 import org.apache.log4j.Logger;
 
 import com.meidusa.amoeba.benchmark.AbstractBenchmark.TaskRunnable;
+import com.meidusa.amoeba.net.AuthingableConnection;
 import com.meidusa.amoeba.net.Connection;
+import com.meidusa.amoeba.net.MessageHandler;
 import com.meidusa.amoeba.net.packet.Packet;
 
-public abstract class AbstractBenchmarkClient<T extends Packet> {
+public abstract class AbstractBenchmarkClient<T extends Packet> implements MessageHandler{
 	private static Logger       logger        = Logger.getLogger(AbstractBenchmarkClient.class);
 	private boolean debug = false;
 	private int timeout = -1;
@@ -76,6 +79,7 @@ public abstract class AbstractBenchmarkClient<T extends Packet> {
 		this.requestLatcher = requestLatcher;
 		this.responseLatcher = responseLatcher;
 		this.task = task;
+		connection.setMessageHandler(this );
 	}
 	
 	public Map getNextRequestContextMap(){
@@ -86,7 +90,9 @@ public abstract class AbstractBenchmarkClient<T extends Packet> {
 
 	public abstract T createPacketWithBytes(byte[] message);
 
-	public abstract void startBenchmark();
+	public void startBenchmark(){
+		postPacketToServer();
+	}
 	
 	protected void doReceiveMessage(byte[] message) {
 		
@@ -106,22 +112,41 @@ public abstract class AbstractBenchmarkClient<T extends Packet> {
 		}
 	}
 	
+	public void handleMessage(Connection conn){
+		
+		if(conn instanceof AuthingableConnection){
+			if(!((AuthingableConnection)conn).isAuthenticated()){
+				conn.getMessageHandler().handleMessage(conn);
+			}else{
+				byte[] message = null;
+				while((message = conn.getInQueue().getNonBlocking()) != null){
+					doReceiveMessage(message);
+				}
+			}
+		}
+	}
+	
 	protected boolean responseIsCompleted(byte[] message){
 		return true;
 	}
 	
 	protected void doAfterResponse(){
 		responseLatcher.countDown();
-		postPacketToServer();
-	}
-
-	protected void postPacketToServer(){
 		if(task.running){
 			if(requestLatcher.getCount()>0){
 				requestLatcher.countDown();
-				connection.postMessage(createRequestPacket().toByteBuffer(connection));
+				postPacketToServer();
 			}
 		}
+	}
+
+	protected void postPacketToServer(){
+		ByteBuffer buffer = createRequestPacket().toByteBuffer(connection);
+		if (debug) {
+			T t = createPacketWithBytes(buffer.array());
+			System.out.println("--->>" + t);
+		}
+		connection.postMessage(buffer);
 	}
 
 	public void init() {
@@ -151,13 +176,11 @@ public abstract class AbstractBenchmarkClient<T extends Packet> {
 		return isTimeOut;
 	}*/
 	
-	/*public void postMessage(ByteBuffer msg) {
+	protected void postMessage(ByteBuffer msg) {
 		next = System.nanoTime();
 		if (debug) {
 			T t = createPacketWithBytes(msg.array());
 			System.out.println("--->>" + t);
 		}
-		super.postMessage(msg);
-
-	}*/
+	}
 }

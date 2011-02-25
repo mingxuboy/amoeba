@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties version="1.0">
+	<entry key="class">com.meidusa.amoeba.mysql.net.packet.QueryCommandPacket</entry>
+	<entry key="command">3</entry>
+	<entry key="query"><![CDATA[
+		select now()
+	]]>
+	</entry>
+</properties>
