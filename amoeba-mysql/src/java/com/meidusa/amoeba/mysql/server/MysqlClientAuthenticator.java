@@ -70,7 +70,19 @@ public class MysqlClientAuthenticator extends Authenticator<AuthenticationPacket
 			logger.info("Accepting conn=" + conn);
 		}
 		String errorMessage = "";
-
+		
+		if((autheticationPacket.clientParam & CLIENT_COMPRESS) !=0){
+			rdata.code = AuthResponseData.ERROR;
+			rdata.message = " cannot use COMPRESSED PROTOCOL over amoeba!";
+			return;
+		}
+		
+		if((autheticationPacket.clientParam & CLIENT_PROTOCOL_41) ==0){
+			rdata.code = AuthResponseData.ERROR;
+			rdata.message = " must use new protocol version 4.1 over amoeba";
+			return;
+		}
+		
 		try{
 			mysqlConn.setCharset(CharsetMapping.INDEX_TO_CHARSET[autheticationPacket.charsetNumber & 0xff]);
 			boolean passwordchecked = false;
@@ -104,11 +116,6 @@ public class MysqlClientAuthenticator extends Authenticator<AuthenticationPacket
 					builder.append("===========================END Client Flag===============================\n");
 					logger.debug(builder.toString());
 				}
-			}
-			if((autheticationPacket.clientParam & CLIENT_COMPRESS) !=0){
-				rdata.code = AuthResponseData.ERROR;
-				rdata.message = " cannot use COMPRESSED PROTOCOL over amoeba!";
-				return;
 			}
 
 			if(!StringUtil.isEmpty(getPassword())){

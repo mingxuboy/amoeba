@@ -101,11 +101,11 @@ public class FileLineData implements RandomData<Object>,Initialisable{
 		mapping.init();
 		List<Thread> list = new ArrayList<Thread>();
 		long start = System.currentTimeMillis();
-		for(int j=0;j<1000;j++){
+		for(int j=0;j<1;j++){
 			Thread thread = new Thread(){
 				public void run(){
 					for(int i=0;i<1000;i++){
-						mapping.nextData();
+						System.out.println(mapping.nextData());
 					}
 				}
 			};

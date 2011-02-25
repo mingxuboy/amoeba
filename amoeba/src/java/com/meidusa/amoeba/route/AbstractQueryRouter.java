@@ -679,5 +679,14 @@ public abstract class  AbstractQueryRouter<T extends Connection,V> implements Qu
     		System.out.println(aaaaa);
     	}
     	System.out.println(System.currentTimeMillis());
+    	String source = "db_3[0-9]*";
+    	Pattern pattern = null;
+    	if(pattern == null){
+			pattern = Pattern.compile(source);
+		}
+    	java.util.regex.Matcher matcher = pattern.matcher("db_3");
+		System.out.println(matcher.matches());
     }
+    
+    
 }
