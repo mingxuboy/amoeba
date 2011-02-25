@@ -98,23 +98,33 @@ public class AuthenticationPacket extends AbstractPacket {
     public void init(AbstractPacketBuffer mybuffer) {
         super.init(mybuffer);
         MysqlPacketBuffer buffer = (MysqlPacketBuffer) mybuffer;
-        clientParam = buffer.readLong();
-        maxThreeBytes = buffer.readLong();
-        charsetNumber = buffer.readByte();
-        // 跳过23个填充字节
-        buffer.setPosition(buffer.getPosition() + 23);
-        user = buffer.readString();
-        // buffer.read
-        long passwordLength = buffer.readFieldLength();
-
-        encryptedPassword = buffer.getBytes(buffer.getPosition(), (int) passwordLength);
-        // encryptedPassword = buffer.readString(CODE_PAGE_1252);
-
-        buffer.setPosition(buffer.getPosition() + (int) passwordLength);
-        if ((clientParam & CLIENT_CONNECT_WITH_DB) != 0) {
-            if (buffer.getPosition() < buffer.getBufLength()) {
-                database = buffer.readString();
-            }
+        int position = buffer.getPosition();
+        clientParam = buffer.readInt();
+        
+        if((clientParam & CLIENT_PROTOCOL_41) == 0){
+        	//protocol version 4.0
+        	//we will reject version 4.0 ,so ignore decode this packet 
+        }else{
+        	//protocol version 4.1
+        	buffer.setPosition(position);
+	        clientParam = buffer.readLong();
+	        maxThreeBytes = buffer.readLong();
+	        charsetNumber = buffer.readByte();
+	        // 跳过23个填充字节
+	        buffer.setPosition(buffer.getPosition() + 23);
+	        user = buffer.readString();
+	        // buffer.read
+	        long passwordLength = buffer.readFieldLength();
+	
+	        encryptedPassword = buffer.getBytes(buffer.getPosition(), (int) passwordLength);
+	        // encryptedPassword = buffer.readString(CODE_PAGE_1252);
+	
+	        buffer.setPosition(buffer.getPosition() + (int) passwordLength);
+	        if ((clientParam & CLIENT_CONNECT_WITH_DB) != 0) {
+	            if (buffer.getPosition() < buffer.getBufLength()) {
+	                database = buffer.readString();
+	            }
+	        }
         }
     }
 
