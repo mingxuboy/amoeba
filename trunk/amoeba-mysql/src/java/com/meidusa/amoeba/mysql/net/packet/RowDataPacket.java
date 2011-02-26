@@ -42,9 +42,9 @@ public class RowDataPacket extends AbstractPacket {
         }
 
         while (buffer.getPosition() < this.packetLength + HEADER_SIZE) {
-            columns.add(buffer.readLengthCodedString(ProxyRuntimeContext.getInstance().getRuntimeContext().getServerCharset()));
+        	//encoding = ProxyRuntimeContext.getInstance().getRuntimeContext().getServerCharset()
+            columns.add(buffer.readLengthCodedString(null));
         }
-
     }
 
     @Override

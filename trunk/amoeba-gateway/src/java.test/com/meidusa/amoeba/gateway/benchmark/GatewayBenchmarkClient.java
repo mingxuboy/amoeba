@@ -36,7 +36,7 @@ public class GatewayBenchmarkClient extends AbstractBenchmarkClient<AbstractGate
 		return false;
 	}
 
-	public AbstractGatewayPacket createPacketWithBytes(byte[] message) {
+	public AbstractGatewayPacket decodeRecievedPacket(byte[] message) {
 		int type = AbstractGatewayPacket.getType(message);
 		AbstractGatewayPacket packet = null;
 		switch(type){

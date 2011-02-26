@@ -88,10 +88,14 @@ public abstract class AbstractBenchmarkClient<T extends Packet> implements Messa
 	
 	public abstract T createRequestPacket();
 
-	public abstract T createPacketWithBytes(byte[] message);
+	public abstract T decodeRecievedPacket(byte[] message);
 
 	public void startBenchmark(){
 		postPacketToServer();
+	}
+	
+	protected void afterMessageRecieved(byte[] message){
+		
 	}
 	
 	protected void doReceiveMessage(byte[] message) {
@@ -101,14 +105,17 @@ public abstract class AbstractBenchmarkClient<T extends Packet> implements Messa
 		min = Math.min(min, current);
 		max = Math.max(max, current);
 		count++;
-
+		
+		boolean completed = responseIsCompleted(message);
 		if (debug) {
-			T t = createPacketWithBytes(message);
+			T t = decodeRecievedPacket(message);
 			System.out.println("<<--" + t);
 		}
 		
-		if(responseIsCompleted(message)){
-			doAfterResponse();
+		afterMessageRecieved(message);
+		
+		if(completed){
+			afterResponseCompleted();
 		}
 	}
 	
@@ -130,7 +137,7 @@ public abstract class AbstractBenchmarkClient<T extends Packet> implements Messa
 		return true;
 	}
 	
-	protected void doAfterResponse(){
+	protected void afterResponseCompleted(){
 		responseLatcher.countDown();
 		if(task.running){
 			if(requestLatcher.getCount()>0){
@@ -141,17 +148,15 @@ public abstract class AbstractBenchmarkClient<T extends Packet> implements Messa
 	}
 
 	protected void postPacketToServer(){
-		ByteBuffer buffer = createRequestPacket().toByteBuffer(connection);
+		T packet = createRequestPacket();
+		ByteBuffer buffer = packet.toByteBuffer(connection);
 		if (debug) {
-			T t = createPacketWithBytes(buffer.array());
-			System.out.println("--->>" + t);
+			System.out.println("--->>" + packet);
 		}
 		connection.postMessage(buffer);
 	}
 
 	public void init() {
-		// TODO Auto-generated method stub
-		
 	}
 	
 	/*public boolean checkIdle(long now) {
@@ -175,12 +180,4 @@ public abstract class AbstractBenchmarkClient<T extends Packet> implements Messa
 		}
 		return isTimeOut;
 	}*/
-	
-	protected void postMessage(ByteBuffer msg) {
-		next = System.nanoTime();
-		if (debug) {
-			T t = createPacketWithBytes(msg.array());
-			System.out.println("--->>" + t);
-		}
-	}
 }

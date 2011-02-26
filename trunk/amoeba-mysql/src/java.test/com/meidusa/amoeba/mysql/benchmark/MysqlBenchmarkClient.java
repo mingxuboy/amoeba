@@ -13,8 +13,14 @@ import com.meidusa.amoeba.config.ParameterMapping;
 import com.meidusa.amoeba.mysql.handler.session.SessionStatus;
 import com.meidusa.amoeba.mysql.net.packet.AbstractPacket;
 import com.meidusa.amoeba.mysql.net.packet.CommandPacket;
+import com.meidusa.amoeba.mysql.net.packet.EOFPacket;
+import com.meidusa.amoeba.mysql.net.packet.ErrorPacket;
+import com.meidusa.amoeba.mysql.net.packet.FieldPacket;
 import com.meidusa.amoeba.mysql.net.packet.MysqlPacketBuffer;
+import com.meidusa.amoeba.mysql.net.packet.OkPacket;
 import com.meidusa.amoeba.mysql.net.packet.QueryCommandPacket;
+import com.meidusa.amoeba.mysql.net.packet.ResultSetHeaderPacket;
+import com.meidusa.amoeba.mysql.net.packet.RowDataPacket;
 import com.meidusa.amoeba.net.Connection;
 
 /**
@@ -26,16 +32,6 @@ public class MysqlBenchmarkClient extends AbstractBenchmarkClient<AbstractPacket
 	private static Logger	logger        = Logger.getLogger(MysqlBenchmarkClient.class);
 	public MysqlBenchmarkClient(Connection connection,CountDownLatch requestLatcher,CountDownLatch responseLatcher,TaskRunnable task) {
 		super(connection,requestLatcher,responseLatcher,task);
-	}
-
-	public boolean needPing(long now) {
-		return false;
-	}
-
-	public AbstractPacket createPacketWithBytes(byte[] message) {
-		AbstractPacket packet = new AbstractPacket();
-		packet.init(message, this.getConnection());
-		return packet;
 	}
 
 	final Map<String ,String > parameterMap = new HashMap<String,String>(); 
@@ -75,6 +71,32 @@ public class MysqlBenchmarkClient extends AbstractBenchmarkClient<AbstractPacket
 		}
 	}
 	
+	public AbstractPacket decodeRecievedPacket(byte[] buffer) {
+		AbstractPacket packet = null;
+		if (packetIndex == 0 && MysqlPacketBuffer.isErrorPacket(buffer)){
+			packet = new ErrorPacket();
+		} else if (packetIndex == 0 && MysqlPacketBuffer.isOkPacket(buffer)) {
+			packet = new OkPacket();
+		} else if (MysqlPacketBuffer.isEofPacket(buffer)) {
+			packet = new EOFPacket();
+		}else{
+			if((statusCode & SessionStatus.EOF_FIELDS) >0){
+				packet = new RowDataPacket(false);
+			}else if(packetIndex == 0){
+				packet = new ResultSetHeaderPacket();
+			}else{
+				packet = new FieldPacket();
+			}
+		}
+		
+		packet.init(buffer, this.getConnection());
+		return packet;
+	}
+	
+	protected void afterMessageRecieved(byte[] message){
+		packetIndex ++ ;
+	}
+
 	protected boolean responseIsCompleted(byte[] buffer){
 		if (this.commandType == QueryCommandPacket.COM_QUERY) {
             boolean isCompleted = false;

@@ -45,7 +45,7 @@ public class MongodbBenchmarkClient extends AbstractBenchmarkClient<AbstractMong
 		return false;
 	}
 
-	public AbstractMongodbPacket createPacketWithBytes(byte[] message) {
+	public AbstractMongodbPacket decodeRecievedPacket(byte[] message) {
 		int type = MongodbPacketBuffer.getOPMessageType(message);
 		AbstractMongodbPacket packet = null;
 		switch(type){
