@@ -44,7 +44,7 @@ public abstract class AbstractBenchmark {
 	protected static CmdLineParser parser = new CmdLineParser(System.getProperty("application", "benchmark"));
 	protected static CmdLineParser.Option debugOption = parser.addOption(new BooleanOption('d', "debug", false,false,true,"show the interaction with the server-side information"));
 	protected static CmdLineParser.Option portOption = parser.addOption(new IntegerOption('p', "port",true,true,"server port"));
-	protected static CmdLineParser.Option hostOption = parser.addOption(new StringOption('h', "host",true,true,"server host","127.0.0.1"));
+	protected static CmdLineParser.Option hostOption = parser.addOption(new StringOption('h', "host",true,true,"127.0.0.1","server host"));
 	protected static CmdLineParser.Option connOption = parser.addOption(new IntegerOption('c', "conn",true,true,"The number of concurrent connections"));
 	protected static CmdLineParser.Option totalOption = parser.addOption(new LongOption('n', "total",true,true,"total requests"));
 	protected static CmdLineParser.Option timeoutOption = parser.addOption(new IntegerOption('t', "timeout",true,false,-1,"query timeout, default value=-1 "));
@@ -66,6 +66,14 @@ public abstract class AbstractBenchmark {
 			return value;
 		}
 	};
+	
+	private List<AbstractBenchmarkClient<?>> benchmarkClientList = new ArrayList<AbstractBenchmarkClient<?>>();
+	
+	
+	public List<AbstractBenchmarkClient<?>> getBenchmarkClientList() {
+		return benchmarkClientList;
+	}
+
 	public AbstractBenchmark(){
 		Random random = new Random();
 		contextMap.put("random",random);
@@ -226,7 +234,6 @@ public abstract class AbstractBenchmark {
 		System.out.println("\r\nconnect to ip="+ip+",port="+port+",connection size="+conn+",total request="+total);
 		AbstractBenchmark benckmark = AbstractBenchmark.getInstance();
 		benckmark.setConnManager(manager);
-		List<AbstractBenchmarkClient<?>> connList = new ArrayList<AbstractBenchmarkClient<?>>();
 		ConnectionFactory factory = benckmark.getConnectionFactory();
 		if(factory instanceof BackendConnectionFactory)
 		{
@@ -236,6 +243,7 @@ public abstract class AbstractBenchmark {
 			((BackendConnectionFactory)factory).init();
 		}
 		
+		long createConnectionStartTime = System.nanoTime();
 		for(int i=0;i<conn;i++){
 			InetSocketAddress address = new InetSocketAddress(ip,port);
 			try{
@@ -251,7 +259,7 @@ public abstract class AbstractBenchmark {
 				if(!(factory instanceof BackendConnectionFactory)){
 					manager.postRegisterNetEventHandler(client.getConnection(), SelectionKey.OP_READ);
 				}
-				connList.add(client);
+				benckmark.benchmarkClientList.add(client);
 			}catch(Exception e){
 				System.err.println("connect to "+address+" error:");
 				e.printStackTrace();
@@ -259,25 +267,27 @@ public abstract class AbstractBenchmark {
 			}
 		}
 		
+		long createConnectionEndTime = System.nanoTime();
 		
-		for(AbstractBenchmarkClient<?> connection: connList){
+		for(AbstractBenchmarkClient<?> connection: benckmark.benchmarkClientList){
 			if(requestLatcher.getCount()>0){
 				requestLatcher.countDown();
 				connection.startBenchmark();
 			}
 		}
+		
 		requestLatcher.await();
 		task.running = false;
 		responseLatcher.await();
-		
-		long min = connList.get(0).min;
+		long endBenchmarkTime = System.nanoTime();
+		long min = benckmark.benchmarkClientList.get(0).min;
 		long max = 0;
 		long average = 0;
 		long cost = 0;
 		long count = 0;
-		long minStart = connList.get(0).start;
+		long minStart = benckmark.benchmarkClientList.get(0).start;
 		long maxend = 0;
-		for(AbstractBenchmarkClient<?> connection: connList){
+		for(AbstractBenchmarkClient<?> connection: benckmark.benchmarkClientList){
 			if(connection.count>0){
 				min = Math.min(min, connection.min);
 				max = Math.max(max, connection.max);
@@ -293,6 +303,11 @@ public abstract class AbstractBenchmark {
 		System.out.println("min="+TimeUnit.MILLISECONDS.convert(min, TimeUnit.NANOSECONDS)+"ms");
 		System.out.println("max="+TimeUnit.MILLISECONDS.convert(max, TimeUnit.NANOSECONDS)+"ms");
 		System.out.println("average="+TimeUnit.MILLISECONDS.convert(average, TimeUnit.NANOSECONDS)+"ms");
+		
+		System.out.println("create Connections time="+TimeUnit.MILLISECONDS.convert(createConnectionEndTime - createConnectionStartTime, TimeUnit.NANOSECONDS)+"ms");
+		
+		long tpsTime = TimeUnit.MILLISECONDS.convert(endBenchmarkTime - createConnectionEndTime, TimeUnit.NANOSECONDS);
+		System.out.println("TPS(after connected)="+(tpsTime>0?((long)total*1000)/tpsTime:total)+"/s");
 		manager.shutdown();
 		
 	}
