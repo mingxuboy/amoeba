@@ -20,6 +20,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import com.meidusa.amoeba.config.ConfigUtil;
 import com.meidusa.amoeba.log4j.DOMConfigurator;
+import com.meidusa.amoeba.net.AuthingableConnection;
 import com.meidusa.amoeba.net.BackendConnectionFactory;
 import com.meidusa.amoeba.net.Connection;
 import com.meidusa.amoeba.net.ConnectionFactory;
@@ -176,6 +177,7 @@ public abstract class AbstractBenchmark {
 		final CountDownLatch requestLatcher = new CountDownLatch((int)total);
 		final CountDownLatch responseLatcher = new CountDownLatch((int)total);
 		final TaskRunnable task = new TaskRunnable();
+		final AtomicLong errorNum = new AtomicLong(0);
 		int port = (Integer)parser.getOptionValue(portOption);
 		
 		final MultiConnectionManagerWrapper manager = new MultiConnectionManagerWrapper();
@@ -201,6 +203,15 @@ public abstract class AbstractBenchmark {
 				if(value.booleanValue()){
 					System.out.println(new Date() +"     client conn="+conn.getSocketId()+ " faild!! "+(fault!= null? (" fault="+fault.getMessage()):""));
 				}
+				
+				if(conn instanceof AuthingableConnection){
+					AuthingableConnection authConn = (AuthingableConnection)conn;
+					if(authConn.isAuthenticatedSeted() && authConn.isAuthenticated()){
+						errorNum.incrementAndGet();
+					}
+				}else{
+					errorNum.incrementAndGet();
+				}
 			}
 			
 		});
@@ -225,7 +236,18 @@ public abstract class AbstractBenchmark {
 						Thread.sleep(1000);
 					} catch (InterruptedException e) {
 					}
+					
+					if(requestLatcher.getCount() == 0){
+						if( responseLatcher.getCount() - errorNum.get() <=0){
+							break;
+						}
+					}
 				}
+				
+				for(long i=0;i<errorNum.get();i++){
+					responseLatcher.countDown();
+				}
+				
 				System.out.println(new Date() +"     compeleted="+(total));
 			}
 			
@@ -299,7 +321,7 @@ public abstract class AbstractBenchmark {
 		}
 		average = cost / total;
 		long time = TimeUnit.MILLISECONDS.convert((maxend - minStart),TimeUnit.NANOSECONDS);
-		System.out.println("completed requests total="+total+", cost="+TimeUnit.MILLISECONDS.convert((maxend - minStart), TimeUnit.NANOSECONDS)+"ms , TPS="+ (time>0?((long)total*1000)/time:total)+"/s");
+		System.out.println("completed requests total="+total+ ", errorNum="+errorNum.get()+", cost="+TimeUnit.MILLISECONDS.convert((maxend - minStart), TimeUnit.NANOSECONDS)+"ms , TPS="+ (time>0?((long)total*1000)/time:total)+"/s");
 		System.out.println("min="+TimeUnit.MILLISECONDS.convert(min, TimeUnit.NANOSECONDS)+"ms");
 		System.out.println("max="+TimeUnit.MILLISECONDS.convert(max, TimeUnit.NANOSECONDS)+"ms");
 		System.out.println("average="+TimeUnit.MILLISECONDS.convert(average, TimeUnit.NANOSECONDS)+"ms");
