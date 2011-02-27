@@ -387,6 +387,15 @@ public class CmdLineParser {
 	 */
 	public static class StringOption extends Option<String> {
 		
+		/**
+		 * 
+		 * @param shortForm
+		 * @param longForm
+		 * @param wantsValue --  must has an argument 
+		 * @param required -- must required
+		 * @param defaultValue 
+		 * @param description
+		 */
 		public StringOption(char shortForm, String longForm,boolean wantsValue,boolean required,String defaultValue,String description) {
 			super(shortForm, longForm, wantsValue);
 			this.setDefaultValue(defaultValue);

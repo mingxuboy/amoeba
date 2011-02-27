@@ -29,7 +29,7 @@ public abstract class AbstractBenchmarkClient<T extends Packet> implements Messa
 	protected TaskRunnable task;
 	private AbstractBenchmark benchmark;
 	private Connection connection;
-	
+	private MessageHandler connOldMessageHandler = null;
 	public AbstractBenchmark getBenchmark() {
 		return benchmark;
 	}
@@ -79,6 +79,7 @@ public abstract class AbstractBenchmarkClient<T extends Packet> implements Messa
 		this.requestLatcher = requestLatcher;
 		this.responseLatcher = responseLatcher;
 		this.task = task;
+		connOldMessageHandler = connection.getMessageHandler();
 		connection.setMessageHandler(this );
 	}
 	
@@ -123,13 +124,15 @@ public abstract class AbstractBenchmarkClient<T extends Packet> implements Messa
 		
 		if(conn instanceof AuthingableConnection){
 			if(!((AuthingableConnection)conn).isAuthenticated()){
-				conn.getMessageHandler().handleMessage(conn);
+				connOldMessageHandler.handleMessage(conn);
 			}else{
 				byte[] message = null;
 				while((message = conn.getInQueue().getNonBlocking()) != null){
 					doReceiveMessage(message);
 				}
 			}
+		}else{
+			connOldMessageHandler.handleMessage(conn);
 		}
 	}
 	
