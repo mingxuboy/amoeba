@@ -34,6 +34,8 @@ public abstract class AuthingableConnectionFactory extends AbstractConnectionFac
 			if(this.getTimeOut()>0){
 				authconn.isAuthenticatedWithBlocked(this.getTimeOut());
 			}
+		}else{
+			connection.getConnectionManager().notifyObservers(ConnectionManager.CONNECTION_ESTABLISHED, connection, null);
 		}
 	}
 }
