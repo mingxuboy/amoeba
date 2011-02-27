@@ -100,13 +100,6 @@ public abstract class AbstractBenchmarkClient<T extends Packet> implements Messa
 	}
 	
 	protected void doReceiveMessage(byte[] message) {
-		
-		end = System.nanoTime();
-		long current = end - next;
-		min = Math.min(min, current);
-		max = Math.max(max, current);
-		count++;
-		
 		boolean completed = responseIsCompleted(message);
 		if (debug) {
 			T t = decodeRecievedPacket(message);
@@ -116,6 +109,12 @@ public abstract class AbstractBenchmarkClient<T extends Packet> implements Messa
 		afterMessageRecieved(message);
 		
 		if(completed){
+			end = System.nanoTime();
+			long current = end - next;
+			next = end;
+			min = Math.min(min, current);
+			max = Math.max(max, current);
+			count++;
 			afterResponseCompleted();
 		}
 	}
