@@ -21,7 +21,7 @@ public class MysqlBenchmark extends AbstractBenchmark{
 	private static Logger logger = Logger.getLogger(MysqlBenchmark.class);
 	protected static CmdLineParser.Option userOption = parser.addOption(new StringOption('u', "user",true,true,"root","mysql user name"));
 	protected static CmdLineParser.Option passwordOption = parser.addOption(new StringOption('P', "password",true,false,null,"mysql password"));
-	protected static CmdLineParser.Option sqlOption = parser.addOption(new StringOption('s', "sql",true,false,"sql",null));
+	protected static CmdLineParser.Option sqlOption = parser.addOption(new StringOption('s', "sql",true,false,null,"query sql"));
 	public static void main(String[] args) throws Exception {
         try {
             parser.parse(args);

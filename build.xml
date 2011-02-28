@@ -178,12 +178,20 @@
 				<exclude name="bin/*" />
 				<exclude name="**/*/amoeba-aladdin*" />
 				<exclude name="**/*/amoeba-mongodb*" />
+				<exclude name="**/*/amoeba-gateway*" />
 				<include name="*.*" />
 			</tarfileset>
+			
+			<tarfileset dir="build/build-mysql" mode="755">
+				<include name="bin/**" />
+				<exclude name="*/.svn/*" />
+			</tarfileset>
+			
 			<tarfileset dir="build/build-mysql">
 				<exclude name="*/.svn/*" />
 				<exclude name="logs/*" />
 				<include name="conf/**" />
+				<include name="benchmark/**" />
 				<exclude name="build.xml" />
 				<exclude name="build.properties" />
 			</tarfileset>
@@ -236,15 +244,24 @@
 				<exclude name="**/*/amoeba-mysql*" />
 				<include name="*.*" />
 			</tarfileset>
+			
 			<tarfileset dir="amoeba">
 				<exclude name="*/.svn/*" />
 				<include name="src/java/**" />
 			</tarfileset>
+			
 			<tarfileset dir="amoeba-mongodb">
 				<exclude name="*/.svn/*" />
 				<include name="src/java/**" />
 			</tarfileset>
+			
+			<tarfileset dir="build/build-mongodb" mode="755" >
+				<include name="bin/**" />
+				<exclude name="*/.svn/*" />
+			</tarfileset>
+			
 			<tarfileset dir="build/build-mongodb">
+				<include name="bin/**" />
 				<exclude name="*/.svn/*" />
 				<exclude name="logs/*" />
 			</tarfileset>

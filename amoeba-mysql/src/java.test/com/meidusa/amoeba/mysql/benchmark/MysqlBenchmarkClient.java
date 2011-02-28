@@ -22,6 +22,9 @@ import com.meidusa.amoeba.mysql.net.packet.QueryCommandPacket;
 import com.meidusa.amoeba.mysql.net.packet.ResultSetHeaderPacket;
 import com.meidusa.amoeba.mysql.net.packet.RowDataPacket;
 import com.meidusa.amoeba.net.Connection;
+import com.meidusa.amoeba.util.CmdLineParser;
+import com.meidusa.amoeba.util.StringUtil;
+import com.meidusa.amoeba.util.CmdLineParser.Option;
 
 /**
  * 
@@ -68,6 +71,12 @@ public class MysqlBenchmarkClient extends AbstractBenchmarkClient<AbstractPacket
 			}else{
 				beanParameterMap.put(entry.getKey().toString(), entry.getValue());
 			}
+		}
+		CmdLineParser parser = this.getBenchmark().getCmdLineParser();
+		Option option = parser.getOption("sql");
+		String sql = (String)parser.getOptionValue(option);
+		if(!StringUtil.isEmpty(sql)){
+			beanParameterMap.put("query", sql);
 		}
 	}
 	
