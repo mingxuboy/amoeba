@@ -75,6 +75,10 @@ public abstract class AbstractBenchmark {
 		return benchmarkClientList;
 	}
 
+	public CmdLineParser getCmdLineParser(){
+		return parser;
+	}
+	
 	public AbstractBenchmark(){
 		Random random = new Random();
 		contextMap.put("random",random);

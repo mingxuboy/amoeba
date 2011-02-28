@@ -140,21 +140,15 @@ public class MongodbBenchmarkClient extends AbstractBenchmarkClient<AbstractMong
 	}
 	
 	protected void postPacketToServer(){
-		if(task.running){
-			if(requestLatcher.getCount()>0){
-				requestLatcher.countDown();
-				
-				if(isLastModifyOperation){
-					byte[] packetMessage = createRequestPacket().toByteBuffer(this.getConnection()).array();
-					byte[] lastError = getLastErrorPacket().toByteBuffer(this.getConnection()).array();
-					byte[] message = new byte[packetMessage.length+lastError.length];
-					System.arraycopy(packetMessage, 0, message, 0, packetMessage.length);
-					System.arraycopy(lastError, 0, message, packetMessage.length,lastError.length);
-					getConnection().postMessage(message);
-				}else{
-					getConnection().postMessage(createRequestPacket().toByteBuffer(this.getConnection()));
-				}
-			}
+		if(isLastModifyOperation){
+			byte[] packetMessage = createRequestPacket().toByteBuffer(this.getConnection()).array();
+			byte[] lastError = getLastErrorPacket().toByteBuffer(this.getConnection()).array();
+			byte[] message = new byte[packetMessage.length+lastError.length];
+			System.arraycopy(packetMessage, 0, message, 0, packetMessage.length);
+			System.arraycopy(lastError, 0, message, packetMessage.length,lastError.length);
+			getConnection().postMessage(message);
+		}else{
+			getConnection().postMessage(createRequestPacket().toByteBuffer(this.getConnection()));
 		}
 	}
 }
