@@ -114,7 +114,7 @@
 		</property>
 		<property name="sqlFunctionFile">${amoeba.home}/conf/functionMap.xml</property>
 		<property name="LRUMapSize">1500</property>
-		<property name="defaultPool">server1</property>
+		<property name="defaultPool">_null_table_</property>
 		
 		<!--
 		<property name="writePool">server1</property>

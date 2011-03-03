@@ -3,7 +3,7 @@
 
 <amoeba:rule xmlns:amoeba="http://amoeba.meidusa.com/">
 
-	<tableRule name="TestTable" schema="test" defaultPools="server1">
+	<tableRule name="*" schema="test" defaultPools="server1">
 		<!--
 		<rule name="rule1">
 			<parameters excludes="NAME">ID,AGE</parameters>
@@ -35,6 +35,7 @@
 		</rule>
 		-->
 	</tableRule>
+	
 	<tableRule defaultPools="_null_table_"/>
 	
 </amoeba:rule>
