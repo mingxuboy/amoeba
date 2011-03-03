@@ -14,10 +14,10 @@ public class AladdinClientConnection extends MysqlClientConnection {
 		super(channel, createStamp);
 	}
 
-	public void setSchema(String schema) {
+/*	public void setSchema(String schema) {
 		//ignore client mysql schema
 		//	this.schema = schema;
-	}
+	}*/
 	
     protected void connectionAuthenticateSuccess(AuthResponseData data) {
         if (logger.isInfoEnabled()) {

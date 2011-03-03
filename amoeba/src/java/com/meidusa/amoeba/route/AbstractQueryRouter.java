@@ -660,7 +660,10 @@ public abstract class  AbstractQueryRouter<T extends Connection,V> implements Qu
     	return this.defaultPools;
     }
     
-    public Pattern getPattern(String source){
+    private Pattern getPattern(String source){
+    	if(source != null && source.indexOf("*") ==0){
+    		source = "^"+source;
+    	}
     	Pattern pattern = this.patternMap.get(source);
     	if(pattern == null){
     		synchronized (patternMap) {
