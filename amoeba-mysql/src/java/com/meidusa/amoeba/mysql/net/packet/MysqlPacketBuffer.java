@@ -340,9 +340,10 @@ public class MysqlPacketBuffer extends AbstractPacketBuffer {
 
     final String readLengthCodedString(String encoding) {
         int fieldLength = (int) readFieldLength();
-        if (fieldLength == 0) {
+        if (fieldLength <= 0) {
             return null;
         }
+        
         try {
             if (encoding != null) {
                 return new String(buffer, position, fieldLength, encoding);
