@@ -24,6 +24,16 @@ import com.meidusa.amoeba.net.PoolableConnectionFactory;
  *
  */
 public class MysqlServerConnectionFactory extends PoolableConnectionFactory{
+	private boolean connPing = false;
+	
+
+	public boolean isConnPing() {
+		return connPing;
+	}
+
+	public void setConnPing(boolean connPing) {
+		this.connPing = connPing;
+	}
 
 	@Override
 	protected Connection newConnectionInstance(SocketChannel channel,
@@ -34,26 +44,30 @@ public class MysqlServerConnectionFactory extends PoolableConnectionFactory{
 	public boolean validateObject(Object arg0) {
 		boolean isValid = super.validateObject(arg0);
 		if(isValid){
-			MysqlServerConnection conn = (MysqlServerConnection)arg0;
-			
-			MessageHandler handler = conn.getMessageHandler();
-			try{
-				synchronized (handler) {
-					PingPacketHandler pingHandler = new PingPacketHandler(handler);
-					conn.setMessageHandler(pingHandler);
-					conn.postMessage(new MysqlPingPacket().toByteBuffer(conn));
-					try {
-						handler.wait(2*1000);
-					} catch (InterruptedException e) {
+			if(connPing){
+				MysqlServerConnection conn = (MysqlServerConnection)arg0;
+				
+				MessageHandler handler = conn.getMessageHandler();
+				try{
+					synchronized (handler) {
+						PingPacketHandler pingHandler = new PingPacketHandler(handler);
+						conn.setMessageHandler(pingHandler);
+						conn.postMessage(new MysqlPingPacket().toByteBuffer(conn));
+						try {
+							handler.wait(2*1000);
+						} catch (InterruptedException e) {
+						}
+						if(pingHandler.msgReturn){
+							return true;
+						}else{
+							return false;
+						}
 					}
-					if(pingHandler.msgReturn){
-						return true;
-					}else{
-						return false;
-					}
+				}finally{
+					conn.setMessageHandler(handler);
 				}
-			}finally{
-				conn.setMessageHandler(handler);
+			}else{
+				return true;
 			}
 		}else{
 			return false;

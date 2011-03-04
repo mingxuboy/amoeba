@@ -175,33 +175,44 @@ public class MultipleLoadBalanceObjectPool implements ObjectPool,Initialisable {
 
     public Object borrowObject() throws Exception {
         ObjectPool pool = null;
-        ObjectPool[] poolsTemp = runtimeObjectPools;
-        if (poolsTemp.length == 0) {
-            throw new Exception("poolName="+name+", no valid pools");
+        ObjectPool[] poolsTemp = null;
+        
+        while(true){
+	        poolsTemp = runtimeObjectPools;
+	        if (poolsTemp.length == 0) {
+	            throw new Exception("poolName="+name+", no valid pools");
+	        }
+	
+	        if (loadbalance == LOADBALANCING_ROUNDROBIN) {
+	            long current = currentCount.getAndIncrement();
+	            pool = poolsTemp[(int) (current % poolsTemp.length)];
+	        } else if (loadbalance == LOADBALANCING_WEIGHTBASED) {
+	            if (poolsTemp.length > 1) {
+	                ObjectPool[] objectPoolsCloned = poolsTemp.clone();
+	                Arrays.sort(objectPoolsCloned, comparator);
+	                pool = objectPoolsCloned[0];
+	            } else if (poolsTemp.length == 1) {
+	                pool = poolsTemp[0];
+	            }
+	        } else if (loadbalance == LOADBALANCING_HA) {
+	            // HA,只要有效的pool
+	        	if(index < poolsTemp.length){
+	        		pool = poolsTemp[index];
+	        	}else{
+	        		pool = poolsTemp[0];
+	        	}
+	        } else {
+	            throw new Exception("poolName="+name+" loadbalance parameter error,parameter loadbalance in [1,2,3]");
+	        }
+	        
+	        if(!pool.isValid()){
+	        	validate();
+	        	continue;
+	        }else{
+	        	break;
+	        }
         }
-
-        if (loadbalance == LOADBALANCING_ROUNDROBIN) {
-            long current = currentCount.getAndIncrement();
-            pool = poolsTemp[(int) (current % poolsTemp.length)];
-        } else if (loadbalance == LOADBALANCING_WEIGHTBASED) {
-            if (poolsTemp.length > 1) {
-                ObjectPool[] objectPoolsCloned = poolsTemp.clone();
-                Arrays.sort(objectPoolsCloned, comparator);
-                pool = objectPoolsCloned[0];
-            } else if (poolsTemp.length == 1) {
-                pool = poolsTemp[0];
-            }
-        } else if (loadbalance == LOADBALANCING_HA) {
-            // HA,只要有效的pool
-        	if(index < poolsTemp.length){
-        		pool = poolsTemp[index];
-        	}else{
-        		pool = poolsTemp[0];
-        	}
-        } else {
-            throw new Exception("poolName="+name+" loadbalance parameter error,parameter loadbalance in [1,2,3]");
-        }
-
+        
         return pool.borrowObject();
         
 
