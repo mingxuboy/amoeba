@@ -32,7 +32,7 @@
     </appender>
 
     <appender name="ROOT" class="org.apache.log4j.DailyRollingFileAppender">
-        <param name="file" value="${amoeba.home}/logs/project.log"/>
+        <param name="file" value="${amoeba.home}/logs/root.log"/>
         <param name="append" value="true"/>
         <param name="encoding" value="GBK"/>
         <layout class="org.apache.log4j.PatternLayout">
