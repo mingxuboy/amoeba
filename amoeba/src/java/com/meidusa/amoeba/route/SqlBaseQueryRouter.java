@@ -60,6 +60,8 @@ public abstract class SqlBaseQueryRouter extends AbstractQueryRouter<DatabaseCon
             }else{
             	tables.put(null, null);
             }
+            
+            return tables;
         }
 		return null;
 	}

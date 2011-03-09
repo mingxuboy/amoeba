@@ -41,6 +41,7 @@ import com.meidusa.amoeba.net.Sessionable;
 import com.meidusa.amoeba.net.poolable.ObjectPool;
 import com.meidusa.amoeba.parser.dbobject.Column;
 import com.meidusa.amoeba.parser.statement.SelectStatement;
+import com.meidusa.amoeba.parser.statement.ShowStatement;
 import com.meidusa.amoeba.parser.statement.Statement;
 import com.meidusa.amoeba.route.SqlBaseQueryRouter;
 import com.meidusa.amoeba.route.SqlQueryObject;
@@ -83,10 +84,10 @@ public class MySqlCommandDispatcher implements MessageHandler {
 	            if (MysqlPacketBuffer.isPacketType(message, QueryCommandPacket.COM_QUERY)) {
 	            	
 	            	SqlBaseQueryRouter router = (SqlBaseQueryRouter)ProxyRuntimeContext.getInstance().getQueryRouter();
-	            	Statement statment = router.parseStatement(conn, command.query);
+	            	Statement statement = router.parseStatement(conn, command.query);
 
 	            	if(command.query != null && (command.query.indexOf("'$version'")>0 || command.query.indexOf("@amoebaversion")>0)){
-	            		MysqlResultSetPacket lastPacketResult = createAmoebaVersion(conn,(SelectStatement)statment,false);
+	            		MysqlResultSetPacket lastPacketResult = createAmoebaVersion(conn,(SelectStatement)statement,false);
             			lastPacketResult.wirteToConnection(conn);
             			return;
 	            	}
@@ -98,10 +99,16 @@ public class MySqlCommandDispatcher implements MessageHandler {
 	                ObjectPool[] pools = router.doRoute(conn, queryObject);
 	               
 		                
-	                if (statment != null && statment instanceof SelectStatement && ((SelectStatement)statment).isQueryLastInsertId()) {
-	                	MysqlResultSetPacket lastPacketResult = createLastInsertIdPacket(conn,(SelectStatement)statment,false);
+	                if (statement != null && statement instanceof SelectStatement && ((SelectStatement)statement).isQueryLastInsertId()) {
+	                	MysqlResultSetPacket lastPacketResult = createLastInsertIdPacket(conn,(SelectStatement)statement,false);
             			lastPacketResult.wirteToConnection(conn);
             			return;
+	                }
+	                
+	                if(statement instanceof ShowStatement){
+	                	if(pools != null && pools.length>1){
+	                		pools = new ObjectPool[]{pools[0]};
+	                	}
 	                }
 	                
 	                if(pools == null){
@@ -109,7 +116,7 @@ public class MySqlCommandDispatcher implements MessageHandler {
 	                	return;
 	                }
 	                
-	                MessageHandler handler = new QueryCommandMessageHandler(conn, message,statment, pools, timeout);
+	                MessageHandler handler = new QueryCommandMessageHandler(conn, message,statement, pools, timeout);
 	                if (handler instanceof Sessionable) {
 	                    Sessionable session = (Sessionable) handler;
 	                    try {
