@@ -239,6 +239,8 @@ public abstract class AbstractBenchmark {
 					long tps = 0;
 					if(currentTime > lastTime){
 						tps = (lastCount - current) * 1000 /(currentTime-lastTime);
+					}else{
+						tps = (lastCount - current);
 					}
 					lastCount = current;
 					lastTime = currentTime;

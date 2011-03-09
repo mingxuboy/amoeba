@@ -245,7 +245,6 @@ TOKEN: /* SQL Keywords. prefixed with K_ to avoid name clashes */
 |   <K_FULL:"FULL">
 |   <K_GROUP:"GROUP">
 |   <K_HAVING:"HAVING">
-|   <K_IF:"IF">
 |   <K_IN:"IN">
 |   <K_IS:"IS">
 |   <K_INTO:"INTO">
@@ -317,7 +316,7 @@ TOKEN: /* SQL Keywords. prefixed with K_ to avoid name clashes */
 |   <K_HOUR:"HOUR">
 |	<K_COMMIT:"COMMIT">
 |	<K_ROLLBACK:"ROLLBACK">
-| 	< K_DESCRIBE:"describe" >
+| 	< K_DESCRIBE:"describe"|"desc" >
 | < K_IGNORE_INDEX:"IGNORE INDEX" >
 | < K_FORCE_INDEX:"FORCE INDEX" >
 |	<K_TRANSACTION_ISOLATION_LEVEL:"TRANSACTION ISOLATION LEVEL">
@@ -333,6 +332,11 @@ TOKEN: /* SQL Keywords. prefixed with K_ to avoid name clashes */
 |	<K_TRANSACTION_REPEATABLE_READ:"REPEATABLE READ">
 |	<K_TRANSACTION_SERIALIZABLE:"SERIALIZABLE">
 |	<K_CLIENT_CHARSET:"CLIENT CHARSET">
+|   <K_SHOW_FILL_TABLES:"FULL TABLES" | "TABLES" >
+|   <K_SHOW_CREATE_TABLE:"CREATE TABLE" >
+| 	<K_SHOW_CREATE_PROCEDURE:"CREATE PROCEDURE" >
+|   <K_SHOW_FULL_COLUMNS:"FULL COLUMNS"| "COLUMNS" >
+| 	<K_CALL:"CALL" >
 /*
 |   <K_MICROSECOND:"MICROSECOND">
 |   <K_MILLISECOND:"MILLISECOND">
@@ -644,7 +648,9 @@ Statement parse()      :
     |
     statement = UpdateQuery()
   	|
-  	statement = ShowQuery() 
+  	statement = ShowQuery()
+ 	|
+ 	statement = CallQuery()	 
     |
     "SET" statement = PropertySetQuery(new PropertyStatement())
     |
@@ -778,9 +784,21 @@ Statement UpdateQuery():
 Statement ShowQuery():
 {	ShowStatement statement = new ShowStatement();
 	Expression expression = null;
-}{	(	  "SHOW" | < K_DESCRIBE >	) FromItem(statement) [expression = WhereClause(statement)]	{	 statement.setExpression(expression);
+}{	(	  ("SHOW" [ <K_SHOW_FILL_TABLES> |<K_SHOW_CREATE_TABLE >| <K_SHOW_FULL_COLUMNS>|< K_SHOW_CREATE_PROCEDURE > ] )
+		| < K_DESCRIBE >)
+	[<K_FROM >] [FromItem(statement)] [expression = WhereClause(statement)]	{	 statement.setExpression(expression);
 	 return statement;
 	}
+}
+
+Statement CallQuery():
+{	CallStatement statement = new CallStatement();
+	Expression expression = null;
+}
+{	<K_CALL> expression = SQLExpression(statement){
+	  statement.setExpression(expression);
+    	return statement;
+    }
 }
 
 Table UpdateStatement(Statement statement):
