@@ -46,11 +46,7 @@
 	<filelist dir="." id="etc.files">
 		<file name="build/LICENSE.txt" />
 		<file name="build/README.html" />
-	</filelist>
-
-	<filelist dir="." id="doc.files">
-		<file name="build/doc/amoeba-0.3.pdf" />
-		<file name="build/doc/changelogs.txt" />
+		<file name="build/changelogs.txt" />
 	</filelist>
 
 	<path id="classpath">
@@ -82,9 +78,6 @@
 			<filelist refid="etc.files" />
 		</copyfilelist>
 
-		<copyfilelist dest="${deploy.dir}/doc">
-			<filelist refid="doc.files" />
-		</copyfilelist>
 	</target>
 
 	<target name="compile" depends="prepare">
@@ -107,7 +100,6 @@
 
 			<tarfileset dir="${deploy.dir}">
 				<include name="lib/**" />
-				<include name="doc/**" />
 				<include name="conf/**" />
 				<include name="src/**" />
 				<exclude name="*/.svn/*" />
@@ -138,7 +130,6 @@
 
 			<zipfileset dir="${deploy.dir}">
 				<include name="lib/**" />
-				<include name="doc/**" />
 				<include name="conf/**" />
 				<include name="src/**" />
 				<exclude name="*/.svn/*" />
@@ -171,7 +162,6 @@
 
 			<tarfileset dir="${deploy.dir}">
 				<include name="lib/**" />
-				<include name="doc/**" />
 				<exclude name="conf/**" />
 				<exclude name="src/**" />
 				<exclude name="*/.svn/*" />
@@ -208,7 +198,6 @@
 
 			<tarfileset dir="${deploy.dir}">
 				<include name="lib/**" />
-				<include name="doc/**" />
 				<include name="conf/**" />
 				<exclude name="src/**" />
 				<exclude name="*/.svn/*" />
@@ -235,7 +224,6 @@
 
 			<tarfileset dir="${deploy.dir}">
 				<include name="lib/**" />
-				<include name="doc/**" />
 				<include name="conf/**" />
 				<include name="src/**" />
 				<exclude name="*/.svn/*" />
@@ -275,7 +263,6 @@
 
 			<zipfileset dir="${deploy.dir}">
 				<include name="lib/**" />
-				<include name="doc/**" />
 				<include name="conf/**" />
 				<include name="src/**" />
 				<exclude name="*/.svn/*" />
@@ -308,7 +295,6 @@
 
 			<tarfileset dir="${deploy.dir}">
 				<include name="lib/**" />
-				<include name="doc/**" />
 				<include name="conf/**" />
 				<exclude name="src/**" />
 				<exclude name="*/.svn/*" />
@@ -335,7 +321,6 @@
 
 			<tarfileset dir="${deploy.dir}">
 				<include name="lib/**" />
-				<include name="doc/**" />
 				<include name="conf/**" />
 				<exclude name="src/**" />
 				<exclude name="*/.svn/*" />
