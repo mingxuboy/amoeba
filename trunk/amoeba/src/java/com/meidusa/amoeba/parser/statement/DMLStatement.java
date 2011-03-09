@@ -79,7 +79,7 @@ public abstract class DMLStatement extends AbstractStatement {
         if (this.evaluatedTableMap == null) {
             currentEvaluatedTableMap = new HashMap<Table, Map<Column, Comparative>>();
             if (expression != null) {
-                evaluateExpression(expression, currentEvaluatedTableMap, parameters);
+                evaluateExpression(currentEvaluatedTableMap, parameters);
                 if (logger.isDebugEnabled()) {
                     logger.debug("expression:[" + expression + "] evaluated");
                 }
@@ -100,7 +100,7 @@ public abstract class DMLStatement extends AbstractStatement {
         return currentEvaluatedTableMap;
     }
 
-    protected static void evaluateExpression(Expression expression, Map<Table, Map<Column, Comparative>> tablesMap,
+    protected void evaluateExpression(Map<Table, Map<Column, Comparative>> tablesMap,
                                              Object[] parameters) {
         if (expression instanceof BaseExpressionList) {
             evaluateExpression((BaseExpressionList) expression, tablesMap, parameters);

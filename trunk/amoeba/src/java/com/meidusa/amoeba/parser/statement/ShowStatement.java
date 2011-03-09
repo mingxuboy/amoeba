@@ -16,11 +16,19 @@ import com.meidusa.amoeba.parser.expression.Expression;
 public class ShowStatement extends AbstractStatement  {
 	public static ShowStatement  STATMENT = new ShowStatement();
 	private Expression expression;
+	private boolean isMultiple = false;
 	public Expression getExpression() {
 		return expression;
 	}
 	public void setExpression(Expression expression) {
 		this.expression = expression;
+	}
+	
+	public boolean isMultiple() {
+		return isMultiple;
+	}
+	public void setMultiple(boolean isMultiple) {
+		this.isMultiple = isMultiple;
 	}
 
 }
