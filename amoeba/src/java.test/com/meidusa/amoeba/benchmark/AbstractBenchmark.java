@@ -44,7 +44,7 @@ public abstract class AbstractBenchmark {
 	private static Properties properties = new Properties();
 	protected static CmdLineParser parser = new CmdLineParser(System.getProperty("application", "benchmark"));
 	protected static CmdLineParser.Option debugOption = parser.addOption(new BooleanOption('d', "debug", false,false,true,"show the interaction with the server-side information"));
-	protected static CmdLineParser.Option portOption = parser.addOption(new IntegerOption('p', "port",true,true,"server port"));
+	protected static CmdLineParser.Option portOption = parser.addOption(new IntegerOption('P', "port",true,true,"server port"));
 	protected static CmdLineParser.Option hostOption = parser.addOption(new StringOption('h', "host",true,true,"127.0.0.1","server host"));
 	protected static CmdLineParser.Option connOption = parser.addOption(new IntegerOption('c', "conn",true,true,"The number of concurrent connections"));
 	protected static CmdLineParser.Option totalOption = parser.addOption(new LongOption('n', "total",true,true,"total requests"));
