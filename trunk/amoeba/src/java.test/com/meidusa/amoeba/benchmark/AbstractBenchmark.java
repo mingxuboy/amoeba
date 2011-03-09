@@ -308,30 +308,28 @@ public abstract class AbstractBenchmark {
 		long endBenchmarkTime = System.nanoTime();
 		long min = benckmark.benchmarkClientList.get(0).min;
 		long max = 0;
-		long average = 0;
-		long cost = 0;
-		long count = 0;
 		long minStart = benckmark.benchmarkClientList.get(0).start;
 		long maxend = 0;
+		long average = 0;
+		int totleConnection = 0;
 		for(AbstractBenchmarkClient<?> connection: benckmark.benchmarkClientList){
 			if(connection.count>0){
 				min = Math.min(min, connection.min);
 				max = Math.max(max, connection.max);
-				cost += (connection.end - connection.start);
-				count += connection.count;
+				average += (connection.end - connection.start)/connection.count;
 				minStart = Math.min(minStart,connection.start);
 				maxend = Math.max(maxend, connection.end);
+				totleConnection ++;
 			}
 		}
-		average = cost / total;
 		long time = TimeUnit.MILLISECONDS.convert((maxend - minStart),TimeUnit.NANOSECONDS);
 		System.out.println("completed requests total="+total+ ", errorNum="+errorNum.get()+", cost="+TimeUnit.MILLISECONDS.convert((maxend - minStart), TimeUnit.NANOSECONDS)+"ms , TPS="+ (time>0?((long)total*1000)/time:total)+"/s");
 		System.out.println("min="+TimeUnit.MILLISECONDS.convert(min, TimeUnit.NANOSECONDS)+"ms");
 		System.out.println("max="+TimeUnit.MILLISECONDS.convert(max, TimeUnit.NANOSECONDS)+"ms");
-		System.out.println("average="+TimeUnit.MILLISECONDS.convert(average, TimeUnit.NANOSECONDS)+"ms");
+		average = TimeUnit.MILLISECONDS.convert(average, TimeUnit.NANOSECONDS)/totleConnection;
+		System.out.println("average="+average+"ms");
 		
 		System.out.println("create Connections time="+TimeUnit.MILLISECONDS.convert(createConnectionEndTime - createConnectionStartTime, TimeUnit.NANOSECONDS)+"ms");
-		
 		long tpsTime = TimeUnit.MILLISECONDS.convert(endBenchmarkTime - createConnectionEndTime, TimeUnit.NANOSECONDS);
 		System.out.println("TPS(after connected)="+(tpsTime>0?((long)total*1000)/tpsTime:total)+"/s");
 		manager.shutdown();
