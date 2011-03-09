@@ -229,12 +229,19 @@ public abstract class AbstractBenchmark {
 		System.out.println("Connection manager started....");
 		new Thread(){
 			long lastCount = responseLatcher.getCount();
+			long lastTime = System.currentTimeMillis();
 			{this.setDaemon(true);}
 			public void run(){
+				
 				while(responseLatcher.getCount()>0){
 					long current = responseLatcher.getCount();
-					long tps = lastCount - current;
+					long currentTime = System.currentTimeMillis();
+					long tps = 0;
+					if(currentTime > lastTime){
+						tps = (lastCount - current) * 1000 /(currentTime-lastTime);
+					}
 					lastCount = current;
+					lastTime = currentTime;
 					System.out.println(new Date() +"     compeleted="+(total - lastCount)+ " TPS="+tps +" ,conns="+manager.getSize());
 					try {
 						Thread.sleep(1000);
