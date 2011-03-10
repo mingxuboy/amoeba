@@ -2,13 +2,13 @@
 /*
  * Copyright (C) 2008 Struct chen <piratebase@sina.com>
  * 	This program is free software; you can redistribute it and/or modify it under the terms of 
- * the GNU AFFERO GENERAL PUBLIC LICENSE as published by the Free Software Foundation; either version 3 of the License, 
+ * the GNU General Public License as published by the Free Software Foundation; either version 3 of the License, 
  * or (at your option) any later version. 
  * 
  * 	This program is distributed in the hope that it will be useful, 
  * but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
- * See the GNU AFFERO GENERAL PUBLIC LICENSE for more details. 
- * 	You should have received a copy of the GNU AFFERO GENERAL PUBLIC LICENSE along with this program; 
+ * See the GNU General Public License for more details. 
+ * 	You should have received a copy of the GNU General Public License along with this program; 
  * if not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 package com.meidusa.amoeba.mysql.parser.sql;
@@ -229,67 +229,69 @@ public interface MysqlParserConstants {
   /** RegularExpression Id. */
   int K_DESCRIBE = 107;
   /** RegularExpression Id. */
-  int K_IGNORE_INDEX = 108;
+  int K_ASC = 108;
   /** RegularExpression Id. */
-  int K_FORCE_INDEX = 109;
+  int K_IGNORE_INDEX = 109;
   /** RegularExpression Id. */
-  int K_TRANSACTION_ISOLATION_LEVEL = 110;
+  int K_FORCE_INDEX = 110;
   /** RegularExpression Id. */
-  int K_DUPLICATE = 111;
+  int K_TRANSACTION_ISOLATION_LEVEL = 111;
   /** RegularExpression Id. */
-  int K_KEY = 112;
+  int K_DUPLICATE = 112;
   /** RegularExpression Id. */
-  int K_START_TRANSACTION = 113;
+  int K_KEY = 113;
   /** RegularExpression Id. */
-  int K_SESSION = 114;
+  int K_START_TRANSACTION = 114;
   /** RegularExpression Id. */
-  int K_TRANSACTION_READ_COMMITTED = 115;
+  int K_SESSION = 115;
   /** RegularExpression Id. */
-  int K_TRANSACTION_READ_UNCOMMITTED = 116;
+  int K_TRANSACTION_READ_COMMITTED = 116;
   /** RegularExpression Id. */
-  int K_TRANSACTION_REPEATABLE_READ = 117;
+  int K_TRANSACTION_READ_UNCOMMITTED = 117;
   /** RegularExpression Id. */
-  int K_TRANSACTION_SERIALIZABLE = 118;
+  int K_TRANSACTION_REPEATABLE_READ = 118;
   /** RegularExpression Id. */
-  int K_CLIENT_CHARSET = 119;
+  int K_TRANSACTION_SERIALIZABLE = 119;
   /** RegularExpression Id. */
-  int K_SHOW_FILL_TABLES = 120;
+  int K_CLIENT_CHARSET = 120;
   /** RegularExpression Id. */
-  int K_SHOW_CREATE_TABLE = 121;
+  int K_SHOW_FILL_TABLES = 121;
   /** RegularExpression Id. */
-  int K_SHOW_CREATE_PROCEDURE = 122;
+  int K_SHOW_CREATE_TABLE = 122;
   /** RegularExpression Id. */
-  int K_SHOW_FULL_COLUMNS = 123;
+  int K_SHOW_CREATE_PROCEDURE = 123;
   /** RegularExpression Id. */
-  int K_CALL = 124;
+  int K_SHOW_FULL_COLUMNS = 124;
   /** RegularExpression Id. */
-  int INTEGER_LITERAL = 125;
+  int K_CALL = 125;
   /** RegularExpression Id. */
-  int FLOATING_POINT_LITERAL = 126;
+  int INTEGER_LITERAL = 126;
   /** RegularExpression Id. */
-  int EXPONENT = 127;
+  int FLOATING_POINT_LITERAL = 127;
   /** RegularExpression Id. */
-  int DIGIT = 128;
+  int EXPONENT = 128;
   /** RegularExpression Id. */
-  int POOL = 129;
+  int DIGIT = 129;
   /** RegularExpression Id. */
-  int LINE_COMMENT = 130;
+  int POOL = 130;
   /** RegularExpression Id. */
-  int MULTI_LINE_COMMENT = 131;
+  int LINE_COMMENT = 131;
   /** RegularExpression Id. */
-  int IDENTIFIER = 132;
+  int MULTI_LINE_COMMENT = 132;
   /** RegularExpression Id. */
-  int LETTER = 133;
+  int IDENTIFIER = 133;
   /** RegularExpression Id. */
-  int SPECIAL_CHARS = 134;
+  int LETTER = 134;
   /** RegularExpression Id. */
-  int STRING_LITERAL = 135;
+  int SPECIAL_CHARS = 135;
   /** RegularExpression Id. */
-  int S_QUOTED_IDENTIFIER = 136;
+  int STRING_LITERAL = 136;
   /** RegularExpression Id. */
-  int S_COMMA_IDENTIFIER = 137;
+  int S_QUOTED_IDENTIFIER = 137;
   /** RegularExpression Id. */
-  int S_PARAMETER_MARKER = 138;
+  int S_COMMA_IDENTIFIER = 138;
+  /** RegularExpression Id. */
+  int S_PARAMETER_MARKER = 139;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -406,6 +408,7 @@ public interface MysqlParserConstants {
     "\"COMMIT\"",
     "\"ROLLBACK\"",
     "<K_DESCRIBE>",
+    "\"asc\"",
     "\"IGNORE INDEX\"",
     "\"FORCE INDEX\"",
     "\"TRANSACTION ISOLATION LEVEL\"",
@@ -463,7 +466,6 @@ public interface MysqlParserConstants {
     "\".*\"",
     "\"NATURAL\"",
     "\"CROSS\"",
-    "\"rand(\"",
     "\"+\"",
     "\"-\"",
     "\"|\"",

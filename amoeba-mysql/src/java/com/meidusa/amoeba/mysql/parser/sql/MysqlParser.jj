@@ -317,6 +317,7 @@ TOKEN: /* SQL Keywords. prefixed with K_ to avoid name clashes */
 |	<K_COMMIT:"COMMIT">
 |	<K_ROLLBACK:"ROLLBACK">
 | 	< K_DESCRIBE:"describe"|"desc" >
+|   <K_ASC:"asc">
 | < K_IGNORE_INDEX:"IGNORE INDEX" >
 | < K_FORCE_INDEX:"FORCE INDEX" >
 |	<K_TRANSACTION_ISOLATION_LEVEL:"TRANSACTION ISOLATION LEVEL">
@@ -1469,8 +1470,7 @@ void GroupByColumn(Statement statement):
 void OrderByClause(Statement statement):
 {}
 {
-    "ORDER" "BY" ("rand(" ")" |( OrderByColumn(statement) [(<IDENTIFIER>|<S_COMMA_IDENTIFIER>)]
-        ("," OrderByColumn(statement) [(<IDENTIFIER>|<S_COMMA_IDENTIFIER>)])*))
+    "ORDER" "BY" OrderByColumn(statement) [(<K_DESCRIBE>|<K_ASC>)] ("," OrderByColumn(statement) [(<K_DESCRIBE>|<K_ASC>)])*
 }
 
 
@@ -1996,7 +1996,7 @@ void FunctionCall(Statement statement)       :
     // function and custom functions
 
     EntityName() [ "." EntityName() ["." EntityName()]]
-    "(" ["DISTINCT" | "ALL"] (SQLExpressionList(statement) | "*") ")"
+    "(" [["DISTINCT" | "ALL"] (SQLExpressionList(statement) | "*")] ")"
 }
 
 
