@@ -92,4 +92,6 @@
 	<function name="INET_ATON" class="com.meidusa.amoeba.parser.function.UnknowableFunction"/>
 	<function name="REPLACE" class="com.meidusa.amoeba.parser.function.UnknowableFunction"/>
 	<function name="IF" class="com.meidusa.amoeba.parser.function.UnknowableFunction"/>
+	<function name="FROM_UNIXTIME" class="com.meidusa.amoeba.parser.function.UnknowableFunction"/>
+	<function name="rand" class="com.meidusa.amoeba.parser.function.UnknowableFunction"/>
 </amoeba:function>
