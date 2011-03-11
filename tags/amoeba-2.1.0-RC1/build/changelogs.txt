@@ -1,0 +1,75 @@
+更多请参阅amoeba Blog ： http://amoeba.meidusa.com
+
+amoeba for mysql
+2010-06-01 amoeba-mysql-1.2.0-GA
+1、修复ConnectionManager 在关闭 connection的时候出现异常导致ConnectionManager无法正常工作
+2、修复tableRule在没有规则的情况下无法正常工作的bug
+3、增加queryTimeout机制，具体配置请参考 conf/amoeba.xml，默认时间为60s(timeunit:second)
+
+
+2010-05-01 amoeba-mysql-1.2.0-RC3
+1、修复了select last_insert_id() 返回id过大以后，客户端无法获得的问题
+2、支持PHP的PDO，个人不是PHP程序员，希望有更多关于PDO连接amoeba的反馈
+3、增强了amoeba与mysql的连接池心跳检测机制
+4、另外提醒使用amoeba的同仁，建议采用prepared statement来访问amoeba，这样amoeba就不需要重复解析sql语句。会节约不少的资源
+5、amoeba的日志输出，默认级别是info甚至更高。需要看到更详细的日志信息，请修改amoeba下面的conf/log4j.xml
+6、稳定性增强
+7、修正错别字(isReadStatment  –> isReadStatement )
+8、修正insert语句中包含 ON DUPLICATE KEY UPDATE  关键字而无法解析的问题
+
+2010-04-05 amoeba-mysql-1.2.0-RC1
+1、添加规则函数case、range、增加表达式   （boolean表达式 ? 表达式1: 表达式2）
+
+range函数：
+  id in range(12,16,0,1) 表示 id>12 and id<=16 
+  id in range(12,16,0,0) 表示 id>12 and id<16 
+  id in range(12,16,1,0) 表示 id>=12 and id<16 
+  id in range(12,16,1,1) 表示 id>=12 and id<=16 
+
+case 函数
+   case  (abs(hash(SDID)) % 32)  when range(0,8,1,0) then (isReadStatement ? 'server1' : 'server1_write');
+           when range(8,16,1,0) then (isReadStatement ? 'server2' : 'server2_write');
+           when range(16,24,1,0) then '(isReadStatement ? 'server3' : 'server3_write')';
+           else 'server4'
+   END CASE;
+                           
+2、增加bool 类型的规则内置变量 isReadStatement
+	用户可以在规则的表达式中使用比如 :  isReadStatement? 'pool1' : 'pool2'
+3、稳定性增强，解决了在大并发下需要多个数据库聚合结果集的时候出现数据异常而无法返回给客户端的问题
+4、规则属性新增加ruleResult属性，有3种类型（BOOLEAN、POOLNAME、INDEX）
+	BOOLEAN -- 默认值、结果一定是布尔值，表示执行的sql是否匹配当前的规则
+	POOLNAME -- 结果是字符串，是由dbpool名字组成的字符串，多个pool以分号间隔（rule中的defaultPools、readPools、writePools无效）
+	INDEX -- 结果是数字 ，如果>=0 则表示当前规则匹配，并且将相关index的pool返回
+	
+    <tableRule name="LIST_FRIEND_GROUP,RELATION_FOLLOW" schema="sd_relation" 
+    		defaultPools="server1,server2,server3,server4">
+
+   		<rule name="rule1" ruleResult="POOLNAME">
+                   <parameters>SDID</parameters>
+                   <expression><![CDATA[
+                           var hashid = abs(hash(SDID)) % 32; 
+                           case  hashid  when range(0,8,1,0) then (isReadStatement ? 'server1' : 'server1_write');
+                                   when range(8,16,1,0) then (isReadStatement ? 'server2' : 'server2_write');
+                                   when range(16,24,1,0) then '(isReadStatement ? 'server3' : 'server3_write')';
+                                   when range(24,32,1,0) then '(isReadStatement ? 'server4' : 'server4_write')';'
+                           END CASE;
+
+                   ]]></expression>
+           </rule>
+    </tableRule>
+5、支持select last_insert_id()/ @@Identity －－最后一次自增长的ID
+6、规则函数中，增加自定义变量（格式 var 变量名称= 变量值 ;） 比如： var hashid = abs(hash(SDID)) % 32;
+
+2010年01月18日发布1.1.0-BETA，主要修改内容：
+1、解决amoeba运行一段时间以后可能出现阻塞
+2、修复个别sql解析问题
+3、重构了ConnectionManager，去除之前读取数据包采用线池的方式，改成目前采用MultiConnectionManagerWrapper，采用多个（具体多少默认由可用的cpu 核数量决定）ConnectionManager进行负责网络IO， 而每个ConnectionManager都是一个单线程
+注意：与之前的amoeba.xml在配置上有点出入（defaultManager 的配置与之前不一样了）
+
+2009年06月28日 发布 1.0.0-BETA,主要修改以下内容:
+1、修复sql解析 explain 关键字开始的sql
+2、修复FORCE INDEX (xx) 之类的sql无法解析问题
+3、修复包含转义符合在内的sql 比如：insert into xx values('\'test\') 
+4、修复包含 Order by rand()的sql
+5、调整默认 网络接受发送缓冲区成128k
+ 

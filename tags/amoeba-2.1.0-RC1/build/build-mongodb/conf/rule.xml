@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="gbk"?>
+<!DOCTYPE amoeba:rule SYSTEM "rule.dtd">
+
+<amoeba:rule xmlns:amoeba="http://amoeba.meidusa.com/">
+	<tableRule name="test" schema="test" defaultPools="server0">
+		<!--
+		<rule name="rule1">
+			<parameters>ID</parameters>
+			<expression><![CDATA[ ID <= 1000000]]></expression>
+			<defaultPools>server1</defaultPools>
+			<readPools>server1</readPools>
+			<writePools>server1</writePools>
+		</rule>
+		
+		<rule name="rule2">
+			<parameters>ID</parameters>
+			<expression><![CDATA[ ID between 1000001 and 2000000 ]]></expression>
+			<defaultPools>server2</defaultPools>
+			<writePools>server2</writePools>
+			<readPools>server2</readPools>
+		</rule>
+		
+		<rule name="rule4">
+			<parameters>ID</parameters>
+			<expression><![CDATA[ ID > 20000000 ]]></expression>
+			<defaultPools>server3</defaultPools>
+		</rule>
+		-->
+		<!--
+		<rule name="rule3">
+			<parameters>ID,CREATE_TIME</parameters>
+			<expression><![CDATA[ID>4 or CREATE_TIME between to_date('2008-11-12 00:00:00.0000') and to_date('2008-12-10 00:00:00.0000') ]]></expression>
+			<defaultPools>server3</defaultPools>
+		</rule>
+		-->
+		<rule name="rule1" ruleResult="POOLNAME">
+			<parameters>s</parameters>
+			<expression><![CDATA[
+		         var hashid = abs(hash(s)) % 1; 
+		         'server'||hashid
+		        
+		       ]]></expression>
+		</rule>
+	</tableRule>
+	
+	<!-- list database command will be matcher this rule -->
+	<tableRule name="listDatabases,^*.system.namespaces" schema="admin" defaultPools="server0,server1"/>
+</amoeba:rule>
