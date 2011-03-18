@@ -6,9 +6,10 @@ options {
    	NODE_PREFIX="Mysql";
    	NODE_SCOPE_HOOK=true;
    	MULTI = true;
-	//VISITOR = true;
+	VISITOR = false;
 	NODE_DEFAULT_VOID = true;
    	STATIC = false;
+   	//NODE_CLASS = "com.meidusa.amoeba.mysql.parser.data.MysqlSimpleNode";
 }
 
 PARSER_BEGIN(MysqlParser)
@@ -394,14 +395,11 @@ TOKEN : /* Numeric Constants */
 				"\uff10" - "\uff19"
 			]>
 }
-< POOL_AND_RULE > TOKEN : { 
-< POOL : "#pool" >
-} 
+ 
 SPECIAL_TOKEN:
 {
    <LINE_COMMENT: "--"(~["\r","\n"])*>
-|  <MULTI_LINE_COMMENT: "/*" (~["*"])* "*" ("*" | (~["*","/"] (~["*"])* "*"))* "/"> 
-}
+|  <MULTI_LINE_COMMENT: "/*" (~["*"])* "*" ("*" | (~["*","/"] (~["*"])* "*"))*  "/">}
 
 TOKEN:
 {
@@ -625,7 +623,7 @@ TOKEN:
 |   < STRING_LITERAL: ( "_" <IDENTIFIER> | "x" )* "'" ((~["'"])|("\\" "'"))* "'">
 |   < S_QUOTED_IDENTIFIER: "\"" (~["\n","\r","\""])* "\"" >
 |	< S_COMMA_IDENTIFIER: "`" ((["@"])*( <LETTER> )+ ( <DIGIT> | "-"|<LETTER> |<SPECIAL_CHARS>)*) "`">
-|   < S_PARAMETER_MARKER: "?">
+|   < S_PARAMETER_MARKER: "?" | "$(" <INTEGER_LITERAL> ")">
 
 }
 
@@ -636,7 +634,7 @@ Statement parse() #void:
 	Statement statement = null;
 }
 {
-    ["EXPLAIN"] (
+   ["EXPLAIN"] (
     statement = DeleteQuery()
     |
     statement = InsertQuery()
@@ -750,6 +748,8 @@ Statement UpdateQuery():
 	Table table = null;
 	BaseExpressionList andExpression = new AndExpression();
 	DMLStatement statement = new UpdateStatement();
+	Token parameter = null;
+	int index = 0;
 }
 {
    	(table = UpdateStatement(statement)
@@ -764,11 +764,19 @@ Statement UpdateQuery():
           } ]
 
 	[<K_LIMIT>
-    (<S_PARAMETER_MARKER>{
-	   	andExpression.addExpression(new ParameterExpression(parameterIndex++));
-	} | <INTEGER_LITERAL>)[("," | <K_OFFSET> ) (<S_PARAMETER_MARKER>
+    (parameter = <S_PARAMETER_MARKER>{
+      	index = parameterIndex++;
+      	if(parameter.image.startsWith("${"))      	{			index = Integer.parseInt(parameter.image.substring(2,parameter.image.length()-1));
+      	}
+	   	andExpression.addExpression(new ParameterExpression(index));
+	} | <INTEGER_LITERAL>)[("," | <K_OFFSET> ) (parameter = <S_PARAMETER_MARKER>
 	{
-	   	andExpression.addExpression(new ParameterExpression(parameterIndex++));
+	  	index = parameterIndex++;
+      	if(parameter.image.startsWith("${"))
+      	{
+			index = Integer.parseInt(parameter.image.substring(2,parameter.image.length()-1));
+      	}
+	   	andExpression.addExpression(new ParameterExpression(index));
 	} |<INTEGER_LITERAL> )
     ]])
     {
@@ -781,9 +789,11 @@ Statement UpdateQuery():
 Statement ShowQuery():
 {	ShowStatement statement = new ShowStatement();
 	Expression expression = null;
-}{	(	  ("SHOW" [ <K_SHOW_FILL_TABLES> |<K_SHOW_CREATE_TABLE >| <K_SHOW_FULL_COLUMNS>|< K_SHOW_CREATE_PROCEDURE > ] )
+	Token valueToken = null;
+}{	(	  (valueToken = "SHOW" [ <K_SHOW_FILL_TABLES> |<K_SHOW_CREATE_TABLE >| <K_SHOW_FULL_COLUMNS>|< K_SHOW_CREATE_PROCEDURE > ] )
 		| < K_DESCRIBE >)
 	[<K_FROM >] [FromItem(statement)] [expression = WhereClause(statement)]	{	 statement.setExpression(expression);
+	 
 	 return statement;
 	}
 }
@@ -859,6 +869,8 @@ Statement DeleteQuery():
 	Table table = null;
 	DMLStatement statement = new DeleteStatement();
 	AndExpression andExpression = new AndExpression();
+	Token parameter = null;
+	int index = 0;
 }
 {
     (      (table = DeleteStatement()
@@ -871,11 +883,21 @@ Statement DeleteQuery():
     }
     [ OrderByClause(statement) ]
     [<K_LIMIT>
-    (<S_PARAMETER_MARKER>{
-	   	andExpression.addExpression(new ParameterExpression(parameterIndex++));
-	} | <INTEGER_LITERAL>)[("," | <K_OFFSET> ) (<S_PARAMETER_MARKER>
+    (parameter = <S_PARAMETER_MARKER>{
+      index = parameterIndex++;
+	if(parameter.image.startsWith("${"))
 	{
-	   	andExpression.addExpression(new ParameterExpression(parameterIndex++));
+		index = Integer.parseInt(parameter.image.substring(2,parameter.image.length()-1));
+	}
+	   	andExpression.addExpression(new ParameterExpression(index));
+	} | <INTEGER_LITERAL>)[("," | <K_OFFSET> ) (parameter = <S_PARAMETER_MARKER>
+	{
+	  index = parameterIndex++;
+		if(parameter.image.startsWith("${"))
+		{
+			index = Integer.parseInt(parameter.image.substring(2,parameter.image.length()-1));
+		}
+	   	andExpression.addExpression(new ParameterExpression(index));
 	} |<INTEGER_LITERAL> )
     ]]  )  {    
  	 return statement;
@@ -1276,6 +1298,8 @@ Expression SubSelectStatement(Statement statement):
 	Expression expression = null;
 	Expression fromExpression = null;
 	AndExpression andExpression = new AndExpression();
+	Token parameter = null;
+	int index = 0;
 }
 {
     (SelectClause(statement)
@@ -1289,10 +1313,20 @@ Expression SubSelectStatement(Statement statement):
 	  }    }]
     [ GroupByClause(statement) ]
     [ OrderByClause(statement) ]
-    [<K_LIMIT>    (<S_PARAMETER_MARKER>{
-	   	andExpression.addExpression(new ParameterExpression(parameterIndex++));
-	} | <INTEGER_LITERAL>)[("," | <K_OFFSET> ) (<S_PARAMETER_MARKER>	{
-	   	andExpression.addExpression(new ParameterExpression(parameterIndex++));	} |<INTEGER_LITERAL> )
+    [<K_LIMIT>    (parameter = <S_PARAMETER_MARKER>{
+      	index = parameterIndex++;
+		if(parameter.image.startsWith("${"))
+		{
+			index = Integer.parseInt(parameter.image.substring(2,parameter.image.length()-1));
+		}
+	   	andExpression.addExpression(new ParameterExpression(index));
+	} | <INTEGER_LITERAL>)[("," | <K_OFFSET> ) (parameter = <S_PARAMETER_MARKER>	{
+	  	index = parameterIndex++;
+		if(parameter.image.startsWith("${"))
+		{
+			index = Integer.parseInt(parameter.image.substring(2,parameter.image.length()-1));
+		}
+	   	andExpression.addExpression(new ParameterExpression(index));	} |<INTEGER_LITERAL> )
     ]])
     {
       if(andExpression.getSize() >0)      {		return andExpression;
@@ -1304,7 +1338,7 @@ Expression SubSelectStatement(Statement statement):
 void SelectClause(Statement statement):
 {}
 {
-	  "SELECT" [< POOL >] [ "ALL" | "DISTINCT"|"DISTINCTROW" ]["HIGH_PRIORITY"]["STRAIGHT_JOIN"] ["SQL_SMALL_RESULT"] ["SQL_BIG_RESULT"] ["SQL_BUFFER_RESULT"] ["SQL_CACHE" | "SQL_NO_CACHE"] ["SQL_CALC_FOUND_ROWS"] SelectList(statement)
+	  "SELECT" [ "ALL" | "DISTINCT"|"DISTINCTROW" ]["HIGH_PRIORITY"]["STRAIGHT_JOIN"] ["SQL_SMALL_RESULT"] ["SQL_BIG_RESULT"] ["SQL_BUFFER_RESULT"] ["SQL_CACHE" | "SQL_NO_CACHE"] ["SQL_CALC_FOUND_ROWS"] SelectList(statement)
 }
 
 /* Checks for whatever follows  SELECT */
@@ -1887,6 +1921,8 @@ Expression SQLPrimaryExpression(Statement statement)#void :
 	Expression expression = null;
 	Comparable value = null;
 	boolean not = false;
+	Token parameter = null;
+	int index = 0;
 }
 {(
 t=<K_NULL>{
@@ -1924,8 +1960,12 @@ t=<K_NULL>{
 		temp = replaceEscape(temp);
 		return new ConstantExpression(temp);
 }
-|  t= <S_PARAMETER_MARKER>{
-	int index = parameterIndex++;
+|  parameter = <S_PARAMETER_MARKER>{
+	index = parameterIndex++;
+	if(parameter.image.startsWith("${"))
+	{
+		index = Integer.parseInt(parameter.image.substring(2,parameter.image.length()-1));
+	}
 	return new ParameterExpression(index);
 }
 | ("INTERVAL" expression=SQLExpression(statement) (token = "YEAR" | token = "MONTH" | token = "DAY" | token = "HOUR" | token = "MINUTE" | token = "SECOND" | token = "MICROSECOND")){

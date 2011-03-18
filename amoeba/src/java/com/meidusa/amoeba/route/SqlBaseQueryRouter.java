@@ -25,6 +25,8 @@ public abstract class SqlBaseQueryRouter extends AbstractQueryRouter<DatabaseCon
 
     private Lock                                    mapLock         = new ReentrantLock(false);
     
+    private boolean replaceEscapeSymbol = false;
+    
     protected void beforeSelectPool(DatabaseConnection connection, SqlQueryObject queryObject){
     	Statement statment = parseStatement(connection,queryObject.sql);
 		if(statment instanceof DMLStatement){
@@ -65,7 +67,37 @@ public abstract class SqlBaseQueryRouter extends AbstractQueryRouter<DatabaseCon
         }
 		return null;
 	}
-
+	
+	protected String amoebaRouterSql(String sql){
+		sql = sql.trim();
+		while(sql.startsWith("/*")){
+			int index = sql.indexOf("*/");
+			if(index >0){
+				String comment = sql.substring(2, index -1);
+				int sIndex = comment.indexOf("@amoeba=(");
+				int lIndex = comment.lastIndexOf(")");
+				if(sIndex>0 && sIndex < lIndex){
+					String subSql = comment.substring(sIndex+9, lIndex);
+					sql = subSql;
+				}else{
+					sql = sql.substring(index+2);
+				}
+			}else{
+				break;
+			}
+			sql = sql.trim();
+			
+		}
+		
+		if(replaceEscapeSymbol){
+			String s = new String(new char[]{(char)0x5c,(char)0x5c});
+			sql = StringUtil.replace(sql,s,"");
+			s = new String(new char[]{(char)0x5c,(char)0x27});
+			sql = StringUtil.replace(sql,s,"");
+		}
+		return sql;
+	}
+	
 	public Statement parseStatement(DatabaseConnection connection, String sql) {
         Statement statment = null;
         String defaultSchema = (connection == null || StringUtil.isEmpty(connection.getSchema())) ? null : connection.getSchema();
@@ -84,7 +116,7 @@ public abstract class SqlBaseQueryRouter extends AbstractQueryRouter<DatabaseCon
                     return statment;
                 }
 
-                Parser parser = newParser(sql);
+                Parser parser = newParser(amoebaRouterSql(sql));
                 parser.setFunctionMap(this.functionMap);
                 if (defaultSchema != null) {
                     Schema schema = new Schema();
