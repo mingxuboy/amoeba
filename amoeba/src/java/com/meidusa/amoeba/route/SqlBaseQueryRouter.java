@@ -70,24 +70,20 @@ public abstract class SqlBaseQueryRouter extends AbstractQueryRouter<DatabaseCon
 	
 	protected String amoebaRouterSql(String sql){
 		sql = sql.trim();
-		while(sql.startsWith("/*")){
-			int index = sql.indexOf("*/");
-			if(index >0){
-				String comment = sql.substring(2, index -1);
-				int sIndex = comment.indexOf("@amoeba=(");
-				int lIndex = comment.lastIndexOf(")");
-				if(sIndex>0 && sIndex < lIndex){
-					String subSql = comment.substring(sIndex+9, lIndex);
-					sql = subSql;
-				}else{
-					sql = sql.substring(index+2);
-				}
-			}else{
-				break;
+		int sIndex = sql.indexOf("@amoeba=(");
+		if(sIndex >0){
+			String subSql = sql.substring(sIndex+9);
+			int lIndex = subSql.indexOf("*/");
+			if(lIndex>0 ){
+				subSql = subSql.substring(0,lIndex);
+				lIndex = subSql.lastIndexOf(")");
+				subSql = subSql.substring(0,lIndex);
+				sql = subSql;
 			}
-			sql = sql.trim();
-			
 		}
+		
+		sql = sql.trim();
+			
 		
 		if(replaceEscapeSymbol){
 			String s = new String(new char[]{(char)0x5c,(char)0x5c});
