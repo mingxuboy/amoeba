@@ -20,7 +20,7 @@ import com.meidusa.amoeba.mysql.parser.sql.Token;
  * @author <a href=mailto:piratebase@sina.com>Struct chen</a>
  *
  */
-public abstract class MysqlSimpleNode{
+public abstract class MysqlSimpleNode {
 	  protected Token firstToken;
 	  protected Token lastToken;
 	  protected String nodeName;

@@ -51,7 +51,7 @@ import com.meidusa.amoeba.util.Tuple;
  * @author struct
  */
 public abstract class  AbstractQueryRouter<T extends Connection,V> implements QueryRouter<T,V>, Initialisable ,ContextChangedListener {
-	protected static final String _CURRENT_QUERY_OBJECT_ = "_CURRENT_STATEMENT_";
+	public static final String _CURRENT_QUERY_OBJECT_ = "_CURRENT_QUERY_OBJECT_";
 	protected static Logger logger = Logger.getLogger(AbstractQueryRouter.class);
 	private Map<String,Pattern> patternMap = new HashMap<String,Pattern>();
 	

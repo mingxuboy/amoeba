@@ -13,13 +13,13 @@ public class PreparedStatmentTest {
 	 * @throws Exception
 	 */
 	public static void main(String[] args) throws Exception {
-		for (int j = 0; j < 10; j++) {
+		for (int j = 0; j < 1; j++) {
 			Thread thread =new Thread() {
 				public void run() {
 					Connection conn = null;
 					PreparedStatement statment = null;
 					ResultSet result = null;
-					for (int i = 0; i < 10000; i++) {
+					for (int i = 0; i < 1; i++) {
 					try {
 						Properties props = new Properties();
 
@@ -40,11 +40,11 @@ public class PreparedStatmentTest {
 						
 						conn = DriverManager
 								.getConnection(
-										"jdbc:mysql://127.0.0.1:8066/test?useUnicode=true&characterEncoding=utf-8&useServerPrepStmts=true&useCompression=true",
+										"jdbc:mysql://127.0.0.1:8066/test?useUnicode=true&useServerPrepStmts=true",
 										"root", null);
 						
 							statment = conn
-									.prepareStatement("SELECT ID, SDID, F_SDID, APP_ID, RESERVE1, RESERVE2, RESERVE3 FROM SD_RELATION.RELATION_ORIGIN WHERE SDID =? AND F_SDID=? AND APP_ID = ?");
+									.prepareStatement("/*  @amoeba=(select * from SD_RELATION.RELATION_ORIGIN where SDID=$(0)) */SELECT ID FROM SD_RELATION.RELATION_ORIGIN WHERE SDID =? AND F_SDID=? AND APP_ID = ?");
 							statment.setLong(1, 1);
 							statment.setLong(2, 2);
 							statment.setLong(3, 1);

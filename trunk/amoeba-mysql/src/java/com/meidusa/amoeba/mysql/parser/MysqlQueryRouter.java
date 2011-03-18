@@ -49,8 +49,11 @@ public class MysqlQueryRouter extends SqlBaseQueryRouter{
 				}
 				sql = sql.trim();
 			}
-			if(sql.length()>4 && sql.subSequence(0, 4).toString().equalsIgnoreCase("show")){
-				return defaultPools;
+			if(sql.length()>4){
+				String sqlHead = sql.substring(0, 4);
+				if(sqlHead.equalsIgnoreCase("show") || sqlHead.equalsIgnoreCase("help") ){
+					return defaultPools;
+				}
 			}
 		}
 		return super.selectPool(connection, queryObject);
