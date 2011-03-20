@@ -22,7 +22,7 @@
 	
 	
 	<sql><![CDATA[
-		SELECT /*  #{pool:'qwer'} */ * FROM AA WHERE ID = 'ASDF\'ADF'
+		SELECT /* @amoeba(5)=(select * from abc) */ * FROM AA WHERE ID = 'ASDF\'ADF'
 	]]></sql>
 
 
