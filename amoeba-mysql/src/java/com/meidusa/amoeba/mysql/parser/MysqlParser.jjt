@@ -67,7 +67,13 @@ public class MysqlParser implements com.meidusa.amoeba.parser.Parser{
 	public void setDefaultSchema(Schema schema){
 		defaultSchema = schema;
 	}
-	
+	private int parameterCount = 0;
+
+	public int getParameterCount()
+	{
+
+		return this.parameterCount;
+	}
 	
     /**
      * main method to test parser
@@ -632,9 +638,14 @@ Statement parse() #void:
 {
 	Expression expression = null;
 	Statement statement = null;
+	Token parameterCountToken = null;
 }
 {
-   ["EXPLAIN"] (
+   ["EXPLAIN"] [
+    ( "@amoeba" ["(" parameterCountToken= < INTEGER_LITERAL >
+    {
+      parameterCount = Integer.parseInt(parameterCountToken.image);
+    } ")" ] "=" )](
     statement = DeleteQuery()
     |
     statement = InsertQuery()
