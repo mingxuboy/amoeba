@@ -44,7 +44,7 @@ public class PreparedStatmentTest {
 										"root", null);
 						
 							statment = conn
-									.prepareStatement("/*  @amoeba=(select * from SD_RELATION.RELATION_ORIGIN where SDID=$(0)) */SELECT ID FROM SD_RELATION.RELATION_ORIGIN WHERE SDID =? AND F_SDID=? AND APP_ID = ?");
+									.prepareStatement("/*  @amoeba[params=3,isRead=false](select * from SD_RELATION.RELATION_ORIGIN where SDID=$(0)) */SELECT ID FROM SD_RELATION.RELATION_ORIGIN WHERE SDID =? AND F_SDID=? AND APP_ID = ?");
 							statment.setLong(1, 1);
 							statment.setLong(2, 2);
 							statment.setLong(3, 1);

@@ -18,10 +18,9 @@ package com.meidusa.amoeba.parser.statement;
  *
  */
 public class InsertStatement extends DMLStatement {
-
-	@Override
-	public boolean isReadStatement() {
-		return false;
+	
+	public InsertStatement(){
+		this.setRead(false);
 	}
 
 }

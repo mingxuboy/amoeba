@@ -419,6 +419,9 @@ public abstract class  AbstractQueryRouter<T extends Connection,V> implements Qu
 		if (logger.isDebugEnabled()) {
 			loggerBuffer = new StringBuffer("query=");
 			loggerBuffer.append(queryObject);
+			if(queryObject instanceof Request){
+				loggerBuffer.append(((Request)queryObject).isPrepared()?",prepared=true":"");
+			}
 		}
 		List<String> poolNames = new ArrayList<String>();
     	 poolNames = evaluate(loggerBuffer,connection,queryObject);

@@ -19,15 +19,14 @@ package com.meidusa.amoeba.parser.statement;
 public class SelectStatement extends DMLStatement {
 	private boolean queryLastInsertId;
 	
+	public SelectStatement(){
+		this.setRead(true);
+	}
 	public void setQueryLastInsertId(boolean queryLastInsertId) {
 		this.queryLastInsertId = queryLastInsertId;
 	}
 	public boolean isQueryLastInsertId(){
 		return queryLastInsertId;
-	}
-	@Override
-	public boolean isReadStatement() {
-		return true;
 	}
 
 }
