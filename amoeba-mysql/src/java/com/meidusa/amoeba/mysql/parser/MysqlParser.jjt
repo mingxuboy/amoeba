@@ -67,13 +67,6 @@ public class MysqlParser implements com.meidusa.amoeba.parser.Parser{
 	public void setDefaultSchema(Schema schema){
 		defaultSchema = schema;
 	}
-	private int parameterCount = 0;
-
-	public int getParameterCount()
-	{
-
-		return this.parameterCount;
-	}
 	
     /**
      * main method to test parser
@@ -132,9 +125,6 @@ public class MysqlParser implements com.meidusa.amoeba.parser.Parser{
 	public Statement doParse() throws com.meidusa.amoeba.parser.ParseException{
 		try{
 			Statement statement = this.parse();
-			if(statement != null){
-				statement.setParameterCount(parameterIndex);
-			}
 			return statement;
 		}catch(Exception e){
 			throw new com.meidusa.amoeba.parser.ParseException(e);
@@ -314,6 +304,7 @@ TOKEN: /* SQL Keywords. prefixed with K_ to avoid name clashes */
 |   <K_MICROSECOND:"MICROSECOND">
 |   <K_SECOND:"SECOND">
 |   <K_DAY:"DAY">
+|   <K_AMOEBA:"@amoeba">
 |   <K_MINUTE:"MINUTE">
 |   <K_MONTH:"MONTH">
 |   <K_HOUR:"HOUR">
@@ -340,7 +331,13 @@ TOKEN: /* SQL Keywords. prefixed with K_ to avoid name clashes */
 |   <K_SHOW_CREATE_TABLE:"CREATE TABLE" >
 | 	<K_SHOW_CREATE_PROCEDURE:"CREATE PROCEDURE" >
 |   <K_SHOW_FULL_COLUMNS:"FULL COLUMNS"| "COLUMNS" >
+| 	<K_TABLE_STATUS:"TABLE STATUS" >
+| 	<K_VARIABLES:"VARIABLES" >
+|   < K_GRANTS_FOR:"GRANTS FOR" >
+|   < K_TRIGGERS:"TRIGGERS" >
+|   < K_EVENTS:"EVENTS" >
 | 	<K_CALL:"CALL" >
+| 	< K_CHARACTER_SET :"CHARACTER SET" >
 /*
 |   <K_MICROSECOND:"MICROSECOND">
 |   <K_MILLISECOND:"MILLISECOND">
@@ -633,19 +630,36 @@ TOKEN:
 
 }
 
-
+void parseParams(Map amoebaParameterMap) #void:
+{	Token parameterToken = null;
+	Object value = null;
+	Token valueToken = null;
+}{	(
+		parameterToken = <IDENTIFIER> "="
+		( valueToken= <K_TRUE> {value = Boolean.TRUE;}
+		| valueToken= <K_FALSE> {value = Boolean.FALSE;}
+		| valueToken = <INTEGER_LITERAL>{value = Integer.valueOf(valueToken.image);} 
+		| valueToken = <STRING_LITERAL>{value = (valueToken.image).substring(1,valueToken.image.length()-1);}
+		)
+	)
+	{
+		amoebaParameterMap.put(parameterToken.image,value);
+	}
+}
 Statement parse() #void:
 {
 	Expression expression = null;
 	Statement statement = null;
-	Token parameterCountToken = null;
+	Token parameterToken = null;
+	Object value = null;
+	Token valueToken = null;
+	Map amoebaParameterMap = null;
 }
 {
    ["EXPLAIN"] [
-    ( "@amoeba" ["(" parameterCountToken= < INTEGER_LITERAL >
-    {
-      parameterCount = Integer.parseInt(parameterCountToken.image);
-    } ")" ] "=" )](
+    ( "@amoeba" ["[" parseParams(amoebaParameterMap = new HashMap()) ( "," parseParams(amoebaParameterMap))*
+	    
+    "]" ])](
     statement = DeleteQuery()
     |
     statement = InsertQuery()
@@ -666,7 +680,7 @@ Statement parse() #void:
     |(<K_START_TRANSACTION>){statement = new StartTansactionStatement();}
     )
     [ INDEX() ]
-    (";"|<EOF>)
+    (";" |<EOF>)
     {
     	if(statement instanceof AbstractStatement){
 	    	List<Table> list = new ArrayList<Table>();
@@ -679,7 +693,27 @@ Statement parse() #void:
 			Table[] tables = new Table[list.size()];
 			list.toArray(tables);
 			((AbstractStatement)statement).setTables(tables);
+
+			/* amoeba parameters  */
+			if(amoebaParameterMap != null)			{				Boolean isRead = (Boolean)amoebaParameterMap.get("isRead");
+				if(isRead != null)				{
+				  if(statement instanceof DMLStatement)				  {					((DMLStatement)statement).setRead(isRead);
+				  }
+				}
+
+			}
     	}
+
+    	/* amoeba parameters  */
+    	if(amoebaParameterMap != null)
+		{
+			Integer params = (Integer)amoebaParameterMap.get("params");
+			if(params != null)
+			{
+				statement.setParameterCount(params);
+			}else			{				statement.setParameterCount(parameterIndex);
+			}
+		}
         return statement;
     }
 }
@@ -801,9 +835,16 @@ Statement ShowQuery():
 {	ShowStatement statement = new ShowStatement();
 	Expression expression = null;
 	Token valueToken = null;
-}{	(	  (valueToken = "SHOW" [ <K_SHOW_FILL_TABLES> |<K_SHOW_CREATE_TABLE >| <K_SHOW_FULL_COLUMNS>|< K_SHOW_CREATE_PROCEDURE > ] )
-		| < K_DESCRIBE >)
-	[<K_FROM >] [FromItem(statement)] [expression = WhereClause(statement)]	{	 statement.setExpression(expression);
+}{	(	  (valueToken = "SHOW" [ <K_SHOW_FILL_TABLES>|
+	  						<K_SHOW_CREATE_TABLE >|
+	  						<K_SHOW_FULL_COLUMNS>|
+	  						< K_SHOW_CREATE_PROCEDURE > |
+	  						< K_TABLE_STATUS > |
+	  						(< K_GRANTS_FOR > SQLExpression(statement)) |
+	  						< K_TRIGGERS > |
+	  						< K_EVENTS >|
+	  						< K_CHARACTER_SET > |	  						([<K_SESSION >] <K_VARIABLES> [<K_LIKE > SQLExpression(statement)])
+	   					   ]	 )| < K_DESCRIBE >) [<K_FROM >] [FromItem(statement)] [expression = WhereClause(statement)]	{	 statement.setExpression(expression);
 	 
 	 return statement;
 	}

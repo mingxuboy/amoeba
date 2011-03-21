@@ -1,6 +1,5 @@
 package com.meidusa.amoeba.route;
 
-import com.meidusa.amoeba.parser.dbobject.Table;
 import com.meidusa.amoeba.util.StringUtil;
 
 public class SqlQueryObject implements Request{
@@ -8,7 +7,6 @@ public class SqlQueryObject implements Request{
 	public String sql;
 	public Object[] parameters;
 	public boolean isRead;
-	public Table table;
 	@Override
 	public boolean isPrepared() {
 		return isPrepared;

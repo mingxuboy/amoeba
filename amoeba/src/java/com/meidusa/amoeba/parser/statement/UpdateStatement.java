@@ -18,9 +18,9 @@ package com.meidusa.amoeba.parser.statement;
  */
 public class UpdateStatement extends DMLStatement {
 
-	@Override
-	public boolean isReadStatement() {
-		return false;
+	public UpdateStatement(){
+		this.setRead(false);
 	}
+	
 
 }
