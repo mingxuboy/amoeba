@@ -659,7 +659,7 @@ Statement parse() #void:
    ["EXPLAIN"] [
     ( "@amoeba" ["[" parseParams(amoebaParameterMap = new HashMap()) ( "," parseParams(amoebaParameterMap))*
 	    
-    "]" ])](
+    "]" ])]["("](
     statement = DeleteQuery()
     |
     statement = InsertQuery()
@@ -679,7 +679,7 @@ Statement parse() #void:
     |(<K_ROLLBACK>/*[<K_WORK>] [<K_AND> [<K_NO>] <K_CHAIN>] [[<K_NO>] <K_RELEASE>]*/){statement = new RollbackStatement();}
     |(<K_START_TRANSACTION>){statement = new StartTansactionStatement();}
     )
-    [ INDEX() ]
+    [ INDEX() ][")"]
     (";" |<EOF>)
     {
     	if(statement instanceof AbstractStatement){
@@ -1268,14 +1268,14 @@ Table TableReference():
 	Token token = null;
 }
 {
-    table = TableName() 
-     [["AS"]     (     token = <S_COMMA_IDENTIFIER>{
- 		table.setAlias(token.image.substring(1,token.image.length()-1));	
- 	}
-|token = <IDENTIFIER>{
-    	table.setAlias(token.image);
-    }  )
-][ INDEX()]{
+    (      table = TableName() 
+	     [["AS"]	     (	     token = <S_COMMA_IDENTIFIER>{
+	 		table.setAlias(token.image.substring(1,token.image.length()-1));	
+	 	}
+		|token = <IDENTIFIER>{
+		    	table.setAlias(token.image);
+		    }		  )
+		][ INDEX()]	){
    	 if(table.getAlias() != null){
    	 	tableAliasMap.put(table.getAlias(),table);	
    	 }
