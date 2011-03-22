@@ -74,7 +74,7 @@
     
     <logger name="com.meidusa.amoeba" additivity="true">
         <level value="info"/>
-        <appender-ref ref="PROJECT"/>
+        <appender-ref ref="ROOT"/>
     </logger>
     
     <logger name="com.meidusa.amoeba.net" additivity="true">
