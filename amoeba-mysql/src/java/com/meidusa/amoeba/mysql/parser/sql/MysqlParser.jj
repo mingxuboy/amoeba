@@ -7,9 +7,10 @@
    	                    
    	                     
    	             
-	                 
+	                
 	                         
    	STATIC = false;
+   	//NODE_CLASS = "com.meidusa.amoeba.mysql.parser.data.MysqlSimpleNode";
 }
 
 PARSER_BEGIN(MysqlParser)
@@ -71,7 +72,6 @@ public class MysqlParser implements/*@bgen(jjtree)*/ MysqlParserTreeConstants, /
 		defaultSchema = schema;
 	}
 	
-	
     /**
      * main method to test parser
      */
@@ -129,9 +129,6 @@ public class MysqlParser implements/*@bgen(jjtree)*/ MysqlParserTreeConstants, /
 	public Statement doParse() throws com.meidusa.amoeba.parser.ParseException{
 		try{
 			Statement statement = this.parse();
-			if(statement != null){
-				statement.setParameterCount(parameterIndex);
-			}
 			return statement;
 		}catch(Exception e){
 			throw new com.meidusa.amoeba.parser.ParseException(e);
@@ -311,6 +308,7 @@ TOKEN: /* SQL Keywords. prefixed with K_ to avoid name clashes */
 |   <K_MICROSECOND:"MICROSECOND">
 |   <K_SECOND:"SECOND">
 |   <K_DAY:"DAY">
+|   <K_AMOEBA:"@amoeba">
 |   <K_MINUTE:"MINUTE">
 |   <K_MONTH:"MONTH">
 |   <K_HOUR:"HOUR">
@@ -337,7 +335,13 @@ TOKEN: /* SQL Keywords. prefixed with K_ to avoid name clashes */
 |   <K_SHOW_CREATE_TABLE:"CREATE TABLE" >
 | 	<K_SHOW_CREATE_PROCEDURE:"CREATE PROCEDURE" >
 |   <K_SHOW_FULL_COLUMNS:"FULL COLUMNS"| "COLUMNS" >
+| 	<K_TABLE_STATUS:"TABLE STATUS" >
+| 	<K_VARIABLES:"VARIABLES" >
+|   < K_GRANTS_FOR:"GRANTS FOR" >
+|   < K_TRIGGERS:"TRIGGERS" >
+|   < K_EVENTS:"EVENTS" >
 | 	<K_CALL:"CALL" >
+| 	< K_CHARACTER_SET :"CHARACTER SET" >
 /*
 |   <K_MICROSECOND:"MICROSECOND">
 |   <K_MILLISECOND:"MILLISECOND">
@@ -398,14 +402,11 @@ TOKEN : /* Numeric Constants */
 				"\uff10" - "\uff19"
 			]>
 }
-< POOL_AND_RULE > TOKEN : { 
-< POOL : "#pool" >
-} 
+ 
 SPECIAL_TOKEN:
 {
    <LINE_COMMENT: "--"(~["\r","\n"])*>
-|  <MULTI_LINE_COMMENT: "/*" (~["*"])* "*" ("*" | (~["*","/"] (~["*"])* "*"))* "/"> 
-}
+|  <MULTI_LINE_COMMENT: "/*" (~["*"])* "*" ("*" | (~["*","/"] (~["*"])* "*"))*  "/">}
 
 TOKEN:
 {
@@ -629,18 +630,40 @@ TOKEN:
 |   < STRING_LITERAL: ( "_" <IDENTIFIER> | "x" )* "'" ((~["'"])|("\\" "'"))* "'">
 |   < S_QUOTED_IDENTIFIER: "\"" (~["\n","\r","\""])* "\"" >
 |	< S_COMMA_IDENTIFIER: "`" ((["@"])*( <LETTER> )+ ( <DIGIT> | "-"|<LETTER> |<SPECIAL_CHARS>)*) "`">
-|   < S_PARAMETER_MARKER: "?">
+|   < S_PARAMETER_MARKER: "?" | "$(" <INTEGER_LITERAL> ")">
 
 }
 
-
+void parseParams(Map amoebaParameterMap)      :
+{	Token parameterToken = null;
+	Object value = null;
+	Token valueToken = null;
+}{	(
+		parameterToken = <IDENTIFIER> "="
+		( valueToken= <K_TRUE> {value = Boolean.TRUE;}
+		| valueToken= <K_FALSE> {value = Boolean.FALSE;}
+		| valueToken = <INTEGER_LITERAL>{value = Integer.valueOf(valueToken.image);} 
+		| valueToken = <STRING_LITERAL>{value = (valueToken.image).substring(1,valueToken.image.length()-1);}
+		)
+	)
+	{
+		amoebaParameterMap.put(parameterToken.image,value);
+	}
+}
 Statement parse()      :
 {
 	Expression expression = null;
 	Statement statement = null;
+	Token parameterToken = null;
+	Object value = null;
+	Token valueToken = null;
+	Map amoebaParameterMap = null;
 }
 {
-    ["EXPLAIN"] (
+   ["EXPLAIN"] [
+    ( "@amoeba" ["[" parseParams(amoebaParameterMap = new HashMap()) ( "," parseParams(amoebaParameterMap))*
+	    
+    "]" ])](
     statement = DeleteQuery()
     |
     statement = InsertQuery()
@@ -661,7 +684,7 @@ Statement parse()      :
     |(<K_START_TRANSACTION>){statement = new StartTansactionStatement();}
     )
     [ INDEX() ]
-    (";"|<EOF>)
+    (";" |<EOF>)
     {
     	if(statement instanceof AbstractStatement){
 	    	List<Table> list = new ArrayList<Table>();
@@ -674,7 +697,27 @@ Statement parse()      :
 			Table[] tables = new Table[list.size()];
 			list.toArray(tables);
 			((AbstractStatement)statement).setTables(tables);
+
+			/* amoeba parameters  */
+			if(amoebaParameterMap != null)			{				Boolean isRead = (Boolean)amoebaParameterMap.get("isRead");
+				if(isRead != null)				{
+				  if(statement instanceof DMLStatement)				  {					((DMLStatement)statement).setRead(isRead);
+				  }
+				}
+
+			}
     	}
+
+    	/* amoeba parameters  */
+    	if(amoebaParameterMap != null)
+		{
+			Integer params = (Integer)amoebaParameterMap.get("params");
+			if(params != null)
+			{
+				statement.setParameterCount(params);
+			}else			{				statement.setParameterCount(parameterIndex);
+			}
+		}
         return statement;
     }
 }
@@ -754,6 +797,8 @@ Statement UpdateQuery():
 	Table table = null;
 	BaseExpressionList andExpression = new AndExpression();
 	DMLStatement statement = new UpdateStatement();
+	Token parameter = null;
+	int index = 0;
 }
 {
    	(table = UpdateStatement(statement)
@@ -768,11 +813,19 @@ Statement UpdateQuery():
           } ]
 
 	[<K_LIMIT>
-    (<S_PARAMETER_MARKER>{
-	   	andExpression.addExpression(new ParameterExpression(parameterIndex++));
-	} | <INTEGER_LITERAL>)[("," | <K_OFFSET> ) (<S_PARAMETER_MARKER>
+    (parameter = <S_PARAMETER_MARKER>{
+      	index = parameterIndex++;
+      	if(parameter.image.startsWith("${"))      	{			index = Integer.parseInt(parameter.image.substring(2,parameter.image.length()-1));
+      	}
+	   	andExpression.addExpression(new ParameterExpression(index));
+	} | <INTEGER_LITERAL>)[("," | <K_OFFSET> ) (parameter = <S_PARAMETER_MARKER>
 	{
-	   	andExpression.addExpression(new ParameterExpression(parameterIndex++));
+	  	index = parameterIndex++;
+      	if(parameter.image.startsWith("${"))
+      	{
+			index = Integer.parseInt(parameter.image.substring(2,parameter.image.length()-1));
+      	}
+	   	andExpression.addExpression(new ParameterExpression(index));
 	} |<INTEGER_LITERAL> )
     ]])
     {
@@ -785,9 +838,18 @@ Statement UpdateQuery():
 Statement ShowQuery():
 {	ShowStatement statement = new ShowStatement();
 	Expression expression = null;
-}{	(	  ("SHOW" [ <K_SHOW_FILL_TABLES> |<K_SHOW_CREATE_TABLE >| <K_SHOW_FULL_COLUMNS>|< K_SHOW_CREATE_PROCEDURE > ] )
-		| < K_DESCRIBE >)
-	[<K_FROM >] [FromItem(statement)] [expression = WhereClause(statement)]	{	 statement.setExpression(expression);
+	Token valueToken = null;
+}{	(	  (valueToken = "SHOW" [ <K_SHOW_FILL_TABLES>|
+	  						<K_SHOW_CREATE_TABLE >|
+	  						<K_SHOW_FULL_COLUMNS>|
+	  						< K_SHOW_CREATE_PROCEDURE > |
+	  						< K_TABLE_STATUS > |
+	  						(< K_GRANTS_FOR > SQLExpression(statement)) |
+	  						< K_TRIGGERS > |
+	  						< K_EVENTS >|
+	  						< K_CHARACTER_SET > |	  						([<K_SESSION >] <K_VARIABLES> [<K_LIKE > SQLExpression(statement)])
+	   					   ]	 )| < K_DESCRIBE >) [<K_FROM >] [FromItem(statement)] [expression = WhereClause(statement)]	{	 statement.setExpression(expression);
+	 
 	 return statement;
 	}
 }
@@ -863,6 +925,8 @@ Statement DeleteQuery():
 	Table table = null;
 	DMLStatement statement = new DeleteStatement();
 	AndExpression andExpression = new AndExpression();
+	Token parameter = null;
+	int index = 0;
 }
 {
     (      (table = DeleteStatement()
@@ -875,11 +939,21 @@ Statement DeleteQuery():
     }
     [ OrderByClause(statement) ]
     [<K_LIMIT>
-    (<S_PARAMETER_MARKER>{
-	   	andExpression.addExpression(new ParameterExpression(parameterIndex++));
-	} | <INTEGER_LITERAL>)[("," | <K_OFFSET> ) (<S_PARAMETER_MARKER>
+    (parameter = <S_PARAMETER_MARKER>{
+      index = parameterIndex++;
+	if(parameter.image.startsWith("${"))
 	{
-	   	andExpression.addExpression(new ParameterExpression(parameterIndex++));
+		index = Integer.parseInt(parameter.image.substring(2,parameter.image.length()-1));
+	}
+	   	andExpression.addExpression(new ParameterExpression(index));
+	} | <INTEGER_LITERAL>)[("," | <K_OFFSET> ) (parameter = <S_PARAMETER_MARKER>
+	{
+	  index = parameterIndex++;
+		if(parameter.image.startsWith("${"))
+		{
+			index = Integer.parseInt(parameter.image.substring(2,parameter.image.length()-1));
+		}
+	   	andExpression.addExpression(new ParameterExpression(index));
 	} |<INTEGER_LITERAL> )
     ]]  )  {    
  	 return statement;
@@ -1280,6 +1354,8 @@ Expression SubSelectStatement(Statement statement):
 	Expression expression = null;
 	Expression fromExpression = null;
 	AndExpression andExpression = new AndExpression();
+	Token parameter = null;
+	int index = 0;
 }
 {
     (SelectClause(statement)
@@ -1293,10 +1369,20 @@ Expression SubSelectStatement(Statement statement):
 	  }    }]
     [ GroupByClause(statement) ]
     [ OrderByClause(statement) ]
-    [<K_LIMIT>    (<S_PARAMETER_MARKER>{
-	   	andExpression.addExpression(new ParameterExpression(parameterIndex++));
-	} | <INTEGER_LITERAL>)[("," | <K_OFFSET> ) (<S_PARAMETER_MARKER>	{
-	   	andExpression.addExpression(new ParameterExpression(parameterIndex++));	} |<INTEGER_LITERAL> )
+    [<K_LIMIT>    (parameter = <S_PARAMETER_MARKER>{
+      	index = parameterIndex++;
+		if(parameter.image.startsWith("${"))
+		{
+			index = Integer.parseInt(parameter.image.substring(2,parameter.image.length()-1));
+		}
+	   	andExpression.addExpression(new ParameterExpression(index));
+	} | <INTEGER_LITERAL>)[("," | <K_OFFSET> ) (parameter = <S_PARAMETER_MARKER>	{
+	  	index = parameterIndex++;
+		if(parameter.image.startsWith("${"))
+		{
+			index = Integer.parseInt(parameter.image.substring(2,parameter.image.length()-1));
+		}
+	   	andExpression.addExpression(new ParameterExpression(index));	} |<INTEGER_LITERAL> )
     ]])
     {
       if(andExpression.getSize() >0)      {		return andExpression;
@@ -1308,7 +1394,7 @@ Expression SubSelectStatement(Statement statement):
 void SelectClause(Statement statement):
 {}
 {
-	  "SELECT" [< POOL >] [ "ALL" | "DISTINCT"|"DISTINCTROW" ]["HIGH_PRIORITY"]["STRAIGHT_JOIN"] ["SQL_SMALL_RESULT"] ["SQL_BIG_RESULT"] ["SQL_BUFFER_RESULT"] ["SQL_CACHE" | "SQL_NO_CACHE"] ["SQL_CALC_FOUND_ROWS"] SelectList(statement)
+	  "SELECT" [ "ALL" | "DISTINCT"|"DISTINCTROW" ]["HIGH_PRIORITY"]["STRAIGHT_JOIN"] ["SQL_SMALL_RESULT"] ["SQL_BIG_RESULT"] ["SQL_BUFFER_RESULT"] ["SQL_CACHE" | "SQL_NO_CACHE"] ["SQL_CALC_FOUND_ROWS"] SelectList(statement)
 }
 
 /* Checks for whatever follows  SELECT */
@@ -1891,6 +1977,8 @@ Expression SQLPrimaryExpression(Statement statement)      :
 	Expression expression = null;
 	Comparable value = null;
 	boolean not = false;
+	Token parameter = null;
+	int index = 0;
 }
 {(
 t=<K_NULL>{
@@ -1928,8 +2016,12 @@ t=<K_NULL>{
 		temp = replaceEscape(temp);
 		return new ConstantExpression(temp);
 }
-|  t= <S_PARAMETER_MARKER>{
-	int index = parameterIndex++;
+|  parameter = <S_PARAMETER_MARKER>{
+	index = parameterIndex++;
+	if(parameter.image.startsWith("${"))
+	{
+		index = Integer.parseInt(parameter.image.substring(2,parameter.image.length()-1));
+	}
 	return new ParameterExpression(index);
 }
 | ("INTERVAL" expression=SQLExpression(statement) (token = "YEAR" | token = "MONTH" | token = "DAY" | token = "HOUR" | token = "MINUTE" | token = "SECOND" | token = "MICROSECOND")){
