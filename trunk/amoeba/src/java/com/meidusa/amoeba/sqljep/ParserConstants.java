@@ -114,7 +114,7 @@ public interface ParserConstants {
     "\"*\"",
     "\"/\"",
     "\"div\"",
-    "<MOD>",
+    "\"%\"",
     "\">\"",
     "\"<\"",
     "<EQ>",

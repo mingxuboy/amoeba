@@ -217,86 +217,96 @@ public interface MysqlParserConstants {
   /** RegularExpression Id. */
   int K_DAY = 101;
   /** RegularExpression Id. */
-  int K_MINUTE = 102;
+  int K_AMOEBA = 102;
   /** RegularExpression Id. */
-  int K_MONTH = 103;
+  int K_MINUTE = 103;
   /** RegularExpression Id. */
-  int K_HOUR = 104;
+  int K_MONTH = 104;
   /** RegularExpression Id. */
-  int K_COMMIT = 105;
+  int K_HOUR = 105;
   /** RegularExpression Id. */
-  int K_ROLLBACK = 106;
+  int K_COMMIT = 106;
   /** RegularExpression Id. */
-  int K_DESCRIBE = 107;
+  int K_ROLLBACK = 107;
   /** RegularExpression Id. */
-  int K_ASC = 108;
+  int K_DESCRIBE = 108;
   /** RegularExpression Id. */
-  int K_IGNORE_INDEX = 109;
+  int K_ASC = 109;
   /** RegularExpression Id. */
-  int K_FORCE_INDEX = 110;
+  int K_IGNORE_INDEX = 110;
   /** RegularExpression Id. */
-  int K_TRANSACTION_ISOLATION_LEVEL = 111;
+  int K_FORCE_INDEX = 111;
   /** RegularExpression Id. */
-  int K_DUPLICATE = 112;
+  int K_TRANSACTION_ISOLATION_LEVEL = 112;
   /** RegularExpression Id. */
-  int K_KEY = 113;
+  int K_DUPLICATE = 113;
   /** RegularExpression Id. */
-  int K_START_TRANSACTION = 114;
+  int K_KEY = 114;
   /** RegularExpression Id. */
-  int K_SESSION = 115;
+  int K_START_TRANSACTION = 115;
   /** RegularExpression Id. */
-  int K_TRANSACTION_READ_COMMITTED = 116;
+  int K_SESSION = 116;
   /** RegularExpression Id. */
-  int K_TRANSACTION_READ_UNCOMMITTED = 117;
+  int K_TRANSACTION_READ_COMMITTED = 117;
   /** RegularExpression Id. */
-  int K_TRANSACTION_REPEATABLE_READ = 118;
+  int K_TRANSACTION_READ_UNCOMMITTED = 118;
   /** RegularExpression Id. */
-  int K_TRANSACTION_SERIALIZABLE = 119;
+  int K_TRANSACTION_REPEATABLE_READ = 119;
   /** RegularExpression Id. */
-  int K_CLIENT_CHARSET = 120;
+  int K_TRANSACTION_SERIALIZABLE = 120;
   /** RegularExpression Id. */
-  int K_SHOW_FILL_TABLES = 121;
+  int K_CLIENT_CHARSET = 121;
   /** RegularExpression Id. */
-  int K_SHOW_CREATE_TABLE = 122;
+  int K_SHOW_FILL_TABLES = 122;
   /** RegularExpression Id. */
-  int K_SHOW_CREATE_PROCEDURE = 123;
+  int K_SHOW_CREATE_TABLE = 123;
   /** RegularExpression Id. */
-  int K_SHOW_FULL_COLUMNS = 124;
+  int K_SHOW_CREATE_PROCEDURE = 124;
   /** RegularExpression Id. */
-  int K_CALL = 125;
+  int K_SHOW_FULL_COLUMNS = 125;
   /** RegularExpression Id. */
-  int INTEGER_LITERAL = 126;
+  int K_TABLE_STATUS = 126;
   /** RegularExpression Id. */
-  int FLOATING_POINT_LITERAL = 127;
+  int K_VARIABLES = 127;
   /** RegularExpression Id. */
-  int EXPONENT = 128;
+  int K_GRANTS_FOR = 128;
   /** RegularExpression Id. */
-  int DIGIT = 129;
+  int K_TRIGGERS = 129;
   /** RegularExpression Id. */
-  int POOL = 130;
+  int K_EVENTS = 130;
   /** RegularExpression Id. */
-  int LINE_COMMENT = 131;
+  int K_CALL = 131;
   /** RegularExpression Id. */
-  int MULTI_LINE_COMMENT = 132;
+  int K_CHARACTER_SET = 132;
   /** RegularExpression Id. */
-  int IDENTIFIER = 133;
+  int INTEGER_LITERAL = 133;
   /** RegularExpression Id. */
-  int LETTER = 134;
+  int FLOATING_POINT_LITERAL = 134;
   /** RegularExpression Id. */
-  int SPECIAL_CHARS = 135;
+  int EXPONENT = 135;
   /** RegularExpression Id. */
-  int STRING_LITERAL = 136;
+  int DIGIT = 136;
   /** RegularExpression Id. */
-  int S_QUOTED_IDENTIFIER = 137;
+  int LINE_COMMENT = 137;
   /** RegularExpression Id. */
-  int S_COMMA_IDENTIFIER = 138;
+  int MULTI_LINE_COMMENT = 138;
   /** RegularExpression Id. */
-  int S_PARAMETER_MARKER = 139;
+  int IDENTIFIER = 139;
+  /** RegularExpression Id. */
+  int LETTER = 140;
+  /** RegularExpression Id. */
+  int SPECIAL_CHARS = 141;
+  /** RegularExpression Id. */
+  int STRING_LITERAL = 142;
+  /** RegularExpression Id. */
+  int S_QUOTED_IDENTIFIER = 143;
+  /** RegularExpression Id. */
+  int S_COMMA_IDENTIFIER = 144;
+  /** RegularExpression Id. */
+  int S_PARAMETER_MARKER = 145;
 
   /** Lexical state. */
   int DEFAULT = 0;
-  /** Lexical state. */
-  int POOL_AND_RULE = 1;
 
   /** Literal token values. */
   String[] tokenImage = {
@@ -402,6 +412,7 @@ public interface MysqlParserConstants {
     "\"MICROSECOND\"",
     "\"SECOND\"",
     "\"DAY\"",
+    "\"@amoeba\"",
     "\"MINUTE\"",
     "\"MONTH\"",
     "\"HOUR\"",
@@ -425,12 +436,17 @@ public interface MysqlParserConstants {
     "\"CREATE TABLE\"",
     "\"CREATE PROCEDURE\"",
     "<K_SHOW_FULL_COLUMNS>",
+    "\"TABLE STATUS\"",
+    "\"VARIABLES\"",
+    "\"GRANTS FOR\"",
+    "\"TRIGGERS\"",
+    "\"EVENTS\"",
     "\"CALL\"",
+    "\"CHARACTER SET\"",
     "<INTEGER_LITERAL>",
     "<FLOATING_POINT_LITERAL>",
     "<EXPONENT>",
     "<DIGIT>",
-    "\"#pool\"",
     "<LINE_COMMENT>",
     "<MULTI_LINE_COMMENT>",
     "<IDENTIFIER>",
@@ -439,11 +455,13 @@ public interface MysqlParserConstants {
     "<STRING_LITERAL>",
     "<S_QUOTED_IDENTIFIER>",
     "<S_COMMA_IDENTIFIER>",
-    "\"?\"",
+    "<S_PARAMETER_MARKER>",
+    "\"=\"",
+    "\"[\"",
+    "\",\"",
+    "\"]\"",
     "\";\"",
     "\".\"",
-    "\"=\"",
-    "\",\"",
     "\"(\"",
     "\")\"",
     "\"`\"",
