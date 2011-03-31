@@ -73,7 +73,9 @@ public class MysqlQueryRouter extends SqlBaseQueryRouter{
 		}else if((value = statment.getValue("names")) != null){
 			((MysqlConnection)conn).setCharset((String)value.evaluate(queryObject.parameters));
 		}else if((value = statment.getValue("charset")) != null){
-				((MysqlConnection)conn).setCharset((String)value.evaluate(queryObject.parameters));
+			((MysqlConnection)conn).setCharset((String)value.evaluate(queryObject.parameters));
+		}else if((value = statment.getValue("character_set_results")) != null){
+			((MysqlConnection)conn).setCharset((String)value.evaluate(queryObject.parameters));
 		}else if((value = statment.getValue("transactionisolation")) != null){
 			//conn.setTransactionIsolation((int)((Long)comparable).longValue());
 		}else if((value = statment.getValue("schema")) != null){
