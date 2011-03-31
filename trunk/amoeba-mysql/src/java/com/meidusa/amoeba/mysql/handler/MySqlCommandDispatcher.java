@@ -224,7 +224,9 @@ public class MySqlCommandDispatcher implements MessageHandler {
 	            } else if (MysqlPacketBuffer.isPacketType(message, QueryCommandPacket.COM_INIT_DB)) {
 	                conn.setSchema(command.query);
 	                conn.postMessage(STATIC_OK_BUFFER);
-	            } else {
+	            } else if (MysqlPacketBuffer.isPacketType(message, QueryCommandPacket.COM_CHANGE_USER)){
+	            	conn.postMessage(STATIC_OK_BUFFER);
+	            }else{
 	                ErrorPacket error = new ErrorPacket();
 	                error.errno = 1044;
 	                error.packetId = 1;
