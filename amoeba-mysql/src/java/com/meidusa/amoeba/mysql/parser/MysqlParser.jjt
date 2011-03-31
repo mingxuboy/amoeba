@@ -1324,7 +1324,7 @@ Expression FullSelectStatement(Statement statement):
 }
 {
 	((expression = SubSelectStatement(statement) )
-	| "(" expression = FullSelectStatement(statement)")" [ UnionClause() unionedExpression = FullSelectStatement(statement)] ){
+	|	(	  "(" expression = FullSelectStatement(statement)")" [ UnionClause() unionedExpression = FullSelectStatement(statement)]	) ){
 		if(unionedExpression != null){
 			if(expression == null){
 				return unionedExpression;
