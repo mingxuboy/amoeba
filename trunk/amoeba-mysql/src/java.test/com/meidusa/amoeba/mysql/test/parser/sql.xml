@@ -5,7 +5,24 @@
 	]]></sql>
 	
 	<sql><![CDATA[
+      	select * from User where uin='20982425'
+ 	]]></sql>
+ 	
+ 	<sql><![CDATA[
+      	SELECT count(*) as count, FROM_UNIXTIME(heartstart, '%Y%m%d') as `day` FROM `bsh_pc_mac` WHERE heartstart > 0 GROUP BY `day`
+ 	]]></sql>
+ 	
+ 	
+ 	<sql><![CDATA[
+      	SELECT version, `number` FROM bsh_pc_installsoft_s WHERE date = 20110331
+ 	]]></sql>
+ 	
+	<sql><![CDATA[
       	SELECT /*  #pool */ * FROM AA WHERE ID = 'ASDF\'ADF' and name='qwerqer'
+ 	]]></sql>
+ 	
+ 	<sql><![CDATA[
+      	select count(1) from (select * from shop_user) a
  	]]></sql>
  	
 	<sql><![CDATA[
@@ -352,5 +369,9 @@
 	<sql><![CDATA[
   	insert into UC_PROFILE.USER_PROFILE_BASIC (SDID ,AVATAR_VERSION,REGISTER_IP,NICK_LAST_MODIFY_TIME,LEVEL,ACTIVE_FLAG,DEL_FLAG,CREATE_TIME,LAST_MODIFY_TIME,REGISTER_TIME)values (? , ?  ,INET_ATON(?),UNIX_TIMESTAMP()*1000,0,1,0,UNIX_TIMESTAMP()*1000,UNIX_TIMESTAMP()*1000,UNIX_TIMESTAMP()*1000)
   ]]></sql>
+
+	<sql><![CDATA[
+  	SET character_set_connection=utf8, character_set_results=utf8, character_set_client=binary
+  	]]></sql>
 
 </list>

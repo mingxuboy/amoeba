@@ -623,7 +623,7 @@ TOKEN:
 				"\uffda" - "\uffdc"
 			]>
 |   < #SPECIAL_CHARS: "$" | "_" >
-|   < STRING_LITERAL: ( "_" <IDENTIFIER> | "x" )* "'" ((~["'"])|("\\" "'"))* "'">
+|   < STRING_LITERAL: ( "_" <IDENTIFIER> | "x" )* ( ( "'" ((~["'"])|("\\" "'"))* "'") | (  "\"" ((~["\""])|("\\" "\""))* "\""))>
 |   < S_QUOTED_IDENTIFIER: "\"" (~["\n","\r","\""])* "\"" >
 |	< S_COMMA_IDENTIFIER: "`" ((["@"])*( <LETTER> )+ ( <DIGIT> | "-"|<LETTER> |<SPECIAL_CHARS>)*) "`">
 |   < S_PARAMETER_MARKER: "?" | "$(" <INTEGER_LITERAL> ")">
@@ -646,20 +646,55 @@ void parseParams(Map amoebaParameterMap) #void:
 		amoebaParameterMap.put(parameterToken.image,value);
 	}
 }
-Statement parse() #void:
+
+Statement parse() #void:{  	Statement statement = null;
+	Map amoebaParameterMap = null;
+}
+{	(		(( "@amoeba" ["[" parseParams(amoebaParameterMap = new HashMap()) ( "," parseParams(amoebaParameterMap))* "]" ]) ["("] statement=parserInner() [")"])
+		|
+		statement=parserInner()	){
+  	if(statement instanceof AbstractStatement){
+		/* amoeba parameters  */
+		if(amoebaParameterMap != null)
+		{
+			Boolean isRead = (Boolean)amoebaParameterMap.get("isRead");
+			if(isRead != null)
+			{
+			  if(statement instanceof DMLStatement)
+			  {
+				((DMLStatement)statement).setRead(isRead);
+			  }
+			}
+	
+		}
+  	}
+
+  	/* amoeba parameters  */
+	if(amoebaParameterMap != null)
+	{
+		Integer params = (Integer)amoebaParameterMap.get("params");
+		if(params != null)
+		{
+			statement.setParameterCount(params);
+		}else
+		{
+			statement.setParameterCount(parameterIndex);
+		}
+	}	return statement;
+
+}
+
+}
+Statement parserInner() #void:
 {
 	Expression expression = null;
 	Statement statement = null;
 	Token parameterToken = null;
 	Object value = null;
 	Token valueToken = null;
-	Map amoebaParameterMap = null;
 }
 {
-   ["EXPLAIN"] [
-    ( "@amoeba" ["[" parseParams(amoebaParameterMap = new HashMap()) ( "," parseParams(amoebaParameterMap))*
-	    
-    "]" ])]["("](
+   ["EXPLAIN"](
     statement = DeleteQuery()
     |
     statement = InsertQuery()
@@ -679,7 +714,7 @@ Statement parse() #void:
     |(<K_ROLLBACK>/*[<K_WORK>] [<K_AND> [<K_NO>] <K_CHAIN>] [[<K_NO>] <K_RELEASE>]*/){statement = new RollbackStatement();}
     |(<K_START_TRANSACTION>){statement = new StartTansactionStatement();}
     )
-    [ INDEX() ][")"]
+    [ INDEX() ]
     (";" |<EOF>)
     {
     	if(statement instanceof AbstractStatement){
@@ -693,27 +728,8 @@ Statement parse() #void:
 			Table[] tables = new Table[list.size()];
 			list.toArray(tables);
 			((AbstractStatement)statement).setTables(tables);
-
-			/* amoeba parameters  */
-			if(amoebaParameterMap != null)			{				Boolean isRead = (Boolean)amoebaParameterMap.get("isRead");
-				if(isRead != null)				{
-				  if(statement instanceof DMLStatement)				  {					((DMLStatement)statement).setRead(isRead);
-				  }
-				}
-
-			}
     	}
 
-    	/* amoeba parameters  */
-    	if(amoebaParameterMap != null)
-		{
-			Integer params = (Integer)amoebaParameterMap.get("params");
-			if(params != null)
-			{
-				statement.setParameterCount(params);
-			}else			{				statement.setParameterCount(parameterIndex);
-			}
-		}
         return statement;
     }
 }
@@ -1424,10 +1440,13 @@ void SelectItem(Statement statement):
 		      }
 		
         }    // Column or Expression
-    )[("=" SQLSimpleExpression(statement))] [["AS"] token = <IDENTIFIER>    {
+    )[("=" SQLSimpleExpression(statement))] [["AS"]( token = <IDENTIFIER> | token = < S_COMMA_IDENTIFIER > )    {
       if(token != null)
 		{
-		  if(column != null)		  {			column.setAlias(token.image);
+		  if(column != null)		  {
+		    if(token.image.indexOf("`") == 0)		    {				column.setAlias(token.image.substring(1,token.image.length()-1));
+		    }else		    {				column.setAlias(token.image);
+			}
 		  }
 		}    }] // Column Alias
 }
@@ -2006,8 +2025,10 @@ t=<K_NULL>{
 
 |  t= <STRING_LITERAL>{
 	// strip away double quotes at end of string
-		int tt =  t.image.indexOf("'");
-		String temp = (t.image).substring(tt+1,t.image.length()-1);
+	String temp  = null;
+	if(t.image.indexOf("_x") ==0)	{		temp = (t.image).substring(2,t.image.length()-1);
+	}else	{		temp = (t.image).substring(1,t.image.length()-1);
+	}
 		// replace escape characters
 		temp = replaceEscape(temp);
 		return new ConstantExpression(temp);
