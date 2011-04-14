@@ -34,7 +34,7 @@ public class QueryCommandMessageHandler extends CommandMessageHandler {
     public static Logger logger = Logger.getLogger(QueryCommandMessageHandler.class);
 
     static class QueryConnectionStatus extends ConnectionStatuts {
-
+    	
         public QueryConnectionStatus(Connection conn){
             super(conn);
         }
@@ -51,21 +51,25 @@ public class QueryCommandMessageHandler extends CommandMessageHandler {
         public boolean isCompleted(byte[] buffer) {
             if (this.commandType == QueryCommandPacket.COM_QUERY) {
                 boolean isCompleted = false;
-                if (packetIndex == 0 && MysqlPacketBuffer.isErrorPacket(buffer)) {
+                if ((packetIndex == 0 || lastStatusCode == SessionStatus.EOF_FIELDS) && MysqlPacketBuffer.isErrorPacket(buffer)) {
                     statusCode |= SessionStatus.ERROR;
                     statusCode |= SessionStatus.COMPLETED;
+                    lastStatusCode = SessionStatus.ERROR;
                     isCompleted = true;
                 } else if (packetIndex == 0 && MysqlPacketBuffer.isOkPacket(buffer)) {
                     statusCode |= SessionStatus.OK;
                     statusCode |= SessionStatus.COMPLETED;
+                    lastStatusCode = SessionStatus.OK;
                     isCompleted = true;
                 } else if (MysqlPacketBuffer.isEofPacket(buffer)) {
                     if ((statusCode & SessionStatus.EOF_FIELDS) > 0) {
                         statusCode |= SessionStatus.EOF_ROWS;
+                        lastStatusCode = SessionStatus.EOF_ROWS;
                         statusCode |= SessionStatus.COMPLETED;
                         isCompleted = true;
                     } else {
                         statusCode |= SessionStatus.EOF_FIELDS;
+                        lastStatusCode = SessionStatus.EOF_FIELDS;
                         isCompleted = false;
                     }
                 } else {

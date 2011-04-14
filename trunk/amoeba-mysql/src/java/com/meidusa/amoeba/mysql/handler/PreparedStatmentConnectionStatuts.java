@@ -34,26 +34,31 @@ public class PreparedStatmentConnectionStatuts extends QueryCommandMessageHandle
                     if ((this.statusCode & PreparedStatmentSessionStatus.PREPAED_PARAMETER_EOF) > 0) {
                         this.statusCode |= PreparedStatmentSessionStatus.PREPAED_FIELD_EOF;
                         this.statusCode |= PreparedStatmentSessionStatus.COMPLETED;
+                        lastStatusCode = PreparedStatmentSessionStatus.PREPAED_FIELD_EOF;
                         return true;
                     } else {
                         if (connection.isVersion(5, 0, 0)) {
                             if (ok.columns == 0) {
                                 this.statusCode |= PreparedStatmentSessionStatus.PREPAED_FIELD_EOF;
                                 this.statusCode |= PreparedStatmentSessionStatus.COMPLETED;
+                                lastStatusCode = PreparedStatmentSessionStatus.PREPAED_FIELD_EOF;
                                 return true;
                             }
                         }
                         this.statusCode |= PreparedStatmentSessionStatus.PREPAED_PARAMETER_EOF;
+                        lastStatusCode = PreparedStatmentSessionStatus.PREPAED_PARAMETER_EOF;
                         return false;
                     }
                 } else {
                     this.statusCode |= PreparedStatmentSessionStatus.PREPAED_FIELD_EOF;
+                    lastStatusCode = PreparedStatmentSessionStatus.PREPAED_FIELD_EOF;
                     this.statusCode |= PreparedStatmentSessionStatus.COMPLETED;
                     return true;
                 }
 
-            } else if (packetIndex == 0 && MysqlPacketBuffer.isErrorPacket(buffer)) {
+            } else if ((packetIndex == 0 || lastStatusCode == PreparedStatmentSessionStatus.PREPAED_FIELD_EOF) && MysqlPacketBuffer.isErrorPacket(buffer)) {
                 this.statusCode |= PreparedStatmentSessionStatus.ERROR;
+                lastStatusCode = PreparedStatmentSessionStatus.ERROR;
                 this.statusCode |= PreparedStatmentSessionStatus.COMPLETED;
                 setErrorPacket(buffer);
                 return true;
@@ -63,12 +68,14 @@ public class PreparedStatmentConnectionStatuts extends QueryCommandMessageHandle
                 if (ok.parameters == 0 && ok.columns == 0) {
                     this.statusCode |= PreparedStatmentSessionStatus.OK;
                     this.statusCode |= PreparedStatmentSessionStatus.COMPLETED;
+                    lastStatusCode = PreparedStatmentSessionStatus.OK;
                     return true;
                 } else {
                     if (connection.isVersion(5, 0, 0)) {
                         if (ok.columns == 0) {
                             this.statusCode |= PreparedStatmentSessionStatus.OK;
                             this.statusCode |= PreparedStatmentSessionStatus.COMPLETED;
+                            lastStatusCode = PreparedStatmentSessionStatus.OK;
                             return true;
                         }
                     }

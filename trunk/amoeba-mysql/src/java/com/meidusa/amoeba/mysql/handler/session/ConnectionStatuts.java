@@ -23,7 +23,7 @@ public abstract class ConnectionStatuts{
 	public int packetIndex;
 	public List<byte[]> buffers = new ArrayList<byte[]>();
 	public  byte commandType;
-	
+	public int lastStatusCode;
 	public boolean isMerged;
 	
 	public void clearBuffer(){

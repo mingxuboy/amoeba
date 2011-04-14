@@ -5,7 +5,9 @@
 	]]></sql>
 	
 	<sql><![CDATA[
-      	select * from User where uin='20982425'
+SELECT COUNT(1) AS `zend_paginator_row_count` FROM GC_Recommand
+ INNER JOIN BE_RecDep ON BE_RecDep.REID=GC_Recommand.REID
+ INNER JOIN BE_Deploy ON BE_Deploy.DEID=BE_RecDep.DEID WHERE (find_in_set(1, BE_Deploy.CTIDs) or BE_Deploy.CTIDs=9999) AND (find_in_set(2, BE_Deploy.Device)) AND (GC_Recommand.Content is not null) AND (GC_Recommand.Project=1)
  	]]></sql>
  	
  	<sql><![CDATA[
