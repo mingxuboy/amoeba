@@ -53,80 +53,80 @@ public class AmoebaSequenceHandler extends QueryMessageHandler {
 			return;
 		}else{
 			Tuple<Boolean,Long> nextSequenceTuple = getNextSequenceTuple(key);
-			int time = 10;
+			int time = 0;
 			if(nextSequenceTuple.left){
 				do{
 					synchronized (key.intern()) {
-					nextSequenceTuple = getNextSequenceTuple(key);
-					
-					if(!nextSequenceTuple.left){
-						break;
-					}
-					if(!inProgress){
-						inProgress = true;
+						nextSequenceTuple = getNextSequenceTuple(key);
 						
-						QueryMongodbPacket packet = this.getSequenceRequest(key);
-						//other request
-						MongodbQueryRouter router = (MongodbQueryRouter)ProxyRuntimeContext.getInstance().getQueryRouter();
-
-						ObjectPool[] pools = router.doRoute(clientConn, requestPacket);
-						if(pools == null || pools.length==0){
-							pools = router.getDefaultObjectPool();
+						if(!nextSequenceTuple.left){
+							break;
 						}
-						
-						if(pools != null && pools.length >1){
-							isMulti = true;
-							this.multiResponsePacket = new ArrayList<ResponseMongodbPacket>();
-						}
-						
-						MongodbServerConnection[] conns = new MongodbServerConnection[pools.length];
-						int index =0;
-						for(ObjectPool pool: pools){
-							try{
-								MongodbServerConnection serverConn = (MongodbServerConnection)pool.borrowObject();
-								serverConn.setSessionMessageHandler(this);
-								conns[index++] = serverConn;
-								handlerMap.put(serverConn, serverConn.getMessageHandler());
-							}catch(Exception e){
-								handlerLogger.error("poolName=["+pool.getName()+"] borrow Connection error",e);
+						if(!inProgress){
+							inProgress = true;
+							
+							QueryMongodbPacket packet = this.getSequenceRequest(key);
+							//other request
+							MongodbQueryRouter router = (MongodbQueryRouter)ProxyRuntimeContext.getInstance().getQueryRouter();
+	
+							ObjectPool[] pools = router.doRoute(clientConn, requestPacket);
+							if(pools == null || pools.length==0){
+								pools = router.getDefaultObjectPool();
+							}
+							
+							if(pools != null && pools.length >1){
+								isMulti = true;
+								this.multiResponsePacket = new ArrayList<ResponseMongodbPacket>();
+							}
+							
+							MongodbServerConnection[] conns = new MongodbServerConnection[pools.length];
+							int index =0;
+							for(ObjectPool pool: pools){
+								try{
+									MongodbServerConnection serverConn = (MongodbServerConnection)pool.borrowObject();
+									serverConn.setSessionMessageHandler(this);
+									conns[index++] = serverConn;
+									handlerMap.put(serverConn, serverConn.getMessageHandler());
+								}catch(Exception e){
+									handlerLogger.error("poolName=["+pool.getName()+"] borrow Connection error",e);
+								}
+							}
+							
+							if(index == 0){
+								throw new Exception("no pool to query,queryObject="+this.requestPacket);
+							}
+							
+							for(MongodbServerConnection serverConn : conns){
+								if(serverConn != null){
+									serverConn.postMessage(packet.toByteBuffer(serverConn));
+								}
 							}
 						}
-						
-						if(index == 0){
-							throw new Exception("no pool to query,queryObject="+this.requestPacket);
-						}
-						
-						for(MongodbServerConnection serverConn : conns){
-							if(serverConn != null){
-								serverConn.postMessage(packet.toByteBuffer(serverConn));
-							}
-						}
+						key.intern().wait(2*1000);
+						nextSequenceTuple =  getNextSequenceTuple(key);
 					}
-					key.intern().wait(2*1000);
-					nextSequenceTuple =  getNextSequenceTuple(key);
-				}
-				time ++;
-				if(nextSequenceTuple.left && time >5){
-					ResponseMongodbPacket result = new ResponseMongodbPacket();
-					result.numberReturned = 1;
-					result.responseFlags = 1;
-					result.documents = new ArrayList<BSONObject>();
-					BSONObject error = new BasicBSONObject();
-					error.put("err", "SEQUENCE key not found");
-					error.put("errmsg", "SEQUENCE key not found");
-					error.put("ok", 0.0);
-					error.put("n", 1);
-					result.documents.add(error);
-					result.responseTo = requestPacket.requestID;
-					conn.postMessage(result.toByteBuffer(conn));
-					return;
-				}
-			}while(nextSequenceTuple.left);
-			conn.postMessage(createResponse(nextSequenceTuple.right).toByteBuffer(conn));
+					time ++;
+					if(nextSequenceTuple.left && time >5){
+						ResponseMongodbPacket result = new ResponseMongodbPacket();
+						result.numberReturned = 1;
+						result.responseFlags = 1;
+						result.documents = new ArrayList<BSONObject>();
+						BSONObject error = new BasicBSONObject();
+						error.put("err", "SEQUENCE key not found");
+						error.put("errmsg", "SEQUENCE key not found");
+						error.put("ok", 0.0);
+						error.put("n", 1);
+						result.documents.add(error);
+						result.responseTo = requestPacket.requestID;
+						conn.postMessage(result.toByteBuffer(conn));
+						return;
+					}
+				}while(nextSequenceTuple.left);
+				conn.postMessage(createResponse(nextSequenceTuple.right).toByteBuffer(conn));
 				
-		}else{
-			conn.postMessage(createResponse(nextSequenceTuple.right).toByteBuffer(conn));
-		}
+			}else{
+				conn.postMessage(createResponse(nextSequenceTuple.right).toByteBuffer(conn));
+			}
 			
 		}
 	}
