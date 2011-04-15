@@ -689,6 +689,7 @@ Statement parse() #void:{  	Statement statement = null;
 		{
 			statement.setParameterCount(parameterIndex);
 		}
+	}else	{		statement.setParameterCount(parameterIndex);
 	}	return statement;
 
 }
@@ -837,13 +838,13 @@ Statement UpdateQuery():
 	[<K_LIMIT>
     (parameter = <S_PARAMETER_MARKER>{
       	index = parameterIndex++;
-      	if(parameter.image.startsWith("${"))      	{			index = Integer.parseInt(parameter.image.substring(2,parameter.image.length()-1));
+      	if(parameter.image.startsWith("$("))      	{			index = Integer.parseInt(parameter.image.substring(2,parameter.image.length()-1));
       	}
 	   	andExpression.addExpression(new ParameterExpression(index));
 	} | <INTEGER_LITERAL>)[("," | <K_OFFSET> ) (parameter = <S_PARAMETER_MARKER>
 	{
 	  	index = parameterIndex++;
-      	if(parameter.image.startsWith("${"))
+      	if(parameter.image.startsWith("$("))
       	{
 			index = Integer.parseInt(parameter.image.substring(2,parameter.image.length()-1));
       	}
@@ -963,7 +964,7 @@ Statement DeleteQuery():
     [<K_LIMIT>
     (parameter = <S_PARAMETER_MARKER>{
       index = parameterIndex++;
-	if(parameter.image.startsWith("${"))
+	if(parameter.image.startsWith("$("))
 	{
 		index = Integer.parseInt(parameter.image.substring(2,parameter.image.length()-1));
 	}
@@ -971,7 +972,7 @@ Statement DeleteQuery():
 	} | <INTEGER_LITERAL>)[("," | <K_OFFSET> ) (parameter = <S_PARAMETER_MARKER>
 	{
 	  index = parameterIndex++;
-		if(parameter.image.startsWith("${"))
+		if(parameter.image.startsWith("$("))
 		{
 			index = Integer.parseInt(parameter.image.substring(2,parameter.image.length()-1));
 		}
@@ -1393,14 +1394,14 @@ Expression SubSelectStatement(Statement statement):
     [ OrderByClause(statement) ]
     [<K_LIMIT>    (parameter = <S_PARAMETER_MARKER>{
       	index = parameterIndex++;
-		if(parameter.image.startsWith("${"))
+		if(parameter.image.startsWith("$("))
 		{
 			index = Integer.parseInt(parameter.image.substring(2,parameter.image.length()-1));
 		}
 	   	andExpression.addExpression(new ParameterExpression(index));
 	} | <INTEGER_LITERAL>)[("," | <K_OFFSET> ) (parameter = <S_PARAMETER_MARKER>	{
 	  	index = parameterIndex++;
-		if(parameter.image.startsWith("${"))
+		if(parameter.image.startsWith("$("))
 		{
 			index = Integer.parseInt(parameter.image.substring(2,parameter.image.length()-1));
 		}
@@ -2045,7 +2046,7 @@ t=<K_NULL>{
 }
 |  parameter = <S_PARAMETER_MARKER>{
 	index = parameterIndex++;
-	if(parameter.image.startsWith("${"))
+	if(parameter.image.startsWith("$("))
 	{
 		index = Integer.parseInt(parameter.image.substring(2,parameter.image.length()-1));
 	}

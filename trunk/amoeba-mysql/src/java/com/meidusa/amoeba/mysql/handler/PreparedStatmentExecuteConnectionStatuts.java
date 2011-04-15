@@ -1,5 +1,6 @@
 package com.meidusa.amoeba.mysql.handler;
 
+import com.meidusa.amoeba.mysql.handler.session.SessionStatus;
 import com.meidusa.amoeba.mysql.net.packet.MysqlPacketBuffer;
 import com.meidusa.amoeba.mysql.net.packet.QueryCommandPacket;
 import com.meidusa.amoeba.net.Connection;
@@ -12,7 +13,53 @@ public class PreparedStatmentExecuteConnectionStatuts extends PreparedStatmentCo
 		@Override
 		public boolean isCompleted(byte[] buffer) {
 			if(this.commandType == QueryCommandPacket.COM_STMT_EXECUTE){
-				if(MysqlPacketBuffer.isEofPacket(buffer)){
+				if (packetIndex == 0){
+                	if(MysqlPacketBuffer.isErrorPacket(buffer)){
+                		this.statusCode |= PreparedStatmentSessionStatus.ERROR;
+    					this.statusCode |= PreparedStatmentSessionStatus.COMPLETED;
+    					 lastStatusCode = SessionStatus.ERROR;
+    					this.setErrorPacket(buffer);
+                        return true;
+                	}else if(MysqlPacketBuffer.isOkPacket(buffer)){
+                		this.statusCode |= PreparedStatmentSessionStatus.OK;
+    					this.statusCode |= PreparedStatmentSessionStatus.COMPLETED;
+                        lastStatusCode = SessionStatus.OK;
+                         return true;
+                	}else {
+                        if (statusCode == SessionStatus.QUERY) {
+                            statusCode |= SessionStatus.RESULT_HEAD;
+                        }
+                        return false;
+                    }
+                }else{
+                	if(lastStatusCode == SessionStatus.EOF_FIELDS && MysqlPacketBuffer.isErrorPacket(buffer)){
+                		statusCode |= SessionStatus.ERROR;
+                        statusCode |= SessionStatus.COMPLETED;
+                        lastStatusCode = SessionStatus.ERROR;
+                        return true;
+                	}else if((isCall && (lastStatusCode == SessionStatus.EOF_ROWS)) && MysqlPacketBuffer.isOkPacket(buffer)){
+                		statusCode |= SessionStatus.OK;
+                        statusCode |= SessionStatus.COMPLETED;
+                        lastStatusCode = SessionStatus.OK;
+                        return true;
+                	}else if (MysqlPacketBuffer.isEofPacket(buffer) ) {
+                        if ((statusCode & SessionStatus.EOF_FIELDS) > 0) {
+                            statusCode |= SessionStatus.EOF_ROWS;
+                            lastStatusCode = SessionStatus.EOF_ROWS;
+                            if(!isCall){
+                            	statusCode |= SessionStatus.COMPLETED;
+                            	return true;
+                            }
+                        } else {
+                            statusCode |= SessionStatus.EOF_FIELDS;
+                            lastStatusCode = SessionStatus.EOF_FIELDS;
+                            return false;
+                        }
+                    } 
+                	return false;
+                }
+				
+				/*if(MysqlPacketBuffer.isEofPacket(buffer)){
 					if((this.statusCode & PreparedStatmentSessionStatus.EOF_FIELDS)==0){
 						this.statusCode |= PreparedStatmentSessionStatus.EOF_FIELDS;
 						return false;
@@ -31,7 +78,7 @@ public class PreparedStatmentExecuteConnectionStatuts extends PreparedStatmentCo
 					this.statusCode |= PreparedStatmentSessionStatus.COMPLETED;
 					return true;
 				}
-				return false;
+				return false;*/
 			}else if(this.commandType == QueryCommandPacket.COM_STMT_SEND_LONG_DATA){
 				return true;
 			}else{
