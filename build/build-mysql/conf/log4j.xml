@@ -67,23 +67,29 @@
         </layout>
     </appender>
     
+    <appender name="HANDLER" class="org.apache.log4j.DailyRollingFileAppender">
+        <param name="file" value="${amoeba.home}/logs/messageHandle.log"/>
+        <param name="append" value="true"/>
+        <param name="encoding" value="GBK"/>
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="%d %-5p %c{2} - %m%n"/>
+        </layout>
+    </appender>
+    
 	<logger name="report" additivity="true">
         <level value="info"/>
         <appender-ref ref="reportAppender"/>
     </logger>
     
-    <logger name="com.meidusa.amoeba" additivity="true">
-        <level value="info"/>
-        <appender-ref ref="ROOT"/>
-    </logger>
+
     
     <logger name="com.meidusa.amoeba.net" additivity="true">
-        <level value="warn"/>
+        <level value="info"/>
         <appender-ref ref="NET"/>
     </logger>
     
     <logger name="com.meidusa.amoeba.mysql.net" additivity="true">
-        <level value="warn"/>
+        <level value="info"/>
         <appender-ref ref="NET"/>
     </logger>
     
@@ -99,14 +105,14 @@
         <appender-ref ref="ROUTER"/>
     </logger>
     
-    <logger name="com.meidusa.amoeba.parser.statment" additivity="true">
+    <logger name="com.meidusa.amoeba.parser.statement" additivity="true">
         <level value="warn"/>
         <appender-ref ref="PROJECT"/>
     </logger>
     
     <logger name="com.meidusa.amoeba.mysql.handler" additivity="true">
-        <level value="warn"/>
-        <appender-ref ref="PROJECT"/>
+        <level value="error"/>
+        <appender-ref ref="HANDLER"/>
     </logger>
     
      <logger name="com.meidusa.amoeba.net.poolable" additivity="true">
