@@ -650,9 +650,9 @@ void parseParams(Map amoebaParameterMap) #void:
 Statement parse() #void:{  	Statement statement = null;
 	Map amoebaParameterMap = null;
 }
-{	(		(( "@amoeba" ["[" parseParams(amoebaParameterMap = new HashMap()) ( "," parseParams(amoebaParameterMap))* "]" ]) ["("] statement=parserInner() [")"])
+{	(		(( "@amoeba" ["[" parseParams(amoebaParameterMap = new HashMap()) ( "," parseParams(amoebaParameterMap))* "]" ]) ["("] statement=parserInner() [")"]) 
 		|
-		statement=parserInner()	){
+		statement=parserInner() 	)(";" |<EOF>){
   	if(statement instanceof AbstractStatement){
 		/* amoeba parameters  */
 		if(amoebaParameterMap != null)
@@ -663,6 +663,15 @@ Statement parse() #void:{  	Statement statement = null;
 			  if(statement instanceof DMLStatement)
 			  {
 				((DMLStatement)statement).setRead(isRead);
+			  }
+			}
+
+			Boolean isProcedure = (Boolean)amoebaParameterMap.get("isProcedure");
+			if(isProcedure != null)
+			{
+			  if(statement instanceof DMLStatement)
+			  {
+				((DMLStatement)statement).setProcedure(isProcedure);
 			  }
 			}
 	
@@ -715,7 +724,6 @@ Statement parserInner() #void:
     |(<K_START_TRANSACTION>){statement = new StartTansactionStatement();}
     )
     [ INDEX() ]
-    (";" |<EOF>)
     {
     	if(statement instanceof AbstractStatement){
 	    	List<Table> list = new ArrayList<Table>();

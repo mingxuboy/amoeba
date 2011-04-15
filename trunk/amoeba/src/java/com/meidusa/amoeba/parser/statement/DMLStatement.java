@@ -44,7 +44,8 @@ public abstract class DMLStatement extends AbstractStatement {
     protected String sql;
     
     private boolean isRead;
-
+    private boolean isProcedure = false;
+    
     public boolean isReadStatement() {
 		return isRead;
 	}
@@ -52,8 +53,16 @@ public abstract class DMLStatement extends AbstractStatement {
 	public void setRead(boolean isRead) {
 		this.isRead = isRead;
 	}
-	
-    public void setSql(String sql) {
+
+	public boolean isProcedure() {
+		return isProcedure;
+	}
+
+	public void setProcedure(boolean isProcedure) {
+		this.isProcedure = isProcedure;
+	}
+
+	public void setSql(String sql) {
 		this.sql = sql;
 	}
 	public String getSql(){

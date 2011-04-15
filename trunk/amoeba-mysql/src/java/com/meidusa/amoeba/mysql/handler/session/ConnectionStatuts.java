@@ -22,21 +22,22 @@ public abstract class ConnectionStatuts{
 	public int statusCode;
 	public int packetIndex;
 	public List<byte[]> buffers = new ArrayList<byte[]>();
-	public  byte commandType;
+	protected  byte commandType;
 	public int lastStatusCode;
 	public boolean isMerged;
-	
+	public boolean isCall = false;
 	public void clearBuffer(){
 		if(buffers != null){
 			buffers.clear();
 		}
 	}
 	
-	public void setCommandType(byte commandType){
+	public void setCommandType(byte commandType,boolean isCall){
 		this.commandType = commandType;
 		statusCode = 0;
 		packetIndex = 0; 
 		isMerged = false;
+		this.isCall = isCall;
 	}
 	
 	public boolean isCompleted(){

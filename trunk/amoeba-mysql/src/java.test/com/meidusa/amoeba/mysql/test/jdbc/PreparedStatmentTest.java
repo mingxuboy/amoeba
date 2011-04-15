@@ -44,16 +44,14 @@ public class PreparedStatmentTest {
 										"root", null);
 						
 							statment = conn
-									.prepareStatement("/*  @amoeba[params=3,isRead=false](select * from SD_RELATION.RELATION_ORIGIN where SDID=$(0)) */SELECT ID FROM SD_RELATION.RELATION_ORIGIN WHERE SDID =? AND F_SDID=? AND APP_ID = ?");
+									.prepareStatement("select * from test.hello where id=? ;");
 							statment.setLong(1, 1);
-							statment.setLong(2, 2);
-							statment.setLong(3, 1);
-							ResultSet rs = statment.executeQuery();
-							statment.getResultSet();
 							
-							while (rs.next()) {
-								if(i % 100 ==0){
-									System.out.println(i);
+							 statment.execute();
+							 result = statment.getResultSet();
+							if(result != null){
+								while (result.next()) {
+									System.out.println(result.getObject("GUID"));
 								}
 							}
 
