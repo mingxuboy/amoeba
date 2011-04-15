@@ -22,6 +22,8 @@ import java.util.Set;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
+import com.meidusa.amoeba.context.ProxyRuntimeContext;
+import com.meidusa.amoeba.context.RuntimeContext;
 import com.meidusa.amoeba.mysql.handler.session.CommandStatus;
 import com.meidusa.amoeba.mysql.handler.session.ConnectionStatuts;
 import com.meidusa.amoeba.mysql.handler.session.SessionStatus;
@@ -29,6 +31,7 @@ import com.meidusa.amoeba.mysql.net.CommandInfo;
 import com.meidusa.amoeba.mysql.net.MysqlClientConnection;
 import com.meidusa.amoeba.mysql.net.MysqlConnection;
 import com.meidusa.amoeba.mysql.net.MysqlServerConnection;
+import com.meidusa.amoeba.mysql.net.packet.CommandPacket;
 import com.meidusa.amoeba.mysql.net.packet.ErrorPacket;
 import com.meidusa.amoeba.mysql.net.packet.MysqlPacketBuffer;
 import com.meidusa.amoeba.mysql.net.packet.OkPacket;
@@ -40,6 +43,8 @@ import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
 import com.meidusa.amoeba.net.packet.PacketBuffer;
 import com.meidusa.amoeba.net.poolable.ObjectPool;
 import com.meidusa.amoeba.net.poolable.PoolableObject;
+import com.meidusa.amoeba.parser.statement.CallStatement;
+import com.meidusa.amoeba.parser.statement.DMLStatement;
 import com.meidusa.amoeba.parser.statement.Statement;
 import com.meidusa.amoeba.util.Reporter;
 import com.meidusa.amoeba.util.StringUtil;
@@ -319,8 +324,19 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 			
 			boolean commandCompleted = commandQueue.currentCommand.getCompletedCount().get() == commandQueue.connStatusMap.size();
 			
+			boolean isProcedure = false;
+			if(statment instanceof DMLStatement){
+				DMLStatement dmlStatement = (DMLStatement)statment;
+				isProcedure = dmlStatement.isProcedure();
+			}
+			
 			for(ConnectionStatuts status : connSet){
-				status.setCommandType(commandType);
+				if(commandQueue.currentCommand.isMain() && isProcedure){
+					status.setCommandType(commandType,true);
+				}else{
+					status.setCommandType(commandType,false);
+				}
+				
 			}
 			
 			dispatchMessageFrom(source,commandQueue.currentCommand.getBuffer());
@@ -474,7 +490,13 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 		}
 		this.commandQueue.currentCommand.setMerged(true);
 		Collection<ConnectionStatuts> connectionStatutsSet = commandQueue.connStatusMap.values();
+		
+		/**
+		 * 表示是否返回具有查询结果的请求
+		 */
 		boolean isSelectQuery = true;
+		boolean isCall = false;
+		
 		List<byte[]> buffers = null;
 		List<byte[]> returnList = new ArrayList<byte[]>();
 		for(ConnectionStatuts connStatus : connectionStatutsSet){
@@ -492,15 +514,29 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 					buffer.append("<----error Packet:"+connStatus1.conn.getInetAddress()+"------>\n");
 					logger.error(buffer.toString());
 				}
+				continue;
 			}
-			byte[] buffer = connStatus.buffers.get(connStatus.buffers.size()-1);
+			
 			buffers = connStatus.buffers;
+			
 			if((connStatus.statusCode & SessionStatus.ERROR) >0){
 				return buffers;
 			}
-			if(isSelectQuery){
-				isSelectQuery =isSelectQuery && MysqlPacketBuffer.isEofPacket(buffer);
+			
+		}
+		
+		if(commandQueue.statment instanceof DMLStatement){
+			DMLStatement dmlStatement = (DMLStatement)commandQueue.statment;
+			if(this.commandQueue.currentCommand.isMain()){
+				isCall = dmlStatement.isProcedure();
 			}
+		}
+		
+		//以下是判断是否是更新操作还是查询操作
+		if(!isCall){
+			isSelectQuery = MysqlPacketBuffer.isEofPacket(buffers.get(buffers.size()-1));
+		}else{
+			isSelectQuery = !MysqlPacketBuffer.isOkPacket(buffers.get(0));
 		}
 		
 		if(isSelectQuery){
@@ -521,7 +557,8 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 			paketId += 1;
 			//发送rows数据包
 			for(ConnectionStatuts connStatus : connectionStatutsSet){
-				boolean rowStart = false;;
+				boolean rowStart = false;
+				boolean isRowEnd = false;
 				for(byte[] buffer : connStatus.buffers){
 					if(!rowStart){
 						if(MysqlPacketBuffer.isEofPacket(buffer)){
@@ -531,17 +568,31 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 						}
 					}else{
 						if(!MysqlPacketBuffer.isEofPacket(buffer)){
-							buffer[3] = paketId;
-							paketId += 1;
-							returnList.add(buffer);
+							if(!isRowEnd){
+								buffer[3] = paketId;
+								paketId += 1;
+								returnList.add(buffer);
+							}
+						}else{
+							isRowEnd = true;
 						}
 					}
 				}
 			}
 			
-			byte[] eofBuffer = buffers.get(buffers.size()-1);
-			eofBuffer[3] = paketId;
-			returnList.add(eofBuffer);
+			if(!isCall){
+				byte[] eofBuffer = buffers.get(buffers.size()-1);
+				eofBuffer[3] = paketId;
+				returnList.add(eofBuffer);
+			}else{
+				byte[] eofBuffer = buffers.get(buffers.size()-2);
+				eofBuffer[3] = paketId;
+				returnList.add(eofBuffer);
+				paketId ++;
+				byte[] okBuffer = buffers.get(buffers.size()-1);
+				okBuffer[3] = paketId;
+				returnList.add(okBuffer);
+			}
 		}else{
 			OkPacket ok = new OkPacket();
 			StringBuffer strbuffer = new StringBuffer();
@@ -602,7 +653,7 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 				 */
 				return (now - endTime)>15000;
 			}else{
-				return (now - lastTimeMillis) > 60 * 1000;
+				return (now - lastTimeMillis) > ProxyRuntimeContext.getInstance().getRuntimeContext().getQueryTimeout() * 1000;
 			}
 		}
 	}

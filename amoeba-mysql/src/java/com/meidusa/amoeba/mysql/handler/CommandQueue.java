@@ -32,7 +32,7 @@ class CommandQueue{
 	protected Map<MysqlServerConnection,ConnectionStatuts> connStatusMap = new HashMap<MysqlServerConnection,ConnectionStatuts>();
 	boolean mainCommandExecuted;
 	private MysqlClientConnection source;
-	private Statement statment;
+	protected Statement statment;
 	public CommandQueue(MysqlClientConnection source,Statement statment){
 		this.source = source;
 		this.statment = statment;
