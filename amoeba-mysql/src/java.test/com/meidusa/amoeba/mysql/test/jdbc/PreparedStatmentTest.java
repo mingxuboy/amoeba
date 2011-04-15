@@ -40,14 +40,14 @@ public class PreparedStatmentTest {
 						
 						conn = DriverManager
 								.getConnection(
-										"jdbc:mysql://127.0.0.1:8066/test?useUnicode=true&useServerPrepStmts=true",
+										"jdbc:mysql://127.0.0.1:8066/test?useUnicode=true&useServerPrepStmts=false",
 										"root", null);
 						
 							statment = conn
-									.prepareStatement("select * from test.hello where id=? ;");
+									.prepareStatement("select /* @amoeba[params=1](select * from test.hello where id= $(0)) */ * from test.hello where id=?");
 							statment.setLong(1, 1);
 							
-							 statment.execute();
+							 statment.executeQuery();
 							 result = statment.getResultSet();
 							if(result != null){
 								while (result.next()) {
