@@ -27,7 +27,15 @@ public abstract class SqlBaseQueryRouter extends AbstractQueryRouter<DatabaseCon
     
     private boolean replaceEscapeSymbol = false;
     
-    protected void beforeSelectPool(DatabaseConnection connection, SqlQueryObject queryObject){
+    public boolean isReplaceEscapeSymbol() {
+		return replaceEscapeSymbol;
+	}
+
+	public void setReplaceEscapeSymbol(boolean replaceEscapeSymbol) {
+		this.replaceEscapeSymbol = replaceEscapeSymbol;
+	}
+
+	protected void beforeSelectPool(DatabaseConnection connection, SqlQueryObject queryObject){
     	Statement statment = parseStatement(connection,queryObject.sql);
 		if(statment instanceof DMLStatement){
 			DMLStatement dmlStatment = ((DMLStatement)statment);
