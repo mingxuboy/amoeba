@@ -18,10 +18,14 @@ SELECT COUNT(1) AS `zend_paginator_row_count` FROM GC_Recommand
  	<sql><![CDATA[
       	SELECT version, `number` FROM bsh_pc_installsoft_s WHERE date = 20110331
  	]]></sql>
- 	
+ 		<sql><![CDATA[
+  select *,count(*) as c from (SELECT p.Name, DATE_FORMAT(p.StartDate,'%m/%d') AS StartDate, DATE_FORMAT(p.EndDate,'%m/%d') AS EndDate, p.Type, p.PMID, p.BRID, pc.CTID, g.Name AS BName, g.BRCode FROM GC_Promotion AS p INNER JOIN GC_PromotionCity AS pc ON pc.PMID=p.PMID LEFT JOIN GC_Brand AS g ON g.BRID = p.BRID WHERE (p.State=1 And p.EndDate>='2011-04-18' And (pc.CTID='1' OR pc.CTID=9999) ) ORDER BY g.BRCode DESC,p.StartDate DESC) as a group by BRID ORDER BY BRCode DESC,StartDate DESC limit 3
+        
+ 	]]></sql>
 	<sql><![CDATA[
       	SELECT /*  #pool */ * FROM AA WHERE ID = 'ASDF\'ADF' and name='qwerqer'
  	]]></sql>
+ 	
  	
  	<sql><![CDATA[
       	select count(1) from (select * from shop_user) a
