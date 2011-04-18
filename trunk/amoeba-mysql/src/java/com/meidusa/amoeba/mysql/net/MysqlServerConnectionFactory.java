@@ -13,20 +13,27 @@ package com.meidusa.amoeba.mysql.net;
 
 import java.nio.channels.SocketChannel;
 
+import com.meidusa.amoeba.context.ProxyRuntimeContext;
 import com.meidusa.amoeba.mysql.net.packet.MysqlPingPacket;
 import com.meidusa.amoeba.net.Connection;
 import com.meidusa.amoeba.net.MessageHandler;
 import com.meidusa.amoeba.net.PoolableConnectionFactory;
+import com.meidusa.amoeba.util.Initialisable;
+import com.meidusa.amoeba.util.InitialisationException;
 
 /**
  * 
  * @author <a href=mailto:piratebase@sina.com>Struct chen</a>
  *
  */
-public class MysqlServerConnectionFactory extends PoolableConnectionFactory{
+public class MysqlServerConnectionFactory extends PoolableConnectionFactory implements Initialisable{
 	private boolean connPing = false;
 	
-
+	/**
+	 * query timeout (TimeUnit:second)
+	 */
+	private long queryTimeout;
+	
 	public boolean isConnPing() {
 		return connPing;
 	}
@@ -35,10 +42,20 @@ public class MysqlServerConnectionFactory extends PoolableConnectionFactory{
 		this.connPing = connPing;
 	}
 
+	public long getQueryTimeout() {
+		return queryTimeout;
+	}
+
+	public void setQueryTimeout(long queryTimeout) {
+		this.queryTimeout = queryTimeout;
+	}
+
 	@Override
 	protected Connection newConnectionInstance(SocketChannel channel,
 			long createStamp) {
-		return new MysqlServerConnection(channel,createStamp);
+		MysqlServerConnection conn = new MysqlServerConnection(channel,createStamp);
+		conn.setQueryTimeout(this.getQueryTimeout());
+		return conn;
 	}
 	
 	public boolean validateObject(Object arg0) {
@@ -74,6 +91,13 @@ public class MysqlServerConnectionFactory extends PoolableConnectionFactory{
 		}
 	}
 	
+	public void init() throws InitialisationException {
+		super.init();
+		
+		if(queryTimeout <=0){
+			queryTimeout = ProxyRuntimeContext.getInstance().getRuntimeContext().getQueryTimeout();
+		}
+	}
 	class PingPacketHandler implements MessageHandler{
 		private MessageHandler handler;
 		private boolean msgReturn = false;
