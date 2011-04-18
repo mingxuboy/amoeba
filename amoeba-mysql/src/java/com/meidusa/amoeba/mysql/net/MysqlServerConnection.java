@@ -61,6 +61,12 @@ public class MysqlServerConnection extends MysqlConnection implements MySqlPacke
 
 	private int serverSubMinorVersion;
 	private String seed;
+
+	/**
+	 * query timeout (TimeUnit:second.)
+	 */
+	private long queryTimeout;
+	
 	public MysqlServerConnection(SocketChannel channel, long createStamp) {
 		super(channel, createStamp);
 	}
@@ -319,7 +325,7 @@ public class MysqlServerConnection extends MysqlConnection implements MySqlPacke
 			//处于使用中的链接， 如果超过5分钟没有发生网络IO，则需要关闭该链接 
 			long idleMillis = now - _lastEvent;
 			if(isActive()){
-				if (idleMillis > 5 * 60 * 1000) {
+				if (idleMillis > getQueryTimeout() * 1000) {
 					return true;
 				}
 			}
@@ -381,6 +387,14 @@ public class MysqlServerConnection extends MysqlConnection implements MySqlPacke
 	public void setActive(boolean active) {
 		this._lastEvent = System.currentTimeMillis();
 		this.active = active;
+	}
+
+	public long getQueryTimeout() {
+		return queryTimeout;
+	}
+
+	public void setQueryTimeout(long queryTimeout) {
+		this.queryTimeout = queryTimeout;
 	}
 
 	public boolean isRemovedFromPool() {
