@@ -1437,7 +1437,8 @@ void SelectItem(Statement statement):
     (
         LOOKAHEAD(2) EntityName()".*" /* table.* */
         |   LOOKAHEAD(4) EntityName()"." EntityName() ".*" /* schema.table.* */
-        |  expression = SQLSimpleExpression(statement)
+        |  LOOKAHEAD(2) expression = SQLSimpleExpression(statement)
+        |  expression = FullSelectStatement(statement)
         {			if(expression instanceof ColumnExpression)
 		      {
 					column = ((ColumnExpression)expression).getColumn();
