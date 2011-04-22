@@ -3,7 +3,19 @@
 	<sql><![CDATA[
 		insert into Bar(id,name,create_time,assoc_bar) values(1169280, 'www.qq.com\\', '2008-05-18 13:49:51', '')
 	]]></sql>
-	
+		<sql><![CDATA[
+			SELECT DISTINCT u.* FROM youni.Contact c, youni.User u
+WHERE c.state=0
+AND substring(c.phone,-11)=u.phone
+AND c.sdid=18601033130;
+	]]></sql>
+
+	<sql><![CDATA[
+			select sectionID,parentSectionID,sectionName,showName,channelid,(select cnname from con_channel where id=channelid) as channelname from sys_section  where 1=1 AND tid=1001001 AND parentSectionID='stbox_tv_guzhuang' AND sectionType=0 AND status=1  and channelid>=0 order by displayorder ASC
+	]]></sql>
+	<sql><![CDATA[
+	EXPLAIN  select distinct(a.id), UUID(1,1,2,3),a.InfoTitle,b.corpName,a.ProPrice,a.ShowTime,a.ExpTime,d.user as user_name,b.province,b.city,a.ProIntro from blogs c, users d,provide_info a ,corp_info b ,keyword e where a.blog_id=b.blog_id and a.blog_id!= '85653' and now() - INTERVAL a.InfoExp DAY  and a.blog_id=c.id and c.owner_id=d.id and a.id=e.host_id and e.ktype=4 and e.kname='气动行业' order by a.ShowTime desc,a.id desc
+	]]></sql>
 	<sql><![CDATA[
 SELECT COUNT(1) AS `zend_paginator_row_count` FROM GC_Recommand
  INNER JOIN BE_RecDep ON BE_RecDep.REID=GC_Recommand.REID

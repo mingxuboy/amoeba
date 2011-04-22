@@ -18,6 +18,9 @@ public class Substring extends AbstractFunction {
 			return null;
 		}
 		String str = (String)list.get(0).evaluate(parameters);
+		if(str == null){
+			return null;
+		}
 		int start = ((Long)list.get(1).evaluate(parameters)).intValue();
 		
 		if(size == 2){
