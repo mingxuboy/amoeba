@@ -24,7 +24,8 @@ import com.meidusa.amoeba.util.ThreadLocalMap;
 public abstract class SqlBaseQueryRouter extends AbstractQueryRouter<DatabaseConnection,SqlQueryObject> {
 
     private Lock                                    mapLock         = new ReentrantLock(false);
-    
+    private static String DIAGONAL = new String(new char[]{(char)0x5c,(char)0x5c});
+    private static String DOT  = new String(new char[]{(char)0x5c,(char)0x27});
     private boolean replaceEscapeSymbol = false;
     
     public boolean isReplaceEscapeSymbol() {
@@ -100,10 +101,8 @@ public abstract class SqlBaseQueryRouter extends AbstractQueryRouter<DatabaseCon
 			
 		
 		if(replaceEscapeSymbol){
-			String s = new String(new char[]{(char)0x5c,(char)0x5c});
-			sql = StringUtil.replace(sql,s,"");
-			s = new String(new char[]{(char)0x5c,(char)0x27});
-			sql = StringUtil.replace(sql,s,"");
+			sql = StringUtil.replace(sql,DIAGONAL,"");
+			sql = StringUtil.replace(sql,DOT,"");
 		}
 		return sql;
 	}
