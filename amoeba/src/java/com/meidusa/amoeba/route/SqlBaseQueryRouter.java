@@ -26,7 +26,7 @@ public abstract class SqlBaseQueryRouter extends AbstractQueryRouter<DatabaseCon
     private Lock                                    mapLock         = new ReentrantLock(false);
     private static String DIAGONAL = new String(new char[]{(char)0x5c,(char)0x5c});
     private static String DOT  = new String(new char[]{(char)0x5c,(char)0x27});
-    private boolean replaceEscapeSymbol = false;
+    private boolean replaceEscapeSymbol = true;
     
     public boolean isReplaceEscapeSymbol() {
 		return replaceEscapeSymbol;
@@ -108,6 +108,7 @@ public abstract class SqlBaseQueryRouter extends AbstractQueryRouter<DatabaseCon
 	}
 	
 	public Statement parseStatement(DatabaseConnection connection, String sql) {
+		if(sql == null) return null;
         Statement statment = null;
         String defaultSchema = (connection == null || StringUtil.isEmpty(connection.getSchema())) ? null : connection.getSchema();
 
