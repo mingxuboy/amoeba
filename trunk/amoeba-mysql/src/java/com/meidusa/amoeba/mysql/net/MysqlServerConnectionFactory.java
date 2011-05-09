@@ -95,7 +95,9 @@ public class MysqlServerConnectionFactory extends PoolableConnectionFactory impl
 		super.init();
 		
 		if(queryTimeout <=0){
-			queryTimeout = ProxyRuntimeContext.getInstance().getRuntimeContext().getQueryTimeout();
+			if(ProxyRuntimeContext.getInstance() != null && ProxyRuntimeContext.getInstance().getRuntimeContext()!= null){
+				queryTimeout = ProxyRuntimeContext.getInstance().getRuntimeContext().getQueryTimeout();
+			}
 		}
 	}
 	class PingPacketHandler implements MessageHandler{

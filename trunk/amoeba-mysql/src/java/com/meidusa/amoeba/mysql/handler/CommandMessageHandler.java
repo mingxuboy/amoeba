@@ -23,7 +23,6 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
 import com.meidusa.amoeba.context.ProxyRuntimeContext;
-import com.meidusa.amoeba.context.RuntimeContext;
 import com.meidusa.amoeba.mysql.handler.session.CommandStatus;
 import com.meidusa.amoeba.mysql.handler.session.ConnectionStatuts;
 import com.meidusa.amoeba.mysql.handler.session.SessionStatus;
