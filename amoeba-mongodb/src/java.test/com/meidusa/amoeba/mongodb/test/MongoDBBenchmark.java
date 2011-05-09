@@ -22,6 +22,7 @@ public class MongoDBBenchmark extends AbstractBenchmark{
 	private static Logger logger = Logger.getLogger(MongoDBBenchmark.class);
 	public static void main(String[] args) throws Exception {
         try {
+        	requestOption.setRequired(true);
             parser.parse(args);
             Boolean value = (Boolean)parser.getOptionValue(helpOption,false);
         	if(value != null && value.booleanValue()){

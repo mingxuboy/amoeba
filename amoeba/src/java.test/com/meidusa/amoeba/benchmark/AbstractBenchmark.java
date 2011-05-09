@@ -51,7 +51,7 @@ public abstract class AbstractBenchmark {
 	protected static CmdLineParser.Option timeoutOption = parser.addOption(new IntegerOption('t', "timeout",true,false,-1,"query timeout, default value=-1 "));
     
 	protected static CmdLineParser.Option contextOption = parser.addOption(new StringOption('C', "context",true,false,"Context xml File"));
-	protected static CmdLineParser.Option requestOption = parser.addOption(new StringOption('f', "file",true,true,"request xml File"));
+	protected static CmdLineParser.Option requestOption = parser.addOption(new StringOption('f', "file",true,false,"request xml File"));
 	
 	protected static CmdLineParser.Option log4jOption = parser.addOption(new StringOption('l', "log4j",true,false,"warn","log4j level[debug,info,warn,error]"));
 	
@@ -99,9 +99,6 @@ public abstract class AbstractBenchmark {
 				System.err.println("requestFile not found or is not file :"+reqestXmlFile.getAbsolutePath());
 				System.exit(-1);
 			}
-		}else{
-			System.err.println("--file="+requestXml+" not found");
-			System.exit(-1);
 		}
 		
 		String contextFile = (String)parser.getOptionValue(contextOption);

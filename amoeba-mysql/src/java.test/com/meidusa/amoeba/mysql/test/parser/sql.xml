@@ -4,6 +4,10 @@
 		insert into Bar(id,name,create_time,assoc_bar) values(1169280, 'www.qq.com\\', '2008-05-18 13:49:51', '')
 	]]></sql>
 		<sql><![CDATA[
+		show full fields from `test`.`staff`
+	]]></sql>
+	
+		<sql><![CDATA[
 			SELECT DISTINCT u.* FROM youni.Contact c, youni.User u
 WHERE c.state=0
 AND substring(c.phone,-11)=u.phone
