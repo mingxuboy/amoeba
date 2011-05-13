@@ -5,15 +5,13 @@ import java.util.concurrent.DelayQueue;
 
 import org.apache.log4j.Logger;
 
-import com.meidusa.amoeba.net.poolable.ObjectPool;
-
 /**
  * 
  * @author Struct
  *
  */
 public class HeartbeatManager {
-	static Logger logger = Logger.getLogger(ObjectPool.class);
+	static Logger logger = Logger.getLogger(HeartbeatManager.class);
 	protected static final BlockingQueue<HeartbeatDelayed> HEART_BEAT_QUEUE = new DelayQueue<HeartbeatDelayed>();
 	static {
 		new Thread() {
