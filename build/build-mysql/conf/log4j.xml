@@ -100,6 +100,13 @@
         <appender-ref ref="PROJECT-CONSOLE"/>
     </logger>
     
+    <logger name="com.meidusa.amoeba.mysql.context.MysqlRuntimeContext" additivity="true">
+        <level value="warn"/>
+        <appender-ref ref="PROJECT"/>
+        <!-- for debug -->
+        <appender-ref ref="PROJECT-CONSOLE"/>
+    </logger>
+    
     <logger name="com.meidusa.amoeba.route" additivity="true">
         <level value="warn"/>
         <appender-ref ref="ROUTER"/>
