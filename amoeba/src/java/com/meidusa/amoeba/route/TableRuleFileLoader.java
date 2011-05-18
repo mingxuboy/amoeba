@@ -166,7 +166,7 @@ public class TableRuleFileLoader implements TableRuleLoader,Initialisable {
 		variableMap.put("isReadStatement",new Variable(){
 		@Override
 		public Comparable<?> getValue() {
-			Object st = (Object)ThreadLocalMap.get(_CURRENT_QUERY_OBJECT_);
+			Object st = (Object)ThreadLocalMap.get(AbstractQueryRouter._CURRENT_QUERY_OBJECT_);
 			if(st instanceof Request){
 				return ((Request)st).isRead();
 			}else{
