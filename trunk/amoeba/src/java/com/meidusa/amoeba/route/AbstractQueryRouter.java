@@ -40,7 +40,6 @@ import com.meidusa.amoeba.parser.function.Function;
 import com.meidusa.amoeba.parser.statement.Statement;
 import com.meidusa.amoeba.sqljep.function.Comparative;
 import com.meidusa.amoeba.sqljep.function.ComparativeBaseList;
-import com.meidusa.amoeba.sqljep.variable.Variable;
 import com.meidusa.amoeba.util.Initialisable;
 import com.meidusa.amoeba.util.InitialisationException;
 import com.meidusa.amoeba.util.StringUtil;
@@ -55,21 +54,6 @@ public abstract class  AbstractQueryRouter<T extends Connection,V> implements Qu
 	protected static Logger logger = Logger.getLogger(AbstractQueryRouter.class);
 	private Map<String,Pattern> patternMap = new HashMap<String,Pattern>();
 	
-	Map<String,Variable> variableMap = new HashMap<String,Variable>();
-	{
-		variableMap.put("isReadStatement",new Variable(){
-		@Override
-		public Comparable<?> getValue() {
-			Object st = (Object)ThreadLocalMap.get(_CURRENT_QUERY_OBJECT_);
-			if(st instanceof Request){
-				return ((Request)st).isRead();
-			}else{
-				return null;
-			}
-		}
-	});
-    }
-
     /* д╛хо1000 */
     private int                                     LRUMapSize      = 1000;
     protected LRUMap                                  map;

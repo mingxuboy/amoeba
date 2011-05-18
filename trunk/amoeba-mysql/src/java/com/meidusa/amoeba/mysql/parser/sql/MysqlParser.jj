@@ -627,7 +627,7 @@ TOKEN:
 				"\uffda" - "\uffdc"
 			]>
 |   < #SPECIAL_CHARS: "$" | "_" >
-|   < STRING_LITERAL: ( "_" <IDENTIFIER> | "x" )* "'" ((~["'"])|("\\" "'"))* "'">
+|   < STRING_LITERAL: ( "_" <IDENTIFIER> | "x" )* ( ( "'" ((~["'"])|("\\" "'"))* "'") | (  "\"" ((~["\""])|("\\" "\""))* "\""))>
 |   < S_QUOTED_IDENTIFIER: "\"" (~["\n","\r","\""])* "\"" >
 |	< S_COMMA_IDENTIFIER: "`" ((["@"])*( <LETTER> )+ ( <DIGIT> | "-"|<LETTER> |<SPECIAL_CHARS>)*) "`">
 |   < S_PARAMETER_MARKER: "?" | "$(" <INTEGER_LITERAL> ")">
@@ -650,20 +650,65 @@ void parseParams(Map amoebaParameterMap)      :
 		amoebaParameterMap.put(parameterToken.image,value);
 	}
 }
-Statement parse()      :
+
+Statement parse()      :{  	Statement statement = null;
+	Map amoebaParameterMap = null;
+}
+{	(		(( "@amoeba" ["[" parseParams(amoebaParameterMap = new HashMap()) ( "," parseParams(amoebaParameterMap))* "]" ]) ["("] statement=parserInner() [")"]) 
+		|
+		statement=parserInner() 	)(";" |<EOF>){
+  	if(statement instanceof AbstractStatement){
+		/* amoeba parameters  */
+		if(amoebaParameterMap != null)
+		{
+			Boolean isRead = (Boolean)amoebaParameterMap.get("isRead");
+			if(isRead != null)
+			{
+			  if(statement instanceof DMLStatement)
+			  {
+				((DMLStatement)statement).setRead(isRead);
+			  }
+			}
+
+			Boolean isProcedure = (Boolean)amoebaParameterMap.get("isProcedure");
+			if(isProcedure != null)
+			{
+			  if(statement instanceof DMLStatement)
+			  {
+				((DMLStatement)statement).setProcedure(isProcedure);
+			  }
+			}
+	
+		}
+  	}
+
+  	/* amoeba parameters  */
+	if(amoebaParameterMap != null)
+	{
+		Integer params = (Integer)amoebaParameterMap.get("params");
+		if(params != null)
+		{
+			statement.setParameterCount(params);
+		}else
+		{
+			statement.setParameterCount(parameterIndex);
+		}
+	}else	{		statement.setParameterCount(parameterIndex);
+	}	return statement;
+
+}
+
+}
+Statement parserInner()      :
 {
 	Expression expression = null;
 	Statement statement = null;
 	Token parameterToken = null;
 	Object value = null;
 	Token valueToken = null;
-	Map amoebaParameterMap = null;
 }
 {
-   ["EXPLAIN"] [
-    ( "@amoeba" ["[" parseParams(amoebaParameterMap = new HashMap()) ( "," parseParams(amoebaParameterMap))*
-	    
-    "]" ])](
+   ["EXPLAIN"](
     statement = DeleteQuery()
     |
     statement = InsertQuery()
@@ -684,7 +729,6 @@ Statement parse()      :
     |(<K_START_TRANSACTION>){statement = new StartTansactionStatement();}
     )
     [ INDEX() ]
-    (";" |<EOF>)
     {
     	if(statement instanceof AbstractStatement){
 	    	List<Table> list = new ArrayList<Table>();
@@ -697,30 +741,13 @@ Statement parse()      :
 			Table[] tables = new Table[list.size()];
 			list.toArray(tables);
 			((AbstractStatement)statement).setTables(tables);
-
-			/* amoeba parameters  */
-			if(amoebaParameterMap != null)			{				Boolean isRead = (Boolean)amoebaParameterMap.get("isRead");
-				if(isRead != null)				{
-				  if(statement instanceof DMLStatement)				  {					((DMLStatement)statement).setRead(isRead);
-				  }
-				}
-
-			}
     	}
 
-    	/* amoeba parameters  */
-    	if(amoebaParameterMap != null)
-		{
-			Integer params = (Integer)amoebaParameterMap.get("params");
-			if(params != null)
-			{
-				statement.setParameterCount(params);
-			}else			{				statement.setParameterCount(parameterIndex);
-			}
-		}
         return statement;
     }
 }
+
+
 Statement SelectSchema() :{
 	Token t = null;
 	String schema = null;
@@ -815,13 +842,13 @@ Statement UpdateQuery():
 	[<K_LIMIT>
     (parameter = <S_PARAMETER_MARKER>{
       	index = parameterIndex++;
-      	if(parameter.image.startsWith("${"))      	{			index = Integer.parseInt(parameter.image.substring(2,parameter.image.length()-1));
+      	if(parameter.image.startsWith("$("))      	{			index = Integer.parseInt(parameter.image.substring(2,parameter.image.length()-1));
       	}
 	   	andExpression.addExpression(new ParameterExpression(index));
 	} | <INTEGER_LITERAL>)[("," | <K_OFFSET> ) (parameter = <S_PARAMETER_MARKER>
 	{
 	  	index = parameterIndex++;
-      	if(parameter.image.startsWith("${"))
+      	if(parameter.image.startsWith("$("))
       	{
 			index = Integer.parseInt(parameter.image.substring(2,parameter.image.length()-1));
       	}
@@ -941,7 +968,7 @@ Statement DeleteQuery():
     [<K_LIMIT>
     (parameter = <S_PARAMETER_MARKER>{
       index = parameterIndex++;
-	if(parameter.image.startsWith("${"))
+	if(parameter.image.startsWith("$("))
 	{
 		index = Integer.parseInt(parameter.image.substring(2,parameter.image.length()-1));
 	}
@@ -949,7 +976,7 @@ Statement DeleteQuery():
 	} | <INTEGER_LITERAL>)[("," | <K_OFFSET> ) (parameter = <S_PARAMETER_MARKER>
 	{
 	  index = parameterIndex++;
-		if(parameter.image.startsWith("${"))
+		if(parameter.image.startsWith("$("))
 		{
 			index = Integer.parseInt(parameter.image.substring(2,parameter.image.length()-1));
 		}
@@ -1272,14 +1299,14 @@ Table TableReference():
 	Token token = null;
 }
 {
-    table = TableName() 
-     [["AS"]     (     token = <S_COMMA_IDENTIFIER>{
- 		table.setAlias(token.image.substring(1,token.image.length()-1));	
- 	}
-|token = <IDENTIFIER>{
-    	table.setAlias(token.image);
-    }  )
-][ INDEX()]{
+    (      table = TableName() 
+	     [["AS"]	     (	     token = <S_COMMA_IDENTIFIER>{
+	 		table.setAlias(token.image.substring(1,token.image.length()-1));	
+	 	}
+		|token = <IDENTIFIER>{
+		    	table.setAlias(token.image);
+		    }		  )
+		][ INDEX()]	){
    	 if(table.getAlias() != null){
    	 	tableAliasMap.put(table.getAlias(),table);	
    	 }
@@ -1328,7 +1355,7 @@ Expression FullSelectStatement(Statement statement):
 }
 {
 	((expression = SubSelectStatement(statement) )
-	| "(" expression = FullSelectStatement(statement)")" [ UnionClause() unionedExpression = FullSelectStatement(statement)] ){
+	|	(	  "(" expression = FullSelectStatement(statement)")" [ UnionClause() unionedExpression = FullSelectStatement(statement)]	) ){
 		if(unionedExpression != null){
 			if(expression == null){
 				return unionedExpression;
@@ -1371,14 +1398,14 @@ Expression SubSelectStatement(Statement statement):
     [ OrderByClause(statement) ]
     [<K_LIMIT>    (parameter = <S_PARAMETER_MARKER>{
       	index = parameterIndex++;
-		if(parameter.image.startsWith("${"))
+		if(parameter.image.startsWith("$("))
 		{
 			index = Integer.parseInt(parameter.image.substring(2,parameter.image.length()-1));
 		}
 	   	andExpression.addExpression(new ParameterExpression(index));
 	} | <INTEGER_LITERAL>)[("," | <K_OFFSET> ) (parameter = <S_PARAMETER_MARKER>	{
 	  	index = parameterIndex++;
-		if(parameter.image.startsWith("${"))
+		if(parameter.image.startsWith("$("))
 		{
 			index = Integer.parseInt(parameter.image.substring(2,parameter.image.length()-1));
 		}
@@ -1414,7 +1441,8 @@ void SelectItem(Statement statement):
     (
         LOOKAHEAD(2) EntityName()".*" /* table.* */
         |   LOOKAHEAD(4) EntityName()"." EntityName() ".*" /* schema.table.* */
-        |  expression = SQLSimpleExpression(statement)
+        |  LOOKAHEAD(2) expression = SQLSimpleExpression(statement)
+        |  expression = FullSelectStatement(statement)
         {			if(expression instanceof ColumnExpression)
 		      {
 					column = ((ColumnExpression)expression).getColumn();
@@ -1428,10 +1456,13 @@ void SelectItem(Statement statement):
 		      }
 		
         }    // Column or Expression
-    )[("=" SQLSimpleExpression(statement))] [["AS"] token = <IDENTIFIER>    {
+    )[("=" SQLSimpleExpression(statement))] [["AS"]( token = <IDENTIFIER> | token = < S_COMMA_IDENTIFIER > )    {
       if(token != null)
 		{
-		  if(column != null)		  {			column.setAlias(token.image);
+		  if(column != null)		  {
+		    if(token.image.indexOf("`") == 0)		    {				column.setAlias(token.image.substring(1,token.image.length()-1));
+		    }else		    {				column.setAlias(token.image);
+			}
 		  }
 		}    }] // Column Alias
 }
@@ -2010,15 +2041,17 @@ t=<K_NULL>{
 
 |  t= <STRING_LITERAL>{
 	// strip away double quotes at end of string
-		int tt =  t.image.indexOf("'");
-		String temp = (t.image).substring(tt+1,t.image.length()-1);
+	String temp  = null;
+	if(t.image.indexOf("_x") ==0)	{		temp = (t.image).substring(2,t.image.length()-1);
+	}else	{		temp = (t.image).substring(1,t.image.length()-1);
+	}
 		// replace escape characters
 		temp = replaceEscape(temp);
 		return new ConstantExpression(temp);
 }
 |  parameter = <S_PARAMETER_MARKER>{
 	index = parameterIndex++;
-	if(parameter.image.startsWith("${"))
+	if(parameter.image.startsWith("$("))
 	{
 		index = Integer.parseInt(parameter.image.substring(2,parameter.image.length()-1));
 	}
