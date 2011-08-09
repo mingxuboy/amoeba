@@ -95,4 +95,6 @@
 	<function name="FROM_UNIXTIME" class="com.meidusa.amoeba.parser.function.UnknowableFunction"/>
 	<function name="rand" class="com.meidusa.amoeba.parser.function.UnknowableFunction"/>
 	<function name="LEFT" class="com.meidusa.amoeba.parser.function.UnknowableFunction"/>
+	<function name="GROUP_CONCAT" class="com.meidusa.amoeba.parser.function.UnknowableFunction"/>
+	
 </amoeba:function>
