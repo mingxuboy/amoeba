@@ -36,10 +36,10 @@ public class MysqlParserTest {
 			List<String> sqlList = XmlToSqlList.executeXml2List(XmlToSqlList.class.getResourceAsStream("sql.xml"));
 			for(String sql:sqlList){
 				if(sql != null){
-					/*String s = new String(new char[]{(char)0x5c,(char)0x5c});
+					String s = new String(new char[]{(char)0x5c,(char)0x5c});
 					sql = StringUtil.replace(sql,s,"");
 					s = new String(new char[]{(char)0x5c,(char)0x27});
-					sql = StringUtil.replace(sql,s,"");*/
+					sql = StringUtil.replace(sql,s,"");
 				}
 				parser(funMap,sql);
 			}

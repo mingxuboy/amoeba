@@ -6,6 +6,26 @@
 		<sql><![CDATA[
 		show full fields from `test`.`staff`
 	]]></sql>
+	<sql><![CDATA[
+		SELECT
+                r.Price,
+                r.Price AS diff,
+                r.Barcode,
+                r.Name,
+                `left`(r.Name,12) as Short
+                FROM BE_Datamine_Result AS r WHERE ( r.Datetime ='2011-05-23'and r.State =1)
+                group by Name
+                order by diff asc
+                limit 20
+	]]></sql>
+	<sql><![CDATA[
+	INSERT INTO GC_User_Report (URID, Action, DirectObject, IndirectObject, IPAddress, Remarks, CTID, Result, Message, Source, Reference, Datetime) VALUES ('4136475', 'search.price', 'barcode', '6901524381184', '117.136.12.76', '□ò□□□□□□□é□á□ú□□□□\\\\', '15', '2', '', 'android', 'android.wochacha.com/search/price?barcode=6901524381184', '2011-05-25 11:37:58')
+	]]></sql>
+	<sql><![CDATA[
+	SELECT group_concat(distinct if(Barcode>0,Barcode,null)) as barcode, group_concat(distinct c.Spec) AS spec FROM GC_Commodity_Medicine AS cm
+ INNER JOIN GC_Commodity AS c ON cm.PKID=c.PKID WHERE (cm.SeriesNum='□□□□□□H20030585') GROUP BY SeriesNum
+	]]></sql>	
+		
 	
 		<sql><![CDATA[
 			SELECT DISTINCT u.* FROM youni.Contact c, youni.User u

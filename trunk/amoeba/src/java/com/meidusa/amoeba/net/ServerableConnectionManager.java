@@ -35,12 +35,30 @@ import com.meidusa.amoeba.service.Service;
 public class ServerableConnectionManager extends AuthingableConnectionManager implements Shutdowner, Service{
 
     protected static Logger       log = Logger.getLogger(ServerableConnectionManager.class);
-    
+   /* class AuthingConnectionObserver implements ConnectionObserver{
+
+		public void connectionClosed(Connection conn) {
+			
+		}
+
+		public void connectionEstablished(Connection connection) {
+			if(connection instanceof AuthingableConnection){
+            	((AuthingableConnection)connection).setAuthenticator(ServerableConnectionManager.this.getAuthenticator());
+            	((AuthingableConnection)connection).beforeAuthing();
+            }
+		}
+
+		public void connectionFailed(Connection conn, Exception fault) {
+			
+		}
+		
+	}*/
     protected int                 port;
     protected ServerSocketChannel ssocket;
     protected String              ipAddress;
     protected ConnectionFactory   connFactory;
     private ConnectionManager manager;
+    //private ConnectionObserver connObserver = new AuthingConnectionObserver(); 
     private int backlog = 128;
     public ConnectionManager getManager() {
 		return manager;
@@ -60,6 +78,7 @@ public class ServerableConnectionManager extends AuthingableConnectionManager im
 
     protected void initServerSocket(){
         try {
+        	//this.addConnectionObserver(connObserver);
             // create a listening socket and add it to the select set
             ssocket = ServerSocketChannel.open();
             ssocket.configureBlocking(false);
@@ -89,6 +108,7 @@ public class ServerableConnectionManager extends AuthingableConnectionManager im
     
     // documentation inherited
     protected void willStart() {
+    	
         super.willStart();
         initServerSocket();
     }
