@@ -29,7 +29,7 @@ rangeº¯Êý£º
 case º¯Êý
    case  (abs(hash(SDID)) % 32)  when range(0,8,1,0) then (isReadStatement ? 'server1' : 'server1_write');
            when range(8,16,1,0) then (isReadStatement ? 'server2' : 'server2_write');
-           when range(16,24,1,0) then '(isReadStatement ? 'server3' : 'server3_write')';
+           when range(16,24,1,0) then (isReadStatement ? 'server3' : 'server3_write');
            else 'server4'
    END CASE;
                            
@@ -50,8 +50,8 @@ case º¯Êý
                            var hashid = abs(hash(SDID)) % 32; 
                            case  hashid  when range(0,8,1,0) then (isReadStatement ? 'server1' : 'server1_write');
                                    when range(8,16,1,0) then (isReadStatement ? 'server2' : 'server2_write');
-                                   when range(16,24,1,0) then '(isReadStatement ? 'server3' : 'server3_write')';
-                                   when range(24,32,1,0) then '(isReadStatement ? 'server4' : 'server4_write')';'
+                                   when range(16,24,1,0) then (isReadStatement ? 'server3' : 'server3_write');
+                                   when range(24,32,1,0) then (isReadStatement ? 'server4' : 'server4_write');
                            END CASE;
 
                    ]]></expression>
