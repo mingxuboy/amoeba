@@ -76,7 +76,7 @@ public class AbstractPacketBuffer implements PacketBuffer {
 
     public void setPosition(int position) {
         if (this.position < position) {
-            int length = this.position - position;
+            int length = position - this.position;
             ensureCapacity(length);
         }
         this.position = position;
