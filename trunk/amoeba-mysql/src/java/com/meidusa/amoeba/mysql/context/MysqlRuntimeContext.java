@@ -8,7 +8,7 @@ import com.meidusa.amoeba.mysql.util.CharsetMapping;
 import com.meidusa.amoeba.util.InitialisationException;
 
 public class MysqlRuntimeContext extends RuntimeContext {
-	public final static String SERVER_VERSION = "5.1.45-mysql-amoeba-proxy-2.1.0-RC5";
+	public final static String SERVER_VERSION = "5.1.45-mysql-amoeba-proxy-2.2.0";
 	private static Logger logger = Logger.getLogger(MysqlRuntimeContext.class);
 	private byte               serverCharsetIndex;
 	private int statementCacheSize = 500;
