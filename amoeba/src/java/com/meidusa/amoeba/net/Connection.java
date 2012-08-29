@@ -208,6 +208,21 @@ public abstract class Connection implements NetEventHandler {
         }
     }
 
+    public boolean isClosedPosted(){
+    	if (closePosted) {
+            return true;
+        }else{
+        	postCloseLock.lock();
+        	 try {
+                 return closePosted;
+             } finally {
+                 postCloseLock.unlock();
+             }
+        	 
+        }
+    	
+    }
+    
     /**
      * POST-->Queue->close->(_cmgr.connectionClosed( notify observer))-->closeSocket()
      * 可以提供给外界调用，这儿只是递交关闭该连接得请求。具体关闭将由Connection Manager处理。

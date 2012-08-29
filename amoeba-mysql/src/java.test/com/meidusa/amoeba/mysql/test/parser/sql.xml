@@ -1,5 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <list>
+
+	<sql><![CDATA[
+		select * from album where (aid = 2 and uid = 3) or (aid = 3 and uid = 4);
+	]]></sql>
+	<sql><![CDATA[
+	SELECT COUNT(messageID) FROM ofOffline WHERE username='30086000000000243' AND (stanza LIKE '%jabber:x:event%')
+	]]></sql>
 	<sql><![CDATA[
 		insert into Bar(id,name,create_time,assoc_bar) values(1169280, 'www.qq.com\\', '2008-05-18 13:49:51', '')
 	]]></sql>

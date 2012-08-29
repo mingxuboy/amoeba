@@ -475,6 +475,8 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 						}
 					}
 				}
+			}else{
+				
 			}
 		}
 	}
@@ -690,6 +692,10 @@ public abstract class CommandMessageHandler implements MessageHandler,Sessionabl
 					buffer.append("<----end connection:"+entry.getKey().getSocketId()+"------>\n");
 				}else{
 					buffer.append("<----start -- end Packet:"+entry.getKey().getSocketId()+",COMPLETED = true------>\n");	
+				}
+				
+				if(force){
+					entry.getKey().postClose(null);
 				}
 				logger.error(buffer.toString());
 			}

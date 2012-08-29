@@ -94,6 +94,8 @@ public class MysqlFramedInputStream extends PacketInputStream implements MySqlPa
     		_buffer.limit(_have);
     		
     		_buffer.compact();
+    		this.shrinkCapacity();
+    		
     		_buffer.position(position - _length);
             _have -= _length;
             _length = this.decodeLength();

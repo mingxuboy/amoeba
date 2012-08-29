@@ -15,6 +15,7 @@ package com.meidusa.amoeba.mysql.net.packet;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 import java.sql.SQLException;
 
 import com.meidusa.amoeba.mysql.io.Constants;
@@ -24,6 +25,7 @@ import com.meidusa.amoeba.mysql.util.SingleByteCharsetConverter;
 import com.meidusa.amoeba.net.Connection;
 import com.meidusa.amoeba.net.DatabaseConnection;
 import com.meidusa.amoeba.net.packet.AbstractPacketBuffer;
+import com.meidusa.amoeba.util.CharsetCache;
 import com.meidusa.amoeba.util.StringUtil;
 
 /**
@@ -33,7 +35,6 @@ import com.meidusa.amoeba.util.StringUtil;
  * @author hexianmao
  */
 public class MysqlPacketBuffer extends AbstractPacketBuffer {
-
     static final int  MAX_BYTES_TO_DUMP = 512;
 
     static final int  NO_LENGTH_LIMIT   = -1;
@@ -346,13 +347,11 @@ public class MysqlPacketBuffer extends AbstractPacketBuffer {
         
         try {
             if (encoding != null) {
-                return new String(buffer, position, fieldLength, encoding);
+            	Charset charset = CharsetCache.getCharset(encoding);
+                return new String(buffer, position, fieldLength, charset);
             } else {
                 return new String(buffer, position, fieldLength);
             }
-        } catch (UnsupportedEncodingException e) {
-            // TODO logger exception
-            return new String(buffer, position, fieldLength);
         } finally {
             position += fieldLength; // update cursor
         }
