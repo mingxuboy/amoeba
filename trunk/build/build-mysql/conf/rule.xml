@@ -35,4 +35,33 @@
 		-->
 	</tableRule>
 	
+	 <tableRule name="USER" schema="mydb" defaultPools="w1,w2">
+     		<rule name="rule1" ruleResult="POOLNAME">
+                   <parameters>UID</parameters>
+                   <expression><![CDATA[
+                           var hashid = abs(hash(UID)) % 16;
+                           case  hashid  	when range(0,8,1,1)  then (isReadStatement ? 'r1' : 'w1');
+                                   			when range(9,15,1,1) then (isReadStatement ? 'r2' : 'w2');
+                           END CASE;
+                   ]]></expression>
+           </rule>
+    </tableRule>
+	
+	<tableRule name="PRODUCT" schema="mydb" readPools="r1" writePools="w1"/>
+	
+	<!-- 
+	select /* @amoeba[isRead=false](select * from order where year=2012) */ * from order where uid=? limit 0,10
+	 -->
+	<tableRule name="ORDER" schema="mydb" readPools="r3" writePools="w3">
+     		<rule name="rule1" ruleResult="POOLNAME">
+                   <parameters>YEAR</parameters>
+                   <expression><![CDATA[
+                           case  YEAR  	when range(0,2010,1,1)  then (isReadStatement ? 'r1' : 'w1');
+                                   		when range(2010,2012,0,0) then (isReadStatement ? 'r2' : 'w2');
+                                   		else  (isReadStatement ? 'r3' : 'w3')
+                           END CASE;
+                   ]]></expression>
+           </rule>
+    </tableRule>
+     		
 </amoeba:rule>

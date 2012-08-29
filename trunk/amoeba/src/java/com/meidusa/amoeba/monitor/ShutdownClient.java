@@ -72,7 +72,11 @@ public class ShutdownClient implements MonitorConstant {
 				if(host == null){
 					socket = new Socket(InetAddress.getLocalHost(),port);
 				}else{
-					socket = new Socket(host, port);
+					if("0.0.0.0".equals(host)){
+						socket = new Socket(InetAddress.getLocalHost(),port);
+					}else{
+						socket = new Socket(host, port);
+					}
 				}
 			}catch(IOException e){
 				return false;

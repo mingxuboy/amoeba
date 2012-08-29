@@ -415,8 +415,8 @@ public class GenericObjectPool extends org.apache.commons.pool.impl.GenericObjec
 	}
 
 	public void close() throws Exception{
-		super.close();
 		HeartbeatManager.removeHeartbeat(delay);
+		super.close();
 	}
 	
 	@Override

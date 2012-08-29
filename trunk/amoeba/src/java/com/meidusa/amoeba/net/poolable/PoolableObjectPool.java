@@ -13,6 +13,8 @@ package com.meidusa.amoeba.net.poolable;
 
 import org.apache.commons.pool.PoolableObjectFactory;
 
+import com.meidusa.amoeba.net.Connection;
+
 
 /**
  * 采用该Poolable ObjectPool，则object 必须实现{@link PoolableObject}
@@ -132,6 +134,5 @@ public class PoolableObjectPool extends GenericObjectPool{
     	}else{
     		super.setFactory(factory);
     	}
-    	
     }
 }

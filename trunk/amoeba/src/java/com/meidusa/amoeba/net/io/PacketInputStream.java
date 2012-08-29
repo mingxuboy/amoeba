@@ -47,17 +47,14 @@ public abstract class PacketInputStream {
     protected static final int INITIAL_BUFFER_CAPACITY = 32;
 
     /** ×î´óÈÝÁ¿ */
-    protected static final int MAX_BUFFER_CAPACITY = 1024 * 1024 * 2;
-    private int maxPacketSize = MAX_BUFFER_CAPACITY;
+    protected static final int MAX_BUFFER_CAPACITY = Integer.getInteger("tookit.packet.max",2* 1024 * 1024);
     
+    protected static int AUTO_SHRINK_SIZE = Integer.getInteger("tookit.packet.shrink",10 * 1024);
     
-    public int getMaxPacketSize() {
-		return maxPacketSize;
-	}
+    private double average = INITIAL_BUFFER_CAPACITY;
+    private long times = 1;
+    
 
-	public void setMaxPacketSize(int maxPacketSize) {
-		this.maxPacketSize = maxPacketSize;
-	}
 	private byte[] tmp = new byte[4096]; 
     /**
      * Creates a new framed input stream.
@@ -83,6 +80,7 @@ public abstract class PacketInputStream {
         throws IOException
     {
         if (checkForCompletePacket()) {
+        	calculateAverage(this._length);
             return readPacket();
         }
 
@@ -92,7 +90,7 @@ public abstract class PacketInputStream {
             if (got == -1) {
                 throw new EOFException();
             }
-            if(got == 0){
+            if(got == 0 && _buffer.hasRemaining()){
             	return null;
             }
             _have += got;
@@ -126,7 +124,7 @@ public abstract class PacketInputStream {
             // read, expand it and try reading some more
             int newSize = _buffer.capacity() << 1;
             newSize = newSize>_length ? newSize:_length+16;
-            if(newSize > maxPacketSize){
+            if(newSize > MAX_BUFFER_CAPACITY || _buffer.capacity() > 2 * MAX_BUFFER_CAPACITY){
             	throw new IOException("packet over MAX_BUFFER_CAPACITY size="+newSize);
             }
             ByteBuffer newbuf = ByteBuffer.allocate(newSize);
@@ -134,9 +132,10 @@ public abstract class PacketInputStream {
             _buffer = newbuf;
 
             // don't let things grow without bounds
-        } while (_buffer.capacity() < maxPacketSize);
+        } while (_buffer.capacity() < 2* MAX_BUFFER_CAPACITY);
 
         if (checkForCompletePacket()) {
+			calculateAverage(this._length);
             return readPacket();
         }else{
         	return null;
@@ -156,6 +155,7 @@ public abstract class PacketInputStream {
 	    // we may already have the next frame entirely in the buffer from
 	    // a previous read
 	    if (checkForCompletePacket()) {
+	    	calculateAverage(this._length);
 	    	return readPacket();
 	    }
 	   
@@ -186,6 +186,7 @@ public abstract class PacketInputStream {
 	    } while (_buffer.capacity() < MAX_BUFFER_CAPACITY &&  !checkForCompletePacket());
 	
 	    if (checkForCompletePacket()) {
+	    	calculateAverage(this._length);
             return readPacket();
         }else{
         	return null;
@@ -193,7 +194,7 @@ public abstract class PacketInputStream {
 	    
 	}
     
-    private void expandCapacity(int needSize){
+    protected void expandCapacity(int needSize){
     	if(_buffer.remaining()<needSize){
     		int newSize = _buffer.capacity() << 1;
             newSize = newSize>_length ? newSize:_length+16;
@@ -202,6 +203,43 @@ public abstract class PacketInputStream {
             _buffer = newbuf;
     	}
     }
+    
+    protected void shrinkCapacity(){
+    	boolean shrink = false;
+    	int aver = (int )Math.ceil(average);
+    	int skrinkSize = aver;
+    	
+		if(_buffer.capacity() > AUTO_SHRINK_SIZE){
+			shrink = true;
+			if(Runtime.getRuntime().freeMemory() < MAX_BUFFER_CAPACITY){
+				skrinkSize = INITIAL_BUFFER_CAPACITY;
+			}else{
+				skrinkSize = (int)aver*2 > AUTO_SHRINK_SIZE? AUTO_SHRINK_SIZE:(int)aver*2;
+			}
+		}else if(_buffer.capacity() <= AUTO_SHRINK_SIZE){
+			
+			if(_buffer.capacity() > aver * 4){
+				shrink = true;
+				skrinkSize = (int)aver * 2;
+    		}
+		}
+		
+		
+		if(shrink && skrinkSize < MAX_BUFFER_CAPACITY && skrinkSize > _have){
+			//System.out.println("hashcode="+this.hashCode()+",capacity="+_buffer.capacity()+",shrink="+shrinkSize+",average="+aver);
+			ByteBuffer newbuf = ByteBuffer.allocate(skrinkSize);
+            newbuf.put((ByteBuffer)_buffer.flip());
+            _buffer = newbuf;
+		}
+    }
+    
+    protected void calculateAverage(int current){
+    	double j = (double) times/  (double)(times +1);
+    	double x = (double)average * j + (double)current/ (double)(times +1);
+    	average = x;
+    	times ++;
+    }
+    
     /**
      * Decodes and returns the length of the current packet from the buffer
      * if possible. Returns -1 otherwise.

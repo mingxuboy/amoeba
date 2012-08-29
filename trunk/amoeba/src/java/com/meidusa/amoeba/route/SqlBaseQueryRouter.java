@@ -182,5 +182,39 @@ public abstract class SqlBaseQueryRouter extends AbstractQueryRouter<DatabaseCon
 	}
 	 
 	public abstract Parser newParser(String sql);
+	
+	protected  static String amoebaRouterSql1(String sql){
+		sql = sql.trim();
+		int sIndex = sql.indexOf("@amoeba");
+		if(sIndex >0){
+			String subSql = sql.substring(sIndex);
+			int lIndex = subSql.indexOf("*/");
+			if(lIndex>0 ){
+				subSql = subSql.substring(0,lIndex);
+				int pIndex = subSql.lastIndexOf("]");
+				
+				lIndex = subSql.lastIndexOf(")");
+				if(pIndex < lIndex){
+					subSql = subSql.substring(0,lIndex+1);
+				}else{
+					subSql = subSql.substring(0,pIndex+1) +" " + sql ; 
+				}
+				sql = subSql;
+			}
+		}
+		
+		sql = sql.trim();
+			
+		
+		if(true){
+			sql = StringUtil.replace(sql,DIAGONAL,"");
+			sql = StringUtil.replace(sql,DOT,"");
+		}
+		return sql;
+	}
+	public static void main(String[] args){
+		String sql="select /* @amoeba('select * from order where year=2012') */ * from order wherer uid=?";
+		System.out.println(amoebaRouterSql1(sql));
+	}
 
 }

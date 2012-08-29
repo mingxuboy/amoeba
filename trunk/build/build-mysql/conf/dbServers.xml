@@ -37,11 +37,19 @@
 			<property name="minEvictableIdleTimeMillis">600000</property>
 			<property name="timeBetweenEvictionRunsMillis">600000</property>
 			<property name="testOnBorrow">true</property>
+			<property name="testOnReturn">true</property>
 			<property name="testWhileIdle">true</property>
 		</poolConfig>
 	</dbServer>
 
 	<dbServer name="server1"  parent="abstractServer">
+		<factoryConfig>
+			<!-- mysql ip -->
+			<property name="ipAddress">127.0.0.1</property>
+		</factoryConfig>
+	</dbServer>
+	
+	<dbServer name="server2"  parent="abstractServer">
 		<factoryConfig>
 			<!-- mysql ip -->
 			<property name="ipAddress">127.0.0.1</property>
@@ -54,7 +62,7 @@
 			<property name="loadbalance">1</property>
 			
 			<!-- Separated by commas,such as: server1,server2,server1 -->
-			<property name="poolNames">server1</property>
+			<property name="poolNames">server1,server2</property>
 		</poolConfig>
 	</dbServer>
 		
